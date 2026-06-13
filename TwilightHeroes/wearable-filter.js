@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/wearable-filter.js
-// @version      1.0
-// @description  Adds a live text filter above the Wearable Items list on wear.php; items whose name does not contain the typed text are hidden. Empty category headers collapse too.
+// @version      1.1
+// @description  Adds a live text filter above the Wearable Items list on wear.php; items whose name does not contain the typed text are hidden. Emptied rows and category headers collapse too, leaving no gaps.
 // @match        https://www.twilightheroes.com/wear.php*
 // @match        https://twilightheroes.com/wear.php*
 // @grant        none
@@ -65,10 +65,13 @@
       if (it.imgCell) it.imgCell.style.display = show ? '' : 'none';
     });
 
-    collapseEmptyHeaders(table);
+    collapseRows(table);
   }
 
-  function collapseEmptyHeaders(table) {
+  // Hide whole rows that have no visible item, and category headers whose
+  // following item rows are all hidden. Hiding the <tr> (not just its cells)
+  // is what removes the empty gaps left behind by filtered-out items.
+  function collapseRows(table) {
     let headerRow = null;
     let anyVisible = false;
 
@@ -87,6 +90,7 @@
         .some(function (td) {
           return td.querySelector('b') && td.style.display !== 'none';
         });
+      row.style.display = visible ? '' : 'none';
       if (visible) anyVisible = true;
     });
 
