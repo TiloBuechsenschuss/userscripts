@@ -51,8 +51,12 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   with `credentials: 'same-origin'` to fire silently.
 
 **Twilight Heroes** is plain (non-frame) pages scraped from table layout. State that must
-survive the full-page reload after equip/unequip is stashed in `sessionStorage`
-(see `wearable-filter.js` `STORAGE_KEY`).
+survive the full-page reload after equip/unequip/use is stashed in `sessionStorage`
+(see `inventory-filter.js`, keyed per page via `TEXT_KEY`/`TYPE_KEY`). That one script
+serves several pages with the same `<td width=50%><b>name</b></td>` item layout
+(wear.php, inventory.php, use.php) by matching all of them and locating the table from a
+known `<h1>`/`<h2>` heading; extend `HEADINGS` rather than forking the file when another
+such page turns up.
 
 ## Verifying a change
 
