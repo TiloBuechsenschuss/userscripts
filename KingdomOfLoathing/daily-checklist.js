@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/daily-checklist.js
-// @version      1.7
+// @version      1.8
 // @description  Adds a Checklist button next to the codpiece button that opens a daily to-do list popup. Items can carry a KoL action link (pwd filled live) and be greyed out when not relevant to the current run. A persistent ronin / post-ronin toggle auto-disables the tasks that only apply to one phase. Checked items reset each day (or manually).
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -496,15 +496,54 @@
           });
         }
 
+        // When a row is hard-disabled by the current run state, give it a
+        // distinct look from a manual skip: a lock badge naming the phase the
+        // task *does* apply to, plus a colored left accent. The colors mirror
+        // the Run-state toggle (tan = ronin, green = post-ronin) so it's clear
+        // which way to flip the toggle to re-enable it.
+        let badge = null;
+        let accent = null;
+        if (runDisabled(item)) {
+          // `disabled` names the phase this task is blocked in, which is the
+          // phase currently active. Colors mirror the Run-state toggle.
+          const blockedIn = item.disabled;
+          const skin = blockedIn === 'ronin'
+            ? { bg: '#f2e9cf', border: '#d9c48f', fg: '#7a5d1f', bar: '#c9a94e' }
+            : { bg: '#dceadc', border: '#9fc19f', fg: '#3a5a3a', bar: '#79a979' };
+          accent = skin.bar;
+          badge = d.createElement('span');
+          badge.textContent = '🔒 disabled in ' + blockedIn;
+          badge.title = 'Auto-disabled by run state — not relevant in ' + blockedIn +
+            '. Flip the Run state toggle to enable it.';
+          badge.style.cssText = [
+            'flex:0 0 auto',
+            'font-size:9px',
+            'font-weight:bold',
+            'text-transform:uppercase',
+            'letter-spacing:.3px',
+            'color:' + skin.fg,
+            'background:' + skin.bg,
+            'border:1px solid ' + skin.border,
+            'border-radius:8px',
+            'padding:1px 6px',
+            'white-space:nowrap'
+          ].join(';');
+          // Inset bar (vs. border-left) so it doesn't shift the row's layout.
+          row.style.boxShadow = 'inset 3px 0 0 ' + accent;
+          row.style.background = '#fbfaf6';
+        }
+
         // Apply the visual state (greyed when off or disabled by run state;
         // struck through when done). A run-disabled row is inert end to end:
-        // its done, skip, delete, link and text edit are all turned off.
+        // its done, skip, delete, link and text edit are all turned off, and
+        // its text goes italic to read as "automatic" rather than a user skip.
         function paint() {
           const hardOff = runDisabled(item);
           const greyed = hardOff || !!item.off;
           cb.disabled = greyed;
           off.disabled = hardOff;
           txt.readOnly = hardOff;
+          txt.style.fontStyle = hardOff ? 'italic' : 'normal';
           if (del) {
             del.style.opacity = hardOff ? '0.3' : '1';
             del.style.cursor = hardOff ? 'default' : 'pointer';
@@ -531,6 +570,7 @@
         row.appendChild(cell(cb, COL.done));
         row.appendChild(txt);
         if (link) row.appendChild(link);
+        if (badge) row.appendChild(badge);
         row.appendChild(cell(off, COL.skip));
         // Seed items have no delete control; keep the column width so rows
         // stay aligned with the header.
