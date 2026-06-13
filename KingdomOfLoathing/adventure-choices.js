@@ -3,6 +3,7 @@
 // @version        3.16
 // @author	       Tilo
 // @namespace      https://github.com/TiloBuechsenschuss
+// @downloadURL    https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/adventure-choices.js
 // @include *kingdomofloathing.com/choice.php*
 // @include *kingdomofloathing.com/basement.php
 // @include *kingdomofloathing.com/friars.php*

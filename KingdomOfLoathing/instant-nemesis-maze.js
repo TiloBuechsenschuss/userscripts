@@ -2,6 +2,7 @@
 // @name           KoL Instant Nemesis Maze v1.1
 // @author         Tilo
 // @namespace      https://github.com/TiloBuechsenschuss
+// @downloadURL    https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/instant-nemesis-maze.js
 // @description    Version 1.1 - Clicks through the nemesis lava maze for you.
 // @include        *127.0.0.1:*/volcanomaze.php*
 // @include        *.kingdomofloathing.com/volcanomaze.php*

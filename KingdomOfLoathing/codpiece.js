@@ -9,6 +9,7 @@
 // @match        https://www.kingdomofloathing.com/topmenu.php*
 // @match        https://kingdomofloathing.com/topmenu.php*
 // @grant        none
+// @downoadURL   https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/codpiece.js
 // ==/UserScript==
 
 (function () {
