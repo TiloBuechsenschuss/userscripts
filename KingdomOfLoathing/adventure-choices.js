@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           KoL Choice Adventure Rewards Updated
-// @version        3.16
+// @version        3.17
 // @author	       Tilo
 // @namespace      https://github.com/TiloBuechsenschuss
 // @downloadURL    https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/adventure-choices.js
@@ -41,6 +41,7 @@
 // @grant 	GM_setValue
 // @grant	GM_xmlhttpRequest
 // @grant   GM_registerMenuCommand
+// @history 3.17 added Play Ball! (choice 1598) pitch spoilers; skip annotating buttons with no matching spoiler text
 // @history 3.16 merged choice spoilers extracted from KoLmafia ChoiceAdventures.java; auto-updater call disabled (mirror only hosts 3.15)
 // @history 3.15 new Hidden City
 // @history 3.14 Dreadsylvania corrections, fix to updater
@@ -186,6 +187,28 @@ function CheckButtonText(inputs, cNum)
                 "take the silver door":"to sleeping quarters (distention/dog hair/back to start)",
                 "take the purple door":"to hallway (toward EMU helmet/hardtack&squeeze)"
 
+            },
+        // Play Ball! -- you throw one pitch per batter; each element offers its 2 minor
+        // pitches first, then the major one (once both minors are thrown this inning).
+        "1598":{
+                "throw some smoke":"[Hot minor] +5 Mus/Mys/Mox on the Baseball Diamond (until rollover)",
+                "bring the heat":"[Hot minor] +5 Hot Damage on the Baseball Diamond (until rollover)",
+                "throw a schenectady scorcher":"[Hot MAJOR] force ALL of the monster's drops (incl. conditionals & non-pickpocketable)",
+                "throw one in the deep freeze":"[Cold minor] +3 Damage Reduction on the Baseball Diamond (until rollover)",
+                "throw a snow ball":"[Cold minor] Regenerate 2-4 MP per Adventure on the Baseball Diamond (until rollover)",
+                "ice him out":"[Cold MAJOR] banish the monster until rollover",
+                "ice her out":"[Cold MAJOR] banish the monster until rollover",
+                "ice it out":"[Cold MAJOR] banish the monster until rollover",
+                "ice them out":"[Cold MAJOR] banish the monster until rollover",
+                "throw a ghost pitch":"[Spooky minor] Regenerate 3-5 HP per Adventure on the Baseball Diamond (until rollover)",
+                "draw a skull on the ball":"[Spooky minor] monster's Atk & Def reduced 50% at start of combat (rest of day)",
+                "throw a non-euclidean curveball":"[Spooky MAJOR] next 3 fights vs this monster today are free",
+                "throw a garbageball":"[Stench minor] acquire discarded hot dog or most of a beer (random)",
+                "throw a beanball":"[Stench minor] passive stench damage each round vs this monster (rest of day)",
+                "throw some cheddar":"[Stench MAJOR] add extra copies of the monster to its zones (like On the Trail)",
+                "throw a slurve":"[Sleaze minor] +1 Sleaze Resistance on the Baseball Diamond (until rollover)",
+                "throw a bacon-wrapped slider":"[Sleaze minor] +5% Combat Initiative on the Baseball Diamond (until rollover)",
+                "throw a screwball":"[Sleaze MAJOR] monster's base Atk & Def +3x level until rollover"
             }
         }
     if (advOptions[cNum] !== undefined) return advOptions[cNum];
@@ -202,7 +225,7 @@ function DisplaySpoilersByButtonText(inputs, SpoilerSet) {
             i = bval.indexOf("[");
             if (i != -1) bval = bval.substring(0, i -1);
             if (debug && SpoilerSet[bval] === undefined) SpoilerSet[bval] = "(button #" + btn.value + ")";
-            btn.value += " -- " + SpoilerSet[bval];
+            if (SpoilerSet[bval] !== undefined) btn.value += " -- " + SpoilerSet[bval];
         }
     }
 }
