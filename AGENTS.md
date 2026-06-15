@@ -49,6 +49,14 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
 - Any action-triggering request needs the player's **`pwd` hash** appended; without it the
   server rejects the request. Navigate `top.frames['mainpane']` to show results, or `fetch`
   with `credentials: 'same-origin'` to fire silently.
+- **`choice.php` is shared by every choice adventure.** A script matching it must identify the
+  specific choice before injecting anything — gate on the hidden `whichchoice` value (e.g.
+  `codpiece.js` only acts when `input[name="whichchoice"][value="1588"]`, the Eternity Codpiece
+  decoration screen, is present). `codpiece.js` also shows the pattern for applying several
+  form submissions in one go: replay each slot's `Replace` form as a sequential
+  `fetch(... credentials:'same-origin')` POST, then `location.reload()` once so the server stays
+  authoritative about item availability rather than trusting the stale page. Named gem setups
+  are persisted in `localStorage` under `tm-codpiece-setups`.
 
 **Twilight Heroes** is plain (non-frame) pages scraped from table layout. State that must
 survive the full-page reload after equip/unequip/use is stashed in `sessionStorage`

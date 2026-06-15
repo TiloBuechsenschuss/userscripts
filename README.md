@@ -48,7 +48,7 @@ and updates independently via its `@downloadURL`.
 
 | Script | Pages | What it does |
 | --- | --- | --- |
-| `codpiece.js` | top/awesome menu | Adds a quick-action button to the menu bar |
+| `codpiece.js` | top/awesome menu, codpiece decoration choice | Menu button to open the Eternity Codpiece, plus tools on the decoration screen to set every gem slot at once and to save/load named gem setups |
 | `daily-checklist.js` | top/awesome menu | Daily tasks checklist |
 | `charpane-heal.js` | charpane | "Heal" button that casts heal skills until full |
 | `renew-buffs-max.js` | charpane | Re-cast buffs at max |

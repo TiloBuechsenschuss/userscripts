@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/daily-checklist.js
-// @version      1.10
+// @version      1.11
 // @description  Adds a Checklist button next to the codpiece button that opens a daily to-do list popup. Items can carry a KoL action link (pwd filled live) and be greyed out when not relevant to the current run. A persistent ronin / post-ronin toggle auto-disables the tasks that only apply to one phase. Checked items reset each day (or manually).
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -742,39 +742,56 @@
     return btn;
   }
 
+  // Shared button row under the edit icon. The daily-checklist and codpiece
+  // scripts each install independently, so they cooperate through a single
+  // absolutely-positioned flex container (created by whichever runs first) and
+  // claim their slot with CSS `order` -- making the left-to-right arrangement
+  // independent of DOM insertion order / which script loads first. Returns the
+  // row, or null in text-mode topmenu where #fixedawesome is absent.
+  function getButtonRow() {
+    let row = document.getElementById('tm-kol-menu-btns');
+    if (row) return row;
+    const fixed = document.getElementById('fixedawesome');
+    const editLink = document.querySelector('#fixedawesome a.config');
+    if (!fixed || !editLink) return null;
+    // #fixedawesome is position:absolute, so an absolutely positioned child is
+    // placed relative to it without disturbing the inline row of icons. The
+    // edit icon is 30px tall; hang the row just below it, left-aligned with it.
+    row = document.createElement('div');
+    row.id = 'tm-kol-menu-btns';
+    row.style.cssText = [
+      'position:absolute',
+      'top:31px',
+      'left:' + Math.max(0, editLink.offsetLeft) + 'px',
+      'z-index:3',
+      'display:flex',
+      'gap:3px',
+      'align-items:flex-start'
+    ].join(';');
+    fixed.appendChild(row);
+    return row;
+  }
+
   function addButton() {
     if (document.getElementById('tm-checklist-btn')) return;
 
     const btn = makeButton();
-    const fixed = document.getElementById('fixedawesome');
-    const editLink = document.querySelector('#fixedawesome a.config');
-
-    if (fixed && editLink) {
-      // #fixedawesome is position:absolute, so an absolutely positioned child
-      // is placed relative to it. The codpiece button (if present) sits at
-      // top:31px; stack this one just below it at top:46px, same left edge.
-      btn.style.position = 'absolute';
-      btn.style.top = '46px';
-      btn.style.left = Math.max(0, editLink.offsetLeft) + 'px';
-      btn.style.zIndex = '3';
+    const row = getButtonRow();
+    if (row) {
+      // Sit to the left; the codpiece button (order 2) lines up to our right.
+      btn.style.order = '1';
       btn.style.backgroundColor = 'white';
-      fixed.appendChild(btn);
+      row.appendChild(btn);
       return;
     }
 
-    // Text-mode topmenu fallback: place near the codpiece button or "edit".
-    const cod = document.getElementById('tm-codpiece-btn');
-    if (cod) {
-      cod.insertAdjacentElement('afterend', btn);
-      return;
-    }
+    // Text-mode topmenu fallback: place after a plain "edit" link, so the
+    // codpiece button (which anchors after us when present) ends up to our right.
     const links = document.querySelectorAll('a');
     for (const a of links) {
       const t = a.textContent.trim().toLowerCase().replace(/^\[|\]$/g, '');
       if (t === 'edit') {
-        const wrap = document.createElement('div');
-        wrap.appendChild(btn);
-        a.insertAdjacentElement('afterend', wrap);
+        a.insertAdjacentElement('afterend', btn);
         return;
       }
     }
