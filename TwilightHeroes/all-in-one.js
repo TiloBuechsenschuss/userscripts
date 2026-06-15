@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/all-in-one.js
-// @version      1.0
+// @version      1.1
 // @description  Single-install loader for the Twilight Heroes userscripts in this repo. It carries no logic of its own; it @requires each individual script straight from GitHub so installing this one file gives you all of them.
 //
 // @match        https://www.twilightheroes.com/header.php*
@@ -18,6 +18,8 @@
 // @match        https://twilightheroes.com/sell.php*
 // @match        https://www.twilightheroes.com/skills.php*
 // @match        https://twilightheroes.com/skills.php*
+// @match        https://www.twilightheroes.com/nav.php*
+// @match        https://twilightheroes.com/nav.php*
 //
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/header-heal.js
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/header-hideout-links.js
