@@ -4,7 +4,7 @@
 // @contributor  Hellion, Tard, Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/strange-leaflet.js
-// @version      0.5.7
+// @version      0.5.8
 // @description  Strange Leaflet spoiler script - auto-solves the leaflet text adventure.
 // @match        https://www.kingdomofloathing.com/main.php*
 // @match        https://kingdomofloathing.com/main.php*
@@ -40,6 +40,14 @@ v0.52: add auto-clicking of the "Do It!" button, except when the secret code is 
 
 (function () {
 	'use strict';
+
+	// Bundled-loader safety: all-in-one.js @requires every KoL script and runs
+	// them on the union of all matched pages. Guard our own pages explicitly --
+	// the leaflet branch below only bails when fewer than 3 <td>s are present,
+	// which is false on td-heavy frames like charpane, so without this guard the
+	// solver logic would run there. A no-op for the standalone install, whose
+	// @match already scopes it to main.php / leaflet.php.
+	if (!/\/(main(_c)?\.html|main\.php|leaflet\.php)/i.test(location.pathname)) return;
 
 	// --- Persistent state (replaces GM_get/setValue) ----------------------
 	// GM storage persisted across page loads; localStorage does the same and

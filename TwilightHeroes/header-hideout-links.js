@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/header-hideout-links.js
-// @version      1.0
+// @version      1.1
 // @description  Adds quick "Garage" (garage.php) and "Rest" (rest.php) links to the top navigation header, in parentheses right after the Hideout link.
 // @match        https://www.twilightheroes.com/header.php*
 // @match        https://twilightheroes.com/header.php*
@@ -13,6 +13,13 @@
 
 (function () {
   "use strict";
+
+  // Bundled-loader safety: all-in-one.js @requires every TH script and runs
+  // them on the union of all matched pages. Guard header.php explicitly, or this
+  // script would inject its links after any Hideout link that happens to appear
+  // on another content page. A no-op for the standalone install, whose @match
+  // already scopes it to header.php.
+  if (!/\/header\.php/i.test(location.pathname)) return;
 
   // Idempotency: a previous run may already have inserted the extra links.
   if (document.getElementById("th-hideout-extra")) return;

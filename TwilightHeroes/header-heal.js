@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/header-heal.js
-// @version      1.2
+// @version      1.3
 // @description  Adds a "Heal" link to the top navigation header, in parentheses right after the Skills link. Clicking it repeatedly casts your heal skill(s) until HP is full or you can no longer afford any of them. Heal skills are configured below with a priority and are matched against skills.php by name (no hardcoded skill ids).
 // @match        https://www.twilightheroes.com/header.php*
 // @match        https://twilightheroes.com/header.php*
@@ -13,6 +13,13 @@
 
 (function () {
   "use strict";
+
+  // Bundled-loader safety: all-in-one.js @requires every TH script and runs
+  // them on the union of all matched pages. Guard header.php explicitly, or this
+  // script would inject its "Heal" link after any Skills link that happens to
+  // appear on another content page. A no-op for the standalone install, whose
+  // @match already scopes it to header.php.
+  if (!/\/header\.php/i.test(location.pathname)) return;
 
   // ---------------------------------------------------------------------------
   // Configuration: the heal skills to consider, highest priority first.

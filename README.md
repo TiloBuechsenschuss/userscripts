@@ -1,3 +1,111 @@
 # userscripts
-Assorted userscripts.
-Mostly vibe coded, as personal testing ground for doing that. Use accordingly, or don't.
+
+Assorted userscripts for two browser games. Mostly vibe coded, as a personal
+testing ground for doing that. Use accordingly, or don't.
+
+- `KingdomOfLoathing/` — scripts for [kingdomofloathing.com](https://www.kingdomofloathing.com)
+- `TwilightHeroes/` — scripts for [twilightheroes.com](https://www.twilightheroes.com)
+
+Each `.js` file is a standalone userscript (Tampermonkey / Greasemonkey /
+Violentmonkey): a self-contained IIFE with a `// ==UserScript== ...` metadata
+block. There's no build step — the file in the repo *is* the shippable artifact.
+
+## Installing
+
+You need a userscript manager extension ([Tampermonkey](https://www.tampermonkey.net/)
+recommended). Then either install everything for a game at once, or pick
+individual scripts.
+
+### Everything for a game (one install)
+
+Install one of the **all-in-one loaders**. Each is a thin script that pulls in
+all of that game's scripts via `@require`, so a single install gives you the
+whole set:
+
+- **Kingdom of Loathing:** [`KingdomOfLoathing/all-in-one.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/all-in-one.js)
+- **Twilight Heroes:** [`TwilightHeroes/all-in-one.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/all-in-one.js)
+
+Open the raw link in a browser with a userscript manager installed and it will
+offer to install.
+
+> **Note — `adventure-choices.js` is not in the KoL loader.** It requires
+> `GM_*` grants, which are incompatible with the `@grant none` mode every other
+> script relies on (mixing them in one install breaks page-`window` access).
+> Install it on its own if you want it.
+
+> **Heads up on updates:** managers cache `@require` content and only re-fetch
+> it on their *external script update* schedule, not as eagerly as a normally
+> installed script. If you want the most reliable auto-updates for a specific
+> script, install that file directly (below) instead of relying on the loader.
+
+### Individual scripts
+
+Open the raw URL of any `.js` file below in a browser with a userscript manager
+installed, and it will offer to install. Each script has its own `@match` lines
+and updates independently via its `@downloadURL`.
+
+**Kingdom of Loathing** (`KingdomOfLoathing/`)
+
+| Script | Pages | What it does |
+| --- | --- | --- |
+| `codpiece.js` | top/awesome menu | Adds a quick-action button to the menu bar |
+| `daily-checklist.js` | top/awesome menu | Daily tasks checklist |
+| `charpane-heal.js` | charpane | "Heal" button that casts heal skills until full |
+| `renew-buffs-max.js` | charpane | Re-cast buffs at max |
+| `strange-leaflet.js` | main / leaflet | Strange Leaflet helper |
+| `mine-sparkle-highlight.js` | mining / mine | Highlights sparkle spots in the mine |
+| `instant-nemesis-maze.js` | volcanomaze | Solves the volcano (nemesis) maze |
+| `adventure-choices.js` | many | Choice-adventure reward annotations *(not in the loader — uses `GM_*`)* |
+
+**Twilight Heroes** (`TwilightHeroes/`)
+
+| Script | Pages | What it does |
+| --- | --- | --- |
+| `header-heal.js` | header | "Heal" button in the header |
+| `header-hideout-links.js` | header | Extra hideout links in the header |
+| `inventory-filter.js` | wear / inventory / use | Text/type filtering for item lists |
+| `wearables-ui.js` | wear | Improved wearables UI |
+| `sell-sort.js` | sell | Sortable sell list |
+| `skills-cast-max.js` | skills | Cast a skill the maximum number of times |
+
+## Editing / contributing
+
+There is no build, bundler, package manager, test suite, or linter. You edit a
+`.js` file, then reload it in your userscript manager against the live page to
+try it. See [`AGENTS.md`](./AGENTS.md) for architecture and conventions. The two
+rules that bite if you forget them:
+
+- **Bump `@version` on every user-facing change.** Userscript managers only pull
+  an update when the remote `@version` is higher than what's installed. An edit
+  without a bump never reaches installed users.
+- **A file's repo path is its public URL.** Each script's `@downloadURL` (and
+  each loader's `@require` line) points at its raw path on `main`. Moving or
+  renaming a file breaks auto-updates for everyone who has it installed — if you
+  move one, update its `@downloadURL` and any `@require` that references it.
+
+### Editing the all-in-one loaders
+
+The loaders (`*/all-in-one.js`) contain no logic — just metadata. When you
+**add or remove a script**, or change which pages it touches:
+
+1. Add/remove its `@require` line in the matching loader.
+2. Update the loader's `@match` union so the new script's pages are covered.
+3. Bump the loader's `@version`.
+
+Because every bundled script is a self-guarding IIFE (it scrapes the page it
+cares about and bails harmlessly elsewhere), running them all on the union of
+matched pages is safe; each one only acts on its own page.
+
+**Important for new bundled scripts:** `@require` runs *every* script on the
+*union* of the loader's matched pages — the manager's per-script `@match` no
+longer scopes it. So any script that injects UI or takes an action must guard
+its own page near the top of the IIFE, e.g.:
+
+```js
+if (!/\/charpane\.php/i.test(location.pathname)) return;
+```
+
+This is a no-op for the standalone install (its `@match` already scopes it) but
+keeps the script from acting on a sibling page when bundled. Scripts that purely
+scrape-and-bail (no UI/side effect when their anchor is absent) don't strictly
+need it, but adding one is the safe default.

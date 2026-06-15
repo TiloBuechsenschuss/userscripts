@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:wiki.kingdomofloathing.com)",
+      "WebSearch",
+      "WebFetch(domain:kol.coldfront.net)"
+    ]
+  }
+}

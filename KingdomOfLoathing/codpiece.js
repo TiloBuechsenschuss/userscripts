@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/codpiece.js
-// @version      1.3
+// @version      1.4
 // @description  Adds a button below the edit icon in the KoL icon menu that triggers inventory.php?action=docodpiece
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -15,6 +15,13 @@
 
 (function () {
   'use strict';
+
+  // Bundled-loader safety: all-in-one.js @requires every KoL script and runs
+  // them on the union of all matched pages. Guard our own page(s) explicitly,
+  // or this script's body-top fallback would drop a stray button onto sibling
+  // frames (charpane, mainpane, ...). A no-op for the standalone install, whose
+  // @match already scopes it to these pages.
+  if (!/\/(awesomemenu|topmenu)\.php/i.test(location.pathname)) return;
 
   // --- Configuration ---------------------------------------------------
   const ACTION_URL = '/inventory.php?action=docodpiece';

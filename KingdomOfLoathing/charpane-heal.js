@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/charpane-heal.js
-// @version      1.0
+// @version      1.1
 // @description  Adds a small "heal" button next to the HP line in the charpane. Clicking it repeatedly casts your heal skills (configured below by priority) until HP is full or no skill can raise it any further. Heal skills are matched against the skills form by name (no hardcoded skill ids); the per-cast result is judged purely by whether HP actually went up, so it copes with out-of-MP, cooldowns and varying heal amounts.
 // @match        https://www.kingdomofloathing.com/charpane.php*
 // @match        https://kingdomofloathing.com/charpane.php*
@@ -13,6 +13,13 @@
 
 (function () {
   'use strict';
+
+  // Bundled-loader safety: all-in-one.js @requires every KoL script and runs
+  // them on the union of all matched pages. Guard charpane.php explicitly, or
+  // addButton()'s body-top fallback would drop a stray "heal" button onto pages
+  // with no HP line (main, mining, ...). A no-op for the standalone install,
+  // whose @match already scopes it to charpane.php.
+  if (!/\/charpane\.php/i.test(location.pathname)) return;
 
   // This script runs INSIDE the charpane frame, so `document` is the sidebar
   // and same-origin fetches to api.php / the skills form work directly.

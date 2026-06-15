@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/mine-sparkle-highlight.js
-// @version      1.3
+// @version      1.4
 // @description  Makes twinkling "Promising Chunk of Wall" tiles in Itznotyerzitz Mine (mining.php) stand out with a constant pulsing gold glow, and subtly marks the other mineable tiles.
 // @match        https://www.kingdomofloathing.com/mining.php*
 // @match        https://kingdomofloathing.com/mining.php*
@@ -15,6 +15,13 @@
 
 (function () {
   'use strict';
+
+  // Bundled-loader safety: all-in-one.js @requires every KoL script and runs
+  // them on the union of all matched pages. Guard our own pages explicitly, or
+  // startPulse() would leave a perpetual no-op setInterval running on every
+  // other KoL page. A no-op for the standalone install, whose @match already
+  // scopes it to mining.php / mine.php.
+  if (!/\/(mining|mine)\.php/i.test(location.pathname)) return;
 
   // NOTE: styling is applied via inline element styles (not an injected
   // <style> element). KoL's Content-Security-Policy allows inline style

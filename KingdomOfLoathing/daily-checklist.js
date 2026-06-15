@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/daily-checklist.js
-// @version      1.9
+// @version      1.10
 // @description  Adds a Checklist button next to the codpiece button that opens a daily to-do list popup. Items can carry a KoL action link (pwd filled live) and be greyed out when not relevant to the current run. A persistent ronin / post-ronin toggle auto-disables the tasks that only apply to one phase. Checked items reset each day (or manually).
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -15,6 +15,13 @@
 
 (function () {
   'use strict';
+
+  // Bundled-loader safety: all-in-one.js @requires every KoL script and runs
+  // them on the union of all matched pages. Guard our own page(s) explicitly,
+  // or this script's body-top fallback would drop a stray button onto sibling
+  // frames (charpane, mainpane, ...). A no-op for the standalone install, whose
+  // @match already scopes it to these pages.
+  if (!/\/(awesomemenu|topmenu)\.php/i.test(location.pathname)) return;
 
   // --- Configuration ---------------------------------------------------
   const BUTTON_LABEL = 'Checklist';
