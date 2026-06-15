@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/skills-cast-max.js
-// @version      1.1
+// @version      1.3
 // @description  On skills.php, adds a "Max" button next to each skill-casting form's "times" input that fills in floor(PP / cost) and casts. In the nav sidebar (nav.php), adds a "+max" button to each Active Effect whose buff is a castable skill; clicking it silently recasts that skill floor(PP / cost) times (via background fetch) and reloads the sidebar.
 // @match        https://www.twilightheroes.com/skills.php*
 // @match        https://twilightheroes.com/skills.php*
@@ -117,10 +117,19 @@
   // sidebar so its PP and effect timers refresh.
   // ===========================================================================
 
+  // Fetch + parse skills.php once. Cached for the session so repeated nav
+  // reloads (each "+max" click reloads the sidebar) don't re-hit the server —
+  // the castable-skill list only changes when you learn/forget a skill.
   async function fetchSkillsDoc() {
+    try {
+      const cached = sessionStorage.getItem("th-skills-html");
+      if (cached) return new DOMParser().parseFromString(cached, "text/html");
+    } catch (e) { /* sessionStorage may be unavailable; fetch fresh */ }
     const res = await fetch(SKILLS_URL, { credentials: "same-origin" });
     if (!res.ok) throw new Error("skills.php returned HTTP " + res.status);
-    return new DOMParser().parseFromString(await res.text(), "text/html");
+    const html = await res.text();
+    try { sessionStorage.setItem("th-skills-html", html); } catch (e) { /* ignore */ }
+    return new DOMParser().parseFromString(html, "text/html");
   }
 
   // Find the skill's casting form, option value and PP cost by name. The cost is
@@ -190,7 +199,9 @@
     return raw.replace(/\s*-\s*$/, "").trim();
   }
 
-  function addEffectMaxButton(div) {
+  // `found` is the skills.php match (value/cost/form) resolved up front in
+  // initNavPage — only effects backed by a castable skill ever get here.
+  function addEffectMaxButton(div, found) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "th-effect-max";
@@ -206,10 +217,6 @@
       btn.disabled = true;
       btn.textContent = "…";
       try {
-        const doc = await fetchSkillsDoc();
-        const found = findSkillOption(doc, name);
-        if (!found) { alert(`"${name}" isn't a castable skill on skills.php.`); return; }
-        if (!found.cost || found.cost <= 0) { alert(`"${name}" has no PP cost.`); return; }
         const pp = getCurrentPP();
         if (pp == null) { alert("Couldn't read your current PP."); return; }
         const max = Math.floor(pp / found.cost);
@@ -230,12 +237,72 @@
     div.appendChild(btn);
   }
 
-  function initNavPage() {
+  // Clears the cached skills.php HTML and re-evaluates every effect, so a skill
+  // learned/forgotten mid-session is reflected without opening a new tab.
+  async function refreshCache() {
+    try { sessionStorage.removeItem("th-skills-html"); } catch (e) { /* ignore */ }
+    for (const b of document.querySelectorAll(".th-effect-max")) b.remove();
+    await initNavPage();
+  }
+
+  // A "refresh cache" button at the very bottom of the effect list. Matches the
+  // sidebar's row markup (<td><font class="smnav">…) for visual consistency.
+  function addRefreshCacheButton() {
+    if (document.querySelector(".th-refresh-cache")) return;
+    const anchor = document.querySelector('div[onclick*="showskill("]');
+    const table = anchor && anchor.closest("table");
+    if (!table) return;
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "th-refresh-cache";
+    btn.textContent = "refresh cache";
+    btn.style.cssText =
+      "cursor:pointer;font-size:10px;line-height:1;padding:0 3px;";
+    btn.addEventListener("click", async () => {
+      if (btn.disabled) return;
+      const original = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "…";
+      try {
+        await refreshCache();
+      } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+      }
+    });
+
+    const tr = table.insertRow();
+    const td = tr.insertCell();
+    const font = document.createElement("font");
+    font.className = "smnav";
+    font.appendChild(btn);
+    td.appendChild(font);
+  }
+
+  async function initNavPage() {
     const divs = document.querySelectorAll('div[onclick*="showskill("]');
-    for (const div of divs) {
-      // Idempotency: a previous run may already have added the button.
-      if (div.querySelector(".th-effect-max")) continue;
-      addEffectMaxButton(div);
+    if (!divs.length) return;
+    addRefreshCacheButton(); // anchored to the list; added once even on re-runs.
+
+    // Idempotency: a previous run may already have added the buttons.
+    const pending = [...divs].filter(div => !div.querySelector(".th-effect-max"));
+    if (!pending.length) return;
+
+    // Resolve castability up front: an effect only gets a "+max" button if its
+    // name matches a castable skill on skills.php with a real PP cost. Effects
+    // granted by items (e.g. "Senging' in the Rain") aren't on skills.php, so
+    // findSkillOption returns null and they're skipped.
+    let doc;
+    try {
+      doc = await fetchSkillsDoc();
+    } catch (e) {
+      return; // can't tell what's castable; add no buttons rather than guess
+    }
+    for (const div of pending) {
+      const found = findSkillOption(doc, effectName(div));
+      if (!found || !found.cost || found.cost <= 0) continue;
+      addEffectMaxButton(div, found);
     }
   }
 
