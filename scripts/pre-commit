@@ -1,0 +1,11 @@
+#!/bin/sh
+# Git pre-commit hook: bump each loader's @version when a file it @require's is
+# staged, then re-stage the loader so the bump rides along in the same commit.
+#
+# Install (run once from the repo root):
+#   git config core.hooksPath scripts          # use the hooks in scripts/, OR
+#   cp scripts/pre-commit .git/hooks/pre-commit # copy into the default hooks dir
+#
+# Bypass for a single commit with:  git commit --no-verify
+
+node scripts/bump-loaders.mjs --staged || exit 1
