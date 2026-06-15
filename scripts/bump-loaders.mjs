@@ -17,8 +17,9 @@
 //   node scripts/bump-loaders.mjs --force      Force-bump every loader, ignoring change
 //                                            detection (and the "loader already edited" guard).
 //   node scripts/bump-loaders.mjs --force kol  Force-bump only loaders whose path contains
-//                                            "kol" (substring match; repeatable). Combine with
-//                                            --staged to also `git add` the bumped loader(s).
+//                                            "kol" (substring match; repeatable). Aliases:
+//                                            kol -> KingdomOfLoathing, th -> TwilightHeroes.
+//                                            Combine with --staged to also `git add` them.
 //
 // A loader is any tracked .js file whose metadata block @require's another file
 // in THIS repo. No config list to maintain -- add a loader and it's covered.
@@ -50,6 +51,11 @@ for (let i = 0; i < argv.length; i++) {
     forceMatches.push(a.slice('--force='.length));
   }
 }
+
+// Short aliases for the --force <match> term, so `--force kol` hits the
+// KingdomOfLoathing loader and `--force th` hits the TwilightHeroes one.
+const ALIASES = { kol: 'kingdomofloathing', th: 'twilightheroes' };
+const resolveMatch = (m) => (ALIASES[m.toLowerCase()] ?? m).toLowerCase();
 
 function git(...a) {
   return execFileSync('git', a, { encoding: 'utf8' }).trim();
@@ -113,7 +119,7 @@ for (const file of tracked) {
   const fileLc = file.toLowerCase();
   const isForced =
     FORCE &&
-    (forceMatches.length === 0 || forceMatches.some((m) => fileLc.includes(m.toLowerCase())));
+    (forceMatches.length === 0 || forceMatches.some((m) => fileLc.includes(resolveMatch(m))));
 
   const changedRequires = requires.filter((r) => changed.has(r));
 

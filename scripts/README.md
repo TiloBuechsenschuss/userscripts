@@ -19,7 +19,7 @@ node scripts/bump-loaders.mjs            # working tree vs HEAD; bump in place
 node scripts/bump-loaders.mjs --staged   # staged changes only; bump + git add the loader
 node scripts/bump-loaders.mjs --check     # report only; exit 1 if a bump is needed (CI)
 node scripts/bump-loaders.mjs --force      # bump every loader, ignoring change detection
-node scripts/bump-loaders.mjs --force kol  # bump only loaders whose path contains "kol"
+node scripts/bump-loaders.mjs --force KingdomOfLoathing  # bump only loaders whose path contains "KingdomOfLoathing"
 ```
 
 If the loader itself was already edited in the same changeset, the script leaves
@@ -33,7 +33,8 @@ ignoring change detection *and* the "loader already edited" guard.
 
 - Bare `--force` bumps every loader.
 - `--force <text>` restricts to loaders whose repo path contains `<text>`
-  (case-insensitive substring; repeatable, e.g. `--force kol --force twilight`).
+  (case-insensitive substring; repeatable, e.g. `--force kol --force th`).
+- Aliases: `kol` → `KingdomOfLoathing`, `th` → `TwilightHeroes`.
 - A `--force <text>` that matches no loader exits non-zero (likely a typo).
 - Combine with `--staged` to also `git add` the bumped loader(s); with `--check`
   to preview without writing.
