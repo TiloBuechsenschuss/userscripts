@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/daily-checklist.js
-// @version      1.8
+// @version      1.9
 // @description  Adds a Checklist button next to the codpiece button that opens a daily to-do list popup. Items can carry a KoL action link (pwd filled live) and be greyed out when not relevant to the current run. A persistent ronin / post-ronin toggle auto-disables the tasks that only apply to one phase. Checked items reset each day (or manually).
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -22,11 +22,25 @@
   // Token in a stored item.url that is swapped for the live pwd hash at click
   // time (pwd can change between sessions, so we never bake it into storage).
   const PWD_TOKEN = 'PWDHASH';
+  // Token swapped for the right Wizard of Ego manual's item id at click time,
+  // based on the player's current class (read from the charpane). The manual
+  // you can use depends on your prime stat, and class changes between
+  // ascensions, so we resolve it live rather than baking an id into storage.
+  const MANUAL_TOKEN = 'MANUALITEM';
+  // Class -> Wizard of Ego manual item id, grouped by prime stat:
+  //   Muscle      -> Manual of Labor        (2280)
+  //   Mysticality -> Manual of Transmission (2281)
+  //   Moxie       -> Manual of Dexterity    (2282)
+  const MANUAL_BY_CLASS = {
+    'Seal Clubber': 2280, 'Turtle Tamer': 2280,
+    'Pastamancer': 2281, 'Sauceror': 2281,
+    'Disco Bandit': 2282, 'Accordion Thief': 2282
+  };
   // Default items injected once (see SEED_VERSION). Items may carry a url that
   // opens in the mainpane when clicked, and a `disabled` phase ('ronin' or
   // 'post-ronin') that greys them out while the run state toggle matches it.
   // Bump SEED_VERSION to push new defaults to people who already have a saved list.
-  const SEED_VERSION = 1;
+  const SEED_VERSION = 2;
   const SEED_ITEMS = [
     {
       text: 'Dig with spade',
@@ -42,7 +56,7 @@
     },
     {
       text: 'Read manual',
-      off: true
+      url: '/inv_use.php?pwd=' + PWD_TOKEN + '&which=3&whichitem=' + MANUAL_TOKEN
     },
     {
       text: 'get friar blessings',
@@ -167,19 +181,50 @@
     return m2 ? m2[1] : null;
   }
 
-  // Swap PWD_TOKEN in a stored url for the live pwd hash.
+  // Detect the player's class by scanning the charpane (left sidebar) text for
+  // one of the known class names. The charpane is a sibling frame; fall back to
+  // this frame's own text if it can't be reached. Returns the class name string
+  // or null when none of the six is found (e.g. an unsupported avatar path).
+  function getCharClass() {
+    let text = '';
+    try {
+      const cp = top.frames['charpane'];
+      if (cp && cp.document && cp.document.body) {
+        text = cp.document.body.textContent || '';
+      }
+    } catch (e) { /* cross-frame access failed; fall back */ }
+    if (!text && document.body) text = document.body.textContent || '';
+    for (const name in MANUAL_BY_CLASS) {
+      if (text.indexOf(name) !== -1) return name;
+    }
+    return null;
+  }
+
+  // Swap the placeholder tokens in a stored url for live values: PWD_TOKEN for
+  // the pwd hash, MANUAL_TOKEN for the manual matching the current class.
+  // Returns null if a needed value can't be resolved (caller alerts).
   function resolveUrl(url) {
-    if (url.indexOf(PWD_TOKEN) === -1) return url;
-    const pwd = getPwd();
-    if (!pwd) return null;
-    return url.split(PWD_TOKEN).join(pwd);
+    let out = url;
+    if (out.indexOf(MANUAL_TOKEN) !== -1) {
+      const cls = getCharClass();
+      const itemId = cls && MANUAL_BY_CLASS[cls];
+      if (!itemId) return null;
+      out = out.split(MANUAL_TOKEN).join(itemId);
+    }
+    if (out.indexOf(PWD_TOKEN) !== -1) {
+      const pwd = getPwd();
+      if (!pwd) return null;
+      out = out.split(PWD_TOKEN).join(pwd);
+    }
+    return out;
   }
 
   // Run an item's url in the mainpane (so results are visible), like codpiece.
   function go(url) {
     const full = resolveUrl(url);
     if (!full) {
-      alert('Daily checklist: could not determine pwd hash for this link.');
+      alert('Daily checklist: could not build this link ' +
+            '(missing pwd hash, or class not recognised for the manual).');
       return;
     }
     const abs = full.charAt(0) === '/' ? full : '/' + full;
@@ -203,6 +248,10 @@
         // Backfill the run-state restriction onto an item that was seeded
         // before this field existed, without clobbering a user's own choice.
         if (seed.disabled && !match.disabled) match.disabled = seed.disabled;
+        // Backfill a newly-added seed url onto an item that didn't have one
+        // (e.g. 'Read manual' gained a link in SEED_VERSION 2). Only fills a
+        // gap -- never overwrites a url the user set themselves.
+        if (seed.url && !match.url) match.url = seed.url;
         // Flag pre-existing seeds so they pick up the no-delete rule too.
         match.seeded = true;
       } else {
