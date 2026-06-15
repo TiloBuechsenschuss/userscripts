@@ -75,6 +75,16 @@
       disabled: 'ronin'
     },
     {
+      text: 'Eat essential tofu',
+      url: 'inv_use.php?pwd=' + PWD_TOKEN + '&which=3&whichitem=4609',
+      disabled: 'ronin'
+    },
+    {
+      text: 'Use etched hourglass',
+      url: 'inv_use.php?pwd=' + PWD_TOKEN + '&which=3&whichitem=10265',
+      disabled: 'ronin'
+    },
+    {
       text: 'Get hermit clovers',
       url: '/hermit.php'
     },
@@ -83,13 +93,8 @@
       url: 'place.php?whichplace=forestvillage&action=fv_scientist'
     },
     {
-      text: 'Eat essential tofu',
-    },
-    {
-      text: 'Use etched hourglass'
-    },
-    {
-      text: 'Use eternal car battery'
+      text: 'Use eternal car battery',
+      url: 'inv_use.php?pwd=' + PWD_TOKEN + '&which=3&whichitem=6741'
     },
     {
       text: 'Pull from Hagnk\'s',
