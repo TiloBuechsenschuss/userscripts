@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/codpiece.js
-// @version      1.9
-// @description  Adds a Codpiece button to the KoL icon menu (triggers inventory.php?action=docodpiece) and, on the Eternity Codpiece decoration screen, adds tools to set every gem slot at once and to save/load gem setups.
+// @version      1.12
+// @description  Adds a Codpiece button to the KoL icon menu (triggers inventory.php?action=docodpiece) and, on the Eternity Codpiece decoration screen, adds tools to set every gem slot at once (with a category filter), and to save/load gem setups.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
 // @match        https://www.kingdomofloathing.com/topmenu.php*
@@ -221,6 +221,72 @@
   const WHICHCHOICE = '1588';
   const SETUPS_KEY = 'tm-codpiece-setups';
 
+  // Gem categories for the "Set every slot to" dropdown filter. Each gem is
+  // sorted into exactly one bucket by matching keywords in its label text (the
+  // same text KoL renders, e.g. "+10% Item Drops from Monsters"); this keeps
+  // the buckets working even if item IDs change. The first matching category
+  // (in this order) wins; anything unmatched falls into "Other". `test` is run
+  // against the gem's label; the synthetic "all" entry has no `test`.
+  const GEM_CATEGORIES = [
+    { key: 'all', label: 'All gems' },
+    {
+      key: 'eledmg', label: 'Elemental damage',
+      test: function (l) {
+        return /(Hot|Cold|Stench|Sleaze|Spooky)\s+(Damage|Spells)/i.test(l) ||
+               /Damage to\b/i.test(l);
+      }
+    },
+    {
+      key: 'eleres', label: 'Elemental resistance',
+      test: function (l) { return /Resistance/i.test(l); }
+    },
+    {
+      key: 'drops', label: 'Drops',
+      test: function (l) {
+        return /Drops from Monsters/i.test(l) || /Pickpocket/i.test(l);
+      }
+    },
+    {
+      key: 'stats', label: 'Stats & initiative',
+      test: function (l) {
+        return /\b(Muscle|Mysticality|Moxie)\b/i.test(l) ||
+               /Initiative/i.test(l);
+      }
+    },
+    {
+      key: 'sustain', label: 'Sustain',
+      // HP/MP regeneration and damage absorption / reduction.
+      test: function (l) {
+        return /Regenerate\b.*\b(HP|MP)\b/i.test(l) ||
+               /Damage (Absorption|Reduction)/i.test(l);
+      }
+    },
+    {
+      key: 'physoff', label: 'Physical offense',
+      // Weapon damage (and room for other physical-damage gems later).
+      test: function (l) { return /Weapon Damage/i.test(l); }
+    },
+    {
+      key: 'other', label: 'Other',
+      // Matches whatever none of the specific categories above claimed.
+      test: function (l) {
+        return !GEM_CATEGORIES.some(function (c) {
+          return c.key !== 'all' && c.key !== 'other' && c.test(l);
+        });
+      }
+    }
+  ];
+
+  // The category key a gem belongs to (first specific match, else "other").
+  function gemCategory(label) {
+    for (let i = 0; i < GEM_CATEGORIES.length; i++) {
+      const c = GEM_CATEGORIES[i];
+      if (c.key === 'all') continue;
+      if (c.test(label)) return c.key;
+    }
+    return 'other';
+  }
+
   function loadSetups() {
     try {
       const o = JSON.parse(localStorage.getItem(SETUPS_KEY));
@@ -335,17 +401,24 @@
     status.id = 'tm-cod-status';
     status.style.cssText = 'margin-top:6px;min-height:14px;color:#006';
 
-    // --- Row 1: set all slots to one gem ------------------------------
+    // --- Row 1: set all slots to one gem (with a category filter) -----
     const row1 = document.createElement('div');
     row1.style.cssText = 'margin-top:6px';
+
+    // Filter sub-line: narrows the gem dropdown to one category.
+    const filterLine = document.createElement('div');
+    const catSel = document.createElement('select');
+    catSel.style.marginLeft = '6px';
+    GEM_CATEGORIES.forEach(function (c) {
+      const o = document.createElement('option');
+      o.value = c.key;
+      o.textContent = c.label;
+      catSel.appendChild(o);
+    });
+
     const gemSel = document.createElement('select');
     gemSel.style.maxWidth = '300px';
-    gems.forEach(function (label, value) {
-      const o = document.createElement('option');
-      o.value = value;
-      o.textContent = label;
-      gemSel.appendChild(o);
-    });
+
     const setAllBtn = document.createElement('button');
     setAllBtn.type = 'button';
     setAllBtn.textContent = 'Set all slots';
@@ -353,6 +426,7 @@
     setAllBtn.style.marginLeft = '6px';
     setAllBtn.addEventListener('click', function () {
       const iid = gemSel.value;
+      if (!iid) return;
       const assignments = slots
         .filter(function (s) { return slotCanTake(s, iid); })
         .map(function (s) { return { which: s.which, iid: iid }; });
@@ -364,9 +438,43 @@
       setAllBtn.disabled = true;
       applyAssignments(assignments, pwd, status);
     });
-    row1.appendChild(document.createTextNode('Set every slot to: '));
-    row1.appendChild(gemSel);
-    row1.appendChild(setAllBtn);
+
+    // (Re)populate the gem dropdown with just the gems in the chosen
+    // category, alphabetically (Map preserves the union's insertion order).
+    function fillGems() {
+      const cat = catSel.value;
+      gemSel.innerHTML = '';
+      let n = 0;
+      gems.forEach(function (label, value) {
+        if (cat !== 'all' && gemCategory(label) !== cat) return;
+        const o = document.createElement('option');
+        o.value = value;
+        o.textContent = label;
+        gemSel.appendChild(o);
+        n++;
+      });
+      if (!n) {
+        const o = document.createElement('option');
+        o.value = '';
+        o.textContent = '(no gems in this category)';
+        gemSel.appendChild(o);
+      }
+      gemSel.disabled = (n === 0);
+      setAllBtn.disabled = (n === 0);
+    }
+    catSel.addEventListener('change', fillGems);
+    fillGems();
+
+    filterLine.appendChild(document.createTextNode('Filter:'));
+    filterLine.appendChild(catSel);
+    row1.appendChild(filterLine);
+
+    const setLine = document.createElement('div');
+    setLine.style.cssText = 'margin-top:4px';
+    setLine.appendChild(document.createTextNode('Set every slot to: '));
+    setLine.appendChild(gemSel);
+    setLine.appendChild(setAllBtn);
+    row1.appendChild(setLine);
     panel.appendChild(row1);
 
     // --- Row 2: save / load named setups ------------------------------
