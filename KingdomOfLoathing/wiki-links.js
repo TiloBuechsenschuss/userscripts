@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/wiki-links.js
-// @version      0.8
+// @version      0.9
 // @description  Adds a small "W" badge linking to the KoL wiki (wiki.kingdomofloathing.com) next to the last adventure in the charpane, the location name atop place.php, the choice-adventure name atop choice.php, each quest title in questlog.php, the monster name in combat and items you acquire (fight.php), and item names in your inventory (inventory.php). Clicking opens the wiki article for that thing in a new tab. All targets are verified against real page HTML.
 // @match        https://www.kingdomofloathing.com/charpane.php*
 // @match        https://kingdomofloathing.com/charpane.php*
@@ -117,9 +117,21 @@
   // keeps it. NOTE: other pages share this exact bar but with non-article
   // titles — fight.php ("Combat!"), questlog.php ("Your Quest Log") — so this
   // is wired only into the place/choice dispatch branches, never called there.
+  //
+  // SPECIAL CASE: a choice adventure can flow straight into the next one. The
+  // page then shows a "Results:" recap bar first — inside <div id="results">,
+  // holding the items/text from the previous choice — and the real next-choice
+  // title bar as a sibling after it. The recap is not an adventure name and
+  // must not be badged, so skip any title cell inside #results and badge the
+  // first real one. (place.php and ordinary single choices have no #results,
+  // so their sole title bar is taken as before.)
   function linkTitleBar() {
-    const td = document.querySelector('td[style*="background-color: blue"]');
-    if (td) addBadge(td.querySelector('b'), 'after');
+    const tds = document.querySelectorAll('td[style*="background-color: blue"]');
+    for (const td of tds) {
+      if (td.closest('#results')) continue;
+      addBadge(td.querySelector('b'), 'after');
+      return;
+    }
   }
 
   // --- Quest titles (questlog.php) -------------------------------------
