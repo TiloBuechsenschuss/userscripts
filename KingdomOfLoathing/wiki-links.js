@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/wiki-links.js
-// @version      0.9
+// @version      0.10
 // @description  Adds a small "W" badge linking to the KoL wiki (wiki.kingdomofloathing.com) next to the last adventure in the charpane, the location name atop place.php, the choice-adventure name atop choice.php, each quest title in questlog.php, the monster name in combat and items you acquire (fight.php), and item names in your inventory (inventory.php). Clicking opens the wiki article for that thing in a new tab. All targets are verified against real page HTML.
 // @match        https://www.kingdomofloathing.com/charpane.php*
 // @match        https://kingdomofloathing.com/charpane.php*
@@ -135,16 +135,27 @@
   }
 
   // --- Quest titles (questlog.php) -------------------------------------
-  // Each current quest is introduced by its title as a <b> that is a DIRECT
-  // child of the <blockquote> holding the quest list, e.g.
-  //   <blockquote><b>Lady Spookyraven's Babies</b><br> Gather up ...
-  // The other <b>s in the body (place links like "Spookyraven Manor") are
-  // nested inside <a>, and the "Current/Other Quests:" headers sit outside
-  // the blockquote, so `blockquote > b` selects exactly the quest titles.
-  // No article stripping: the wiki quest page keeps the title verbatim.
+  // Each current quest is introduced by its title as a <b> immediately
+  // followed by the <br> that precedes the quest's description, e.g.
+  //   <b>Lady Spookyraven's Babies</b><br> Gather up ...
+  // Only the FIRST quest in a section is a direct child of the <blockquote>;
+  // the rest are each wrapped in a <p> (<blockquote><p><b>title</b><br>...),
+  // so `blockquote > b` would catch only one per section. We scope to all
+  // <b>s inside the blockquote instead and pick out the titles by structure:
+  //  - place links in descriptions ("The Old Man", "The Sea") are <b>s nested
+  //    inside <a>, so skip any <b> with an <a> ancestor;
+  //  - bold words mid-description ("...make it a <b>big</b> war.") are NOT
+  //    followed by a <br>, so require the trailing <br>.
+  // The "Current/Council/Other Quests:" headers sit OUTSIDE the blockquote,
+  // so the blockquote scope already excludes them. No article stripping: the
+  // wiki quest page keeps the title verbatim.
   function linkQuests() {
-    document.querySelectorAll('blockquote > b')
-      .forEach(function (b) { addBadge(b, 'after'); });
+    document.querySelectorAll('blockquote b').forEach(function (b) {
+      if (b.closest('a')) return;
+      const next = b.nextElementSibling;
+      if (!next || next.tagName !== 'BR') return;
+      addBadge(b, 'after');
+    });
   }
 
   // --- Combat monster (fight.php) --------------------------------------
