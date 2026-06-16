@@ -5,10 +5,11 @@ Guidance for AI agents (and humans) working in this repository.
 ## What this is
 
 A collection of standalone **userscripts** (Tampermonkey / Greasemonkey / Violentmonkey)
-for two browser games:
+for three browser games:
 
 - `KingdomOfLoathing/` — scripts for kingdomofloathing.com
 - `TwilightHeroes/` — scripts for twilightheroes.com
+- `FallenLondon/` — scripts for fallenlondon.com
 
 There is **no build, no bundler, no package manager, no test suite, and no lint config**.
 Each `.js` file is the shippable artifact: a single self-contained IIFE prefixed with a
@@ -65,6 +66,25 @@ serves several pages with the same `<td width=50%><b>name</b></td>` item layout
 (wear.php, inventory.php, use.php) by matching all of them and locating the table from a
 known `<h1>`/`<h2>` heading; extend `HEADINGS` rather than forking the file when another
 such page turns up.
+
+**Fallen London** is a different animal from the other two: a **single-page React app**.
+There are no per-page URLs to `@match` — everything happens under `fallenlondon.com/*`, and
+the game swaps storylets, branches and results into the DOM client-side without any page
+navigation. Two consequences:
+
+- A one-shot `document-idle` pass (the KoL/TH model) misses anything drawn after load.
+  Scripts must re-scan on DOM changes — see `wiki-links.js`, which runs once and then on a
+  debounced `MutationObserver(document.body, {childList, subtree})`, relying on a per-element
+  `data-*` flag to stay idempotent across the repeated passes.
+- The React class names are partly verified. `wiki-links.js`'s wiki-link helper is confirmed
+  (the wiki is MediaWiki; `wiki/Special:Search?search=...&go=Go` resolves exact titles and
+  otherwise lands on search results). Storylet-list titles are confirmed against real HTML:
+  each is `<h2 class="... storylet__heading">` inside `.media.storylet`, so `.storylet__heading`
+  tags them uniquely — note the same element also carries the broader `.media__heading`, which
+  is reused elsewhere in the SPA and is deliberately NOT matched (it would over-badge). The
+  in-storylet `.branch__heading` selector is still a guess (FL's `*__heading` BEM convention);
+  confirm it in-game. Selectors live in one `TITLE_SELECTORS` array so that's the only place to
+  fix them.
 
 ## Verifying a change
 

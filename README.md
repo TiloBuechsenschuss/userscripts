@@ -1,10 +1,11 @@
 # userscripts
 
-Assorted userscripts for two browser games. Mostly vibe coded, as a personal
+Assorted userscripts for three browser games. Mostly vibe coded, as a personal
 testing ground for doing that. Use accordingly, or don't.
 
 - `KingdomOfLoathing/` — scripts for [kingdomofloathing.com](https://www.kingdomofloathing.com)
 - `TwilightHeroes/` — scripts for [twilightheroes.com](https://www.twilightheroes.com)
+- `FallenLondon/` — scripts for [fallenlondon.com](https://www.fallenlondon.com)
 
 Each `.js` file is a standalone userscript (Tampermonkey / Greasemonkey /
 Violentmonkey): a self-contained IIFE with a `// ==UserScript== ...` metadata
@@ -24,6 +25,7 @@ whole set:
 
 - **Kingdom of Loathing:** [`KingdomOfLoathing/all-in-one.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/all-in-one.js)
 - **Twilight Heroes:** [`TwilightHeroes/all-in-one.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/all-in-one.js)
+- **Fallen London:** [`FallenLondon/all-in-one.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/all-in-one.js)
 
 Open the raw link in a browser with a userscript manager installed and it will
 offer to install.
@@ -69,6 +71,12 @@ and updates independently via its `@downloadURL`.
 | `wearables-ui.js` | wear | Improved wearables UI |
 | `sell-sort.js` | sell | Sortable sell list |
 | `skills-cast-max.js` | skills | Cast a skill the maximum number of times |
+
+**Fallen London** (`FallenLondon/`)
+
+| Script | Pages | What it does |
+| --- | --- | --- |
+| `wiki-links.js` | game (SPA) | "W" badge linking storylet titles (and, tentatively, in-storylet branch titles) to the Fallen London wiki |
 
 ## Editing / contributing
 

@@ -34,7 +34,7 @@ ignoring change detection *and* the "loader already edited" guard.
 - Bare `--force` bumps every loader.
 - `--force <text>` restricts to loaders whose repo path contains `<text>`
   (case-insensitive substring; repeatable, e.g. `--force kol --force th`).
-- Aliases: `kol` → `KingdomOfLoathing`, `th` → `TwilightHeroes`.
+- Aliases: `kol` → `KingdomOfLoathing`, `th` → `TwilightHeroes`, `fl` → `FallenLondon`.
 - A `--force <text>` that matches no loader exits non-zero (likely a typo).
 - Combine with `--staged` to also `git add` the bumped loader(s); with `--check`
   to preview without writing.
