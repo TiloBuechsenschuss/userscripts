@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/inventory-filter.js
-// @version      2.1
-// @description  Adds a live text filter above the item list on the Wearable Items page (wear.php), the full Inventory (inventory.php), and the Use Something page (use.php); items whose name does not contain the typed text are hidden. On pages with consumables a Type dropdown also filters by caffeine/sugar. Emptied rows and category headers collapse too, leaving no gaps.
+// @version      2.2
+// @description  Adds a live text filter above the item list on the Wearable Items page (wear.php), the full Inventory (inventory.php), and the Use Something page (use.php); items whose name does not contain the typed text are hidden. On pages with consumables a Type dropdown also filters by caffeine, sugar, or both. Emptied rows and category headers collapse too, leaving no gaps.
 // @match        https://www.twilightheroes.com/wear.php*
 // @match        https://twilightheroes.com/wear.php*
 // @match        https://www.twilightheroes.com/inventory.php*
@@ -89,7 +89,8 @@
       const textOk = !q || it.name.includes(q);
       const typeOk = !type ||
         (type === 'caffeine' && it.caffeine) ||
-        (type === 'sugar' && it.sugar);
+        (type === 'sugar' && it.sugar) ||
+        (type === 'both' && it.caffeine && it.sugar);
       const show = textOk && typeOk;
       it.nameCell.style.display = show ? '' : 'none';
       if (it.imgCell) it.imgCell.style.display = show ? '' : 'none';
@@ -160,7 +161,8 @@
       typeSelect = document.createElement('select');
       typeSelect.id = 'th-item-type';
       typeSelect.style.cssText = 'margin-left:8px;';
-      [['', 'All types'], ['caffeine', 'Caffeine'], ['sugar', 'Sugar']]
+      [['', 'All types'], ['caffeine', 'Caffeine'], ['sugar', 'Sugar'],
+        ['both', 'Caff + Sugar']]
         .forEach(function (pair) {
           const opt = document.createElement('option');
           opt.value = pair[0];

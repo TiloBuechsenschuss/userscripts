@@ -3,7 +3,8 @@
     "allow": [
       "WebFetch(domain:wiki.kingdomofloathing.com)",
       "WebSearch",
-      "WebFetch(domain:kol.coldfront.net)"
+      "WebFetch(domain:kol.coldfront.net)",
+      "WebFetch(domain:th.blandsauce.com)"
     ]
   }
 }
