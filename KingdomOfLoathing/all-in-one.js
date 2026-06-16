@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/all-in-one.js
-// @version      1.5
+// @version      1.11
 // @description  Single-install loader for the Kingdom of Loathing userscripts in this repo. It carries no logic of its own; it @requires each individual script straight from GitHub so installing this one file gives you all of them. NOTE: adventure-choices.js is intentionally NOT bundled here -- it needs GM_* grants, which are incompatible with the @grant none mode the other scripts rely on. Install that one separately.
 //
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
@@ -26,6 +26,14 @@
 // @match        https://kingdomofloathing.com/volcanomaze.php*
 // @match        https://www.kingdomofloathing.com/sellstuff_ugly.php*
 // @match        https://kingdomofloathing.com/sellstuff_ugly.php*
+// @match        https://www.kingdomofloathing.com/fight.php*
+// @match        https://kingdomofloathing.com/fight.php*
+// @match        https://www.kingdomofloathing.com/inventory.php*
+// @match        https://kingdomofloathing.com/inventory.php*
+// @match        https://www.kingdomofloathing.com/place.php*
+// @match        https://kingdomofloathing.com/place.php*
+// @match        https://www.kingdomofloathing.com/questlog.php*
+// @match        https://kingdomofloathing.com/questlog.php*
 //
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/codpiece.js
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/daily-checklist.js
@@ -35,6 +43,7 @@
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/mine-sparkle-highlight.js
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/instant-nemesis-maze.js
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/sell-sort.js
+// @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/wiki-links.js
 //
 // @run-at       document-idle
 // @grant        none

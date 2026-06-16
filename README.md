@@ -55,6 +55,8 @@ and updates independently via its `@downloadURL`.
 | `strange-leaflet.js` | main / leaflet | Strange Leaflet helper |
 | `mine-sparkle-highlight.js` | mining / mine | Highlights sparkle spots in the mine |
 | `instant-nemesis-maze.js` | volcanomaze | Solves the volcano (nemesis) maze |
+| `sell-sort.js` | sell (ugly) | Sortable sell list |
+| `wiki-links.js` | charpane / place / choice / questlog / fight / inventory | "W" badge linking the last adventure, location title, choice-adventure name, quest titles, combat monster, acquired items, and inventory item names to the KoL wiki |
 | `adventure-choices.js` | many | Choice-adventure reward annotations *(not in the loader — uses `GM_*`)* |
 
 **Twilight Heroes** (`TwilightHeroes/`)
