@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/dwarven-factory-solver.js
-// @version      1.1
+// @version      1.2
 // @description  Adds a panel to the Dwarven Machine Room (dwarfcontraption.php) that solves the Dwarven Factory Complex puzzle. A browser port of That FN Ninja's KoLmafia "DwaFa" (dwafa.ash). One-click Solve sets the gauges, fills the hoppers and pushes the red button using what you've already gathered; a confirm-gated Full auto-pilot additionally solves the digit code (Dwarvish Dice), adventures the Mine Foremens' Office / Warehouse and pauses for you to supply ore.
 // @match        https://www.kingdomofloathing.com/dwarfcontraption.php*
 // @match        https://kingdomofloathing.com/dwarfcontraption.php*
@@ -140,12 +140,21 @@
   //   diceRolls  : array of "AB-CD=xx" roll strings (so a refresh keeps progress)
   //   hoppers    : { "1": {rune, count, ore}, ... }  (1..4)
   //   office     : { "<itemId>": "B,HGIG,MGDE,PJD" }  (decoded cards/documents)
-  //   oiRune     : the chosen equipment piece's word rune (single char)
+  //   oiByPiece  : { helmet|mattock|kilt : wordRune } learned per piece. The word
+  //                rune MUST match the piece selected on the left panel, so it is
+  //                tracked per piece rather than as one global value.
+  //   oiRune     : the resolved word rune for the *currently selected* piece
+  //                (set from oiByPiece by resolveOiRune; consumed by the math)
   //   piece      : "helmet" | "mattock" | "kilt"
   const STATE = loadState();
   STATE.office = STATE.office || {};
   STATE.hoppers = STATE.hoppers || {};
   STATE.diceRolls = STATE.diceRolls || [];
+  STATE.oiByPiece = STATE.oiByPiece || {};
+  // Migrate an older flat oiRune onto the selected piece so it isn't lost.
+  if (STATE.oiRune && STATE.piece && !STATE.oiByPiece[STATE.piece]) {
+    STATE.oiByPiece[STATE.piece] = STATE.oiRune;
+  }
 
   // === Rune parsing (mafia DwarfFactoryRequest) ============================
 
@@ -496,10 +505,54 @@
     }
   }
 
-  // ONE-CLICK SOLVE: assumes you already gathered everything (cards, the matching
-  // document, the punchcard fed in, the digit code solved, ore on hand). Reads
-  // hoppers + decodes any office items in inventory, derives oi_rune if possible,
-  // then applies the solution.
+  // Select the chosen piece on the left panel. This is what tells the machine
+  // WHICH item to forge; without it the gauges/ore are correct but nothing drops
+  // into the bin. (Mirrors dwafa.ash's panelleft step.)
+  async function selectPiece(log) {
+    const piece = PIECES[STATE.piece || 'helmet'];
+    log('Selecting ' + piece.label + ' on the left panel…');
+    await get('dwarfcontraption.php?action=panelleft&action=doleftpanel&' +
+      piece.activate + '=%C2%A0%C2%A0%C2%A0%C2%A0');
+  }
+
+  // Feed the punchcard into the right panel if it isn't already in. The red
+  // button only works once the punchcard is seated.
+  async function ensurePunchcard(log) {
+    const right = await get('dwarfcontraption.php?action=panelright');
+    if (!/punchcard sticking slightly out/i.test(right)) {
+      log('Feeding the punchcard into the right panel…');
+      await get('dwarfcontraption.php?action=panelright&action=dorightpanel');
+    }
+  }
+
+  // Resolve oi_rune for the CURRENTLY SELECTED piece. Uses a cached/overridden
+  // value if present; otherwise derives it from the Warehouse (which costs
+  // turns) now that the piece is selected on the left panel. Sets STATE.oiRune
+  // (consumed by computeSolution) and caches per piece. Returns true on success.
+  async function resolveOiRune(log) {
+    const key = STATE.piece || 'helmet';
+    const cached = STATE.oiByPiece[key];
+    if (cached) {
+      STATE.oiRune = cached; saveState();
+      log('Word rune for ' + PIECES[key].label + ' = "' + cached + '" (cached).');
+      return true;
+    }
+    log('Deriving the word rune for ' + PIECES[key].label +
+      ' from the Warehouse (uses turns)…');
+    const r = await deriveOiRuneFromWarehouse(log);
+    if (!r) {
+      log('Could not derive the word rune. Type it into the oi_rune box for this ' +
+        'piece (the first rune of its matching document) and Solve again.');
+      return false;
+    }
+    STATE.oiByPiece[key] = r; STATE.oiRune = r; saveState();
+    log('Word rune for ' + PIECES[key].label + ' = "' + r + '".');
+    return true;
+  }
+
+  // ONE-CLICK SOLVE: select the piece, feed the punchcard, resolve its word rune,
+  // read hoppers + decode any office items in inventory, compute and apply. Note
+  // the word-rune step can spend turns the first time per piece.
   async function runSolve(log) {
     if (!PWD) { log('ERROR: could not find your pwd hash.'); return; }
     log('--- One-click Solve ---');
@@ -509,17 +562,15 @@
       const d = solveDigitsFromRolls();
       if (d) { STATE.digitRunes = d; saveState(); log('Digit code: ' + d); }
     }
+
+    // Tell the machine what to build, seat the punchcard, and pin oi_rune to that
+    // same piece. Doing this before the math keeps the solution self-consistent.
+    await selectPiece(log);
+    await ensurePunchcard(log);
+    if (!(await resolveOiRune(log))) return;
+
     await refreshHoppers(log);
     await decodeOwnedOfficeItems(log);
-
-    if (!STATE.oiRune) {
-      // Try to derive from the warehouse without spending many turns; if the
-      // user already set it via the override field this is skipped.
-      log('oi_rune unknown — attempting Warehouse derivation (may use turns)…');
-      const r = await deriveOiRuneFromWarehouse(log);
-      if (r) { STATE.oiRune = r; saveState(); log('Derived oi_rune = "' + r + '".'); }
-      else { log('Could not derive oi_rune. Set it manually in the panel, then Solve again.'); return; }
-    }
 
     let sol;
     try { sol = computeSolution(); }
@@ -548,29 +599,18 @@
       if (!STATE.digitRunes) { log('Could not solve digit code in 60 rolls — stopping.'); return; }
     }
 
-    // 2) Punchcard into the right panel (idempotent: server ignores if absent).
-    const right = await get('dwarfcontraption.php?action=panelright');
-    if (!/punchcard sticking slightly out/i.test(right)) {
-      log('Feeding the punchcard into the right panel…');
-      await get('dwarfcontraption.php?action=panelright&action=dorightpanel');
-    }
+    // 2) Select the piece (what to build) and seat the punchcard.
+    await selectPiece(log);
+    await ensurePunchcard(log);
 
-    // 3) Select the chosen piece on the left panel so the warehouse reveals it.
-    const piece = PIECES[STATE.piece || 'helmet'];
-    log('Selecting ' + piece.label + ' on the left panel…');
-    await get('dwarfcontraption.php?action=panelleft&action=doleftpanel&' +
-      piece.activate + '=%C2%A0%C2%A0%C2%A0%C2%A0');
-
-    // 4) Adventure the office for cards + the matching document, decoding as we go.
+    // 3) Adventure the office for cards + the matching document, decoding as we go.
     //    We stop early if an adventure result looks like combat / an unexpected page.
     log('Adventuring the Mine Foremens\' Office for cards & document…');
     for (let i = 0; i < 25; i++) {
       await decodeOwnedOfficeItems(log);
-      // oi_rune lets us know which document we still need; if we can already
-      // compute a solution, we have enough office items.
-      if (!STATE.oiRune) {
-        const r = await deriveOiRuneFromWarehouse(log);
-        if (r) { STATE.oiRune = r; saveState(); log('oi_rune = "' + r + '".'); }
+      // Resolve the selected piece's word rune (needs the cards to be decoded).
+      if (!STATE.oiRune && ID.CARDS.some((id) => STATE.office[String(id)])) {
+        await resolveOiRune(log);
       }
       if (STATE.oiRune && pickDocument() &&
         ID.CARDS.every((id) => STATE.office[String(id)])) break;
@@ -636,18 +676,30 @@
       pieceSel.appendChild(o);
     });
     pieceSel.value = STATE.piece || 'helmet';
-    pieceSel.addEventListener('change', () => { STATE.piece = pieceSel.value; saveState(); });
     if (!STATE.piece) { STATE.piece = pieceSel.value; saveState(); }
     pieceRow.appendChild(pieceSel);
 
-    // oi_rune manual override.
+    // oi_rune manual override (per piece). Leave blank to auto-derive.
     pieceRow.appendChild(document.createTextNode('   oi_rune: '));
     const oiInput = document.createElement('input');
     oiInput.type = 'text'; oiInput.maxLength = 1; oiInput.size = 2;
-    oiInput.value = STATE.oiRune || '';
-    oiInput.title = 'The chosen piece\'s word rune. Leave blank to auto-derive from the Warehouse.';
+    oiInput.title = 'This piece\'s word rune (the first rune of its matching document). ' +
+      'Leave blank to auto-derive from the Warehouse.';
+    const syncOi = () => { oiInput.value = STATE.oiByPiece[pieceSel.value] || ''; };
+    syncOi();
+    // Changing the piece swaps the cached rune shown; the panel/document must
+    // match whichever piece is selected.
+    pieceSel.addEventListener('change', () => {
+      STATE.piece = pieceSel.value;
+      STATE.oiRune = STATE.oiByPiece[pieceSel.value] || null;
+      saveState(); syncOi();
+    });
     oiInput.addEventListener('change', () => {
-      STATE.oiRune = oiInput.value.trim() || null; saveState();
+      const v = oiInput.value.trim();
+      if (v) STATE.oiByPiece[pieceSel.value] = v;
+      else delete STATE.oiByPiece[pieceSel.value];
+      STATE.oiRune = v || null;
+      saveState();
     });
     pieceRow.appendChild(oiInput);
     panel.appendChild(pieceRow);
@@ -676,7 +728,9 @@
       l('Digit code: ' + (STATE.digitRunes || '(unsolved)'));
       await refreshHoppers(l);
       await decodeOwnedOfficeItems(l);
-      l('Done. oi_rune = ' + (STATE.oiRune || '(unknown)'));
+      const key = STATE.piece || 'helmet';
+      l('Done. oi_rune for ' + PIECES[key].label + ' = ' +
+        (STATE.oiByPiece[key] || '(unknown — derived on Solve, or type it)'));
     })));
 
     btnRow.appendChild(mkBtn('Solve (one-click)', busy(runSolve)));
@@ -701,7 +755,7 @@
       if (!confirm('Clear all decoded factory state (digit code, hoppers, cards, oi_rune)?')) return;
       localStorage.removeItem(LS_KEY);
       Object.keys(STATE).forEach((k) => delete STATE[k]);
-      STATE.office = {}; STATE.hoppers = {}; STATE.diceRolls = [];
+      STATE.office = {}; STATE.hoppers = {}; STATE.diceRolls = []; STATE.oiByPiece = {};
       oiInput.value = '';
       l('State cleared.');
     })));
