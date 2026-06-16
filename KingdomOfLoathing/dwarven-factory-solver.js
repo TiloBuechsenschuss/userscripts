@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/dwarven-factory-solver.js
-// @version      1.0
+// @version      1.1
 // @description  Adds a panel to the Dwarven Machine Room (dwarfcontraption.php) that solves the Dwarven Factory Complex puzzle. A browser port of That FN Ninja's KoLmafia "DwaFa" (dwafa.ash). One-click Solve sets the gauges, fills the hoppers and pushes the red button using what you've already gathered; a confirm-gated Full auto-pilot additionally solves the digit code (Dwarvish Dice), adventures the Mine Foremens' Office / Warehouse and pauses for you to supply ore.
 // @match        https://www.kingdomofloathing.com/dwarfcontraption.php*
 // @match        https://kingdomofloathing.com/dwarfcontraption.php*
@@ -409,24 +409,47 @@
       }
     }
 
-    // 3) Fill each hopper up to its target. Fill amount = target - current count.
+    // 3) Fill each hopper up to its target, then RE-READ to confirm it worked.
+    //    A fill silently does nothing if you don't actually own the ore, so we
+    //    verify counts rather than trusting the request.
+    const shortfalls = [];
     for (let n = 0; n < 4; n++) {
-      const html = await get('dwarfcontraption.php?action=hopper' + n);
-      const lc = html.toLowerCase();
-      const ore = ORES.find((o) => lc.indexOf(o) !== -1);
-      if (!ore) continue;
+      let h = await readHopper(n); // fresh read; updates STATE.hoppers
       const hopperNum = n + 1;
-      const cur = (STATE.hoppers[String(hopperNum)] || {}).count || 0;
-      const add = Math.max(0, sol.targets[hopperNum] - cur);
-      if (add <= 0) continue;
-      log('Hopper ' + hopperNum + ' (' + ore + '): adding ' + add + ' to reach ' +
-        sol.targets[hopperNum] + '.');
-      await get('dwarfcontraption.php?action=hopper' + n + '&action=dohopper' + n +
-        '&howmany=' + add + '&whichore=' + ore);
+      const ore = h.ore;
+      const target = sol.targets[hopperNum];
+      const add = Math.max(0, target - (h.count || 0));
+      if (ore && add > 0) {
+        // Coal was just produced from diamonds in step 2; it fills like any ore.
+        log('Hopper ' + hopperNum + ' (' + ore + '): adding ' + add + ' to reach ' + target + '…');
+        await get('dwarfcontraption.php?action=hopper' + n + '&action=dohopper' + n +
+          '&howmany=' + add + '&whichore=' + ore);
+        h = await readHopper(n); // confirm
+      }
+      const got = h.count || 0;
+      if (got !== target) {
+        const why = ore
+          ? (ore === 'coal'
+            ? ' — not enough coal (have lumps of diamond ready for the chamber)'
+            : ' — you appear to be short ' + (target - got) + ' ' + ore + ' ore')
+          : '';
+        log('Hopper ' + hopperNum + ': ' + got + '/' + target + why + '.');
+        shortfalls.push(hopperNum);
+      } else {
+        log('Hopper ' + hopperNum + ': ' + got + '/' + target + ' ✔');
+      }
     }
 
-    // 4) Push the red button (requires an adventure server-side).
-    log('Pushing the red button…');
+    if (shortfalls.length) {
+      log('NOT pushing the button — hopper(s) ' + shortfalls.join(', ') +
+        ' are not at their target (almost always missing ore). Acquire the ore ' +
+        'listed above and click Solve again; gauges are already set, so it will ' +
+        'just top up the hoppers and push.');
+      return false;
+    }
+
+    // 4) All hoppers correct — push the red button (costs an adventure).
+    log('All hoppers at target. Pushing the red button…');
     await get('dwarfcontraption.php?action=panelright&action=dorightpanel&action=doredbutton');
 
     // 5) Check the bin.
@@ -435,7 +458,8 @@
       log('PUZZLE SOLVED — item delivered to the bin! ✔');
       return true;
     }
-    log('Pushed, but the bin shows no item. Re-check the gauges/hoppers above.');
+    log('Pushed, but the bin shows no item. Double-check the gauges read correctly ' +
+      'on the page; if they look wrong, the digit code may be off.');
     return false;
   }
 
