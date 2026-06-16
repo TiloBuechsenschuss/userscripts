@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/dwarven-factory-solver.js
-// @version      1.2
-// @description  Adds a panel to the Dwarven Machine Room (dwarfcontraption.php) that solves the Dwarven Factory Complex puzzle. A browser port of That FN Ninja's KoLmafia "DwaFa" (dwafa.ash). One-click Solve sets the gauges, fills the hoppers and pushes the red button using what you've already gathered; a confirm-gated Full auto-pilot additionally solves the digit code (Dwarvish Dice), adventures the Mine Foremens' Office / Warehouse and pauses for you to supply ore.
+// @version      1.7
+// @description  Adds a panel to the Dwarven Machine Room (dwarfcontraption.php) that solves the Dwarven Factory Complex puzzle. A browser port of That FN Ninja's KoLmafia "DwaFa" (dwafa.ash). Solve spends no adventures on its own: it cracks the digit code by rolling the Dwarvish Dice (gambling, which does NOT cost turns), reads the hoppers, decodes the cards/documents, sets the gauges, runs the diamond→coal chamber and fills the hoppers — then tells YOU to press the red button to forge. The outfit word rune (oi_rune) lives only in the Warehouse: a separate opt-in "Determine oi_rune (Warehouse)" button adventures there to find it and caches it per piece (so it costs adventures only once, and may infer another piece by elimination); you can also type it in by hand. The panel includes a "What to do if Solve can't finish" guide.
 // @match        https://www.kingdomofloathing.com/dwarfcontraption.php*
 // @match        https://kingdomofloathing.com/dwarfcontraption.php*
 // @grant        none
@@ -30,19 +30,28 @@
 //     (5040-permutation elimination, exactly as mafia does)
 //   * Decoding laminated cards / dwarvish documents          inv_use.php (RUNE_PATTERN)
 //   * Computing per-hopper gauge values and target ore counts
-//   * Setting gauges, filling hoppers, the coal/diamond chamber, the red button
+//   * Setting gauges, the coal/diamond chamber, filling hoppers (all turn-free)
+//
+// TURN POLICY: Solve issues no adventure-costing request. Rolling the Dwarvish
+// Dice is gambling, NOT an adventure, so Solve does it automatically to crack the
+// digit code. Two things cost adventures, and Solve never does them itself:
+//   * Learning the piece's word rune (oi_rune). Only the Warehouse maps a rune to
+//     "helmet" vs "mattock" vs "kilt". The opt-in "Determine oi_rune (Warehouse)"
+//     button adventures there on demand and caches the result per piece (like the
+//     digit code), inferring a second piece by elimination when it can — so it
+//     spends adventures only once. Solve itself just reports it's missing and
+//     lists the candidate runes for hand entry. (Warehouse read = UNVERIFIED.)
+//   * Pressing the red button to forge. Solve sets gauges + hoppers, then stops
+//     and tells you to push it (the one adventure of the whole solve).
 //
 // What is intentionally NOT done automatically (by design / safety):
 //   * Mining for ore. dwafa.ash calls mine(), which is the *separate* miner.ash
-//     grid solver that was not provided. Auto-pilot therefore PAUSES and asks you
-//     to supply the ore (target amounts are shown), instead of mining or buying.
-//   * Silent mall purchases of ore (risky meat spend) — same pause.
-//   * Combat / generic choice adventures. If an adventure lands in combat or an
-//     unexpected page, auto-pilot stops and tells you, rather than mis-clicking.
-//
-// Least-verified part: deriving the chosen equipment piece's WORD rune (oi_rune)
-// from the Warehouse. There is a manual override (type the rune, or pick the
-// document) for when the automatic derivation can't resolve it.
+//     grid solver that was not provided. Solve therefore reports the ore it still
+//     needs (target amounts are shown) instead of mining or buying.
+//   * Silent mall purchases of ore (risky meat spend) — same report.
+//   * Adventuring the Mine Foremens' Office for the cards/document. That can land
+//     in combat or an unexpected page, so Solve leaves it to you and just tells
+//     you what it still needs in hand.
 //
 // UNTESTED IN-GAME: this was written from the .ash + mafia source + the wiki, not
 // validated against a live factory (the puzzle is ascension-gated). Treat the
@@ -67,6 +76,9 @@
     PARCHMENT: 3214, // special-cased in the original (trailing entry, no comma)
   };
 
+  // Human label per document item id, for telling the user which one to read.
+  const DOC_LABEL = { 3212: 'paper', 3213: 'document', 3214: 'parchment' };
+
   // The three forgeable Dwarvish War Uniform pieces and the left-panel control
   // that selects each (from dwafa.ash). The factory makes the piece you select
   // here; its word rune (oi_rune) is then what the cards/document are keyed on.
@@ -79,8 +91,6 @@
   // Ore "whichore" values for hopper fills, matched to the rune/name in the
   // hopper text. Order matters only for display.
   const ORES = ['chrome', 'asbestos', 'linoleum', 'coal'];
-
-  const OFFICE_SNARFBLAT = 176; // The Mine Foremens' Office (the only adv.php area)
 
   // KoLmafia's parsing regexes (verbatim).
   const RUNE_PATTERN = /title="Dwarf (Digit|Word) Rune (.)"/g; // [1]=Digit|Word [2]=rune
@@ -191,10 +201,11 @@
   }
 
   // === Digit-code solver (Dwarvish Dice) ===================================
-  // Port of mafia's permutation elimination. We keep all 7! orderings of the 7
-  // distinct digit runes and drop any inconsistent with an observed roll.
-  // A roll "AB-CD=xx": value(AB) - value(CD) == xx (base-7), with the mafia
-  // quirk that "the same rune twice in the high number, at digit 0" means 49.
+  // Port of mafia's permutation elimination. Rolling the Dwarvish Dice is gambling
+  // (it does NOT cost an adventure), so the solver rolls automatically. We keep all
+  // 7! orderings of the 7 distinct digit runes and drop any inconsistent with an
+  // observed roll. A roll "AB-CD=xx": value(AB) - value(CD) == xx (base-7), with the
+  // mafia quirk that "the same rune twice in the high number, at digit 0" means 49.
 
   function allDigitRunes() {
     // The 7 distinct digit runes are exactly the runes seen in dice rolls.
@@ -243,7 +254,8 @@
     return perms.length === 1 ? perms[0] : null;
   }
 
-  // Roll the dice once; append the parsed roll string. Returns {meat, roll}.
+  // Roll the dice once; append the parsed roll string. Returns {roll}. Gambling,
+  // so this does not cost an adventure.
   async function rollDiceOnce() {
     const html = await get('dwarffactory.php?action=dodice');
     const meatM = MEAT_PATTERN.exec(html);
@@ -308,15 +320,45 @@
     return s;
   }
 
-  // === Warehouse word-rune derivation ======================================
-  // The chosen piece's word rune (oi_rune). We adventure the Warehouse with only
-  // the chosen piece selected on the left panel; the equipment rune it reveals
-  // that also keys an entry in our decoded cards is oi_rune. Manual override
-  // exists for when this can't resolve.
+  // === Word rune (oi_rune) =================================================
+  // The chosen piece's word rune. Everything else in this puzzle is machine-
+  // readable, but WHICH secret rune maps to "helmet" vs "mattock" vs "kilt"
+  // lives only in the Warehouse, and visiting the Warehouse costs adventures. So
+  // Solve never does it; the result is found once by the opt-in "Determine
+  // oi_rune (Warehouse)" button (deriveOiRuneFromWarehouse) and cached per piece
+  // in STATE.oiByPiece, exactly like the digit code. Failing that, the user reads
+  // the rune themselves; listOiCandidates() narrows it to the (usually three)
+  // first-runes of the documents they already hold.
 
+  // The first word rune of each decoded document the player owns, with a label.
+  // These are the three candidate oi_runes; the Warehouse says which is helmet.
+  function oiCandidates() {
+    const out = [];
+    ID.DOCS.forEach((id) => {
+      const s = STATE.office[String(id)];
+      if (s && s[0]) out.push({ id, label: DOC_LABEL[id], rune: s[0] });
+    });
+    return out;
+  }
+
+  // Tell the user the candidate runes (no turns), or what to fetch if none.
+  function listOiCandidates(log, key) {
+    const cands = oiCandidates();
+    if (cands.length) {
+      log('Candidate word runes — the first rune of each dwarvish document you own:');
+      cands.forEach((c) => log('    ' + c.rune + '   (from the dwarvish ' + c.label + ')'));
+      log('One of these is the ' + PIECES[key].label + '\'s. The Warehouse shows ' +
+        'which: type that rune into the oi_rune box and Solve again.');
+    } else {
+      log('No dwarvish documents decoded yet. Adventure the Mine Foremens\' Office ' +
+        'until you hold the dwarvish paper/document/parchment, then click Read state.');
+    }
+  }
+
+  // The set of equipment word runes used as keys in the decoded laminated cards.
+  // In a card "B,HGIG,MGDE,PJD" the entries after the first comma are keyed by the
+  // three piece runes (their first char). That set is the candidate oi_runes.
   function equipmentRuneKeysFromCards() {
-    // In a laminated card "B,HGIG,MGDE,PJD" the entries after the first comma are
-    // keyed by equipment word runes (their first char). Collect that set.
     const keys = new Set();
     ID.CARDS.forEach((id) => {
       const s = STATE.office[String(id)];
@@ -327,17 +369,55 @@
     return keys;
   }
 
+  // Determine the SELECTED piece's word rune by adventuring the Warehouse (costs a
+  // turn per visit). The piece must already be selected on the left panel; the
+  // Warehouse then shows a word rune that also keys an entry in our cards — that's
+  // oi_rune. Returns the rune, or null (with a logged reason). UNVERIFIED in-game.
   async function deriveOiRuneFromWarehouse(log) {
     const eqKeys = equipmentRuneKeysFromCards();
+    if (!eqKeys.size) {
+      log('No decoded laminated cards yet, so there is nothing to match the ' +
+        'Warehouse runes against. Get the four cards and Read state first.');
+      return null;
+    }
     for (let tries = 0; tries < 12; tries++) {
       const html = await get('dwarffactory.php?action=ware');
-      const runes = parseRunes(html).filter((r) => r.type === 'Word').map((r) => r.rune);
+      const all = parseRunes(html);
+      // If the page gives no runes at all, this reader doesn't work on this game.
+      // Bail immediately rather than spending 12 turns to learn the same thing.
+      if (!all.length) {
+        log('Warehouse visit ' + (tries + 1) + ' returned no runes — the automatic ' +
+          'reader does not work on your game (this is the untested part of the port). ' +
+          'Stopping so it does not waste more turns; enter oi_rune by hand instead.');
+        return null;
+      }
+      const runes = all.filter((r) => r.type === 'Word').map((r) => r.rune);
       const hit = runes.filter((r) => eqKeys.has(r));
       if (hit.length === 1) { return hit[0]; }
-      log('Warehouse visit ' + (tries + 1) + ': runes ' + runes.join('') +
+      log('Warehouse visit ' + (tries + 1) + ': word runes ' + runes.join('') +
         (hit.length ? ' (ambiguous: ' + hit.join('') + ')' : ' (no equipment rune yet)'));
     }
     return null;
+  }
+
+  // If two of the three pieces' runes are known and the cards give exactly three
+  // candidate runes, the third piece must own the remaining candidate. Filling it
+  // in means the Warehouse is needed at most twice per ascension. Returns the
+  // inferred {piece, rune}, or null if it can't be determined safely.
+  function inferRemainingOiRune() {
+    const cands = Array.from(equipmentRuneKeysFromCards());
+    if (cands.length !== 3) return null;
+    const pieces = Object.keys(PIECES); // helmet, mattock, kilt
+    const known = pieces.filter((p) => STATE.oiByPiece[p]);
+    if (known.length !== 2) return null;
+    const usedRunes = known.map((p) => STATE.oiByPiece[p]);
+    if (!usedRunes.every((r) => cands.includes(r))) return null; // mapping must fit
+    const piece = pieces.find((p) => !STATE.oiByPiece[p]);
+    const rune = cands.find((r) => !usedRunes.includes(r));
+    if (!piece || !rune) return null;
+    STATE.oiByPiece[piece] = rune;
+    saveState();
+    return { piece, rune };
   }
 
   // === Puzzle math =========================================================
@@ -362,8 +442,8 @@
   }
 
   function computeSolution() {
-    if (!STATE.digitRunes) throw new Error('Digit code not solved yet (roll the Dwarvish Dice).');
-    if (!STATE.oiRune) throw new Error('Outfit word rune (oi_rune) unknown — set it or run the Warehouse step.');
+    if (!STATE.digitRunes) throw new Error('Digit code not solved yet — Solve rolls the Dwarvish Dice to crack it (free); run Solve again, or type a known code into the Digit code box.');
+    if (!STATE.oiRune) throw new Error('Outfit word rune (oi_rune) not set — visit the Warehouse, read the rune by the piece, and type it into the oi_rune box.');
     const doc = pickDocument();
     if (!doc) throw new Error('No decoded document matches oi_rune "' + STATE.oiRune + '" — use the matching dwarvish paper/document/parchment.');
 
@@ -398,7 +478,10 @@
     return { gauges, targets, coalHopper };
   }
 
-  // === Applying the solution (gauges, hoppers, button) =====================
+  // === Applying the solution (gauges, hoppers; you press the button) =======
+  // All of this is turn-free: setting gauges, running the diamond->coal chamber
+  // and filling hoppers don't cost adventures. Only the red button does, so this
+  // stops once the hoppers are correct and tells you to press it yourself.
 
   async function applySolution(sol, log) {
     // 1) Gauges. temp{n-1} = gauge for hopper n.
@@ -450,26 +533,20 @@
     }
 
     if (shortfalls.length) {
-      log('NOT pushing the button — hopper(s) ' + shortfalls.join(', ') +
-        ' are not at their target (almost always missing ore). Acquire the ore ' +
-        'listed above and click Solve again; gauges are already set, so it will ' +
-        'just top up the hoppers and push.');
+      log('Hopper(s) ' + shortfalls.join(', ') + ' are not at their target (almost ' +
+        'always missing ore). Acquire the ore listed above and click Solve again; ' +
+        'gauges are already set, so it will just top up the hoppers.');
       return false;
     }
 
-    // 4) All hoppers correct — push the red button (costs an adventure).
-    log('All hoppers at target. Pushing the red button…');
-    await get('dwarfcontraption.php?action=panelright&action=dorightpanel&action=doredbutton');
-
-    // 5) Check the bin.
-    const bin = await get('dwarfcontraption.php?action=bin');
-    if (/acquire an item/i.test(bin)) {
-      log('PUZZLE SOLVED — item delivered to the bin! ✔');
-      return true;
-    }
-    log('Pushed, but the bin shows no item. Double-check the gauges read correctly ' +
-      'on the page; if they look wrong, the digit code may be off.');
-    return false;
+    // 4) All hoppers correct. The red button is the only turn-costing step, so the
+    //    solver stops here and hands it to you.
+    const label = PIECES[STATE.piece || 'helmet'].label;
+    log('✔ Everything is set: gauges ' + sol.gauges.join(',') + ' and every hopper at ' +
+      'its target. NOW PRESS THE RED BUTTON yourself to forge the ' + label + '. That ' +
+      'is the only step that costs an adventure, so the solver leaves it to you. ' +
+      '(After it forges, your item is in the bin.)');
+    return true;
   }
 
   // === Higher-level flows ==================================================
@@ -525,10 +602,11 @@
     }
   }
 
-  // Resolve oi_rune for the CURRENTLY SELECTED piece. Uses a cached/overridden
-  // value if present; otherwise derives it from the Warehouse (which costs
-  // turns) now that the piece is selected on the left panel. Sets STATE.oiRune
-  // (consumed by computeSolution) and caches per piece. Returns true on success.
+  // Resolve oi_rune for the CURRENTLY SELECTED piece, WITHOUT spending turns.
+  // Uses the cached/typed value if present. Otherwise it can't be deduced (the
+  // piece->rune mapping lives in the Warehouse), so we decode the documents to
+  // surface the candidate runes and tell the user to type the right one. The
+  // turn-spending Warehouse auto-read is a separate, opt-in button.
   async function resolveOiRune(log) {
     const key = STATE.piece || 'helmet';
     const cached = STATE.oiByPiece[key];
@@ -537,31 +615,48 @@
       log('Word rune for ' + PIECES[key].label + ' = "' + cached + '" (cached).');
       return true;
     }
-    log('Deriving the word rune for ' + PIECES[key].label +
-      ' from the Warehouse (uses turns)…');
-    const r = await deriveOiRuneFromWarehouse(log);
-    if (!r) {
-      log('Could not derive the word rune. Type it into the oi_rune box for this ' +
-        'piece (the first rune of its matching document) and Solve again.');
-      return false;
+    // Make sure the documents are decoded so we can show the candidate runes.
+    for (const id of ID.DOCS) {
+      if (!STATE.office[String(id)]) await useAndDecode(id, false);
     }
-    STATE.oiByPiece[key] = r; STATE.oiRune = r; saveState();
-    log('Word rune for ' + PIECES[key].label + ' = "' + r + '".');
-    return true;
+    log('The word rune (oi_rune) for ' + PIECES[key].label + ' is not set yet, and ' +
+      'it can\'t be deduced from your inventory alone — only the Warehouse knows ' +
+      'which rune is this piece. Either click "Determine oi_rune (Warehouse)" to ' +
+      'find it automatically (spends adventures once, then cached), or set it by hand:');
+    listOiCandidates(log, key);
+    return false;
   }
 
-  // ONE-CLICK SOLVE: select the piece, feed the punchcard, resolve its word rune,
-  // read hoppers + decode any office items in inventory, compute and apply. Note
-  // the word-rune step can spend turns the first time per piece.
+  // Crack the digit code. Uses a cached/typed code if present; otherwise rolls the
+  // Dwarvish Dice until the elimination converges. Rolling is gambling, not an
+  // adventure, so this is done automatically (no confirm). Returns true on success.
+  async function solveDigitCode(log) {
+    if (STATE.digitRunes) return true;
+    let d = solveDigitsFromRolls();
+    if (d) { STATE.digitRunes = d; saveState(); log('Digit code: ' + d); return true; }
+
+    log('Rolling the Dwarvish Dice to crack the digit code (gambling — costs meat ' +
+      'but no turns)…');
+    for (let i = 0; i < 60 && !STATE.digitRunes; i++) {
+      await rollDiceOnce();
+      d = solveDigitsFromRolls();
+      if (d) { STATE.digitRunes = d; saveState(); log('Digit code solved: ' + d); return true; }
+    }
+    log('Could not solve the digit code in 60 rolls. Run Solve again to roll more, ' +
+      'or type a known code into the Digit code box.');
+    return false;
+  }
+
+  // ONE-CLICK SOLVE: crack the digit code (rolling dice — free), select the piece,
+  // feed the punchcard, resolve its word rune, read hoppers + decode any office
+  // items in inventory, compute, set gauges/hoppers, then tell you to visit the
+  // Warehouse (if oi_rune is unknown) and to press the red button. The only
+  // adventure-costing steps — Warehouse and red button — are left to you.
   async function runSolve(log) {
     if (!PWD) { log('ERROR: could not find your pwd hash.'); return; }
     log('--- One-click Solve ---');
 
-    // Make sure the digit code is solved from any stored rolls.
-    if (!STATE.digitRunes) {
-      const d = solveDigitsFromRolls();
-      if (d) { STATE.digitRunes = d; saveState(); log('Digit code: ' + d); }
-    }
+    if (!(await solveDigitCode(log))) return;
 
     // Tell the machine what to build, seat the punchcard, and pin oi_rune to that
     // same piece. Doing this before the math keeps the solution self-consistent.
@@ -578,74 +673,6 @@
 
     log('Gauges ' + sol.gauges.join(',') + ' | targets ' +
       JSON.stringify(sol.targets) + (sol.coalHopper ? ' | coal hopper ' + sol.coalHopper : ''));
-    await applySolution(sol, log);
-  }
-
-  // FULL AUTO-PILOT (confirm-gated): solve digit code by rolling dice; ensure the
-  // punchcard is fed; adventure the office until cards/document are in hand;
-  // derive oi_rune from the warehouse; PAUSE for ore; then solve.
-  async function runAutopilot(log) {
-    if (!PWD) { log('ERROR: could not find your pwd hash.'); return; }
-    log('--- Full auto-pilot ---');
-
-    // 1) Digit code via Dwarvish Dice.
-    if (!STATE.digitRunes) {
-      log('Solving the digit code by rolling Dwarvish Dice…');
-      for (let i = 0; i < 60 && !STATE.digitRunes; i++) {
-        await rollDiceOnce();
-        const d = solveDigitsFromRolls();
-        if (d) { STATE.digitRunes = d; saveState(); log('Digit code solved: ' + d); break; }
-      }
-      if (!STATE.digitRunes) { log('Could not solve digit code in 60 rolls — stopping.'); return; }
-    }
-
-    // 2) Select the piece (what to build) and seat the punchcard.
-    await selectPiece(log);
-    await ensurePunchcard(log);
-
-    // 3) Adventure the office for cards + the matching document, decoding as we go.
-    //    We stop early if an adventure result looks like combat / an unexpected page.
-    log('Adventuring the Mine Foremens\' Office for cards & document…');
-    for (let i = 0; i < 25; i++) {
-      await decodeOwnedOfficeItems(log);
-      // Resolve the selected piece's word rune (needs the cards to be decoded).
-      if (!STATE.oiRune && ID.CARDS.some((id) => STATE.office[String(id)])) {
-        await resolveOiRune(log);
-      }
-      if (STATE.oiRune && pickDocument() &&
-        ID.CARDS.every((id) => STATE.office[String(id)])) break;
-      const adv = await get('adventure.php?snarfblat=' + OFFICE_SNARFBLAT);
-      if (/fight\.php|Combat|monstername/i.test(adv) && !/results/i.test(adv)) {
-        log('An office adventure landed in combat / an unexpected page. Resolve it ' +
-          'manually, then run auto-pilot again.');
-        return;
-      }
-      if (/not enough|no more adventures|ran out of/i.test(adv)) {
-        log('Out of adventures. Restore turns and run auto-pilot again.'); return;
-      }
-    }
-
-    await refreshHoppers(log);
-
-    // 5) Compute and PAUSE for ore.
-    let sol;
-    try { sol = computeSolution(); }
-    catch (e) { log('Cannot compute solution: ' + e.message); return; }
-    const needList = [];
-    for (let n = 1; n <= 4; n++) {
-      const h = STATE.hoppers[String(n)];
-      const add = Math.max(0, sol.targets[n] - (h.count || 0));
-      if (add > 0) needList.push(add + ' ' + (h.ore || ('hopper ' + n)));
-    }
-    log('Gauges ' + sol.gauges.join(',') + ' | targets ' + JSON.stringify(sol.targets));
-    if (needList.length) {
-      const ok = confirm('Auto-pilot needs you to supply ore before filling the hoppers ' +
-        '(mining/buying is not automated):\n\n  ' + needList.join('\n  ') +
-        '\n\n(For coal, have that many lumps of diamond — they are converted in the chamber.)' +
-        '\n\nClick OK once the ore/diamonds are in your inventory to set gauges, fill ' +
-        'hoppers and push the button. Cancel to stop here.');
-      if (!ok) { log('Paused before filling. Re-run auto-pilot when ready.'); return; }
-    }
     await applySolution(sol, log);
   }
 
@@ -679,12 +706,13 @@
     if (!STATE.piece) { STATE.piece = pieceSel.value; saveState(); }
     pieceRow.appendChild(pieceSel);
 
-    // oi_rune manual override (per piece). Leave blank to auto-derive.
+    // oi_rune manual entry (per piece). You read this rune at the Warehouse.
     pieceRow.appendChild(document.createTextNode('   oi_rune: '));
     const oiInput = document.createElement('input');
     oiInput.type = 'text'; oiInput.maxLength = 1; oiInput.size = 2;
-    oiInput.title = 'This piece\'s word rune (the first rune of its matching document). ' +
-      'Leave blank to auto-derive from the Warehouse.';
+    oiInput.title = 'This piece\'s word rune. Visit the Warehouse, read the rune ' +
+      'shown next to the piece, and type it here (it\'s the first rune of that ' +
+      'piece\'s dwarvish document). Remembered per piece.';
     const syncOi = () => { oiInput.value = STATE.oiByPiece[pieceSel.value] || ''; };
     syncOi();
     // Changing the piece swaps the cached rune shown; the panel/document must
@@ -704,52 +732,105 @@
     pieceRow.appendChild(oiInput);
     panel.appendChild(pieceRow);
 
+    // Digit-code box (optional). Solve cracks this for free by rolling the Dwarvish
+    // Dice, so you normally leave it blank; it's here to display the solved code and
+    // to let you paste a known one (e.g. KoLmafia's lastDwarfDigitRunes) to skip the
+    // rolling. Refreshed from STATE after Solve/Read state by refreshInputs().
+    const digitRow = document.createElement('div');
+    digitRow.style.cssText = 'margin-top:6px';
+    digitRow.appendChild(document.createTextNode('Digit code (7 runes): '));
+    const digitInput = document.createElement('input');
+    digitInput.type = 'text'; digitInput.maxLength = 7; digitInput.size = 10;
+    digitInput.title = 'The seven digit runes in value order 0..6. Leave blank and ' +
+      'Solve will roll the Dwarvish Dice to find them (free — gambling, not turns). ' +
+      'Or paste KoLmafia\'s lastDwarfDigitRunes to skip rolling. Remembered until Reset.';
+    digitInput.value = STATE.digitRunes || '';
+    digitInput.addEventListener('change', () => {
+      const v = digitInput.value.trim();
+      STATE.digitRunes = v || null;
+      saveState();
+    });
+    digitRow.appendChild(digitInput);
+    panel.appendChild(digitRow);
+
     // Buttons.
     const btnRow = document.createElement('div');
     btnRow.style.cssText = 'margin-top:8px;display:flex;gap:6px;flex-wrap:wrap';
 
     const log = makeLogger(panel);
 
+    // Re-sync the input boxes from STATE (e.g. after Solve auto-rolls the dice).
+    const syncDigit = () => { digitInput.value = STATE.digitRunes || ''; };
+
     function busy(fn) {
       return async function () {
         Array.from(btnRow.querySelectorAll('button')).forEach((b) => (b.disabled = true));
         try { await fn(log); }
         catch (e) { log('Unexpected error: ' + (e && e.message ? e.message : e)); console.error(e); }
+        syncOi(); syncDigit();
         Array.from(btnRow.querySelectorAll('button')).forEach((b) => (b.disabled = false));
       };
     }
 
     btnRow.appendChild(mkBtn('Read state', busy(async (l) => {
       l('--- Reading state ---');
+      // Try to finish the digit code from any rolls already gathered (no new rolls).
       if (!STATE.digitRunes) {
         const d = solveDigitsFromRolls();
         if (d) { STATE.digitRunes = d; saveState(); }
       }
-      l('Digit code: ' + (STATE.digitRunes || '(unsolved)'));
+      l('Digit code: ' + (STATE.digitRunes ||
+        '(unsolved — Solve will roll the Dwarvish Dice to crack it, free)'));
       await refreshHoppers(l);
       await decodeOwnedOfficeItems(l);
       const key = STATE.piece || 'helmet';
-      l('Done. oi_rune for ' + PIECES[key].label + ' = ' +
-        (STATE.oiByPiece[key] || '(unknown — derived on Solve, or type it)'));
+      if (STATE.oiByPiece[key]) {
+        l('Done. oi_rune for ' + PIECES[key].label + ' = "' + STATE.oiByPiece[key] + '".');
+      } else {
+        l('Done. oi_rune for ' + PIECES[key].label + ' is not set yet.');
+        listOiCandidates(l, key);
+      }
     })));
 
     btnRow.appendChild(mkBtn('Solve (one-click)', busy(runSolve)));
 
-    const auto = mkBtn('Full auto-pilot', busy(async (l) => {
-      if (!confirm(
-        'Full auto-pilot will, for the ' + PIECES[STATE.piece || 'helmet'].label + ':\n' +
-        ' • roll the Dwarvish Dice repeatedly to crack the digit code,\n' +
-        ' • feed the punchcard and adventure the Mine Foremens\' Office (uses turns),\n' +
-        ' • visit the Warehouse to learn the word rune (uses turns),\n' +
-        ' • then PAUSE so you can supply the required ore (it will NOT mine or buy),\n' +
-        ' • and finally set the gauges, fill the hoppers and push the red button.\n\n' +
-        'It stops if an adventure hits combat or an unexpected page. Proceed?')) {
-        l('Auto-pilot cancelled.'); return;
+    // Standalone, opt-in Warehouse determination of the SELECTED piece's word rune.
+    // Spends adventures, but the result is cached per piece (like the digit code),
+    // so it only needs to run once per piece — and may infer a second by elimination.
+    btnRow.appendChild(mkBtn('Determine oi_rune (Warehouse)', busy(async (l) => {
+      if (!PWD) { l('ERROR: could not find your pwd hash.'); return; }
+      const key = STATE.piece || 'helmet';
+      if (STATE.oiByPiece[key]) {
+        l('oi_rune for ' + PIECES[key].label + ' is already known: "' +
+          STATE.oiByPiece[key] + '". (Use Reset to redo it.)');
+        return;
       }
-      await runAutopilot(l);
-    }));
-    auto.style.background = '#ffe0e0';
-    btnRow.appendChild(auto);
+      if (!confirm('Determine the ' + PIECES[key].label + '\'s word rune by ' +
+        'adventuring the Warehouse?\n\nThis SPENDS ADVENTURES (one per visit, up to ' +
+        '~12). The result is saved, so you only do it once per piece. It is the ' +
+        'untested part of this port and may fail — it stops after one turn if the ' +
+        'Warehouse returns nothing.')) {
+        l('Warehouse determination cancelled.'); return;
+      }
+      l('--- Determine oi_rune (Warehouse) ---');
+      await decodeOwnedOfficeItems(l);     // cards must be decoded to recognise the rune
+      await selectPiece(l);                // Warehouse reveals the selected piece's rune
+      const r = await deriveOiRuneFromWarehouse(l);
+      if (r) {
+        STATE.oiByPiece[key] = r; STATE.oiRune = r; saveState();
+        l('✔ ' + PIECES[key].label + '\'s word rune = "' + r + '" (saved).');
+        const inf = inferRemainingOiRune();
+        if (inf) {
+          l('✔ Inferred ' + PIECES[inf.piece].label + '\'s word rune = "' + inf.rune +
+            '" by elimination (saved) — no more Warehouse trips needed.');
+        }
+        l('Now click Solve.');
+      } else {
+        l('Could not determine it automatically. Read the rune at the Warehouse ' +
+          'yourself and type it into the oi_rune box:');
+        listOiCandidates(l, key);
+      }
+    })));
 
     btnRow.appendChild(mkBtn('Reset state', busy(async (l) => {
       if (!confirm('Clear all decoded factory state (digit code, hoppers, cards, oi_rune)?')) return;
@@ -757,11 +838,63 @@
       Object.keys(STATE).forEach((k) => delete STATE[k]);
       STATE.office = {}; STATE.hoppers = {}; STATE.diceRolls = []; STATE.oiByPiece = {};
       oiInput.value = '';
+      digitInput.value = '';
       l('State cleared.');
     })));
 
     panel.appendChild(btnRow);
+    panel.appendChild(buildHelp());
     return panel;
+  }
+
+  // Collapsible guide for when Solve stops short. Solve always logs the exact
+  // missing piece; this maps each message to the manual fix.
+  function buildHelp() {
+    const det = document.createElement('details');
+    det.style.cssText = 'margin-top:8px;color:#444';
+    const sum = document.createElement('summary');
+    sum.style.cssText = 'cursor:pointer;font-weight:bold';
+    sum.textContent = 'What to do if Solve can\'t finish';
+    det.appendChild(sum);
+    const body = document.createElement('div');
+    body.style.cssText = 'margin-top:4px;line-height:1.5';
+    body.innerHTML =
+      'The solver never spends an adventure — it cracks the digit code by rolling the ' +
+      'Dwarvish Dice (gambling, not turns), does all the other setup, then asks you to ' +
+      'do the two steps that <i>do</i> cost an adventure. Solve reads the log line it ' +
+      'stops on; do that step and click <b>Solve</b> again (gauges and progress are ' +
+      'kept, so it just resumes):' +
+      '<ul style="margin:4px 0 0 16px;padding:0">' +
+      '<li><b>Digit code unsolved</b> — normally you do nothing: Solve rolls the ' +
+      '<b>Dwarvish Dice</b> until it cracks the code (free — gambling spends meat, not ' +
+      'turns). If it can\'t converge, click <b>Solve</b> again to roll more, or paste a ' +
+      'known code (e.g. KoLmafia\'s <i>lastDwarfDigitRunes</i>) into the <b>Digit code</b> ' +
+      'box. It\'s remembered until you Reset.</li>' +
+      '<li><b>oi_rune (word rune) not set</b> — only the <b>Warehouse</b> knows which ' +
+      'rune is the piece you\'re forging. Easiest: click <b>Determine oi_rune ' +
+      '(Warehouse)</b> — it adventures the Warehouse to find it, caches it per piece ' +
+      '(so it only spends adventures once), and may infer a second piece by ' +
+      'elimination. If that fails (it\'s the untested part of the port), do it by ' +
+      'hand: click <b>Read state</b> for the candidate runes (the first rune of each ' +
+      'dwarvish document you own — usually three), visit the Warehouse, see which rune ' +
+      'sits next to the piece, and type that single letter into the <b>oi_rune</b> ' +
+      'box. To read a rune\'s letter, hover the rune image — its tooltip says ' +
+      '<i>"Dwarf Word Rune X"</i>; the <i>X</i> is what you type. Remembered per ' +
+      'piece.</li>' +
+      '<li><b>"No laminated card" / "No decoded document"</b> — adventure the Mine ' +
+      'Foremens\' Office in-game until you hold all four laminated cards and the ' +
+      'matching document, then click <b>Read state</b> to decode them and Solve.</li>' +
+      '<li><b>"Hopper N: x/target … short"</b> — acquire the listed ore (for coal, ' +
+      'carry that many lumps of diamond — they are converted in the chamber), then ' +
+      'Solve again to top up.</li>' +
+      '<li><b>"NOW PRESS THE RED BUTTON"</b> — the setup is done; press the red ' +
+      'button yourself to forge (the only adventure of the solve). The item lands in ' +
+      'the bin.</li>' +
+      '<li><b>"could not find your pwd hash"</b> — reload the Machine Room page so ' +
+      'the charpane is present, then try again.</li>' +
+      '</ul>';
+    det.appendChild(body);
+    return det;
   }
 
   function mkBtn(label, onClick) {
@@ -780,7 +913,10 @@
       'background:#111', 'color:#9f9', 'font:11px/1.4 monospace',
       'white-space:pre-wrap', 'border:1px solid #663300',
     ].join(';');
-    box.textContent = 'Ready. "Read state" is safe (no turns). "Full auto-pilot" spends turns.';
+    box.textContent = 'Ready. Solve does all the free work (rolling the Dwarvish ' +
+      'Dice for the digit code is gambling, not turns), then tells you the only two ' +
+      'adventure-costing steps: visit the Warehouse for oi_rune, and press the red ' +
+      'button. Enter oi_rune when asked, then click Solve.';
     panel.appendChild(box);
     return function (msg) {
       box.textContent += '\n' + msg;
