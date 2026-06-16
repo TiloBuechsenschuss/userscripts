@@ -51,7 +51,7 @@ and updates independently via its `@downloadURL`.
 | `codpiece.js` | top/awesome menu, codpiece decoration choice | Menu button to open the Eternity Codpiece, plus tools on the decoration screen to set every gem slot at once and to save/load named gem setups |
 | `daily-checklist.js` | top/awesome menu | Daily tasks checklist |
 | `charpane-heal.js` | charpane | "Heal" button that casts heal skills until full |
-| `renew-buffs-max.js` | charpane | Re-cast buffs at max |
+| `skills-cast-max.js` | charpane | "Max" button on each castable buff to re-cast it at max MP |
 | `strange-leaflet.js` | main / leaflet | Strange Leaflet helper |
 | `mine-sparkle-highlight.js` | mining / mine | Highlights sparkle spots in the mine |
 | `instant-nemesis-maze.js` | volcanomaze | Solves the volcano (nemesis) maze |

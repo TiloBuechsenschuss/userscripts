@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/daily-checklist.js
-// @version      1.13
+// @version      1.14
 // @description  Adds a Checklist button next to the codpiece button that opens a daily to-do list popup. Items can carry a KoL action link (pwd filled live) and be greyed out when not relevant to the current run. A persistent ronin / post-ronin toggle auto-disables the tasks that only apply to one phase. Checked items reset each day (or manually).
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -46,12 +46,15 @@
   // Default items injected once (see SEED_VERSION). Items may carry a url that
   // opens in the mainpane when clicked, and a `disabled` phase ('ronin' or
   // 'post-ronin') that greys them out while the run state toggle matches it.
+  // An item marked `hidden: true` is skipped entirely during seeding -- the
+  // tidy alternative to commenting the block out (see applySeeds).
   // Bump SEED_VERSION to push new defaults to people who already have a saved list.
   const SEED_VERSION = 4;
   const SEED_ITEMS = [
     {
       text: 'Dig with spade',
-      url: '/inv_use.php?pwd=' + PWD_TOKEN + '&which=f-1&whichitem=12184'
+      url: '/inv_use.php?pwd=' + PWD_TOKEN + '&which=f-1&whichitem=12184',
+      hidden: true
     },
     {
       text: 'Play baseball',
@@ -103,7 +106,8 @@
     {
       text: 'Use etched hourglass',
       url: 'inv_use.php?pwd=' + PWD_TOKEN + '&which=3&whichitem=10265',
-      disabled: 'ronin'
+      disabled: 'ronin',
+      hidden: true
     },
     {
       text: 'Get hermit clovers',
@@ -115,11 +119,13 @@
     },
     {
       text: 'Use eternal car battery',
-      url: 'inv_use.php?pwd=' + PWD_TOKEN + '&which=3&whichitem=6741'
+      url: 'inv_use.php?pwd=' + PWD_TOKEN + '&which=3&whichitem=6741',
+      hidden: true
     },
     {
       text: 'Use Pork Elf toiletries kit',
-      url: 'inv_use.php?pwd=' + PWD_TOKEN + '&which=3&whichitem=12192'
+      url: 'inv_use.php?pwd=' + PWD_TOKEN + '&which=3&whichitem=12192',
+      hidden: true
     },
     {
         text: 'Rest (free and with fullness / drunkenness)',
@@ -256,6 +262,10 @@
   function applySeeds(s) {
     if ((s.seed || 0) >= SEED_VERSION) return false;
     SEED_ITEMS.forEach(function (seed) {
+      // `hidden` seeds are skipped entirely -- they're effectively commented
+      // out: never injected, never backfilled. Leave the flag in place so the
+      // entry can be un-hidden later by just deleting the line.
+      if (seed.hidden) return;
       const match = s.items.find(function (it) {
         return (seed.url && it.url === seed.url) || it.text === seed.text;
       });
