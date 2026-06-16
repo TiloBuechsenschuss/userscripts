@@ -76,15 +76,21 @@ navigation. Two consequences:
   Scripts must re-scan on DOM changes — see `wiki-links.js`, which runs once and then on a
   debounced `MutationObserver(document.body, {childList, subtree})`, relying on a per-element
   `data-*` flag to stay idempotent across the repeated passes.
-- The React class names are partly verified. `wiki-links.js`'s wiki-link helper is confirmed
+- `wiki-links.js`'s selectors are verified against real HTML. The wiki-link helper is confirmed
   (the wiki is MediaWiki; `wiki/Special:Search?search=...&go=Go` resolves exact titles and
-  otherwise lands on search results). Storylet-list titles are confirmed against real HTML:
-  each is `<h2 class="... storylet__heading">` inside `.media.storylet`, so `.storylet__heading`
-  tags them uniquely — note the same element also carries the broader `.media__heading`, which
-  is reused elsewhere in the SPA and is deliberately NOT matched (it would over-badge). The
-  in-storylet `.branch__heading` selector is still a guess (FL's `*__heading` BEM convention);
-  confirm it in-game. Selectors live in one `TITLE_SELECTORS` array so that's the only place to
-  fix them.
+  otherwise lands on search results). A storylet title shows up three ways, all badged: in a list
+  it's `<h2 class="... storylet__heading">` inside `.media.storylet`; atop an opened storylet it's
+  `<h1 class="... storylet-root__heading">` inside `.media--root`; and each opportunity card in hand,
+  which has two layouts. In the compact (small-media) layout the card title is a bare
+  `<h2 class="media__heading ...">` reached by scoping `.hand .small-card__body .media__heading`
+  (the bare `.media__heading` alone would also hit the "Opportunity deck" label and storylet
+  headings, so the `.hand` scope is what keeps it to in-hand cards). In the full-width layout the
+  card is image-only with no heading — the title lives solely in `.hand__image`'s `alt`/`aria-label`
+  — so it's handled by a separate `linkHandCards()` that reads that attribute and overlays a badge in
+  the card corner (rather than the text-append path). The text selectors that go through `addBadge`
+  live in one `TITLE_SELECTORS` array. Two things are deliberately NOT matched: the unscoped
+  `.media__heading` (reused all over the SPA — would over-badge), and `.branch__title`, the per-choice
+  titles inside an opened storylet (they're choices, not articles — left unlinked by request).
 
 ## Verifying a change
 

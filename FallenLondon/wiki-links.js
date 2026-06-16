@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/wiki-links.js
-// @version      0.2
-// @description  Adds a small "W" badge linking to the Fallen London wiki (fallenlondon.wiki) next to storylet and branch titles in the game. Clicking opens the wiki article for that thing in a new tab. The storylet-list selector is verified against real game HTML; the in-storylet branch selector is still a best-effort guess.
+// @version      0.5
+// @description  Adds a small "W" badge linking to the Fallen London wiki (fallenlondon.wiki) next to storylet titles in the game -- in a storylet list, at the top of an opened storylet, and on each opportunity card in your hand (both the compact and the full-width card layouts). Clicking opens the wiki article for that storylet/card in a new tab. The individual branch/choice titles inside an opened storylet are intentionally left unlinked. Selectors verified against real game HTML.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 // @run-at       document-idle
@@ -75,24 +75,45 @@
     else el.after(badge);
   }
 
-  // --- Storylet & branch titles ----------------------------------------
-  // Each storylet in a list is a `.media.storylet`; its title is the
-  // `<h2 class="media__heading heading heading--3 storylet__heading">` inside
-  // `.storylet__body`. VERIFIED against real game HTML: `.storylet__heading`
-  // uniquely tags those titles (e.g. "Making your Name: the Infestation",
-  // "A Stroll around the Hill"). We deliberately do NOT match the broader
-  // `.media__heading` on the same element -- it is reused for other headings
-  // across the SPA and would over-badge non-article text.
+  // --- Storylet titles -------------------------------------------------
+  // A storylet's title appears in two shapes, both VERIFIED against real game
+  // HTML and both wanted:
+  //   - In a storylet list: `.media.storylet` > ... >
+  //     `<h2 class="media__heading heading heading--3 storylet__heading">`
+  //     (e.g. "A Stroll around the Hill").
+  //   - At the top of an opened storylet: `.media--root` > ... >
+  //     `<h1 class="media__heading heading heading--2 storylet-root__heading">`
+  //     (e.g. "Making your Name: the Infestation").
+  // So `.storylet__heading, .storylet-root__heading` tags exactly the storylet
+  // names and nothing else.
   //
-  // `.branch__heading` is the in-storylet branch title and is still a
-  // best-effort guess (following FL's `*__heading` BEM naming, as seen on
-  // `storylet__heading`); confirm it once you open a storylet in-game. Keep
-  // this list as the single place to fix selectors; the badge/observer
-  // plumbing around it does not change. Titles are taken verbatim (no article
-  // stripping) -- FL wiki pages keep the full title.
+  // A third shape, also wanted: each opportunity card in your hand, in the
+  // COMPACT (narrow / small-media) layout. Its title is a plain
+  // `<h2 class="media__heading heading heading--3">` -- no card-specific class --
+  // inside `.hand` > `.small-card-container` > `.small-card__body`. That bare
+  // `.media__heading` is shared with headings we must NOT badge (the
+  // "Opportunity deck" label, "Pick a card from your hand (1/3)"), but those sit
+  // OUTSIDE `.hand`, so scoping under `.hand .small-card__body` selects exactly
+  // the in-hand cards (e.g. "The Calendrical Confusion of 1899"). The full-width
+  // layout of the same hand has NO heading and is handled separately by
+  // linkHandCards() below.
+  //
+  // Deliberately NOT matched:
+  //   - The broader `.media__heading` on storylet headings and on the deck
+  //     labels -- it is reused for other headings across the SPA and would
+  //     over-badge non-article text. (We only reach it via the scoped hand
+  //     selector above.)
+  //   - `.branch__title` -- the per-choice titles inside an opened storylet
+  //     (e.g. "Visit the Department of Menace Eradication"). These are choices,
+  //     not their own wiki articles, so they get no badge by request.
+  //
+  // Titles are taken verbatim (no article stripping) -- FL wiki pages keep the
+  // full title. This list is the single place to change which titles get a
+  // badge; the badge/observer plumbing around it does not change.
   const TITLE_SELECTORS = [
-    '.storylet__heading', // verified
-    '.branch__heading',   // best-effort guess
+    '.storylet__heading',                 // storylet in a list
+    '.storylet-root__heading',            // title atop an opened storylet
+    '.hand .small-card__body .media__heading', // opportunity card in hand
   ];
 
   function linkStorylets() {
@@ -101,15 +122,50 @@
     });
   }
 
+  // --- Opportunity cards (full-width hand layout) ----------------------
+  // In the wide browser layout an in-hand card is image-only: there is NO
+  // heading element, just
+  //   .hand__card-container > .hand__card > .hand__border > div[role=button]
+  //     > img.hand__image
+  // and the card title lives ONLY in that image's alt / aria-label (e.g.
+  // "The Calendrical Confusion of 1899"). So the text-element approach above
+  // does not apply; derive the name from the image attribute and overlay a
+  // badge in the card's corner instead. Empty deck slots render as
+  // `.card--empty` (no `.hand__card-container`, no image), so they fall out
+  // naturally. The flag lives on the container, matching addBadge's dataset
+  // convention, so repeated observer passes stay idempotent.
+  function linkHandCards() {
+    document.querySelectorAll('.hand__card-container').forEach(function (card) {
+      if (card.dataset.flWiki) return;
+      const img = card.querySelector('.hand__image');
+      const name = img && (img.getAttribute('alt') || img.getAttribute('aria-label'));
+      if (!name || !name.trim()) return;
+      const badge = makeBadge(name);
+      if (!badge) return;
+      card.dataset.flWiki = '1';
+      // Overlay top-right of the card. Small and out of the way of the card's
+      // own play (click) / Discard controls; opens the wiki in a new tab.
+      if (getComputedStyle(card).position === 'static') card.style.position = 'relative';
+      badge.style.position = 'absolute';
+      badge.style.top = '2px';
+      badge.style.right = '2px';
+      badge.style.marginLeft = '0';
+      badge.style.zIndex = '5';
+      card.appendChild(badge);
+    });
+  }
+
   // --- Dispatch ---------------------------------------------------------
   // SPA: run once now, then re-run (debounced) on every DOM mutation so newly
-  // drawn storylets/branches get badged too. addBadge's per-element flag keeps
+  // drawn storylets get badged too (e.g. opening a storylet swaps the list out
+  // for the root view). addBadge's per-element flag keeps
   // repeated passes idempotent. Observe document.body since the React root is
   // replaced wholesale during navigation.
   let pending = false;
   function scan() {
     pending = false;
     linkStorylets();
+    linkHandCards();
   }
   function schedule() {
     if (pending) return;

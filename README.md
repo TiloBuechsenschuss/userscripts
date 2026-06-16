@@ -76,7 +76,7 @@ and updates independently via its `@downloadURL`.
 
 | Script | Pages | What it does |
 | --- | --- | --- |
-| `wiki-links.js` | game (SPA) | "W" badge linking storylet titles (and, tentatively, in-storylet branch titles) to the Fallen London wiki |
+| `wiki-links.js` | game (SPA) | "W" badge linking storylet titles (in a list, atop an opened storylet, and on opportunity cards in hand — both card layouts) to the Fallen London wiki; the per-choice branch titles are left unlinked |
 
 ## Editing / contributing
 
