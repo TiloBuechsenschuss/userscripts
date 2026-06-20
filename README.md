@@ -71,6 +71,7 @@ and updates independently via its `@downloadURL`.
 | `wearables-ui.js` | wear | Improved wearables UI |
 | `sell-sort.js` | sell | Sortable sell list |
 | `skills-cast-max.js` | skills | Cast a skill the maximum number of times |
+| `auto-combat.js` | fight / nav | Buttons to repeat attack/skill until a fight ends, and to re-adventure the same location and auto-attack fight after fight until a non-combat, low HP, or out of turns |
 
 **Fallen London** (`FallenLondon/`)
 
