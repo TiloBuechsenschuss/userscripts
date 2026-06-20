@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/all-in-one.js
-// @version      1.17
+// @version      1.19
 // @description  Single-install loader for the Kingdom of Loathing userscripts in this repo. It carries no logic of its own; it @requires each individual script straight from GitHub so installing this one file gives you all of them. NOTE: adventure-choices.js is intentionally NOT bundled here -- it needs GM_* grants, which are incompatible with the @grant none mode the other scripts rely on. Install that one separately.
 //
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
@@ -36,6 +36,12 @@
 // @match        https://kingdomofloathing.com/questlog.php*
 // @match        https://www.kingdomofloathing.com/dwarfcontraption.php*
 // @match        https://kingdomofloathing.com/dwarfcontraption.php*
+// @match        https://www.kingdomofloathing.com/cobbsknob.php*
+// @match        https://kingdomofloathing.com/cobbsknob.php*
+// @match        https://www.kingdomofloathing.com/crypt.php*
+// @match        https://kingdomofloathing.com/crypt.php*
+// @match        https://www.kingdomofloathing.com/cellar.php*
+// @match        https://kingdomofloathing.com/cellar.php*
 //
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/codpiece.js
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/daily-checklist.js
@@ -48,6 +54,7 @@
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/wiki-links.js
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/dwarven-factory-solver.js
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/inventory-collapse.js
+// @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/boss-aggro-warn.js
 //
 // @run-at       document-idle
 // @grant        none

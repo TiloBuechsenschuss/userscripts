@@ -3,12 +3,14 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/wiki-links.js
-// @version      0.10
-// @description  Adds a small "W" badge linking to the KoL wiki (wiki.kingdomofloathing.com) next to the last adventure in the charpane, the location name atop place.php, the choice-adventure name atop choice.php, each quest title in questlog.php, the monster name in combat and items you acquire (fight.php), and item names in your inventory (inventory.php). Clicking opens the wiki article for that thing in a new tab. All targets are verified against real page HTML.
+// @version      0.11
+// @description  Adds a small "W" badge linking to the KoL wiki (wiki.kingdomofloathing.com) next to the last adventure in the charpane, the location name atop place.php and crypt.php (the Defiled Cyrpt), the choice-adventure name atop choice.php, each quest title in questlog.php, the monster name in combat and items you acquire (fight.php), and item names in your inventory (inventory.php). Clicking opens the wiki article for that thing in a new tab. All targets are verified against real page HTML.
 // @match        https://www.kingdomofloathing.com/charpane.php*
 // @match        https://kingdomofloathing.com/charpane.php*
 // @match        https://www.kingdomofloathing.com/choice.php*
 // @match        https://kingdomofloathing.com/choice.php*
+// @match        https://www.kingdomofloathing.com/crypt.php*
+// @match        https://kingdomofloathing.com/crypt.php*
 // @match        https://www.kingdomofloathing.com/questlog.php*
 // @match        https://kingdomofloathing.com/questlog.php*
 // @match        https://www.kingdomofloathing.com/place.php*
@@ -107,12 +109,14 @@
     addBadge(anchors[i + 1], 'after');
   }
 
-  // --- Page title bar (place.php, choice.php) --------------------------
-  // Both pages head with a blue title bar whose cell holds the name in
+  // --- Page title bar (place.php, choice.php, crypt.php) ---------------
+  // These pages head with a blue title bar whose cell holds the name in
   // white bold:
   //   <td style="background-color: blue"><b style="color: white">Name</b></td>
   // On place.php this is the location ("The Right Side of the Tracks"); on
-  // choice.php it is the choice adventure ("The Popular Machine"). Badge that
+  // crypt.php the Defiled Cyrpt map carries the same bar ("The Defiled
+  // Cyrpt"); on choice.php it is the choice adventure ("The Popular
+  // Machine"). Badge that
   // <b>. Unlike monsters, the leading article is NOT stripped: the wiki page
   // keeps it. NOTE: other pages share this exact bar but with non-article
   // titles — fight.php ("Combat!"), questlog.php ("Your Quest Log") — so this
@@ -208,7 +212,7 @@
   // every script on the union of matched pages, so explicit gating matters.)
   const path = location.pathname.toLowerCase();
   if (/\/charpane\.php/.test(path)) linkLastAdventure();
-  if (/\/(place|choice)\.php/.test(path)) linkTitleBar();
+  if (/\/(place|choice|crypt)\.php/.test(path)) linkTitleBar();
   if (/\/questlog\.php/.test(path)) linkQuests();
   if (/\/fight\.php/.test(path)) {
     linkMonster();
