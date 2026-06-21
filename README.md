@@ -94,6 +94,10 @@ rules that bite if you forget them:
   each loader's `@require` line) points at its raw path on `main`. Moving or
   renaming a file breaks auto-updates for everyone who has it installed — if you
   move one, update its `@downloadURL` and any `@require` that references it.
+- **Start every `@name` with the game's prefix** so it sorts next to its siblings
+  in the userscript manager: `Twilight Heroes ` for `TwilightHeroes/`, `KoL ` for
+  `KingdomOfLoathing/`, and `Fallen London ` for `FallenLondon/`. Keep the prefix
+  identical across a game's scripts (don't mix `KoL` and `Kingdom of Loathing`).
 
 ### Editing the all-in-one loaders
 

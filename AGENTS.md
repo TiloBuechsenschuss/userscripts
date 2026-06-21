@@ -32,6 +32,12 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
 
 ## Conventions that recur across scripts
 
+- **`@name` starts with the game's prefix** so a script sorts next to its siblings in the
+  userscript manager's (alphabetical) list. Use exactly: `Twilight Heroes ` for `TwilightHeroes/`,
+  `KoL ` for `KingdomOfLoathing/`, and `Fallen London ` for `FallenLondon/` (e.g.
+  `Twilight Heroes Autobox`, `KoL Codpiece Button`, `Fallen London Wiki Links`). Keep the
+  prefix identical across a game's scripts — don't expand `KoL` to `Kingdom of Loathing` for
+  one script, or it'll sort away from the rest.
 - One IIFE, `'use strict';`, no external dependencies, `@grant none` (plain page APIs only).
 - **Idempotency guard**: before injecting UI, bail if the element already exists
   (e.g. `if (document.getElementById(...)) return;`). Scripts may run more than once per page.
