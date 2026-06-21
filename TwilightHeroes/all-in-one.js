@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/all-in-one.js
-// @version      1.3
+// @version      1.4
 // @description  Single-install loader for the Twilight Heroes userscripts in this repo. It carries no logic of its own; it @requires each individual script straight from GitHub so installing this one file gives you all of them.
 //
 // @match        https://www.twilightheroes.com/header.php*
@@ -26,6 +26,10 @@
 // @match        https://twilightheroes.com/skills.php*
 // @match        https://www.twilightheroes.com/nav.php*
 // @match        https://twilightheroes.com/nav.php*
+// @match        https://www.twilightheroes.com/main.php*
+// @match        https://twilightheroes.com/main.php*
+// @match        https://www.twilightheroes.com/criminology.php*
+// @match        https://twilightheroes.com/criminology.php*
 //
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/header-heal.js
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/header-hideout-links.js
@@ -35,6 +39,7 @@
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/skills-cast-max.js
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/wiki-links.js
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/auto-combat.js
+// @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/autobox.js
 //
 // @run-at       document-idle
 // @grant        none

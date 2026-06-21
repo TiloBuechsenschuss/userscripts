@@ -67,6 +67,15 @@ serves several pages with the same `<td width=50%><b>name</b></td>` item layout
 known `<h1>`/`<h2>` heading; extend `HEADINGS` rather than forking the file when another
 such page turns up.
 
+`autobox.js` is a *multi-page* TH script: its `main.php` branch injects the trigger button,
+and its `criminology.php` branch drives the Black Box quest across the page reloads that each
+form submission causes. The "run in progress" flag lives in `sessionStorage` (`th-autobox-active`)
+— the same survive-the-reload pattern, but it spans navigation between two different pages, so
+each branch is gated on `location.pathname` up front (also what makes it safe to bundle). The
+quest-advancing logic it inherits from the legacy original is index-based (`forms.length > 3` →
+submit `forms[2]`, else follow the first `<a>`) and is **unverified against the live page**;
+preserve it faithfully rather than "improving" form heuristics you can't test in-game.
+
 **Fallen London** is a different animal from the other two: a **single-page React app**.
 There are no per-page URLs to `@match` — everything happens under `fallenlondon.com/*`, and
 the game swaps storylets, branches and results into the DOM client-side without any page
