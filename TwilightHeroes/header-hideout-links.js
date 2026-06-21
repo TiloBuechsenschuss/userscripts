@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Twilight Heroes - Header Hideout Links
+// @name         Twilight Heroes Header Hideout Links
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/header-hideout-links.js
-// @version      1.1
+// @version      1.2
 // @description  Adds quick "Garage" (garage.php) and "Rest" (rest.php) links to the top navigation header, in parentheses right after the Hideout link.
 // @match        https://www.twilightheroes.com/header.php*
 // @match        https://twilightheroes.com/header.php*

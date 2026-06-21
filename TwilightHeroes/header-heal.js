@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Twilight Heroes - Header Heal Button
+// @name         Twilight Heroes Header Heal Button
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/header-heal.js
-// @version      1.4
+// @version      1.5
 // @description  Adds a "Heal" link to the top navigation header, in parentheses right after the Skills link. Clicking it repeatedly casts your heal skill(s) until HP is full or you can no longer afford any of them. Heal skills are configured below with a priority and are matched against skills.php by name (no hardcoded skill ids).
 // @match        https://www.twilightheroes.com/header.php*
 // @match        https://twilightheroes.com/header.php*

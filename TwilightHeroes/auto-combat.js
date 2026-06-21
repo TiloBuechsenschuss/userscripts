@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Twilight Heroes - Auto-Combat
+// @name         Twilight Heroes Auto-Combat
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/auto-combat.js
-// @version      1.0
+// @version      1.1
 // @description  Adds three combat automation buttons. On fight.php: "repeat attack until fight done" next to the Attack button, and "repeat skill until fight done" next to the Use-a-Skill button (each re-issues that action every round until the fight ends). "adventure here again and attack until done" appears on the fight-over screen and below the Last Area Patrolled link in the nav sidebar; it re-adventures the same location and auto-attacks, fight after fight, until you hit a non-combat encounter, your HP drops below a threshold, or you run out of turns. Loops by re-submitting the real forms (one visible page reload per round) with a brief Stop window each round; HP is read from the per-round combat form and the sidebar.
 // @match        https://www.twilightheroes.com/fight.php*
 // @match        https://twilightheroes.com/fight.php*

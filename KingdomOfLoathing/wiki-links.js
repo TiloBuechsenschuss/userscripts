@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         KoL - Wiki Links
+// @name         KoL Wiki Links
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/wiki-links.js
-// @version      0.11
+// @version      0.12
 // @description  Adds a small "W" badge linking to the KoL wiki (wiki.kingdomofloathing.com) next to the last adventure in the charpane, the location name atop place.php and crypt.php (the Defiled Cyrpt), the choice-adventure name atop choice.php, each quest title in questlog.php, the monster name in combat and items you acquire (fight.php), and item names in your inventory (inventory.php). Clicking opens the wiki article for that thing in a new tab. All targets are verified against real page HTML.
 // @match        https://www.kingdomofloathing.com/charpane.php*
 // @match        https://kingdomofloathing.com/charpane.php*

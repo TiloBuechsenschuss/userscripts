@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Twilight Heroes - Wearables UI
+// @name         Twilight Heroes Wearables UI
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/wearables-ui.js
-// @version      1.2
+// @version      1.3
 // @description  Adds a button to the "Wear Something" page that sorts each equipment slot's items by power (descending), pushing items that can't currently be equipped to the bottom of their section.
 // @match        https://www.twilightheroes.com/wear.php*
 // @run-at       document-idle

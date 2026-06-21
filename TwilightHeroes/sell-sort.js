@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Twilight Heroes - Sell Sort
+// @name         Twilight Heroes Sell Sort
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/sell-sort.js
-// @version      1.0
+// @version      1.1
 // @description  Adds buttons above the item list on the Sell Things page (sell.php) to reorder the list by quantity or by sell price instead of the default alphabetical order. Click a button again to flip between descending and ascending; a Name button restores the original order.
 // @match        https://www.twilightheroes.com/sell.php*
 // @match        https://twilightheroes.com/sell.php*

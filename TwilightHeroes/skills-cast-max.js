@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Twilight Heroes - Skill Cast Max
+// @name         Twilight Heroes Skill Cast Max
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/skills-cast-max.js
-// @version      1.3
+// @version      1.4
 // @description  On skills.php, adds a "Max" button next to each skill-casting form's "times" input that fills in floor(PP / cost) and casts. In the nav sidebar (nav.php), adds a "+max" button to each Active Effect whose buff is a castable skill; clicking it silently recasts that skill floor(PP / cost) times (via background fetch) and reloads the sidebar.
 // @match        https://www.twilightheroes.com/skills.php*
 // @match        https://twilightheroes.com/skills.php*

@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         KoL - Skills Cast Max
+// @name         KoL Skills Cast Max
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/skills-cast-max.js
-// @version      1.3
+// @version      1.5
 // @description  Adds a small "max" button next to every prolongable (up-arrow) buff in the charpane whose skill is actually castable right now. Castability is checked against skillz.php (mirroring the Twilight Heroes script), so buffs from skills you can't currently cast get no button. Clicking "max" casts that buff as many times as your current MP allows, then refreshes the charpane; the per-cast MP cost is measured live (cast once, read the MP delta) so it stays correct under MP-cost reductions from gear/effects. A "refresh skills" button below the buff list re-checks skillz.php so a skill learned/lost mid-session is picked up without a new tab.
 // @match        https://www.kingdomofloathing.com/charpane.php*
 // @match        https://kingdomofloathing.com/charpane.php*

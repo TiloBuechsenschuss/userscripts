@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Twilight Heroes - Wiki Links
+// @name         Twilight Heroes Wiki Links
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/wiki-links.js
-// @version      1.0
+// @version      1.1
 // @description  Adds a small "W" badge that links to the TH wiki (th.blandsauce.com) next to the monster name in combat, the encounter name in non-combat adventures, items you receive ("You got an item: ..."), each area on the map/square pages, the last area patrolled in the nav sidebar, each quest in the Hero's Journal, and each item name on the inventory/wearables/use pages. Clicking opens the wiki article for that thing in a new tab.
 // @match        https://www.twilightheroes.com/fight.php*
 // @match        https://twilightheroes.com/fight.php*
