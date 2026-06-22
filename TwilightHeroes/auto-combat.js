@@ -255,8 +255,11 @@
     if (cur < side.max) return;                     // only act at full PP
     const btn = topmostBuffMaxButton();
     if (!btn || btn.disabled) return;               // no castable buff (or mid-cast)
+    // data-pp-cost is set only by skills-cast-max.js >= 1.5; when present, skip a
+    // buff we couldn't afford one cast of (sidesteps its "not enough PP" alert).
+    // When absent (older build) we still click — at full PP it's always castable.
     const cost = parseInt(btn.dataset.ppCost, 10);
-    if (!cost || cur < cost) return;                // can't afford even one cast
+    if (cost > 0 && cur < cost) return;
     btn.click();                                    // casts + reloads the nav frame
   }
 
