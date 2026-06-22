@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/skills-cast-max.js
-// @version      1.4
-// @description  On skills.php, adds a "Max" button next to each skill-casting form's "times" input that fills in floor(PP / cost) and casts. In the nav sidebar (nav.php), adds a "+max" button to each Active Effect whose buff is a castable skill; clicking it silently recasts that skill floor(PP / cost) times (via background fetch) and reloads the sidebar.
+// @version      1.5
+// @description  On skills.php, adds a "Max" button next to each skill-casting form's "times" input that fills in floor(PP / cost) and casts. In the nav sidebar (nav.php), adds a "+max" button to each Active Effect whose buff is a castable skill; clicking it silently recasts that skill floor(PP / cost) times (via background fetch) and reloads the sidebar. Each "+max" button carries the buff's PP cost in data-pp-cost so auto-combat.js can drive it when PP fills up.
 // @match        https://www.twilightheroes.com/skills.php*
 // @match        https://twilightheroes.com/skills.php*
 // @match        https://www.twilightheroes.com/nav.php*
@@ -206,6 +206,10 @@
     btn.type = "button";
     btn.className = "th-effect-max";
     btn.textContent = "+max";
+    // Expose the resolved PP cost so a sibling script (auto-combat.js) can decide
+    // whether a click would cast at least once before triggering this button —
+    // it can't re-derive the cost without re-scraping skills.php itself.
+    btn.dataset.ppCost = String(found.cost);
     btn.style.cssText =
       "margin-left:6px;cursor:pointer;font-size:10px;line-height:1;padding:0 3px;vertical-align:middle;";
 

@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/auto-combat.js
-// @version      1.4
-// @description  Adds three combat automation buttons. On fight.php: "repeat attack until fight done" next to the Attack button, and "repeat skill until fight done" next to the Use-a-Skill button (each re-issues that action every round until the fight ends). "adventure here again and attack until done" appears on the fight-over screen and below the Last Area Patrolled link in the nav sidebar; it re-adventures the same location and auto-attacks, fight after fight, until you hit a non-combat encounter, your HP drops below a threshold, or you run out of turns. Loops by re-submitting the real forms (one visible page reload per round) with a brief Stop window each round; HP is read from the per-round combat form and the sidebar. On non-combat encounters it adds a "remember choice" button beside each option; once remembered, that option is auto-picked whenever the same encounter recurs during an adventure chain, and choiceless non-combats auto-advance (re-adventure) instead of halting the chain. A "remembered choices…" button in the nav sidebar opens a popup listing every remembered encounter→option pick, with a Delete per row and a Delete-all.
+// @version      1.5
+// @description  Adds three combat automation buttons. On fight.php: "repeat attack until fight done" next to the Attack button, and "repeat skill until fight done" next to the Use-a-Skill button (each re-issues that action every round until the fight ends). "adventure here again and attack until done" appears on the fight-over screen and below the Last Area Patrolled link in the nav sidebar; it re-adventures the same location and auto-attacks, fight after fight, until you hit a non-combat encounter, your HP drops below a threshold, or you run out of turns. Loops by re-submitting the real forms (one visible page reload per round) with a brief Stop window each round; HP is read from the per-round combat form and the sidebar. After each won fight in an adventure chain (buffs can't be cast mid-combat), if PP has filled up it refreshes the shortest-duration buff before re-adventuring by driving that effect's "+max" button in the nav sidebar (added by skills-cast-max.js). On non-combat encounters it adds a "remember choice" button beside each option; once remembered, that option is auto-picked whenever the same encounter recurs during an adventure chain, and choiceless non-combats auto-advance (re-adventure) instead of halting the chain. A "remembered choices…" button in the nav sidebar opens a popup listing every remembered encounter→option pick, with a Delete per row and a Delete-all.
 // @match        https://www.twilightheroes.com/fight.php*
 // @match        https://twilightheroes.com/fight.php*
 // @match        https://www.twilightheroes.com/nav.php*
@@ -89,6 +89,13 @@
   function sidebarHP() {
     const d = navDoc();
     const el = d && d.getElementById("hpstring");
+    const m = el && el.textContent.match(/(\d+)\s*\/\s*(\d+)/);
+    return m ? { cur: +m[1], max: +m[2] } : null;
+  }
+
+  function sidebarPP() {
+    const d = navDoc();
+    const el = d && d.getElementById("ppstring");
     const m = el && el.textContent.match(/(\d+)\s*\/\s*(\d+)/);
     return m ? { cur: +m[1], max: +m[2] } : null;
   }
@@ -232,6 +239,36 @@
   }
 
   // ---------------------------------------------------------------------------
+  // Buff upkeep — called on the fight-over screen (buffs can't be cast during a
+  // combat round), when PP has filled up, to dump the full bar into the
+  // shortest-duration buff. skills-cast-max.js tags each castable Active Effect
+  // in the nav sidebar with a "+max" button (ordered shortest-duration-first,
+  // so the topmost is the one most in need of a refresh) and clicking it recasts
+  // that skill floor(PP / cost) times via a background fetch. We drive that
+  // button rather than re-implement the skills.php scraping/casting it owns.
+  // ---------------------------------------------------------------------------
+  function maybeRefreshBuff() {
+    const side = sidebarPP();
+    if (!side || !side.max) return;                 // can't read PP — skip
+    const curHidden = hiddenInt("ppstring");        // exact current PP if present
+    const cur = curHidden != null ? curHidden : side.cur;
+    if (cur < side.max) return;                     // only act at full PP
+    const btn = topmostBuffMaxButton();
+    if (!btn || btn.disabled) return;               // no castable buff (or mid-cast)
+    const cost = parseInt(btn.dataset.ppCost, 10);
+    if (!cost || cur < cost) return;                // can't afford even one cast
+    btn.click();                                    // casts + reloads the nav frame
+  }
+
+  // The first "+max" button in document order in the nav frame = the topmost
+  // (shortest-duration) castable Active Effect. Null if skills-cast-max.js hasn't
+  // added any (no castable buffs active, or it hasn't finished its skills.php pass).
+  function topmostBuffMaxButton() {
+    const d = navDoc();
+    return d ? d.querySelector(".th-effect-max") : null;
+  }
+
+  // ---------------------------------------------------------------------------
   // Actions — re-submit the real forms (server keys off the hidden choice value,
   // so .submit() without the submit button is enough, as skills-cast-max relies on).
   // ---------------------------------------------------------------------------
@@ -342,8 +379,9 @@
       return stop("HP at " + Math.round(pct) + "% (floor " + HP_FLOOR_PCT + "%) — heal up, then restart");
     }
 
-    // Confirmed combat victory → straight on to the next fight.
-    if (isCombatVictory()) return readventure(s);
+    // Confirmed combat victory → buffs are castable again now the fight is over,
+    // so top up the shortest one if PP filled up, then on to the next fight.
+    if (isCombatVictory()) { maybeRefreshBuff(); return readventure(s); }
 
     // Non-combat with options: auto-pick a remembered one, else hand control back
     // (the "remember choice" buttons are already on the page to teach it).
