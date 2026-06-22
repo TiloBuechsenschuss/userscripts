@@ -5,7 +5,8 @@
       "WebSearch",
       "WebFetch(domain:kol.coldfront.net)",
       "WebFetch(domain:th.blandsauce.com)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(node --check auto-combat.js)"
     ]
   }
 }
