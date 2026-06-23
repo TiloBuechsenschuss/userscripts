@@ -59,6 +59,10 @@ and updates independently via its `@downloadURL`.
 | `instant-nemesis-maze.js` | volcanomaze | Solves the volcano (nemesis) maze |
 | `sell-sort.js` | sell (ugly) | Sortable sell list |
 | `wiki-links.js` | charpane / place / choice / questlog / fight / inventory | "W" badge linking the last adventure, location title, choice-adventure name, quest titles, combat monster, acquired items, and inventory item names to the KoL wiki |
+| `dwarven-factory-solver.js` | dwarfcontraption | Panel that solves the Dwarven Factory Complex puzzle (a browser port of KoLmafia's "DwaFa"); the solve itself spends no adventures, with an optional opt-in Warehouse run to find the outfit rune |
+| `inventory-collapse.js` | inventory | "Collapse all / Expand all" button that flips every inventory category open or closed at once |
+| `equip-optimize.js` | inventory (equipment) | "Optimize for this" button that equips the highest-value item per slot for whatever the enchantment-sort dropdown is sorting by, with element / Monster Level / encounter pickers for those sorts |
+| `boss-aggro-warn.js` | place / cobbsknob / crypt / cellar | Warns before you enter a special-reward boss's lair if your Monster Aggravation Device isn't set to force the unique reward to drop |
 | `adventure-choices.js` | many | Choice-adventure reward annotations *(not in the loader — uses `GM_*`)* |
 
 **Twilight Heroes** (`TwilightHeroes/`)
@@ -71,6 +75,7 @@ and updates independently via its `@downloadURL`.
 | `wearables-ui.js` | wear | Improved wearables UI |
 | `sell-sort.js` | sell | Sortable sell list |
 | `skills-cast-max.js` | skills | Cast a skill the maximum number of times |
+| `wiki-links.js` | fight / nav / journal / maps / wear / inventory / use | "W" badge linking the combat monster, non-combat encounter, received items, map areas, the last patrolled area, journal quests, and item names to the TH wiki |
 | `auto-combat.js` | fight / nav | Buttons to repeat attack/skill until a fight ends, and to re-adventure the same location and auto-attack fight after fight until a non-combat, low HP, or out of turns |
 | `autobox.js` | main / criminology | "Get & Equip Black Box" button that walks the criminology.php quest steps and equips the box |
 
