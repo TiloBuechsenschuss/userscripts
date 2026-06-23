@@ -4,7 +4,7 @@
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/equip-optimize.js
 // @version      1.0
-// @description  On the equipment inventory (inventory.php?which=2), adds an "Optimize for this" button next to KoL's enchantment sort dropdown. It equips, in every slot, the highest-value item you own for whatever attribute that dropdown is sorting by (the blue value next to each item). To get a clean comparison it first unequips everything (so currently-worn items rejoin the list), expands every category, then equips the best per slot and reloads. The run spans the page reload that "unequip all" causes, so its working state is kept in sessionStorage. For the Elemental Damage / Resistance sorts it adds an element picker (All + the five elements), and for Monster Level a Higher/Lower picker. For sorts with nothing to optimize (Outfit / Name / Item Quantity) the button is hidden.
+// @description  On the equipment inventory (inventory.php?which=2), adds an "Optimize for this" button next to KoL's enchantment sort dropdown. It equips, in every slot, the highest-value item you own for whatever attribute that dropdown is sorting by (the blue value next to each item). To get a clean comparison it first unequips everything (so currently-worn items rejoin the list), expands every category, then equips the best per slot and reloads. The run spans the page reload that "unequip all" causes, so its working state is kept in sessionStorage. For the Elemental Damage / Resistance sorts it adds an element picker (All + the five elements), for Monster Level a Higher/Lower picker, and for Monster Encounters a More/Fewer picker. For sorts with nothing to optimize (Outfit / Name / Item Quantity) the button is hidden.
 // @match        https://www.kingdomofloathing.com/inventory.php*
 // @match        https://kingdomofloathing.com/inventory.php*
 // @run-at       document-idle
@@ -70,6 +70,12 @@
   const ELEMENTS = ['hot', 'cold', 'spooky', 'stench', 'sleaze'];
   const ELEMENTAL_SORTS = { ed: 'Elemental Damage', er: 'Elemental Resistance' };
 
+  // Sorts optimizable in either direction: each gets a two-option picker
+  // [maximize, minimize] and value-based ranking that can run ascending.
+  // Monster Encounters (adr) is qualitative ("more"/"less Monsters") — see
+  // encountersValue — so its picker is More/Fewer.
+  const DIRECTIONAL_SORTS = { ml: ['Higher', 'Lower'], adr: ['More', 'Fewer'] };
+
   // Sort options with no enchantment magnitude to optimize — hide the button.
   const NON_OPTIMIZABLE = { set: true, name: true, qty: true };
 
@@ -81,6 +87,16 @@
   const SEASONAL_ITEMS = {
     'perfect christmas scarf': function (d) { return d.getMonth() === 11; }, // Dec
     'mr. accessaturday': function (d) { return d.getDay() === 6; }           // Sat
+  };
+
+  // Items whose value for a given sort isn't what the static annotation shows
+  // (e.g. date-dependent bonuses). Keyed by lowercased name -> { sortKey:
+  // function(Date) -> value }; when the current sort matches, this replaces the
+  // parsed value. Add more entries as needed.
+  const VALUE_OVERRIDES = {
+    'gingerbeard': {
+      adv: function (d) { return d.getMonth() === 11 ? 9 : 6; } // +9 Dec, else +6
+    }
   };
 
   // --- Persisted run state ----------------------------------------------
@@ -139,11 +155,15 @@
   //
   // For a specific element: the item counts if it names that element or is an
   // all-elements line; value is that number. For 'all': sum over the five
-  // elements — an all-elements line covers all five (N×5), a single line one (N).
+  // elements — an all-elements line covers all five (N×5), a single line one (N)
+  // — so 'all' rewards breadth. For 'any': the strongest single value regardless
+  // of element (a single-element line's number, or an all-elements line's per-
+  // element number), so it rewards magnitude rather than coverage.
   function elementValue(text, element) {
-    const numM = text.match(/[+-]?\d+/);
-    if (!numM) return null;
-    const n = Number(numM[0]);
+    const nums = (text.match(/[+-]?\d+/g) || []).map(Number);
+    if (!nums.length) return null;
+    if (element === 'any') return Math.max.apply(null, nums);
+    const n = nums[0];
     const isAll = /all elements|prismatic/i.test(text);
     const has = function (el) { return new RegExp('\\b' + el + '\\b', 'i').test(text); };
 
@@ -153,6 +173,24 @@
     }
     if (isAll) return n;
     return has(element) ? n : null;
+  }
+
+  // Monster Encounters (adr) annotations are qualitative, with no magnitude:
+  // "(more Monsters)" / "(less Monsters)". Map them to +1 / -1 so the directional
+  // ranking and sign-filter work; combat modifiers stack, so each slot taking
+  // one matching item pushes encounters further in the chosen direction.
+  function encountersValue(text) {
+    if (/more monster/i.test(text)) return 1;
+    if (/less monster/i.test(text)) return -1;
+    return null;
+  }
+
+  // Pick the value parser for the current sort: per-element (ed/er), qualitative
+  // encounters (adr), or the generic signed number (everything else).
+  function makeValueFn(attr, element) {
+    if (element) return function (t) { return elementValue(t, element); };
+    if (attr === 'adr') return encountersValue;
+    return parseValue;
   }
 
   function isCollapsed(div) {
@@ -217,11 +255,12 @@
   // rank within that category (0 = top = KoL's best), which is how we honour
   // "match KoL's sort order". `links` is [ { slot, href } ] — slot is null for
   // normal items, or 1/2/3 for the per-slot accessory equip links KoL renders.
-  // `elementMode` (an element key, or 'all', or null) switches value/ranking to
-  // the elemental path for the ed/er sorts.
-  function scrapeCandidates(elementMode) {
+  // `valueFn(text)` parses an item's value for the current sort (see
+  // makeValueFn); items it returns null for aren't candidates. `attr` is the
+  // current sort key, used for per-item value overrides.
+  function scrapeCandidates(valueFn, attr) {
     const bySlot = {};
-    const now = new Date(); // for seasonal-item checks
+    const now = new Date(); // for seasonal items / date-dependent overrides
 
     document.querySelectorAll('b.tit a.nounder').forEach(function (a) {
       const m = /toggle\('(.+?)'\)/.exec(a.getAttribute('href') || '');
@@ -243,18 +282,22 @@
 
         const valueEl = item.querySelector('font[color="blue"]');
         if (!valueEl) return; // no value for this attribute
-        const value = elementMode
-          ? elementValue(valueEl.textContent, elementMode)
-          : parseValue(valueEl.textContent);
-        if (value === null) return; // (elemental: no value for this element)
 
         const nameEl = item.querySelector('b');
         const name = nameEl ? nameEl.textContent.trim() : '(item ' + item.id + ')';
+        const key = name.toLowerCase();
 
         // Skip seasonal items whose bonus isn't active today (KoL still shows
         // their value, so they'd otherwise be equipped where they do nothing).
-        const season = SEASONAL_ITEMS[name.toLowerCase()];
+        const season = SEASONAL_ITEMS[key];
         if (season && !season(now)) return;
+
+        // Per-item value override (e.g. date-dependent bonuses the static
+        // annotation doesn't reflect); else parse the annotation.
+        const ov = VALUE_OVERRIDES[key];
+        const value = (ov && ov[attr]) ? ov[attr](now)
+          : valueFn(valueEl.textContent);
+        if (value === null) return; // no value for this sort/element/direction
 
         const links = equipLinks.map(function (l) {
           const sm = /[?&]slot=(\d+)/.exec(l.href);
@@ -292,8 +335,8 @@
 
   // Build the list of equips to perform. Each slot's pick follows KoL's own
   // sort order (see bestOf), except in value mode (byValue=true: the elemental
-  // sorts, and Monster Level) where KoL's order isn't what we want — we rank by
-  // the parsed value, descending, or ascending when lowerBetter (minimize ML).
+  // sorts and the directional sorts ml/adr) where KoL's order isn't what we want
+  // — we rank by the parsed value, descending, or ascending when lowerBetter.
   // In value mode we also drop items on the wrong side of zero (see beneficial),
   // since after unequip-all an empty slot contributes 0 and a wrong-sign item
   // would be worse than nothing. Weapon + off-hand are decided together (a 2h
@@ -438,12 +481,17 @@
   function start(dropdown, status, opts) {
     const attr = dropdown.value;
     const element = opts.element || null;
-    const lowerBetter = !!opts.mlLower;
-    // Elemental sorts and Monster Level rank by parsed value (not KoL's order).
-    const byValue = !!element || attr === 'ml';
+    const lowerBetter = !!opts.lower;
+    // Elemental sorts and the directional sorts rank by parsed value, not by
+    // KoL's DOM order.
+    const byValue = !!element || !!DIRECTIONAL_SORTS[attr];
     let suffix = '';
-    if (element && element !== 'all') suffix = ' (' + element + ')';
-    else if (attr === 'ml') suffix = lowerBetter ? ' (lower)' : ' (higher)';
+    if (element && element !== 'all') {
+      suffix = ' (' + element + ')';
+    } else if (DIRECTIONAL_SORTS[attr]) {
+      const labels = DIRECTIONAL_SORTS[attr];
+      suffix = ' (' + (lowerBetter ? labels[1] : labels[0]).toLowerCase() + ')';
+    }
     const attrLabel = selectedAttributeLabel(dropdown) + suffix;
 
     const href = getUnequipAllHref();
@@ -495,7 +543,8 @@
     expandAllCategories();
     waitForStableItems(function () {
       const plan = planEquipment(
-        scrapeCandidates(state.element), state.byValue, state.lowerBetter);
+        scrapeCandidates(makeValueFn(state.attr, state.element), state.attr),
+        state.byValue, state.lowerBetter);
       if (!plan.length) {
         clearState();
         status.textContent = 'No equippable items have a value for "' +
@@ -530,29 +579,32 @@
       'margin-left:8px;font-family:arial;font-size:9pt;color:#006;';
 
     // Secondary picker for sorts that need a sub-choice:
-    //  - elemental (ed/er): which element to optimize (All + the five); KoL
-    //    lumps all five under one sort, and "all" sums them.
-    //  - Monster Level (ml): optimize for Higher or Lower ML.
-    let elemSel = null, mlSel = null;
+    //  - elemental (ed/er): which element to optimize. "All" sums coverage
+    //    across the five; "Any" takes the strongest single value regardless of
+    //    element; or pick one specific element.
+    //  - directional (ml / adr): which way to optimize (maximize/minimize).
+    let elemSel = null, dirSel = null;
     if (ELEMENTAL_SORTS[dropdown.value]) {
       elemSel = makeSelect('tm-equip-optimize-elem',
-        [['all', 'All elements']].concat(ELEMENTS.map(function (e) {
-          return [e, e.charAt(0).toUpperCase() + e.slice(1)];
-        })));
-    } else if (dropdown.value === 'ml') {
-      mlSel = makeSelect('tm-equip-optimize-ml',
-        [['higher', 'Higher'], ['lower', 'Lower']]);
+        [['all', 'All elements'], ['any', 'Any element']].concat(
+          ELEMENTS.map(function (e) {
+            return [e, e.charAt(0).toUpperCase() + e.slice(1)];
+          })));
+    } else if (DIRECTIONAL_SORTS[dropdown.value]) {
+      const labels = DIRECTIONAL_SORTS[dropdown.value];
+      dirSel = makeSelect('tm-equip-optimize-dir',
+        [['higher', labels[0]], ['lower', labels[1]]]);
     }
 
     btn.addEventListener('click', function () {
       start(dropdown, status, {
         element: elemSel ? elemSel.value : null,
-        mlLower: mlSel ? mlSel.value === 'lower' : false
+        lower: dirSel ? dirSel.value === 'lower' : false
       });
     });
 
     let anchor = dropdown;
-    [elemSel, mlSel].forEach(function (sel) {
+    [elemSel, dirSel].forEach(function (sel) {
       if (sel) { anchor.insertAdjacentElement('afterend', sel); anchor = sel; }
     });
     anchor.insertAdjacentElement('afterend', btn);
@@ -563,7 +615,7 @@
     const state = loadState();
     if (state) {
       if (elemSel && state.element) elemSel.value = state.element;
-      if (mlSel && state.lowerBetter) mlSel.value = 'lower';
+      if (dirSel && state.lowerBetter) dirSel.value = 'lower';
       resume(dropdown, status, state);
     }
   }
