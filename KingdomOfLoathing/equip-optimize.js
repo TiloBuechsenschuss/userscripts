@@ -73,6 +73,16 @@
   // Sort options with no enchantment magnitude to optimize — hide the button.
   const NON_OPTIMIZABLE = { set: true, name: true, qty: true };
 
+  // Seasonal items: their enchantment only applies at certain times, yet KoL
+  // still shows the value year-round — so without this they'd be "optimized"
+  // into a slot where they currently do nothing. Keyed by lowercased item name;
+  // each predicate says whether the bonus is live for the given Date. When it
+  // isn't, the item is skipped as a candidate. Add more entries as needed.
+  const SEASONAL_ITEMS = {
+    'perfect christmas scarf': function (d) { return d.getMonth() === 11; }, // Dec
+    'mr. accessaturday': function (d) { return d.getDay() === 6; }           // Sat
+  };
+
   // --- Persisted run state ----------------------------------------------
   function loadState() {
     try {
@@ -211,6 +221,7 @@
   // the elemental path for the ed/er sorts.
   function scrapeCandidates(elementMode) {
     const bySlot = {};
+    const now = new Date(); // for seasonal-item checks
 
     document.querySelectorAll('b.tit a.nounder').forEach(function (a) {
       const m = /toggle\('(.+?)'\)/.exec(a.getAttribute('href') || '');
@@ -238,6 +249,13 @@
         if (value === null) return; // (elemental: no value for this element)
 
         const nameEl = item.querySelector('b');
+        const name = nameEl ? nameEl.textContent.trim() : '(item ' + item.id + ')';
+
+        // Skip seasonal items whose bonus isn't active today (KoL still shows
+        // their value, so they'd otherwise be equipped where they do nothing).
+        const season = SEASONAL_ITEMS[name.toLowerCase()];
+        if (season && !season(now)) return;
+
         const links = equipLinks.map(function (l) {
           const sm = /[?&]slot=(\d+)/.exec(l.href);
           return { slot: sm ? Number(sm[1]) : null, href: l.href };
@@ -255,7 +273,7 @@
 
         (bySlot[slotKey] = bySlot[slotKey] || []).push({
           id: item.id.slice(2), // "ic7468" -> "7468"
-          name: nameEl ? nameEl.textContent.trim() : '(item ' + item.id + ')',
+          name: name,
           cat: m[1],
           index: index++,
           value: value,
