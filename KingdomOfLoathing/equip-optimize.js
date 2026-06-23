@@ -4,7 +4,7 @@
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/equip-optimize.js
 // @version      1.0
-// @description  On the equipment inventory (inventory.php?which=2), adds an "Optimize for this" button next to KoL's enchantment sort dropdown. It equips, in every slot, the highest-value item you own for whatever attribute that dropdown is sorting by (the blue value next to each item). To get a clean comparison it first unequips everything (so currently-worn items rejoin the list), expands every category, then equips the best per slot and reloads. The run spans the page reload that "unequip all" causes, so its working state is kept in sessionStorage. For the Elemental Damage / Resistance sorts it adds an element picker (All + the five elements). For sorts with nothing to optimize (Outfit / Name / Item Quantity) the button is hidden.
+// @description  On the equipment inventory (inventory.php?which=2), adds an "Optimize for this" button next to KoL's enchantment sort dropdown. It equips, in every slot, the highest-value item you own for whatever attribute that dropdown is sorting by (the blue value next to each item). To get a clean comparison it first unequips everything (so currently-worn items rejoin the list), expands every category, then equips the best per slot and reloads. The run spans the page reload that "unequip all" causes, so its working state is kept in sessionStorage. For the Elemental Damage / Resistance sorts it adds an element picker (All + the five elements), and for Monster Level a Higher/Lower picker. For sorts with nothing to optimize (Outfit / Name / Item Quantity) the button is hidden.
 // @match        https://www.kingdomofloathing.com/inventory.php*
 // @match        https://kingdomofloathing.com/inventory.php*
 // @run-at       document-idle
@@ -291,23 +291,27 @@
   // --- Optimization -----------------------------------------------------
 
   // Build the list of equips to perform. Each slot's pick follows KoL's own
-  // sort order (see bestOf), except in elemental mode (byValue=true) where KoL's
-  // order isn't element-specific so we rank by the parsed per-element value.
-  // Weapon + off-hand are decided together (a 2h weapon takes the off-hand slot
-  // — see preferTwoHand); accessories take the top three into slots 1/2/3.
-  // Returns [ { label, name, valueText, href } ].
-  function planEquipment(bySlot, byValue) {
+  // sort order (see bestOf), except in value mode (byValue=true: the elemental
+  // sorts, and Monster Level) where KoL's order isn't what we want — we rank by
+  // the parsed value, descending, or ascending when lowerBetter (minimize ML).
+  // In value mode we also drop items on the wrong side of zero (see beneficial),
+  // since after unequip-all an empty slot contributes 0 and a wrong-sign item
+  // would be worse than nothing. Weapon + off-hand are decided together (a 2h
+  // weapon takes the off-hand slot — see preferTwoHand); accessories take the
+  // top three into slots 1/2/3. Returns [ { label, name, valueText, href } ].
+  function planEquipment(bySlot, byValue, lowerBetter) {
     const plan = [];
 
-    const weapons = bySlot.weapon || [];
+    const weapons = beneficial(bySlot.weapon, byValue, lowerBetter);
     const oneHand = bestOf(weapons.filter(function (w) {
       return (w.hands || 1) === 1;
-    }), byValue);
+    }), byValue, lowerBetter);
     const twoHand = bestOf(weapons.filter(function (w) {
       return (w.hands || 1) >= 2;
-    }), byValue);
-    const offhand = bestOf(bySlot.offhand, byValue);
-    const useTwoHand = preferTwoHand(oneHand, twoHand, offhand);
+    }), byValue, lowerBetter);
+    const offhand = bestOf(beneficial(bySlot.offhand, byValue, lowerBetter),
+      byValue, lowerBetter);
+    const useTwoHand = preferTwoHand(oneHand, twoHand, offhand, lowerBetter);
     const weaponChoice = useTwoHand ? twoHand : oneHand;
     const offhandChoice = useTwoHand ? null : offhand;
 
@@ -315,7 +319,8 @@
       let best;
       if (slot.key === 'weapon') best = weaponChoice;
       else if (slot.key === 'offhand') best = offhandChoice;
-      else best = bestOf(bySlot[slot.key], byValue);
+      else best = bestOf(beneficial(bySlot[slot.key], byValue, lowerBetter),
+        byValue, lowerBetter);
       if (!best) return;
       plan.push({
         label: slot.label, name: best.name,
@@ -324,10 +329,12 @@
     });
 
     // Accessories are one category — by KoL's DOM order normally, or by value in
-    // elemental mode — take the top three distinct items into slots 1/2/3.
-    const accs = (bySlot.accessory || []).slice().sort(function (a, b) {
-      return byValue ? b.value - a.value : a.index - b.index;
-    });
+    // value mode — take the top three distinct items into slots 1/2/3.
+    const accs = beneficial(bySlot.accessory, byValue, lowerBetter)
+      .sort(function (a, b) {
+        if (!byValue) return a.index - b.index;
+        return lowerBetter ? a.value - b.value : b.value - a.value;
+      });
     ACCESSORY_SLOTS.forEach(function (s, i) {
       const item = accs[i];
       if (!item) return;
@@ -346,17 +353,29 @@
   // KoL's best of a list. Within one category, "best" is simply the earliest
   // (KoL already sorted it best-first, handling flat vs % its own way). Across
   // different categories — only weapons span two (Melee / Ranged), where KoL
-  // gives no relative order — fall back to the higher value.
-  function bestOf(list, byValue) {
+  // gives no relative order — fall back to value. In value mode (byValue) rank
+  // purely by value: highest, or lowest when lowerBetter (minimize ML).
+  function bestOf(list, byValue, lowerBetter) {
     if (!list || !list.length) return null;
     return list.reduce(function (best, it) {
-      return koLBetter(it, best, byValue) ? it : best;
+      return koLBetter(it, best, byValue, lowerBetter) ? it : best;
     });
   }
-  function koLBetter(a, b, byValue) {
-    if (byValue) return a.value > b.value;      // elemental: rank by value
+  function koLBetter(a, b, byValue, lowerBetter) {
+    if (byValue) return lowerBetter ? a.value < b.value : a.value > b.value;
     if (a.cat === b.cat) return a.index < b.index;
     return a.value > b.value;
+  }
+
+  // In value mode, keep only items on the beneficial side of zero: positive when
+  // maximizing, negative when minimizing (ML lower). An empty slot is 0, so a
+  // wrong-sign item would be worse than equipping nothing. Outside value mode we
+  // trust KoL's order and don't filter.
+  function beneficial(list, byValue, lowerBetter) {
+    if (!byValue) return (list || []).slice();
+    return (list || []).filter(function (it) {
+      return lowerBetter ? it.value < 0 : it.value > 0;
+    });
   }
 
   // Unit shared by a set of candidates: 'flat', 'pct', or 'mixed' (some of each).
@@ -372,17 +391,18 @@
   //   A) best 1h weapon + best off-hand   B) best 2h+ weapon alone
   // We can only add the off-hand to the 1h weapon when their values share a unit
   // (you can't add "+X" to "+Y%"). When A and B are comparable in the same unit,
-  // take the higher total. Otherwise — a 2h is the only option, or the units are
-  // mixed so a total is meaningless — default to filling both slots (config A),
-  // except when there's no 1h weapon and no off-hand at all.
-  function preferTwoHand(oneHand, twoHand, offhand) {
+  // take the better total (higher, or lower when lowerBetter). Otherwise — a 2h
+  // is the only option, or the units are mixed so a total is meaningless —
+  // default to filling both slots (config A), except when there's no 1h weapon
+  // and no off-hand at all.
+  function preferTwoHand(oneHand, twoHand, offhand, lowerBetter) {
     if (!twoHand) return false;
     if (!oneHand && !offhand) return true; // a 2h weapon is the only option
     const unitA = unitOf([oneHand, offhand]);
     if (unitA !== 'mixed' && unitA === unitOf([twoHand])) {
       const totalA = (oneHand ? oneHand.value : 0) +
         (offhand ? offhand.value : 0);
-      return twoHand.value > totalA;
+      return lowerBetter ? twoHand.value < totalA : twoHand.value > totalA;
     }
     return false; // units not comparable: keep both slots filled
   }
@@ -415,20 +435,27 @@
   // That reload lands us back here with state set, where resume() takes over —
   // with nothing equipped, every owned item rejoins the lists, so the per-slot
   // "best" is a true comparison rather than "best among items not already worn".
-  function start(dropdown, status, element) {
+  function start(dropdown, status, opts) {
     const attr = dropdown.value;
-    const attrLabel = selectedAttributeLabel(dropdown) +
-      (element && element !== 'all' ? ' (' + element + ')' : '');
+    const element = opts.element || null;
+    const lowerBetter = !!opts.mlLower;
+    // Elemental sorts and Monster Level rank by parsed value (not KoL's order).
+    const byValue = !!element || attr === 'ml';
+    let suffix = '';
+    if (element && element !== 'all') suffix = ' (' + element + ')';
+    else if (attr === 'ml') suffix = lowerBetter ? ' (lower)' : ' (higher)';
+    const attrLabel = selectedAttributeLabel(dropdown) + suffix;
+
     const href = getUnequipAllHref();
     if (!confirm('Optimize equipment for "' + attrLabel + '"?\n\n' +
         (href ? 'This unequips everything, then equips ' : 'This equips ') +
-        'the highest-value item for "' + attrLabel + '" in each slot.')) {
+        'the best item for "' + attrLabel + '" in each slot.')) {
       status.textContent = 'Cancelled.';
       return;
     }
     const state = {
       attr: attr, attrLabel: attrLabel, sortTried: false,
-      element: element || null
+      element: element, byValue: byValue, lowerBetter: lowerBetter
     };
     if (!href) {
       // No "unequip all" link means nothing is equipped, so there's nothing to
@@ -468,7 +495,7 @@
     expandAllCategories();
     waitForStableItems(function () {
       const plan = planEquipment(
-        scrapeCandidates(state.element), !!state.element);
+        scrapeCandidates(state.element), state.byValue, state.lowerBetter);
       if (!plan.length) {
         clearState();
         status.textContent = 'No equippable items have a value for "' +
@@ -502,40 +529,57 @@
     status.style.cssText =
       'margin-left:8px;font-family:arial;font-size:9pt;color:#006;';
 
-    // For the elemental sorts, offer an element picker (All + the five
-    // elements). KoL lumps all five under one sort, so the user tells us which
-    // to optimize; "all" sums them.
-    let elemSel = null;
+    // Secondary picker for sorts that need a sub-choice:
+    //  - elemental (ed/er): which element to optimize (All + the five); KoL
+    //    lumps all five under one sort, and "all" sums them.
+    //  - Monster Level (ml): optimize for Higher or Lower ML.
+    let elemSel = null, mlSel = null;
     if (ELEMENTAL_SORTS[dropdown.value]) {
-      elemSel = document.createElement('select');
-      elemSel.id = 'tm-equip-optimize-elem';
-      elemSel.style.cssText = 'margin-left:6px;';
-      [['all', 'All elements']].concat(ELEMENTS.map(function (e) {
-        return [e, e.charAt(0).toUpperCase() + e.slice(1)];
-      })).forEach(function (pair) {
-        const o = document.createElement('option');
-        o.value = pair[0];
-        o.textContent = pair[1];
-        elemSel.appendChild(o);
-      });
+      elemSel = makeSelect('tm-equip-optimize-elem',
+        [['all', 'All elements']].concat(ELEMENTS.map(function (e) {
+          return [e, e.charAt(0).toUpperCase() + e.slice(1)];
+        })));
+    } else if (dropdown.value === 'ml') {
+      mlSel = makeSelect('tm-equip-optimize-ml',
+        [['higher', 'Higher'], ['lower', 'Lower']]);
     }
 
     btn.addEventListener('click', function () {
-      start(dropdown, status, elemSel ? elemSel.value : null);
+      start(dropdown, status, {
+        element: elemSel ? elemSel.value : null,
+        mlLower: mlSel ? mlSel.value === 'lower' : false
+      });
     });
 
     let anchor = dropdown;
-    if (elemSel) { anchor.insertAdjacentElement('afterend', elemSel); anchor = elemSel; }
+    [elemSel, mlSel].forEach(function (sel) {
+      if (sel) { anchor.insertAdjacentElement('afterend', sel); anchor = sel; }
+    });
     anchor.insertAdjacentElement('afterend', btn);
     btn.insertAdjacentElement('afterend', status);
 
     // Mid-run? Pick up where the unequip-all reload left off, restoring the
-    // element choice in the picker so it reflects what's being applied.
+    // sub-choice in its picker so it reflects what's being applied.
     const state = loadState();
     if (state) {
       if (elemSel && state.element) elemSel.value = state.element;
+      if (mlSel && state.lowerBetter) mlSel.value = 'lower';
       resume(dropdown, status, state);
     }
+  }
+
+  // Build a <select> from [value, label] pairs.
+  function makeSelect(id, pairs) {
+    const sel = document.createElement('select');
+    sel.id = id;
+    sel.style.cssText = 'margin-left:6px;';
+    pairs.forEach(function (pair) {
+      const o = document.createElement('option');
+      o.value = pair[0];
+      o.textContent = pair[1];
+      sel.appendChild(o);
+    });
+    return sel;
   }
 
   build();
