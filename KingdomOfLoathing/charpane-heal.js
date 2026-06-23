@@ -14,7 +14,7 @@
 (function () {
   'use strict';
 
-  // Bundled-loader safety: all-in-one.js @requires every KoL script and runs
+  // Bundled-loader safety: the all-in-one loader @requires every KoL script and runs
   // them on the union of all matched pages. Guard charpane.php explicitly, or
   // addButton()'s body-top fallback would drop a stray "heal" button onto pages
   // with no HP line (main, mining, ...). A no-op for the standalone install,

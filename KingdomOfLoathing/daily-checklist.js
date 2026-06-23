@@ -16,7 +16,7 @@
 (function () {
   'use strict';
 
-  // Bundled-loader safety: all-in-one.js @requires every KoL script and runs
+  // Bundled-loader safety: the all-in-one loader @requires every KoL script and runs
   // them on the union of all matched pages. Guard our own page(s) explicitly,
   // or this script's body-top fallback would drop a stray button onto sibling
   // frames (charpane, mainpane, ...). A no-op for the standalone install, whose

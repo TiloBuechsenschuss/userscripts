@@ -23,9 +23,9 @@ Install one of the **all-in-one loaders**. Each is a thin script that pulls in
 all of that game's scripts via `@require`, so a single install gives you the
 whole set:
 
-- **Kingdom of Loathing:** [`KingdomOfLoathing/all-in-one.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/all-in-one.js)
-- **Twilight Heroes:** [`TwilightHeroes/all-in-one.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/all-in-one.js)
-- **Fallen London:** [`FallenLondon/all-in-one.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/all-in-one.js)
+- **Kingdom of Loathing:** [`all-in-one/kingdom-of-loathing.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/all-in-one/kingdom-of-loathing.js)
+- **Twilight Heroes:** [`all-in-one/twilight-heroes.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/all-in-one/twilight-heroes.js)
+- **Fallen London:** [`all-in-one/fallen-london.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/all-in-one/fallen-london.js)
 
 Open the raw link in a browser with a userscript manager installed and it will
 offer to install.
@@ -101,7 +101,7 @@ rules that bite if you forget them:
 
 ### Editing the all-in-one loaders
 
-The loaders (`*/all-in-one.js`) contain no logic — just metadata. When you
+The loaders (`all-in-one/*.js`) contain no logic — just metadata. When you
 **add or remove a script**, or change which pages it touches:
 
 1. Add/remove its `@require` line in the matching loader.

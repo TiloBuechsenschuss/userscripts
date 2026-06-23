@@ -5,10 +5,10 @@ just automate a chore.
 
 ## bump-loaders.mjs
 
-The `all-in-one.js` loaders pull each bundled script from GitHub via `@require`.
+The loaders in `all-in-one/` pull each bundled script from GitHub via `@require`.
 Userscript managers cache those required resources and only re-fetch them when
 the **loader's own `@version`** increases. So changing, say, `codpiece.js`
-without bumping `all-in-one.js` means installed users never receive the update.
+without bumping the matching loader means installed users never receive the update.
 
 This script finds every loader (any tracked `.js` whose metadata block
 `@require`s another file in this repo) and, when one of its required files has
@@ -19,7 +19,7 @@ node scripts/bump-loaders.mjs            # working tree vs HEAD; bump in place
 node scripts/bump-loaders.mjs --staged   # staged changes only; bump + git add the loader
 node scripts/bump-loaders.mjs --check     # report only; exit 1 if a bump is needed (CI)
 node scripts/bump-loaders.mjs --force      # bump every loader, ignoring change detection
-node scripts/bump-loaders.mjs --force KingdomOfLoathing  # bump only loaders whose path contains "KingdomOfLoathing"
+node scripts/bump-loaders.mjs --force kingdom-of-loathing  # bump only loaders whose path contains "kingdom-of-loathing"
 ```
 
 If the loader itself was already edited in the same changeset, the script leaves
@@ -34,7 +34,7 @@ ignoring change detection *and* the "loader already edited" guard.
 - Bare `--force` bumps every loader.
 - `--force <text>` restricts to loaders whose repo path contains `<text>`
   (case-insensitive substring; repeatable, e.g. `--force kol --force th`).
-- Aliases: `kol` → `KingdomOfLoathing`, `th` → `TwilightHeroes`, `fl` → `FallenLondon`.
+- Aliases: `kol` → `kingdom-of-loathing`, `th` → `twilight-heroes`, `fl` → `fallen-london`.
 - A `--force <text>` that matches no loader exits non-zero (likely a typo).
 - Combine with `--staged` to also `git add` the bumped loader(s); with `--check`
   to preview without writing.

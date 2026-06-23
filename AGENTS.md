@@ -11,6 +11,11 @@ for three browser games:
 - `TwilightHeroes/` — scripts for twilightheroes.com
 - `FallenLondon/` — scripts for fallenlondon.com
 
+- `all-in-one/` — one "loader" userscript per game (`kingdom-of-loathing.js`,
+  `twilight-heroes.js`, `fallen-london.js`). Each carries no logic of its own; it
+  `@require`s every individual script for that game from GitHub, so a single install
+  pulls in the whole set. Bumping a loader is automated — see `scripts/bump-loaders.mjs`.
+
 There is **no build, no bundler, no package manager, no test suite, and no lint config**.
 Each `.js` file is the shippable artifact: a single self-contained IIFE prefixed with a
 `// ==UserScript== ... // ==/UserScript==` metadata block. You edit the file, the user

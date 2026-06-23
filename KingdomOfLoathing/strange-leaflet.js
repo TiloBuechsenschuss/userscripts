@@ -41,7 +41,7 @@ v0.52: add auto-clicking of the "Do It!" button, except when the secret code is 
 (function () {
 	'use strict';
 
-	// Bundled-loader safety: all-in-one.js @requires every KoL script and runs
+	// Bundled-loader safety: the all-in-one loader @requires every KoL script and runs
 	// them on the union of all matched pages. Guard our own pages explicitly --
 	// the leaflet branch below only bails when fewer than 3 <td>s are present,
 	// which is false on td-heavy frames like charpane, so without this guard the

@@ -25,7 +25,7 @@
   const path = location.pathname;
 
   // Bundled-loader safety (mirrors charpane-heal.js): if this is ever @require'd
-  // into all-in-one.js, that loader runs every script on the union of all matched
+  // into the all-in-one loader, that loader runs every script on the union of all matched
   // pages. Bail unless we're on a page this script actually handles.
   if (!/\/(place|cobbsknob|crypt|cellar)\.php/i.test(path)) return;
 

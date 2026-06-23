@@ -607,7 +607,7 @@
 
   // --- Dispatch --------------------------------------------------------
   // Run last, so the `const` config above is past its temporal dead zone by the
-  // time addButton()/fireAction() read it. all-in-one.js @requires every KoL
+  // time addButton()/fireAction() read it. The all-in-one loader @requires every KoL
   // script and runs them on the union of all matched pages; gating by page here
   // keeps each feature off sibling frames. A no-op gate for the standalone
   // install, whose @match already scopes it.

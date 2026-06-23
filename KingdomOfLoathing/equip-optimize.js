@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/equip-optimize.js
-// @version      1.0
+// @version      1.1
 // @description  On the equipment inventory (inventory.php?which=2), adds an "Optimize for this" button next to KoL's enchantment sort dropdown. It equips, in every slot, the highest-value item you own for whatever attribute that dropdown is sorting by (the blue value next to each item). To get a clean comparison it first unequips everything (so currently-worn items rejoin the list), expands every category, then equips the best per slot and reloads. The run spans the page reload that "unequip all" causes, so its working state is kept in sessionStorage. For the Elemental Damage / Resistance sorts it adds an element picker (All + the five elements), for Monster Level a Higher/Lower picker, and for Monster Encounters a More/Fewer picker. For sorts with nothing to optimize (Outfit / Name / Item Quantity) the button is hidden.
 // @match        https://www.kingdomofloathing.com/inventory.php*
 // @match        https://kingdomofloathing.com/inventory.php*
@@ -15,7 +15,7 @@
 (function () {
   'use strict';
 
-  // Bundled-loader safety: all-in-one.js @requires every KoL script and runs
+  // Bundled-loader safety: the all-in-one loader @requires every KoL script and runs
   // them on the union of all matched pages. The standalone @match scopes this
   // to inventory.php, but guard explicitly for the bundle.
   if (!/\/inventory\.php/i.test(location.pathname)) return;

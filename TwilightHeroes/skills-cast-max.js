@@ -311,7 +311,7 @@
   }
 
   // --- dispatch ---------------------------------------------------------------
-  // Bundled via all-in-one.js this IIFE may run on other pages too; branch on
+  // Bundled via the all-in-one loader this IIFE may run on other pages too; branch on
   // the path and no-op everywhere else.
   const path = location.pathname;
   if (/\/skills\.php/i.test(path)) initSkillsPage();

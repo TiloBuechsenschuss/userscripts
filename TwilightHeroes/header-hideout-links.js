@@ -14,7 +14,7 @@
 (function () {
   "use strict";
 
-  // Bundled-loader safety: all-in-one.js @requires every TH script and runs
+  // Bundled-loader safety: the all-in-one loader @requires every TH script and runs
   // them on the union of all matched pages. Guard header.php explicitly, or this
   // script would inject its links after any Hideout link that happens to appear
   // on another content page. A no-op for the standalone install, whose @match

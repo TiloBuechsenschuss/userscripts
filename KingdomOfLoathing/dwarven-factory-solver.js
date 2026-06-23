@@ -61,7 +61,7 @@
 (function () {
   'use strict';
 
-  // all-in-one.js @requires every KoL script onto the union of matched pages;
+  // The all-in-one loader @requires every KoL script onto the union of matched pages;
   // scope ourselves explicitly so we never touch a sibling frame/page.
   if (!/\/dwarfcontraption\.php/i.test(location.pathname)) return;
   if (document.getElementById('tm-dwafa-panel')) return; // idempotency guard

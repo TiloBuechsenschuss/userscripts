@@ -157,7 +157,7 @@
   }
 
   // --- Dispatch ---------------------------------------------------------
-  // Gate by page: all-in-one.js runs every TH script on the union of matched
+  // Gate by page: the all-in-one loader runs every TH script on the union of matched
   // pages, so scope each branch explicitly rather than relying on @match.
   const path = location.pathname.toLowerCase();
   if (/\/fight\.php/.test(path)) {

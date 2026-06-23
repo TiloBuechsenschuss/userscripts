@@ -14,7 +14,7 @@
 (function () {
   'use strict';
 
-  // Bundled-loader safety: all-in-one.js @requires every KoL script and runs
+  // Bundled-loader safety: the all-in-one loader @requires every KoL script and runs
   // them on the union of all matched pages. The standalone @match already
   // scopes this to inventory.php, but guard explicitly for the bundle.
   if (!/\/inventory\.php/i.test(location.pathname)) return;

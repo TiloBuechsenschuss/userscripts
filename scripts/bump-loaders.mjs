@@ -2,10 +2,10 @@
 // Auto-bump the @version of each "loader" userscript when one of the files it
 // @require's has changed.
 //
-// Why this exists: the all-in-one.js loaders pull each bundled script straight
+// Why this exists: the loaders in all-in-one/ pull each bundled script straight
 // from GitHub via @require. Userscript managers cache those @require resources
 // and only re-fetch them when the LOADER's own @version goes up. So editing
-// codpiece.js without bumping all-in-one.js means installed users never see the
+// codpiece.js without bumping the loader means installed users never see the
 // change. This script closes that gap.
 //
 // Usage:
@@ -18,8 +18,8 @@
 //                                            detection (and the "loader already edited" guard).
 //   node scripts/bump-loaders.mjs --force kol  Force-bump only loaders whose path contains
 //                                            "kol" (substring match; repeatable). Aliases:
-//                                            kol -> KingdomOfLoathing, th -> TwilightHeroes,
-//                                            fl -> FallenLondon.
+//                                            kol -> kingdom-of-loathing, th -> twilight-heroes,
+//                                            fl -> fallen-london.
 //                                            Combine with --staged to also `git add` them.
 //
 // A loader is any tracked .js file whose metadata block @require's another file
@@ -54,9 +54,10 @@ for (let i = 0; i < argv.length; i++) {
 }
 
 // Short aliases for the --force <match> term, so `--force kol` hits the
-// KingdomOfLoathing loader, `--force th` the TwilightHeroes one, and
-// `--force fl` the FallenLondon one.
-const ALIASES = { kol: 'kingdomofloathing', th: 'twilightheroes', fl: 'fallenlondon' };
+// Kingdom of Loathing loader, `--force th` the Twilight Heroes one, and
+// `--force fl` the Fallen London one. Values are substrings of the loader
+// paths under all-in-one/.
+const ALIASES = { kol: 'kingdom-of-loathing', th: 'twilight-heroes', fl: 'fallen-london' };
 const resolveMatch = (m) => (ALIASES[m.toLowerCase()] ?? m).toLowerCase();
 
 function git(...a) {

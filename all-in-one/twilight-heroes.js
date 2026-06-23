@@ -2,8 +2,8 @@
 // @name         Twilight Heroes All-in-One (loader)
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
-// @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/all-in-one.js
-// @version      1.4
+// @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/all-in-one/twilight-heroes.js
+// @version      1.5
 // @description  Single-install loader for the Twilight Heroes userscripts in this repo. It carries no logic of its own; it @requires each individual script straight from GitHub so installing this one file gives you all of them.
 //
 // @match        https://www.twilightheroes.com/header.php*

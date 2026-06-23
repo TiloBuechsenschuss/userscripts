@@ -208,7 +208,7 @@
 
   // --- Dispatch ---------------------------------------------------------
   // Gate by page so this stays inert in any frame it is injected into that
-  // it does not handle. (When/if it joins all-in-one.js, that loader runs
+  // it does not handle. (When/if it joins the all-in-one loader, that loader runs
   // every script on the union of matched pages, so explicit gating matters.)
   const path = location.pathname.toLowerCase();
   if (/\/charpane\.php/.test(path)) linkLastAdventure();

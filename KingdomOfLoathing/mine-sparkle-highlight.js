@@ -16,7 +16,7 @@
 (function () {
   'use strict';
 
-  // Bundled-loader safety: all-in-one.js @requires every KoL script and runs
+  // Bundled-loader safety: the all-in-one loader @requires every KoL script and runs
   // them on the union of all matched pages. Guard our own pages explicitly, or
   // startPulse() would leave a perpetual no-op setInterval running on every
   // other KoL page. A no-op for the standalone install, whose @match already

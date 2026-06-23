@@ -16,7 +16,7 @@
 // Originally "Twilight Heroes Autobox" v2 by Heather Robinson
 // (https://greasyfork.org/scripts/38222). Reworked to follow this repo's
 // conventions: IIFE + 'use strict', explicit pathname guards (so it is safe to
-// bundle via all-in-one.js), an idempotency guard on the injected button, and
+// bundle via the all-in-one loader), an idempotency guard on the injected button, and
 // sessionStorage instead of localStorage for the cross-reload "run in progress"
 // flag — matching the rest of the Twilight Heroes scripts here, which only need
 // the state to survive the page's own reloads, not to persist between visits.

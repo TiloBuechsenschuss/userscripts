@@ -27,7 +27,7 @@
   const KEY = "th-autocombat";
   const CKEY = "th-autocombat-choices"; // persisted non-combat picks {encounter: optionLabel}
 
-  // Bundled via all-in-one.js this IIFE runs on the union of all matched pages,
+  // Bundled via the all-in-one loader this IIFE runs on the union of all matched pages,
   // so scope to the two pages we touch and no-op everywhere else.
   const path = location.pathname.toLowerCase();
   const onFight = /\/fight\.php/.test(path);
