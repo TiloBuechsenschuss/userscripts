@@ -96,12 +96,14 @@
   }
 
   // Pull a comparable number out of a blue annotation like "(30-60 HP Regen)",
-  // "(+5 Moxie)" or "(+10% Item Drops)". Take the largest number present, so a
-  // range sorts by its high end; all items in one category share the attribute,
-  // so this stays a fair comparison. Returns null if there's no number.
+  // "(+5 Moxie)" or "(+10% Item Drops)". We use the low end of a range, matching
+  // how KoL itself orders these lists (descending by the low end). Ranking
+  // *within* a category comes from KoL's DOM order, not this number — value is
+  // only used where KoL gives no order: merging the two weapon categories and
+  // the 1h+offhand vs 2h total. Returns null if there's no number.
   function parseValue(text) {
     const nums = (text.match(/-?\d+(?:\.\d+)?/g) || []).map(Number);
-    return nums.length ? Math.max.apply(null, nums) : null;
+    return nums.length ? Math.min.apply(null, nums) : null;
   }
 
   function isCollapsed(div) {
@@ -147,15 +149,25 @@
     })();
   }
 
+  // NOTE: KoL sorts each category smartly for the chosen attribute, with the
+  // better equipment higher up the list (and it handles flat vs % the way the
+  // game considers correct). So an item's position *within its category* is the
+  // authoritative ranking — we trust that DOM order rather than re-deriving a
+  // "best" from the displayed number. The parsed value is only a fallback for
+  // the two comparisons KoL leaves to us: merging the two weapon categories
+  // (Melee / Ranged) and weighing 1h+offhand against a 2h weapon.
+  //
   // Collect candidate items per slot type. A candidate is an item that (a) has
   // an [equip] link (owned, equippable, requirements met) and (b) carries a
   // blue value annotation for the current sort (so it contributes to the
   // attribute). Each item lives inside a collapsible category whose
   // toggle('Name') tells us the slot.
   //
-  // Returns { slotKey: [ { id, name, value, valueText, links } ] } where links
-  // is [ { slot, href } ] — slot is null for normal items, or 1/2/3 for the
-  // per-slot accessory equip links KoL renders.
+  // Returns { slotKey: [ { id, name, cat, index, value, isPercent, valueText,
+  // hands, links } ] }. `cat` is the KoL category name and `index` the item's
+  // rank within that category (0 = top = KoL's best), which is how we honour
+  // "match KoL's sort order". `links` is [ { slot, href } ] — slot is null for
+  // normal items, or 1/2/3 for the per-slot accessory equip links KoL renders.
   function scrapeCandidates() {
     const bySlot = {};
 
@@ -168,6 +180,9 @@
       const box = a.closest('table.stuffbox');
       if (!box) return;
 
+      // Rank candidates by their order within this (already KoL-sorted)
+      // category; only count items we actually keep, preserving relative order.
+      let index = 0;
       box.querySelectorAll('table.item[id^="ic"]').forEach(function (item) {
         const equipLinks = Array.prototype.slice.call(
           item.querySelectorAll('a[href*="action=equip"]')
@@ -198,7 +213,10 @@
         (bySlot[slotKey] = bySlot[slotKey] || []).push({
           id: item.id.slice(2), // "ic7468" -> "7468"
           name: nameEl ? nameEl.textContent.trim() : '(item ' + item.id + ')',
+          cat: m[1],
+          index: index++,
           value: value,
+          isPercent: /%/.test(valueEl.textContent),
           valueText: valueEl.textContent.trim().replace(/^\(|\)$/g, ''),
           hands: hands,
           links: links
@@ -211,18 +229,13 @@
 
   // --- Optimization -----------------------------------------------------
 
-  // Build the list of equips to perform. For single slots, the highest-value
-  // candidate. For accessories, the three highest-value distinct items, mapped
-  // to physical slots 1/2/3 (each via its own slot-targeted [equip] link).
-  // Returns [ { label, name, valueText, href } ].
+  // Build the list of equips to perform. Each slot's pick follows KoL's own
+  // sort order (see bestOf). Weapon + off-hand are decided together (a 2h weapon
+  // takes the off-hand slot — see preferTwoHand); accessories take the top three
+  // into slots 1/2/3. Returns [ { label, name, valueText, href } ].
   function planEquipment(bySlot) {
     const plan = [];
 
-    // Weapon + off-hand share two hands. A 2h (or the joke 3h) weapon fills the
-    // off-hand slot itself, so the real choice is between two configurations,
-    // and we take whichever gives the higher combined value for the attribute:
-    //   A) best 1h weapon + best off-hand
-    //   B) best 2h+ weapon alone (off-hand left empty)
     const weapons = bySlot.weapon || [];
     const oneHand = bestOf(weapons.filter(function (w) {
       return (w.hands || 1) === 1;
@@ -231,9 +244,7 @@
       return (w.hands || 1) >= 2;
     }));
     const offhand = bestOf(bySlot.offhand);
-    const totalA = (oneHand ? oneHand.value : 0) + (offhand ? offhand.value : 0);
-    const totalB = twoHand ? twoHand.value : 0;
-    const useTwoHand = totalB > totalA;
+    const useTwoHand = preferTwoHand(oneHand, twoHand, offhand);
     const weaponChoice = useTwoHand ? twoHand : oneHand;
     const offhandChoice = useTwoHand ? null : offhand;
 
@@ -249,8 +260,10 @@
       });
     });
 
+    // Accessories are one KoL-sorted category, so its DOM order is the ranking;
+    // take the top three distinct items into physical slots 1/2/3.
     const accs = (bySlot.accessory || []).slice().sort(function (a, b) {
-      return b.value - a.value;
+      return a.index - b.index;
     });
     ACCESSORY_SLOTS.forEach(function (s, i) {
       const item = accs[i];
@@ -267,11 +280,47 @@
     return plan;
   }
 
+  // KoL's best of a list. Within one category, "best" is simply the earliest
+  // (KoL already sorted it best-first, handling flat vs % its own way). Across
+  // different categories — only weapons span two (Melee / Ranged), where KoL
+  // gives no relative order — fall back to the higher value.
   function bestOf(list) {
     if (!list || !list.length) return null;
     return list.reduce(function (best, it) {
-      return it.value > best.value ? it : best;
+      return koLBetter(it, best) ? it : best;
     });
+  }
+  function koLBetter(a, b) {
+    if (a.cat === b.cat) return a.index < b.index;
+    return a.value > b.value;
+  }
+
+  // Unit shared by a set of candidates: 'flat', 'pct', or 'mixed' (some of each).
+  function unitOf(items) {
+    let flat = false, pct = false;
+    items.forEach(function (it) {
+      if (it) { if (it.isPercent) pct = true; else flat = true; }
+    });
+    return (flat && pct) ? 'mixed' : (pct ? 'pct' : 'flat');
+  }
+
+  // Choose between the two weapon configurations:
+  //   A) best 1h weapon + best off-hand   B) best 2h+ weapon alone
+  // We can only add the off-hand to the 1h weapon when their values share a unit
+  // (you can't add "+X" to "+Y%"). When A and B are comparable in the same unit,
+  // take the higher total. Otherwise — a 2h is the only option, or the units are
+  // mixed so a total is meaningless — default to filling both slots (config A),
+  // except when there's no 1h weapon and no off-hand at all.
+  function preferTwoHand(oneHand, twoHand, offhand) {
+    if (!twoHand) return false;
+    if (!oneHand && !offhand) return true; // a 2h weapon is the only option
+    const unitA = unitOf([oneHand, offhand]);
+    if (unitA !== 'mixed' && unitA === unitOf([twoHand])) {
+      const totalA = (oneHand ? oneHand.value : 0) +
+        (offhand ? offhand.value : 0);
+      return twoHand.value > totalA;
+    }
+    return false; // units not comparable: keep both slots filled
   }
 
   // --- Applying equipment ----------------------------------------------
