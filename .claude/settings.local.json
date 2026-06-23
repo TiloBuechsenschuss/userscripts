@@ -6,7 +6,8 @@
       "WebFetch(domain:kol.coldfront.net)",
       "WebFetch(domain:th.blandsauce.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(node --check auto-combat.js)"
+      "Bash(node --check auto-combat.js)",
+      "Bash(node --check KingdomOfLoathing/equip-optimize.js)"
     ]
   }
 }

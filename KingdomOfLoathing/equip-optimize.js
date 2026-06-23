@@ -4,7 +4,7 @@
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/equip-optimize.js
 // @version      1.0
-// @description  On the equipment inventory (inventory.php?which=2), adds an "Optimize for this" button next to KoL's enchantment sort dropdown. It equips, in every slot, the highest-value item you own for whatever attribute that dropdown is sorting by (the blue value next to each item). To get a clean comparison it first unequips everything (so currently-worn items rejoin the list), expands every category, then equips the best per slot and reloads. The run spans the page reload that "unequip all" causes, so its working state is kept in sessionStorage.
+// @description  On the equipment inventory (inventory.php?which=2), adds an "Optimize for this" button next to KoL's enchantment sort dropdown. It equips, in every slot, the highest-value item you own for whatever attribute that dropdown is sorting by (the blue value next to each item). To get a clean comparison it first unequips everything (so currently-worn items rejoin the list), expands every category, then equips the best per slot and reloads. The run spans the page reload that "unequip all" causes, so its working state is kept in sessionStorage. For the Elemental Damage / Resistance sorts it adds an element picker (All + the five elements). For sorts with nothing to optimize (Outfit / Name / Item Quantity) the button is hidden.
 // @match        https://www.kingdomofloathing.com/inventory.php*
 // @match        https://kingdomofloathing.com/inventory.php*
 // @run-at       document-idle
@@ -63,6 +63,16 @@
     { slot: 3, label: 'Accessory 3' }
   ];
 
+  // The five KoL elements. "Elemental Damage" / "Elemental Resistance" sorts
+  // (sortby ed / er) lump all five together — KoL can't sort by just one — so
+  // for those we show an element picker and rank by the chosen element ourselves
+  // (see elementValue / scrapeCandidates), instead of trusting KoL's DOM order.
+  const ELEMENTS = ['hot', 'cold', 'spooky', 'stench', 'sleaze'];
+  const ELEMENTAL_SORTS = { ed: 'Elemental Damage', er: 'Elemental Resistance' };
+
+  // Sort options with no enchantment magnitude to optimize — hide the button.
+  const NON_OPTIMIZABLE = { set: true, name: true, qty: true };
+
   // --- Persisted run state ----------------------------------------------
   function loadState() {
     try {
@@ -104,6 +114,35 @@
   function parseValue(text) {
     const nums = (text.match(/-?\d+(?:\.\d+)?/g) || []).map(Number);
     return nums.length ? Math.min.apply(null, nums) : null;
+  }
+
+  // Per-element value for the elemental sorts. Verified against live er and ed
+  // pages. Each annotation is one line:
+  //   er, single:    "Serious Hot Resistance [+3]"
+  //   er, all:       "Serious Resistance to All Elements [+3]"  (+3 to each)
+  //   ed, single:    "Hot Damage +5"
+  //   ed, all:       "Prismatic Damage +5"                      (+5 to each)
+  // (In ed the element word / "Prismatic" is split across colored <font> tags,
+  // but textContent flattens it back to plain text.) The magnitude is the first
+  // signed number (covers both the [+N] and +N shapes). The all-elements case is
+  // flagged by "All Elements" (er) or "Prismatic" (ed).
+  //
+  // For a specific element: the item counts if it names that element or is an
+  // all-elements line; value is that number. For 'all': sum over the five
+  // elements — an all-elements line covers all five (N×5), a single line one (N).
+  function elementValue(text, element) {
+    const numM = text.match(/[+-]?\d+/);
+    if (!numM) return null;
+    const n = Number(numM[0]);
+    const isAll = /all elements|prismatic/i.test(text);
+    const has = function (el) { return new RegExp('\\b' + el + '\\b', 'i').test(text); };
+
+    if (element === 'all') {
+      if (isAll) return n * ELEMENTS.length;
+      return ELEMENTS.some(has) ? n : null;
+    }
+    if (isAll) return n;
+    return has(element) ? n : null;
   }
 
   function isCollapsed(div) {
@@ -168,7 +207,9 @@
   // rank within that category (0 = top = KoL's best), which is how we honour
   // "match KoL's sort order". `links` is [ { slot, href } ] — slot is null for
   // normal items, or 1/2/3 for the per-slot accessory equip links KoL renders.
-  function scrapeCandidates() {
+  // `elementMode` (an element key, or 'all', or null) switches value/ranking to
+  // the elemental path for the ed/er sorts.
+  function scrapeCandidates(elementMode) {
     const bySlot = {};
 
     document.querySelectorAll('b.tit a.nounder').forEach(function (a) {
@@ -191,8 +232,10 @@
 
         const valueEl = item.querySelector('font[color="blue"]');
         if (!valueEl) return; // no value for this attribute
-        const value = parseValue(valueEl.textContent);
-        if (value === null) return;
+        const value = elementMode
+          ? elementValue(valueEl.textContent, elementMode)
+          : parseValue(valueEl.textContent);
+        if (value === null) return; // (elemental: no value for this element)
 
         const nameEl = item.querySelector('b');
         const links = equipLinks.map(function (l) {
@@ -230,20 +273,22 @@
   // --- Optimization -----------------------------------------------------
 
   // Build the list of equips to perform. Each slot's pick follows KoL's own
-  // sort order (see bestOf). Weapon + off-hand are decided together (a 2h weapon
-  // takes the off-hand slot — see preferTwoHand); accessories take the top three
-  // into slots 1/2/3. Returns [ { label, name, valueText, href } ].
-  function planEquipment(bySlot) {
+  // sort order (see bestOf), except in elemental mode (byValue=true) where KoL's
+  // order isn't element-specific so we rank by the parsed per-element value.
+  // Weapon + off-hand are decided together (a 2h weapon takes the off-hand slot
+  // — see preferTwoHand); accessories take the top three into slots 1/2/3.
+  // Returns [ { label, name, valueText, href } ].
+  function planEquipment(bySlot, byValue) {
     const plan = [];
 
     const weapons = bySlot.weapon || [];
     const oneHand = bestOf(weapons.filter(function (w) {
       return (w.hands || 1) === 1;
-    }));
+    }), byValue);
     const twoHand = bestOf(weapons.filter(function (w) {
       return (w.hands || 1) >= 2;
-    }));
-    const offhand = bestOf(bySlot.offhand);
+    }), byValue);
+    const offhand = bestOf(bySlot.offhand, byValue);
     const useTwoHand = preferTwoHand(oneHand, twoHand, offhand);
     const weaponChoice = useTwoHand ? twoHand : oneHand;
     const offhandChoice = useTwoHand ? null : offhand;
@@ -252,7 +297,7 @@
       let best;
       if (slot.key === 'weapon') best = weaponChoice;
       else if (slot.key === 'offhand') best = offhandChoice;
-      else best = bestOf(bySlot[slot.key]);
+      else best = bestOf(bySlot[slot.key], byValue);
       if (!best) return;
       plan.push({
         label: slot.label, name: best.name,
@@ -260,10 +305,10 @@
       });
     });
 
-    // Accessories are one KoL-sorted category, so its DOM order is the ranking;
-    // take the top three distinct items into physical slots 1/2/3.
+    // Accessories are one category — by KoL's DOM order normally, or by value in
+    // elemental mode — take the top three distinct items into slots 1/2/3.
     const accs = (bySlot.accessory || []).slice().sort(function (a, b) {
-      return a.index - b.index;
+      return byValue ? b.value - a.value : a.index - b.index;
     });
     ACCESSORY_SLOTS.forEach(function (s, i) {
       const item = accs[i];
@@ -284,13 +329,14 @@
   // (KoL already sorted it best-first, handling flat vs % its own way). Across
   // different categories — only weapons span two (Melee / Ranged), where KoL
   // gives no relative order — fall back to the higher value.
-  function bestOf(list) {
+  function bestOf(list, byValue) {
     if (!list || !list.length) return null;
     return list.reduce(function (best, it) {
-      return koLBetter(it, best) ? it : best;
+      return koLBetter(it, best, byValue) ? it : best;
     });
   }
-  function koLBetter(a, b) {
+  function koLBetter(a, b, byValue) {
+    if (byValue) return a.value > b.value;      // elemental: rank by value
     if (a.cat === b.cat) return a.index < b.index;
     return a.value > b.value;
   }
@@ -351,21 +397,31 @@
   // That reload lands us back here with state set, where resume() takes over —
   // with nothing equipped, every owned item rejoins the lists, so the per-slot
   // "best" is a true comparison rather than "best among items not already worn".
-  function start(dropdown, status) {
+  function start(dropdown, status, element) {
     const attr = dropdown.value;
-    const attrLabel = selectedAttributeLabel(dropdown);
+    const attrLabel = selectedAttributeLabel(dropdown) +
+      (element && element !== 'all' ? ' (' + element + ')' : '');
     const href = getUnequipAllHref();
-    if (!href) {
-      status.textContent = 'Could not find the "unequip all" link.';
-      return;
-    }
     if (!confirm('Optimize equipment for "' + attrLabel + '"?\n\n' +
-        'This unequips everything, then equips the highest-value item for "' +
-        attrLabel + '" in each slot.')) {
+        (href ? 'This unequips everything, then equips ' : 'This equips ') +
+        'the highest-value item for "' + attrLabel + '" in each slot.')) {
       status.textContent = 'Cancelled.';
       return;
     }
-    saveState({ attr: attr, attrLabel: attrLabel, sortTried: false });
+    const state = {
+      attr: attr, attrLabel: attrLabel, sortTried: false,
+      element: element || null
+    };
+    if (!href) {
+      // No "unequip all" link means nothing is equipped, so there's nothing to
+      // unequip and no reload to wait for — optimize this page directly. (The
+      // sort already matches what the user just clicked, so resume() won't need
+      // to re-sort; it expands, scrapes, equips, then reloads.)
+      status.textContent = 'Nothing equipped; optimizing…';
+      resume(dropdown, status, state);
+      return;
+    }
+    saveState(state);
     status.textContent = 'Unequipping all…';
     location.href = href; // GET → reload back into resume()
   }
@@ -393,7 +449,8 @@
     status.textContent = 'Expanding categories…';
     expandAllCategories();
     waitForStableItems(function () {
-      const plan = planEquipment(scrapeCandidates());
+      const plan = planEquipment(
+        scrapeCandidates(state.element), !!state.element);
       if (!plan.length) {
         clearState();
         status.textContent = 'No equippable items have a value for "' +
@@ -412,6 +469,10 @@
     const dropdown = findSortDropdown();
     if (!dropdown) return; // not the equipment view
 
+    // Nothing to optimize for these sorts (Outfit / Name / Item Quantity) —
+    // don't show the button at all.
+    if (NON_OPTIMIZABLE[dropdown.value]) return;
+
     const btn = document.createElement('button');
     btn.id = BUTTON_ID;
     btn.type = 'button'; // must not submit the sort form
@@ -423,14 +484,40 @@
     status.style.cssText =
       'margin-left:8px;font-family:arial;font-size:9pt;color:#006;';
 
-    btn.addEventListener('click', function () { start(dropdown, status); });
+    // For the elemental sorts, offer an element picker (All + the five
+    // elements). KoL lumps all five under one sort, so the user tells us which
+    // to optimize; "all" sums them.
+    let elemSel = null;
+    if (ELEMENTAL_SORTS[dropdown.value]) {
+      elemSel = document.createElement('select');
+      elemSel.id = 'tm-equip-optimize-elem';
+      elemSel.style.cssText = 'margin-left:6px;';
+      [['all', 'All elements']].concat(ELEMENTS.map(function (e) {
+        return [e, e.charAt(0).toUpperCase() + e.slice(1)];
+      })).forEach(function (pair) {
+        const o = document.createElement('option');
+        o.value = pair[0];
+        o.textContent = pair[1];
+        elemSel.appendChild(o);
+      });
+    }
 
-    dropdown.insertAdjacentElement('afterend', btn);
+    btn.addEventListener('click', function () {
+      start(dropdown, status, elemSel ? elemSel.value : null);
+    });
+
+    let anchor = dropdown;
+    if (elemSel) { anchor.insertAdjacentElement('afterend', elemSel); anchor = elemSel; }
+    anchor.insertAdjacentElement('afterend', btn);
     btn.insertAdjacentElement('afterend', status);
 
-    // Mid-run? Pick up where the unequip-all reload left off.
+    // Mid-run? Pick up where the unequip-all reload left off, restoring the
+    // element choice in the picker so it reflects what's being applied.
     const state = loadState();
-    if (state) resume(dropdown, status, state);
+    if (state) {
+      if (elemSel && state.element) elemSel.value = state.element;
+      resume(dropdown, status, state);
+    }
   }
 
   build();
