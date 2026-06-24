@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/quest-helper.js
-// @version      1.0
+// @version      1.1
 // @description  Adds a "Next steps" box under each quest in the Hero's Journal (journal.php). Quests advance through stages; the current stage is read from the journal entry text under the quest header, and the matching next-step hint is shown. Hints come from a built-in map keyed by quest + stage (built from the TH wiki); quests/stages not yet mapped fall back to a link to that quest's walkthrough on the TH wiki (th.blandsauce.com).
 // @match        https://www.twilightheroes.com/journal.php*
 // @match        https://twilightheroes.com/journal.php*
@@ -477,9 +477,23 @@
   // Collect that text (to pick the stage) and remember where the run ends (to
   // drop the box after the description, before the next quest, so it doesn't
   // split the title from its text). `isBoundary` decides where the run ends.
+  // The quest name from a heading, EXCLUDING any badge the wiki-links script
+  // injects into the same <h2>/<b> (an <a class="th-wiki-link">W</a>). Using
+  // heading.textContent here would append that "W" to the name, so the map
+  // lookup (and the derived wiki slug) would never match. Skip those nodes.
+  function headingName(heading) {
+    let s = '';
+    for (const node of heading.childNodes) {
+      if (node.nodeType === 1 && node.classList &&
+          node.classList.contains('th-wiki-link')) continue;
+      s += node.textContent;
+    }
+    return s.trim();
+  }
+
   function injectAfterSection(heading, isBoundary) {
     if (!heading || heading.dataset.thQuestHelper) return;
-    const name = heading.textContent.trim();
+    const name = headingName(heading);
     if (!name) return;
 
     let entryText = '';

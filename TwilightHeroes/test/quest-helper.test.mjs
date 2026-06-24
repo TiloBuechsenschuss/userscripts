@@ -25,7 +25,7 @@ const fakeLocation = { pathname: '/journal.php' };
 // Re-expose the IIFE's internals: name the IIFE and have it return the helpers.
 const wrapped = src
   .replace('(function () {', 'globalThis.__qh = (function () {')
-  .replace(/\}\)\(\);\s*$/, 'return { QUESTS, hintFor, key, normForMatch }; })();');
+  .replace(/\}\)\(\);\s*$/, 'return { QUESTS, hintFor, key, normForMatch, headingName }; })();');
 const fn = new Function('document', 'location', wrapped + '\nreturn globalThis.__qh;');
 const api = fn(fakeDoc, fakeLocation);
 
@@ -99,6 +99,24 @@ check('Go Fish, Again',
 check('Go Fish, Again',
   "The eco-terrorists on the oil platform have led you to their underwater base, where you've discovered that they have dealings with the nefarious Mick.",
   'key card');
+
+// --- headingName: must drop the wiki-links badge (<a class="th-wiki-link">W</a>)
+// the sibling script injects into the same heading, else the name picks up "W". ---
+function checkHeadingName(childNodes, expect) {
+  const heading = { childNodes };
+  const got = api.headingName(heading);
+  const ok = got === expect;
+  if (!ok) failures++;
+  console.log((ok ? 'PASS' : 'FAIL'), '| headingName =>', JSON.stringify(got));
+  if (!ok) console.log('   expected:', JSON.stringify(expect));
+}
+const textNode = (t) => ({ nodeType: 3, textContent: t });
+const badge = { nodeType: 1, textContent: 'W',
+  classList: { contains: (c) => c === 'th-wiki-link' } };
+checkHeadingName([textNode('Cleaning Up'), badge], 'Cleaning Up');
+checkHeadingName(
+  [textNode('Age of Destruction, in a World of Corruption'), badge],
+  'Age of Destruction, in a World of Corruption');
 
 // --- Fallbacks ---
 check('Some Brand New Quest', 'blah blah', 'walkthrough for this quest');
