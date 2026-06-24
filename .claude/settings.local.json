@@ -7,7 +7,9 @@
       "WebFetch(domain:th.blandsauce.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(node --check auto-combat.js)",
-      "Bash(node --check KingdomOfLoathing/equip-optimize.js)"
+      "Bash(node --check KingdomOfLoathing/equip-optimize.js)",
+      "Bash(node --check \"E:\\\\Projects\\\\userscripts\\\\TwilightHeroes\\\\quest-helper.js\")",
+      "Bash(node \"C:\\\\Users\\\\tilob\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\E--Projects-userscripts\\\\889ffa37-a4d5-4365-8cb2-e872f94a8b02\\\\scratchpad\\\\test.mjs\")"
     ]
   }
 }

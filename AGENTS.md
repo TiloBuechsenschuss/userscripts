@@ -16,7 +16,9 @@ for three browser games:
   `@require`s every individual script for that game from GitHub, so a single install
   pulls in the whole set. Bumping a loader is automated — see `scripts/bump-loaders.mjs`.
 
-There is **no build, no bundler, no package manager, no test suite, and no lint config**.
+There is **no build, no bundler, no package manager, no test suite, and no lint config**
+(one exception: a single ad-hoc Node test script for the quest-helper hint map — see
+"Verifying a change" below).
 Each `.js` file is the shippable artifact: a single self-contained IIFE prefixed with a
 `// ==UserScript== ... // ==/UserScript==` metadata block. You edit the file, the user
 reloads it in their userscript manager. "Running" a script means installing it in a
@@ -114,6 +116,13 @@ navigation. Two consequences:
 
 ## Verifying a change
 
-There is nothing to run here. Validate by reasoning about the DOM the script targets and,
-when possible, by installing the edited file in a userscript manager against the live page.
+There is (almost) nothing to run here. Validate by reasoning about the DOM the script targets
+and, when possible, by installing the edited file in a userscript manager against the live page.
 Don't claim a script "works" from static review alone — say it's untested in-game.
+
+The one exception is `TwilightHeroes/test/quest-helper.test.mjs`: a standalone Node script
+(no test runner, matching the no-build convention) that evaluates `quest-helper.js`'s IIFE
+against a stub DOM and asserts its per-stage hint lookup resolves correctly — it's the one
+piece of pure logic here that's worth checking without a browser. Run it with
+`node TwilightHeroes/test/quest-helper.test.mjs`. If you add quests/stages to that script's
+hint map (especially overlapping-text stages), add a case here too.

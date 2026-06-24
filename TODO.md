@@ -1,7 +1,7 @@
 ## Kingdom of Loathing
-- Quest Helper
+- Quest Helper (new)
   - displays next steps in Journal
-- Wiki Links
+- Wiki Links (edit)
   - Links with `<playername>` in title get linked to correct page
 ## Twilight Heroes
 - Quest Helper
