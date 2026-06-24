@@ -26,11 +26,19 @@ const fakeDoc = {
 };
 const fakeLocation = { pathname: '/fight.php' };
 
+// Minimal localStorage mock so the solution persistence helpers are testable.
+const lsStore = new Map();
+const mockLS = {
+  getItem: (k) => (lsStore.has(k) ? lsStore.get(k) : null),
+  setItem: (k, v) => { lsStore.set(k, String(v)); },
+  removeItem: (k) => { lsStore.delete(k); },
+};
+
 const wrapped = src
   .replace('(function () {', 'globalThis.__ps = (function () {')
   .replace(/\}\)\(\);\s*$/, 'return { BitPlayer, Goldbergium }; })();');
-const fn = new Function('document', 'location', wrapped + '\nreturn globalThis.__ps;');
-const api = fn(fakeDoc, fakeLocation);
+const fn = new Function('document', 'location', 'localStorage', wrapped + '\nreturn globalThis.__ps;');
+const api = fn(fakeDoc, fakeLocation, mockLS);
 const G = api.Goldbergium;
 
 let failures = 0;
@@ -144,6 +152,24 @@ const counts = G.parseOptionCounts(['bottle rocket (1)', 'water saw (4)', 'gong'
 ok(counts.get('bottle rocket') === 1 && counts.get('water saw') === 4
   && counts.get('gong') === 1 && !counts.has(''),
   'parseOptionCounts reads counts (default 1 when no "(N)", drops blanks)');
+
+// --- Placed-parts parsing from the build-state prose ---
+ok(JSON.stringify(G.placedFromText("So far you have the bottle rocket. That's a start")) === '["bottle rocket"]',
+  'placedFromText reads a single placed part');
+ok(JSON.stringify(G.placedFromText(
+  'So far you have the bottle rocket connected to the gong connected to the dry cat. That gets'))
+  === '["bottle rocket","gong","dry cat"]',
+  'placedFromText reads a chain of placed parts in order');
+ok(G.placedFromText('nothing relevant here').length === 0,
+  'placedFromText returns [] when not building');
+
+// --- Solution persistence round-trip ---
+G.saveSolution('startling', [{ name: 'bottle rocket', input: 'heating', output: 'shooting' }]);
+const loaded = G.loadSolution();
+ok(loaded && loaded.goal === 'startling' && loaded.chain[0].name === 'bottle rocket',
+  'saveSolution/loadSolution round-trips the stored plan');
+G.clearSolution();
+ok(G.loadSolution() === null, 'clearSolution removes the stored plan');
 
 // --- Live scenario: this player's actual 37 components, goal = startling ---
 const liveOwned = new Set([

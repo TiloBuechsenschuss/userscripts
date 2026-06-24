@@ -77,6 +77,7 @@ and updates independently via its `@downloadURL`.
 | `skills-cast-max.js` | skills | Cast a skill the maximum number of times |
 | `wiki-links.js` | fight / nav / journal / maps / wear / inventory / use | "W" badge linking the combat monster, non-combat encounter, received items, map areas, the last patrolled area, journal quests, and item names to the TH wiki |
 | `quest-helper.js` | journal | "Next steps" box under each Hero's Journal quest, from a built-in hint map with a TH wiki walkthrough link as fallback |
+| `puzzle-solver.js` | goldberg / fight | Goldbergium Door (goldberg.php): solves the contraption for the current goal, shows a component matrix with inventory counts and drop zones, and replays the plan with progress as you build. Bit Player (fight.php): _not yet implemented_ |
 | `auto-combat.js` | fight / nav | Buttons to repeat attack/skill until a fight ends, and to re-adventure the same location and auto-attack fight after fight until a non-combat, low HP, or out of turns |
 | `autobox.js` | main / criminology | "Get & Equip Black Box" button that walks the criminology.php quest steps and equips the box |
 

@@ -4,7 +4,7 @@
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/puzzle-solver.js
 // @version      1.0
-// @description  In-page help for Twilight Heroes' interactive puzzles. The Bit Player (All the World's a Quest): the correct Shakespeare roles are randomised per retcon and can't be known in advance, so this TRACKS what you've tried and highlights options as correct / wrong / untried (with a reset). The Goldbergium Door (Asylumbreak): the goal is randomised per attempt but the component input/output mapping is fixed, so this SOLVES it -- computing a valid 5+ component chain for the current goal. The Bit Player runs on fight.php (a non-combat choice encounter); the Goldbergium Door has its own page, goldberg.php.
+// @description  In-page help for Twilight Heroes' interactive puzzles. WORKING: the Goldbergium Door (Asylumbreak, on goldberg.php) -- the goal is randomised per attempt but the component input/output mapping is fixed, so this SOLVES it (a valid 5+ component chain for the current goal), persists the plan, and replays it with progress as you build. NOT YET IMPLEMENTED: the Bit Player (All the World's a Quest, on fight.php) -- intended to TRACK which Shakespeare roles you've tried (correct/wrong/untried, with a reset), since the correct set is randomised per retcon; currently a skeleton that does nothing.
 // @match        https://www.twilightheroes.com/fight.php*
 // @match        https://twilightheroes.com/fight.php*
 // @match        https://www.twilightheroes.com/goldberg.php*
@@ -13,9 +13,10 @@
 // @grant        none
 // ==/UserScript==
 
-// TODO(dist): once this does something user-visible, add it to the all-in-one
-//   bundle (all-in-one/twilight-heroes.js) as an @require line, matching the
-//   @downloadURL above (see AGENTS.md distribution rules).
+// DIST: bundled in all-in-one/twilight-heroes.js since loader v1.7 (its @match
+//   union includes goldberg.php for this script). The Goldbergium Door solver is
+//   confirmed working in-game; the Bit Player module is still a skeleton (see
+//   its block below) and no-ops until wired up.
 
 (function () {
   'use strict';
@@ -112,6 +113,10 @@
   // ====================================================================
   // The Goldbergium Door  --  Asylumbreak! Battle of Shiloh
   // --------------------------------------------------------------------
+  // STATUS: confirmed working in-game -- solves the empty state, persists the
+  // plan, and replays it with progress through a full build. (The Bit Player
+  // module below is still a skeleton, pending a live encounter's HTML.)
+  //
   // A real solver. The cavern goal is randomised per attempt (one of nine),
   // each needing ONE final action; the components you own each turn one input
   // action into one output action. A working contraption is a chain of 5+
@@ -225,13 +230,54 @@
       return !!document.querySelector('select[name="nextstep"]');
     }
 
-    // True iff the contraption is empty (the "Start a contraption" state). We
-    // only suggest a chain here: once parts are placed the select lists just the
-    // REMAINING parts, so a full re-solve would be wrong.
-    // TODO(html): support the partial-build state (needs that page's HTML) --
-    //   parse the already-placed chain and solve only the remainder.
+    // True iff the contraption is empty (the "Start a contraption" state) -- the
+    // only state where the dropdown lists ALL owned parts, so the only place we
+    // can solve from scratch. We persist that solution and replay it while
+    // building (where the dropdown lists just the REMAINING parts).
     function isEmptyState() {
       return !!document.querySelector('input[type="submit"][value="Start a contraption"]');
+    }
+
+    // True iff a contraption is partway built ("Build further" / "Try it out!").
+    function isBuildingState() {
+      return !!document.querySelector(
+        'input[type="submit"][value="Build further"],' +
+        'input[type="submit"][value="Try it out!"]');
+    }
+
+    // Persist the solution computed at the empty state so the build steps (which
+    // no longer have the full inventory) can replay the SAME plan rather than
+    // recomputing a different one each step. Keyed by goal; localStorage may be
+    // unavailable (privacy modes), so everything is guarded.
+    const STORE_KEY = 'th-goldberg-solution';
+    function saveSolution(goal, chain) {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify({ goal: goal, chain: chain })); }
+      catch (e) { /* ignore */ }
+    }
+    function loadSolution() {
+      try {
+        const raw = localStorage.getItem(STORE_KEY);
+        const obj = raw && JSON.parse(raw);
+        if (obj && typeof obj.goal === 'string' && Array.isArray(obj.chain)) return obj;
+      } catch (e) { /* ignore */ }
+      return null;
+    }
+    function clearSolution() {
+      try { localStorage.removeItem(STORE_KEY); } catch (e) { /* ignore */ }
+    }
+
+    // Pure: the ordered names of components already placed, from the build prose
+    // "So far you have the X connected to the Y connected to the Z."
+    function placedFromText(text) {
+      const m = String(text).match(/so far you have the (.+?)\./i);
+      if (!m) return [];
+      return m[1].split(/\s+connected to the\s+/i)
+        .map(function (s) { return s.trim(); })
+        .filter(Boolean);
+    }
+
+    function readPlacedComponents() {
+      return placedFromText(document.body ? document.body.textContent : '');
     }
 
     // Pure: the goal action from a blob of page text, or null. Reads only the
@@ -331,7 +377,9 @@
     // Inject a styled box just above the contraption form, listing the chain in
     // build order (first part to place -> last, whose output frees the key).
     // Mirrors quest-helper's note-box look for visual consistency.
-    function renderSolution(chain, goalAction) {
+    // `placed` is null at the empty state, or an array of already-placed
+    // component names while building (used to mark steps done / next).
+    function renderSolution(chain, goalAction, placed) {
       const form = document.querySelector('form');
       if (!form || document.querySelector('.th-puzzle-solver')) return;
 
@@ -351,11 +399,19 @@
 
       if (!chain) {
         const msg = document.createElement('div');
-        msg.textContent =
-          "Couldn't build a chain to " + goalAction + ' from the components you ' +
-          'have here -- you may be missing parts from some Shiloh subzones.';
+        msg.textContent = placed
+          ? 'No saved plan for this contraption (started before the helper loaded?). '
+            + 'Tear it down and start over to get a suggested solution.'
+          : "Couldn't build a chain to " + goalAction + ' from the components you '
+            + 'have here -- you may be missing parts from some Shiloh subzones.';
         box.appendChild(msg);
       } else {
+        const placedSet = new Set(placed || []);
+        // The next part to add: the first chain step not yet placed.
+        let nextIdx = chain.length;
+        for (let i = 0; i < chain.length; i++) {
+          if (!placedSet.has(chain[i].name)) { nextIdx = i; break; }
+        }
         const ol = document.createElement('ol');
         ol.style.cssText = 'margin:2px 0 0;padding-left:20px;';
         chain.forEach(function (c, i) {
@@ -363,6 +419,12 @@
           const last = i === chain.length - 1;
           li.textContent = c.name + ' (' + c.input + ' → ' + c.output + ')' +
             (last ? ' — frees the key' : '');
+          if (placedSet.has(c.name)) {
+            li.style.cssText = 'color:#888;text-decoration:line-through;';
+          } else if (i === nextIdx) {
+            li.style.cssText = 'font-weight:bold;';
+            li.textContent += '  ← add this next';
+          }
           ol.appendChild(li);
         });
         box.appendChild(ol);
@@ -376,13 +438,14 @@
     // the current solution `chain` are highlighted gold and numbered in build
     // order; other owned cells are tinted green; unowned are greyed; the
     // diagonal is blank (no component maps an action to itself).
-    function renderMatrix(counts, chain) {
+    function renderMatrix(counts, chain, placed) {
       const form = document.querySelector('form');
       if (!form || !counts || !counts.size || document.querySelector('.th-puzzle-matrix')) return;
 
       // Edge "input>output" -> 1-based step in the suggested chain.
       const stepByEdge = new Map();
       if (chain) chain.forEach(function (c, i) { stepByEdge.set(c.input + '>' + c.output, i + 1); });
+      const placedSet = new Set(placed || []);
 
       const wrap = document.createElement('div');
       wrap.className = 'th-puzzle-matrix';
@@ -440,9 +503,11 @@
             const n = counts.get(name) || 0;
             const step = stepByEdge.get(inp + '>' + out);
             if (step) {
-              td.textContent = step + '. ' + name + (n ? ' ×' + n : '');
-              td.style.background = '#fff3c4'; // gold: part of the current solution
+              const done = placedSet.has(name);
+              td.textContent = (done ? '✓ ' : step + '. ') + name + (n ? ' ×' + n : '');
               td.style.fontWeight = 'bold';
+              if (done) { td.style.background = '#dfeedf'; td.style.color = '#777'; }
+              else td.style.background = '#fff3c4'; // gold: still to place
             } else {
               td.textContent = name + (n ? ' ×' + n : '');
               if (n) td.style.background = '#eef6ee';
@@ -459,21 +524,39 @@
     }
 
     function run() {
-      if (!detect() || !isEmptyState()) return;
-      const counts = readComponentCounts();
+      if (!detect()) return;
       const goalAction = readGoalAction();
-      let chain = null;
-      if (goalAction) {
-        const available = counts.size ? new Set(counts.keys()) : null;
-        chain = solve(goalAction, available);
-        renderSolution(chain, goalAction);
+      const counts = readComponentCounts();
+
+      if (isEmptyState()) {
+        // Solve from the full inventory and remember it for the build steps.
+        let chain = null;
+        if (goalAction) {
+          const available = counts.size ? new Set(counts.keys()) : null;
+          chain = solve(goalAction, available);
+          if (chain) saveSolution(goalAction, chain);
+          else clearSolution();
+        }
+        renderSolution(chain, goalAction, null);
+        renderMatrix(counts, chain, null); // shown even for the unknown "?" goal
+        return;
       }
-      renderMatrix(counts, chain); // reference table even when the goal is the "?" one
+
+      if (isBuildingState()) {
+        // Replay the stored plan (recomputing here would drift, and the dropdown
+        // now only lists the remaining parts). Mark placed parts as done.
+        const stored = loadSolution();
+        const chain = stored && stored.goal === goalAction ? stored.chain : null;
+        const placed = readPlacedComponents();
+        renderSolution(chain, goalAction, placed);
+        renderMatrix(counts, chain, placed);
+      }
     }
 
     return {
       run, detect, solve, renderSolution, renderMatrix,
-      goalActionFromText, componentsFromOptionTexts, parseOptionCounts,
+      goalActionFromText, componentsFromOptionTexts, parseOptionCounts, placedFromText,
+      saveSolution, loadSolution, clearSolution,
       ACTIONS, MIN_CHAIN, COMPONENTS, GOAL_TO_ACTION, ZONES,
     };
   })();
