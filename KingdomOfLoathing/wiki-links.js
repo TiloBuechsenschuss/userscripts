@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/wiki-links.js
-// @version      0.12
+// @version      0.13
 // @description  Adds a small "W" badge linking to the KoL wiki (wiki.kingdomofloathing.com) next to the last adventure in the charpane, the location name atop place.php and crypt.php (the Defiled Cyrpt), the choice-adventure name atop choice.php, each quest title in questlog.php, the monster name in combat and items you acquire (fight.php), and item names in your inventory (inventory.php). Clicking opens the wiki article for that thing in a new tab. All targets are verified against real page HTML.
 // @match        https://www.kingdomofloathing.com/charpane.php*
 // @match        https://kingdomofloathing.com/charpane.php*
@@ -152,13 +152,80 @@
   //    followed by a <br>, so require the trailing <br>.
   // The "Current/Council/Other Quests:" headers sit OUTSIDE the blockquote,
   // so the blockquote scope already excludes them. No article stripping: the
-  // wiki quest page keeps the title verbatim.
+  // wiki quest page keeps the title verbatim — except for the per-player names
+  // scrubbed by normalizeQuestTitle below.
+  //
+  // SPECIAL CASE: KoL splices the logged-in player's name (and sometimes the
+  // current familiar's name) into several quest-log titles — e.g. the White
+  // Citadel quest reads "<Player> and <Familiar> Go To White Citadel" (and
+  // "<Player> and Kumar Go To White Citadel" with no familiar along). Those
+  // names vary per player, so the verbatim title is not a wiki page and even a
+  // Go-search on it gets swamped by the names. We scrub them to the generic
+  // placeholders the wiki documents these titles with ("Player Name" /
+  // "Familiar Name"), so the search keys off the fixed words: e.g. "Player
+  // Name and Familiar Name Go To White Citadel" lands the White Citadel Quest
+  // article as its top hit. (The bracket form "<playername>" does NOT — the
+  // wiki tokenises it differently and the right article drops off the results.)
+
+  // Best-effort lookup of the logged-in player's name. questlog.php is the
+  // mainpane frame and carries no name of its own, so read it from a sibling
+  // frame: the charpane (and the top menu) link the player's name to
+  // charsheet.php. Probe the charpane first, then any other reachable frame.
+  // Returns null when no accessible frame exposes it (e.g. questlog.php opened
+  // standalone, outside the frameset) — titles are then left untouched rather
+  // than mangled.
+  function getPlayerName() {
+    const docs = [];
+    try {
+      const frames = window.top && window.top.frames;
+      if (frames) {
+        const cp = frames['charpane'];
+        if (cp) { try { docs.push(cp.document); } catch (e) {} }
+        for (let i = 0; i < frames.length; i++) {
+          try { docs.push(frames[i].document); } catch (e) {}
+        }
+      }
+    } catch (e) {}
+    try { docs.push(document); } catch (e) {}
+    for (const doc of docs) {
+      if (!doc || !doc.querySelector) continue;
+      const a = doc.querySelector('a[href*="charsheet.php"]');
+      if (a) {
+        // Player names are alphanumerics/spaces/underscores — no parens — so a
+        // trailing "(#id)" or "(Level N)" some menus append is safe to drop.
+        const name = a.textContent.replace(/\s*\([^)]*\)\s*$/, '').replace(/\s+/g, ' ').trim();
+        if (name) return name;
+      }
+    }
+    return null;
+  }
+
+  function escapeRegExp(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function normalizeQuestTitle(name) {
+    let out = name;
+    const player = getPlayerName();
+    if (player) {
+      out = out.replace(new RegExp(escapeRegExp(player), 'gi'), 'Player Name');
+    }
+    // White Citadel also embeds the familiar's name, which isn't exposed as
+    // reliably as the player's — but that title is otherwise fixed, so collapse
+    // the whole dynamic prefix. This also covers the case where the player-name
+    // lookup above failed (no reachable charpane).
+    if (/ Go to White Citadel$/i.test(out)) {
+      return 'Player Name and Familiar Name Go To White Citadel';
+    }
+    return out;
+  }
+
   function linkQuests() {
     document.querySelectorAll('blockquote b').forEach(function (b) {
       if (b.closest('a')) return;
       const next = b.nextElementSibling;
       if (!next || next.tagName !== 'BR') return;
-      addBadge(b, 'after');
+      addBadge(b, 'after', normalizeQuestTitle(b.textContent.trim()));
     });
   }
 
