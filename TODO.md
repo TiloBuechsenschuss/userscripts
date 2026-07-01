@@ -1,4 +1,9 @@
 ## Kingdom of Loathing
+- update to codpiece
+  - now becomes IotM script
+  - still has codpiece button
+  - also has link to baseball diamond that allows to play ball
+    - that link is highlighted if ball can be played
 - Quest Helper (new) (?)
   - displays next steps in Journal
 ## Twilight Heroes
