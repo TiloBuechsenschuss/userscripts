@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/iotm.js
-// @version      1.20
+// @version      1.22
 // @description  Adds an "IotM" button to the KoL icon menu that opens a small popup of Item-of-the-Month actions: fire the Codpiece (inventory.php?action=docodpiece), play ball at the baseball diamond (highlighted when a ball is available), and drink from the Cup of 13s. Also adds sort buttons to the Cup of 13s ingredient dropdowns (choice.php whichchoice=1601), and keeps the Eternity Codpiece decoration tools (choice.php whichchoice=1588) for setting every gem slot at once and saving/loading gem setups.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -1015,22 +1015,45 @@
 
   const CUP13_CHOICE = '1601';
 
+  // Split an additional-effect string into a grouping name and a magnitude, so
+  // effects with the same name group together regardless of their number:
+  //   "20 turns of Runneth Over" -> { name: 'Runneth Over', mag: 20 }
+  //   "40 turns of Runneth Over" -> { name: 'Runneth Over', mag: 40 }
+  //   "100 Mys"                  -> { name: 'Mys',          mag: 100 }
+  //   ""                         -> { name: '',             mag: 0 }
+  // "N turns of X" -> name X, mag N (turn length); a leading-number form like
+  // "100 Mys" -> name "Mys", mag 100 (stat amount). Anything else is its own
+  // name with mag 0.
+  function parseCupEffect(effect) {
+    if (!effect) return { name: '', mag: 0 };
+    let m = effect.match(/^(\d+)\s+turns?\s+of\s+(.+)$/i);
+    if (m) return { name: m[2].trim(), mag: parseInt(m[1], 10) || 0 };
+    m = effect.match(/^(\d+)\s+(.+)$/);
+    if (m) return { name: m[2].trim(), mag: parseInt(m[1], 10) || 0 };
+    return { name: effect, mag: 0 };
+  }
+
   // Parse one ingredient <option>. Label format is
   // "NAME (QTY) - N Adv.[, EXTRA]", e.g.
   //   "hot wing (16) - 1 Adv."            -> qty 16, advs 1, effect ''
   //   "alarm accordion (1) - 1 Adv., 100 Mys"     -> effect '100 Mys'
   //   "bum cheek (1) - 2 Adv., 20 turns of Runneth a Fever'
   // QTY is the amount in inventory; advs is read from the reliable data-advs
-  // attribute (not the text). EXTRA (if any) is the additional effect.
+  // attribute (not the text). EXTRA (if any) is the additional effect, further
+  // split into effName/effMag for grouping (see parseCupEffect).
   function parseCupOption(opt) {
     const text = (opt.textContent || '').trim();
     const advs = parseInt(opt.getAttribute('data-advs'), 10) || 0;
     const m = text.match(/^(.*) \((\d+)\) - \d+ Adv\.(?:,\s*(.*))?$/);
+    const effect = (m && m[3]) ? m[3].trim() : '';
+    const eff = parseCupEffect(effect);
     return {
       name: m ? m[1] : text,
       qty: m ? (parseInt(m[2], 10) || 0) : 0,
       advs: advs,
-      effect: (m && m[3]) ? m[3].trim() : ''
+      effect: effect,
+      effName: eff.name,
+      effMag: eff.mag
     };
   }
 
@@ -1045,14 +1068,17 @@
       return (b.qty - a.qty) || a.name.localeCompare(b.name);
     },
     effect: function (a, b) {
-      // Options with an additional effect first (by effect text), then the rest
-      // by name.
+      // Options with an additional effect first, then the rest by name.
       const ae = a.effect ? 0 : 1;
       const be = b.effect ? 0 : 1;
       if (ae !== be) return ae - be;
       if (a.effect && b.effect) {
-        const c = a.effect.localeCompare(b.effect);
+        // Group by effect name; within a name, higher turn length (magnitude)
+        // first, then higher adventures, then item name.
+        const c = a.effName.localeCompare(b.effName);
         if (c) return c;
+        if (b.effMag !== a.effMag) return b.effMag - a.effMag;
+        if (b.advs !== a.advs) return b.advs - a.advs;
       }
       return a.name.localeCompare(b.name);
     }
@@ -1066,17 +1092,17 @@
   }
 
   // Reorder every ingredient dropdown by `compare`. appendChild moves the
-  // existing <option> nodes (no re-creation), and we restore each select's
-  // current value so the player's pick survives the sort.
+  // existing <option> nodes (no re-creation). After sorting, each select jumps
+  // to its new topmost option -- makes the sort visibly "take", and puts the
+  // best pick (for the chosen order) one click away.
   function sortCup13(selects, compare) {
     selects.forEach(function (sel) {
-      const selectedVal = sel.value;
       const items = Array.prototype.map.call(sel.options, function (opt) {
         return { opt: opt, info: parseCupOption(opt) };
       });
       items.sort(function (a, b) { return compare(a.info, b.info); });
       items.forEach(function (it) { sel.appendChild(it.opt); });
-      sel.value = selectedVal;
+      sel.selectedIndex = 0;
     });
   }
 

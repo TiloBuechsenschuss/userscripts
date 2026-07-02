@@ -55,7 +55,7 @@ function opt(value, text, advs) {
   };
 }
 function select(options, selectedValue) {
-  return {
+  const sel = {
     options: options.slice(),
     value: selectedValue,
     _order: options.slice(),
@@ -65,27 +65,37 @@ function select(options, selectedValue) {
       this._order.push(node);
     }
   };
+  // Mirror DOM: setting selectedIndex updates value to that option's value.
+  Object.defineProperty(sel, 'selectedIndex', {
+    set(i) { this.value = this._order[i] ? this._order[i].value : ''; },
+    get() { return this._order.findIndex((o) => o.value === this.value); }
+  });
+  return sel;
 }
 const order = (sel) => sel._order.map((o) => o.value);
 
 // --- parseCupOption ------------------------------------------------------
 check('parse plain',
   api.parseCupOption(opt('x', '1-ball (3) - 1 Adv.', 1)),
-  { name: '1-ball', qty: 3, advs: 1, effect: '' });
+  { name: '1-ball', qty: 3, advs: 1, effect: '', effName: '', effMag: 0 });
 check('parse stat effect',
   api.parseCupOption(opt('x', 'alarm accordion (1) - 1 Adv., 100 Mys', 1)),
-  { name: 'alarm accordion', qty: 1, advs: 1, effect: '100 Mys' });
+  { name: 'alarm accordion', qty: 1, advs: 1, effect: '100 Mys',
+    effName: 'Mys', effMag: 100 });
 check('parse buff effect',
   api.parseCupOption(
     opt('x', 'bum cheek (1) - 2 Adv., 20 turns of Runneth a Fever', 2)),
   { name: 'bum cheek', qty: 1, advs: 2,
-    effect: '20 turns of Runneth a Fever' });
+    effect: '20 turns of Runneth a Fever',
+    effName: 'Runneth a Fever', effMag: 20 });
 check('parse trademark + high advs',
   api.parseCupOption(opt('x', 'Newbiesport™ tent (1) - 1 Adv.', 1)),
-  { name: 'Newbiesport™ tent', qty: 1, advs: 1, effect: '' });
+  { name: 'Newbiesport™ tent', qty: 1, advs: 1, effect: '',
+    effName: '', effMag: 0 });
 check('parse ampersand name',
   api.parseCupOption(opt('x', 'Drac & Tan (1) - 2 Adv.', 2)),
-  { name: 'Drac & Tan', qty: 1, advs: 2, effect: '' });
+  { name: 'Drac & Tan', qty: 1, advs: 2, effect: '',
+    effName: '', effMag: 0 });
 
 // --- Sort orders ---------------------------------------------------------
 // A representative four-item set (value == name for readable assertions):
@@ -112,21 +122,48 @@ s = select(sample(), 'apple');
 api.sortCup13([s], api.CUP13_SORTS.inventory);
 check('sort inventory', order(s), ['cider', 'apple', 'beer', 'dram']);
 
-// effect: options with an effect first (by effect text), then rest by name.
-// "100 Mys" < "20 turns..." by localeCompare, so dram precedes beer.
+// effect: options with an effect first (grouped by effect name), then rest by
+// name. Effect names: dram -> "Mys", beer -> "Runneth For Thy Life"; "Mys" <
+// "Runneth..." so dram precedes beer, then the effectless apple, cider.
 s = select(sample(), 'apple');
 api.sortCup13([s], api.CUP13_SORTS.effect);
 check('sort effect', order(s), ['dram', 'beer', 'apple', 'cider']);
+
+// effect grouping: same effect name stays together regardless of turn count,
+// higher turn length first -- and a stat effect ("Mys") groups separately.
+// Order: Mys group, then "Runneth On Empty", then "Runneth Over" (40 before 20),
+// then the effectless item last.
+s = select([
+  opt('over20', 'aaa (1) - 1 Adv., 20 turns of Runneth Over', 1),
+  opt('over40', 'zzz (1) - 1 Adv., 40 turns of Runneth Over', 1),
+  opt('empty', 'mmm (1) - 1 Adv., 20 turns of Runneth On Empty', 1),
+  opt('mys', 'bbb (1) - 2 Adv., 50 Mys', 2),
+  opt('plain', 'ccc (5) - 1 Adv.', 1)
+], 'plain');
+api.sortCup13([s], api.CUP13_SORTS.effect);
+check('sort effect groups by name, turns desc', order(s),
+  ['mys', 'empty', 'over40', 'over20', 'plain']);
+
+// within one effect name + equal turn length: higher adventures first, then
+// item name. All three are "Runneth Over" at 20 turns.
+s = select([
+  opt('a3', 'apple (1) - 3 Adv., 20 turns of Runneth Over', 3),
+  opt('a1', 'apple-b (1) - 1 Adv., 20 turns of Runneth Over', 1),
+  opt('z3', 'zebra (1) - 3 Adv., 20 turns of Runneth Over', 3)
+], 'a3');
+api.sortCup13([s], api.CUP13_SORTS.effect);
+check('sort effect ties: advs then name', order(s), ['a3', 'z3', 'a1']);
 
 // name asc (the game default)
 s = select(sample(), 'apple');
 api.sortCup13([s], api.CUP13_SORTS.name);
 check('sort name', order(s), ['apple', 'beer', 'cider', 'dram']);
 
-// selection is preserved across a sort
+// after a sort, the topmost option is selected (regardless of prior pick), so
+// the sort visibly "takes" and the best pick sits at the top
 s = select(sample(), 'cider');
 api.sortCup13([s], api.CUP13_SORTS.advs);
-check('selection preserved', s.value, 'cider');
+check('selects topmost after sort', s.value, order(s)[0]);
 
 // all three dropdowns get sorted in one call
 const a = select(sample(), 'apple');

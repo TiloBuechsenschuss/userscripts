@@ -1,15 +1,13 @@
-## Kingdom of Loathing
-- update to codpiece
-  - now becomes IotM script
-  - codpiece button becomes IoTM button
-    - that opens a dialogue to other buttons on click
-  - still has codpiece button in that dialogue
-  - also has link to baseball diamond that allows to play ball
-    - that link is highlighted if ball can be played
-  - also has a link to the Cup of 13s drinking
+# ToDo
 
+
+
+# Maybe
+
+## Kingdom of Loathing
 - Quest Helper (new) (?)
   - displays next steps in Journal
+
 ## Twilight Heroes
 - Quest Helper (upate)
   - highlights options when picking play pages in specific quest
