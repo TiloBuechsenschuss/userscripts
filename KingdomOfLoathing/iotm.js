@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/iotm.js
-// @version      1.22
-// @description  Adds an "IotM" button to the KoL icon menu that opens a small popup of Item-of-the-Month actions: fire the Codpiece (inventory.php?action=docodpiece), play ball at the baseball diamond (highlighted when a ball is available), and drink from the Cup of 13s. Also adds sort buttons to the Cup of 13s ingredient dropdowns (choice.php whichchoice=1601), and keeps the Eternity Codpiece decoration tools (choice.php whichchoice=1588) for setting every gem slot at once and saving/loading gem setups.
+// @version      1.23
+// @description  Adds an "IotM" button to the KoL icon menu that opens a small popup of Item-of-the-Month actions: fire the Codpiece (inventory.php?action=docodpiece), play ball at the baseball diamond (highlighted when a ball is available), and drink from the Cup of 13s. Also highlights the worthwhile pitch buttons on the Play Ball! choice (choice.php whichchoice=1598), adds sort buttons to the Cup of 13s ingredient dropdowns (choice.php whichchoice=1601), and keeps the Eternity Codpiece decoration tools (choice.php whichchoice=1588) for setting every gem slot at once and saving/loading gem setups.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
 // @match        https://www.kingdomofloathing.com/topmenu.php*
@@ -1151,6 +1151,57 @@
     form.parentNode.insertBefore(buildCup13Toolbar(selects), form);
   }
 
+  // === Play Ball! pitch highlight (choice.php, whichchoice=1598) ========
+  // The Baseball Diamond's Play Ball! choice offers a batch of same-looking
+  // pitch buttons. Give the ones worth caring about a visual cue: the
+  // once-per-inning MAJOR pitches get a bold gold button, and the lone minor
+  // pitch that hands you an item gets a bold green one; plain minor pitches
+  // stay unstyled so the highlighted ones stand out at a glance. (The pitch
+  // spoiler text itself is added by the separate adventure-choices script;
+  // this only does the highlighting, which fits better with the other
+  // baseball tools here.)
+
+  const BALL_CHOICE = '1598';
+
+  // Pitch buttons worth emphasizing, keyed by the button's leading text
+  // (lowercased): 'major' -> gold (the big once-per-inning payoff), 'item' ->
+  // green (the minor pitch that grants an item). Matching by name keeps this
+  // self-contained -- it doesn't depend on the other script's spoiler text.
+  const BALL_PITCH_HIGHLIGHTS = {
+    'throw a schenectady scorcher': 'major', // Hot MAJOR: force all drops
+    'ice him out': 'major',                  // Cold MAJOR: banish
+    'ice her out': 'major',
+    'ice it out': 'major',
+    'ice them out': 'major',
+    'throw a non-euclidean curveball': 'major', // Spooky MAJOR: free fights
+    'throw some cheddar': 'major',           // Stench MAJOR: copy monster
+    'throw a screwball': 'major',            // Sleaze MAJOR: buff monster
+    'throw a garbageball': 'item'            // Stench minor: acquire food/drink
+  };
+
+  function highlightBallPitch(btn, kind) {
+    btn.style.fontWeight = 'bold';
+    btn.style.backgroundColor = (kind === 'major') ? '#ffd700' : '#9cdf9c';
+  }
+
+  function initBallPitchHighlight() {
+    // Only the Play Ball! choice carries whichchoice=1598.
+    if (!document.querySelector(
+        'input[name="whichchoice"][value="' + BALL_CHOICE + '"]')) {
+      return;
+    }
+    document.querySelectorAll('input[type="submit"]').forEach(function (btn) {
+      // The adventure-choices script may have appended a " -- spoiler" suffix
+      // (load order between the two scripts isn't guaranteed); match on the
+      // leading pitch name only so we work with or without it.
+      let txt = (btn.value || '').toLowerCase();
+      const i = txt.indexOf(' -- ');
+      if (i !== -1) txt = txt.substring(0, i);
+      const kind = BALL_PITCH_HIGHLIGHTS[txt.trim()];
+      if (kind) highlightBallPitch(btn, kind);
+    });
+  }
+
   // --- Dispatch --------------------------------------------------------
   // Run last, so the `const` config above is past its temporal dead zone by the
   // time addButton()/firePath() read it. The all-in-one loader @requires every KoL
@@ -1163,5 +1214,6 @@
   } else if (/\/choice\.php/i.test(PATH)) {
     initDecorator();
     initCup13Sort();
+    initBallPitchHighlight();
   }
 })();

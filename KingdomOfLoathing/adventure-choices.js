@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           KoL Choice Adventure Rewards Updated
-// @version        3.18
+// @version        3.19
 // @author	       Tilo
 // @namespace      https://github.com/TiloBuechsenschuss
 // @downloadURL    https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/adventure-choices.js
@@ -41,6 +41,7 @@
 // @grant 	GM_setValue
 // @grant	GM_xmlhttpRequest
 // @grant   GM_registerMenuCommand
+// @history 3.19 moved the Play Ball! (1598) pitch button highlighting to the IotM menu script (still adds the pitch spoiler text)
 // @history 3.18 Play Ball! (1598): highlight MAJOR pitches (gold) and the item-granting pitch (green) buttons
 // @history 3.17 added Play Ball! (choice 1598) pitch spoilers; skip annotating buttons with no matching spoiler text
 // @history 3.16 merged choice spoilers extracted from KoLmafia ChoiceAdventures.java; auto-updater call disabled (mirror only hosts 3.15)
@@ -229,27 +230,11 @@ function DisplaySpoilersByButtonText(inputs, SpoilerSet) {
             spoiler = SpoilerSet[bval];
             if (spoiler !== undefined) {
                 btn.value += " -- " + spoiler;
-                // Baseball Diamond (Play Ball!, 1598): the pitch buttons all look
-                // alike, so give the ones worth caring about a visual cue beyond
-                // the text. Scoped to 1598 so other button-text choices (which can
-                // also say "acquire") are left alone.
-                if (adventureChoiceNumber === "1598") HighlightBaseballPitch(btn, spoiler);
+                // (Play Ball!, 1598 pitch buttons are also visually highlighted --
+                // that lives in the IotM menu script now, alongside the other
+                // baseball tools.)
             }
         }
-    }
-}
-
-// MAJOR pitches (the once-per-inning payoff) get a bold gold button; the lone
-// minor pitch that hands you an item gets a bold green one. Plain minor pitches
-// stay unstyled so the highlighted ones stand out at a glance.
-function HighlightBaseballPitch(btn, spoiler) {
-    var t = spoiler.toUpperCase();
-    if (t.indexOf("MAJOR") !== -1) {
-        btn.style.fontWeight = "bold";
-        btn.style.backgroundColor = "#ffd700";
-    } else if (t.indexOf("ACQUIRE") !== -1) {
-        btn.style.fontWeight = "bold";
-        btn.style.backgroundColor = "#9cdf9c";
     }
 }
 
