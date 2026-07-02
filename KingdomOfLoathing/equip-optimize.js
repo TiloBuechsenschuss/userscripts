@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/equip-optimize.js
-// @version      1.1
-// @description  On the equipment inventory (inventory.php?which=2), adds an "Optimize for this" button next to KoL's enchantment sort dropdown. It equips, in every slot, the highest-value item you own for whatever attribute that dropdown is sorting by (the blue value next to each item). To get a clean comparison it first unequips everything (so currently-worn items rejoin the list), expands every category, then equips the best per slot and reloads. The run spans the page reload that "unequip all" causes, so its working state is kept in sessionStorage. For the Elemental Damage / Resistance sorts it adds an element picker (All + the five elements), for Monster Level a Higher/Lower picker, and for Monster Encounters a More/Fewer picker. For sorts with nothing to optimize (Outfit / Name / Item Quantity) the button is hidden.
+// @version      1.2
+// @description  On the equipment inventory (inventory.php?which=2), adds an "Optimize for this" button next to KoL's enchantment sort dropdown. It equips, in every slot, the highest-value item you own for whatever attribute that dropdown is sorting by (the blue value next to each item). To get a clean comparison it records your current equipment, then unequips everything (so currently-worn items rejoin the list), expands every category, and equips the best per slot. Any slot whose attribute has no owned/valued item keeps whatever you had on before, so slots only ever change to something better and are never left empty. Then it reloads. The run spans the page reload that "unequip all" causes, so its working state is kept in sessionStorage. For the Elemental Damage / Resistance sorts it adds an element picker (All + the five elements), for Monster Level a Higher/Lower picker, and for Monster Encounters a More/Fewer picker. For sorts with nothing to optimize (Outfit / Name / Item Quantity) the button is hidden.
 // @match        https://www.kingdomofloathing.com/inventory.php*
 // @match        https://kingdomofloathing.com/inventory.php*
 // @run-at       document-idle
@@ -62,6 +62,24 @@
     { slot: 2, label: 'Accessory 2' },
     { slot: 3, label: 'Accessory 3' }
   ];
+
+  // KoL's "[unequip]" links carry the slot they clear as ?type=… . We snapshot
+  // what's worn (by that type) before the unequip-all, keyed here to the plan's
+  // slot label so a slot the optimizer leaves empty can be refilled with what it
+  // held. `accSlot` marks the three accessory slots (which need a slot-specific
+  // equip link on restore); the rest map one-to-one to SINGLE_SLOTS labels.
+  const WORN_TYPES = {
+    hat: { label: 'Hat' },
+    shirt: { label: 'Shirt' },
+    pants: { label: 'Pants' },
+    container: { label: 'Back' },
+    familiarequip: { label: 'Familiar' },
+    weapon: { label: 'Weapon' },
+    offhand: { label: 'Off-hand' },
+    acc1: { label: 'Accessory 1', accSlot: 1 },
+    acc2: { label: 'Accessory 2', accSlot: 2 },
+    acc3: { label: 'Accessory 3', accSlot: 3 }
+  };
 
   // The five KoL elements. "Elemental Damage" / "Elemental Resistance" sorts
   // (sortby ed / er) lump all five together — KoL can't sort by just one — so
@@ -129,6 +147,29 @@
   function getUnequipAllHref() {
     const a = document.querySelector('a[href*="action=unequipall"]');
     return a ? a.href : null;
+  }
+
+  // Snapshot what's currently equipped, before the unequip-all wipes it. Each
+  // worn item is displayed next to an "[unequip]" link whose ?type=… names its
+  // slot (hat, weapon, offhand, acc1…acc3, familiarequip, container, …); the
+  // item name sits in the same cell (a descitem link, or failing that a <b>).
+  // Returns { type: itemName } for the types we know how to restore (WORN_TYPES);
+  // restore() re-matches those names to equip links after the reload.
+  function scrapeWornItems() {
+    const worn = {};
+    document.querySelectorAll('a[href*="action=unequip"]').forEach(function (a) {
+      const m = /[?&]type=([a-z0-9]+)/i.exec(a.getAttribute('href') || '');
+      if (!m) return; // e.g. action=unequipall carries no type
+      const type = m[1].toLowerCase();
+      if (!WORN_TYPES[type]) return;
+      const cell = a.closest('td') || a.parentElement;
+      if (!cell) return;
+      const nameEl = cell.querySelector('a[onclick*="descitem"]') ||
+        cell.querySelector('b');
+      const name = nameEl ? nameEl.textContent.trim() : '';
+      if (name) worn[type] = name;
+    });
+    return worn;
   }
 
   // Pull a comparable number out of a blue annotation like "(30-60 HP Regen)",
@@ -331,6 +372,38 @@
     return bySlot;
   }
 
+  // For restore: map every owned, equippable item (lowercased name) to its equip
+  // links, regardless of whether it carries a value for the current sort — a slot
+  // we're refilling with its original item may hold something the current sort
+  // doesn't score. Mirrors scrapeCandidates' link/handedness parsing but over the
+  // full list. Returns { name: { links: [ { slot, href } ], hands } }; first item
+  // of a given name wins (duplicates are interchangeable for restore). `hands`
+  // lets restore() honour the 2h-weapon-eats-the-off-hand rule.
+  function scrapeEquipLinksByName() {
+    const byName = {};
+    document.querySelectorAll('table.item[id^="ic"]').forEach(function (item) {
+      const equipLinks = Array.prototype.slice.call(
+        item.querySelectorAll('a[href*="action=equip"]')
+      );
+      if (!equipLinks.length) return; // worn / unowned / requirements unmet
+      const nameEl = item.querySelector('b');
+      if (!nameEl) return;
+      const key = nameEl.textContent.trim().toLowerCase();
+      if (byName[key]) return;
+      const links = equipLinks.map(function (l) {
+        const sm = /[?&]slot=(\d+)/.exec(l.href);
+        return { slot: sm ? Number(sm[1]) : null, href: l.href };
+      });
+      let hands = null;
+      equipLinks.forEach(function (l) {
+        const hm = /\((\d+)h\)/i.exec(l.textContent);
+        if (hm) hands = Number(hm[1]);
+      });
+      byName[key] = { links: links, hands: hands };
+    });
+    return byName;
+  }
+
   // --- Optimization -----------------------------------------------------
 
   // Build the list of equips to perform. Each slot's pick follows KoL's own
@@ -367,7 +440,8 @@
       if (!best) return;
       plan.push({
         label: slot.label, name: best.name,
-        valueText: best.valueText, href: best.links[0].href
+        valueText: best.valueText, href: best.links[0].href,
+        hands: best.hands
       });
     });
 
@@ -391,6 +465,73 @@
     });
 
     return plan;
+  }
+
+  // Build the "put back what you had" steps for slots the optimizer left empty.
+  // `worn` is the pre-unequip snapshot (type -> name); `byName` maps names to
+  // equip links (post-unequip, so the originals are equippable again). The
+  // optimizer's picks are authoritative — a restore never displaces one — so we
+  // only touch labels absent from `optimize`. Weapon and off-hand are decided
+  // together because a 2h+ weapon claims the off-hand slot: we won't restore a 2h
+  // weapon over an off-hand the optimizer kept, and won't restore an off-hand
+  // under a 2h weapon (optimizer's or restored). Returns [ { label, name,
+  // valueText, href } ] to append after the optimize plan.
+  function planRestore(optimize, worn, byName) {
+    if (!worn) return [];
+    const filled = {};
+    let optimizerWeaponHands = null;
+    optimize.forEach(function (p) {
+      filled[p.label] = true;
+      if (p.label === 'Weapon') optimizerWeaponHands = p.hands || 1;
+    });
+
+    // Resolve a worn item to a restore step, choosing an accessory-slot-specific
+    // equip link when one applies. Returns null if the item can't be re-equipped.
+    function stepFor(type) {
+      const spec = WORN_TYPES[type];
+      const name = worn[type];
+      if (!spec || !name) return null;
+      const entry = byName[name.toLowerCase()];
+      if (!entry) return null;
+      const link = spec.accSlot
+        ? (entry.links.find(function (l) { return l.slot === spec.accSlot; }) ||
+           entry.links[0])
+        : entry.links[0];
+      return {
+        label: spec.label, name: name, valueText: 'kept',
+        href: link.href, hands: entry.hands
+      };
+    }
+
+    const restore = [];
+
+    // Slots with no cross-slot interaction.
+    ['hat', 'shirt', 'pants', 'container', 'familiarequip',
+     'acc1', 'acc2', 'acc3'].forEach(function (type) {
+      if (filled[WORN_TYPES[type].label]) return;
+      const step = stepFor(type);
+      if (step) restore.push(step);
+    });
+
+    // Weapon: only if the optimizer left it empty, and never a 2h weapon over an
+    // off-hand the optimizer equipped. Track the handedness of whatever ends up
+    // in the weapon slot to gate the off-hand below.
+    let weaponHands = filled['Weapon'] ? optimizerWeaponHands : null;
+    if (!filled['Weapon']) {
+      const w = stepFor('weapon');
+      if (w && !((w.hands || 1) >= 2 && filled['Off-hand'])) {
+        restore.push(w);
+        weaponHands = w.hands || 1;
+      }
+    }
+
+    // Off-hand: only if empty and the weapon in effect leaves the slot free.
+    if (!filled['Off-hand'] && !(weaponHands >= 2)) {
+      const o = stepFor('offhand');
+      if (o) restore.push(o);
+    }
+
+    return restore;
   }
 
   // KoL's best of a list. Within one category, "best" is simply the earliest
@@ -497,13 +638,17 @@
     const href = getUnequipAllHref();
     if (!confirm('Optimize equipment for "' + attrLabel + '"?\n\n' +
         (href ? 'This unequips everything, then equips ' : 'This equips ') +
-        'the best item for "' + attrLabel + '" in each slot.')) {
+        'the best item for "' + attrLabel + '" in each slot, keeping your ' +
+        'current gear in any slot with no better option.')) {
       status.textContent = 'Cancelled.';
       return;
     }
+    // Snapshot what's worn now (before the unequip-all wipes it) so resume() can
+    // put the original item back in any slot the optimizer leaves empty.
     const state = {
       attr: attr, attrLabel: attrLabel, sortTried: false,
-      element: element, byValue: byValue, lowerBetter: lowerBetter
+      element: element, byValue: byValue, lowerBetter: lowerBetter,
+      worn: scrapeWornItems()
     };
     if (!href) {
       // No "unequip all" link means nothing is equipped, so there's nothing to
@@ -520,7 +665,8 @@
   }
 
   // Step 2 (after the unequip-all reload): make sure we're still sorted by the
-  // saved attribute, expand everything, then equip the best per slot.
+  // saved attribute, expand everything, equip the best per slot, then put the
+  // originally-worn item back in any slot that got nothing.
   function resume(dropdown, status, state) {
     // The sort is a sticky KoL preference, so it normally survives the reload;
     // if it didn't, re-apply it (one shot) and let the resubmit reload us.
@@ -542,9 +688,14 @@
     status.textContent = 'Expanding categories…';
     expandAllCategories();
     waitForStableItems(function () {
-      const plan = planEquipment(
+      const optimize = planEquipment(
         scrapeCandidates(makeValueFn(state.attr, state.element), state.attr),
         state.byValue, state.lowerBetter);
+      // Refill every slot the optimizer left empty with what it held before, so
+      // slots only ever change to something better (and nothing is left bare —
+      // including the case where the optimizer found nothing at all).
+      const plan = optimize.concat(
+        planRestore(optimize, state.worn, scrapeEquipLinksByName()));
       if (!plan.length) {
         clearState();
         status.textContent = 'No equippable items have a value for "' +

@@ -8,9 +8,6 @@
     - that link is highlighted if ball can be played
   - also has a link to the Cup of 13s drinking
 
-- update to equipment-optimize:
-  - save current equipment before unequipping all, restore current equipment in empty slots
-
 - Quest Helper (new) (?)
   - displays next steps in Journal
 ## Twilight Heroes
