@@ -27,7 +27,7 @@ userscript manager and loading the matching game page — it cannot be exercised
 ## Distribution model (important)
 
 Each script carries a `@downloadURL` pointing at its own raw GitHub path on `main`, e.g.
-`https://raw.githubusercontent.com/.../main/KingdomOfLoathing/codpiece.js`. Consequences:
+`https://raw.githubusercontent.com/.../main/KingdomOfLoathing/iotm.js`. Consequences:
 
 - **The file's location in the repo is its public URL.** Renaming or moving a file breaks
   auto-updates for everyone who has it installed. If you move one, update its `@downloadURL`.
@@ -42,7 +42,7 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
 - **`@name` starts with the game's prefix** so a script sorts next to its siblings in the
   userscript manager's (alphabetical) list. Use exactly: `Twilight Heroes ` for `TwilightHeroes/`,
   `KoL ` for `KingdomOfLoathing/`, and `Fallen London ` for `FallenLondon/` (e.g.
-  `Twilight Heroes Autobox`, `KoL Codpiece Button`, `Fallen London Wiki Links`). Keep the
+  `Twilight Heroes Autobox`, `KoL IotM Menu`, `Fallen London Wiki Links`). Keep the
   prefix identical across a game's scripts — don't expand `KoL` to `Kingdom of Loathing` for
   one script, or it'll sort away from the rest.
 - One IIFE, `'use strict';`, no external dependencies, `@grant none` (plain page APIs only).
@@ -58,15 +58,15 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
 **Kingdom of Loathing** is **frameset-based**. The UI is split across `topmenu`/`awesomemenu`,
 `charpane`, and `mainpane` frames. Two things follow:
 
-- State you need may live in a *sibling frame* — see `codpiece.js` `getPwd()`, which probes
+- State you need may live in a *sibling frame* — see `iotm.js` `getPwd()`, which probes
   inputs, page globals, links, `top.frames['charpane']`, and inline script text in turn.
 - Any action-triggering request needs the player's **`pwd` hash** appended; without it the
   server rejects the request. Navigate `top.frames['mainpane']` to show results, or `fetch`
   with `credentials: 'same-origin'` to fire silently.
 - **`choice.php` is shared by every choice adventure.** A script matching it must identify the
   specific choice before injecting anything — gate on the hidden `whichchoice` value (e.g.
-  `codpiece.js` only acts when `input[name="whichchoice"][value="1588"]`, the Eternity Codpiece
-  decoration screen, is present). `codpiece.js` also shows the pattern for applying several
+  `iotm.js` only acts when `input[name="whichchoice"][value="1588"]`, the Eternity Codpiece
+  decoration screen, is present). `iotm.js` also shows the pattern for applying several
   form submissions in one go: replay each slot's `Replace` form as a sequential
   `fetch(... credentials:'same-origin')` POST, then `location.reload()` once so the server stays
   authoritative about item availability rather than trusting the stale page. Named gem setups

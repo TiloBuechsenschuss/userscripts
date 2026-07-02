@@ -50,7 +50,7 @@ and updates independently via its `@downloadURL`.
 
 | Script | Pages | What it does |
 | --- | --- | --- |
-| `codpiece.js` | top/awesome menu, codpiece decoration choice | Menu button to open the Eternity Codpiece, plus tools on the decoration screen to set every gem slot at once and to save/load named gem setups |
+| `iotm.js` | top/awesome menu, codpiece decoration choice | "IotM" menu button opening a popup of Item-of-the-Month actions (Codpiece, Play Ball, Cup of 13s), plus tools on the Eternity Codpiece decoration screen to set every gem slot at once and to save/load named gem setups |
 | `daily-checklist.js` | top/awesome menu | Daily tasks checklist |
 | `charpane-heal.js` | charpane | "Heal" button that casts heal skills until full |
 | `skills-cast-max.js` | charpane | "Max" button on each castable buff to re-cast it at max MP |

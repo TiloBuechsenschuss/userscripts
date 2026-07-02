@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name         KoL Codpiece Button
+// @name         KoL IotM Menu
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
-// @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/codpiece.js
-// @version      1.12
-// @description  Adds a Codpiece button to the KoL icon menu (triggers inventory.php?action=docodpiece) and, on the Eternity Codpiece decoration screen, adds tools to set every gem slot at once (with a category filter), and to save/load gem setups.
+// @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/iotm.js
+// @version      1.17
+// @description  Adds an "IotM" button to the KoL icon menu that opens a small popup of Item-of-the-Month actions: fire the Codpiece (inventory.php?action=docodpiece), play ball at the baseball diamond (highlighted when a ball is available), and drink from the Cup of 13s. Also keeps the Eternity Codpiece decoration tools (choice.php whichchoice=1588) for setting every gem slot at once and saving/loading gem setups.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
 // @match        https://www.kingdomofloathing.com/topmenu.php*
@@ -19,14 +19,11 @@
   'use strict';
 
   // --- Configuration ---------------------------------------------------
-  const ACTION_URL = '/inventory.php?action=docodpiece';
-  const BUTTON_LABEL = 'Codpiece';
   // Eternity Codpiece item icon, inlined as a data URI so it needs no network
   // fetch (and isn't subject to a page CSP blocking external hosts). The source
   // GIF is kept in the repo at assets/eternitycod.gif for reference; this is its
-  // base64. Shown as the button's face; falls back to BUTTON_LABEL text if it
-  // somehow can't render.
-  const ICON_URL =
+  // base64. Used as the Codpiece action's face in the popup.
+  const CODPIECE_ICON =
     'data:image/gif;base64,R0lGODlhHgAeAIMAAAAAAAgICBQUFCEhITExMU5OTnNzc5ycnL2' +
     '9vc7OztbW1t7e3ufn5+/v7/f39////yH5BAAAAP8ALAAAAAAeAB4AAAT/8MlJq7046827/2Ao' +
     'juRzGInkWAXBaMrxOgIQEINgGIekAACBYtJIHI4DYOGBCB4KwCggOQUYGgdCLRrYMgiAXlPAS' +
@@ -34,11 +31,63 @@
     'dABAtWEgZWUAE/UwV1FaYHCjU8bz42TwgJQCkXpgUrElALE1A9DqAAuxYMdC8MAUsTY41AAoA' +
     'YYLZQQw0vuVIA0BgHieBMNQcN2M/oG8ZUPabluQEvIKBwCQMDmmsi9xdJrH1gAE5gDDADRhwY' +
     'cENLFEckFhTApAPBrxIOuF0swbGjx48fAiIAADs=';
-  // If true, the result page is shown in the mainpane.
+
+  // Baseball diamond and Cup of 13s item icons, inlined as data URIs for the
+  // same reason as the codpiece icon above (no network fetch, CSP-proof). The
+  // source PNGs are kept in the repo at assets/baseball.png and
+  // assets/cupof13s.png for reference; these are their base64.
+  const BALL_ICON =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAAAXNS' +
+    'R0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAI8SURBVEhLnZ' +
+    'fNjQIxDEbnyJECaIRGaIR2aIMjDVACDXDkyDGrF+khb7Azs/tJ1kDi+PNfJpml/QHv97u9Xq/2' +
+    'fD673O/3drvd2vV6befzuZ1Op/5kbA3LODDi8Xi0w+HQdrtdl2VZVmW/3/d1M0yJiQjSaJT/RK' +
+    'YQIXK5XLrwWz2yUqEkJn1EiAEcQNaiEJLjGOXJkBLjOQuPx2N3YCsp9bfukGIDJzJ8EUtKpJDF' +
+    'JpqRo4cOgj7/cbwi/0VMdJFUkC4NZnBeHdNrY2KTgCI+xHhINyIZAUYwTDpHOJdlZIxcpzpxnC' +
+    'TqDKYy61RLUTUS49bcoDrxrBaiIiYDszII5mPKOzHpZTBLlaiIre9sLUiJbYDZ4qrGa40nWO/e' +
+    'Bp3Y/GOgwqyOzo1ORTD3ReybpmqstTpahriVRqDzZ2LTPNY3Qp3KuTTVM+K1aCNmDk6JsxrPjI' +
+    '0gzVW9p8RZVFujFdVbzBqzg3CwE3swjKneulUiKmIAB0fth9jNPRI7V22jEfZDVRo4kB49A55K' +
+    '4wkCtmwVgJ5OZtHGmwnoxG7u8TgUGuQJAfpKJKzKYmCcCWbicyx61eG9nXW3kVeiUyMIxOM2Bv' +
+    'UhBixGAQeyepNqjGMAXYTfjGVlYM5zYLT3ixjgvZFnad8KnJE0O26/iEG8Ao0vgi2IkWYNC1Ji' +
+    '4N6eXVEjcJY1PGflEiVxvK7QjV7c42Wecb8y3KNmKuvuiJIYQO61KBM/a4gQMnSRLb0xJQY0iZ' +
+    '8mPO1i9/N/8QOomu135/fVUgAAAABJRU5ErkJggg==';
+  const CUP13_ICON =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAAAXNS' +
+    'R0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAIFSURBVEhLrZ' +
+    'e7rcJAEEUdUgANuADKoBkqohlaICQkJSQk3KeDdNBotD/zuNLIi9eeO/81S/knXq9Xud/v5fF45' +
+    'K0ulnyjBQgul0s5nU5vOR6PZV3XstvtyrIsb2HNPfbO53N5Pp9ZzQdD4uv1+iba7/cfAgTlGhA' +
+    'lPnc4HLK6D5rEhA/FUQle3G63rieAsOM57xGlGqrEeKnlkPObUHOFXE8xJopR4BnWvM+6hioxS' +
+    'nwJ62uhnpVNHmsthIbsG6HYWmmpEhPSrGRWIDMNRKmFKjEwtLllsthC5pbig5j7X1W1FW2eUUi' +
+    '+ENZEhXUsNoyNRnK/hSYxCrNnUbLnkOKhRmh0C01i2sfqzsPC6YViBM8tItYa1yos0CQGeo0BG' +
+    'DICKTAaPW9BlxgYNgqoN3/11AiNMCRmdBpyxYOAcNs27nG/ZVzEkFjEuV0TvaXaZzBNjCd4Gtv' +
+    'I9qLduM7kVkwTewi04LTr9W7ENDGeEE4qtwZT8XNiCsbxaQ8T4nhus8fvGUwTA8hzhSsY1ToCa' +
+    '9hEDCwivKONbKXZohKbiZ1mXJlmhHtLbsUm4hhqc+lMJwKzPQymiVEaP4nynkeikRhhSIxS5zX' +
+    'S6mXbjWcwIhuXMSQ2p5L2vIljdZTzITHFE72B3PPXLxP2Y5vZ4z0MiQVkUXntK4T92V6eJgbx/' +
+    '5Oz2ym2paLBH92CFUryT2pEAAAAAElFTkSuQmCC';
+
+  // Face for the IotM menu button itself. Source GIF kept at assets/mracc.gif.
+  const IOTM_ICON =
+    'data:image/gif;base64,R0lGODlhHgAeAKIAAAgICDU1NW9vb7W1tdbW1ufn5/f39////yH5' +
+    'BAAAAAAALAAAAAAeAB4AAAPHeLrc/jDK6Qy9pwgRBp4CIAKC9T3hQASAdzbG0B6y8DoEOYTdU' +
+    'NwKzUjE6tyEAgLtZ0idmgElKvC7QKuLHcFgCNgunEJzYCmMlDKppNAx5Fqxkaf7XZgYuZ8MQH' +
+    '3PDjkuEXkZI1w8ahsTMhZNJAcGBSoMHIsAVZF3DpUSXYIOkiYhmg8DAXeTGSwunBFcfwchG0V' +
+    'SXhemVQQcAR1VaRdsJQpcw0G8HysCBVgLK1Enzr1lPJ8YMbu8vKlABQQD3yqkQHbj5eYRCQA7';
+
+  // If true, an action's result page is shown in the mainpane.
   // If false, the request fires silently in the background.
   const SHOW_RESULT_IN_MAINPANE = true;
+
+  // Baseball diamond: plays ball. (firePath appends the pwd hash.)
+  const BASEBALL_URL = '/inventory.php?action=pball';
+  // The Baseball Diamond item description lists the current team; a full team of
+  // this many players means an inning can be played (button gets highlighted).
+  const BASEBALL_DESC_URL = '/desc_item.php?whichitem=229573660';
+  const BASEBALL_FULL_TEAM = 9;
+
+  // Cup of 13s: drinks from it. (firePath appends the pwd hash.)
+  const CUP13_URL = '/inventory.php?action=cupof13s';
   // ----------------------------------------------------------------------
 
+  // === pwd hash discovery (frameset-aware) =============================
   function getPwd() {
     // 1. awesomemenu has hidden <input name="pwd"> fields in its config forms.
     const inp = document.querySelector('input[name="pwd"]');
@@ -74,35 +123,103 @@
     return m2 ? m2[1] : null;
   }
 
-  function fireAction() {
+  // Append the pwd hash to a path, or null if it can't be found.
+  function withPwd(path) {
     const pwd = getPwd();
-    if (!pwd) {
-      alert('Codpiece button: could not determine pwd hash.');
-      return;
-    }
+    if (!pwd) return null;
+    const sep = path.indexOf('?') === -1 ? '?' : '&';
+    return path + sep + 'pwd=' + pwd;
+  }
 
-    const url = ACTION_URL + '&pwd=' + pwd;
-
+  // Navigate the mainpane to a URL (frameset), falling back to a silent
+  // background fetch when SHOW_RESULT_IN_MAINPANE is off or the frame is
+  // unreachable.
+  function goMainpane(url) {
     if (SHOW_RESULT_IN_MAINPANE) {
       try {
         top.frames['mainpane'].location.href = url;
         return;
       } catch (e) {
-        console.warn('Codpiece button: could not navigate mainpane, ' +
+        console.warn('IotM menu: could not navigate mainpane, ' +
                      'falling back to background request.', e);
       }
     }
-
     fetch(url, { credentials: 'same-origin' })
       .then(function (res) {
-        console.log('Codpiece action sent, HTTP ' + res.status);
+        console.log('IotM action sent, HTTP ' + res.status);
       })
       .catch(function (err) {
-        console.error('Codpiece action failed:', err);
+        console.error('IotM action failed:', err);
       });
   }
 
-  // Restore the original text-label look (used as the icon's fallback).
+  // Fire a pwd-gated action path (append pwd, then navigate/fetch). Shared by
+  // the popup actions below.
+  function firePath(path) {
+    const url = withPwd(path);
+    if (!url) {
+      alert('IotM menu: could not determine pwd hash.');
+      return;
+    }
+    goMainpane(url);
+  }
+
+  // === IotM actions (the popup contents) ===============================
+  // Each entry renders one button in the popup. `run()` performs the action;
+  // optional `icon` shows an image face (else the label text); optional
+  // `isHighlighted()` returns true to draw attention to the button (e.g. a ball
+  // is available to play right now).
+
+  // Resolve true when a full baseball team is assembled (an inning can be
+  // played). The item description page lists the current team as
+  // <li data-monster-id> entries; a team of BASEBALL_FULL_TEAM can play. The
+  // fetch is credentialed (same-origin) so the logged-in session returns the
+  // real description; any failure resolves false (leaves the button un-lit).
+  function ballCanBePlayed() {
+    return fetch(BASEBALL_DESC_URL, { credentials: 'same-origin' })
+      .then(function (res) { return res.ok ? res.text() : ''; })
+      .then(function (html) {
+        if (!html) return false;
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const players = doc.querySelectorAll(
+          '#description li[data-monster-id]');
+        return players.length >= BASEBALL_FULL_TEAM;
+      })
+      .catch(function (e) {
+        console.warn('IotM menu: baseball team check failed', e);
+        return false;
+      });
+  }
+
+  const ACTIONS = [
+    {
+      key: 'codpiece',
+      label: 'Codpiece',
+      title: 'Codpiece (inventory.php?action=docodpiece)',
+      icon: CODPIECE_ICON,
+      run: function () { firePath('/inventory.php?action=docodpiece'); }
+    },
+    {
+      key: 'baseball',
+      label: 'Play Ball',
+      title: 'Play ball at the baseball diamond',
+      icon: BALL_ICON,
+      run: function () { firePath(BASEBALL_URL); },
+      isHighlighted: ballCanBePlayed
+    },
+    {
+      key: 'cup13',
+      label: 'Cup of 13s',
+      title: 'Drink from the Cup of 13s',
+      icon: CUP13_ICON,
+      run: function () { firePath(CUP13_URL); }
+    }
+  ];
+
+  // === IotM button + popup UI ==========================================
+
+  // Restore a compact text-label look (used as the icon's fallback / for the
+  // main IotM button).
   function styleAsTextButton(btn) {
     btn.style.cssText = [
       'padding:0 4px',
@@ -115,11 +232,183 @@
     ].join(';');
   }
 
-  function makeButton() {
-    const btn = document.createElement('button');
-    btn.id = 'tm-codpiece-btn';
+  // Draw attention to an action button (e.g. a ball is ready to play).
+  function highlightButton(btn) {
+    btn.style.borderColor = '#e0a000';
+    btn.style.background = '#fff6d5';
+    btn.style.boxShadow = '0 0 4px #e0a000';
+    btn.style.fontWeight = 'bold';
+  }
+
+  // Build one action button for inside the popup. `d` is the document the popup
+  // lives in (the mainpane frame; see openPopup), so create nodes there.
+  function makeActionButton(action, d) {
+    const btn = d.createElement('button');
     btn.type = 'button';
-    btn.title = BUTTON_LABEL + ' (inventory.php?action=docodpiece)';
+    btn.title = action.title || action.label;
+    btn.style.cssText = [
+      'display:inline-flex',
+      'align-items:center',
+      'gap:4px',
+      'padding:2px 6px',
+      'font-size:10px',
+      'font-family:arial',
+      'cursor:pointer',
+      'white-space:nowrap',
+      'background:white',
+      'border:1px solid #999',
+      'border-radius:3px'
+    ].join(';');
+
+    if (action.icon) {
+      const img = d.createElement('img');
+      img.src = action.icon;
+      img.alt = action.label;
+      img.width = 16;
+      img.height = 16;
+      img.style.display = 'block';
+      btn.appendChild(img);
+    }
+    const span = d.createElement('span');
+    span.textContent = action.label;
+    btn.appendChild(span);
+
+    // Highlight when the action flags itself as ready (e.g. ball playable).
+    // `isHighlighted` may return a boolean or a Promise<boolean> (the baseball
+    // check fetches the item description); apply the highlight synchronously, or
+    // once the promise resolves true. The popup is rebuilt each open, so this
+    // re-checks freshly every time.
+    if (typeof action.isHighlighted === 'function') {
+      const hi = action.isHighlighted();
+      if (hi && typeof hi.then === 'function') {
+        hi.then(function (ok) { if (ok) highlightButton(btn); })
+          .catch(function () { /* leave un-highlighted */ });
+      } else if (hi) {
+        highlightButton(btn);
+      }
+    }
+
+    btn.addEventListener('click', function () {
+      closePopup();
+      try {
+        action.run();
+      } catch (e) {
+        console.error('IotM action "' + action.key + '" failed:', e);
+      }
+    });
+    return btn;
+  }
+
+  // Module-level popup teardown handle (removes listeners + node).
+  let popupCleanup = null;
+
+  function closePopup() {
+    if (popupCleanup) {
+      popupCleanup();
+      popupCleanup = null;
+    }
+  }
+
+  // Pick a document to render the popup into. This menu frame is only a thin
+  // bar, so a stacked popup overflowing it gets clipped by the frame boundary
+  // (and hidden behind the mainpane frame). Render into the mainpane document
+  // instead -- a roomy, normal document -- overlaid with position:fixed. Falls
+  // back to this frame's own document if mainpane is unreachable.
+  function popupDoc() {
+    try {
+      const mp = top.frames['mainpane'];
+      if (mp && mp.document && mp.document.body) return mp.document;
+    } catch (e) { /* cross-frame access failed; fall back */ }
+    return document.body ? document : null;
+  }
+
+  function openPopup(anchorBtn) {
+    closePopup();
+
+    const d = popupDoc();
+    if (!d) return;
+
+    const pop = d.createElement('div');
+    pop.id = 'tm-iotm-popup';
+    pop.style.cssText = [
+      'position:fixed',
+      'z-index:99999',
+      'display:flex',
+      'flex-direction:column',
+      'gap:3px',
+      'padding:5px',
+      'background:#f5f5ff',
+      'border:1px solid blue',
+      'border-radius:3px',
+      'box-shadow:0 2px 6px rgba(0,0,0,0.3)'
+    ].join(';');
+
+    ACTIONS.forEach(function (a) {
+      pop.appendChild(makeActionButton(a, d));
+    });
+
+    d.body.appendChild(pop);
+
+    // Open to the LEFT of the IotM button. The button lives in the menu bar
+    // above the mainpane; both share the window's left origin, so the button's
+    // x maps across. Place the popup's right edge just left of the button and
+    // pin it near the top of the mainpane (the button sits just above it).
+    // Clamp to the mainpane's left edge so it never spills off-screen.
+    const r = anchorBtn.getBoundingClientRect();
+    const popW = pop.offsetWidth;
+    let left = r.left - popW - 4;
+    if (left < 2) left = 2;
+    pop.style.left = left + 'px';
+    pop.style.top = '4px';
+
+    // Close on outside click or Escape. The popup is in the mainpane document
+    // but the anchor button is in this (menu) one, so watch both.
+    function onDocClick(e) {
+      if (pop.contains(e.target) || anchorBtn.contains(e.target)) return;
+      closePopup();
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') closePopup();
+    }
+    const docs = d === document ? [document] : [d, document];
+    // Defer binding the click handler so the opening click doesn't immediately
+    // close the popup.
+    setTimeout(function () {
+      docs.forEach(function (doc) {
+        doc.addEventListener('mousedown', onDocClick, true);
+      });
+    }, 0);
+    docs.forEach(function (doc) {
+      doc.addEventListener('keydown', onKey, true);
+    });
+
+    popupCleanup = function () {
+      docs.forEach(function (doc) {
+        doc.removeEventListener('mousedown', onDocClick, true);
+        doc.removeEventListener('keydown', onKey, true);
+      });
+      if (pop.parentNode) pop.parentNode.removeChild(pop);
+    };
+  }
+
+  // Restore a compact text-label look, used if the IotM icon can't render.
+  function styleAsTextButton(btn) {
+    btn.style.cssText = [
+      'padding:0 4px',
+      'font-size:9px',
+      'font-family:arial',
+      'height:14px',
+      'line-height:12px',
+      'cursor:pointer',
+      'white-space:nowrap'
+    ].join(';');
+  }
+
+  function makeIotmButton() {
+    const btn = document.createElement('button');
+    btn.id = 'tm-iotm-btn';
+    btn.type = 'button';
+    btn.title = 'IotM actions';
     btn.style.cssText = [
       'padding:1px 2px',
       'height:22px',
@@ -131,26 +420,33 @@
     ].join(';');
 
     const img = document.createElement('img');
-    img.src = ICON_URL;
-    img.alt = BUTTON_LABEL;
+    img.src = IOTM_ICON;
+    img.alt = 'IotM';
     img.width = 18;
     img.height = 18;
     img.style.display = 'block';
-    // If the icon can't load, drop back to the plain text label so the button
-    // is never blank.
+    // If the icon can't load, drop back to a plain text label so the button is
+    // never blank.
     img.addEventListener('error', function () {
       if (img.parentNode === btn) btn.removeChild(img);
-      btn.textContent = BUTTON_LABEL;
+      btn.textContent = 'IotM';
       styleAsTextButton(btn);
     });
     btn.appendChild(img);
 
-    btn.addEventListener('click', fireAction);
+    btn.addEventListener('click', function () {
+      // Toggle: a second click on the button closes an open popup.
+      if (popupCleanup) {
+        closePopup();
+      } else {
+        openPopup(btn);
+      }
+    });
     return btn;
   }
 
-  // Shared button row under the edit icon. The codpiece and daily-checklist
-  // scripts each install independently, so they cooperate through a single
+  // Shared button row under the edit icon. The IotM and daily-checklist scripts
+  // each install independently, so they cooperate through a single
   // absolutely-positioned flex container (created by whichever runs first) and
   // claim their slot with CSS `order` -- making the left-to-right arrangement
   // independent of DOM insertion order / which script loads first. Returns the
@@ -180,9 +476,9 @@
   }
 
   function addButton() {
-    if (document.getElementById('tm-codpiece-btn')) return;
+    if (document.getElementById('tm-iotm-btn')) return;
 
-    const btn = makeButton();
+    const btn = makeIotmButton();
     const row = getButtonRow();
     if (row) {
       // Sit to the right of the checklist button (order 1) when both load.
@@ -193,8 +489,7 @@
     }
 
     // Text-mode topmenu fallback: place after the checklist button if it's
-    // already there (keeping codpiece to its right), else after a plain "edit"
-    // link.
+    // already there (keeping IotM to its right), else after a plain "edit" link.
     const cl = document.getElementById('tm-checklist-btn');
     if (cl) {
       cl.insertAdjacentElement('afterend', btn);
@@ -209,7 +504,7 @@
       }
     }
 
-    console.warn('Codpiece button: no anchor point found, ' +
+    console.warn('IotM menu: no anchor point found, ' +
                  'placing button at top of frame.');
     document.body.insertBefore(btn, document.body.firstChild);
   }
@@ -368,7 +663,7 @@
         await applySlot(assignments[i].which, assignments[i].iid, pwd);
       } catch (e) {
         if (status) status.textContent = 'Request failed: ' + e;
-        console.error('Codpiece: applySlot failed', e);
+        console.error('IotM: applySlot failed', e);
         return;
       }
     }
@@ -607,7 +902,7 @@
 
   // --- Dispatch --------------------------------------------------------
   // Run last, so the `const` config above is past its temporal dead zone by the
-  // time addButton()/fireAction() read it. The all-in-one loader @requires every KoL
+  // time addButton()/firePath() read it. The all-in-one loader @requires every KoL
   // script and runs them on the union of all matched pages; gating by page here
   // keeps each feature off sibling frames. A no-op gate for the standalone
   // install, whose @match already scopes it.

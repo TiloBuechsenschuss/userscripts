@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/daily-checklist.js
-// @version      1.16
-// @description  Adds a Checklist button next to the codpiece button that opens a daily to-do list popup. Items can carry a KoL action link (pwd filled live) and be greyed out when not relevant to the current run. A persistent ronin / post-ronin toggle auto-disables the tasks that only apply to one phase. Checked items reset each day (or manually).
+// @version      1.17
+// @description  Adds a Checklist button next to the IotM button that opens a daily to-do list popup. Items can carry a KoL action link (pwd filled live) and be greyed out when not relevant to the current run. A persistent ronin / post-ronin toggle auto-disables the tasks that only apply to one phase. Checked items reset each day (or manually).
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
 // @match        https://www.kingdomofloathing.com/topmenu.php*
@@ -157,7 +157,7 @@
   }
 
   // Read the player's pwd hash from the current (menu) frame, mirroring the
-  // codpiece script. Used to fill PWD_TOKEN in item URLs at click time.
+  // iotm script. Used to fill PWD_TOKEN in item URLs at click time.
   function getPwd() {
     const inp = document.querySelector('input[name="pwd"]');
     if (inp && inp.value) return inp.value;
@@ -226,7 +226,7 @@
     return out;
   }
 
-  // Run an item's url in the mainpane (so results are visible), like codpiece.
+  // Run an item's url in the mainpane (so results are visible), like iotm.
   function go(url) {
     const full = resolveUrl(url);
     if (!full) {
@@ -746,7 +746,7 @@
     return btn;
   }
 
-  // Shared button row under the edit icon. The daily-checklist and codpiece
+  // Shared button row under the edit icon. The daily-checklist and iotm
   // scripts each install independently, so they cooperate through a single
   // absolutely-positioned flex container (created by whichever runs first) and
   // claim their slot with CSS `order` -- making the left-to-right arrangement
@@ -782,7 +782,7 @@
     const btn = makeButton();
     const row = getButtonRow();
     if (row) {
-      // Sit to the left; the codpiece button (order 2) lines up to our right.
+      // Sit to the left; the iotm button (order 2) lines up to our right.
       btn.style.order = '1';
       btn.style.backgroundColor = 'white';
       row.appendChild(btn);
@@ -790,7 +790,7 @@
     }
 
     // Text-mode topmenu fallback: place after a plain "edit" link, so the
-    // codpiece button (which anchors after us when present) ends up to our right.
+    // iotm button (which anchors after us when present) ends up to our right.
     const links = document.querySelectorAll('a');
     for (const a of links) {
       const t = a.textContent.trim().toLowerCase().replace(/^\[|\]$/g, '');

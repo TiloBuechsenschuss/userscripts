@@ -5,7 +5,7 @@
 // Why this exists: the loaders in all-in-one/ pull each bundled script straight
 // from GitHub via @require. Userscript managers cache those @require resources
 // and only re-fetch them when the LOADER's own @version goes up. So editing
-// codpiece.js without bumping the loader means installed users never see the
+// iotm.js without bumping the loader means installed users never see the
 // change. This script closes that gap.
 //
 // Usage:

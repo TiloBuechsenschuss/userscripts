@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/all-in-one/kingdom-of-loathing.js
-// @version      1.22
+// @version      1.23
 // @description  Single-install loader for the Kingdom of Loathing userscripts in this repo. It carries no logic of its own; it @requires each individual script straight from GitHub so installing this one file gives you all of them. NOTE: adventure-choices.js is intentionally NOT bundled here -- it needs GM_* grants, which are incompatible with the @grant none mode the other scripts rely on. Install that one separately.
 //
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
@@ -43,7 +43,7 @@
 // @match        https://www.kingdomofloathing.com/cellar.php*
 // @match        https://kingdomofloathing.com/cellar.php*
 //
-// @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/codpiece.js
+// @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/iotm.js
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/daily-checklist.js
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/charpane-heal.js
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/skills-cast-max.js

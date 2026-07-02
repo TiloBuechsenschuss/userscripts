@@ -595,7 +595,7 @@
   // Fire each equip via its own [equip] href (GET, same as clicking the link),
   // sequentially, then reload once. The server is authoritative about what can
   // actually be worn, so we let each equip settle before the next and re-read
-  // the truth on reload (mirrors codpiece.js's multi-slot apply).
+  // the truth on reload (mirrors iotm.js's multi-slot apply).
   async function applyPlan(plan, status) {
     for (let i = 0; i < plan.length; i++) {
       const step = plan[i];

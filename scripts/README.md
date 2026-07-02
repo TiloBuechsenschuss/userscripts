@@ -7,7 +7,7 @@ just automate a chore.
 
 The loaders in `all-in-one/` pull each bundled script from GitHub via `@require`.
 Userscript managers cache those required resources and only re-fetch them when
-the **loader's own `@version`** increases. So changing, say, `codpiece.js`
+the **loader's own `@version`** increases. So changing, say, `iotm.js`
 without bumping the matching loader means installed users never receive the update.
 
 This script finds every loader (any tracked `.js` whose metadata block

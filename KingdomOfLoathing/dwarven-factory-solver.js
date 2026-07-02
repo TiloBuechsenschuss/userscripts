@@ -99,7 +99,7 @@
 
   const LS_KEY = 'tm-dwafa-state';
 
-  // === pwd hash (same probing strategy as codpiece.js) =====================
+  // === pwd hash (same probing strategy as iotm.js) =========================
 
   function getPwd() {
     const inp = document.querySelector('input[name="pwd"]');
