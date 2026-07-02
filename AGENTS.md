@@ -16,9 +16,10 @@ for three browser games:
   `@require`s every individual script for that game from GitHub, so a single install
   pulls in the whole set. Bumping a loader is automated — see `scripts/bump-loaders.mjs`.
 
-There is **no build, no bundler, no package manager, no test suite, and no lint config**
-(one exception: a single ad-hoc Node test script for the quest-helper hint map — see
-"Verifying a change" below).
+There is **no build, no bundler, no package manager, and no lint config**, and no test *runner*
+or framework. The only tests are a handful of **standalone, dependency-free Node scripts** that
+live in a `test/` subfolder inside each game directory (e.g. `KingdomOfLoathing/test/`), named
+`*.test.mjs`, and are run directly with `node <path>` — see "Verifying a change" below.
 Each `.js` file is the shippable artifact: a single self-contained IIFE prefixed with a
 `// ==UserScript== ... // ==/UserScript==` metadata block. You edit the file, the user
 reloads it in their userscript manager. "Running" a script means installing it in a
@@ -120,9 +121,26 @@ There is (almost) nothing to run here. Validate by reasoning about the DOM the s
 and, when possible, by installing the edited file in a userscript manager against the live page.
 Don't claim a script "works" from static review alone — say it's untested in-game.
 
-The one exception is `TwilightHeroes/test/quest-helper.test.mjs`: a standalone Node script
-(no test runner, matching the no-build convention) that evaluates `quest-helper.js`'s IIFE
-against a stub DOM and asserts its per-stage hint lookup resolves correctly — it's the one
-piece of pure logic here that's worth checking without a browser. Run it with
-`node TwilightHeroes/test/quest-helper.test.mjs`. If you add quests/stages to that script's
-hint map (especially overlapping-text stages), add a case here too.
+The exception is the bits of **pure logic** worth verifying without a browser. Those are covered
+by **standalone Node test scripts** under a `test/` subfolder in the relevant game directory,
+named `*.test.mjs`. Each is dependency-free (no runner, matching the no-build convention): it
+names its script's IIFE, evaluates it against a stub DOM, and returns the internals to assert on.
+Run one directly, e.g.:
+
+```
+node KingdomOfLoathing/test/iotm-cup13-sort.test.mjs
+node TwilightHeroes/test/quest-helper.test.mjs
+```
+
+Current tests:
+
+- `TwilightHeroes/test/quest-helper.test.mjs` — asserts `quest-helper.js`'s per-stage hint
+  lookup resolves correctly. If you add quests/stages to that hint map (especially
+  overlapping-text stages), add a case here too.
+- `KingdomOfLoathing/test/iotm-cup13-sort.test.mjs` — asserts `iotm.js`'s Cup-of-13s option
+  parser and each ingredient sort order (advs / effect / inventory / name). If you touch that
+  parsing or the sort comparators, add/adjust a case here.
+
+The re-expose trick (rename `(function () {` and `return { ... }` the helpers before `})()`) is
+how a test reaches an IIFE's internals — copy an existing test when adding one, and put it in the
+game's `test/` subfolder.

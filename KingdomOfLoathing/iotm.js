@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/iotm.js
-// @version      1.17
-// @description  Adds an "IotM" button to the KoL icon menu that opens a small popup of Item-of-the-Month actions: fire the Codpiece (inventory.php?action=docodpiece), play ball at the baseball diamond (highlighted when a ball is available), and drink from the Cup of 13s. Also keeps the Eternity Codpiece decoration tools (choice.php whichchoice=1588) for setting every gem slot at once and saving/loading gem setups.
+// @version      1.20
+// @description  Adds an "IotM" button to the KoL icon menu that opens a small popup of Item-of-the-Month actions: fire the Codpiece (inventory.php?action=docodpiece), play ball at the baseball diamond (highlighted when a ball is available), and drink from the Cup of 13s. Also adds sort buttons to the Cup of 13s ingredient dropdowns (choice.php whichchoice=1601), and keeps the Eternity Codpiece decoration tools (choice.php whichchoice=1588) for setting every gem slot at once and saving/loading gem setups.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
 // @match        https://www.kingdomofloathing.com/topmenu.php*
@@ -50,6 +50,7 @@
     'UhBixGAQeyepNqjGMAXYTfjGVlYM5zYLT3ixjgvZFnad8KnJE0O26/iEG8Ao0vgi2IkWYNC1Ji' +
     '4N6eXVEjcJY1PGflEiVxvK7QjV7c42Wecb8y3KNmKuvuiJIYQO61KBM/a4gQMnSRLb0xJQY0iZ' +
     '8mPO1i9/N/8QOomu135/fVUgAAAABJRU5ErkJggg==';
+
   const CUP13_ICON =
     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAAAXNS' +
     'R0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAIFSURBVEhLrZ' +
@@ -167,8 +168,8 @@
   // === IotM actions (the popup contents) ===============================
   // Each entry renders one button in the popup. `run()` performs the action;
   // optional `icon` shows an image face (else the label text); optional
-  // `isHighlighted()` returns true to draw attention to the button (e.g. a ball
-  // is available to play right now).
+  // `highlightState()` returns a highlight kind ('ready' | 'spent') -- or a
+  // Promise of one -- to draw attention to the button (else null for none).
 
   // Resolve true when a full baseball team is assembled (an inning can be
   // played). The item description page lists the current team as
@@ -191,6 +192,99 @@
       });
   }
 
+  // --- Baseball "spent for the day" tracking ---------------------------
+  // The diamond allows a limited number of innings per day. There's no reliable
+  // page flag for it, so we detect the refusal message when a pitch is rejected
+  // (see playBall) and remember it for the rest of the KoL day in localStorage.
+  const BALL_SPENT_KEY = 'tm-iotm-ball-spent';
+  const BALL_EXHAUSTED_RE =
+    /already pitched .*innings today|blow out your shoulder/i;
+
+  // A day stamp that rolls at KoL's ~3:30am Pacific reset: shift "now" back by
+  // that offset and take the resulting calendar date, so the flag self-clears
+  // at rollover rather than local midnight.
+  function kolDayStamp() {
+    const now = Date.now();
+    // Pacific is UTC-8/-7; approximate rollover as UTC-11 so ~3:30am PT lands on
+    // the date boundary regardless of DST. Good enough for a daily self-clear.
+    const shifted = new Date(now - 11 * 3600 * 1000);
+    return shifted.getUTCFullYear() + '-' + (shifted.getUTCMonth() + 1) + '-' +
+      shifted.getUTCDate();
+  }
+  function ballExhaustedToday() {
+    try { return localStorage.getItem(BALL_SPENT_KEY) === kolDayStamp(); }
+    catch (e) { return false; }
+  }
+  function markBallExhaustedToday() {
+    try { localStorage.setItem(BALL_SPENT_KEY, kolDayStamp()); }
+    catch (e) { /* storage unavailable */ }
+  }
+
+  // Play an inning: fire once, show the result in the mainpane, and sniff the
+  // response for the "already pitched N innings" refusal to mark the diamond
+  // spent for the day. Firing exactly once matters -- a successful pitch
+  // consumes a daily inning -- so we never re-request to read the result.
+  function playBall() {
+    const url = withPwd(BASEBALL_URL);
+    if (!url) {
+      alert('IotM menu: could not determine pwd hash.');
+      return;
+    }
+    let mp = null;
+    try { mp = top.frames['mainpane']; } catch (e) { mp = null; }
+    if (SHOW_RESULT_IN_MAINPANE && mp) {
+      try {
+        mp.location.href = url;
+        sniffBallResult();   // watch the resulting page for the refusal message
+        return;
+      } catch (e) {
+        console.warn('IotM menu: could not navigate mainpane for Play Ball.', e);
+      }
+    }
+    // Background fallback (no visible result): fetch, sniff, done.
+    fetch(url, { credentials: 'same-origin' })
+      .then(function (res) { return res.ok ? res.text() : ''; })
+      .then(function (html) {
+        if (BALL_EXHAUSTED_RE.test(html)) markBallExhaustedToday();
+      })
+      .catch(function (err) { console.error('IotM Play Ball failed:', err); });
+  }
+
+  // Poll the mainpane document for the daily-limit refusal after a Play Ball
+  // navigation. A `load` listener is unreliable here: assigning
+  // mainpane.location replaces its window, discarding any listener attached to
+  // it, so it'd never fire. Re-reading top.frames['mainpane'].document each tick
+  // sidesteps that -- the WindowProxy always resolves to the current document.
+  // Stops as soon as the message is seen, or after a few seconds.
+  function sniffBallResult() {
+    let tries = 0;
+    const timer = setInterval(function () {
+      tries++;
+      let txt = '';
+      try {
+        const mp = top.frames['mainpane'];
+        if (mp && mp.document && mp.document.body) {
+          txt = mp.document.body.textContent || '';
+        }
+      } catch (e) { /* cross-frame not ready yet */ }
+      if (BALL_EXHAUSTED_RE.test(txt)) {
+        markBallExhaustedToday();
+        clearInterval(timer);
+      } else if (tries >= 25) {   // ~5s at 200ms
+        clearInterval(timer);
+      }
+    }, 200);
+  }
+
+  // Baseball button highlight: 'spent' (subdued) once exhausted for the day,
+  // else 'ready' (strong) when a full team can play, else none. Exhaustion is a
+  // synchronous localStorage check and takes precedence over the async team
+  // check so a spent diamond never shows the strong "go play" highlight.
+  function baseballHighlight() {
+    if (ballExhaustedToday()) return 'spent';
+    return ballCanBePlayed().then(function (ok) { return ok ? 'ready' : null; });
+  }
+
   const ACTIONS = [
     {
       key: 'codpiece',
@@ -204,8 +298,8 @@
       label: 'Play Ball',
       title: 'Play ball at the baseball diamond',
       icon: BALL_ICON,
-      run: function () { firePath(BASEBALL_URL); },
-      isHighlighted: ballCanBePlayed
+      run: playBall,
+      highlightState: baseballHighlight
     },
     {
       key: 'cup13',
@@ -232,11 +326,25 @@
     ].join(';');
   }
 
-  // Draw attention to an action button (e.g. a ball is ready to play).
-  function highlightButton(btn) {
-    btn.style.borderColor = '#e0a000';
-    btn.style.background = '#fff6d5';
-    btn.style.boxShadow = '0 0 4px #e0a000';
+  // Draw attention to an action button. `kind` picks the treatment:
+  //   'spent' -- subdued/muted (e.g. the diamond is used up for the day)
+  //   'ready' (default) -- strong, hard-to-miss (e.g. a ball is ready to play)
+  function highlightButton(btn, kind) {
+    if (kind === 'spent') {
+      btn.style.borderColor = '#8a97a8';
+      btn.style.background = '#e9edf2';
+      btn.style.color = '#556';
+      btn.style.boxShadow = 'none';
+      btn.style.fontWeight = 'normal';
+      btn.style.opacity = '0.85';
+      return;
+    }
+    // 'ready': bright green with a bold glow -- much stronger than the old
+    // subtle yellow.
+    btn.style.borderColor = '#1f9d1f';
+    btn.style.background = '#b8f5b0';
+    btn.style.color = '#0a3d0a';
+    btn.style.boxShadow = '0 0 7px 2px #2ecc40';
     btn.style.fontWeight = 'bold';
   }
 
@@ -273,18 +381,17 @@
     span.textContent = action.label;
     btn.appendChild(span);
 
-    // Highlight when the action flags itself as ready (e.g. ball playable).
-    // `isHighlighted` may return a boolean or a Promise<boolean> (the baseball
-    // check fetches the item description); apply the highlight synchronously, or
-    // once the promise resolves true. The popup is rebuilt each open, so this
-    // re-checks freshly every time.
-    if (typeof action.isHighlighted === 'function') {
-      const hi = action.isHighlighted();
-      if (hi && typeof hi.then === 'function') {
-        hi.then(function (ok) { if (ok) highlightButton(btn); })
+    // Highlight per the action's state. `highlightState` returns a kind
+    // ('ready' | 'spent'), null for none, or a Promise of one (the baseball
+    // check fetches the item description). Apply synchronously or once resolved.
+    // The popup is rebuilt each open, so this re-checks freshly every time.
+    if (typeof action.highlightState === 'function') {
+      const st = action.highlightState();
+      if (st && typeof st.then === 'function') {
+        st.then(function (kind) { if (kind) highlightButton(btn, kind); })
           .catch(function () { /* leave un-highlighted */ });
-      } else if (hi) {
-        highlightButton(btn);
+      } else if (st) {
+        highlightButton(btn, st);
       }
     }
 
@@ -900,6 +1007,124 @@
     document.body.insertBefore(panel, document.body.firstChild);
   }
 
+  // === Cup of 13s ingredient sort (choice.php, whichchoice=1601) =======
+  // The Cup of 13s choice offers three identical ingredient dropdowns
+  // (whichitem1..3). This adds a toolbar to re-order the options in all three
+  // by adventures, additional effect, inventory amount, or name -- it only
+  // reorders <option>s, changing nothing the form submits.
+
+  const CUP13_CHOICE = '1601';
+
+  // Parse one ingredient <option>. Label format is
+  // "NAME (QTY) - N Adv.[, EXTRA]", e.g.
+  //   "hot wing (16) - 1 Adv."            -> qty 16, advs 1, effect ''
+  //   "alarm accordion (1) - 1 Adv., 100 Mys"     -> effect '100 Mys'
+  //   "bum cheek (1) - 2 Adv., 20 turns of Runneth a Fever'
+  // QTY is the amount in inventory; advs is read from the reliable data-advs
+  // attribute (not the text). EXTRA (if any) is the additional effect.
+  function parseCupOption(opt) {
+    const text = (opt.textContent || '').trim();
+    const advs = parseInt(opt.getAttribute('data-advs'), 10) || 0;
+    const m = text.match(/^(.*) \((\d+)\) - \d+ Adv\.(?:,\s*(.*))?$/);
+    return {
+      name: m ? m[1] : text,
+      qty: m ? (parseInt(m[2], 10) || 0) : 0,
+      advs: advs,
+      effect: (m && m[3]) ? m[3].trim() : ''
+    };
+  }
+
+  // Comparators over parsed option info. Name is the game's default order; the
+  // others fall back to name to stay stable/predictable on ties.
+  const CUP13_SORTS = {
+    name: function (a, b) { return a.name.localeCompare(b.name); },
+    advs: function (a, b) {
+      return (b.advs - a.advs) || a.name.localeCompare(b.name);
+    },
+    inventory: function (a, b) {
+      return (b.qty - a.qty) || a.name.localeCompare(b.name);
+    },
+    effect: function (a, b) {
+      // Options with an additional effect first (by effect text), then the rest
+      // by name.
+      const ae = a.effect ? 0 : 1;
+      const be = b.effect ? 0 : 1;
+      if (ae !== be) return ae - be;
+      if (a.effect && b.effect) {
+        const c = a.effect.localeCompare(b.effect);
+        if (c) return c;
+      }
+      return a.name.localeCompare(b.name);
+    }
+  };
+
+  function cup13Selects() {
+    return Array.prototype.slice.call(
+      document.querySelectorAll(
+        'select[name="whichitem1"], select[name="whichitem2"], ' +
+        'select[name="whichitem3"]'));
+  }
+
+  // Reorder every ingredient dropdown by `compare`. appendChild moves the
+  // existing <option> nodes (no re-creation), and we restore each select's
+  // current value so the player's pick survives the sort.
+  function sortCup13(selects, compare) {
+    selects.forEach(function (sel) {
+      const selectedVal = sel.value;
+      const items = Array.prototype.map.call(sel.options, function (opt) {
+        return { opt: opt, info: parseCupOption(opt) };
+      });
+      items.sort(function (a, b) { return compare(a.info, b.info); });
+      items.forEach(function (it) { sel.appendChild(it.opt); });
+      sel.value = selectedVal;
+    });
+  }
+
+  function buildCup13Toolbar(selects) {
+    const bar = document.createElement('div');
+    bar.id = 'tm-cup13-sort';
+    bar.style.cssText = [
+      'margin:4px 0 8px', 'display:flex', 'flex-wrap:wrap', 'gap:4px',
+      'align-items:center', 'font-family:arial', 'font-size:11px'
+    ].join(';');
+
+    const label = document.createElement('span');
+    label.textContent = 'Sort ingredients:';
+    label.style.marginRight = '2px';
+    bar.appendChild(label);
+
+    [
+      { key: 'advs', text: '# Adv.' },
+      { key: 'effect', text: 'Effect' },
+      { key: 'inventory', text: 'Inventory' },
+      { key: 'name', text: 'Name' }
+    ].forEach(function (b) {
+      const btn = document.createElement('button');
+      btn.type = 'button';           // never submits the surrounding form
+      btn.className = 'button';
+      btn.textContent = b.text;
+      btn.addEventListener('click', function () {
+        sortCup13(selects, CUP13_SORTS[b.key]);
+      });
+      bar.appendChild(btn);
+    });
+    return bar;
+  }
+
+  function initCup13Sort() {
+    if (document.getElementById('tm-cup13-sort')) return;
+    // Only the Cup of 13s choice carries whichchoice=1601.
+    if (!document.querySelector(
+        'input[name="whichchoice"][value="' + CUP13_CHOICE + '"]')) {
+      return;
+    }
+    const selects = cup13Selects();
+    if (!selects.length) return;
+    // Drop the toolbar just above the ingredient form.
+    const form = selects[0].form || selects[0];
+    form.parentNode.insertBefore(buildCup13Toolbar(selects), form);
+  }
+
   // --- Dispatch --------------------------------------------------------
   // Run last, so the `const` config above is past its temporal dead zone by the
   // time addButton()/firePath() read it. The all-in-one loader @requires every KoL
@@ -911,5 +1136,6 @@
     addButton();
   } else if (/\/choice\.php/i.test(PATH)) {
     initDecorator();
+    initCup13Sort();
   }
 })();

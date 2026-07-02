@@ -89,7 +89,7 @@ and updates independently via its `@downloadURL`.
 
 ## Editing / contributing
 
-There is no build, bundler, package manager, test suite, or linter. You edit a
+There is no build, bundler, package manager, test runner, or linter. You edit a
 `.js` file, then reload it in your userscript manager against the live page to
 try it. See [`AGENTS.md`](./AGENTS.md) for architecture and conventions. The two
 rules that bite if you forget them:
@@ -132,3 +132,19 @@ This is a no-op for the standalone install (its `@match` already scopes it) but
 keeps the script from acting on a sibling page when bundled. Scripts that purely
 scrape-and-bail (no UI/side effect when their anchor is absent) don't strictly
 need it, but adding one is the safe default.
+
+### Tests
+
+There's no test runner. The few bits of pure logic worth checking without a
+browser have **standalone Node scripts** in a `test/` subfolder inside the
+relevant game directory, named `*.test.mjs` and run directly with `node`:
+
+```
+node KingdomOfLoathing/test/iotm-cup13-sort.test.mjs
+node TwilightHeroes/test/quest-helper.test.mjs
+```
+
+Each is dependency-free: it loads the userscript, evaluates its IIFE against a
+stub DOM, and asserts on the internals. Copy an existing one when adding a test,
+and keep it in the game's `test/` subfolder. See [`AGENTS.md`](./AGENTS.md) for
+the re-expose trick these use to reach an IIFE's internals.
