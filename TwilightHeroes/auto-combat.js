@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/auto-combat.js
-// @version      1.6
+// @version      1.7
 // @description  Adds three combat automation buttons. On fight.php: "repeat attack until fight done" next to the Attack button, and "repeat skill until fight done" next to the Use-a-Skill button (each re-issues that action every round until the fight ends). "adventure here again and attack until done" appears on the fight-over screen and below the Last Area Patrolled link in the nav sidebar; it re-adventures the same location and auto-attacks, fight after fight, until you hit a non-combat encounter, your HP drops below a threshold, or you run out of turns. Loops by re-submitting the real forms (one visible page reload per round) with a brief Stop window each round; HP is read from the per-round combat form and the sidebar. After each won fight in an adventure chain (buffs can't be cast mid-combat), if PP has filled up it refreshes the shortest-duration buff before re-adventuring by driving that effect's "+max" button in the nav sidebar (added by skills-cast-max.js). On non-combat encounters it adds a "remember choice" button beside each option; once remembered, that option is auto-picked whenever the same encounter recurs during an adventure chain, and choiceless non-combats auto-advance (re-adventure) instead of halting the chain. A "remembered choices…" button in the nav sidebar opens a popup listing every remembered encounter→option pick, with a Delete per row and a Delete-all.
 // @match        https://www.twilightheroes.com/fight.php*
 // @match        https://twilightheroes.com/fight.php*
@@ -156,8 +156,11 @@
   // ---------------------------------------------------------------------------
   // Non-combat encounters (fight.php). A non-combat heads its result with an
   // <h2>Encounter Name</h2> (combat uses <h1>Combat!</h1>). Its options are a
-  // radio group sharing name="choice" inside one form, each radio followed by
-  // its label text, picked via a single submit button — e.g.
+  // radio group inside one form, each radio followed by its label text, picked
+  // via a single submit button. The group's name varies — classic branch pickers
+  // use name="choice"; others (e.g. a prize picker) carry a hidden name="choice"
+  // action plus radios named "itemid" — so choiceOptions() keys off the radios,
+  // not a fixed name. E.g.
   //   <input type="radio" name="choice" value="1"> Exit stage left<br>...
   //   <input type="submit" value="Pick Your Exit">
   // We key a remembered pick on the encounter name (text only, so a wiki-links
@@ -176,11 +179,18 @@
     return s || h2.textContent.trim() || null;
   }
 
-  // The non-combat radio options (combat's name="choice" inputs are hidden, not
-  // radios, so they never match — and attackForm() short-circuits combat anyway).
+  // The non-combat radio options. The option group's name varies by encounter:
+  // classic branch-pickers use name="choice", while others (e.g. a prize/item
+  // picker) put a single hidden name="choice" action alongside radios named
+  // "itemid" — so we detect the first radio in a form and gather its whole group
+  // by that name rather than hard-coding "choice". Combat rounds never reach here
+  // (their name="choice" inputs are hidden, not radios, and attackForm()
+  // short-circuits combat in both callers anyway).
   function choiceOptions() {
-    const radio = document.querySelector('form input[type="radio"][name="choice"]');
-    return radio ? Array.from(radio.form.querySelectorAll('input[type="radio"][name="choice"]')) : [];
+    const radio = document.querySelector('form input[type="radio"]');
+    if (!radio) return [];
+    const name = radio.name;
+    return Array.from(radio.form.querySelectorAll('input[type="radio"][name="' + name + '"]'));
   }
 
   // An option's label is the run of text after its radio up to the next <br> /
