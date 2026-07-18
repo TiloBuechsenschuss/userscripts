@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/daily-checklist.js
-// @version      1.17
+// @version      1.19
 // @description  Adds a Checklist button next to the IotM button that opens a daily to-do list popup. Items can carry a KoL action link (pwd filled live) and be greyed out when not relevant to the current run. A persistent ronin / post-ronin toggle auto-disables the tasks that only apply to one phase. Checked items reset each day (or manually).
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -49,7 +49,7 @@
   // An item marked `hidden: true` is skipped entirely during seeding -- the
   // tidy alternative to commenting the block out (see applySeeds).
   // Bump SEED_VERSION to push new defaults to people who already have a saved list.
-  const SEED_VERSION = 5;
+  const SEED_VERSION = 6;
   const SEED_ITEMS = [
     {
       text: 'Dig with spade',
@@ -59,10 +59,6 @@
     {
       text: 'Play baseball',
       url: '/inventory.php?pwd=' + PWD_TOKEN + '&action=pball'
-    },
-    {
-      text: 'Read manual',
-      url: '/inv_use.php?pwd=' + PWD_TOKEN + '&which=3&whichitem=' + MANUAL_TOKEN
     },
     {
       text: 'get friar blessings',
