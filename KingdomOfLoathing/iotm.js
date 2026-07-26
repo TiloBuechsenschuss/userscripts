@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/iotm.js
-// @version      1.25
-// @description  Adds an "IotM" button to the KoL icon menu that opens a small popup of Item-of-the-Month actions: fire the Codpiece (inventory.php?action=docodpiece), play ball at the baseball diamond (highlighted when a ball is available), drink from the Cup of 13s, and open the Allied Radio Backpack. Also highlights the worthwhile pitch buttons on the Play Ball! choice (choice.php whichchoice=1598), adds sort buttons to the Cup of 13s ingredient dropdowns (choice.php whichchoice=1601), adds a one-click request table to the Allied Radio Backpack's Request Supply Drop choice (choice.php whichchoice=1561), and keeps the Eternity Codpiece decoration tools (choice.php whichchoice=1588) for setting every gem slot at once and saving/loading gem setups.
+// @version      1.26
+// @description  Adds an "IotM" button to the KoL icon menu that opens a small popup of Item-of-the-Month actions: fire the Codpiece (inventory.php?action=docodpiece), play ball at the baseball diamond (highlighted when a ball is available), drink from the Cup of 13s, and open the Allied Radio Backpack. Also highlights the worthwhile pitch buttons on the Play Ball! choice (choice.php whichchoice=1598), adds sort buttons to the Cup of 13s ingredient dropdowns (choice.php whichchoice=1601), adds a one-click request table to the Request Supply Drop choice for both the Allied Radio Backpack and the handheld Allied radio (choice.php, detected by the request field), and keeps the Eternity Codpiece decoration tools (choice.php whichchoice=1588) for setting every gem slot at once and saving/loading gem setups.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
 // @match        https://www.kingdomofloathing.com/topmenu.php*
@@ -1231,15 +1231,16 @@
     });
   }
 
-  // === Request Supply Drop (choice.php, whichchoice=1561) ==============
-  // The Allied Radio Backpack's Request Supply Drop choice has a single free-
-  // text field: you type a "request word" and submit. Only rations/fuel/
-  // ordnance are legible on the pack; the rest are secret words discovered
-  // from puzzles/hints. This adds a reference table of every known request
-  // with what it yields and a button per row that fills the field and fires
-  // the call (behind a confirm -- calls are limited to 3/day).
-
-  const SUPPLY_DROP_CHOICE = '1561';
+  // === Request Supply Drop (choice.php) ================================
+  // Both the Allied Radio Backpack (whichchoice=1561) and the handheld Allied
+  // radio it can birth run a Request Supply Drop choice: a single free-text
+  // field where you type a "request word" and submit. The request words (and
+  // what each yields) are identical between the two, so rather than pin a
+  // whichchoice number we detect the choice by its <input name="request">
+  // field. Only rations/fuel/ordnance are legible on the pack; the rest are
+  // secret words discovered from puzzles/hints. This adds a reference table of
+  // every known request with what it yields and a button per row that fills the
+  // field and fires the call (behind a confirm -- calls are limited per day).
 
   // Known request words and what each delivers. rations/fuel/ordnance are
   // always available; the rest are "secret" words (a couple once-per-day).
@@ -1332,14 +1333,14 @@
 
   function initSupplyDrop() {
     if (document.getElementById('tm-supplydrop')) return;
-    // Only the Request Supply Drop choice carries whichchoice=1561.
-    if (!document.querySelector(
-        'input[name="whichchoice"][value="' + SUPPLY_DROP_CHOICE + '"]')) {
-      return;
-    }
+    // Detect the Request Supply Drop choice by its free-text request field
+    // rather than a whichchoice number, so it works for both the Allied Radio
+    // Backpack and the handheld radio (different choices, same request field).
     const input = document.querySelector(
       'form[action="choice.php"] input[name="request"]');
     if (!input || !input.form) return;
+    // Guard: the form must be an actual choice submission (has whichchoice).
+    if (!input.form.querySelector('input[name="whichchoice"]')) return;
     const form = input.form;
     const table = buildSupplyDropTable(form, input);
     // Drop the table just below the request form.

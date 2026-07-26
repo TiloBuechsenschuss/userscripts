@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/daily-checklist.js
-// @version      1.19
+// @version      1.20
 // @description  Adds a Checklist button next to the IotM button that opens a daily to-do list popup. Items can carry a KoL action link (pwd filled live) and be greyed out when not relevant to the current run. A persistent ronin / post-ronin toggle auto-disables the tasks that only apply to one phase. Checked items reset each day (or manually).
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -49,16 +49,12 @@
   // An item marked `hidden: true` is skipped entirely during seeding -- the
   // tidy alternative to commenting the block out (see applySeeds).
   // Bump SEED_VERSION to push new defaults to people who already have a saved list.
-  const SEED_VERSION = 6;
+  const SEED_VERSION = 7;
   const SEED_ITEMS = [
     {
       text: 'Dig with spade',
       url: '/inv_use.php?pwd=' + PWD_TOKEN + '&which=f-1&whichitem=12184',
       hidden: true
-    },
-    {
-      text: 'Play baseball',
-      url: '/inventory.php?pwd=' + PWD_TOKEN + '&action=pball'
     },
     {
       text: 'get friar blessings',
@@ -120,6 +116,20 @@
     },
     {
       text: 'Put on rollover gear and familiar'
+    }
+  ];
+  // Seeded defaults to prune from existing lists when the seed marker advances
+  // (see applySeeds). Deleting a seed from SEED_ITEMS only stops NEW lists from
+  // getting it; anyone who already has it keeps it until it's listed here.
+  // Matched like SEED_ITEMS (by url or text) and only removes auto-seeded
+  // entries, so a user's own same-named item is never touched. Safe to leave in
+  // place after everyone's marker has passed -- it simply stops matching.
+  const REMOVED_SEEDS = [
+    // Baseball diamond: the IotM menu already highlights it and it alerts after
+    // combat, so the checklist entry is redundant.
+    {
+      text: 'Play baseball',
+      url: '/inventory.php?pwd=' + PWD_TOKEN + '&action=pball'
     }
   ];
   // ----------------------------------------------------------------------
@@ -243,6 +253,17 @@
   // default keeps it gone. Returns true if state changed.
   function applySeeds(s) {
     if ((s.seed || 0) >= SEED_VERSION) return false;
+    // Prune retired defaults. Only auto-seeded entries (it.seeded) are eligible,
+    // so a task the user added themselves is left alone even if it happens to
+    // share a url/text with a removed seed.
+    if (REMOVED_SEEDS.length) {
+      s.items = s.items.filter(function (it) {
+        if (!it.seeded) return true;
+        return !REMOVED_SEEDS.some(function (r) {
+          return (r.url && it.url === r.url) || it.text === r.text;
+        });
+      });
+    }
     SEED_ITEMS.forEach(function (seed) {
       // `hidden` seeds are skipped entirely -- they're effectively commented
       // out: never injected, never backfilled. Leave the flag in place so the
