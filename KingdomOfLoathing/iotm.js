@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/iotm.js
-// @version      1.23
-// @description  Adds an "IotM" button to the KoL icon menu that opens a small popup of Item-of-the-Month actions: fire the Codpiece (inventory.php?action=docodpiece), play ball at the baseball diamond (highlighted when a ball is available), and drink from the Cup of 13s. Also highlights the worthwhile pitch buttons on the Play Ball! choice (choice.php whichchoice=1598), adds sort buttons to the Cup of 13s ingredient dropdowns (choice.php whichchoice=1601), and keeps the Eternity Codpiece decoration tools (choice.php whichchoice=1588) for setting every gem slot at once and saving/loading gem setups.
+// @version      1.25
+// @description  Adds an "IotM" button to the KoL icon menu that opens a small popup of Item-of-the-Month actions: fire the Codpiece (inventory.php?action=docodpiece), play ball at the baseball diamond (highlighted when a ball is available), drink from the Cup of 13s, and open the Allied Radio Backpack. Also highlights the worthwhile pitch buttons on the Play Ball! choice (choice.php whichchoice=1598), adds sort buttons to the Cup of 13s ingredient dropdowns (choice.php whichchoice=1601), adds a one-click request table to the Allied Radio Backpack's Request Supply Drop choice (choice.php whichchoice=1561), and keeps the Eternity Codpiece decoration tools (choice.php whichchoice=1588) for setting every gem slot at once and saving/loading gem setups.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
 // @match        https://www.kingdomofloathing.com/topmenu.php*
@@ -64,6 +64,28 @@
     '9hEDCwivKONbKXZohKbiZ1mXJlmhHtLbsUm4hhqc+lMJwKzPQymiVEaP4nynkeikRhhSIxS5zX' +
     'S6mXbjWcwIhuXMSQ2p5L2vIljdZTzITHFE72B3PPXLxP2Y5vZ4z0MiQVkUXntK4T92V6eJgbx/' +
     '5Oz2ym2paLBH92CFUryT2pEAAAAAElFTkSuQmCC';
+
+  // Allied Radio Backpack item icon, inlined as a data URI for the same reason
+  // as the icons above (no network fetch, CSP-proof). The source PNG is kept in
+  // the repo at assets/radiobackpack.png for reference; this is its base64.
+  const RADIO_BACKPACK_ICON =
+    'data:image/png;base64,' +
+    'iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAAAXNSR0IArs4c' +
+    '6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJeSURB' +
+    'VEhLtZa7jQJBEETXJAASIAgSIRHSIRlSwMTExcTE3NNb6aHaZmc/ElfS6LiZ' +
+    '7q7+Te90/Qxer1fd+hm6upE4nU795XKp2wOez2f/eDz69/tdjz7A8ZZMk/h+' +
+    'v/e73W4gv91un30Ij8dj33XdsPb7fX+9Xke6yKfM4XAY7CUmic/n80cJcv4X' +
+    'OIIhMgEB/yOnYfZwBmJkcIrf6OC0mCRGGSUM8tdUYZy9jJAziHQORyDK/iDd' +
+    'BJBlmyRGAEEjNtUQ4nmFWSCilE/gTGZukhgPTXcaIWIIarMoi8OWASezrjqn' +
+    '7iQxQBFjpgyFbLhcGDQ79obL9OIcJRGLxKSIlUbdS3IMQ8LCWfuBM2DtRZOY' +
+    'FFdinNkyVIhwMzGNAjFpRAniLaA0XkU7XydAkxjhrOFWYhrUGpMlfi92dQIH' +
+    'UMg0Aa8WZzgHUT2HzPJko4EmMcJ2orVOOGBq99ZzHFodMYJEYVfWxgBrielu' +
+    '+2WWGAWj9MJLTNpQNvVJTA8g7y3QBsQ60Uy1MzWNQWb07lVSll2rkw6V/Jrl' +
+    'VRwRO/pYKOq104q7TQYwUKdUXpW0ZbSZZjAilohlN/ptTcNOpVy1xpkl7NbB' +
+    'MyJOQykIcfU46+2QSCRxdQo0ifPLkt/btTDVLb0RsQ2hl0SRg2ILJG5hdJJ3' +
+    'k+bJmv8rMcirgrLO1AfdErxSLXwRc++MlAaTOB9qS/AJVKdd4osY+NIgYroz' +
+    'Xw5r4AdirjyTxCBH51biqRFZ0SQWTjCiwBDLsWgd6yJbrPqITywS5yDIbncu' +
+    '58qBMkcKFom5y0RJxM7qX+APITvhw4H8XiQAAAAASUVORK5CYII=';
 
   // Face for the IotM menu button itself. Source GIF kept at assets/mracc.gif.
   const IOTM_ICON =
@@ -307,6 +329,13 @@
       title: 'Drink from the Cup of 13s',
       icon: CUP13_ICON,
       run: function () { firePath(CUP13_URL); }
+    },
+    {
+      key: 'radiobackpack',
+      label: 'Radio Backpack',
+      title: 'Allied Radio Backpack',
+      icon: RADIO_BACKPACK_ICON,
+      run: function () { firePath('/inventory.php?action=requestdrop'); }
     }
   ];
 
@@ -1202,6 +1231,121 @@
     });
   }
 
+  // === Request Supply Drop (choice.php, whichchoice=1561) ==============
+  // The Allied Radio Backpack's Request Supply Drop choice has a single free-
+  // text field: you type a "request word" and submit. Only rations/fuel/
+  // ordnance are legible on the pack; the rest are secret words discovered
+  // from puzzles/hints. This adds a reference table of every known request
+  // with what it yields and a button per row that fills the field and fires
+  // the call (behind a confirm -- calls are limited to 3/day).
+
+  const SUPPLY_DROP_CHOICE = '1561';
+
+  // Known request words and what each delivers. rations/fuel/ordnance are
+  // always available; the rest are "secret" words (a couple once-per-day).
+  const SUPPLY_DROP_OPTIONS = [
+    { label: 'Rations', req: 'rations',
+      desc: 'Skeleton Wars rations (food).' },
+    { label: 'Fuel', req: 'fuel',
+      desc: 'Skeleton war fuel can.' },
+    { label: 'Ordnance', req: 'ordnance',
+      desc: 'Skeleton war grenade.' },
+    { label: 'Salary', req: 'salary',
+      desc: '15 Chroner.' },
+    { label: 'Radio', req: 'radio',
+      desc: 'A handheld Allied radio (a second, portable radio).' },
+    { label: 'Sniper Support', req: 'sniper support',
+      desc: 'Forces a non-combat on your next adventure.' },
+    { label: 'Ellipsoidtine', req: 'ellipsoidtine',
+      desc: 'Ellipsoidtined effect (30 turns); also removes one negative ' +
+            'effect.' },
+    { label: 'Materiel Intel', req: 'materiel intel',
+      desc: 'Materiel Intel effect (10 turns). Once per day.' },
+    { label: 'Wildsun Boon', req: 'wildsun boon',
+      desc: 'Wildsun Boon effect (100 turns). Once per day.' }
+  ];
+
+  // Fill the choice's request field and submit the real page form, so the
+  // result renders in the mainpane exactly as a manual call would. The form
+  // already carries the pwd/whichchoice/option hidden inputs.
+  function fireSupplyDrop(form, input, opt) {
+    if (!confirm('Request "' + opt.req +
+                 '"? This uses one of your daily calls.')) {
+      return;
+    }
+    input.value = opt.req;
+    form.submit();
+  }
+
+  function buildSupplyDropTable(form, input) {
+    const wrap = document.createElement('div');
+    wrap.id = 'tm-supplydrop';
+    wrap.style.cssText = [
+      'max-width:520px', 'margin:8px auto', 'padding:8px',
+      'border:1px solid blue', 'background:#f5f5ff',
+      'font-family:arial', 'font-size:11px', 'text-align:left'
+    ].join(';');
+
+    const title = document.createElement('b');
+    title.textContent = 'Supply drop requests';
+    wrap.appendChild(title);
+
+    const table = document.createElement('table');
+    table.style.cssText =
+      'margin-top:6px;border-collapse:collapse;width:100%';
+
+    SUPPLY_DROP_OPTIONS.forEach(function (opt) {
+      const tr = document.createElement('tr');
+
+      const tdBtn = document.createElement('td');
+      tdBtn.style.cssText =
+        'padding:2px 6px;vertical-align:top;white-space:nowrap';
+      const btn = document.createElement('button');
+      btn.type = 'button';           // never submits via the button itself
+      btn.className = 'button';
+      btn.textContent = opt.label;
+      btn.title = 'Request "' + opt.req + '"';
+      btn.addEventListener('click', function () {
+        fireSupplyDrop(form, input, opt);
+      });
+      tdBtn.appendChild(btn);
+
+      const tdDesc = document.createElement('td');
+      tdDesc.style.cssText = 'padding:2px 6px;vertical-align:top';
+      tdDesc.textContent = opt.desc;
+
+      tr.appendChild(tdBtn);
+      tr.appendChild(tdDesc);
+      table.appendChild(tr);
+    });
+    wrap.appendChild(table);
+
+    const note = document.createElement('div');
+    note.style.cssText = 'margin-top:6px;color:#556;font-size:10px';
+    note.textContent =
+      'Rations, fuel and ordnance are always available; the rest are ' +
+      'secret request words. Each button fills the field and makes the call.';
+    wrap.appendChild(note);
+
+    return wrap;
+  }
+
+  function initSupplyDrop() {
+    if (document.getElementById('tm-supplydrop')) return;
+    // Only the Request Supply Drop choice carries whichchoice=1561.
+    if (!document.querySelector(
+        'input[name="whichchoice"][value="' + SUPPLY_DROP_CHOICE + '"]')) {
+      return;
+    }
+    const input = document.querySelector(
+      'form[action="choice.php"] input[name="request"]');
+    if (!input || !input.form) return;
+    const form = input.form;
+    const table = buildSupplyDropTable(form, input);
+    // Drop the table just below the request form.
+    form.parentNode.insertBefore(table, form.nextSibling);
+  }
+
   // --- Dispatch --------------------------------------------------------
   // Run last, so the `const` config above is past its temporal dead zone by the
   // time addButton()/firePath() read it. The all-in-one loader @requires every KoL
@@ -1215,5 +1359,6 @@
     initDecorator();
     initCup13Sort();
     initBallPitchHighlight();
+    initSupplyDrop();
   }
 })();
