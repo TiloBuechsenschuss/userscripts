@@ -79,6 +79,14 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   filter categories by **matching text in the `<option>` label**, never by item ID; the Mr. Store
   (IotM) bucket therefore matches each gem by its item name *or* its enchantment, since it isn't
   verified in-game which of the two KoL renders there.
+- `quest-helper.js` is the other `choice.php` script: a small registry of puzzle answers
+  (`PUZZLES`, keyed by `whichchoice`) with a UI bar injected only when a matching choice is
+  on screen. It deliberately **never submits** — each entry's button only fills the form in,
+  and the player presses KoL's own submit button, so a wrong database entry can't burn a turn.
+  The `selects` puzzle type stores each answer as both an item id (the `<option>` value, the
+  primary key) and its label (fallback). Add new puzzles as entries, not as new files. Because
+  a choice page carries the same `whichchoice` on several forms (the action form *and* "Leave"),
+  `findForm` matches on the puzzle's fields too rather than taking the first hit.
 
 **Twilight Heroes** is plain (non-frame) pages scraped from table layout. State that must
 survive the full-page reload after equip/unequip/use is stashed in `sessionStorage`
