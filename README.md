@@ -63,6 +63,7 @@ and updates independently via its `@downloadURL`.
 | `inventory-collapse.js` | inventory | "Collapse all / Expand all" button that flips every inventory category open or closed at once |
 | `equip-optimize.js` | inventory (equipment) | "Optimize for this" button that equips the highest-value item per slot for whatever the enchantment-sort dropdown is sorting by, with element / Monster Level / encounter pickers for those sorts |
 | `boss-aggro-warn.js` | place / cobbsknob / crypt / cellar | Warns before you enter a special-reward boss's lair if your Monster Aggravation Device isn't set to force the unique reward to drop |
+| `ux-enhancers.js` | hermit | Grab-bag of small quality-of-life tweaks; currently a "Buy all clovers" button at the Hermit that trades for every 11-leaf clover still in stock today |
 | `adventure-choices.js` | many | Choice-adventure reward annotations *(not in the loader — uses `GM_*`)* |
 
 **Twilight Heroes** (`TwilightHeroes/`)
