@@ -44,6 +44,10 @@
 // @match        https://kingdomofloathing.com/cellar.php*
 // @match        https://www.kingdomofloathing.com/hermit.php*
 // @match        https://kingdomofloathing.com/hermit.php*
+// @match        https://www.kingdomofloathing.com/tiles.php*
+// @match        https://kingdomofloathing.com/tiles.php*
+// @match        https://www.kingdomofloathing.com/adventure.php*
+// @match        https://kingdomofloathing.com/adventure.php*
 //
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/iotm.js
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/daily-checklist.js
@@ -70,3 +74,9 @@
 // and bails out harmlessly on every other page. This loader only exists to
 // pull them in from one install. To add/remove a bundled script, edit the
 // @require list (and the @match union) here and bump @version.
+//
+// tiles.php and adventure.php are in the @match union only for quest-helper.js:
+// the Hidden Temple tile-floor puzzle uses the custom tiles.php endpoint, and its
+// first screen renders as an ordinary adventure result. adventure.php is a hot
+// page, but every bundled script gates on location.pathname before doing anything,
+// so the rest just bail there.

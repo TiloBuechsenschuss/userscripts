@@ -86,7 +86,27 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   The `selects` puzzle type stores each answer as both an item id (the `<option>` value, the
   primary key) and its label (fallback). Add new puzzles as entries, not as new files. Because
   a choice page carries the same `whichchoice` on several forms (the action form *and* "Leave"),
-  `findForm` matches on the puzzle's fields too rather than taking the first hit.
+  `findSelectsForm` matches on the puzzle's fields too rather than taking the first hit.
+  A second type, `tiles` ("step on these, in this order"), only *highlights* — reusing
+  `mine-sparkle-highlight.js`'s gold JS-timer pulse, and for the same CSP reason (KoL allows
+  inline style attributes but blocks script-injected stylesheets, so CSS classes/`@keyframes`
+  do nothing). Its entry is **Beginning at the Beginning of Beginning**, the Hidden Temple tile
+  floor, and it shows why the registry has a `page` regex: that puzzle is *not* on `choice.php`
+  at all — it uses a custom **`tiles.php`** endpoint, with its first screen rendered as an
+  ordinary `adventure.php` result. With no `whichchoice` to gate on it uses `detect` instead
+  (≥4 lettered tile images on the page), which is also what keeps it quiet on the rest of
+  `adventure.php`.
+  The path rule is **positional, not a letter hunt**: you stand on the arrow row and jump one
+  row up at a time, and the 7-row grid spells `BANANAS` bottom-to-top, one tile per row. So
+  `planTiles` counts the rows still *above the arrows* and takes that many letters off the **end**
+  of the word — which self-corrects as the page re-renders between steps (6 rows left ⇒
+  `ANANAS`) and after a fatal misstep restarts the puzzle, so the script keeps no state. It's
+  kept DOM-free (rows in, indices out) for that reason and to stay unit-testable. What is
+  *unverified* is only the artwork: `letterOfTile`/`isArrow` read `tile<letter>.gif` and
+  `left/rightarrow.gif` off the wiki's copies of the images, with an alt/title fallback — if the
+  live `tiles.php` names them differently, those two functions are the only things to fix.
+  Note `tiles` auto-runs on sight since highlighting commits nothing, while `selects` stays
+  behind its button.
 
 **Twilight Heroes** is plain (non-frame) pages scraped from table layout. State that must
 survive the full-page reload after equip/unequip/use is stashed in `sessionStorage`

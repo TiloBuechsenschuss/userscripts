@@ -63,7 +63,7 @@ and updates independently via its `@downloadURL`.
 | `inventory-collapse.js` | inventory | "Collapse all / Expand all" button that flips every inventory category open or closed at once |
 | `equip-optimize.js` | inventory (equipment) | "Optimize for this" button that equips the highest-value item per slot for whatever the enchantment-sort dropdown is sorting by, with element / Monster Level / encounter pickers for those sorts |
 | `boss-aggro-warn.js` | place / cobbsknob / crypt / cellar | Warns before you enter a special-reward boss's lair if your Monster Aggravation Device isn't set to force the unique reward to drop |
-| `quest-helper.js` | choice | Fills in the answer to puzzle-y quest choice adventures (currently Drawn Onward — the photo frames in Dr. Awkward's office); never submits, you press the game's own button |
+| `quest-helper.js` | choice / tiles / adventure | Fills in or highlights the answer to puzzle-y quest adventures: Drawn Onward sets Dr. Awkward's four photo dropdowns; the Hidden Temple tile floor (Beginning at the Beginning of Beginning) glows the tile to step on in each row, spelling B-A-N-A-N-A-S from the bottom up and numbered in step order. Never submits or clicks — you make the move |
 | `ux-enhancers.js` | hermit | Grab-bag of small quality-of-life tweaks; currently a "Buy all clovers" button at the Hermit that trades for every 11-leaf clover still in stock today |
 | `adventure-choices.js` | many | Choice-adventure reward annotations *(not in the loader — uses `GM_*`)* |
 
