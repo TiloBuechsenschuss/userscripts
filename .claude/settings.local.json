@@ -12,7 +12,10 @@
       "Bash(node \"C:\\\\Users\\\\tilob\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\E--Projects-userscripts\\\\889ffa37-a4d5-4365-8cb2-e872f94a8b02\\\\scratchpad\\\\test.mjs\")",
       "Bash(node --check KingdomOfLoathing/ux-enhancers.js)",
       "Bash(node scripts/bump-loaders.mjs)",
-      "PowerShell(Get-ChildItem *)"
+      "PowerShell(Get-ChildItem *)",
+      "Bash(curl -s -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120 Safari/537.36\" \"https://wiki.kingdomofloathing.com/api.php?action=parse&page=Decorate_Your_Eternity_Codpiece&prop=wikitext&format=json\")",
+      "Bash(curl -s -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/120 Safari/537.36\" \"https://wiki.kingdomofloathing.com/api.php?action=parse&page=Decorate_Your_Eternity_Codpiece&prop=wikitext&format=json\")",
+      "PowerShell(\\(Get-Command node -ErrorAction SilentlyContinue\\).Source; node --version)"
     ]
   }
 }

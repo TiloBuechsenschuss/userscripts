@@ -71,7 +71,10 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   form submissions in one go: replay each slot's `Replace` form as a sequential
   `fetch(... credentials:'same-origin')` POST, then `location.reload()` once so the server stays
   authoritative about item availability rather than trusting the stale page. Named gem setups
-  are persisted in `localStorage` under `tm-codpiece-setups`.
+  are persisted in `localStorage` under `tm-codpiece-setups`. Gems are bucketed into the panel's
+  filter categories by **matching text in the `<option>` label**, never by item ID; the Mr. Store
+  (IotM) bucket therefore matches each gem by its item name *or* its enchantment, since it isn't
+  verified in-game which of the two KoL renders there.
 
 **Twilight Heroes** is plain (non-frame) pages scraped from table layout. State that must
 survive the full-page reload after equip/unequip/use is stashed in `sessionStorage`
@@ -140,6 +143,11 @@ Current tests:
 - `KingdomOfLoathing/test/iotm-cup13-sort.test.mjs` — asserts `iotm.js`'s Cup-of-13s option
   parser and each ingredient sort order (advs / effect / inventory / name). If you touch that
   parsing or the sort comparators, add/adjust a case here.
+- `KingdomOfLoathing/test/iotm-codpiece-categories.test.mjs` — asserts `iotm.js`'s codpiece
+  gem bucketing: every `MR_STORE_GEMS` entry matches both its item name and its enchantment,
+  no entry claims another's label, near-miss mundane gems (torquoise's `Weapon Damage +10%`,
+  `So-So Spooky Resistance`) stay out of the Mr. Store bucket, and the pre-existing buckets
+  still resolve. Add a case when a new IotM gem or category shows up.
 
 The re-expose trick (rename `(function () {` and `return { ... }` the helpers before `})()`) is
 how a test reaches an IIFE's internals — copy an existing test when adding one, and put it in the

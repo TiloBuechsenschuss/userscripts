@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/iotm.js
-// @version      1.26
-// @description  Adds an "IotM" button to the KoL icon menu that opens a small popup of Item-of-the-Month actions: fire the Codpiece (inventory.php?action=docodpiece), play ball at the baseball diamond (highlighted when a ball is available), drink from the Cup of 13s, and open the Allied Radio Backpack. Also highlights the worthwhile pitch buttons on the Play Ball! choice (choice.php whichchoice=1598), adds sort buttons to the Cup of 13s ingredient dropdowns (choice.php whichchoice=1601), adds a one-click request table to the Request Supply Drop choice for both the Allied Radio Backpack and the handheld Allied radio (choice.php, detected by the request field), and keeps the Eternity Codpiece decoration tools (choice.php whichchoice=1588) for setting every gem slot at once and saving/loading gem setups.
+// @version      1.27
+// @description  Adds an "IotM" button to the KoL icon menu that opens a small popup of Item-of-the-Month actions: fire the Codpiece (inventory.php?action=docodpiece), play ball at the baseball diamond (highlighted when a ball is available), drink from the Cup of 13s, and open the Allied Radio Backpack. Also highlights the worthwhile pitch buttons on the Play Ball! choice (choice.php whichchoice=1598), adds sort buttons to the Cup of 13s ingredient dropdowns (choice.php whichchoice=1601), adds a one-click request table to the Request Supply Drop choice for both the Allied Radio Backpack and the handheld Allied radio (choice.php, detected by the request field), and keeps the Eternity Codpiece decoration tools (choice.php whichchoice=1588) for setting every gem slot at once, filtering the gem list by category (including a "Mr. Store items" category with an "Insert all" button that puts the four IotM gems alphabetically into slots 1-4), and saving/loading gem setups.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
 // @match        https://www.kingdomofloathing.com/topmenu.php*
@@ -652,6 +652,43 @@
   const WHICHCHOICE = '1588';
   const SETUPS_KEY = 'tm-codpiece-setups';
 
+  // The Mr. Store gems (Items of the Month) that fit the codpiece, in ascending
+  // alphabetical order by item name -- the order "Insert all" pours them into
+  // slots 1-4. Each `test` matches either the item name or the enchantment KoL
+  // renders for it, so the bucket holds whichever of the two the <option> label
+  // happens to carry. The enchantment patterns are specific enough not to catch
+  // the mundane gems: "Weapon Damage +10" without a % (torquoise is +10%),
+  // "Serious" (not "So-So") Spooky Resistance, and the paired HP/MP maximum.
+  const MR_STORE_GEMS = [
+    {
+      name: 'Baseball Diamond',                 // April 2026 IotM
+      test: function (l) {
+        return /baseball\s+diamond/i.test(l) ||
+               /Weapon Damage \+10(?![\d%])/i.test(l);
+      }
+    },
+    {
+      name: 'blood cubic zirconia',             // October 2025 IotM
+      test: function (l) {
+        return /blood\s+cubic\s+zirconia/i.test(l) ||
+               /Serious Spooky Resistance/i.test(l);
+      }
+    },
+    {
+      name: 'Heartstone',                       // February 2026 IotM
+      test: function (l) {
+        return /heartstone/i.test(l) || /\+5 Familiar Weight/i.test(l);
+      }
+    },
+    {
+      name: 'Peridot of Peril',                 // May 2025 IotM
+      test: function (l) {
+        return /peridot\s+of\s+peril/i.test(l) ||
+               /Maximum HP \+20, ?Maximum MP \+20/i.test(l);
+      }
+    }
+  ];
+
   // Gem categories for the "Set every slot to" dropdown filter. Each gem is
   // sorted into exactly one bucket by matching keywords in its label text (the
   // same text KoL renders, e.g. "+10% Item Drops from Monsters"); this keeps
@@ -660,6 +697,16 @@
   // against the gem's label; the synthetic "all" entry has no `test`.
   const GEM_CATEGORIES = [
     { key: 'all', label: 'All gems' },
+    {
+      // First specific bucket, so an IotM gem lands here rather than in the
+      // generic bucket its enchantment would otherwise match (the Baseball
+      // Diamond in "Physical offense", the blood cubic zirconia in
+      // "Elemental resistance", ...).
+      key: 'mrstore', label: 'Mr. Store items',
+      test: function (l) {
+        return MR_STORE_GEMS.some(function (g) { return g.test(l); });
+      }
+    },
     {
       key: 'eledmg', label: 'Elemental damage',
       test: function (l) {
@@ -870,6 +917,44 @@
       applyAssignments(assignments, pwd, status);
     });
 
+    // "Insert all" -- only shown for the Mr. Store bucket. Pours those gems,
+    // alphabetically ascending, into slots 1-4 (one gem per slot, in order).
+    const insertAllBtn = document.createElement('button');
+    insertAllBtn.type = 'button';
+    insertAllBtn.textContent = 'Insert all';
+    insertAllBtn.className = 'button';
+    insertAllBtn.style.marginLeft = '6px';
+    insertAllBtn.title = 'Put the Mr. Store gems, alphabetically ascending, ' +
+      'into slots 1-4';
+    insertAllBtn.addEventListener('click', function () {
+      const assignments = [];
+      const missing = [];
+      MR_STORE_GEMS.forEach(function (g, i) {
+        const slot = slots[i];
+        if (!slot) return;                      // fewer slots than gems
+        let iid = null;
+        gems.forEach(function (label, value) {
+          if (iid === null && g.test(label)) iid = value;
+        });
+        if (iid === null) { missing.push(g.name); return; }
+        if (!slotCanTake(slot, iid)) {          // already mounted, or not owned
+          if (!slot.select.querySelector('option[value="' + iid + '"]')) {
+            missing.push(g.name);
+          }
+          return;                               // no-op POST the server rejects
+        }
+        assignments.push({ which: slot.which, iid: iid });
+      });
+      status.textContent = missing.length
+        ? 'Not available: ' + missing.join(', ') + '. ' : '';
+      if (!assignments.length) {
+        status.textContent += 'Nothing to change.';
+        return;
+      }
+      insertAllBtn.disabled = true;
+      applyAssignments(assignments, pwd, status);
+    });
+
     // (Re)populate the gem dropdown with just the gems in the chosen
     // category, alphabetically (Map preserves the union's insertion order).
     function fillGems() {
@@ -892,12 +977,15 @@
       }
       gemSel.disabled = (n === 0);
       setAllBtn.disabled = (n === 0);
+      insertAllBtn.style.display = (cat === 'mrstore') ? '' : 'none';
+      insertAllBtn.disabled = (n === 0);
     }
     catSel.addEventListener('change', fillGems);
     fillGems();
 
     filterLine.appendChild(document.createTextNode('Filter:'));
     filterLine.appendChild(catSel);
+    filterLine.appendChild(insertAllBtn);
     row1.appendChild(filterLine);
 
     const setLine = document.createElement('div');
