@@ -15,7 +15,9 @@
       "PowerShell(Get-ChildItem *)",
       "Bash(curl -s -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120 Safari/537.36\" \"https://wiki.kingdomofloathing.com/api.php?action=parse&page=Decorate_Your_Eternity_Codpiece&prop=wikitext&format=json\")",
       "Bash(curl -s -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/120 Safari/537.36\" \"https://wiki.kingdomofloathing.com/api.php?action=parse&page=Decorate_Your_Eternity_Codpiece&prop=wikitext&format=json\")",
-      "PowerShell(\\(Get-Command node -ErrorAction SilentlyContinue\\).Source; node --version)"
+      "PowerShell(\\(Get-Command node -ErrorAction SilentlyContinue\\).Source; node --version)",
+      "PowerShell($env:Path = \"C:\\\\nvm4w\\\\nodejs;$env:Path\"; node KingdomOfLoathing/test/iotm-codpiece-categories.test.mjs)",
+      "PowerShell($env:Path = \"C:\\\\nvm4w\\\\nodejs;$env:Path\"; node KingdomOfLoathing/test/iotm-codpiece-categories.test.mjs 2>&1 | Select-Object -Last 22)"
     ]
   }
 }

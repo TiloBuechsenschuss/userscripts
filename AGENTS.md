@@ -70,7 +70,11 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   decoration screen, is present). `iotm.js` also shows the pattern for applying several
   form submissions in one go: replay each slot's `Replace` form as a sequential
   `fetch(... credentials:'same-origin')` POST, then `location.reload()` once so the server stays
-  authoritative about item availability rather than trusting the stale page. Named gem setups
+  authoritative about item availability rather than trusting the stale page. Because those POSTs
+  are what *change* availability, a multi-step action must not pre-filter its plan against the
+  page (a gem mounted in the wrong slot looks unavailable everywhere else); `planMrStore` instead
+  emits a removal phase first, then the mounts. Only the Replace option (`option=1`) is hardcoded
+  — the remove action's option value and fields are read off the slot's own form and replayed. Named gem setups
   are persisted in `localStorage` under `tm-codpiece-setups`. Gems are bucketed into the panel's
   filter categories by **matching text in the `<option>` label**, never by item ID; the Mr. Store
   (IotM) bucket therefore matches each gem by its item name *or* its enchantment, since it isn't
@@ -147,7 +151,8 @@ Current tests:
   gem bucketing: every `MR_STORE_GEMS` entry matches both its item name and its enchantment,
   no entry claims another's label, near-miss mundane gems (torquoise's `Weapon Damage +10%`,
   `So-So Spooky Resistance`) stay out of the Mr. Store bucket, and the pre-existing buckets
-  still resolve. Add a case when a new IotM gem or category shows up.
+  still resolve. Also covers `planMrStore`, the "Insert all" planner (removal phase, consecutive
+  slot packing, unowned gems). Add a case when a new IotM gem or category shows up.
 
 The re-expose trick (rename `(function () {` and `return { ... }` the helpers before `})()`) is
 how a test reaches an IIFE's internals — copy an existing test when adding one, and put it in the

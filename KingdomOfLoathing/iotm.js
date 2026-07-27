@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/iotm.js
-// @version      1.27
-// @description  Adds an "IotM" button to the KoL icon menu that opens a small popup of Item-of-the-Month actions: fire the Codpiece (inventory.php?action=docodpiece), play ball at the baseball diamond (highlighted when a ball is available), drink from the Cup of 13s, and open the Allied Radio Backpack. Also highlights the worthwhile pitch buttons on the Play Ball! choice (choice.php whichchoice=1598), adds sort buttons to the Cup of 13s ingredient dropdowns (choice.php whichchoice=1601), adds a one-click request table to the Request Supply Drop choice for both the Allied Radio Backpack and the handheld Allied radio (choice.php, detected by the request field), and keeps the Eternity Codpiece decoration tools (choice.php whichchoice=1588) for setting every gem slot at once, filtering the gem list by category (including a "Mr. Store items" category with an "Insert all" button that puts the four IotM gems alphabetically into slots 1-4), and saving/loading gem setups.
+// @version      1.28
+// @description  Adds an "IotM" button to the KoL icon menu that opens a small popup of Item-of-the-Month actions: fire the Codpiece (inventory.php?action=docodpiece), play ball at the baseball diamond (highlighted when a ball is available), drink from the Cup of 13s, and open the Allied Radio Backpack. Also highlights the worthwhile pitch buttons on the Play Ball! choice (choice.php whichchoice=1598), adds sort buttons to the Cup of 13s ingredient dropdowns (choice.php whichchoice=1601), adds a one-click request table to the Request Supply Drop choice for both the Allied Radio Backpack and the handheld Allied radio (choice.php, detected by the request field), and keeps the Eternity Codpiece decoration tools (choice.php whichchoice=1588) for setting every gem slot at once, filtering the gem list by category (including a "Mr. Store items" category with an "Insert all" button that puts the four IotM gems alphabetically into slots 1-4), emptying every slot at once, and saving/loading gem setups.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
 // @match        https://www.kingdomofloathing.com/topmenu.php*
@@ -651,6 +651,9 @@
 
   const WHICHCHOICE = '1588';
   const SETUPS_KEY = 'tm-codpiece-setups';
+  // The choice option that mounts a gem in a slot. It's the only option value
+  // this script assumes; the remove option is read off the page (collectSlots).
+  const REPLACE_OPTION = '1';
 
   // The Mr. Store gems (Items of the Month) that fit the codpiece, in ascending
   // alphabetical order by item name -- the order "Insert all" pours them into
@@ -781,17 +784,34 @@
   // Collect the per-slot "Replace" forms (option=1), keyed by their `which`.
   // Each carries a <select name="iid"> whose currently-selected (disabled)
   // option is the gem mounted in that slot.
+  //
+  // An occupied slot also has a second form -- the one that pries the gem back
+  // out. Its `option` value is NOT hardcoded: any other choice.php form
+  // carrying the same `which` but no gem dropdown is taken to be it, and it is
+  // replayed input-for-input when fired. A slot with no such form (an empty
+  // slot, or a rendering we don't recognise) simply gets `removeForm: null`,
+  // and the features that need it hide themselves.
   function collectSlots() {
     const slots = [];
+    const removers = new Map();                       // which -> form
     document.querySelectorAll('form[action="choice.php"]').forEach(function (f) {
       const wc = f.querySelector('input[name="whichchoice"]');
       const opt = f.querySelector('input[name="option"]');
       const which = f.querySelector('input[name="which"]');
       const select = f.querySelector('select[name="iid"]');
       if (!wc || wc.value !== WHICHCHOICE) return;
-      if (!opt || opt.value !== '1') return;          // Replace forms only
-      if (!which || !select) return;
-      slots.push({ which: which.value, form: f, select: select });
+      if (!opt || !which) return;
+      if (select) {
+        if (opt.value !== REPLACE_OPTION) return;     // Replace forms only
+        slots.push({ which: which.value, form: f, select: select,
+                     removeForm: null });
+      } else if (opt.value !== REPLACE_OPTION &&
+                 !removers.has(which.value)) {
+        removers.set(which.value, f);                 // pry-it-out form
+      }
+    });
+    slots.forEach(function (s) {
+      s.removeForm = removers.get(s.which) || null;
     });
     slots.sort(function (a, b) { return Number(a.which) - Number(b.which); });
     return slots;
@@ -820,9 +840,26 @@
     const body = new URLSearchParams();
     body.set('whichchoice', WHICHCHOICE);
     body.set('pwd', pwd);
-    body.set('option', '1');
+    body.set('option', REPLACE_OPTION);
     body.set('which', which);
     body.set('iid', iid);
+    return postChoice(body);
+  }
+
+  // Replay one of the page's own forms verbatim (with a live pwd), rather than
+  // synthesising the request. Used for the remove action, whose option value
+  // and extra fields we take from the page instead of assuming them.
+  function postForm(form, pwd) {
+    const body = new URLSearchParams();
+    form.querySelectorAll('input[name], select[name]').forEach(function (el) {
+      if ((el.type === 'checkbox' || el.type === 'radio') && !el.checked) return;
+      body.set(el.name, el.name === 'pwd' ? pwd : el.value);
+    });
+    body.set('pwd', pwd);
+    return postChoice(body);
+  }
+
+  function postChoice(body) {
     return fetch('/choice.php', {
       method: 'POST',
       credentials: 'same-origin',
@@ -831,22 +868,25 @@
     });
   }
 
-  // assignments: array of { which, iid }. Fires sequentially, then reloads.
-  async function applyAssignments(assignments, pwd, status) {
-    if (!assignments.length) {
+  // steps: array of either { which, iid } (mount a gem) or { form } (replay a
+  // form, i.e. pry a gem out). Fires sequentially -- each request changes what
+  // the next one can do, which is exactly why they aren't parallel -- then
+  // reloads once so the server, not the stale page, has the last word.
+  async function applyAssignments(steps, pwd, status) {
+    if (!steps.length) {
       if (status) status.textContent = 'Nothing to change.';
       return;
     }
-    for (let i = 0; i < assignments.length; i++) {
+    for (let i = 0; i < steps.length; i++) {
       if (status) {
-        status.textContent = 'Applying slot ' + (i + 1) + '/' +
-          assignments.length + '…';
+        status.textContent = 'Applying ' + (i + 1) + '/' + steps.length + '…';
       }
       try {
-        await applySlot(assignments[i].which, assignments[i].iid, pwd);
+        await (steps[i].form ? postForm(steps[i].form, pwd)
+                             : applySlot(steps[i].which, steps[i].iid, pwd));
       } catch (e) {
         if (status) status.textContent = 'Request failed: ' + e;
-        console.error('IotM: applySlot failed', e);
+        console.error('IotM: codpiece step failed', steps[i], e);
         return;
       }
     }
@@ -860,6 +900,62 @@
   function slotCanTake(slot, iid) {
     const opt = slot.select.querySelector('option[value="' + iid + '"]');
     return !!opt && !opt.disabled;
+  }
+
+  // The gem currently mounted in a slot -- the <select>'s own selection, the
+  // same signal the "Save current…" snapshot reads.
+  function slotGem(slot) { return slot.select.value; }
+
+  // Work out what "Insert all" has to do: MR_STORE_GEMS[i] goes to slots[i], so
+  // the four land in slots 1-4 alphabetically ascending.
+  //
+  // Two phases, because a gem mounted in the *wrong* slot is not in inventory
+  // and the server refuses to mount it a second time -- that's what made this
+  // insert only three of the four. Phase 1 pries such gems out; phase 2 mounts
+  // everything. Availability is deliberately NOT filtered against the page: the
+  // page is a snapshot from before phase 1 freed anything, so the only thing
+  // skipped is a true no-op (the gem is already in the slot it belongs in).
+  function planMrStore(slots, gems) {
+    // Resolve the gems actually on offer, keeping alphabetical order, then
+    // pack them into the slots consecutively -- a gem you don't own shifts the
+    // rest up rather than leaving a hole in the middle.
+    const owned = [];                       // { iid, name }
+    const missing = [];                     // not owned / not offered anywhere
+    MR_STORE_GEMS.forEach(function (g) {
+      let iid = null;
+      gems.forEach(function (label, value) {
+        if (iid === null && g.test(label)) iid = value;
+      });
+      if (iid === null) { missing.push(g.name); return; }
+      owned.push({ iid: iid, name: g.name });
+    });
+    const targets = [];                     // { slot, iid, name }
+    const noSlot = [];                      // fewer slots than gems
+    owned.forEach(function (o, i) {
+      if (!slots[i]) { noSlot.push(o.name); return; }
+      targets.push({ slot: slots[i], iid: o.iid, name: o.name });
+    });
+
+    const want = new Map();                 // iid -> the slot that wants it
+    targets.forEach(function (t) { want.set(t.iid, t.slot.which); });
+
+    // Phase 1: any Mr. Store gem sitting somewhere other than its target slot
+    // (including a slot past the fourth) goes back to inventory first.
+    const removals = [];
+    slots.forEach(function (s) {
+      const cur = slotGem(s);
+      if (!s.removeForm) return;            // empty slot, or no remove control
+      if (!want.has(cur) || want.get(cur) === s.which) return;
+      removals.push({ which: s.which, form: s.removeForm });
+    });
+
+    // Phase 2: mount each gem, skipping the slots already holding it.
+    const assignments = targets
+      .filter(function (t) { return slotGem(t.slot) !== t.iid; })
+      .map(function (t) { return { which: t.slot.which, iid: t.iid }; });
+
+    return { removals: removals, assignments: assignments,
+             missing: missing, noSlot: noSlot };
   }
 
   function buildPanel(slots, gems, pwd) {
@@ -927,32 +1023,51 @@
     insertAllBtn.title = 'Put the Mr. Store gems, alphabetically ascending, ' +
       'into slots 1-4';
     insertAllBtn.addEventListener('click', function () {
-      const assignments = [];
-      const missing = [];
-      MR_STORE_GEMS.forEach(function (g, i) {
-        const slot = slots[i];
-        if (!slot) return;                      // fewer slots than gems
-        let iid = null;
-        gems.forEach(function (label, value) {
-          if (iid === null && g.test(label)) iid = value;
-        });
-        if (iid === null) { missing.push(g.name); return; }
-        if (!slotCanTake(slot, iid)) {          // already mounted, or not owned
-          if (!slot.select.querySelector('option[value="' + iid + '"]')) {
-            missing.push(g.name);
-          }
-          return;                               // no-op POST the server rejects
-        }
-        assignments.push({ which: slot.which, iid: iid });
-      });
-      status.textContent = missing.length
-        ? 'Not available: ' + missing.join(', ') + '. ' : '';
-      if (!assignments.length) {
+      const plan = planMrStore(slots, gems);
+      // The status line is overwritten by the progress counter below, so leave
+      // the full plan in the console for when a gem doesn't land.
+      console.log('Codpiece tools: Insert all plan', plan);
+      const notes = [];
+      if (plan.missing.length) {
+        notes.push('not in inventory: ' + plan.missing.join(', '));
+      }
+      if (plan.noSlot.length) {
+        notes.push('no slot for: ' + plan.noSlot.join(', '));
+      }
+      status.textContent = notes.length ? notes.join('; ') + '. ' : '';
+      const steps = plan.removals.concat(plan.assignments);
+      if (!steps.length) {
         status.textContent += 'Nothing to change.';
         return;
       }
       insertAllBtn.disabled = true;
-      applyAssignments(assignments, pwd, status);
+      applyAssignments(steps, pwd, status);
+    });
+
+    // "Empty all slots" -- pries every mounted gem back out, in one go. Only
+    // offered when the page actually gave us a remove form to replay.
+    const emptyAllBtn = document.createElement('button');
+    emptyAllBtn.type = 'button';
+    emptyAllBtn.textContent = 'Empty all slots';
+    emptyAllBtn.className = 'button';
+    emptyAllBtn.style.marginLeft = '6px';
+    emptyAllBtn.title = 'Pry every gem out of the codpiece (they go back to ' +
+      'your inventory)';
+    const removable = slots.filter(function (s) { return !!s.removeForm; });
+    if (!removable.length) {
+      emptyAllBtn.style.display = 'none';
+      console.warn('Codpiece tools: no remove form found on the page, ' +
+                   'hiding "Empty all slots".');
+    }
+    emptyAllBtn.addEventListener('click', function () {
+      if (!confirm('Pry all ' + removable.length +
+                   ' gem(s) out of the codpiece?')) {
+        return;
+      }
+      emptyAllBtn.disabled = true;
+      applyAssignments(removable.map(function (s) {
+        return { which: s.which, form: s.removeForm };
+      }), pwd, status);
     });
 
     // (Re)populate the gem dropdown with just the gems in the chosen
@@ -993,6 +1108,7 @@
     setLine.appendChild(document.createTextNode('Set every slot to: '));
     setLine.appendChild(gemSel);
     setLine.appendChild(setAllBtn);
+    setLine.appendChild(emptyAllBtn);
     row1.appendChild(setLine);
     panel.appendChild(row1);
 

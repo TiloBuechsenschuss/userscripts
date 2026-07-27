@@ -30,7 +30,8 @@ const fakeLocation = { pathname: '/nowhere.php' };
 const wrapped = src
   .replace('(function () {', 'globalThis.__iotm = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { gemCategory, GEM_CATEGORIES, MR_STORE_GEMS }; })();');
+    'return { gemCategory, GEM_CATEGORIES, MR_STORE_GEMS, planMrStore };' +
+    ' })();');
 const fn = new Function('document', 'location',
   wrapped + '\nreturn globalThis.__iotm;');
 const api = fn(fakeDoc, fakeLocation);
@@ -106,6 +107,108 @@ check('category keys', keys,
    'physoff', 'other']);
 check('unknown label falls back to a real key',
   keys.includes(api.gemCategory('+3 Whatever, unmatched')), true);
+
+// --- planMrStore ---------------------------------------------------------
+// "Insert all" maps MR_STORE_GEMS[i] -> slots[i]. The regression it guards
+// against: a gem mounted in the WRONG slot isn't in inventory, so the server
+// refuses to mount it again -- only three of the four landed. The plan has to
+// pry that gem out first rather than filter it away as "unavailable".
+//
+// Fake slots: planMrStore only reads `which`, `select.value` (the gem mounted
+// there) and `removeForm` (present iff the slot is occupied).
+const IID = { baseball: '111', blood: '222', heart: '333', peridot: '444',
+              onyx: '999' };
+function slot(which, mounted) {
+  return {
+    which: String(which),
+    select: { value: mounted || '' },
+    removeForm: mounted ? { form: 'remove-' + which } : null
+  };
+}
+// The union of gems the page offers, keyed by iid -- labelled by item name.
+const ALL_GEMS = new Map([
+  [IID.baseball, 'Baseball Diamond'],
+  [IID.blood, 'blood cubic zirconia'],
+  [IID.heart, 'Heartstone'],
+  [IID.peridot, 'Peridot of Peril'],
+  [IID.onyx, 'unearthly onyx']
+]);
+const wh = (list) => list.map((x) => x.which);
+const pairs = (list) => list.map((x) => x.which + '=' + x.iid);
+
+// Five empty slots: nothing to pry out, all four gems get mounted in order.
+let p = api.planMrStore(
+  [slot(1), slot(2), slot(3), slot(4), slot(5)], ALL_GEMS);
+check('empty codpiece: no removals', wh(p.removals), []);
+check('empty codpiece: fills slots 1-4 alphabetically', pairs(p.assignments),
+  ['1=' + IID.baseball, '2=' + IID.blood, '3=' + IID.heart,
+   '4=' + IID.peridot]);
+check('empty codpiece: nothing missing', [p.missing, p.noSlot], [[], []]);
+
+// The reported bug: the Peridot already sits in slot 1, so slot 4 could not
+// take it from the stale page. It must be pried out first, then all four go in.
+p = api.planMrStore(
+  [slot(1, IID.peridot), slot(2), slot(3), slot(4), slot(5)], ALL_GEMS);
+check('gem in wrong slot: pried out first', wh(p.removals), ['1']);
+check('gem in wrong slot: still assigns all four', pairs(p.assignments),
+  ['1=' + IID.baseball, '2=' + IID.blood, '3=' + IID.heart,
+   '4=' + IID.peridot]);
+check('gem in wrong slot: not reported missing', p.missing, []);
+
+// Same, for a gem parked in the fifth slot -- which no target ever overwrites,
+// so without the removal phase it would stay stuck there forever.
+p = api.planMrStore(
+  [slot(1), slot(2), slot(3), slot(4), slot(5, IID.heart)], ALL_GEMS);
+check('gem in slot 5: pried out', wh(p.removals), ['5']);
+check('gem in slot 5: assigned to slot 3',
+  pairs(p.assignments).includes('3=' + IID.heart), true);
+
+// A gem already in its target slot is left alone -- no pointless POST, and no
+// removal either.
+p = api.planMrStore(
+  [slot(1, IID.baseball), slot(2), slot(3), slot(4)], ALL_GEMS);
+check('gem already correct: no removal', wh(p.removals), []);
+check('gem already correct: skipped', pairs(p.assignments),
+  ['2=' + IID.blood, '3=' + IID.heart, '4=' + IID.peridot]);
+
+// Fully set up already: nothing at all to do.
+p = api.planMrStore([slot(1, IID.baseball), slot(2, IID.blood),
+  slot(3, IID.heart), slot(4, IID.peridot)], ALL_GEMS);
+check('already set up: no steps',
+  [wh(p.removals), pairs(p.assignments)], [[], []]);
+
+// An unrelated gem occupying a target slot is NOT pried out -- the Replace
+// POST swaps it out on its own.
+p = api.planMrStore(
+  [slot(1, IID.onyx), slot(2), slot(3), slot(4)], ALL_GEMS);
+check('foreign gem in target slot: not pried out', wh(p.removals), []);
+check('foreign gem in target slot: replaced', pairs(p.assignments)[0],
+  '1=' + IID.baseball);
+
+// A gem the page never offers isn't owned -- reported, not attempted.
+const noHeart = new Map(ALL_GEMS);
+noHeart.delete(IID.heart);
+p = api.planMrStore([slot(1), slot(2), slot(3), slot(4)], noHeart);
+check('unowned gem reported', p.missing, ['Heartstone']);
+check('unowned gem: the other three still go in, in their own slots',
+  pairs(p.assignments),
+  ['1=' + IID.baseball, '2=' + IID.blood, '3=' + IID.peridot]);
+
+// Fewer slots than gems: the leftovers are reported rather than dropped.
+p = api.planMrStore([slot(1), slot(2), slot(3)], ALL_GEMS);
+check('too few slots reported', p.noSlot, ['Peridot of Peril']);
+check('too few slots: fills what there is', pairs(p.assignments),
+  ['1=' + IID.baseball, '2=' + IID.blood, '3=' + IID.heart]);
+
+// No remove control on the page (slot rendering we don't recognise): we can't
+// pry anything out, but the assignment is still attempted -- the server, not
+// the stale page, gets to decide.
+const stuck = slot(1, IID.peridot);
+stuck.removeForm = null;
+p = api.planMrStore([stuck, slot(2), slot(3), slot(4)], ALL_GEMS);
+check('no remove form: no removals planned', wh(p.removals), []);
+check('no remove form: assignment still attempted',
+  pairs(p.assignments).includes('4=' + IID.peridot), true);
 
 console.log(failures ? `\n${failures} FAILED` : '\nAll passed');
 process.exit(failures ? 1 : 0);
