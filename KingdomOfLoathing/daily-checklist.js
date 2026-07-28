@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/daily-checklist.js
-// @version      1.21
+// @version      1.22
 // @description  Adds a Checklist button next to the IotM button that opens a daily to-do list popup. Items can carry a KoL action link (pwd filled live) and be greyed out when not relevant to the current run. A persistent ronin / post-ronin toggle auto-disables the tasks that only apply to one phase. Checked items reset each day (or manually).
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -49,7 +49,7 @@
   // An item marked `hidden: true` is skipped entirely during seeding -- the
   // tidy alternative to commenting the block out (see applySeeds).
   // Bump SEED_VERSION to push new defaults to people who already have a saved list.
-  const SEED_VERSION = 8;
+  const SEED_VERSION = 9;
   const SEED_ITEMS = [
     {
       text: 'Dig with spade',
@@ -112,6 +112,14 @@
     {
         text: 'Rest (free and with fullness / drunkenness)',
         url: '/campground.php'
+    },
+    {
+      text: 'Shake the tea tree',
+      url: '/campground.php'
+    },
+    {
+      text: 'Harvest the garden',
+      url: '/campground.php'
     },
     {
       text: 'Pull from Hagnk\'s',
@@ -252,6 +260,16 @@
     }
   }
 
+  // How many seeds share each url. A url only identifies a task when exactly
+  // one seed uses it: resting, the tea tree and the garden all point at plain
+  // campground.php, so matching on the url alone would make the two new ones
+  // look like the resting entry that's already in the list and they'd never be
+  // seeded. Text is the identity in that case (see applySeeds).
+  const SEED_URL_USES = SEED_ITEMS.reduce(function (acc, seed) {
+    if (seed.url) acc[seed.url] = (acc[seed.url] || 0) + 1;
+    return acc;
+  }, {});
+
   // Inject SEED_ITEMS once per SEED_VERSION. Skips items already present (by
   // url or text) and never re-adds after the marker advances, so deleting a
   // default keeps it gone. Returns true if state changed.
@@ -268,15 +286,27 @@
         });
       });
     }
+    // Where the seed before this one sits in the user's list. A new default is
+    // spliced in just after it rather than appended, so it lands next to the
+    // neighbour it was written next to here (the tea tree and the garden go
+    // under resting) instead of at the bottom of a list someone already has.
+    // There's no reordering UI, so getting this right on the way in is the only
+    // chance. -1 until the first seed is placed, which is also what a brand-new
+    // list does throughout -- every splice is then an append, as before.
+    let anchor = -1;
     SEED_ITEMS.forEach(function (seed) {
       // `hidden` seeds are skipped entirely -- they're effectively commented
       // out: never injected, never backfilled. Leave the flag in place so the
       // entry can be un-hidden later by just deleting the line.
       if (seed.hidden) return;
-      const match = s.items.find(function (it) {
-        return (seed.url && it.url === seed.url) || it.text === seed.text;
+      // The url matches a reworded task back to its seed, but only when it's
+      // that seed's alone (see SEED_URL_USES); otherwise text is the identity.
+      const byUrl = seed.url && SEED_URL_USES[seed.url] === 1;
+      const at = s.items.findIndex(function (it) {
+        return (byUrl && it.url === seed.url) || it.text === seed.text;
       });
-      if (match) {
+      if (at >= 0) {
+        const match = s.items[at];
         // Backfill the run-state restriction onto an item that was seeded
         // before this field existed, without clobbering a user's own choice.
         if (seed.disabled && !match.disabled) match.disabled = seed.disabled;
@@ -286,11 +316,14 @@
         if (seed.url && !match.url) match.url = seed.url;
         // Flag pre-existing seeds so they pick up the no-delete rule too.
         match.seeded = true;
+        anchor = at;
       } else {
-        s.items.push({
+        const item = {
           text: seed.text, done: false, off: !!seed.off,
           url: seed.url, disabled: seed.disabled, seeded: true
-        });
+        };
+        anchor = anchor >= 0 ? anchor + 1 : s.items.length;
+        s.items.splice(anchor, 0, item);
       }
     });
     s.seed = SEED_VERSION;

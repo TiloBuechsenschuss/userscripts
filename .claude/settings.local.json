@@ -23,7 +23,10 @@
       "PowerShell(node --check KingdomOfLoathing/quest-helper.js; if \\($?\\) { \"syntax OK\" }; node scripts/bump-loaders.mjs --check)",
       "Bash(node KingdomOfLoathing/test/quest-helper-rotation.test.mjs)",
       "Bash(node KingdomOfLoathing/test/iotm-cup13-sort.test.mjs)",
-      "Bash(node KingdomOfLoathing/test/iotm-codpiece-categories.test.mjs)"
+      "Bash(node KingdomOfLoathing/test/iotm-codpiece-categories.test.mjs)",
+      "Bash(node --check KingdomOfLoathing/daily-checklist.js)",
+      "Bash(node KingdomOfLoathing/test/daily-checklist-seeding.test.mjs)",
+      "Bash(node scripts/bump-loaders.mjs --force kol)"
     ]
   }
 }

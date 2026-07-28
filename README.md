@@ -144,6 +144,7 @@ relevant game directory, named `*.test.mjs` and run directly with `node`:
 ```
 node KingdomOfLoathing/test/iotm-cup13-sort.test.mjs
 node KingdomOfLoathing/test/quest-helper-rotation.test.mjs
+node KingdomOfLoathing/test/daily-checklist-seeding.test.mjs
 node TwilightHeroes/test/quest-helper.test.mjs
 ```
 

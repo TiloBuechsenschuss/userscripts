@@ -204,6 +204,15 @@ Current tests:
 - `TwilightHeroes/test/quest-helper.test.mjs` — asserts `quest-helper.js`'s per-stage hint
   lookup resolves correctly. If you add quests/stages to that hint map (especially
   overlapping-text stages), add a case here too.
+- `KingdomOfLoathing/test/daily-checklist-seeding.test.mjs` — asserts `daily-checklist.js`'s
+  `applySeeds`: order on a fresh list, and that a new default reaches a list someone already
+  has, in the right place and exactly once. Two traps it pins down — resting, the tea tree
+  and the garden all link to plain `campground.php`, and a seed's url is only its identity
+  when **one** seed uses it (`SEED_URL_USES`), or the new pair would match the resting entry
+  already in the list and never seed at all; and since there's no reordering UI, a new
+  default is spliced in after the seed it follows in `SEED_ITEMS` rather than appended, so it
+  doesn't land at the bottom of an existing list. Add a case when you add a seed that shares
+  a url with another, and remember to bump `SEED_VERSION`.
 - `KingdomOfLoathing/test/quest-helper-rotation.test.mjs` — asserts `quest-helper.js`'s
   Control Freak logic: the turntable arithmetic, what each of the five stops does for each
   inventory state, undo as the exact inverse, the "a turn re-buries the chamber" rule, and
