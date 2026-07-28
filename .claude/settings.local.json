@@ -20,7 +20,10 @@
       "PowerShell($env:Path = \"C:\\\\nvm4w\\\\nodejs;$env:Path\"; node KingdomOfLoathing/test/iotm-codpiece-categories.test.mjs 2>&1 | Select-Object -Last 22)",
       "Bash(node --check KingdomOfLoathing/quest-helper.js)",
       "Bash(node scripts/bump-loaders.mjs --check)",
-      "PowerShell(node --check KingdomOfLoathing/quest-helper.js; if \\($?\\) { \"syntax OK\" }; node scripts/bump-loaders.mjs --check)"
+      "PowerShell(node --check KingdomOfLoathing/quest-helper.js; if \\($?\\) { \"syntax OK\" }; node scripts/bump-loaders.mjs --check)",
+      "Bash(node KingdomOfLoathing/test/quest-helper-rotation.test.mjs)",
+      "Bash(node KingdomOfLoathing/test/iotm-cup13-sort.test.mjs)",
+      "Bash(node KingdomOfLoathing/test/iotm-codpiece-categories.test.mjs)"
     ]
   }
 }

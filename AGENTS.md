@@ -105,8 +105,40 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   *unverified* is only the artwork: `letterOfTile`/`isArrow` read `tile<letter>.gif` and
   `left/rightarrow.gif` off the wiki's copies of the images, with an alt/title fallback — if the
   live `tiles.php` names them differently, those two functions are the only things to fix.
-  Note `tiles` auto-runs on sight since highlighting commits nothing, while `selects` stays
-  behind its button.
+  A third type, `rotation`, is **Control Freak** (choice 929), the pyramid control room. The
+  Lower Chambers sit on a five-position turntable and each wheel/ratchet used on the peg
+  advances it by one, wrapping 5→1 — the flavour text says "anti-clockwise", but that's the
+  only reading under which the wiki's walkthrough (3 turns from 1 reach 4, then 4 reach 3,
+  then 3 reach 1 = 10 turns, 2 cycles) is arithmetically consistent. Only three stops ever
+  do anything, each once and in order: **4** gives the bronze token, **3** spends it on the
+  bomb, **1** blows the rubble open; **2** and **5** have rats and never give anything. The
+  trap this exists to prevent is at the *end* — turning the peg again after the rubble is
+  blown re-buries it and costs a fresh token *and* a fresh bomb.
+  Because `choice.php` can't see your inventory, state is inferred and kept in `localStorage`
+  under `tm-pyramid-rotation` (suffixed with the character name off the charpane's
+  `charsheet.php` link, so a multi doesn't share one pyramid; expires after 30 days since the
+  quest is per-ascension). Two signals feed it, and the split matters: **rotations** are
+  detected by the position changing between page loads — no click hook, and the delta is
+  still correct mod 5 if the peg was turned with the script off — while **descents** must be
+  hooked on the "Head down to the Lower Chambers" option, because clicking it navigates away
+  and the outcome is never visible to us. Each logged descent stores a signature of what you
+  were carrying, which is what lets a repeat trip to the same position with the same setup be
+  called out as the wasted turn it is.
+  The believed position (`pos`) is deliberately **separate** from the raw scraped number
+  (`seen`): the position is read from the `pyramid_readout<N>.gif` artwork (the `a`/`b`
+  variants are mid-rotation animation frames and are ignored) with the `(N)` in the descend
+  option's own label as a second opinion, and **neither is verified against the live page**.
+  Keeping them apart means a consistently *mislabelled* readout still yields correct turn
+  *deltas*, and one hand correction in the bar's manual row fixes the absolute value for good
+  instead of being stomped on the next load. That manual row — position, carried items, undo
+  last trip, reset — is the escape hatch for every inference here; don't remove it.
+  The pure logic (`turnsTo`/`advance`/`applyVisit`/`unapplyVisit`/`applyTurn`/
+  `turnsRemaining`/`rotationAdvice`) is DOM-free for the same reason as `planTiles`.
+  Note `tiles` and `rotation` auto-run on sight since highlighting and advising commit
+  nothing, while `selects` stays behind its button — hence `auto` on the registry entry.
+  `rotation` also has no button at all (nothing to trigger) and instead brings its own body
+  via the handler's optional `extras` hook, since one status line can't carry state plus
+  corrections.
 
 **Twilight Heroes** is plain (non-frame) pages scraped from table layout. State that must
 survive the full-page reload after equip/unequip/use is stashed in `sessionStorage`
@@ -172,6 +204,13 @@ Current tests:
 - `TwilightHeroes/test/quest-helper.test.mjs` — asserts `quest-helper.js`'s per-stage hint
   lookup resolves correctly. If you add quests/stages to that hint map (especially
   overlapping-text stages), add a case here too.
+- `KingdomOfLoathing/test/quest-helper-rotation.test.mjs` — asserts `quest-helper.js`'s
+  Control Freak logic: the turntable arithmetic, what each of the five stops does for each
+  inventory state, undo as the exact inverse, the "a turn re-buries the chamber" rule, and
+  that a simulated run from a fresh pyramid costs exactly the wiki's 10 wheels. Note it
+  cannot use the usual append-a-return trick — the script's page dispatch bails early — so it
+  hands the helpers back by replacing the `const puzzle = currentPuzzle();` line instead. If
+  you touch that line or the rotation state machine, adjust this test.
 - `KingdomOfLoathing/test/iotm-cup13-sort.test.mjs` — asserts `iotm.js`'s Cup-of-13s option
   parser and each ingredient sort order (advs / effect / inventory / name). If you touch that
   parsing or the sort comparators, add/adjust a case here.

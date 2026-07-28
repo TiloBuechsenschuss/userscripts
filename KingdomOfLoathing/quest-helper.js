@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/quest-helper.js
-// @version      1.2
-// @description  Helper for puzzle-y quest choice adventures. It never submits or clicks anything on its own -- it fills in or highlights the known-correct answer and leaves the actual move to you. Currently: Drawn Onward (choice 872), the photo frames in Dr. Awkward's office, sets the four photo dropdowns to the correct order; Beginning at the Beginning of Beginning (the Hidden Temple tile floor, tiles.php) glows the tile to step on in each row, spelling B-A-N-A-N-A-S from the bottom up, numbered in step order.
+// @version      1.3
+// @description  Helper for puzzle-y quest choice adventures. It never submits or clicks anything on its own -- it fills in, highlights or explains the known-correct answer and leaves the actual move to you. Currently: Drawn Onward (choice 872), the photo frames in Dr. Awkward's office, sets the four photo dropdowns to the correct order; Beginning at the Beginning of Beginning (the Hidden Temple tile floor, tiles.php) glows the tile to step on in each row, spelling B-A-N-A-N-A-S from the bottom up, numbered in step order; Control Freak (choice 929), the pyramid control room, tracks the Lower Chambers rotation and tells you how many more times to turn the wheel, when to go down instead, and when to stop turning.
 // @match        https://www.kingdomofloathing.com/choice.php*
 // @match        https://kingdomofloathing.com/choice.php*
 // @match        https://www.kingdomofloathing.com/tiles.php*
@@ -40,6 +40,10 @@
   //              'selects' -- the answer is "put these values in these dropdowns".
   //              'tiles'   -- the answer is "step on these, in this order"; we
   //                           only highlight them.
+  //              'rotation'-- the answer is "turn this N more times, then go
+  //                           down"; we only advise, and track where you are.
+  // `auto`   - run the handler on sight instead of waiting for the button. Only
+  //            for handlers that don't write into a form (see the note below).
   //
   // NOTHING here submits or clicks. Each handler fills a form in or marks tiles;
   // the player makes the actual move. That keeps a wrong database entry from
@@ -80,9 +84,24 @@
       // from firing on an ordinary adventure.php result page.
       detect: () => countLetterTiles() >= 4,
       type: 'tiles',
+      auto: true,
       button: 'Re-highlight',
       hint: 'Glows the tile to step on in each row, numbered in step order.',
       answer: 'BANANAS',
+    },
+
+    {
+      name: 'Control Freak',
+      page: /\/choice\.php/i,
+      choice: '929',
+      // The pyramid control room. Turning the peg rotates the Lower Chambers
+      // one position; the route through the quest is a rotation puzzle, not a
+      // riddle, so this handler only ever *advises* -- see the block comment
+      // above the rotation handler for the actual mechanics.
+      type: 'rotation',
+      auto: true,
+      button: '',
+      hint: 'Works out how many more times to turn the wheel, and when to stop.',
     },
   ];
 
@@ -330,7 +349,494 @@
     },
   };
 
-  const HANDLERS = { selects: selectsHandler, tiles: tilesHandler };
+  // === 'rotation' handler ==================================================
+  //
+  // Control Freak (choice 929), the Ancient Buried Pyramid's control room. The
+  // Lower Chambers sit on a turntable with five positions; each use of a
+  // crumbling wooden wheel or tomb ratchet on the peg consumes the item and
+  // advances the position by exactly one, wrapping 5 -> 1. (The flavour text
+  // says "anti-clockwise", but the wiki's own walkthrough -- 3 turns from the
+  // fresh position 1 reaches 4, then 4 more reach 3, then 3 more reach 1 --
+  // only works out as N -> N+1 mod 5.)
+  //
+  // What each position offers depends on what you're carrying, which is what
+  // makes this worth scripting: only three of the five stops ever do anything,
+  // and each of those only once, in a fixed order.
+  //
+  //   4  basket of tokens          -> ancient bronze token (if empty-handed)
+  //   3  bomb vending machine      -> ancient bomb (feeds on the token)
+  //   1  rubble-covered stairway   -> the bomb blows it open; Ed's chamber
+  //   2  coin basket WITH rats     -> never anything (-30-35 HP empty-handed)
+  //   5  bomb machine WITH rats    -> never anything
+  //
+  // So the whole quest is 3 turns, go down, 4 turns, go down, 3 turns, go down
+  // = 10 turns and 10 wheels/ratchets from a fresh pyramid. And there is a real
+  // trap at the end: turning the wheel again after the rubble is blown puts the
+  // rubble back and costs you a fresh token AND a fresh bomb. Hence "when to
+  // stop rotating".
+  //
+  // TRACKING. choice.php can't see your inventory, so the state is inferred and
+  // persisted instead:
+  //   - rotations are detected by the position changing between page loads --
+  //     no click hook needed, and it survives turning the wheel with the script
+  //     disabled (the delta is still right, mod 5);
+  //   - descents are detected by hooking the "Head down to the Lower Chambers"
+  //     option, because clicking it navigates away from choice.php and we'd
+  //     never see the outcome. The visit is logged with a signature of what you
+  //     were carrying at the time, so a second trip to the same position with
+  //     the same setup can be flagged as the wasted turn it is.
+  // Everything inferred can be corrected by hand in the bar; see the manual row.
+
+  const ROT_KEY = 'tm-pyramid-rotation';
+  const ROT_POSITIONS = 5;
+  const ROT_STALE_MS = 30 * 24 * 60 * 60 * 1000; // a quest is one ascension
+
+  // --- pure logic (DOM-free, unit-tested) ----------------------------------
+
+  // Turns of the peg to get from position `from` to position `to`.
+  function turnsTo(from, to) {
+    return ((to - from) % ROT_POSITIONS + ROT_POSITIONS) % ROT_POSITIONS;
+  }
+
+  // Where `turns` turns of the peg from `pos` lands you.
+  function advance(pos, turns) {
+    return ((pos - 1 + turns) % ROT_POSITIONS + ROT_POSITIONS) % ROT_POSITIONS + 1;
+  }
+
+  // The position you actually want to be standing on, given what you carry.
+  // null means "you're done -- stop turning".
+  function rotationTarget(state) {
+    if (state.open) return null;
+    if (state.bomb) return 1; // blow the rubble
+    if (state.token) return 3; // buy the bomb
+    return 4; // grab a token
+  }
+
+  // What descending at `pos` does to you. The only three transitions that
+  // exist; everything else (wrong position, wrong inventory) is a wasted turn.
+  function applyVisit(state, pos) {
+    const s = { token: !!state.token, bomb: !!state.bomb, open: !!state.open };
+    if (pos === 4 && !s.token && !s.bomb) s.token = true;
+    else if (pos === 3 && s.token && !s.bomb) { s.token = false; s.bomb = true; }
+    else if (pos === 1 && s.bomb) { s.bomb = false; s.open = true; }
+    return s;
+  }
+
+  // Rewind a logged descent -- the exact inverse of the three transitions
+  // above, so "undo" doesn't have to replay the whole log (which couldn't
+  // reproduce turns or hand corrections anyway).
+  function unapplyVisit(state, pos) {
+    const s = { token: !!state.token, bomb: !!state.bomb, open: !!state.open };
+    if (pos === 4 && s.token) s.token = false;
+    else if (pos === 3 && s.bomb) { s.bomb = false; s.token = true; }
+    else if (pos === 1 && s.open) { s.open = false; s.bomb = true; }
+    return s;
+  }
+
+  // Turning the wheel at all re-buries the stairway. Your token/bomb are safe.
+  function applyTurn(state, turns) {
+    const s = { token: !!state.token, bomb: !!state.bomb, open: !!state.open };
+    if (turns > 0) s.open = false;
+    return s;
+  }
+
+  // Wheels/ratchets still needed to finish the quest from here, walking the
+  // remaining targets. Bounded: there are only ever three left.
+  function turnsRemaining(pos, state) {
+    let total = 0;
+    let at = pos;
+    let s = state;
+    for (let guard = 0; guard < 4; guard++) {
+      const target = rotationTarget(s);
+      if (target === null) break;
+      total += turnsTo(at, target);
+      at = target;
+      s = applyVisit(s, target);
+    }
+    return total;
+  }
+
+  // What you'd get by going down *right now*, in words.
+  function positionOutcome(pos, state) {
+    if (pos === 1) {
+      return state.bomb
+        ? 'you light the ancient bomb and the rubble goes away — the burial chamber opens'
+        : 'a stairway buried under rubble you can\'t shift without the ancient bomb';
+    }
+    if (pos === 2) {
+      return (state.token || state.bomb)
+        ? 'rats — you refuse to go in while carrying quest loot, so nothing happens'
+        : 'rats: one knocks you out and steals the coin. 30-35 HP for nothing';
+    }
+    if (pos === 3) {
+      return state.token
+        ? 'the bomb vending machine — your bronze token buys the ancient bomb'
+        : 'the bomb vending machine, and you have no token to feed it';
+    }
+    if (pos === 4) {
+      return (state.token || state.bomb)
+        ? 'the basket of tokens — you already have what a token is for'
+        : 'the basket of tokens — a free ancient bronze token';
+    }
+    return 'the bomb machine with rats prowling behind it — never gives anything';
+  }
+
+  const ROT_NAMES = {
+    1: 'rubble-covered stairway',
+    2: 'coin basket, rats',
+    3: 'bomb vending machine',
+    4: 'basket of tokens',
+    5: 'bomb machine, rats',
+  };
+
+  // What you're carrying, as a short signature -- the "particular setup" a
+  // logged visit is keyed on.
+  function stateSig(state) {
+    return (state.token ? 'T' : '-') + (state.bomb ? 'B' : '-') + (state.open ? 'O' : '-');
+  }
+
+  function alreadyVisited(log, pos, state) {
+    const sig = stateSig(state);
+    return (log || []).some((v) => v.pos === pos && v.sig === sig);
+  }
+
+  // THE ADVICE, kept DOM-free so it can be reasoned about and unit-tested.
+  // Returns { tone, headline, lines } where tone is 'go' | 'turn' | 'stop'.
+  function rotationAdvice(pos, state, log, canTurn) {
+    const lines = [];
+    const target = rotationTarget(state);
+    const carrying = state.open ? 'the burial chamber is open'
+      : state.bomb ? 'the ancient bomb'
+        : state.token ? 'the ancient bronze token'
+          : 'nothing yet';
+    lines.push('Position ' + pos + '/5 — ' + ROT_NAMES[pos] + '. Carrying: ' + carrying + '.');
+
+    if (target === null) {
+      lines.push('Head down to the Lower Chambers and fight Ed the Undying — seven ' +
+        'turns of combat, and getting beaten up or running away restarts him from ' +
+        'full.');
+      lines.push('Do NOT turn the peg again: that re-buries the stairway, and you would ' +
+        'need a fresh token and a fresh bomb to dig it back out.');
+      lines.push('Once Ed is dead, press Reset so this stops nagging you.');
+      return { tone: 'stop', headline: 'STOP TURNING — the burial chamber is open.', lines };
+    }
+
+    const turns = turnsTo(pos, target);
+    const total = turnsRemaining(pos, state);
+    const prize = target === 4 ? 'the ancient bronze token'
+      : target === 3 ? 'the ancient bomb'
+        : 'the way into the burial chamber';
+
+    let tone;
+    let headline;
+    if (turns === 0) {
+      tone = 'go';
+      headline = 'Go down NOW — this position gives you ' + prize + '.';
+      lines.push('Head down to the Lower Chambers from here. Don\'t turn the peg first.');
+      if (alreadyVisited(log, pos, state)) {
+        lines.push('Note: a trip to position ' + pos + ' with this exact setup is already ' +
+          'logged, so either it didn\'t take or the tracking is off. Fix it in the row below.');
+      }
+    } else {
+      tone = 'turn';
+      headline = 'Turn the peg ' + turns + ' more time' + (turns === 1 ? '' : 's') +
+        ' — to position ' + target + ', for ' + prize + '.';
+      lines.push('Don\'t go down here: ' + positionOutcome(pos, state) + '.');
+      if (alreadyVisited(log, pos, state)) {
+        lines.push('You already went down at position ' + pos + ' carrying the same thing — ' +
+          'it gave you nothing then either.');
+      }
+    }
+
+    lines.push('Wheels/ratchets to finish the whole quest from here: ' + total + '.');
+    if (!canTurn) {
+      lines.push('No peg option on this page, so you\'re out of both — restock with ' +
+        'crumbling wooden wheels (Upper Chamber noncombat) or tomb ratchets (tomb rats ' +
+        'in the Middle Chamber; a tangle of rat tails makes a tomb rat king that drops several).');
+    }
+    return { tone: tone, headline: headline, lines: lines };
+  }
+
+  // --- persistence ---------------------------------------------------------
+
+  // localStorage is per-origin, so a multi would otherwise share one pyramid.
+  // Best-effort: the charpane's charsheet link is the player name. Falls back
+  // to a shared record rather than failing.
+  function rotCharKey() {
+    try {
+      const cp = top.frames['charpane'];
+      const a = cp && cp.document && cp.document.querySelector('a[href*="charsheet.php"]');
+      const name = a && (a.textContent || '').trim();
+      if (name) return ROT_KEY + ':' + name;
+    } catch (e) { /* cross-frame access failed; fall back */ }
+    return ROT_KEY;
+  }
+
+  // `pos` is the position we believe you're on and is what the advice uses;
+  // `seen` is the raw number last scraped off the page. They're separate so
+  // that a hand correction sticks: if the artwork is named differently live
+  // than on the wiki we'd still read a *consistent* number, so the delta
+  // between two page loads stays a correct turn count even when the absolute
+  // value is wrong, and correcting `pos` once fixes the advice for good.
+  function freshRot() {
+    return {
+      v: 1, pos: null, seen: null,
+      token: false, bomb: false, open: false,
+      log: [], t: Date.now(),
+    };
+  }
+
+  function loadRot() {
+    try {
+      const rec = JSON.parse(localStorage.getItem(rotCharKey()));
+      if (!rec || rec.v !== 1) return freshRot();
+      // The quest is per-ascension, so a months-old record is almost certainly
+      // from a previous run and would give confidently wrong advice.
+      if (!rec.t || Date.now() - rec.t > ROT_STALE_MS) return freshRot();
+      if (!Array.isArray(rec.log)) rec.log = [];
+      return rec;
+    } catch (e) {
+      return freshRot();
+    }
+  }
+
+  function saveRot(rec) {
+    rec.t = Date.now();
+    try {
+      localStorage.setItem(rotCharKey(), JSON.stringify(rec));
+    } catch (e) {
+      console.error('Quest helper: could not save pyramid rotation state.', e);
+    }
+  }
+
+  // --- reading the page ----------------------------------------------------
+
+  // A choice.php option is usually a submit button whose label lives in @value,
+  // but be liberal: it may render as a <button> or a plain link.
+  function findOption(re) {
+    const els = document.querySelectorAll('input[type="submit"], button, a');
+    for (const el of els) {
+      const label = (el.tagName === 'INPUT' ? el.value : el.textContent) || '';
+      if (!re.test(label.trim())) continue;
+      // Anchors: only the ones that actually go somewhere in-game, so we don't
+      // pick up a menu item that happens to read the same.
+      if (el.tagName === 'A' && !/(choice|adventure)\.php/i.test(el.getAttribute('href') || '')) {
+        continue;
+      }
+      return el;
+    }
+    return null;
+  }
+
+  // The readout carved into the rings is the position indicator. The `a`/`b`
+  // variants are the mid-rotation animation frames -- they mean "between two
+  // positions", so they're no answer and we fall through to the label.
+  const ROT_READOUT_SRC = /pyramid_readout(\d)([ab])?\.gif/i;
+
+  function readReadoutPosition() {
+    for (const img of document.images) {
+      const m = (img.getAttribute('src') || '').match(ROT_READOUT_SRC);
+      if (m && !m[2]) {
+        const n = Number(m[1]);
+        if (n >= 1 && n <= ROT_POSITIONS) return n;
+      }
+    }
+    return null;
+  }
+
+  // The descend option is labelled "Head down to the Lower Chambers (N)", where
+  // N is the position. Second opinion in case the artwork is named differently
+  // live than on the wiki.
+  function readLabelPosition(el) {
+    if (!el) return null;
+    const label = (el.tagName === 'INPUT' ? el.value : el.textContent) || '';
+    const m = label.match(/\((\d)\)/);
+    if (!m) return null;
+    const n = Number(m[1]);
+    return (n >= 1 && n <= ROT_POSITIONS) ? n : null;
+  }
+
+  // --- the handler ---------------------------------------------------------
+
+  const rotationHandler = {
+    locate() {
+      const descend = findOption(/lower chamber/i);
+      const wheel = findOption(/wheel on the peg/i);
+      const ratchet = findOption(/ratchet on the peg/i);
+      const readout = Array.from(document.images)
+        .find((i) => ROT_READOUT_SRC.test(i.getAttribute('src') || '')) || null;
+      const mount = (readout && readout.closest && readout.closest('table')) ||
+        (descend && descend.closest && descend.closest('form')) || null;
+      return { descend: descend, wheel: wheel, ratchet: ratchet, mount: mount, body: null };
+    },
+
+    // The bar's own button is no use here (nothing to trigger), so this handler
+    // brings its own body: the advice, plus the manual-correction row.
+    extras(puzzle, ctx, say) {
+      const body = document.createElement('div');
+      body.style.cssText = 'margin-top:5px';
+      ctx.body = body;
+      ctx.say = say;
+      return body;
+    },
+
+    apply(puzzle, ctx, say) {
+      const rec = loadRot();
+
+      // Reconcile with the page before advising. A changed readout means the
+      // peg was turned that many times since we last looked -- which is also
+      // true if it was turned with the script disabled, since the delta is
+      // still right mod 5. Advance the believed position by the same delta
+      // rather than snapping it to the page, so a hand correction survives.
+      const seen = readReadoutPosition() || readLabelPosition(ctx.descend);
+      if (seen != null) {
+        if (rec.seen == null) {
+          rec.seen = seen;
+          if (rec.pos == null) rec.pos = seen;
+        } else if (seen !== rec.seen) {
+          const turned = turnsTo(rec.seen, seen);
+          Object.assign(rec, applyTurn(rec, turned));
+          rec.pos = rec.pos == null ? seen : advance(rec.pos, turned);
+          rec.seen = seen;
+        }
+        saveRot(rec);
+      }
+
+      if (rec.pos == null) {
+        say('Can\'t tell which position the Lower Chambers are in — set it by hand below.', true);
+        renderRotBody(puzzle, ctx, rec, null);
+        return;
+      }
+
+      // Log the descent from the click, since it navigates away and we'd never
+      // see how it went otherwise.
+      if (ctx.descend) trackDescend(ctx.descend, rec);
+
+      const canTurn = !!(ctx.wheel || ctx.ratchet);
+      const advice = rotationAdvice(rec.pos, rec, rec.log, canTurn);
+      say(advice.headline, ROT_TONE[advice.tone]);
+      renderRotBody(puzzle, ctx, rec, advice);
+    },
+  };
+
+  // Hook the "Head down to the Lower Chambers" option so the trip is recorded
+  // with the setup you took into it. Nothing is clicked for you -- this only
+  // watches. Capture phase plus the form's submit covers keyboard submission;
+  // `done` keeps the pair from double-logging one trip.
+  function trackDescend(el, rec) {
+    if (el.dataset && el.dataset.tmQhRotTracked) return;
+    let done = false;
+    const record = () => {
+      if (done) return;
+      done = true;
+      const fresh = loadRot();
+      if (fresh.pos == null) fresh.pos = rec.pos;
+      fresh.log.push({ pos: fresh.pos, sig: stateSig(fresh), t: Date.now() });
+      if (fresh.log.length > 40) fresh.log = fresh.log.slice(-40);
+      Object.assign(fresh, applyVisit(fresh, fresh.pos));
+      saveRot(fresh);
+    };
+    el.addEventListener('click', record, true);
+    const form = el.form || (el.closest && el.closest('form'));
+    if (form) form.addEventListener('submit', record, true);
+    if (el.dataset) el.dataset.tmQhRotTracked = '1';
+  }
+
+  // --- the bar's rotation body ---------------------------------------------
+
+  // go = do it now, turn = keep cranking, stop = the trap at the end.
+  const ROT_TONE = { go: '#060', turn: '#333', stop: '#a00' };
+
+  function rotButton(label, on, onClick) {
+    const b = document.createElement('button');
+    b.type = 'button'; // never submit the form we live next to
+    b.className = 'button';
+    b.textContent = label;
+    b.style.cssText = 'margin:2px 2px 0 0;padding:1px 5px;font-size:10px' +
+      (on ? ';font-weight:bold;outline:2px solid #336' : '');
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
+  function renderRotBody(puzzle, ctx, rec, advice) {
+    const body = ctx.body;
+    if (!body) return;
+    body.textContent = '';
+
+    if (advice) {
+      advice.lines.forEach((text) => {
+        const p = document.createElement('div');
+        p.style.cssText = 'margin-top:3px;color:' + (ROT_TONE[advice.tone] || '#333');
+        p.textContent = text;
+        body.appendChild(p);
+      });
+    }
+
+    const rerender = () => {
+      saveRot(rec);
+      rotationHandler.apply(puzzle, ctx, ctx.say);
+    };
+
+    // Manual correction. Everything above is inferred from the artwork and from
+    // your own clicks, so all of it has to be overridable -- if the tracking
+    // drifts (script installed mid-quest, a trip that didn't happen, an
+    // ascension) these buttons are the fix.
+    const manual = document.createElement('div');
+    manual.style.cssText = 'margin-top:6px;padding-top:5px;border-top:1px dotted #99a;color:#444';
+
+    const note = document.createElement('div');
+    note.style.cssText = 'font-style:italic;color:#666';
+    note.textContent = 'Tracked from the readout and from your own trips down — ' +
+      'correct it here if it drifted.';
+    manual.appendChild(note);
+
+    const posRow = document.createElement('div');
+    posRow.style.cssText = 'margin-top:3px';
+    posRow.appendChild(document.createTextNode('Position: '));
+    for (let n = 1; n <= ROT_POSITIONS; n++) {
+      posRow.appendChild(rotButton(String(n), rec.pos === n, ((v) => () => {
+        rec.pos = v;
+        rerender();
+      })(n)));
+    }
+    manual.appendChild(posRow);
+
+    const carryRow = document.createElement('div');
+    carryRow.style.cssText = 'margin-top:3px';
+    carryRow.appendChild(document.createTextNode('I have: '));
+    [
+      ['bronze token', 'token'],
+      ['ancient bomb', 'bomb'],
+      ['chamber open', 'open'],
+    ].forEach(([label, key]) => {
+      carryRow.appendChild(rotButton(label, !!rec[key], () => {
+        rec[key] = !rec[key];
+        rerender();
+      }));
+    });
+    manual.appendChild(carryRow);
+
+    const fixRow = document.createElement('div');
+    fixRow.style.cssText = 'margin-top:3px';
+    fixRow.appendChild(rotButton('Undo last trip (' + rec.log.length + ' logged)', false, () => {
+      // For the trip that got recorded but didn't happen -- you were too drunk
+      // to go in, or you hit back. Drop the log entry and reverse its effect.
+      const last = rec.log.pop();
+      if (last) Object.assign(rec, unapplyVisit(rec, last.pos));
+      rerender();
+    }));
+    fixRow.appendChild(rotButton('Reset', false, () => {
+      const fresh = freshRot();
+      fresh.pos = rec.pos;
+      Object.assign(rec, fresh);
+      rerender();
+    }));
+    manual.appendChild(fixRow);
+
+    body.appendChild(manual);
+  }
+
+  const HANDLERS = { selects: selectsHandler, tiles: tilesHandler, rotation: rotationHandler };
 
   // === UI ==================================================================
 
@@ -352,19 +858,32 @@
     status.textContent = puzzle.hint;
     bar.appendChild(status);
 
+    // `warn` is a boolean for the two-state handlers; 'rotation' has three
+    // outcomes (go / turn / stop) so it passes a colour instead.
     const say = (msg, warn) => {
       status.textContent = msg;
-      status.style.color = warn ? '#a00' : '#060';
+      status.style.color = typeof warn === 'string' ? warn : (warn ? '#a00' : '#060');
     };
 
-    const btn = document.createElement('button');
-    btn.type = 'button'; // never submit the form we live next to
-    btn.className = 'button';
-    btn.textContent = puzzle.button;
-    btn.style.cssText = 'margin-top:5px';
-    btn.addEventListener('click', () => handler.apply(puzzle, ctx, say));
+    // A handler may bring its own body -- 'rotation' does, because it has state
+    // to show and to let you correct, which one status line can't carry.
+    if (typeof handler.extras === 'function') {
+      const extra = handler.extras(puzzle, ctx, say);
+      if (extra) bar.appendChild(extra);
+    }
 
-    bar.appendChild(btn);
+    // The button is what keeps a form-writing handler opt-in. A handler with
+    // nothing to trigger (again, 'rotation') leaves `button` empty.
+    if (puzzle.button) {
+      const btn = document.createElement('button');
+      btn.type = 'button'; // never submit the form we live next to
+      btn.className = 'button';
+      btn.textContent = puzzle.button;
+      btn.style.cssText = 'margin-top:5px';
+      btn.addEventListener('click', () => handler.apply(puzzle, ctx, say));
+      bar.appendChild(btn);
+    }
+
     return { bar, say };
   }
 
@@ -385,8 +904,8 @@
     document.body.insertBefore(bar, document.body.firstChild);
   }
 
-  // Highlighting commits nothing, so 'tiles' runs on sight (like
-  // mine-sparkle-highlight.js) and the button just re-runs it. 'selects' WRITES
-  // into the form, so it stays strictly opt-in behind its button.
-  if (puzzle.type === 'tiles') handler.apply(puzzle, ctx, say);
+  // Highlighting and advising commit nothing, so 'tiles' and 'rotation' run on
+  // sight (like mine-sparkle-highlight.js). 'selects' WRITES into the form, so
+  // it stays strictly opt-in behind its button.
+  if (puzzle.auto) handler.apply(puzzle, ctx, say);
 })();
