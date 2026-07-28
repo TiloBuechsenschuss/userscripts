@@ -26,7 +26,9 @@
       "Bash(node KingdomOfLoathing/test/iotm-codpiece-categories.test.mjs)",
       "Bash(node --check KingdomOfLoathing/daily-checklist.js)",
       "Bash(node KingdomOfLoathing/test/daily-checklist-seeding.test.mjs)",
-      "Bash(node scripts/bump-loaders.mjs --force kol)"
+      "Bash(node scripts/bump-loaders.mjs --force kol)",
+      "Bash(node KingdomOfLoathing/test/ux-mall-buy.test.mjs)",
+      "Bash(node \"C:/Users/tilob/AppData/Local/Temp/claude/C--Projekte-userscripts/86a0dfce-e2a1-4aa9-99f8-885194c78d7b/scratchpad/selcheck.mjs\" \"C:/Users/tilob/AppData/Local/Temp/claude/C--Projekte-userscripts/86a0dfce-e2a1-4aa9-99f8-885194c78d7b/scratchpad/mall.html\")"
     ]
   }
 }

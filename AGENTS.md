@@ -160,6 +160,25 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   at all. Keep it that way. A guard that fires on the wrong crop, or blocks a ripe harvest, is
   worse than no guard, and this is the one script here that stands between the player and an
   irreversible click.
+  The third feature is **mall bulk buying** on `mall.php`: a `[buy all]` action per store row
+  and a "Buy N" row per item that walks stores cheapest-first. It's the only thing in this
+  repo that spends **Meat**, which is gone for good, so the rules are stricter than elsewhere.
+  No purchase URL is *built*: each store row's `a.buysome` carries a `rel` that is already a
+  complete purchase URL ending in `&quantity=` (pwd included), so a purchase is that string
+  with a number appended — which is what keeps this working if KoL changes the parameters.
+  Two page facts drive the arithmetic and are easy to get wrong: a store's usable amount is
+  its stock **capped by its daily limit** (one row in the sample has 555,831 in stock and a
+  1/day limit), and a row with **no buy links at all** is how the page renders a store whose
+  daily limit you've already used — those are skipped, not planned against. The limit column
+  is the one cell with no class of its own, so it's found by content *after* skipping the
+  classed cells, or a store named "5 / day deals" would shadow it and silently cap every
+  purchase. Runs are strictly sequential (each buy changes stock and Meat) and **stop** the
+  moment a response doesn't confirm an acquisition — `acquiredCount` returns 0 for anything it
+  can't read, and 0 means stop, never "assume it worked". Buying too little is recoverable;
+  the other direction isn't. `planPurchase`/`describePlan`/`purchaseSummary` are DOM-free so
+  the money arithmetic is unit-tested. "Buy N" always confirms with the total, the average and
+  a check against your Meat; `[buy all]` deliberately doesn't (the quantity and total are on
+  the button itself) *except* above `MALL_CONFIRM_MEAT`, which catches the joke-priced stores.
 
 **Twilight Heroes** is plain (non-frame) pages scraped from table layout. State that must
 survive the full-page reload after equip/unequip/use is stashed in `sessionStorage`
@@ -225,6 +244,12 @@ Current tests:
 - `TwilightHeroes/test/quest-helper.test.mjs` — asserts `quest-helper.js`'s per-stage hint
   lookup resolves correctly. If you add quests/stages to that hint map (especially
   overlapping-text stages), add a case here too.
+- `KingdomOfLoathing/test/ux-mall-buy.test.mjs` — asserts `ux-enhancers.js`'s mall purchase
+  planner against the real numbers from a "perfect negroni" search: that a daily limit caps
+  stock, that allocation is cheapest-first with price ties keeping page order, that the
+  average is over what would actually be bought (not what was asked for), that an unreadable
+  purchase response counts as zero, and what the confirm text and post-run summary say. This
+  is the money path — extend it before touching the planner, never after.
 - `KingdomOfLoathing/test/ux-beer-garden.test.mjs` — asserts `ux-enhancers.js`'s beer garden
   yield table against the wiki's (3 barley/hops per day, clamped at day 7; day 1 gives no
   fancy item and day 2 gives the first, which is where the threshold comes from), what the
