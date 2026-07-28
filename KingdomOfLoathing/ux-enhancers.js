@@ -3,10 +3,12 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js
-// @version      1.0
-// @description  A grab-bag of small quality-of-life tweaks for Kingdom of Loathing pages. Currently: at the Hermit (hermit.php) it adds a "Buy all clovers" button next to the Trade button that trades worthless items for every 11-leaf clover the Hermit still has in stock today, one at a time, then reloads and reports how many it got.
+// @version      1.1
+// @description  A grab-bag of small quality-of-life tweaks for Kingdom of Loathing pages. Currently: at the Hermit (hermit.php) it adds a "Buy all clovers" button next to the Trade button that trades worthless items for every 11-leaf clover the Hermit still has in stock today, one at a time, then reloads and reports how many it got; at the Campground (campground.php) it guards a Beer Garden that hasn't grown for two days yet, since the fancy bottles and labels don't appear before then -- the crop is flagged and clicking it asks for confirmation first.
 // @match        https://www.kingdomofloathing.com/hermit.php*
 // @match        https://kingdomofloathing.com/hermit.php*
+// @match        https://www.kingdomofloathing.com/campground.php*
+// @match        https://kingdomofloathing.com/campground.php*
 // @grant        none
 // ==/UserScript==
 
@@ -235,10 +237,142 @@
     } catch (e) { /* sessionStorage may be unavailable; skip the summary */ }
   }
 
+  // === feature: don't harvest a beer garden too early ====================
+  //
+  // A Beer Garden's barley and hops scale evenly with growth, but the fancy
+  // beer bottles and labels -- the part worth waiting for, since they're the
+  // currency in Let's Brew! -- don't appear at all until the second day:
+  //
+  //   day 1    3 barley,  3 hops, and NO bottle or label
+  //   day 2    6 barley,  6 hops, 1 bottle or label
+  //   day 3    9 barley,  9 hops, 1 of each
+  //   day 4   12 barley, 12 hops, 3 in total
+  //   day 5   15 barley, 15 hops, 2 of each
+  //   day 6   18 barley, 18 hops, 5 in total
+  //   day 7+  21 barley, 21 hops, 3 of each  (no special result past this)
+  //
+  // Harvesting on day 1 therefore throws the fancy items away for nothing, and
+  // the game asks for no confirmation -- one stray click on the crop and it's
+  // gone for the day. So we ask instead.
+  //
+  // UNVERIFIED: the day count is read off the crop artwork, beergarden<N>.gif,
+  // taking N for the days of growth -- the wiki lists exactly beergarden0..7
+  // and the yield table tops out at "7+", so the mapping is near certain, but
+  // it hasn't been checked against a live campground. Everything here FAILS
+  // OPEN on purpose: no readable number, no recognisable crop or no harvest
+  // link and the feature simply stays out of the way, because a guard that
+  // fires on the wrong crop (or blocks a ripe harvest) would be worse than no
+  // guard at all.
+
+  const BEER_GARDEN_SRC = /beergarden(\d+)\.gif/i;
+  // The first fancy bottle/label lands on day 2. Before that there's nothing to
+  // wait for and nothing to lose by harvesting -- which is exactly the mistake.
+  const BEER_RIPE_DAYS = 2;
+  // The fancy-item column of the wiki's yield table, by day of growth.
+  const BEER_FANCY = {
+    0: 'nothing at all',
+    1: 'no fancy bottle or label',
+    2: '1 fancy bottle or label',
+    3: '1 fancy bottle and 1 fancy label',
+    4: '3 fancy bottles/labels in total',
+    5: '2 fancy bottles and 2 fancy labels',
+    6: '5 fancy bottles/labels in total',
+    7: '3 fancy bottles and 3 fancy labels',
+  };
+
+  // What harvesting at `days` of growth hands you. Growth past day 7 yields no
+  // more than day 7 does, so it's clamped there.
+  function beerYield(days) {
+    const d = Math.max(0, Math.min(7, days));
+    return { barley: 3 * d, hops: 3 * d, fancy: BEER_FANCY[d] };
+  }
+
+  function beerYieldText(days) {
+    const y = beerYield(days);
+    return y.barley + ' barley, ' + y.hops + ' hops, and ' + y.fancy;
+  }
+
+  // The confirm() text for a harvest that's too early. Spells out both what
+  // you'd get now and what one more day buys, so the choice is informed rather
+  // than just obstructed.
+  function unripeMessage(days) {
+    const now = days === 0
+      ? 'Nothing has grown in it yet'
+      : 'It has only ' + days + ' day' + (days === 1 ? '' : 's') +
+        ' of growth, so harvesting now gives ' + beerYieldText(days);
+    return 'Your beer garden is not ready.\n\n' + now + '.\n\n' +
+      'On day ' + BEER_RIPE_DAYS + ' you would get ' + beerYieldText(BEER_RIPE_DAYS) +
+      '. The fancy bottles and labels never drop before then.\n\nHarvest anyway?';
+  }
+
+  // The crop image and its days of growth, or null when the garden holds some
+  // other crop (or none) -- in which case this feature has no opinion.
+  function findBeerGarden() {
+    for (const img of document.images) {
+      const m = (img.getAttribute('src') || '').match(BEER_GARDEN_SRC);
+      if (!m) continue;
+      const days = Number(m[1]);
+      if (!Number.isFinite(days)) continue;
+      return { img: img, days: days };
+    }
+    return null;
+  }
+
+  // Whatever a click on the crop actually goes through: normally the anchor
+  // wrapping the image, with the garden action link as a fallback.
+  function findHarvestTrigger(img) {
+    return (img.closest && img.closest('a')) ||
+      document.querySelector('a[href*="action=garden"]') || null;
+  }
+
+  function beerGardenGuard() {
+    const garden = findBeerGarden();
+    if (!garden) return;
+    if (garden.img.dataset.tmGardenChecked) return; // idempotency guard
+    garden.img.dataset.tmGardenChecked = '1';
+
+    // Put the numbers where they can be read without hovering blind. A tooltip
+    // on the image works with KoL's markup as-is; a positioned badge would need
+    // a wrapper inside the campground's layout (same reasoning as the tile
+    // highlighter in quest-helper.js).
+    const was = garden.img.getAttribute('title') || '';
+    garden.img.setAttribute('title', 'Beer garden, ' + garden.days + ' day' +
+      (garden.days === 1 ? '' : 's') + ' of growth — harvesting now gives ' +
+      beerYieldText(garden.days) + (was ? ' — ' + was : ''));
+
+    if (garden.days >= BEER_RIPE_DAYS) return; // ripe; nothing to guard
+
+    // Flag it so "not ready" is visible at a glance. Inline styles only: KoL's
+    // CSP allows style attributes but blocks script-injected stylesheets.
+    garden.img.style.outline = '3px dashed #c00';
+    garden.img.style.outlineOffset = '-3px';
+
+    const trigger = findHarvestTrigger(garden.img);
+    if (!trigger) return;
+
+    // Capture on the document, so the click is caught on the way DOWN and never
+    // reaches the link at all. A listener on the link itself would be too late:
+    // at the target, handlers run in registration order, and any inline onclick
+    // KoL put there was registered while the page parsed -- before us.
+    document.addEventListener('click', function (ev) {
+      const hit = ev.target && ev.target.closest ? ev.target.closest('a') : null;
+      if (hit !== trigger) return;
+      if (trigger.dataset.tmGardenConfirmed === '1') return; // our own retry
+      ev.preventDefault();
+      ev.stopPropagation();
+      if (!window.confirm(unripeMessage(garden.days))) return;
+      trigger.dataset.tmGardenConfirmed = '1';
+      const href = trigger.getAttribute('href');
+      if (href) location.href = href;
+      else trigger.click();
+    }, true);
+  }
+
   // === feature registry =================================================
 
   const FEATURES = [
     { name: 'hermit-clovers', path: /\/hermit\.php/i, run: hermitClovers },
+    { name: 'beer-garden-guard', path: /\/campground\.php/i, run: beerGardenGuard },
   ];
 
   function run() {

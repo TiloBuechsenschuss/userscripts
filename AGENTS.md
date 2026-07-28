@@ -139,6 +139,27 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   `rotation` also has no button at all (nothing to trigger) and instead brings its own body
   via the handler's optional `extras` hook, since one status line can't carry state plus
   corrections.
+- `ux-enhancers.js` is the catch-all for unrelated small tweaks. It's a `FEATURES` registry of
+  `{ name, path, run }`, each entry scoped to its own pathname and each `run` wrapped in a
+  try/catch so one broken feature can't take the others down — add a tweak as an entry, not as
+  a new file, and add its page to `@match`. Two features so far. The Hermit one buys clovers
+  one at a time because the page never says how many are left, stopping when a trade stops
+  producing an item.
+  The other guards **A Beer Garden** on `campground.php`: barley and hops grow 3/day, but the
+  fancy bottles and labels — the Let's Brew! currency, and the only reason to wait — don't
+  drop at all until **day 2**, and the game asks nothing before a harvest. So the crop gets a
+  tooltip with its yield, an outline when it's short of two days, and a `confirm()` on the way
+  past. That interception is a **document-level capture listener**, deliberately: a listener
+  on the link itself would run *after* any inline `onclick` KoL put there, because handlers at
+  the target fire in registration order and the page's own were registered while it parsed.
+  Catching it on the way down and calling `stopPropagation()` means the click never reaches
+  the link; the confirmed retry is let through by a `data-` flag.
+  Days of growth are read from the crop artwork (`beergarden<N>.gif`, N taken as the day) and
+  that mapping is **unverified against a live campground** — so every step of the feature
+  **fails open**: unreadable number, unrecognised crop or no harvest link and it does nothing
+  at all. Keep it that way. A guard that fires on the wrong crop, or blocks a ripe harvest, is
+  worse than no guard, and this is the one script here that stands between the player and an
+  irreversible click.
 
 **Twilight Heroes** is plain (non-frame) pages scraped from table layout. State that must
 survive the full-page reload after equip/unequip/use is stashed in `sessionStorage`
@@ -204,6 +225,12 @@ Current tests:
 - `TwilightHeroes/test/quest-helper.test.mjs` — asserts `quest-helper.js`'s per-stage hint
   lookup resolves correctly. If you add quests/stages to that hint map (especially
   overlapping-text stages), add a case here too.
+- `KingdomOfLoathing/test/ux-beer-garden.test.mjs` — asserts `ux-enhancers.js`'s beer garden
+  yield table against the wiki's (3 barley/hops per day, clamped at day 7; day 1 gives no
+  fancy item and day 2 gives the first, which is where the threshold comes from), what the
+  `confirm()` text says, and that `findBeerGarden` reads the day off the artwork while
+  ignoring other crops and other campground images. If you touch the table or the artwork
+  regex, adjust this test.
 - `KingdomOfLoathing/test/daily-checklist-seeding.test.mjs` — asserts `daily-checklist.js`'s
   `applySeeds`: order on a fresh list, and that a new default reaches a list someone already
   has, in the right place and exactly once. Two traps it pins down — resting, the tea tree
