@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js
-// @version      1.2
+// @version      1.3
 // @description  A grab-bag of small quality-of-life tweaks for Kingdom of Loathing pages. Currently: at the Hermit (hermit.php) it adds a "Buy all clovers" button next to the Trade button that trades worthless items for every 11-leaf clover the Hermit still has in stock today, one at a time, then reloads and reports how many it got; at the Campground (campground.php) it guards a Beer Garden that hasn't grown for two days yet, since the fancy bottles and labels don't appear before then -- the crop is flagged and clicking it asks for confirmation first; and in the Mall (mall.php) it adds a "buy all" action to each store row and a "Buy N" row per item that walks the stores cheapest-first, showing the total and the average cost per item before spending anything.
 // @match        https://www.kingdomofloathing.com/hermit.php*
 // @match        https://kingdomofloathing.com/hermit.php*
@@ -454,14 +454,21 @@
     return null;
   }
 
-  // How many items a purchase response actually handed over. 0 when it can't be
-  // confirmed -- which the callers treat as "stop", never as "assume it worked".
+  // A rough read of a purchase response. Only ever a FALLBACK, and only when
+  // api.php can't be reached: the `ajax=1` responses don't reliably carry the
+  // usual "You acquire" wording, which is what made an earlier version of this
+  // report a completed purchase as "bought nothing". The inventory delta is the
+  // real answer -- see runPlan. Null means "this told me nothing", which is
+  // deliberately different from 0 ("it told me nothing was bought").
   function acquiredCount(html) {
     const s = String(html || '');
     const many = s.match(/You acquire[^<]*?<b>\s*([\d,]+)\s*<\/b>/i) ||
-      s.match(/You acquire\s+([\d,]+)\s+items?/i);
+      s.match(/You acquire\s+([\d,]+)\s+items?/i) ||
+      s.match(/You bought\s+([\d,]+)/i);
     if (many) return parseInt(many[1].replace(/,/g, ''), 10) || 0;
-    return /You acquire an item/i.test(s) ? 1 : 0;
+    if (/You acquire an item|You bought/i.test(s)) return 1;
+    if (/didn't have enough|don't have enough|not enough Meat|no longer/i.test(s)) return 0;
+    return null; // unrecognised -- says nothing either way
   }
 
   // Cheapest-first allocation across stores. `offers` is [{ price, available,
@@ -607,8 +614,8 @@
 
   // --- buying --------------------------------------------------------------
 
-  // One purchase. Resolves with how many were actually acquired -- 0 for any
-  // response we can't read as a success, which stops the caller.
+  // One purchase. Resolves with what the response claimed -- a number, or null
+  // for "couldn't tell". Never used on its own; runPlan measures instead.
   async function buyFrom(offer, qty) {
     const url = buyUrlFor(offer, qty);
     if (!url) return 0;
@@ -622,33 +629,84 @@
   // Run a plan, one store at a time. Sequential on purpose: each purchase
   // changes stock and Meat, so the server stays authoritative about whether the
   // next one is possible.
-  async function runPlan(plan, say) {
-    let bought = 0;
-    let spent = 0;
+  //
+  // What was bought is MEASURED from the inventory, not read out of the
+  // purchase response. That's the whole point: the `ajax=1` response format
+  // isn't something this script can verify, and a run that reads it wrong
+  // either reports a completed purchase as "bought nothing" (the bug this
+  // replaced) or, far worse, keeps buying because it thinks nothing happened.
+  // api.php's inventory count and Meat are the same numbers the game uses.
+  //
+  // Returns { bought, spent, claimed } where bought/spent are null when the
+  // measurement wasn't available -- callers must NOT read null as zero.
+  async function runPlan(plan, itemId, say) {
+    const startCount = await apiItemCount(itemId);
+    const startMeat = await apiMeat();
+    let lastCount = startCount;
+    let claimed = 0;
+
     for (const step of plan.steps) {
       say('Buying ' + meatFmt(step.qty) + ' from ' + step.offer.storeName + '...');
       // eslint-disable-next-line no-await-in-loop
-      const got = await buyFrom(step.offer, step.qty);
-      bought += got;
-      spent += got * step.offer.price;
-      // Short or nothing means out of Meat, out of stock, or a response we
-      // couldn't read. Any of those means stop, not press on.
-      if (got < step.qty) break;
+      const said = await buyFrom(step.offer, step.qty);
+      if (Number.isFinite(said)) claimed += said;
+
+      if (lastCount === null) {
+        // No inventory to measure against. Fall back to the response, and stop
+        // unless it positively confirmed the whole step -- when we can't see
+        // what's happening, stopping early is the only safe direction.
+        if (said === null || said < step.qty) break;
+        continue;
+      }
+
+      // eslint-disable-next-line no-await-in-loop
+      const now = await apiItemCount(itemId);
+      if (now === null) { lastCount = null; continue; }
+      const gained = now - lastCount;
+      lastCount = now;
+      // Short means out of stock, out of Meat, or the store refused. Stop.
+      if (gained < step.qty) break;
     }
-    return { bought: bought, spent: spent };
+
+    const endCount = await apiItemCount(itemId);
+    const endMeat = await apiMeat();
+    return {
+      bought: (startCount !== null && endCount !== null)
+        ? Math.max(0, endCount - startCount) : null,
+      spent: (startMeat !== null && endMeat !== null)
+        ? Math.max(0, startMeat - endMeat) : null,
+      claimed: claimed,
+    };
   }
 
-  function purchaseSummary(bought, spent, wanted) {
-    if (!bought) {
-      return 'Bought nothing — no purchase went through. Your Meat is untouched.';
+  // The post-run report. It must never assert something it didn't measure --
+  // telling someone "your Meat is untouched" when the Meat is in fact gone is
+  // worse than admitting the script couldn't tell.
+  function purchaseSummary(res, wanted) {
+    if (res.bought === null) {
+      return res.claimed > 0
+        ? 'Bought at least ' + meatFmt(res.claimed) + ', but your inventory ' +
+          'couldn\'t be read to confirm the total — check it before buying more.'
+        : 'Couldn\'t confirm the result: api.php didn\'t answer. Purchases may ' +
+          'still have gone through — check your inventory and Meat before retrying.';
     }
-    const avg = Math.round(spent / bought);
-    return 'Bought ' + meatFmt(bought) + ' for ' + meatFmt(spent) +
-      ' Meat — ' + meatFmt(avg) + ' Meat each on average.' +
-      (Number.isFinite(wanted) && bought < wanted
-        ? ' (' + meatFmt(wanted - bought) + ' short of the ' + meatFmt(wanted) +
-          ' asked for; a store ran out, or the Meat did.)'
-        : '');
+    if (!res.bought) {
+      return res.spent
+        ? 'No items arrived, but ' + meatFmt(res.spent) + ' Meat left your ' +
+          'account — check your inventory.'
+        : 'Nothing was bought, and no Meat was spent.';
+    }
+    let msg = 'Bought ' + meatFmt(res.bought);
+    if (res.spent) {
+      msg += ' for ' + meatFmt(res.spent) + ' Meat — ' +
+        meatFmt(Math.round(res.spent / res.bought)) + ' Meat each on average';
+    }
+    msg += '.';
+    if (Number.isFinite(wanted) && res.bought < wanted) {
+      msg += ' (' + meatFmt(wanted - res.bought) + ' short of the ' +
+        meatFmt(wanted) + ' asked for; a store ran out, or the Meat did.)';
+    }
+    return msg;
   }
 
   // Finish a run: stash the summary, then reload so stock, limits and Meat are
@@ -660,22 +718,41 @@
     location.reload();
   }
 
-  // The player's Meat, for the "can you even afford this" line. Null when
-  // api.php can't be reached -- the plan is then shown without it rather than
-  // blocking on it.
-  async function getMeat() {
+  // api.php is the game's own view of your character, and the only thing here
+  // that doesn't depend on parsing a page. Null on any failure, never a guess:
+  // every caller distinguishes "couldn't tell" from a real number.
+  async function apiJson(what) {
     try {
-      const res = await fetch(ORIGIN + '/api.php?what=status&for=ux-enhancers', {
-        credentials: 'same-origin', cache: 'no-store',
-      });
+      const res = await fetch(
+        ORIGIN + '/api.php?what=' + what + '&for=ux-enhancers',
+        { credentials: 'same-origin', cache: 'no-store' });
       if (!res.ok) return null;
-      const j = await res.json();
-      const meat = j && (j.meat !== undefined ? j.meat : j.Meat);
-      const n = parseInt(String(meat).replace(/,/g, ''), 10);
-      return Number.isFinite(n) ? n : null;
+      return await res.json();
     } catch (e) {
       return null;
     }
+  }
+
+  // The player's Meat, for the "can you even afford this" line and for
+  // measuring what a run actually spent.
+  async function apiMeat() {
+    const j = await apiJson('status');
+    if (!j) return null;
+    const n = parseInt(String(j.meat !== undefined ? j.meat : j.Meat)
+      .replace(/,/g, ''), 10);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  // How many of one item you're holding. `what=inventory` answers with an
+  // object of itemId -> count; an item you have none of is simply absent, which
+  // is a real 0 rather than a failure.
+  async function apiItemCount(itemId) {
+    const j = await apiJson('inventory');
+    if (!j || typeof j !== 'object') return null;
+    const raw = j[String(itemId)];
+    if (raw === undefined) return 0;
+    const n = parseInt(String(raw).replace(/,/g, ''), 10);
+    return Number.isFinite(n) ? n : null;
   }
 
   // --- the UI --------------------------------------------------------------
@@ -719,8 +796,8 @@
 
       a.textContent = 'buying...';
       const plan = planPurchase([offer], offer.available);
-      const res = await runPlan(plan, () => {});
-      finishRun(item.itemId, purchaseSummary(res.bought, res.spent, offer.available));
+      const res = await runPlan(plan, item.itemId, () => {});
+      finishRun(item.itemId, purchaseSummary(res, offer.available));
     }));
   }
 
@@ -765,14 +842,14 @@
         return;
       }
       status.textContent = 'Checking your Meat...';
-      const meat = await getMeat();
+      const meat = await apiMeat();
       if (!window.confirm(describePlan(plan, item.name, meat))) {
         status.textContent = 'Cancelled — nothing was bought.';
         return;
       }
       a.textContent = 'buying...';
-      const res = await runPlan(plan, (m) => { status.textContent = m; });
-      finishRun(item.itemId, purchaseSummary(res.bought, res.spent, want));
+      const res = await runPlan(plan, item.itemId, (m) => { status.textContent = m; });
+      finishRun(item.itemId, purchaseSummary(res, want));
     };
 
     td.appendChild(mallLink('', 'buy\u00a0these', 'Work out the cheapest stores ' +

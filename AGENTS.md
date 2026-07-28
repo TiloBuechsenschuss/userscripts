@@ -172,13 +172,26 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   daily limit you've already used — those are skipped, not planned against. The limit column
   is the one cell with no class of its own, so it's found by content *after* skipping the
   classed cells, or a store named "5 / day deals" would shadow it and silently cap every
-  purchase. Runs are strictly sequential (each buy changes stock and Meat) and **stop** the
-  moment a response doesn't confirm an acquisition — `acquiredCount` returns 0 for anything it
-  can't read, and 0 means stop, never "assume it worked". Buying too little is recoverable;
-  the other direction isn't. `planPurchase`/`describePlan`/`purchaseSummary` are DOM-free so
-  the money arithmetic is unit-tested. "Buy N" always confirms with the total, the average and
-  a check against your Meat; `[buy all]` deliberately doesn't (the quantity and total are on
-  the button itself) *except* above `MALL_CONFIRM_MEAT`, which catches the joke-priced stores.
+  purchase. Runs are strictly sequential (each buy changes stock and Meat), and what was
+  bought is **measured from `api.php`, not read out of the purchase response**. That is the
+  important bit, and it was learned the hard way: the first version parsed the `ajax=1`
+  response for "You acquire", which that response doesn't reliably say, so a completed
+  purchase came back as *"Bought nothing — no purchase went through. Your Meat is
+  untouched."* — a confident, false claim about someone's Meat. `runPlan` now diffs
+  `api.php?what=inventory` (an object of `itemId -> count`, where a missing key is a true 0)
+  and `what=status`'s `meat`; both shapes are verified against KoLmafia's `ApiRequest` /
+  `InventoryManager`, since the wiki documents no api.php. Three consequences to preserve:
+  `acquiredCount` returns **null** for an unrecognised response — distinct from 0, which is a
+  real "nothing was bought" — and is only a fallback for when api.php is unreachable;
+  `runPlan` returns `bought`/`spent` as **null** when unmeasurable, and no caller may read a
+  null as zero; and `purchaseSummary` must never assert a fact it wasn't given — with no
+  measurement it says it couldn't tell and to go check, which is the honest answer. The
+  per-step inventory re-read is also what makes stopping early correct. Buying too little is
+  recoverable; the other direction isn't.
+  `planPurchase`/`describePlan`/`purchaseSummary` are DOM-free so the money arithmetic is
+  unit-tested. "Buy N" always confirms with the total, the average and a check against your
+  Meat; `[buy all]` deliberately doesn't (the quantity and total are on the button itself)
+  *except* above `MALL_CONFIRM_MEAT`, which catches the joke-priced stores.
 
 **Twilight Heroes** is plain (non-frame) pages scraped from table layout. State that must
 survive the full-page reload after equip/unequip/use is stashed in `sessionStorage`
@@ -247,9 +260,12 @@ Current tests:
 - `KingdomOfLoathing/test/ux-mall-buy.test.mjs` — asserts `ux-enhancers.js`'s mall purchase
   planner against the real numbers from a "perfect negroni" search: that a daily limit caps
   stock, that allocation is cheapest-first with price ties keeping page order, that the
-  average is over what would actually be bought (not what was asked for), that an unreadable
-  purchase response counts as zero, and what the confirm text and post-run summary say. This
-  is the money path — extend it before touching the planner, never after.
+  average is over what would actually be bought (not what was asked for), and what the confirm
+  text and post-run summary say. It also pins the reporting contract that a real bug turned
+  up: an unrecognised purchase response yields `null` ("says nothing"), never 0 ("nothing was
+  bought"), and an unmeasurable run must admit it rather than claim either that nothing
+  happened or that the Meat is untouched. This is the money path — extend it before touching
+  the planner, never after.
 - `KingdomOfLoathing/test/ux-beer-garden.test.mjs` — asserts `ux-enhancers.js`'s beer garden
   yield table against the wiki's (3 barley/hops per day, clamped at day 7; day 1 gives no
   fancy item and day 2 gives the first, which is where the threshold comes from), what the

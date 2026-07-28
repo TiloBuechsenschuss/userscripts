@@ -91,12 +91,14 @@ check('acquisitions are counted from the response', [
   api.acquiredCount('You acquire 1,200 items'),
   api.acquiredCount('You acquire an item: <b>perfect negroni</b>'),
 ], [21, 1200, 1]);
-// Anything unreadable must count as zero -- the callers stop on that, and
-// assuming success would keep spending.
-check('an unreadable response counts as nothing bought', [
-  api.acquiredCount('You don\'t have enough Meat.'),
-  api.acquiredCount(''), api.acquiredCount(null),
-], [0, 0, 0]);
+check('an explicit refusal is a real zero',
+  api.acquiredCount('You don\'t have enough Meat.'), 0);
+// The distinction that matters: an ajax response we don't recognise says
+// NOTHING, and must not be reported as "nothing was bought" -- that's the bug
+// where a completed purchase came back as "Bought nothing".
+check('an unrecognised response says nothing either way', [
+  api.acquiredCount('<span>ok</span>'), api.acquiredCount(''), api.acquiredCount(null),
+], [null, null, null]);
 
 // --- planning -------------------------------------------------------------
 // The real store list, cheapest first, with each one's usable amount.
@@ -163,14 +165,42 @@ check('daily limits are disclaimed', /daily limits/.test(shortText), true);
 check('an impossible plan says so plainly',
   /^Nothing to buy/.test(api.describePlan(api.planPurchase([], 5), 'perfect negroni', 10)), true);
 
-// The summary the player gets after the run, from what actually happened.
-check('the summary reports the real average',
-  api.purchaseSummary(10, 31404, 10),
+// --- the summary ----------------------------------------------------------
+// bought/spent are MEASURED from api.php (inventory and Meat deltas), so the
+// summary must never assert anything it wasn't given. `null` means "couldn't
+// tell" and is not the same as 0.
+const summary = (bought, spent, claimed, wanted) =>
+  api.purchaseSummary({ bought: bought, spent: spent, claimed: claimed }, wanted);
+
+check('the summary reports the measured average',
+  summary(10, 31404, 10, 10),
   'Bought 10 for 31,404 Meat — 3,140 Meat each on average.');
 check('...and flags a run that came up short',
-  /5 short of the 15 asked for/.test(api.purchaseSummary(10, 31404, 15)), true);
-check('...and reassures when nothing happened',
-  /Your Meat is untouched/.test(api.purchaseSummary(0, 0, 10)), true);
+  /5 short of the 15 asked for/.test(summary(10, 31404, 10, 15)), true);
+
+// The reported bug: the purchase went through, the store vanished, and the
+// script still said "Bought nothing — no purchase went through. Your Meat is
+// untouched." An unmeasurable run must now say so instead of claiming either.
+const unknown = summary(null, null, 0, 5);
+check('an unmeasurable run admits it rather than claiming nothing happened', [
+  /Couldn't confirm the result/.test(unknown),
+  /may still have gone through/.test(unknown),
+  /untouched/.test(unknown),
+  /Bought nothing/.test(unknown),
+], [true, true, false, false]);
+
+check('...and uses the response as a floor when it had one',
+  /Bought at least 3, but your inventory couldn't be read/.test(summary(null, null, 3, 5)), true);
+
+// A measured zero is a real claim and may be stated.
+check('a measured no-op is stated plainly',
+  summary(0, 0, 0, 5), 'Nothing was bought, and no Meat was spent.');
+// Meat gone but no items is the one case worth shouting about.
+check('Meat leaving with nothing arriving is called out',
+  /No items arrived, but 3,476 Meat left your account/.test(summary(0, 3476, 0, 5)), true);
+// Items measured but Meat unreadable: report the count, don't invent a total.
+check('an unknown spend doesn\'t fabricate an average',
+  summary(10, null, 10, 10), 'Bought 10.');
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nAll passed');
 process.exit(failures ? 1 : 0);
