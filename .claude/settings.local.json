@@ -34,7 +34,8 @@
       "PowerShell(node KingdomOfLoathing/test/quest-helper-8bit.test.mjs; node KingdomOfLoathing/test/quest-helper-rotation.test.mjs | Select-Object -Last 3)",
       "PowerShell(node scripts/bump-loaders.mjs)",
       "PowerShell($ProgressPreference='SilentlyContinue'; $r = Invoke-WebRequest \"https://wiki.kingdomofloathing.com/Monster_Aggravation_Devices?action=raw\" -UserAgent \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\)\" -TimeoutSec 30; $r.Content.Substring\\(0, [Math]::Min\\(6000, $r.Content.Length\\)\\))",
-      "PowerShell(node KingdomOfLoathing/test/ux-mcd-link.test.mjs)"
+      "PowerShell(node KingdomOfLoathing/test/ux-mcd-link.test.mjs)",
+      "PowerShell(node KingdomOfLoathing/test/ux-mcd-link.test.mjs | Select-Object -Last 2; node KingdomOfLoathing/test/ux-beer-garden.test.mjs | Select-Object -Last 2; node KingdomOfLoathing/test/ux-mall-buy.test.mjs | Select-Object -Last 2)"
     ]
   }
 }

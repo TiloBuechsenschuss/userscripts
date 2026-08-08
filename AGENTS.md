@@ -210,7 +210,21 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   unit-tested. "Buy N" always confirms with the total, the average and a check against your
   Meat; `[buy all]` deliberately doesn't (the quantity and total are on the button itself)
   *except* above `MALL_CONFIRM_MEAT`, which catches the joke-priced stores.
-  The fourth feature restores the **monster aggravation device** line on `charpane.php`. KoL
+  The fourth feature adds a **`[mall]` action** to every item on `inventory.php`, styled as
+  one of the page's own bracketed actions and searching the Mall for that exact item. Two
+  things carry it. The search term is the item's name **in quotes** — KoL's item matcher
+  reads a quoted string as an exact name and anything else as a substring, so an unquoted
+  `poppy` would drag in every item with poppy in its name (`mall.php?justitems=0&pudnuggler=…`,
+  the same endpoint KoLmafia's `MallSearchRequest` posts to). And the link is suppressed for
+  **untradeable** items, read as `t=0` off the item table's own `rel` — the flag the page's
+  right-click menu gates "Stock in Mall" on — while an unparseable `rel` still gets the link,
+  since a search that finds nothing is cheaper than a link that mysteriously isn't there.
+  This is the one KoL feature here with a `MutationObserver`: inventory sections are
+  collapsed and only fetch their items by AJAX when opened, and using or buying something
+  splices the item back in, so a single pass would miss most of the page. It's debounced and
+  a per-table `data-` flag makes each item a no-op on later passes, which is also what keeps
+  our own inserts from looping the observer.
+  The fifth feature restores the **monster aggravation device** line on `charpane.php`. KoL
   links your device there with its current setting, but *only while the dial is above 0* —
   the line disappears exactly when you want to click it. Which device you have follows the
   moon sign's **zone, not its stat** (`MOON_SIGN_DEVICE`): Mongoose/Wallaby/Vole → the
@@ -314,6 +328,11 @@ Current tests:
   `confirm()` text says, and that `findBeerGarden` reads the day off the artwork while
   ignoring other crops and other campground images. If you touch the table or the artwork
   regex, adjust this test.
+- `KingdomOfLoathing/test/ux-inventory-mall.test.mjs` — asserts `ux-enhancers.js`'s inventory
+  `[mall]` link: that the search term is the name in quotes (exact match, not substring) and
+  survives apostrophes, `™` and a quote embedded in the name; that `t=0` suppresses the link
+  while an unreadable `rel` doesn't; and that re-running (the observer fires on every DOM
+  change) never stacks up a second link.
 - `KingdomOfLoathing/test/ux-mcd-link.test.mjs` — asserts `ux-enhancers.js`'s monster
   aggravation device line: the sign→device map (with Platypus/Opossum/Marmot pinned to
   Canadia, the trap a stat-based grouping falls into), KoL's own URLs and dial ranges, that

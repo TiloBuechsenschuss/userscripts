@@ -3,14 +3,16 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js
-// @version      1.6
-// @description  A grab-bag of small quality-of-life tweaks for Kingdom of Loathing pages. Currently: at the Hermit (hermit.php) it adds a "Buy all clovers" button next to the Trade button that trades worthless items for every 11-leaf clover the Hermit still has in stock today, one at a time, then reloads and reports how many it got; at the Campground (campground.php) it guards a Beer Garden that hasn't grown for two days yet, since the fancy bottles and labels don't appear before then -- the crop is flagged and clicking it asks for confirmation first; in the Mall (mall.php) it adds a "buy all" action to each store row and a "Buy N" row per item that walks the stores cheapest-first, showing the total and the average cost per item before spending anything; and in the character pane (charpane.php) it keeps the link to your monster aggravation device on screen even when the dial is at 0, which is exactly when KoL hides it.
+// @version      1.7
+// @description  A grab-bag of small quality-of-life tweaks for Kingdom of Loathing pages. Currently: at the Hermit (hermit.php) it adds a "Buy all clovers" button next to the Trade button that trades worthless items for every 11-leaf clover the Hermit still has in stock today, one at a time, then reloads and reports how many it got; at the Campground (campground.php) it guards a Beer Garden that hasn't grown for two days yet, since the fancy bottles and labels don't appear before then -- the crop is flagged and clicking it asks for confirmation first; in the Mall (mall.php) it adds a "buy all" action to each store row and a "Buy N" row per item that walks the stores cheapest-first, showing the total and the average cost per item before spending anything; in the Inventory (inventory.php) it adds a [mall] action next to [use] on every tradeable item, searching the Mall for that exact item; and in the character pane (charpane.php) it keeps the link to your monster aggravation device on screen even when the dial is at 0, which is exactly when KoL hides it.
 // @match        https://www.kingdomofloathing.com/hermit.php*
 // @match        https://kingdomofloathing.com/hermit.php*
 // @match        https://www.kingdomofloathing.com/campground.php*
 // @match        https://kingdomofloathing.com/campground.php*
 // @match        https://www.kingdomofloathing.com/mall.php*
 // @match        https://kingdomofloathing.com/mall.php*
+// @match        https://www.kingdomofloathing.com/inventory.php*
+// @match        https://kingdomofloathing.com/inventory.php*
 // @match        https://www.kingdomofloathing.com/charpane.php*
 // @match        https://kingdomofloathing.com/charpane.php*
 // @grant        none
@@ -883,6 +885,107 @@
     }
   }
 
+  // === feature: a [mall] action on every inventory item ==================
+  //
+  // inventory.php gives each item a row of bracketed actions -- [use], [use
+  // multiple], [discard], [assemble] -- but nothing that answers "what does
+  // this go for?". So add a [mall] in the same style, searching the Mall for
+  // that exact item.
+  //
+  // Each item is:
+  //   <table class="item" id="icNNNN" rel="id=NNNN&s=0&q=0&d=0&g=0&t=1&n=10&...">
+  //     <td class="img">...</td>
+  //     <td id="iNNNN"><b class="ircm">NAME</b>&nbsp;<span>(10)</span>
+  //       <font size=1><br><a href="inv_use.php?...">[use]</a>&nbsp;</font></td>
+  //   </table>
+  // so the actions live in that <font size=1>, and the flags live in `rel`.
+  // `t` is the tradeable flag -- the same one the page's own right-click menu
+  // gates "Stock in Mall" on -- and an untradeable item is never in the Mall,
+  // so those get no link at all rather than one that always comes back empty.
+  // An item whose `rel` doesn't parse still gets the link: a search that finds
+  // nothing costs nothing, whereas a silently missing link looks like a bug.
+  //
+  // The search term is the item's name IN QUOTES. KoL's item matcher treats a
+  // quoted string as an exact name and anything else as a substring, so an
+  // unquoted "poppy" would also drag in every other item with poppy in its
+  // name. The name is used exactly as rendered, which is also what the search
+  // wants: KoL's own name for "Newbiesport&trade; tent" matches on the ™.
+
+  const INV_MALL_FLAG = 'tmMallLink';
+
+  // --- pure helpers (unit-tested) ------------------------------------------
+
+  // "id=10881&s=0&q=0&t=1" -> { id: '10881', s: '0', q: '0', t: '1' }
+  function parseItemRel(rel) {
+    const out = {};
+    String(rel || '').split('&').forEach((pair) => {
+      const eq = pair.indexOf('=');
+      if (eq > 0) out[pair.slice(0, eq)] = pair.slice(eq + 1);
+    });
+    return out;
+  }
+
+  // Only `t=0` is a definite "not tradeable"; anything unreadable errs towards
+  // showing the link.
+  function itemIsTradeable(rel) {
+    return rel.t !== '0';
+  }
+
+  function mallSearchUrl(name) {
+    // Drop any quote the name carries of its own, so nothing can break out of
+    // the exact-match quoting.
+    const exact = '"' + String(name).replace(/"/g, '') + '"';
+    return 'mall.php?justitems=0&pudnuggler=' + encodeURIComponent(exact);
+  }
+
+  // --- the link ------------------------------------------------------------
+
+  function addMallLink(table) {
+    if (table.dataset && table.dataset[INV_MALL_FLAG]) return; // idempotency guard
+    const nameEl = table.querySelector('b.ircm') || table.querySelector('b');
+    const name = nameEl && (nameEl.textContent || '').trim();
+    if (!name) return;
+    if (table.dataset) table.dataset[INV_MALL_FLAG] = '1';
+
+    if (!itemIsTradeable(parseItemRel(table.getAttribute('rel')))) return;
+
+    // The actions row. KoL emits it even for an item with no actions (just the
+    // <br>), but fall back to the name's own cell if one ever renders without.
+    const host = table.querySelector('font[size="1"]') || nameEl.parentNode;
+    if (!host) return;
+
+    const a = document.createElement('a');
+    a.href = mallSearchUrl(name);
+    a.textContent = '[mall]';
+    a.title = 'Search the Mall for ' + name;
+    host.appendChild(a);
+    host.appendChild(document.createTextNode(' '));
+  }
+
+  // inventory.php builds itself in stages: a collapsed section only fetches
+  // its items the first time it's opened, and using or buying something
+  // splices the changed item back in by AJAX. A single pass would miss all of
+  // that, so re-run on DOM changes -- debounced, and a no-op for items already
+  // flagged, which is also what stops our own inserts from looping.
+  function watchInventory(pass) {
+    if (window.__tmInvMallWatch) return; // one observer only
+    if (typeof MutationObserver !== 'function' || !document.body) return;
+    window.__tmInvMallWatch = true;
+    let pending = null;
+    new MutationObserver(() => {
+      if (pending) return;
+      pending = setTimeout(() => { pending = null; pass(); }, 150);
+    }).observe(document.body, { childList: true, subtree: true });
+  }
+
+  function inventoryMallLinks() {
+    const pass = () => {
+      for (const table of document.querySelectorAll('table.item')) addMallLink(table);
+    };
+    pass();
+    watchInventory(pass);
+  }
+
   // === feature: always show the monster aggravation device ===============
   //
   // Every moon sign gets a Monster Aggravation Device -- a dial that adds its
@@ -1173,6 +1276,7 @@
     { name: 'hermit-clovers', path: /\/hermit\.php/i, run: hermitClovers },
     { name: 'beer-garden-guard', path: /\/campground\.php/i, run: beerGardenGuard },
     { name: 'mall-bulk-buy', path: /\/mall\.php/i, run: mallBulkBuy },
+    { name: 'inventory-mall-link', path: /\/inventory\.php/i, run: inventoryMallLinks },
     { name: 'mcd-always-visible', path: /\/charpane\.php/i, run: mcdAlwaysVisible },
   ];
 
