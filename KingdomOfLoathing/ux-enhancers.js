@@ -3,14 +3,16 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js
-// @version      1.3
-// @description  A grab-bag of small quality-of-life tweaks for Kingdom of Loathing pages. Currently: at the Hermit (hermit.php) it adds a "Buy all clovers" button next to the Trade button that trades worthless items for every 11-leaf clover the Hermit still has in stock today, one at a time, then reloads and reports how many it got; at the Campground (campground.php) it guards a Beer Garden that hasn't grown for two days yet, since the fancy bottles and labels don't appear before then -- the crop is flagged and clicking it asks for confirmation first; and in the Mall (mall.php) it adds a "buy all" action to each store row and a "Buy N" row per item that walks the stores cheapest-first, showing the total and the average cost per item before spending anything.
+// @version      1.6
+// @description  A grab-bag of small quality-of-life tweaks for Kingdom of Loathing pages. Currently: at the Hermit (hermit.php) it adds a "Buy all clovers" button next to the Trade button that trades worthless items for every 11-leaf clover the Hermit still has in stock today, one at a time, then reloads and reports how many it got; at the Campground (campground.php) it guards a Beer Garden that hasn't grown for two days yet, since the fancy bottles and labels don't appear before then -- the crop is flagged and clicking it asks for confirmation first; in the Mall (mall.php) it adds a "buy all" action to each store row and a "Buy N" row per item that walks the stores cheapest-first, showing the total and the average cost per item before spending anything; and in the character pane (charpane.php) it keeps the link to your monster aggravation device on screen even when the dial is at 0, which is exactly when KoL hides it.
 // @match        https://www.kingdomofloathing.com/hermit.php*
 // @match        https://kingdomofloathing.com/hermit.php*
 // @match        https://www.kingdomofloathing.com/campground.php*
 // @match        https://kingdomofloathing.com/campground.php*
 // @match        https://www.kingdomofloathing.com/mall.php*
 // @match        https://kingdomofloathing.com/mall.php*
+// @match        https://www.kingdomofloathing.com/charpane.php*
+// @match        https://kingdomofloathing.com/charpane.php*
 // @grant        none
 // ==/UserScript==
 
@@ -881,21 +883,312 @@
     }
   }
 
+  // === feature: always show the monster aggravation device ===============
+  //
+  // Every moon sign gets a Monster Aggravation Device -- a dial that adds its
+  // setting to the level of every monster in the Kingdom, and forces the
+  // special drops out of the level bosses. Which one you get is decided by the
+  // sign you ascended under, and there are four:
+  //
+  //   Mongoose / Wallaby / Vole      Degrassi Knoll        detuned radio (0-10)
+  //   Platypus / Opossum / Marmot    Little Canadia        the MCD       (0-11)
+  //   Wombat  / Blender / Packrat    Gnomish Gnomads Camp  Annoy-o-Tron  (0-10)
+  //   Bad Moon                       Hey Deze              Heartbreaker's Hotel
+  //
+  // Note the grouping is by the sign's ZONE, not by its stat -- Platypus is a
+  // Muscle sign but a Canadia one, so a "muscle sign means the radio" shortcut
+  // would send a third of players to the wrong page.
+  //
+  // KoL puts a link to your device in the charpane showing its current
+  // setting... but ONLY while the dial is above 0. At 0 the line vanishes,
+  // which is precisely when you want to click it. So: put it back, reading 0.
+  // No setting is changed here -- this is a link, nothing else.
+  //
+  // Both charpane layouts are handled, with the game's own markup, labels and
+  // hrefs, so the restored line is indistinguishable from the real one (and
+  // still parses for anything else reading the pane, KoLmafia included):
+  //
+  //   expanded  <br><font size=2><a target=mainpane href=...>Detuned Radio</a>: <b>0</b></font>
+  //   compact   <tr><td align=right><a target=mainpane href=...>Radio</a>:</td><td><b>0</b></td></tr>
+  //
+  // The value is hardcoded to 0 rather than looked up, because KoL hides the
+  // line exactly when the dial is 0 -- its absence IS the reading. If the line
+  // is already on the page we leave it completely alone.
+
+  const MCD_ID = 'tm-mcd-link';
+  const MCD_CACHE_KEY = 'tm-mcd-device';
+  // The sign is fixed for an ascension, so this only has to be re-derived after
+  // one. A day's grace keeps a stale entry from outliving a run for long, and
+  // the worst a wrong one can do is offer a link to a zone you can't reach.
+  const MCD_CACHE_MS = 24 * 60 * 60 * 1000;
+
+  // KoL's own link for each device, and its own two labels for it. Verified
+  // against real charpane HTML (KoLmafia's charpane test fixtures) rather than
+  // reconstructed, so these are the game's URLs, not guesses at them.
+  const MCD_DEVICES = {
+    knoll: {
+      label: 'Detuned Radio', short: 'Radio', max: 10, pwd: true,
+      url: 'inv_use.php?whichitem=2682',
+      note: 'The radio costs 300 Meat at the Degrassi Knoll Bakery and Hardware ' +
+        'Store, and you have to be carrying it.',
+    },
+    canadia: {
+      label: 'Mind Control', short: 'MC', max: 11, pwd: false,
+      url: 'place.php?whichplace=canadia&action=lc_mcd',
+      note: 'Free and available from turn one — and this is the one whose dial ' +
+        'goes to 11.',
+    },
+    gnomads: {
+      label: 'Annoy-o-Tron 5k', short: 'AOT5K', max: 10, pwd: false,
+      url: 'gnomes.php?place=machine',
+      note: 'Free, but the Gnomish Gnomads\' Camp needs the Desert Beach ' +
+        'unlocked first.',
+    },
+    badmoon: {
+      label: 'Heartbreaker\'s', short: 'HH', max: 11, pwd: false,
+      url: 'adventure.php?snarfblat=148',
+      note: 'Setting this one costs an Adventure, and each visit only offers one ' +
+        'floor from 1-3, one from 4-7 and one from 8-11 (plus 0).',
+    },
+  };
+
+  // --- pure helpers (unit-tested) ------------------------------------------
+
+  const MOON_SIGN_DEVICE = {
+    mongoose: 'knoll', wallaby: 'knoll', vole: 'knoll',
+    platypus: 'canadia', opossum: 'canadia', marmot: 'canadia',
+    wombat: 'gnomads', blender: 'gnomads', packrat: 'gnomads',
+    'bad moon': 'badmoon',
+  };
+
+  // api.php's `sign` -> a key of MCD_DEVICES. Null for "None" and for anything
+  // unrecognised, which is the signal to leave the pane alone entirely.
+  function mcdDeviceForSign(sign) {
+    const key = String(sign || '').trim().toLowerCase();
+    return MOON_SIGN_DEVICE[key] || null;
+  }
+
+  // KoL's own label for a device, either layout's wording -> the device key.
+  // Used to recognise the line when the game IS drawing it.
+  function mcdDeviceForLabel(label) {
+    const want = String(label || '').trim().toLowerCase().replace(/:$/, '');
+    for (const key of Object.keys(MCD_DEVICES)) {
+      const dev = MCD_DEVICES[key];
+      if (want === dev.label.toLowerCase() || want === dev.short.toLowerCase()) return key;
+    }
+    return null;
+  }
+
+  function mcdTooltip(dev) {
+    return 'Monster aggravation device — the dial goes 0-' + dev.max + ' and adds ' +
+      'that much to the level of every monster you fight. ' + dev.note +
+      ' Setting it to the right number also forces the special drops from the Boss ' +
+      'Bat, Baron von Ratsworth, the Knob Goblin King and the Bonerdagon' +
+      (dev.max === 11
+        ? ' — and beating all four with it at 11 earns the Boss Boss trophy.'
+        : '.') +
+      ' KoL hides this line whenever the dial is at 0; this is that line, put back.';
+  }
+
+  // --- reading the pane ----------------------------------------------------
+
+  // The game's own device line, if it's drawing one. Matched on the label text
+  // (the same four names in each layout) rather than on the href: the Hey Deze
+  // link is an ordinary adventure.php URL and would collide with a "last
+  // adventure" link pointing at the same zone.
+  function findExistingMcdLink() {
+    for (const a of document.querySelectorAll('a[href]')) {
+      if (mcdDeviceForLabel(a.textContent)) return a;
+    }
+    return null;
+  }
+
+  // The compact pane lists Adv / PvP / the device as two-cell rows:
+  //   <tr><td align=right><a ...>PvP</a>:</td><td align=left><b>48</b></td></tr>
+  // The expanded pane draws the same things as icons with a <span class=black>
+  // count, so requiring a <b> in the second cell is what tells the two apart.
+  // Returns the row to sit after, or null when this isn't the compact pane.
+  function findCompactStatRow() {
+    const pvp = document.querySelector('a[href*="peevpee.php"]');
+    const tr = pvp && pvp.closest ? pvp.closest('tr') : null;
+    if (!tr || tr.children.length < 2) return null;
+    if (!tr.children[1].querySelector('b')) return null;
+    // KoL puts the device last in that table, so go to the end of it.
+    const rows = tr.parentNode ? tr.parentNode.children : null;
+    return rows && rows.length ? rows[rows.length - 1] : tr;
+  }
+
+  // The charpane defines pwdhash itself and is full of pwd-carrying links, so
+  // read it locally: getPwd() would spend an api.php round trip, and this runs
+  // on every single turn.
+  function localPwd() {
+    if (typeof window.pwdhash === 'string' && window.pwdhash) return window.pwdhash;
+    const link = document.querySelector('a[href*="pwd="]');
+    const m = link && (link.getAttribute('href') || '').match(/[?&]pwd=([0-9a-fA-F]+)/);
+    return m ? m[1] : null;
+  }
+
+  // --- remembering which device you have -----------------------------------
+  //
+  // localStorage is per-origin, so key on the character name (the charpane's
+  // own charsheet link) or a multi would share one device.
+
+  function mcdCacheKey() {
+    const a = document.querySelector('a[href*="charsheet.php"]');
+    const name = a && (a.textContent || '').trim();
+    return name ? MCD_CACHE_KEY + ':' + name : MCD_CACHE_KEY;
+  }
+
+  function readCachedDevice() {
+    try {
+      const rec = JSON.parse(localStorage.getItem(mcdCacheKey()));
+      if (!rec || !rec.t || Date.now() - rec.t > MCD_CACHE_MS) return null;
+      return MCD_DEVICES[rec.dev] ? rec.dev : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function rememberDevice(key) {
+    if (!key) return;
+    try {
+      localStorage.setItem(mcdCacheKey(), JSON.stringify({ dev: key, t: Date.now() }));
+    } catch (e) { /* storage unavailable; we'll just ask api.php again */ }
+  }
+
+  // --- the line ------------------------------------------------------------
+
+  function mcdAnchor(dev, text, pwd) {
+    const a = document.createElement('a');
+    a.target = 'mainpane'; // we're in the sidebar frame; the device opens in the big one
+    a.href = dev.url + (dev.pwd && pwd ? '&pwd=' + pwd : '');
+    a.textContent = text;
+    a.title = mcdTooltip(dev);
+    return a;
+  }
+
+  function boldZero() {
+    const b = document.createElement('b');
+    b.textContent = '0';
+    return b;
+  }
+
+  function injectMcdLine(dev, pwd) {
+    const compactAfter = findCompactStatRow();
+    if (compactAfter && compactAfter.parentNode) {
+      const tr = document.createElement('tr');
+      tr.id = MCD_ID;
+      const label = document.createElement('td');
+      label.setAttribute('align', 'right');
+      label.appendChild(mcdAnchor(dev, dev.short, pwd));
+      label.appendChild(document.createTextNode(':'));
+      const value = document.createElement('td');
+      value.appendChild(boldZero());
+      tr.appendChild(label);
+      tr.appendChild(value);
+      compactAfter.parentNode.insertBefore(tr, compactAfter.nextSibling);
+      return true;
+    }
+
+    // Expanded pane. KoL's own line stands clear of its neighbours on BOTH
+    // sides, and real charpanes show it two ways:
+    //   ...</table><br><font size=2>DEVICE</font><br><br><center id="nudgeblock">
+    //   ...<b>Hardcore</b></font><br><br><font size=2>DEVICE</font><br><br><center ...>
+    // With the line hidden the lower gap is still on the page, so go in ABOVE
+    // that run of <br>s and it lands below us, right where the game puts it.
+    // Then open the same gap above -- except after a block element (the stats
+    // table), which already ends the line, where one <br> is a blank line and
+    // two would be one more than the game leaves.
+    const nudge = document.getElementById('nudgeblock');
+    let anchor = nudge;
+    let gap = 0;
+    while (anchor && anchor.previousSibling) {
+      const prev = anchor.previousSibling;
+      if (prev.nodeName === 'BR') { gap++; } else if (
+        // Whitespace between the tags isn't spacing; step over it either way.
+        !(prev.nodeType === 3 && !/\S/.test(prev.nodeValue || ''))) break;
+      anchor = prev;
+    }
+    const wanted = Math.max(gap, 2);
+    const above = anchor && anchor.previousSibling;
+    const blockAbove = above && above.nodeType === 1 &&
+      /^(TABLE|CENTER|DIV|P|HR)$/.test(above.nodeName);
+
+    const wrap = document.createElement('span');
+    wrap.id = MCD_ID;
+    for (let i = 0; i < (blockAbove ? 1 : wanted); i++) {
+      wrap.appendChild(document.createElement('br'));
+    }
+    const font = document.createElement('font');
+    font.setAttribute('size', '2');
+    font.appendChild(mcdAnchor(dev, dev.label, pwd));
+    font.appendChild(document.createTextNode(': '));
+    font.appendChild(boldZero());
+    wrap.appendChild(font);
+    for (let i = gap; i < wanted; i++) wrap.appendChild(document.createElement('br'));
+
+    if (anchor && anchor.parentNode) {
+      anchor.parentNode.insertBefore(wrap, anchor);
+      return true;
+    }
+    if (document.body) {
+      document.body.appendChild(wrap);
+      return true;
+    }
+    return false;
+  }
+
+  async function mcdAlwaysVisible() {
+    if (document.getElementById(MCD_ID)) return; // idempotency guard
+
+    // The dial is above 0 and KoL is already showing the line. Don't touch it --
+    // but do note for free which device this character has, so the next turn
+    // (at 0) needs no lookup at all.
+    const existing = findExistingMcdLink();
+    if (existing) {
+      rememberDevice(mcdDeviceForLabel(existing.textContent));
+      return;
+    }
+
+    let key = readCachedDevice();
+    if (!key) {
+      // api.php is the game's own answer for the moon sign, and it's the only
+      // place that states it without loading a whole page.
+      const status = await apiJson('status');
+      key = mcdDeviceForSign(status && status.sign);
+      rememberDevice(key);
+    }
+    // No sign, or one we don't know: this character has no device, so say
+    // nothing rather than link somewhere they can't go.
+    if (!key) return;
+
+    const dev = MCD_DEVICES[key];
+    const pwd = dev.pwd ? (localPwd() || await getPwd()) : null;
+    injectMcdLine(dev, pwd);
+  }
+
   // === feature registry =================================================
 
   const FEATURES = [
     { name: 'hermit-clovers', path: /\/hermit\.php/i, run: hermitClovers },
     { name: 'beer-garden-guard', path: /\/campground\.php/i, run: beerGardenGuard },
     { name: 'mall-bulk-buy', path: /\/mall\.php/i, run: mallBulkBuy },
+    { name: 'mcd-always-visible', path: /\/charpane\.php/i, run: mcdAlwaysVisible },
   ];
 
   function run() {
     for (const feature of FEATURES) {
       if (!feature.path.test(location.pathname)) continue;
-      try {
-        feature.run();
-      } catch (e) {
+      const fail = (e) => {
         console.error('UX Enhancers: feature "' + feature.name + '" failed.', e);
+      };
+      try {
+        // An async feature settles after this frame, so try/catch alone would
+        // let a rejection escape as an unhandled one.
+        const out = feature.run();
+        if (out && typeof out.catch === 'function') out.catch(fail);
+      } catch (e) {
+        fail(e);
       }
     }
   }

@@ -210,6 +210,30 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   unit-tested. "Buy N" always confirms with the total, the average and a check against your
   Meat; `[buy all]` deliberately doesn't (the quantity and total are on the button itself)
   *except* above `MALL_CONFIRM_MEAT`, which catches the joke-priced stores.
+  The fourth feature restores the **monster aggravation device** line on `charpane.php`. KoL
+  links your device there with its current setting, but *only while the dial is above 0* —
+  the line disappears exactly when you want to click it. Which device you have follows the
+  moon sign's **zone, not its stat** (`MOON_SIGN_DEVICE`): Mongoose/Wallaby/Vole → the
+  detuned radio, Platypus/Opossum/Marmot → the Canadian MCD, Wombat/Blender/Packrat → the
+  Annoy-o-Tron, Bad Moon → Heartbreaker's Hotel. Platypus is a *Muscle* sign in *Canadia*,
+  so a stat-based shortcut would misroute a third of players. The labels and hrefs in
+  `MCD_DEVICES` are KoL's own, copied from real charpane HTML (KoLmafia's charpane test
+  fixtures), and the injected line uses the game's markup for whichever pane is showing —
+  so it reads as native and still parses for anything else scraping the pane. The value is
+  hardcoded **0** rather than looked up: KoL hides the line precisely when the dial is 0, so
+  its absence *is* the reading. The two panes are told apart by whether the PvP row's second
+  cell holds a `<b>` count (compact) or an icon plus `<span class=black>` (expanded).
+  In the expanded pane the line is inserted *above* the run of `<br>`s already sitting before
+  the nudge block, so that existing gap falls below it, and a matching gap is opened above —
+  one `<br>` after a block element (which already ends the line) and the full gap after inline
+  content. That looks fussy but both shapes occur in real charpanes, and without it the
+  restored line sits flush against whatever is above.
+  The sign comes from `api.php?what=status`'s `sign`, cached in `localStorage` per character
+  for a day — and refreshed for free whenever KoL *is* drawing the line, since the label
+  names the device. An unknown or absent sign injects nothing at all. The feature only ever
+  adds a link; it never sets the dial. Note the registry's `run()` also `.catch`es a
+  returned promise now, because this feature is async and try/catch alone would let a
+  rejection escape.
 
 **Twilight Heroes** is plain (non-frame) pages scraped from table layout. State that must
 survive the full-page reload after equip/unequip/use is stashed in `sessionStorage`
@@ -290,6 +314,12 @@ Current tests:
   `confirm()` text says, and that `findBeerGarden` reads the day off the artwork while
   ignoring other crops and other campground images. If you touch the table or the artwork
   regex, adjust this test.
+- `KingdomOfLoathing/test/ux-mcd-link.test.mjs` — asserts `ux-enhancers.js`'s monster
+  aggravation device line: the sign→device map (with Platypus/Opossum/Marmot pinned to
+  Canadia, the trap a stat-based grouping falls into), KoL's own URLs and dial ranges, that
+  both panes' labels for a device are recognised so the line is never duplicated, that a
+  last-adventure link to Hey Deze is *not* mistaken for the Heartbreaker's line (which is
+  why the label rather than the href identifies it), and the compact/expanded discriminator.
 - `KingdomOfLoathing/test/daily-checklist-seeding.test.mjs` — asserts `daily-checklist.js`'s
   `applySeeds`: order on a fresh list, and that a new default reaches a list someone already
   has, in the right place and exactly once. Two traps it pins down — resting, the tea tree
