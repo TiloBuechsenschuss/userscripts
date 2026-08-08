@@ -28,7 +28,11 @@
       "Bash(node KingdomOfLoathing/test/daily-checklist-seeding.test.mjs)",
       "Bash(node scripts/bump-loaders.mjs --force kol)",
       "Bash(node KingdomOfLoathing/test/ux-mall-buy.test.mjs)",
-      "Bash(node \"C:/Users/tilob/AppData/Local/Temp/claude/C--Projekte-userscripts/86a0dfce-e2a1-4aa9-99f8-885194c78d7b/scratchpad/selcheck.mjs\" \"C:/Users/tilob/AppData/Local/Temp/claude/C--Projekte-userscripts/86a0dfce-e2a1-4aa9-99f8-885194c78d7b/scratchpad/mall.html\")"
+      "Bash(node \"C:/Users/tilob/AppData/Local/Temp/claude/C--Projekte-userscripts/86a0dfce-e2a1-4aa9-99f8-885194c78d7b/scratchpad/selcheck.mjs\" \"C:/Users/tilob/AppData/Local/Temp/claude/C--Projekte-userscripts/86a0dfce-e2a1-4aa9-99f8-885194c78d7b/scratchpad/mall.html\")",
+      "Bash(gh api *)",
+      "PowerShell(\\(Invoke-WebRequest \"https://raw.githubusercontent.com/loathers/8bit-relay/main/relay/place.8bit.js\"\\).Content)",
+      "PowerShell(node KingdomOfLoathing/test/quest-helper-8bit.test.mjs; node KingdomOfLoathing/test/quest-helper-rotation.test.mjs | Select-Object -Last 3)",
+      "PowerShell(node scripts/bump-loaders.mjs)"
     ]
   }
 }

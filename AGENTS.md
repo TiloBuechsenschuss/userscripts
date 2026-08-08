@@ -139,6 +139,24 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   `rotation` also has no button at all (nothing to trigger) and instead brings its own body
   via the handler's optional `extras` hook, since one status line can't carry state plus
   corrections.
+  The file's one non-puzzle feature is the **8-Bit Realm score**, and it deliberately sits
+  outside the registry: it's on `charpane.php`, where no `whichchoice` exists and the bar
+  doesn't fit, so it dispatches on its own just above `currentPuzzle()` and returns. The
+  realm's four zones each pay for exactly one modifier, and the **colour** of the sidebar
+  Score says which one is currently paying double — black = Vanya's Castle (565, Combat
+  Initiative), blue = Megalo-City (566, Damage Absorption), green = Hero's Field (564, Item
+  Drop), red = The Fungus Plains (563, Meat Drop). `EIGHTBIT_ZONES` is stored **in cycle
+  order** (black → blue → green → red, fixed and identical for every player, advancing one
+  step per 5 kills in the realm), so "what's next" is just the next entry — don't re-sort it.
+  `eightBitPoints` is the community `8bit-relay` override's formula, and the two facts it
+  encodes are the reason the box exists: the modifier is worth **nothing** until it clears the
+  zone's floor, and nothing past its cap, so 400 a fight is the ceiling and only the coloured
+  zone reaches it. Score is **not** a currency — it only counts up and the Treasure House
+  chests merely unlock at 10k/20k/30k — so `eightBitChest` reports distance, never a cost.
+  The colour is read from the span's `alt`/`title` (`"black score - 0"`, which carries the
+  score too) with the `<font color>` beside a "Score:" cell as fallback, and an unrecognised
+  colour yields **no box at all** rather than a guess about where to spend turns. The link
+  carries `target="mainpane"` because the script runs inside the sidebar frame.
 - `ux-enhancers.js` is the catch-all for unrelated small tweaks. It's a `FEATURES` registry of
   `{ name, path, run }`, each entry scoped to its own pathname and each `run` wrapped in a
   try/catch so one broken feature can't take the others down — add a tweak as an entry, not as
@@ -288,6 +306,13 @@ Current tests:
   cannot use the usual append-a-return trick — the script's page dispatch bails early — so it
   hands the helpers back by replacing the `const puzzle = currentPuzzle();` line instead. If
   you touch that line or the rotation state machine, adjust this test.
+- `KingdomOfLoathing/test/quest-helper-8bit.test.mjs` — asserts `quest-helper.js`'s 8-Bit
+  Realm advice: the colour→zone→snarfblat map, the fixed black/blue/green/red cycle, the
+  points formula (nothing below the floor, 10 per 10 over it in the bonus zone and per 20
+  outside, capping at 400 and 200 — the bonus is exactly double), the chest distances, and
+  that an unrecognised colour yields no advice. It also parses the real charpane markup
+  through both paths (the labelled span, and the `<font color>` fallback). Uses the same
+  replace-the-dispatch-line trick as the rotation test.
 - `KingdomOfLoathing/test/iotm-cup13-sort.test.mjs` — asserts `iotm.js`'s Cup-of-13s option
   parser and each ingredient sort order (advs / effect / inventory / name). If you touch that
   parsing or the sort comparators, add/adjust a case here.

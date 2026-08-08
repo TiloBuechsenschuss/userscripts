@@ -3,14 +3,16 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/quest-helper.js
-// @version      1.3
-// @description  Helper for puzzle-y quest choice adventures. It never submits or clicks anything on its own -- it fills in, highlights or explains the known-correct answer and leaves the actual move to you. Currently: Drawn Onward (choice 872), the photo frames in Dr. Awkward's office, sets the four photo dropdowns to the correct order; Beginning at the Beginning of Beginning (the Hidden Temple tile floor, tiles.php) glows the tile to step on in each row, spelling B-A-N-A-N-A-S from the bottom up, numbered in step order; Control Freak (choice 929), the pyramid control room, tracks the Lower Chambers rotation and tells you how many more times to turn the wheel, when to go down instead, and when to stop turning.
+// @version      1.4
+// @description  Helper for puzzle-y quest choice adventures. It never submits or clicks anything on its own -- it fills in, highlights or explains the known-correct answer and leaves the actual move to you. Currently: Drawn Onward (choice 872), the photo frames in Dr. Awkward's office, sets the four photo dropdowns to the correct order; Beginning at the Beginning of Beginning (the Hidden Temple tile floor, tiles.php) glows the tile to step on in each row, spelling B-A-N-A-N-A-S from the bottom up, numbered in step order; Control Freak (choice 929), the pyramid control room, tracks the Lower Chambers rotation and tells you how many more times to turn the wheel, when to go down instead, and when to stop turning. Also reads the 8-Bit Realm Score in the charpane and turns its colour into a link to the zone that is currently paying double, with what to boost there.
 // @match        https://www.kingdomofloathing.com/choice.php*
 // @match        https://kingdomofloathing.com/choice.php*
 // @match        https://www.kingdomofloathing.com/tiles.php*
 // @match        https://kingdomofloathing.com/tiles.php*
 // @match        https://www.kingdomofloathing.com/adventure.php*
 // @match        https://kingdomofloathing.com/adventure.php*
+// @match        https://www.kingdomofloathing.com/charpane.php*
+// @match        https://kingdomofloathing.com/charpane.php*
 // @run-at       document-idle
 // @grant        none
 // ==/UserScript==
@@ -23,7 +25,9 @@
   // is in here because the tile puzzle's FIRST screen is rendered as a normal
   // adventure result (the wiki notes it uniquely shows two titled blue boxes: the
   // results box and the puzzle box); every later step posts to tiles.php.
-  if (!/\/(choice|tiles|adventure)\.php/i.test(location.pathname)) return;
+  // charpane.php is here for the 8-Bit Realm score readout, which isn't a puzzle
+  // page at all -- see its own section near the bottom.
+  if (!/\/(choice|tiles|adventure|charpane)\.php/i.test(location.pathname)) return;
   if (document.getElementById('tm-questhelper-bar')) return; // idempotency guard
 
   // NOTE on styling: KoL's Content-Security-Policy allows inline style ATTRIBUTES
@@ -838,6 +842,215 @@
 
   const HANDLERS = { selects: selectsHandler, tiles: tilesHandler, rotation: rotationHandler };
 
+  // === The 8-Bit Realm score (charpane) ====================================
+  //
+  // Not a puzzle and not on a puzzle page -- it's a sidebar readout -- but it's
+  // the same shape as the rest of this file: the answer is knowable and the
+  // game simply doesn't say it out loud.
+  //
+  // The realm is four zones, and the COLOUR of your Score in the charpane says
+  // which one is currently paying double. The colour moves one step every five
+  // kills in the realm, along a cycle that is fixed and the same for everyone:
+  // black -> blue -> green -> red -> black. EIGHTBIT_ZONES is in that order, so
+  // "what's next" is just the next entry.
+  //
+  //   black  Vanya's Castle      565   Combat Initiative
+  //   blue   Megalo-City         566   Damage Absorption
+  //   green  Hero's Field        564   Item Drop
+  //   red    The Fungus Plains   563   Meat Drop
+  //
+  // A fight pays 50 points (100 in the bonus zone) plus a slab for that one
+  // modifier -- see eightBitPoints, which is the formula the community's
+  // 8bit-relay override uses. Two things follow that the game never tells you
+  // and that this exists to say: the modifier is worth NOTHING until it clears
+  // the zone's floor, and it stops helping at the cap, so 400 a fight is the
+  // ceiling and only the zone whose colour is showing can reach it.
+  //
+  // Score is not a currency -- it only counts up, and nothing spends it. The
+  // Treasure House chests just unlock as it passes 10k / 20k / 30k.
+  //
+  // Everything here is read-only, and every step bails out silently: an
+  // unparseable score row or an unrecognised colour means no box at all rather
+  // than a confident guess about where to spend turns.
+
+  const EIGHTBIT_ZONES = [
+    { colour: 'black', name: 'Vanya\'s Castle', snarfblat: 565,
+      stat: 'Combat Initiative', pct: true, floor: 300, cap: 595, ink: '#000' },
+    { colour: 'blue', name: 'Megalo-City', snarfblat: 566,
+      stat: 'Damage Absorption', pct: false, floor: 300, cap: 595, ink: '#00a' },
+    { colour: 'green', name: 'Hero\'s Field', snarfblat: 564,
+      stat: 'Item Drop', pct: true, floor: 100, cap: 395, ink: '#070' },
+    { colour: 'red', name: 'The Fungus Plains', snarfblat: 563,
+      stat: 'Meat Drop', pct: true, floor: 150, cap: 445, ink: '#a00' },
+  ];
+
+  const EIGHTBIT_CHESTS = [
+    { at: 10000, prize: 'the digital key' },
+    { at: 20000, prize: 'a fat loot token' },
+    { at: 30000, prize: 'the third chest' },
+  ];
+
+  // --- pure logic (DOM-free, unit-tested) ----------------------------------
+
+  // Points from one fight in `zone` while carrying `modifier` of its stat.
+  // The bonus doubles the base AND halves the divisor, so the same modifier is
+  // worth exactly twice as much in the zone whose colour is up.
+  function eightBitPoints(zone, modifier, bonus) {
+    const over = Math.max(0, Math.min(300, modifier - zone.floor));
+    return (bonus ? 100 : 50) + Math.round(over / (bonus ? 10 : 20)) * 10;
+  }
+
+  // Damage Absorption is a flat number; the other three are percentages.
+  function eightBitAmount(zone, v) {
+    return zone.pct ? '+' + v + '%' : String(v);
+  }
+
+  function eightBitZone(colour) {
+    const c = String(colour || '').trim().toLowerCase();
+    return EIGHTBIT_ZONES.find((z) => z.colour === c) || null;
+  }
+
+  function eightBitNextZone(zone) {
+    const i = EIGHTBIT_ZONES.indexOf(zone);
+    return i < 0 ? null : EIGHTBIT_ZONES[(i + 1) % EIGHTBIT_ZONES.length];
+  }
+
+  // The next Treasure House chest, or null once all three are within reach.
+  function eightBitChest(score) {
+    if (typeof score !== 'number' || !isFinite(score)) return null;
+    return EIGHTBIT_CHESTS.find((c) => score < c.at) || null;
+  }
+
+  // THE ADVICE, kept DOM-free so it can be reasoned about and unit-tested.
+  // Returns { zone, url, boost, next, goal, tip }, or null when the colour
+  // isn't one of the four (in which case we say nothing at all).
+  function eightBitAdvice(colour, score) {
+    const zone = eightBitZone(colour);
+    if (!zone) return null;
+    const next = eightBitNextZone(zone);
+
+    const floor = eightBitAmount(zone, zone.floor);
+    const cap = eightBitAmount(zone, zone.cap);
+    const min = eightBitPoints(zone, zone.floor, true);
+    const max = eightBitPoints(zone, zone.cap, true);
+
+    const boost = 'Boost ' + zone.stat + ' — worth nothing below ' + floor +
+      ', maxed at ' + cap + '.';
+
+    let goal = null;
+    if (typeof score === 'number' && isFinite(score)) {
+      const chest = eightBitChest(score);
+      goal = chest
+        ? (chest.at - score).toLocaleString() + ' more for ' + chest.prize + '.'
+        : 'All three chests are open.';
+    }
+
+    const tip = [
+      'The Score\'s colour is the 8-Bit Realm zone paying double right now: ' +
+        EIGHTBIT_ZONES.map((z) => z.colour + ' = ' + z.name).join(', ') + '.',
+      'It moves one step along that cycle every 5 kills in the realm, so it ' +
+        'shifts under you.',
+      'In ' + zone.name + ' a fight pays ' + min + ' points, plus 10 for every 10 of ' +
+        zone.stat + ' above ' + floor + ', up to ' + max + ' at ' + cap +
+        '. In the other three zones it is half that.',
+      'Score is never spent — the Treasure House chests open at 10,000 (digital key), ' +
+        '20,000 (fat loot token) and 30,000.',
+    ].join(' ');
+
+    return {
+      zone: zone,
+      url: 'adventure.php?snarfblat=' + zone.snarfblat,
+      boost: boost,
+      next: next ? 'Then ' + next.name + ' (' + next.colour + ').' : null,
+      goal: goal,
+      tip: tip,
+    };
+  }
+
+  // --- reading the charpane ------------------------------------------------
+
+  // e.g. "black score - 0"
+  const EIGHTBIT_LABEL = /^\s*([a-z]+)\s+score\s*-\s*([\d,]+)\s*$/i;
+
+  // The charpane states the colour three ways at once:
+  //   <font color="black"><span class="nes" alt="black score - 0"
+  //                             title="black score - 0">0</span></font>
+  // so take the labelled span first (it carries the score too) and fall back to
+  // the label cell plus the <font color> wrapping the number.
+  // Returns { colour, score, el } or null.
+  function readEightBitScore() {
+    for (const el of document.querySelectorAll('[title], [alt]')) {
+      const m = (el.getAttribute('title') || '').match(EIGHTBIT_LABEL) ||
+        (el.getAttribute('alt') || '').match(EIGHTBIT_LABEL);
+      if (m) {
+        return { colour: m[1].toLowerCase(), score: Number(m[2].replace(/,/g, '')), el: el };
+      }
+    }
+    for (const td of document.querySelectorAll('td')) {
+      if (!/^\s*score:?\s*$/i.test(td.textContent || '')) continue;
+      const row = td.closest && td.closest('tr');
+      const font = row && row.querySelector('font[color]');
+      if (!font) continue;
+      const n = Number((font.textContent || '').replace(/[^\d]/g, ''));
+      return {
+        colour: (font.getAttribute('color') || '').toLowerCase(),
+        score: isFinite(n) && (font.textContent || '').trim() !== '' ? n : null,
+        el: font,
+      };
+    }
+    return null;
+  }
+
+  function showEightBit() {
+    if (document.getElementById('tm-8bit-advice')) return; // idempotency guard
+    const found = readEightBitScore();
+    if (!found) return;
+    const advice = eightBitAdvice(found.colour, found.score);
+    if (!advice) return;
+
+    const box = document.createElement('div');
+    box.id = 'tm-8bit-advice';
+    box.style.cssText = [
+      'margin:2px 0 0', 'padding:2px 3px', 'border:1px solid #ccc',
+      'background:#f6f6f6', 'font-family:arial', 'font-size:9px',
+      'line-height:11px', 'text-align:left',
+    ].join(';');
+    box.title = advice.tip;
+
+    const head = document.createElement('div');
+    head.appendChild(document.createTextNode('2× points: '));
+    const link = document.createElement('a');
+    link.href = advice.url;
+    link.target = 'mainpane'; // we're in the sidebar frame; adventure in the big one
+    link.textContent = advice.zone.name;
+    link.style.cssText = 'font-weight:bold;color:' + advice.zone.ink;
+    head.appendChild(link);
+    box.appendChild(head);
+
+    [advice.boost, advice.next, advice.goal].forEach((text) => {
+      if (!text) return;
+      const line = document.createElement('div');
+      line.style.cssText = 'color:#555';
+      line.textContent = text;
+      box.appendChild(line);
+    });
+
+    // The score sits in a two-column table row and the sidebar is narrow, so a
+    // full-width row of its own underneath is the only place a sentence fits.
+    // If the charpane ever stops being a table, sit beside the number instead.
+    const row = found.el.closest && found.el.closest('tr');
+    if (row && row.parentNode) {
+      const tr = document.createElement('tr');
+      const cell = document.createElement('td');
+      cell.colSpan = 2;
+      cell.appendChild(box);
+      tr.appendChild(cell);
+      row.parentNode.insertBefore(tr, row.nextSibling);
+    } else if (found.el.parentNode) {
+      found.el.parentNode.insertBefore(box, found.el.nextSibling);
+    }
+  }
+
   // === UI ==================================================================
 
   function buildBar(puzzle, ctx, handler) {
@@ -885,6 +1098,14 @@
     }
 
     return { bar, say };
+  }
+
+  // The charpane is a different page with a different job: no puzzle can be on
+  // it, and the 8-Bit box brings its own markup rather than the bar's, so it
+  // dispatches here and nothing below applies.
+  if (/\/charpane\.php/i.test(location.pathname)) {
+    showEightBit();
+    return;
   }
 
   const puzzle = currentPuzzle();
