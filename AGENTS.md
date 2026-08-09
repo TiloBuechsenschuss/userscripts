@@ -139,6 +139,35 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   `rotation` also has no button at all (nothing to trigger) and instead brings its own body
   via the handler's optional `extras` hook, since one status line can't carry state plus
   corrections.
+  A fourth type, `combat`, is the file's only **fight.php** work: two fights where a move
+  works on exactly one round and the game never says which. A Junkyard gremlin presenting
+  one of **Yossarian's tools** (use the molybdenum magnet: the tool is yours and the fight
+  ends) and a raver Outside the Club pulling his **special dance move** (Gothy Handwave
+  studies it, which is how the Disco Bandit nemesis skills are learned). Each is a registry
+  entry like any other puzzle.
+  Detection is **not** prose matching. KoL tags the round itself with an HTML comment —
+  `<!--moly4-->` on the gremlin round, `<!-- gh:50 -->` on the raver's special — and that
+  marker is the primary signal, the same one KoLmafia's relay override keys on
+  (`IslandDecorator.GREMLIN_TOOL_MESSAGE`). It's the game's own tag, so it survives flavour
+  rewrites: the gremlins' combat messages *were* rewritten on 27 August 2024, which is why
+  the wiki's "the message must mention a tool" rule no longer describes what fires. The
+  wiki/`NemesisDecorator` message strings are kept only as a fallback. Comments reach the
+  DOM as comment nodes, so a `TreeWalker` finds them and the parent element is what gets
+  highlighted (the tile floor's gold pulse and shared timer, reused).
+  Who you're fighting comes from `<!-- MONSTERID: 551 -->`, and for the gremlins that is
+  load-bearing: **each Junkyard zone runs a tool-carrying gremlin and an identically named
+  tool-less one** (549/548, 547/546, 553/552, 551/550), so only the id tells them apart.
+  `<span id='monname'>` is the fallback, and because a name can't make that distinction the
+  advice explicitly hedges — hence `certain` on the subject and `ambiguous` on the entry.
+  Like `selects`, the handler **never uses or casts anything**: its button only picks the
+  item/skill in KoL's own dropdown. Item 2497 and skill 49 are matched by option value
+  alone, because KoL writes the two dropdowns differently
+  (`<option picurl=magnet2 value=2497>` vs `<option value="49" picurl="loop">`). This is
+  also the one handler that asks to sit *above* its mount (`ctx.before`) — the mount is the
+  block of combat buttons, and advice has to be read before they're pressed. Everything
+  here — markers, ids, dropdown markup — comes from KoLmafia's fixtures for these exact
+  fights (`test/root/request/test_fight_gremlin_good.html`,
+  `test_raver_special_move_*.html`) and its `monsters.txt`; none of it is verified in-game.
   The file's one non-puzzle feature is the **8-Bit Realm score**, and it deliberately sits
   outside the registry: it's on `charpane.php`, where no `whichchoice` exists and the bar
   doesn't fit, so it dispatches on its own just above `currentPuzzle()` and returns. The
@@ -362,6 +391,14 @@ Current tests:
   that an unrecognised colour yields no advice. It also parses the real charpane markup
   through both paths (the labelled span, and the `<font color>` fallback). Uses the same
   replace-the-dispatch-line trick as the rotation test.
+- `KingdomOfLoathing/test/quest-helper-combat.test.mjs` — asserts `quest-helper.js`'s
+  fight.php combat cues: that KoL's own round markers fire them (using the literal comment
+  payloads from KoLmafia's fixtures) and that neither cue answers for the other's, that an
+  ordinary round fires nothing at all, and that the prose fallback still catches a round
+  with no marker. The case worth keeping is the monster-id table: the tool-carrying gremlin
+  ids are in the map and the **tool-less ones next to them are not**, and a name-only match
+  is flagged unsure so the advice hedges instead of promising a tool. Extend it before
+  adding a cue, and pin the new marker with a real payload rather than an invented one.
 - `KingdomOfLoathing/test/iotm-cup13-sort.test.mjs` — asserts `iotm.js`'s Cup-of-13s option
   parser and each ingredient sort order (advs / effect / inventory / name). If you touch that
   parsing or the sort comparators, add/adjust a case here.

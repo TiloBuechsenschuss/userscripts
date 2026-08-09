@@ -3,10 +3,12 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/quest-helper.js
-// @version      1.4
-// @description  Helper for puzzle-y quest choice adventures. It never submits or clicks anything on its own -- it fills in, highlights or explains the known-correct answer and leaves the actual move to you. Currently: Drawn Onward (choice 872), the photo frames in Dr. Awkward's office, sets the four photo dropdowns to the correct order; Beginning at the Beginning of Beginning (the Hidden Temple tile floor, tiles.php) glows the tile to step on in each row, spelling B-A-N-A-N-A-S from the bottom up, numbered in step order; Control Freak (choice 929), the pyramid control room, tracks the Lower Chambers rotation and tells you how many more times to turn the wheel, when to go down instead, and when to stop turning. Also reads the 8-Bit Realm Score in the charpane and turns its colour into a link to the zone that is currently paying double, with what to boost there.
+// @version      1.5
+// @description  Helper for puzzle-y quest choice adventures and combat cues. It never submits or clicks anything on its own -- it fills in, highlights or explains the known-correct answer and leaves the actual move to you. Currently: Drawn Onward (choice 872), the photo frames in Dr. Awkward's office, sets the four photo dropdowns to the correct order; Beginning at the Beginning of Beginning (the Hidden Temple tile floor, tiles.php) glows the tile to step on in each row, spelling B-A-N-A-N-A-S from the bottom up, numbered in step order; Control Freak (choice 929), the pyramid control room, tracks the Lower Chambers rotation and tells you how many more times to turn the wheel, when to go down instead, and when to stop turning. On fight.php it watches the combat text for the one round where a move only works right now: a Junkyard gremlin presenting Yossarian's tool (use the molybdenum magnet) and a raver pulling his special dance move (cast Gothy Handwave), highlighting the message and offering to pick the item/skill in the dropdown for you. Also reads the 8-Bit Realm Score in the charpane and turns its colour into a link to the zone that is currently paying double, with what to boost there.
 // @match        https://www.kingdomofloathing.com/choice.php*
 // @match        https://kingdomofloathing.com/choice.php*
+// @match        https://www.kingdomofloathing.com/fight.php*
+// @match        https://kingdomofloathing.com/fight.php*
 // @match        https://www.kingdomofloathing.com/tiles.php*
 // @match        https://kingdomofloathing.com/tiles.php*
 // @match        https://www.kingdomofloathing.com/adventure.php*
@@ -26,8 +28,10 @@
   // adventure result (the wiki notes it uniquely shows two titled blue boxes: the
   // results box and the puzzle box); every later step posts to tiles.php.
   // charpane.php is here for the 8-Bit Realm score readout, which isn't a puzzle
-  // page at all -- see its own section near the bottom.
-  if (!/\/(choice|tiles|adventure|charpane)\.php/i.test(location.pathname)) return;
+  // page at all -- see its own section near the bottom. fight.php is here for the
+  // combat cues, which aren't puzzles either but are the same shape: the answer is
+  // knowable from the page and the game doesn't say it out loud.
+  if (!/\/(choice|tiles|adventure|charpane|fight)\.php/i.test(location.pathname)) return;
   if (document.getElementById('tm-questhelper-bar')) return; // idempotency guard
 
   // NOTE on styling: KoL's Content-Security-Policy allows inline style ATTRIBUTES
@@ -46,6 +50,9 @@
   //                           only highlight them.
   //              'rotation'-- the answer is "turn this N more times, then go
   //                           down"; we only advise, and track where you are.
+  //              'combat'  -- the answer is "use this, this round"; we highlight
+  //                           the message that says so and offer to pick the
+  //                           item/skill in the dropdown.
   // `auto`   - run the handler on sight instead of waiting for the button. Only
   //            for handlers that don't write into a form (see the note below).
   //
@@ -107,6 +114,104 @@
       button: '',
       hint: 'Works out how many more times to turn the wheel, and when to stop.',
     },
+
+    // --- combat cues (fight.php) -------------------------------------------
+    // See the 'combat' handler's block comment for how these are detected. Both
+    // entries auto-run (highlighting and advising commit nothing) and bring
+    // their own button via `extras`, since it only makes sense on the round the
+    // cue actually fires.
+
+    {
+      name: 'Yossarian\'s tools',
+      page: /\/fight\.php/i,
+      choice: null,
+      type: 'combat',
+      auto: true,
+      button: '',
+      hint: 'Watches for the round where the molybdenum magnet takes the gremlin\'s tool.',
+      detect: (p) => !!combatSubject(p),
+      // The tool-carrying variants only. KoL runs a second, tool-less copy of
+      // each gremlin in the same zones (548/546/552/550), and only these four
+      // ever hand anything over -- so identify by monster id, not by name.
+      monsters: {
+        549: 'molybdenum hammer',           // batwinged gremlin (tool)
+        547: 'molybdenum crescent wrench',  // erudite gremlin (tool)
+        553: 'molybdenum pliers',           // spider gremlin (tool)
+        551: 'molybdenum screwdriver',      // vegetable gremlin (tool)
+      },
+      // Fallback when the id comment is missing. The two variants share a name,
+      // so a name-only match can't tell them apart -- `ambiguous` is what makes
+      // the advice hedge instead of promising a tool.
+      names: {
+        'batwinged gremlin': 'molybdenum hammer',
+        'erudite gremlin': 'molybdenum crescent wrench',
+        'spider gremlin': 'molybdenum pliers',
+        'vegetable gremlin': 'molybdenum screwdriver',
+      },
+      ambiguous: true,
+      marker: /^\s*moly\d+\s*$/i,
+      texts: [
+        'It whips out a hammer',
+        'He whips out a crescent wrench',
+        'It whips out a pair of pliers',
+        'It whips out a screwdriver',
+      ],
+      act: { kind: 'item', value: '2497', name: 'molybdenum magnet', press: 'Use Item' },
+      payoff: (prize) => 'it wrenches the ' + prize + ' out of its hand and ends the fight',
+      waiting: 'Keep the fight going. The magnet only works on the round the gremlin ' +
+        'presents its tool, and this isn\'t it — a use now just says "nothing happens" ' +
+        '(which costs you no round, unless you funksling or the Black Cat interferes).',
+      missing: 'Yossarian hands it over at the Junkyard when you turn up in Frat Warrior ' +
+        'Fatigues, or in War Hippy Fatigues once you\'ve beaten enough frat boys.',
+      notes: [
+        { re: /nothing happens/i, text: 'That use missed the moment — the magnet did nothing.' },
+      ],
+    },
+
+    {
+      name: 'Raver dance moves',
+      page: /\/fight\.php/i,
+      choice: null,
+      type: 'combat',
+      auto: true,
+      button: '',
+      hint: 'Watches for the raver\'s special move, the one round Gothy Handwave studies.',
+      detect: (p) => !!combatSubject(p),
+      monsters: {
+        855: 'Break It On Down',    // breakdancing raver
+        856: 'Pop and Lock It',     // pop-and-lock raver
+        857: 'Run Like the Wind',   // running man
+      },
+      names: {
+        'breakdancing raver': 'Break It On Down',
+        'pop-and-lock raver': 'Pop and Lock It',
+        'running man': 'Run Like the Wind',
+      },
+      marker: /^\s*gh:\d+\s*$/i,
+      // KoLmafia's own strings for the same six messages (each move has a hit
+      // and a miss version), copied verbatim from NemesisDecorator.
+      texts: [
+        'the raver drops to the ground and whirls his legs around like a windmill',
+        'The raver drops to the ground and starts spinning his legs wildly',
+        'The raver\'s movements suddenly became spastic and jerky',
+        'The raver\'s movements suddenly become spastic and jerky',
+        'You watch him go, and soon realize he isn\'t actually running anywhere',
+        'You start to give chase, but stop short when you realize that he hasn\'t ' +
+          'actually gone anywhere at all',
+      ],
+      act: { kind: 'skill', value: '49', name: 'Gothy Handwave', press: 'the skill button' },
+      payoff: (prize) => 'studying this move is how you learn ' + prize,
+      waiting: 'Not this round — his special move comes when it comes. Keep the fight ' +
+        'alive until it does; a handwave at any other moment is a wasted round.',
+      missing: 'It\'s the Disco Bandit skill from A Girl in a Black Dress, and it is the ' +
+        'only way to learn the ravers\' moves.',
+      notes: [
+        { re: /find the right moment/i,
+          text: 'That handwave landed on the wrong move — nothing was learned.' },
+        { re: /self-respect/i,
+          text: 'Already handwaved this fight; it only works once per combat.' },
+      ],
+    },
   ];
 
   // === Page matching =======================================================
@@ -120,7 +225,7 @@
       if (p.choice) {
         return !!document.querySelector('input[name="whichchoice"][value="' + p.choice + '"]');
       }
-      return typeof p.detect === 'function' && p.detect();
+      return typeof p.detect === 'function' && p.detect(p);
     }) || null;
   }
 
@@ -840,7 +945,254 @@
     body.appendChild(manual);
   }
 
-  const HANDLERS = { selects: selectsHandler, tiles: tilesHandler, rotation: rotationHandler };
+  // === 'combat' handler ====================================================
+  //
+  // Two fights in the game hinge on a move that only works on ONE round, and
+  // the game gives you no warning that the round has arrived:
+  //
+  //   - A Junkyard gremlin carrying one of Yossarian's tools. Hold out the
+  //     molybdenum magnet on the round it presents the tool and the tool is
+  //     yours and the fight ends; any other round and "nothing happens".
+  //   - A raver Outside the Club pulling his special dance move. Gothy Handwave
+  //     on that round studies it (three studies teach you his skill, which the
+  //     Disco Bandit nemesis quest needs); any other round and you're told you
+  //     couldn't find the right moment, and it only works once per fight.
+  //
+  // DETECTION. Both are found the same way, and not by reading the prose:
+  // KoL tags the round itself with an HTML comment of its own, which is exactly
+  // what KoLmafia's relay override keys on. `<!--moly4-->` (any digit) marks the
+  // gremlin round; `<!-- gh:50 -->` marks the raver's special move. Comments
+  // survive into the DOM as comment nodes, so a TreeWalker finds them and their
+  // parent element is the message to highlight.
+  //
+  // That marker is the primary signal because it's the game's own, and it does
+  // not depend on flavour text that gets rewritten (the gremlins' messages were
+  // rewritten on 27 August 2024, and the wiki's "the message must mention a
+  // tool" rule is from before that). The wiki/KoLmafia message strings are kept
+  // as a fallback for a page where the comment doesn't survive.
+  //
+  // WHO YOU'RE FIGHTING comes from `<!-- MONSTERID: 551 -->`, which is on every
+  // fight page. That matters for the gremlins specifically: each Junkyard zone
+  // runs a tool-carrying gremlin and an identically-named tool-less one, and
+  // only the id tells them apart. `<span id='monname'>` is the fallback, and
+  // because it can't make that distinction the advice hedges when it's used.
+  //
+  // Nothing is used or cast for you. The button only picks the item/skill in
+  // KoL's own dropdown -- the same thing the 'selects' handler does, for the
+  // same reason: a wrong entry here should cost you nothing but a click.
+  //
+  // UNVERIFIED against a live fight: the markers, the monster ids and the
+  // dropdown markup all come from KoLmafia's test fixtures for these exact
+  // fights (test/root/request/test_fight_gremlin_good.html and
+  // test_raver_special_move_*.html) plus its monsters.txt, which is the closest
+  // thing to real HTML available outside the game.
+
+  const MONSTER_ID_COMMENT = /^\s*MONSTERID:\s*(\d+)\s*$/i;
+
+  // Every comment node on the page, with the element it sits in. Cached: the
+  // registry's `detect` runs this before anything else does.
+  let commentCache = null;
+  function pageComments() {
+    if (commentCache) return commentCache;
+    commentCache = [];
+    try {
+      const walk = document.createTreeWalker(document.documentElement, NodeFilter.SHOW_COMMENT);
+      for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+        commentCache.push({ data: n.data || '', el: n.parentElement || null });
+      }
+    } catch (e) {
+      // No TreeWalker (or no document element) -- then there are no comments to
+      // find, and everything below falls through to the text fallbacks.
+    }
+    return commentCache;
+  }
+
+  function readMonsterId() {
+    for (const c of pageComments()) {
+      const m = c.data.match(MONSTER_ID_COMMENT);
+      if (m) return Number(m[1]);
+    }
+    return null;
+  }
+
+  // "You're fighting <span id='monname'>a vegetable gremlin</span>", minus the
+  // article. Only a fallback -- see the block comment.
+  function readMonsterName() {
+    const el = document.querySelector('#monname');
+    const raw = (el && el.textContent ? el.textContent : '').trim().toLowerCase();
+    return raw.replace(/^(an?|the)\s+/, '');
+  }
+
+  // Who this cue is about, if anyone. DOM-free so the id/name precedence can be
+  // tested. Returns { prize, certain } -- `certain` is false when only the name
+  // matched on a cue whose names are shared with a monster that gives nothing.
+  function combatSubjectFrom(puzzle, monsterId, monsterName) {
+    if (!puzzle.monsters) return null;
+    const byId = puzzle.monsters[monsterId];
+    if (byId) return { prize: byId, certain: true };
+    const byName = puzzle.names && puzzle.names[monsterName];
+    if (byName) return { prize: byName, certain: !puzzle.ambiguous };
+    return null;
+  }
+
+  function combatSubject(puzzle) {
+    return combatSubjectFrom(puzzle, readMonsterId(), readMonsterName());
+  }
+
+  // Has the cue fired this round? `comments` is the list of comment strings and
+  // `text` the page's visible text; DOM-free for the same reason as above.
+  function cueFired(puzzle, comments, text) {
+    if (puzzle.marker && (comments || []).some((c) => puzzle.marker.test(c))) return true;
+    return (puzzle.texts || []).some((t) => (text || '').indexOf(t) !== -1);
+  }
+
+  // Anything the page is already telling you about a use that didn't work. KoL
+  // does say these -- they're just easy to scroll past.
+  function cueNotes(puzzle, text) {
+    return (puzzle.notes || [])
+      .filter((n) => n.re.test(text || ''))
+      .map((n) => n.text);
+  }
+
+  // THE ADVICE, kept DOM-free so it can be reasoned about and unit-tested.
+  // Returns { tone, headline, lines }, tone as the rotation handler's
+  // 'go' | 'turn' | 'stop'.
+  function cueAdvice(puzzle, subject, fired, hasAction, notes) {
+    const act = puzzle.act;
+    const where = act.kind === 'item' ? 'combat items' : 'skills';
+    const lines = [];
+    let tone;
+    let headline;
+
+    if (!fired) {
+      tone = 'turn';
+      headline = 'Not this round — hold the ' + act.name + '.';
+      lines.push(puzzle.waiting);
+    } else if (!hasAction) {
+      tone = 'stop';
+      headline = 'This is the round for the ' + act.name + ' — and it isn\'t in your ' +
+        where + '.';
+      lines.push(puzzle.missing);
+    } else {
+      tone = 'go';
+      headline = (act.kind === 'item' ? 'Use the ' : 'Cast ') + act.name +
+        ' NOW — ' + puzzle.payoff(subject.prize) + '.';
+      lines.push('Nothing is used for you. The button below only picks it in KoL\'s own ' +
+        'dropdown; you press ' + act.press + ' yourself.');
+    }
+
+    if (!subject.certain) {
+      lines.push('Heads up: the page didn\'t give a monster id, and the tool-carrying and ' +
+        'tool-less versions of this monster share a name — so this one may have nothing ' +
+        'to give.');
+    }
+    (notes || []).forEach((n) => lines.push(n));
+    return { tone: tone, headline: headline, lines: lines };
+  }
+
+  // --- reading the page ----------------------------------------------------
+
+  // KoL writes the two dropdowns differently (`<option picurl=magnet2 value=2497>`
+  // for items, `<option value="49" picurl="loop">` for skills), so match on the
+  // value alone and walk up to whichever <select> holds it. Funkslinging puts a
+  // second item dropdown on the page; the first one that offers it is fine.
+  function findActionSelect(act) {
+    const opts = document.querySelectorAll('option[value="' + act.value + '"]');
+    for (const opt of opts) {
+      const sel = opt.closest && opt.closest('select');
+      if (sel) return { select: sel, option: opt };
+    }
+    return null;
+  }
+
+  // The element holding the round that fired, for the highlight.
+  function findCueElement(puzzle) {
+    if (puzzle.marker) {
+      const hit = pageComments().find((c) => puzzle.marker.test(c.data));
+      if (hit && hit.el) return hit.el;
+    }
+    for (const td of document.querySelectorAll('td')) {
+      const text = td.textContent || '';
+      if ((puzzle.texts || []).some((t) => text.indexOf(t) !== -1)) return td;
+    }
+    return null;
+  }
+
+  // Same gold pulse as the tile floor (and mine-sparkle-highlight.js), on the
+  // shared timer. No step numbers here -- there's only ever one message.
+  function markCue(el) {
+    if (!el || (el.dataset && el.dataset.tmQhCue)) return;
+    el.style.outline = '3px solid gold';
+    el.style.outlineOffset = '2px';
+    el.style.borderRadius = '3px';
+    el.style.transition = 'box-shadow 0.45s ease-in-out';
+    if (el.dataset) el.dataset.tmQhCue = '1';
+    pulsing.push(el);
+    startPulse();
+  }
+
+  // --- the handler ---------------------------------------------------------
+
+  const combatHandler = {
+    locate(puzzle) {
+      const subject = combatSubject(puzzle);
+      if (!subject) return null;
+      const cueEl = findCueElement(puzzle);
+      // Above the combat buttons is where you're already looking, and it's also
+      // just under the round's text. Fall back to the highlighted message.
+      const form = document.querySelector(
+        'form[name=useitem], form[name=skill], form[name=attack]');
+      const mount = (form && form.closest && (form.closest('center') || form)) ||
+        (cueEl && cueEl.closest && cueEl.closest('table')) || null;
+      return { subject: subject, cueEl: cueEl, mount: mount, before: !!form, body: null };
+    },
+
+    // Like the rotation handler, this brings its own body: the button only makes
+    // sense on the round the cue actually fires, so it can't be the bar's.
+    extras(puzzle, ctx, say) {
+      const body = document.createElement('div');
+      body.style.cssText = 'margin-top:5px';
+      ctx.body = body;
+      ctx.say = say;
+      return body;
+    },
+
+    apply(puzzle, ctx, say) {
+      const comments = pageComments().map((c) => c.data);
+      const text = document.body ? (document.body.textContent || '') : '';
+      const fired = cueFired(puzzle, comments, text);
+      const found = findActionSelect(puzzle.act);
+      const advice = cueAdvice(puzzle, ctx.subject, fired, !!found, cueNotes(puzzle, text));
+
+      if (fired && ctx.cueEl) markCue(ctx.cueEl);
+      say(advice.headline, ROT_TONE[advice.tone]);
+
+      const body = ctx.body;
+      if (!body) return;
+      body.textContent = '';
+      advice.lines.forEach((line) => {
+        const p = document.createElement('div');
+        p.style.cssText = 'margin-top:3px;color:' + (ROT_TONE[advice.tone] || '#333');
+        p.textContent = line;
+        body.appendChild(p);
+      });
+
+      if (!fired || !found) return;
+      body.appendChild(rotButton('Select ' + puzzle.act.name, false, () => {
+        found.select.value = found.option.value;
+        found.select.dispatchEvent(new Event('change', { bubbles: true }));
+        ctx.say(puzzle.act.name + ' is selected. Press ' + puzzle.act.press +
+          ' yourself — this script never does.', ROT_TONE.go);
+      }));
+    },
+  };
+
+  const HANDLERS = {
+    selects: selectsHandler,
+    tiles: tilesHandler,
+    rotation: rotationHandler,
+    combat: combatHandler,
+  };
 
   // === The 8-Bit Realm score (charpane) ====================================
   //
@@ -1118,9 +1470,11 @@
 
   const { bar, say } = buildBar(puzzle, ctx, handler);
   // Sit right below the puzzle's own form/table when we found one; otherwise at
-  // the top of the page.
+  // the top of the page. A handler can ask to go ABOVE its mount instead --
+  // 'combat' does, because its mount is the block of combat buttons and the
+  // advice has to be read before they're pressed.
   if (ctx.mount && ctx.mount.parentNode) {
-    ctx.mount.parentNode.insertBefore(bar, ctx.mount.nextSibling);
+    ctx.mount.parentNode.insertBefore(bar, ctx.before ? ctx.mount : ctx.mount.nextSibling);
   } else if (document.body) {
     document.body.insertBefore(bar, document.body.firstChild);
   }

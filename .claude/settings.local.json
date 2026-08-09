@@ -35,7 +35,24 @@
       "PowerShell(node scripts/bump-loaders.mjs)",
       "PowerShell($ProgressPreference='SilentlyContinue'; $r = Invoke-WebRequest \"https://wiki.kingdomofloathing.com/Monster_Aggravation_Devices?action=raw\" -UserAgent \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\)\" -TimeoutSec 30; $r.Content.Substring\\(0, [Math]::Min\\(6000, $r.Content.Length\\)\\))",
       "PowerShell(node KingdomOfLoathing/test/ux-mcd-link.test.mjs)",
-      "PowerShell(node KingdomOfLoathing/test/ux-mcd-link.test.mjs | Select-Object -Last 2; node KingdomOfLoathing/test/ux-beer-garden.test.mjs | Select-Object -Last 2; node KingdomOfLoathing/test/ux-mall-buy.test.mjs | Select-Object -Last 2)"
+      "PowerShell(node KingdomOfLoathing/test/ux-mcd-link.test.mjs | Select-Object -Last 2; node KingdomOfLoathing/test/ux-beer-garden.test.mjs | Select-Object -Last 2; node KingdomOfLoathing/test/ux-mall-buy.test.mjs | Select-Object -Last 2)",
+      "Bash(curl -s -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\)\" \"https://wiki.kingdomofloathing.com/index.php?title=Gothy_Handwave&action=raw\")",
+      "Bash(curl -s -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\)\" \"https://wiki.kingdomofloathing.com/index.php?title=Molybdenum_magnet&action=raw\")",
+      "Bash(curl -s -H \"User-Agent: Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120 Safari/537.36\" -H \"Accept: text/html\" \"https://wiki.kingdomofloathing.com/index.php?title=Batwinged_gremlin_\\(quest\\)&action=raw\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/kolmafia/kolmafia/main/src/net/sourceforge/kolmafia/request/FightRequest.java\" -o \"C:/Users/tilob/AppData/Local/Temp/claude/E--Projects-userscripts/7a1bfefb-2d13-4051-8670-a0386a2a3f29/scratchpad/FightRequest.java\")",
+      "WebFetch(domain:kolmafia.us)",
+      "Bash(curl -s -H \"User-Agent: Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120 Safari/537.36\" \"https://wiki.kingdomofloathing.com/index.php?title=Vegetable_gremlin_\\(quest\\)&action=raw\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/kolmafia/kolmafia/main/src/net/sourceforge/kolmafia/webui/RequestEditorKit.java\" -o REK.java)",
+      "Bash(curl -s \"https://api.github.com/repos/kolmafia/kolmafia/git/trees/main?recursive=1\" -o tree.json)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/kolmafia/kolmafia/main/src/net/sourceforge/kolmafia/RequestEditorKit.java\" -o REK.java)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/kolmafia/kolmafia/main/src/net/sourceforge/kolmafia/webui/IslandDecorator.java\" -o Island.java)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/kolmafia/kolmafia/main/src/net/sourceforge/kolmafia/webui/NemesisDecorator.java\" -o Nem.java)",
+      "Bash(curl -s -H \"User-Agent: Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120 Safari/537.36\" \"https://wiki.kingdomofloathing.com/index.php?title=Data:Gothy_Handwave&action=raw\")",
+      "Bash(curl -s -H \"User-Agent: Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120 Safari/537.36\" \"https://wiki.kingdomofloathing.com/index.php?title=Break_It_On_Down&action=raw\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/kolmafia/kolmafia/main/src/net/sourceforge/kolmafia/session/NemesisManager.java\")",
+      "Bash(curl -s -H \"User-Agent: Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120 Safari/537.36\" \"https://wiki.kingdomofloathing.com/index.php?title=Outside_the_Club&action=raw\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/kolmafia/kolmafia/main/test/root/request/test_fight_battle_end_both_combat_bars.html\" -o fight1.html)",
+      "Bash(node *)"
     ]
   }
 }
