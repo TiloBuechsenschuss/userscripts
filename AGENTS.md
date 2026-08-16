@@ -307,6 +307,55 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   returned promise now, because this feature is async and try/catch alone would let a
   rejection escape.
 
+- `auto-combat.js` adds an "Auto" button to the shared menu button row (`order:3`, right of
+  the checklist and IotM) opening a panel that adventures a chosen zone for a chosen number of
+  turns. One zone so far (The Haunted Bedroom); the machinery is finished, the zone list isn't.
+  It runs in the **menu frame** and talks to the server with `fetch`, rather than navigating a
+  frame the way `TwilightHeroes/auto-combat.js` does — the topmenu frame is the only one that
+  isn't torn down while you adventure, so it's the only place a driver loop can live. That's
+  what lets the run survive the player clicking around in the mainpane, and it's why `RUN` is
+  module-scope while the panel (rendered into the mainpane document, as `iotm.js`'s popup is)
+  can be closed and reopened freely. There is deliberately **no resume across a frameset
+  reload**: a half-remembered run that restarts itself is worse than one that stops.
+  Zone-specific behaviour hangs off a `ZONES` entry — `guard` (refuse/stop before a turn),
+  `combat` (per-round policy, returning an action object rather than a URL), `hints`
+  (annotations for the choice prompt), `onResult` (bookkeeping, and the zone's own "we're
+  done" signal). Add a zone as an entry, not as a branch.
+  Combat defaults to handing the whole fight to a saved combat macro named **"Auto-Attack
+  until finished"** (`MACRO_NAMES`, matched case- and punctuation-insensitively against the
+  fight page's own `select[name=whichmacro]`, so the id always comes off the page) — KoL runs
+  a macro server-side, so that's one request per fight instead of one per round. With no such
+  macro saved, or after one aborts mid-fight, it falls back to `action=attack` each round.
+  Choice adventures use the **remembered-pick** model from the TH script, adapted to a loop
+  with nothing on screen: an unfamiliar choice **pauses the run** and the panel offers its
+  options; you pick one and it's stored (keyed by `whichchoice`, which is exact where TH had
+  to key on the encounter name) and answered by itself afterwards. There is no timeout and no
+  default — a timeout that picked something would be the exact failure this design prevents —
+  and the Stop button wakes the parked promise rather than setting a flag nothing will read.
+  `usableRemembered` re-asks when the stored option isn't on offer, which is the normal case
+  here: several bedroom options are conditional on equipment or are rare.
+  Three rules exist because this spends turns, which don't come back. **Turns spent are
+  measured**, from `api.php?what=status`'s adventure total before and after each cycle, never
+  counted from requests sent: free fights, the bedroom's free post-combat choices and
+  multi-page choice chains all make the request count a wrong answer, and when api.php can't
+  be read the log says it's counting requests instead (the same reporting rule the mall
+  planner learned the hard way). A fight still going after `MAX_ROUNDS_PER_FIGHT` is **left
+  open for the player**, not fled. And the `CYCLE_BUDGET_*` ceiling bounds a run that has
+  stopped making progress.
+  The one thing here that is easy to get catastrophically wrong: **a finished KoL fight still
+  carries the whole block of combat forms**, so "there's an attack form" is not "we're in a
+  fight". The discriminator is KoL's own `window.fightover = true` (with the `#againlink`
+  anchor as a second opinion) — the same signal KoLmafia keys on — and both predicates read
+  the response text rather than a parsed document so they can be tested against real fixtures.
+  There is also **no `whichround` input** on a modern fight page; the server tracks the round.
+  Winning a fight can hand you a free choice adventure with no page in between (the bedroom's
+  entire design), so `probeChoice` asks for `choice.php` after every fight ends; with nothing
+  pending it lands somewhere harmless and reads as "no choice".
+  What is **unverified in-game**: `fightFields`' parameter names and the choice/macro markup
+  (all from KoLmafia's fight and choice fixtures), and the `BLOCKERS` wordings (wiki /
+  KoLmafia string tables). A missed blocker fails in the wrong direction — the run keeps going
+  — so that list is the first thing to correct when a run misbehaves.
+
 **Twilight Heroes** is plain (non-frame) pages scraped from table layout. State that must
 survive the full-page reload after equip/unequip/use is stashed in `sessionStorage`
 (see `inventory-filter.js`, keyed per page via `TEXT_KEY`/`TYPE_KEY`). That one script
@@ -437,6 +486,18 @@ Current tests:
   the other's row; an exclusive item is spent first so the shared one still reaches whoever
   has no alternative. It also pins the reporting contract — an unreadable dropdown says so
   instead of claiming an empty bag, which would send you off to spend turns you don't need.
+- `KingdomOfLoathing/test/auto-combat-fight-state.test.mjs` — asserts `auto-combat.js`'s
+  fight-state reading, macro lookup and remembered-choice rule, against markup copied verbatim
+  from KoLmafia's fight and choice fixtures. The case the whole file exists for: an open fight
+  and a **finished** one carry the *same* block of combat forms, so `hasFightForms` is true for
+  both and only `window.fightover` separates them — read it the naive way and the engine posts
+  an attack into a closed fight every turn. It also pins that no fixture carries a `whichround`
+  to send, that the macro name matches however the player capitalised it without matching a
+  near-miss, that a remembered option the page isn't offering falls back to asking, and the
+  Haunted Bedroom's option numbering — "Ignore it" is option 6 on four nightstands and 4 on the
+  fifth, which is why the engine reads the value off the hidden input rather than counting
+  buttons. Note it re-exposes the internals by replacing the single `bootButton();` line; move
+  that line and this test needs the same edit.
 - `KingdomOfLoathing/test/iotm-cup13-sort.test.mjs` — asserts `iotm.js`'s Cup-of-13s option
   parser and each ingredient sort order (advs / effect / inventory / name). If you touch that
   parsing or the sort comparators, add/adjust a case here.
