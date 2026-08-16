@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/wiki-links.js
-// @version      0.13
+// @version      0.14
 // @description  Adds a small "W" badge linking to the KoL wiki (wiki.kingdomofloathing.com) next to the last adventure in the charpane, the location name atop place.php and crypt.php (the Defiled Cyrpt), the choice-adventure name atop choice.php, each quest title in questlog.php, the monster name in combat and items you acquire (fight.php), and item names in your inventory (inventory.php). Clicking opens the wiki article for that thing in a new tab. All targets are verified against real page HTML.
 // @match        https://www.kingdomofloathing.com/charpane.php*
 // @match        https://kingdomofloathing.com/charpane.php*
@@ -206,6 +206,12 @@
 
   function normalizeQuestTitle(name) {
     let out = name;
+    // The Azazel quest logs as "Angry <playername>, this is Azazel in Hell." —
+    // a pun on the song, not the wiki's name for it, and the player name inside
+    // makes even a Go-search useless. The article is "Azazel, Ma Belle"; that
+    // title shares no wording with the log line, so no amount of scrubbing gets
+    // there. Match the one fixed word and hard-map it.
+    if (/\bazazel\b/i.test(out)) return 'Azazel, Ma Belle';
     const player = getPlayerName();
     if (player) {
       out = out.replace(new RegExp(escapeRegExp(player), 'gi'), 'Player Name');

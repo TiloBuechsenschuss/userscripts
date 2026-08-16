@@ -168,6 +168,35 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   here — markers, ids, dropdown markup — comes from KoLmafia's fixtures for these exact
   fights (`test/root/request/test_fight_gremlin_good.html`,
   `test_raver_special_move_*.html`) and its `monsters.txt`; none of it is verified in-game.
+  A fifth type, `sven`, is **Talk to Sven Golly** (`pandamonium.php?action=sven`), the Hey
+  Deze Arena side quest for Azazel's unicorn — four demons, each craving one of
+  white/soft/sweet/boozy and hating a different one, and six items carrying exactly two
+  traits each. The wiki notes this puzzle is one of the very few that **does not reshuffle
+  per ascension**, so the answer is a constant and solving it isn't the point; the
+  bookkeeping is. A given item is eaten whether or not it was right (KoLmafia's
+  `PandamoniumRequest` removes it from inventory on every give), and an item's backstage
+  noncombat **does not occur while you're already carrying one** — so a wrong give costs
+  another trip through Infernal Rackets Backstage, not just the item. Hence the overview:
+  who's left, what each of them takes, which of those the page will let you hand over, and
+  where the rest drop.
+  Two items are **shared** — gin-soaked blotter paper suits Bognort *or* Stinkface, sponge
+  cake Flargwurm *or* Jim — and giving one consumes it, so `svenPlan` spends a stock as it
+  allocates. `svenItemsFor` sorts a member's options by how many members want them, which is
+  what makes that greedy allocation safe: an item only one member accepts can never starve
+  anyone else. `svenOptionState` is why the other member's row doesn't show a green tick for
+  the copy already promised away — with one paper in the bag, marking it available on both
+  rows would be a claim you're holding two. All of that is DOM-free and unit-tested.
+  What is **unverified** is the page: the form's shape comes from KoLmafia's
+  `decorateSven`, which rewrites this exact form — `<form name="bandcamp">` posting
+  `action=sven&preaction=try`, a `bandmember` select whose options are bare names
+  (`<option>Bognort</option>`, so the value *is* the name) and a `togive` select of item ids
+  (4670-4675). Both selects have a by-content fallback, the member select is read for **who
+  is still waiting** (KoL drops the fed ones), and the item select is read for **stock** —
+  deliberately instead of `api.php`, since the dropdown is by definition what the server
+  will accept right now. An unreadable dropdown yields "couldn't tell", never "you have
+  nothing"; that distinction is the same reporting rule the mall planner learned the hard
+  way. The whole feature gates on the form existing, so it stays silent on the rest of
+  `pandamonium.php` and once the quest is done.
   The file's one non-puzzle feature is the **8-Bit Realm score**, and it deliberately sits
   outside the registry: it's on `charpane.php`, where no `whichchoice` exists and the bar
   doesn't fit, so it dispatches on its own just above `currentPuzzle()` and returns. The
@@ -399,6 +428,15 @@ Current tests:
   ids are in the map and the **tool-less ones next to them are not**, and a name-only match
   is flagged unsure so the advice hedges instead of promising a tool. Extend it before
   adding a cue, and pin the new marker with a real payload rather than an invented one.
+- `KingdomOfLoathing/test/quest-helper-sven.test.mjs` — asserts `quest-helper.js`'s Sven
+  Golly overview: the wiki's answer table in both directions (who takes what, and who each
+  item is for), that each trait is craved by exactly one member and hated by exactly one,
+  and the third verdict the two-state reading misses — an item carrying neither trait is
+  *shrugged at*, and eaten anyway. The cases that matter are the two shared items: one
+  blotter paper must be planned for one member, not both, and must not read as available on
+  the other's row; an exclusive item is spent first so the shared one still reaches whoever
+  has no alternative. It also pins the reporting contract — an unreadable dropdown says so
+  instead of claiming an empty bag, which would send you off to spend turns you don't need.
 - `KingdomOfLoathing/test/iotm-cup13-sort.test.mjs` — asserts `iotm.js`'s Cup-of-13s option
   parser and each ingredient sort order (advs / effect / inventory / name). If you touch that
   parsing or the sort comparators, add/adjust a case here.

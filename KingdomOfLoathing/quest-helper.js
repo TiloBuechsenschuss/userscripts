@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/quest-helper.js
-// @version      1.5
-// @description  Helper for puzzle-y quest choice adventures and combat cues. It never submits or clicks anything on its own -- it fills in, highlights or explains the known-correct answer and leaves the actual move to you. Currently: Drawn Onward (choice 872), the photo frames in Dr. Awkward's office, sets the four photo dropdowns to the correct order; Beginning at the Beginning of Beginning (the Hidden Temple tile floor, tiles.php) glows the tile to step on in each row, spelling B-A-N-A-N-A-S from the bottom up, numbered in step order; Control Freak (choice 929), the pyramid control room, tracks the Lower Chambers rotation and tells you how many more times to turn the wheel, when to go down instead, and when to stop turning. On fight.php it watches the combat text for the one round where a move only works right now: a Junkyard gremlin presenting Yossarian's tool (use the molybdenum magnet) and a raver pulling his special dance move (cast Gothy Handwave), highlighting the message and offering to pick the item/skill in the dropdown for you. Also reads the 8-Bit Realm Score in the charpane and turns its colour into a link to the zone that is currently paying double, with what to boost there.
+// @version      1.6
+// @description  Helper for puzzle-y quest choice adventures and combat cues. It never submits or clicks anything on its own -- it fills in, highlights or explains the known-correct answer and leaves the actual move to you. Currently: Drawn Onward (choice 872), the photo frames in Dr. Awkward's office, sets the four photo dropdowns to the correct order; Beginning at the Beginning of Beginning (the Hidden Temple tile floor, tiles.php) glows the tile to step on in each row, spelling B-A-N-A-N-A-S from the bottom up, numbered in step order; Control Freak (choice 929), the pyramid control room, tracks the Lower Chambers rotation and tells you how many more times to turn the wheel, when to go down instead, and when to stop turning. Talk to Sven Golly (pandamonium.php?action=sven) gets an overview of the band -- who craves and hates what, which of the six items each one accepts, which of those you're carrying and where the rest drop -- plus a button per give that fills the dropdowns. On fight.php it watches the combat text for the one round where a move only works right now: a Junkyard gremlin presenting Yossarian's tool (use the molybdenum magnet) and a raver pulling his special dance move (cast Gothy Handwave), highlighting the message and offering to pick the item/skill in the dropdown for you. Also reads the 8-Bit Realm Score in the charpane and turns its colour into a link to the zone that is currently paying double, with what to boost there.
 // @match        https://www.kingdomofloathing.com/choice.php*
 // @match        https://kingdomofloathing.com/choice.php*
 // @match        https://www.kingdomofloathing.com/fight.php*
@@ -15,6 +15,8 @@
 // @match        https://kingdomofloathing.com/adventure.php*
 // @match        https://www.kingdomofloathing.com/charpane.php*
 // @match        https://kingdomofloathing.com/charpane.php*
+// @match        https://www.kingdomofloathing.com/pandamonium.php*
+// @match        https://kingdomofloathing.com/pandamonium.php*
 // @run-at       document-idle
 // @grant        none
 // ==/UserScript==
@@ -30,8 +32,12 @@
   // charpane.php is here for the 8-Bit Realm score readout, which isn't a puzzle
   // page at all -- see its own section near the bottom. fight.php is here for the
   // combat cues, which aren't puzzles either but are the same shape: the answer is
-  // knowable from the page and the game doesn't say it out loud.
-  if (!/\/(choice|tiles|adventure|charpane|fight)\.php/i.test(location.pathname)) return;
+  // knowable from the page and the game doesn't say it out loud. pandamonium.php
+  // is here for Sven Golly's band, which is a puzzle with its own endpoint --
+  // no whichchoice, so it gates on its own form being present.
+  if (!/\/(choice|tiles|adventure|charpane|fight|pandamonium)\.php/i.test(location.pathname)) {
+    return;
+  }
   if (document.getElementById('tm-questhelper-bar')) return; // idempotency guard
 
   // NOTE on styling: KoL's Content-Security-Policy allows inline style ATTRIBUTES
@@ -211,6 +217,19 @@
         { re: /self-respect/i,
           text: 'Already handwaved this fight; it only works once per combat.' },
       ],
+    },
+
+    {
+      name: 'Talk to Sven Golly',
+      page: /\/pandamonium\.php/i,
+      choice: null,
+      type: 'sven',
+      auto: true,
+      button: '',
+      hint: 'Works out who in the band wants what, and what each item is for.',
+      // The form is the gate: Sven only shows it while the band is still hungry,
+      // so this stays quiet on the rest of pandamonium.php and after the quest.
+      detect: () => !!svenForm(),
     },
   ];
 
@@ -1187,11 +1206,392 @@
     },
   };
 
+  // === 'sven' handler ======================================================
+  //
+  // Talk to Sven Golly (pandamonium.php?action=sven), the Hey Deze Arena side
+  // quest that pays out Azazel's unicorn. Four demons in a band; each craves one
+  // of white / soft / sweet / boozy and hates a different one of the same four,
+  // and six items each carry exactly two of those traits. Hand every member
+  // something they crave and don't hate and the band goes on.
+  //
+  // Unlike almost every other puzzle in the game this one does NOT reshuffle per
+  // ascension (the wiki is explicit about that), so the whole solution is a
+  // constant and solving it isn't the interesting part. The bookkeeping is. Two
+  // facts make a wrong give expensive:
+  //
+  //   - the item is taken off you and thrown away whether or not it was right
+  //     (KoLmafia's PandamoniumRequest removes it from inventory on every give,
+  //     and the wiki's response texts have Sven eating/binning each refusal), and
+  //   - the backstage noncombat that drops an item does not occur while you are
+  //     already carrying one, so a replacement costs another trip through
+  //     Infernal Rackets Backstage.
+  //
+  // Hence: show the answer before the dropdowns are touched, and — like every
+  // other handler here — never submit. The buttons only pick the two dropdowns.
+  //
+  // UNVERIFIED against the live page: the form's shape is taken from KoLmafia's
+  // PandamoniumRequest, which rewrites this exact form. It expects a
+  // `<form name="bandcamp">` posting to pandamonium.php with action=sven and
+  // preaction=try, a `bandmember` select whose options are bare names
+  // (`<option>Bognort</option>` — no value attribute, so the value IS the name)
+  // and a `togive` select of item ids. Members who have already been fed drop
+  // out of the member select, which is what tells us who is left. Every read
+  // here has a fallback and every one of them degrades to "show the table
+  // anyway" rather than to a wrong claim.
+
+  // The six items, with the two traits each carries. Ids are KoLmafia's
+  // ItemPool constants (4670-4675) and are what the `togive` options carry.
+  const SVEN_ITEMS = [
+    { id: '4670', name: 'beer-scented teddy bear', traits: ['soft', 'boozy'],
+      from: 'Suckubus? You Hardly Know Us!' },
+    { id: '4671', name: 'booze-soaked cherry', traits: ['sweet', 'boozy'],
+      from: 'Entour Rage', store: 'Gnomish Micromicrobrewery daily special, 120 Meat' },
+    { id: '4672', name: 'comfy pillow', traits: ['soft', 'white'],
+      from: 'A Pertinent Imp' },
+    { id: '4673', name: 'giant marshmallow', traits: ['sweet', 'white'],
+      from: 'Primo Donno', store: 'Chez Snootée daily special, 90 Meat' },
+    { id: '4674', name: 'sponge cake', traits: ['sweet', 'soft'],
+      from: 'Your Bassist Impulses', store: 'Chez Snootée daily special, 90 Meat' },
+    { id: '4675', name: 'gin-soaked blotter paper', traits: ['white', 'boozy'],
+      from: 'A Dicey Situation', store: 'Gnomish Micromicrobrewery daily special, 120 Meat' },
+  ];
+
+  // The solved band. Sven's own clue list is on the page above this bar; this is
+  // what it works out to, per the wiki's walkthrough. Roles are here because the
+  // clues (and KoLmafia's BAND_MEMBERS) name people both ways.
+  const SVEN_BAND = [
+    { name: 'Bognort', role: 'guitarist', craves: 'white', hates: 'soft' },
+    { name: 'Stinkface', role: 'vocalist', craves: 'boozy', hates: 'sweet' },
+    { name: 'Flargwurm', role: 'bassist', craves: 'sweet', hates: 'white' },
+    { name: 'Jim', role: 'drummer', craves: 'soft', hates: 'boozy' },
+  ];
+
+  // --- the pure logic (DOM-free, so it can be unit-tested) ------------------
+
+  // What a member does with an item. Three outcomes, not two: an item carrying
+  // neither of their traits is merely shrugged at (and still eaten).
+  function svenVerdict(member, item) {
+    if (item.traits.indexOf(member.hates) !== -1) return 'hates';
+    if (item.traits.indexOf(member.craves) !== -1) return 'takes';
+    return 'shrugs';
+  }
+
+  function svenTakers(item) {
+    return SVEN_BAND.filter((m) => svenVerdict(m, item) === 'takes');
+  }
+
+  // The items a member accepts, rarest first: an item only this member wants
+  // comes before one shared with someone else. That ordering is what makes the
+  // greedy allocation below safe — spending an exclusive item can never starve
+  // anyone, because nobody else could have used it.
+  function svenItemsFor(member) {
+    return SVEN_ITEMS
+      .filter((i) => svenVerdict(member, i) === 'takes')
+      .sort((a, b) => svenTakers(a).length - svenTakers(b).length);
+  }
+
+  // Who to give what, given who's left and what's on hand.
+  // `stock` is { itemId: count }; the plan spends it as it goes, so the two
+  // members who share an item aren't both told to hand over the same one.
+  function svenPlan(remaining, stock) {
+    const left = Object.assign({}, stock || {});
+    return remaining.map((member) => {
+      const options = svenItemsFor(member);
+      const give = options.find((i) => (left[i.id] || 0) > 0) || null;
+      if (give) left[give.id] -= 1;
+      return { member: member, options: options, give: give };
+    });
+  }
+
+  // What's still in the bag once the plan has been carried out.
+  function svenLeftovers(plan, stock) {
+    const left = Object.assign({}, stock || {});
+    plan.forEach((p) => { if (p.give) left[p.give.id] = (left[p.give.id] || 0) - 1; });
+    return left;
+  }
+
+  // How one of a member's two options stands, given the plan as a whole. The
+  // 'claimed' case is the one worth having: with a single blotter paper both
+  // Bognort and Stinkface show it as something they'd accept, and marking
+  // Stinkface's copy as available would be a straight lie about your inventory.
+  function svenOptionState(plan, stock, row, item) {
+    if (row.give === item) return { state: 'give' };
+    if (!stock) return { state: 'unknown' };
+    if ((svenLeftovers(plan, stock)[item.id] || 0) > 0) return { state: 'spare' };
+    const claimed = plan.find((p) => p.give === item);
+    if (claimed) return { state: 'claimed', by: claimed.member.name };
+    return { state: 'missing' };
+  }
+
+  // The headline, same { tone, headline, lines } shape as the other handlers.
+  function svenAdvice(plan, knewRemaining, knewStock) {
+    const left = plan.length;
+    const ready = plan.filter((p) => p.give).length;
+    const who = left === 1 ? '1 is' : left + ' are';
+    const lines = [];
+    let tone;
+    let headline;
+
+    if (!knewStock) {
+      tone = 'turn';
+      headline = who + ' still waiting — couldn\'t read the item dropdown, so ' +
+        'here\'s the answer table only.';
+    } else if (ready === 0) {
+      tone = 'turn';
+      headline = who + ' still waiting, and you\'re carrying nothing any of them want.';
+      lines.push('Everything on the list drops backstage at Infernal Rackets — but only ' +
+        'while you aren\'t already carrying that item.');
+    } else if (ready === left) {
+      tone = 'go';
+      headline = 'You\'re carrying something for all ' + (left === 1 ? 'that\'s' : left) +
+        ' left. Give it to them one at a time.';
+    } else {
+      tone = 'go';
+      headline = ready + ' of the ' + left + ' still waiting can be fed right now.';
+    }
+
+    if (!knewRemaining) {
+      lines.push('Couldn\'t read the band-member dropdown, so all four are listed — ' +
+        'skip anyone Sven has already stopped asking about.');
+    }
+    lines.push('A wrong item is eaten and gone either way, and its backstage noncombat ' +
+      'won\'t come back while you\'re carrying one — so a slip costs turns, not just Meat.');
+    return { tone: tone, headline: headline, lines: lines };
+  }
+
+  // --- reading the page ----------------------------------------------------
+
+  function svenMemberNamed(text) {
+    const t = (text || '').trim().toLowerCase();
+    return SVEN_BAND.find((m) => m.name.toLowerCase() === t) || null;
+  }
+
+  function svenMemberSelect(form) {
+    if (!form) return null;
+    const named = form.querySelector('select[name="bandmember"]');
+    if (named) return named;
+    // Fallback: identify it by what it offers rather than by its name.
+    return Array.from(form.querySelectorAll('select'))
+      .find((s) => Array.from(s.options).some((o) => svenMemberNamed(o.textContent))) || null;
+  }
+
+  function svenItemSelect(form) {
+    if (!form) return null;
+    const named = form.querySelector('select[name="togive"]');
+    if (named) return named;
+    const member = svenMemberSelect(form);
+    return Array.from(form.querySelectorAll('select')).find((s) => s !== member) || null;
+  }
+
+  // The give form. Sven only draws it while the band is still waiting, so its
+  // absence is the quest being over (or not started) and we render nothing.
+  function svenForm() {
+    if (!/\/pandamonium\.php/i.test(location.pathname)) return null;
+    const named = document.querySelector('form[name="bandcamp"]');
+    if (named && svenMemberSelect(named)) return named;
+    return Array.from(document.querySelectorAll('form'))
+      .find((f) => !!svenMemberSelect(f)) || null;
+  }
+
+  // Who is still waiting. The member select lists exactly the unfed ones, so
+  // that's the reading — null (not "all four") when it can't be read, so the
+  // caller can say so instead of implying the quest is untouched.
+  function svenRemaining(sel) {
+    if (!sel) return null;
+    const found = [];
+    Array.from(sel.options).forEach((o) => {
+      const m = svenMemberNamed(o.textContent);
+      if (m && found.indexOf(m) === -1) found.push(m);
+    });
+    return found.length ? found : null;
+  }
+
+  function svenItemOfOption(o) {
+    const byId = SVEN_ITEMS.find((i) => i.id === (o.value || '').trim());
+    if (byId) return byId;
+    const label = (o.textContent || '').trim().toLowerCase();
+    return SVEN_ITEMS.find((i) => label.indexOf(i.name) !== -1) || null;
+  }
+
+  // What can be handed over right now, read off the item dropdown rather than
+  // from api.php: the dropdown IS what the server will accept from you at this
+  // moment. A trailing "(2)" is read as a count when KoL writes one.
+  function svenStock(sel) {
+    if (!sel) return null;
+    const stock = {};
+    Array.from(sel.options).forEach((o) => {
+      const item = svenItemOfOption(o);
+      if (!item) return;
+      const m = (o.textContent || '').match(/\((\d+)\)\s*$/);
+      stock[item.id] = (stock[item.id] || 0) + (m ? Number(m[1]) : 1);
+    });
+    return stock;
+  }
+
+  // --- the bar's body -------------------------------------------------------
+
+  function svenLine(parent, text, css) {
+    const el = document.createElement('div');
+    el.style.cssText = css || '';
+    el.textContent = text;
+    parent.appendChild(el);
+    return el;
+  }
+
+  // Fills the two dropdowns and stops. Sven's own button stays yours to press.
+  function svenFill(ctx, member, item, say) {
+    const memberSel = svenMemberSelect(ctx.form);
+    const itemSel = svenItemSelect(ctx.form);
+    const okMember = !!memberSel &&
+      selectOption(memberSel, { value: member.name, text: member.name });
+    const okItem = !!itemSel && selectOption(itemSel, { value: item.id, text: item.name });
+    if (!okMember || !okItem) {
+      say('Couldn\'t set the dropdowns — pick ' + member.name + ' and the ' + item.name +
+        ' by hand.', true);
+      return;
+    }
+    say('Set to give ' + member.name + ' the ' + item.name + '. Press Sven\'s own button ' +
+      'yourself — this script never submits.', ROT_TONE.go);
+  }
+
+  function renderSvenBody(ctx, plan, stock, say) {
+    const body = ctx.body;
+    if (!body) return;
+    body.textContent = '';
+
+    plan.forEach((row) => {
+      const block = document.createElement('div');
+      block.style.cssText = 'margin-top:6px;text-align:left';
+
+      const head = document.createElement('div');
+      const name = document.createElement('b');
+      name.textContent = row.member.name;
+      head.appendChild(name);
+      head.appendChild(document.createTextNode(
+        ' · ' + row.member.role + ' · craves ' + row.member.craves +
+        ', hates ' + row.member.hates));
+      block.appendChild(head);
+
+      row.options.forEach((item) => {
+        const how = svenOptionState(plan, stock, row, item);
+        const source = item.from + (item.store ? ' (or ' + item.store + ')' : '');
+        const line = document.createElement('div');
+        line.style.cssText = 'margin-left:8px;color:' +
+          (how.state === 'give' || how.state === 'spare' ? '#060' : '#555');
+
+        if (how.state === 'give' || how.state === 'spare') {
+          line.appendChild(document.createTextNode('✓ ' + item.name));
+        } else if (how.state === 'claimed') {
+          line.appendChild(document.createTextNode(
+            '· ' + item.name + ' — your only one is going to ' + how.by +
+            '; a second comes from ' + source));
+        } else if (how.state === 'missing') {
+          line.appendChild(document.createTextNode('✗ ' + item.name + ' — ' + source));
+        } else {
+          line.appendChild(document.createTextNode('• ' + item.name + ' — ' + source));
+        }
+
+        // Only the item this plan actually allocated gets a button: the other
+        // one is either not on hand, spare, or already spoken for by the member
+        // who shares it.
+        if (how.state === 'give') {
+          line.appendChild(document.createTextNode(' '));
+          line.appendChild(rotButton('Fill in', false,
+            () => svenFill(ctx, row.member, item, say)));
+        }
+        block.appendChild(line);
+      });
+
+      body.appendChild(block);
+    });
+
+    body.appendChild(svenLookupTable(stock));
+  }
+
+  // The six-item lookup: what each one is, who it satisfies, where it comes
+  // from. Useful in the other direction from the per-member rows above — you're
+  // holding a thing and want to know who it's for, or whether to bother.
+  function svenLookupTable(stock) {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'margin-top:8px;padding-top:5px;border-top:1px dotted #99a';
+    svenLine(wrap, 'All six items', 'text-align:left;font-weight:bold');
+
+    const table = document.createElement('table');
+    table.style.cssText = 'width:100%;font-size:10px;text-align:left;border-collapse:collapse';
+
+    const head = table.insertRow();
+    ['Item', 'Wanted by', 'Drops from'].forEach((label) => {
+      const th = document.createElement('th');
+      th.textContent = label;
+      th.style.cssText = 'text-align:left;color:#666;font-weight:normal;padding:1px 3px';
+      head.appendChild(th);
+    });
+
+    SVEN_ITEMS.forEach((item) => {
+      const have = stock ? (stock[item.id] || 0) > 0 : null;
+      const tr = table.insertRow();
+      tr.style.cssText = 'vertical-align:top;color:' + (have ? '#060' : '#333');
+
+      const c1 = tr.insertCell();
+      c1.style.cssText = 'padding:1px 3px';
+      c1.textContent = (have ? '✓ ' : '') + item.name;
+      svenLine(c1, item.traits.join(' + '), 'color:#777');
+
+      const c2 = tr.insertCell();
+      c2.style.cssText = 'padding:1px 3px';
+      c2.textContent = svenTakers(item).map((m) => m.name).join(' or ');
+
+      const c3 = tr.insertCell();
+      c3.style.cssText = 'padding:1px 3px';
+      c3.textContent = item.from;
+      if (item.store) svenLine(c3, item.store, 'color:#777');
+    });
+
+    wrap.appendChild(table);
+    svenLine(wrap, 'Every one of these drops backstage at Infernal Rackets, and none of ' +
+      'them drops while you\'re already carrying it.', 'margin-top:4px;color:#666;text-align:left');
+    return wrap;
+  }
+
+  // --- the handler ---------------------------------------------------------
+
+  const svenHandler = {
+    locate() {
+      const form = svenForm();
+      if (!form) return null;
+      return { form: form, mount: form, body: null };
+    },
+
+    // Like the rotation and combat handlers, this brings its own body: there's a
+    // table and a button per give, which one status line can't carry.
+    extras(puzzle, ctx, say) {
+      const body = document.createElement('div');
+      body.style.cssText = 'margin-top:5px';
+      ctx.body = body;
+      ctx.say = say;
+      return body;
+    },
+
+    apply(puzzle, ctx, say) {
+      const remaining = svenRemaining(svenMemberSelect(ctx.form));
+      const stock = svenStock(svenItemSelect(ctx.form));
+      const plan = svenPlan(remaining || SVEN_BAND, stock || {});
+      const advice = svenAdvice(plan, !!remaining, !!stock);
+
+      say(advice.headline, ROT_TONE[advice.tone]);
+      renderSvenBody(ctx, plan, stock, say);
+      advice.lines.forEach((text) => {
+        svenLine(ctx.body, text, 'margin-top:5px;color:#666;text-align:left');
+      });
+    },
+  };
+
   const HANDLERS = {
     selects: selectsHandler,
     tiles: tilesHandler,
     rotation: rotationHandler,
     combat: combatHandler,
+    sven: svenHandler,
   };
 
   // === The 8-Bit Realm score (charpane) ====================================
