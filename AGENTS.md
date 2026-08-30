@@ -197,6 +197,53 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   nothing"; that distinction is the same reporting rule the mall planner learned the hard
   way. The whole feature gates on the form existing, so it stays silent on the rest of
   `pandamonium.php` and once the quest is done.
+  The **Mer-kin Deepcity** quest (The Sea) is the file's largest entry and covers both of
+  its forks. The gladiator fork is a sixth type, `counter`, and it is `combat` with a choice
+  of answers: a Colosseum gladiator telegraphs one of *three* specials and each has its own
+  counter skill, so the entry carries a list of specials instead of one `act`. The mapping is
+  the one thing here that must not be got backwards — you counter a gladiator with the weapon
+  of the **next** one round the cycle, never his own: balldodger → Mer-kin dragnet, netdragger
+  → switchblade, bladeswitcher → dodgeball. Detection is the telegraph *sentence*, matched
+  against flattened page text, not the word KoL bolds inside it: "gain", "loss" and "sack" are
+  ordinary English and would fire on half the combat log. Whether you *can* counter is read
+  off KoL's own skill dropdown rather than off equipment, because that is the only honest
+  test — the skills come from the weapon and the bladeswitcher's `sack` special takes the
+  weapon away mid-fight, at which point they are gone. A quiet round with the wrong weapon
+  says to run away, because fleeing or losing here puts you back against the *same* gladiator
+  and so costs a turn and nothing else.
+  The scholar fork is the **dreadscroll** (choice 703): eight dropdowns of four words,
+  rolled per ascension, so there is no answer to tabulate and the whole feature is
+  bookkeeping. Three things carry it. **Harvest** — every page the script sees is scanned for
+  the eight clue sentences (KoLmafia's `DreadScrollManager` reads the same ones), which is why
+  `inv_use`/`inventory`, `runskillz` and `sushi` are in `@match`. Each slot matches its own
+  *context* sentence and then looks for one of its four known words, rather than pulling
+  whatever sits in a `<b>` tag — that does not depend on KoL's markup, and, critically, it
+  cannot read a "clue" off the dreadscroll page itself, which shows all thirty-two candidate
+  words at once. **Deduce** — a failed reading is not a wasted turn: Deep-Tainted Mind lasts
+  three adventures per *wrong* word, so every failure says how many of the eight were right.
+  That plus the clues is a Mastermind position and `dreadSolve` brute-forces all 4^8 = 65,536
+  arrangements against it (fast, and it cannot be subtly wrong the way hand deduction can);
+  slots it pins down are as good as clued, and a contradiction reports **zero arrangements**
+  rather than picking one. The turn charged for the reading itself means the number on screen
+  can be 3x, 3x-1 or 3x-2 — `dreadWrongFromDuration` uses **ceiling** division, which folds
+  all three onto x where plain division would score a failure one word too kind.
+  **Report** — a bar on the scroll (which fills in only the words it can name, and leaves
+  "Read Aloud" to the player), a `catalog` bar on Playing the Catalog Card (choice 704) saying
+  which of the library's three words are still outstanding and, learned per ascension, which
+  book button gave which, and a **`Mer-kin` button in the shared menu row** (`order:4`, right
+  of Auto) opening the tracker anywhere — the clue tracker is wanted between visits, not only
+  when the scroll is open. That is why the file now also matches `topmenu`/`awesomemenu`; the
+  panel renders into the *mainpane* document like auto-combat.js's, which is why every render
+  helper takes its document as an argument.
+  The picks are stashed on the way out of "Read Aloud" and scored on the next page load —
+  the same hook-the-navigating-option pattern as the pyramid's descend option, and for the
+  same reason: the result page no longer carries the form.
+  UNVERIFIED against a live page: the dropdown option **labels** (KoLmafia's, matched by
+  text — the wiki transcribes slot 1's second word as "double" where KoLmafia has "doubled",
+  which is why `dreadMatchOption` is deliberately loose), the Colosseum telegraph sentences
+  (the wiki's), and the assumption that the three champions reuse their own gladiator type's
+  telegraphs — the wiki's boss pages still carry a NeedsSpading tag for exactly those, so a
+  champion round that matches nothing falls back to the reference table instead of guessing.
   The file's one non-puzzle feature is the **8-Bit Realm score**, and it deliberately sits
   outside the registry: it's on `charpane.php`, where no `whichchoice` exists and the bar
   doesn't fit, so it dispatches on its own just above `currentPuzzle()` and returns. The
@@ -486,6 +533,18 @@ Current tests:
   the other's row; an exclusive item is spent first so the shared one still reaches whoever
   has no alternative. It also pins the reporting contract — an unreadable dropdown says so
   instead of claiming an empty bag, which would send you off to spend turns you don't need.
+- `KingdomOfLoathing/test/quest-helper-merkin.test.mjs` — asserts `quest-helper.js`'s Mer-kin
+  Deepcity work. For the Colosseum: the counter mapping (each gladiator is beaten with the
+  *next* weapon round the cycle, never his own — inverting it is the likeliest edit-time
+  mistake and would spend a round on a skill that does nothing), the monster and skill ids,
+  that each telegraph sentence fires its own special and an ordinary round fires none, and
+  that a telegraph with the skill missing reads as "wrong weapon", never "cast it anyway".
+  For the dreadscroll: the ceiling-division scoring of Deep-Tainted Mind (3x, 3x-1 and 3x-2
+  all mean the same number of wrong words); that a clue is only read off the page that
+  *prints* it, above all that the scroll's own page — every candidate word on screen at once
+  — yields nothing; and the solver, including that a failed reading narrows the field, that
+  contradictory input reports zero rather than guessing, and that an unscoreable reading is
+  dropped whole rather than half-applied.
 - `KingdomOfLoathing/test/auto-combat-fight-state.test.mjs` — asserts `auto-combat.js`'s
   fight-state reading, macro lookup and remembered-choice rule, against markup copied verbatim
   from KoLmafia's fight and choice fixtures. The case the whole file exists for: an open fight
@@ -501,6 +560,12 @@ Current tests:
 - `KingdomOfLoathing/test/iotm-cup13-sort.test.mjs` — asserts `iotm.js`'s Cup-of-13s option
   parser and each ingredient sort order (advs / effect / inventory / name). If you touch that
   parsing or the sort comparators, add/adjust a case here.
+- `KingdomOfLoathing/test/iotm-ball-refusal.test.mjs` — asserts `iotm.js`'s Play Ball
+  refusal sniffing: the daily-limit wording marks the diamond spent for the day, the
+  "you need to recruit N more foes" wording (only ever said while innings remain) *clears*
+  a stale spent flag, and anything else — a played inning, an unrelated page — leaves the
+  flag untouched. The subdued button state rests entirely on these two regexes; extend the
+  cases if the game's wording moves.
 - `KingdomOfLoathing/test/iotm-codpiece-categories.test.mjs` — asserts `iotm.js`'s codpiece
   gem bucketing: every `MR_STORE_GEMS` entry matches both its item name and its enchantment,
   no entry claims another's label, near-miss mundane gems (torquoise's `Weapon Damage +10%`,

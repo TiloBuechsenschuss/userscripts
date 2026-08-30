@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/iotm.js
-// @version      1.28
+// @version      1.29
 // @description  Adds an "IotM" button to the KoL icon menu that opens a small popup of Item-of-the-Month actions: fire the Codpiece (inventory.php?action=docodpiece), play ball at the baseball diamond (highlighted when a ball is available), drink from the Cup of 13s, and open the Allied Radio Backpack. Also highlights the worthwhile pitch buttons on the Play Ball! choice (choice.php whichchoice=1598), adds sort buttons to the Cup of 13s ingredient dropdowns (choice.php whichchoice=1601), adds a one-click request table to the Request Supply Drop choice for both the Allied Radio Backpack and the handheld Allied radio (choice.php, detected by the request field), and keeps the Eternity Codpiece decoration tools (choice.php whichchoice=1588) for setting every gem slot at once, filtering the gem list by category (including a "Mr. Store items" category with an "Insert all" button that puts the four IotM gems alphabetically into slots 1-4), emptying every slot at once, and saving/loading gem setups.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -221,6 +221,12 @@
   const BALL_SPENT_KEY = 'tm-iotm-ball-spent';
   const BALL_EXHAUSTED_RE =
     /already pitched .*innings today|blow out your shoulder/i;
+  // The opposite signal: the diamond refuses because the team is short ("You
+  // need to recruit 3 more foes to play baseball"), which the server only says
+  // when innings are still left today. Seeing it proves a stored "spent" flag is
+  // stale (a mis-sniffed refusal, or a rollover the day stamp missed), so it
+  // clears the flag rather than setting it.
+  const BALL_PLAYABLE_RE = /need to recruit|recruit \d+ more/i;
 
   // A day stamp that rolls at KoL's ~3:30am Pacific reset: shift "now" back by
   // that offset and take the resulting calendar date, so the flag self-clears
@@ -240,6 +246,26 @@
   function markBallExhaustedToday() {
     try { localStorage.setItem(BALL_SPENT_KEY, kolDayStamp()); }
     catch (e) { /* storage unavailable */ }
+  }
+  function clearBallExhausted() {
+    try { localStorage.removeItem(BALL_SPENT_KEY); }
+    catch (e) { /* storage unavailable */ }
+  }
+
+  // Fold one Play Ball response into the spent flag: the daily-limit refusal
+  // sets it, the "recruit more foes" refusal clears it, anything else (a played
+  // inning, an unrelated page) leaves it alone. Returns true once the text was
+  // conclusive, so the poller can stop watching.
+  function applyBallResultText(txt) {
+    if (BALL_EXHAUSTED_RE.test(txt)) {
+      markBallExhaustedToday();
+      return true;
+    }
+    if (BALL_PLAYABLE_RE.test(txt)) {
+      clearBallExhausted();
+      return true;
+    }
+    return false;
   }
 
   // Play an inning: fire once, show the result in the mainpane, and sniff the
@@ -267,7 +293,7 @@
     fetch(url, { credentials: 'same-origin' })
       .then(function (res) { return res.ok ? res.text() : ''; })
       .then(function (html) {
-        if (BALL_EXHAUSTED_RE.test(html)) markBallExhaustedToday();
+        applyBallResultText(html);
       })
       .catch(function (err) { console.error('IotM Play Ball failed:', err); });
   }
@@ -289,8 +315,7 @@
           txt = mp.document.body.textContent || '';
         }
       } catch (e) { /* cross-frame not ready yet */ }
-      if (BALL_EXHAUSTED_RE.test(txt)) {
-        markBallExhaustedToday();
+      if (applyBallResultText(txt)) {
         clearInterval(timer);
       } else if (tries >= 25) {   // ~5s at 200ms
         clearInterval(timer);

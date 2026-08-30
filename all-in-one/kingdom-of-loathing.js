@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/all-in-one/kingdom-of-loathing.js
-// @version      1.37
+// @version      1.38
 // @description  Single-install loader for the Kingdom of Loathing userscripts in this repo. It carries no logic of its own; it @requires each individual script straight from GitHub so installing this one file gives you all of them. NOTE: adventure-choices.js is intentionally NOT bundled here -- it needs GM_* grants, which are incompatible with the @grant none mode the other scripts rely on. Install that one separately.
 //
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
@@ -50,6 +50,12 @@
 // @match        https://kingdomofloathing.com/adventure.php*
 // @match        https://www.kingdomofloathing.com/pandamonium.php*
 // @match        https://kingdomofloathing.com/pandamonium.php*
+// @match        https://www.kingdomofloathing.com/inv_use.php*
+// @match        https://kingdomofloathing.com/inv_use.php*
+// @match        https://www.kingdomofloathing.com/runskillz.php*
+// @match        https://kingdomofloathing.com/runskillz.php*
+// @match        https://www.kingdomofloathing.com/sushi.php*
+// @match        https://kingdomofloathing.com/sushi.php*
 //
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/iotm.js
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/daily-checklist.js
@@ -78,9 +84,11 @@
 // pull them in from one install. To add/remove a bundled script, edit the
 // @require list (and the @match union) here and bump @version.
 //
-// tiles.php, adventure.php and pandamonium.php are in the @match union only for
-// quest-helper.js: the Hidden Temple tile-floor puzzle uses the custom tiles.php
-// endpoint, its first screen renders as an ordinary adventure result, and Sven
-// Golly's band lives on pandamonium.php. adventure.php is a hot page, but every
-// bundled script gates on location.pathname before doing anything, so the rest
-// just bail there.
+// tiles.php, adventure.php, pandamonium.php, inv_use.php, runskillz.php and
+// sushi.php are in the @match union only for quest-helper.js: the Hidden Temple
+// tile-floor puzzle uses the custom tiles.php endpoint, its first screen renders
+// as an ordinary adventure result, Sven Golly's band lives on pandamonium.php,
+// and the last three are where the Mer-kin dreadscroll's clue words get printed
+// (a knucklebone, Deep Dark Visions, and sushi eaten with worktea in your bag).
+// adventure.php is a hot page, but every bundled script gates on
+// location.pathname before doing anything, so the rest just bail there.

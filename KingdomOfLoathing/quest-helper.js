@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/quest-helper.js
-// @version      1.6
-// @description  Helper for puzzle-y quest choice adventures and combat cues. It never submits or clicks anything on its own -- it fills in, highlights or explains the known-correct answer and leaves the actual move to you. Currently: Drawn Onward (choice 872), the photo frames in Dr. Awkward's office, sets the four photo dropdowns to the correct order; Beginning at the Beginning of Beginning (the Hidden Temple tile floor, tiles.php) glows the tile to step on in each row, spelling B-A-N-A-N-A-S from the bottom up, numbered in step order; Control Freak (choice 929), the pyramid control room, tracks the Lower Chambers rotation and tells you how many more times to turn the wheel, when to go down instead, and when to stop turning. Talk to Sven Golly (pandamonium.php?action=sven) gets an overview of the band -- who craves and hates what, which of the six items each one accepts, which of those you're carrying and where the rest drop -- plus a button per give that fills the dropdowns. On fight.php it watches the combat text for the one round where a move only works right now: a Junkyard gremlin presenting Yossarian's tool (use the molybdenum magnet) and a raver pulling his special dance move (cast Gothy Handwave), highlighting the message and offering to pick the item/skill in the dropdown for you. Also reads the 8-Bit Realm Score in the charpane and turns its colour into a link to the zone that is currently paying double, with what to boost there.
+// @version      1.7
+// @description  Helper for puzzle-y quest choice adventures and combat cues. It never submits or clicks anything on its own -- it fills in, highlights or explains the known-correct answer and leaves the actual move to you. Currently: Drawn Onward (choice 872), the photo frames in Dr. Awkward's office, sets the four photo dropdowns to the correct order; Beginning at the Beginning of Beginning (the Hidden Temple tile floor, tiles.php) glows the tile to step on in each row, spelling B-A-N-A-N-A-S from the bottom up, numbered in step order; Control Freak (choice 929), the pyramid control room, tracks the Lower Chambers rotation and tells you how many more times to turn the wheel, when to go down instead, and when to stop turning. Talk to Sven Golly (pandamonium.php?action=sven) gets an overview of the band -- who craves and hates what, which of the six items each one accepts, which of those you're carrying and where the rest drop -- plus a button per give that fills the dropdowns. On fight.php it watches the combat text for the one round where a move only works right now: a Junkyard gremlin presenting Yossarian's tool (use the molybdenum magnet) and a raver pulling his special dance move (cast Gothy Handwave), highlighting the message and offering to pick the item/skill in the dropdown for you. In the Mer-kin Colosseum it reads the gladiator's telegraph and names the skill that counters it -- Net Gain/Loss/Neutrality, Blade Sling/Roller/Runner or Ball Bust/Sweat/Sack -- says which of the three gladiatorial weapons this opponent needs, and warns when the one you are holding is the wrong one. For the scholar path it tracks the Mer-kin dreadscroll: the eight prophecy words are filed automatically from the pages that print them (the library card catalogue, a healscroll or killscroll in combat, a knucklebone, Deep Dark Visions, sushi with worktea), each failed reading is scored from the length of the Deep-Tainted Mind it cost and fed into a solver, and a "Mer-kin" button in the menu row opens the tracker anywhere. On the scroll itself it fills in every word it can name and leaves "Read Aloud" to you. Also reads the 8-Bit Realm Score in the charpane and turns its colour into a link to the zone that is currently paying double, with what to boost there.
 // @match        https://www.kingdomofloathing.com/choice.php*
 // @match        https://kingdomofloathing.com/choice.php*
 // @match        https://www.kingdomofloathing.com/fight.php*
@@ -17,6 +17,18 @@
 // @match        https://kingdomofloathing.com/charpane.php*
 // @match        https://www.kingdomofloathing.com/pandamonium.php*
 // @match        https://kingdomofloathing.com/pandamonium.php*
+// @match        https://www.kingdomofloathing.com/inv_use.php*
+// @match        https://kingdomofloathing.com/inv_use.php*
+// @match        https://www.kingdomofloathing.com/inventory.php*
+// @match        https://kingdomofloathing.com/inventory.php*
+// @match        https://www.kingdomofloathing.com/runskillz.php*
+// @match        https://kingdomofloathing.com/runskillz.php*
+// @match        https://www.kingdomofloathing.com/sushi.php*
+// @match        https://kingdomofloathing.com/sushi.php*
+// @match        https://www.kingdomofloathing.com/topmenu.php*
+// @match        https://kingdomofloathing.com/topmenu.php*
+// @match        https://www.kingdomofloathing.com/awesomemenu.php*
+// @match        https://kingdomofloathing.com/awesomemenu.php*
 // @run-at       document-idle
 // @grant        none
 // ==/UserScript==
@@ -34,11 +46,18 @@
   // combat cues, which aren't puzzles either but are the same shape: the answer is
   // knowable from the page and the game doesn't say it out loud. pandamonium.php
   // is here for Sven Golly's band, which is a puzzle with its own endpoint --
-  // no whichchoice, so it gates on its own form being present.
-  if (!/\/(choice|tiles|adventure|charpane|fight|pandamonium)\.php/i.test(location.pathname)) {
+  // no whichchoice, so it gates on its own form being present. The rest are the
+  // Mer-kin dreadscroll's doing: its clue words are printed by an item
+  // use (inv_use/inventory), a skill cast (runskillz) and a plate of sushi, and
+  // the tracker itself hangs off a button in the menu frame.
+  if (!/\/(choice|tiles|adventure|charpane|fight|pandamonium|inv_use|inventory|runskillz|sushi|topmenu|awesomemenu)\.php/i
+    .test(location.pathname)) {
     return;
   }
-  if (document.getElementById('tm-questhelper-bar')) return; // idempotency guard
+  // The menu frame gets the Mer-kin button and nothing else, so the bar's guard
+  // (and everything else below) does not apply there.
+  const ON_MENU = /\/(topmenu|awesomemenu)\.php/i.test(location.pathname);
+  if (!ON_MENU && document.getElementById('tm-questhelper-bar')) return; // idempotency guard
 
   // NOTE on styling: KoL's Content-Security-Policy allows inline style ATTRIBUTES
   // (the game uses them everywhere) but blocks script-injected stylesheets, so CSS
@@ -59,8 +78,18 @@
   //              'combat'  -- the answer is "use this, this round"; we highlight
   //                           the message that says so and offer to pick the
   //                           item/skill in the dropdown.
+  //              'counter' -- 'combat' with a choice of answers: the monster
+  //                           telegraphs one of several specials and each has
+  //                           its own counter skill (the Mer-kin Colosseum).
+  //              'dreadscroll' -- the answer is eight words rolled per
+  //                           ascension and learned a clue at a time; we track
+  //                           what is known and offer to fill it in.
+  //              'catalog' -- no answer at all, just which of the three library
+  //                           clue words are still outstanding.
   // `auto`   - run the handler on sight instead of waiting for the button. Only
-  //            for handlers that don't write into a form (see the note below).
+  //            for handlers that don't write into a form (see the note below);
+  //            'dreadscroll' qualifies because its auto pass only reports, and
+  //            the writing sits behind a button of its own.
   //
   // NOTHING here submits or clicks. Each handler fills a form in or marks tiles;
   // the player makes the actual move. That keeps a wrong database entry from
@@ -231,7 +260,45 @@
       // so this stays quiet on the rest of pandamonium.php and after the quest.
       detect: () => !!svenForm(),
     },
+    // --- the Mer-kin Deepcity quest (The Sea) -------------------------------
+    // The quest forks: you either become the Colosseum's champion (gladiator)
+    // or read the dreadscroll aloud correctly (scholar). One entry for the
+    // gladiator half and two for the scholar half -- the dreadscroll itself and
+    // the library card catalogue that feeds it clues. See each handler's block
+    // comment for the mechanics.
+
+    {
+      name: 'Mer-kin Colosseum',
+      page: /\/fight\.php/i,
+      choice: null,
+      type: 'counter',
+      auto: true,
+      button: '',
+      hint: 'Reads the gladiator\'s telegraph and names the skill that counters it.',
+      detect: () => !!merkinGladiator(),
+    },
+
+    {
+      name: 'Mer-kin dreadscroll',
+      page: /\/choice\.php/i,
+      choice: '703',
+      type: 'dreadscroll',
+      auto: true,
+      button: '',
+      hint: 'Shows which of the eight prophecy words are pinned down, and offers to fill them in.',
+    },
+
+    {
+      name: 'Playing the Catalog Card',
+      page: /\/choice\.php/i,
+      choice: '704',
+      type: 'catalog',
+      auto: true,
+      button: '',
+      hint: 'Says which of the library\'s three clue words you still need.',
+    },
   ];
+
 
   // === Page matching =======================================================
 
@@ -690,14 +757,18 @@
   // localStorage is per-origin, so a multi would otherwise share one pyramid.
   // Best-effort: the charpane's charsheet link is the player name. Falls back
   // to a shared record rather than failing.
-  function rotCharKey() {
+  function charKey(base) {
     try {
       const cp = top.frames['charpane'];
       const a = cp && cp.document && cp.document.querySelector('a[href*="charsheet.php"]');
       const name = a && (a.textContent || '').trim();
-      if (name) return ROT_KEY + ':' + name;
+      if (name) return base + ':' + name;
     } catch (e) { /* cross-frame access failed; fall back */ }
-    return ROT_KEY;
+    return base;
+  }
+
+  function rotCharKey() {
+    return charKey(ROT_KEY);
   }
 
   // `pos` is the position we believe you're on and is what the advice uses;
@@ -1586,12 +1657,1456 @@
     },
   };
 
+  // === 'counter' handler ===================================================
+  //
+  // The Mer-kin Colosseum -- the gladiator half of the Mer-kin Deepcity quest,
+  // which you get into by wearing the Mer-kin Gladiatorial Gear. Fifteen
+  // rounds: twelve ordinary gladiators in four sets of three (balldodger, then
+  // netdragger, then bladeswitcher, in that order and repeating), then the
+  // three champions in the same order. Set 1 uses no specials, set 2 one, set 3
+  // two, set 4 all three; a champion pulls one EVERY round.
+  //
+  // Each gladiator has three special attacks. Each is countered by one specific
+  // skill, and you only have that skill while the right weapon is equipped:
+  //
+  //   fighting a...   counter with the...   (his own weapon is the...)
+  //   balldodger      Mer-kin dragnet       dodgeball
+  //   netdragger      Mer-kin switchblade   dragnet
+  //   bladeswitcher   Mer-kin dodgeball     switchblade
+  //
+  // -- always the NEXT weapon round the cycle, never the one he is carrying,
+  // which is the thing that is easy to get backwards in the middle of a fight.
+  //
+  // Like the gremlin and raver cues this is a one-round window: the gladiator
+  // telegraphs the special, and the counter has to go in on the round straight
+  // after the telegraph. Unlike them, WHICH counter depends on which of the
+  // three telegraphs fired, so an entry carries a list of specials rather than
+  // one `act` and the handler picks between them.
+  //
+  // DETECTION is the telegraph sentence, matched against the page's flattened
+  // text. KoL bolds the give-away word inside the sentence ("...trying to
+  // <b>gain</b> an advantage over you..."), which is how the wiki indexes them,
+  // but the markup is deliberately not used: textContent flattens it away, and
+  // the sentence is far more distinctive than the word -- "gain", "loss" and
+  // "sack" are ordinary English that turns up all over a combat page.
+  //
+  // Whether you CAN counter is read off KoL's own skill dropdown rather than
+  // off your equipment, because that is the only honest test. The skills come
+  // from the weapon, and the bladeswitcher's third special takes your weapon
+  // away for the rest of the fight -- at which point its skills are gone too,
+  // and no amount of reading an equipment page would have said so.
+  //
+  // UNVERIFIED against a live fight: the telegraph and outcome sentences and
+  // the counter mapping are the wiki's (Mer-kin balldodger / netdragger /
+  // bladeswitcher, and Mer-kin Colosseum); the monster ids and skill ids are
+  // KoLmafia's monsters.txt and classskills.txt. The three champions are
+  // assumed to reuse their own gladiator type's telegraphs -- the wiki's boss
+  // pages still carry a NeedsSpading tag for exactly those messages -- so a
+  // champion round that matches nothing falls back to the reference table
+  // rather than guessing at a counter.
+
+  const MERKIN_WEAPONS = {
+    dodgeball: { id: '4292', name: 'Mer-kin dodgeball' },
+    dragnet: { id: '4293', name: 'Mer-kin dragnet' },
+    switchblade: { id: '4294', name: 'Mer-kin switchblade' },
+  };
+
+  // Each weapon grants exactly these three skills, so their presence in the
+  // dropdown is what "that weapon is in your hand right now" means here.
+  const MERKIN_WEAPON_SKILLS = {
+    dodgeball: ['7085', '7086', '7087'],
+    dragnet: ['7088', '7089', '7090'],
+    switchblade: ['7091', '7092', '7093'],
+  };
+
+  // Who each weapon is FOR -- the inverse of the table above, used to say "you
+  // are holding the wrong one, and here is who it was for".
+  const MERKIN_COUNTERS = {
+    dragnet: 'balldodger',
+    switchblade: 'netdragger',
+    dodgeball: 'bladeswitcher',
+  };
+
+  // `text` is the distinctive tail of the telegraph sentence -- what we match.
+  // `word` is the word KoL bolds inside it, kept because it is how the wiki's
+  // table is indexed and so what a player will recognise. `landed` is the
+  // sentence printed when the special goes through uncountered; reporting that
+  // is worth as much as the warning, since several of them change how the rest
+  // of the fight has to be played.
+  const MERKIN_ROLES = {
+    balldodger: {
+      key: 'balldodger',
+      name: 'balldodger',
+      weapon: 'dragnet',
+      next: 'netdragger',
+      specials: [
+        {
+          word: 'gain', skill: '7088', skillName: 'Net Gain',
+          text: 'trying to gain an advantage over you',
+          threat: 'he hurls the ball into your gut and leaves you Gutballed — -300% Muscle.',
+          landed: 'You double over in a combination of several types of pain',
+          after: 'Gutballed is -300% Muscle, and it is on you for the rest of this fight.',
+        },
+        {
+          word: 'loss', skill: '7089', skillName: 'Net Loss',
+          text: 'about to experience a serious loss of control',
+          threat: 'something snaps inside him and he fights with doubled intensity.',
+          landed: 'he begins to fight with doubled intensity',
+          after: 'He hits harder now. Nothing to be done about it — finish him or run.',
+        },
+        {
+          word: 'neutrality', skill: '7090', skillName: 'Net Neutrality',
+          text: 'facial features take on an ominous neutrality',
+          threat: 'every hit you land for the rest of the fight is cut to 1 damage.',
+          landed: 'which are now glowing eerily',
+          after: 'All your damage is 1 for the rest of this fight — weapons, spells, combat ' +
+            'items and saucespheres alike. Run away and come back: you face the same ' +
+            'gladiator, with the fight started over.',
+        },
+      ],
+    },
+    netdragger: {
+      key: 'netdragger',
+      name: 'netdragger',
+      weapon: 'switchblade',
+      next: 'bladeswitcher',
+      specials: [
+        {
+          word: 'sling', skill: '7091', skillName: 'Blade Sling',
+          text: 'fold his net up into some sort of a sling',
+          threat: 'he slings the net and heals himself.',
+          landed: 'uses it to quickly heal some of his broken bones',
+          after: 'He healed — some of the damage you had already done is undone.',
+        },
+        {
+          word: 'roller', skill: '7092', skillName: 'Blade Roller',
+          text: 'rolls his net up and draws it back like a baseball bat',
+          threat: 'he swats you with the rolled-up net and leaves you Nettled — -300% Moxie.',
+          landed: 'making you significantly less pretty',
+          after: 'Nettled is -300% Moxie for the rest of this fight.',
+        },
+        {
+          word: 'runner', skill: '7093', skillName: 'Blade Runner',
+          text: 'you\'d be tempted to run right now',
+          threat: 'the barbed net takes half your maximum HP, and then he attacks as well.',
+          landed: 'slicing you to ribbons with the sharp metal bits',
+          after: 'That was half your maximum HP, and his normal attack lands on top of it. ' +
+            'Check your health before the next round.',
+        },
+      ],
+    },
+    bladeswitcher: {
+      key: 'bladeswitcher',
+      name: 'bladeswitcher',
+      weapon: 'dodgeball',
+      next: 'balldodger',
+      specials: [
+        {
+          word: 'bust', skill: '7085', skillName: 'Ball Bust',
+          text: 'bust an especially dope move with his switchblade',
+          threat: 'he reflects your damage back at you for the next ten rounds.',
+          landed: 'so fast that you can\'t even see it anymore',
+          after: 'Reflection is live for ten rounds: he takes 1 from everything and YOU take ' +
+            'what he should have. Stall with a seal tooth or heal until it passes — and mind ' +
+            'retaliation effects like Jalapeno Saucesphere, which come straight back at you.',
+        },
+        {
+          word: 'sweat', skill: '7086', skillName: 'Ball Sweat',
+          text: 'pauses to wipe the sweat from his brow',
+          threat: 'he comes back at you with renewed vigor.',
+          landed: 'comes at you with renewed vigor',
+          after: 'He hits harder now.',
+        },
+        {
+          word: 'sack', skill: '7087', skillName: 'Ball Sack',
+          text: 'bottle of oil out of his sack',
+          threat: 'he flicks your weapon out of your hand for the rest of the fight.',
+          landed: 'wrenches your weapon out of your hand',
+          after: 'Your weapon is gone for this fight, and with it the skills it granted — so ' +
+            'there is nothing left to counter with. Run away; you face the same gladiator ' +
+            'again, with your weapon back.',
+        },
+      ],
+    },
+  };
+
+  // Ids from KoLmafia's monsters.txt. The three champions sit alongside their
+  // own gladiator type. Unlike the Junkyard gremlins there is no same-named
+  // decoy in this zone, so a name-only match here is not ambiguous.
+  const MERKIN_MONSTERS = {
+    842: 'balldodger', 879: 'balldodger',
+    843: 'netdragger', 880: 'netdragger',
+    844: 'bladeswitcher', 881: 'bladeswitcher',
+  };
+  const MERKIN_MONSTER_NAMES = {
+    'mer-kin balldodger': 'balldodger',
+    'mer-kin netdragger': 'netdragger',
+    'mer-kin bladeswitcher': 'bladeswitcher',
+    'georgepaul, the balldodger': 'balldodger',
+    'johnringo, the netdragger': 'netdragger',
+    'ringogeorge, the bladeswitcher': 'bladeswitcher',
+  };
+  const MERKIN_CHAMPIONS = { 879: true, 880: true, 881: true };
+
+  // Who you are up against, if it is one of the six. DOM-free so the id/name
+  // precedence can be tested. `champion` only changes the wording (a champion
+  // specials every round), never the counter.
+  function merkinGladiatorFrom(monsterId, monsterName) {
+    const key = MERKIN_MONSTERS[monsterId] || MERKIN_MONSTER_NAMES[monsterName] || null;
+    if (!key) return null;
+    return {
+      role: MERKIN_ROLES[key],
+      champion: !!MERKIN_CHAMPIONS[monsterId] ||
+        /^(georgepaul|johnringo|ringogeorge)\b/.test(monsterName || ''),
+    };
+  }
+
+  function merkinGladiator() {
+    return merkinGladiatorFrom(readMonsterId(), readMonsterName());
+  }
+
+  // Which of the three telegraphs is on the page, and whether one has already
+  // landed uncountered. DOM-free; `text` is the page's flattened text.
+  function merkinRead(role, text) {
+    const t = text || '';
+    return {
+      telegraph: role.specials.find((s) => t.indexOf(s.text) !== -1) || null,
+      landed: role.specials.find((s) => t.indexOf(s.landed) !== -1) || null,
+    };
+  }
+
+  // The announcer's own line, and the same pattern KoLmafia reads the colosseum
+  // round from. Null when the announcer is not on screen.
+  const MERKIN_ROUND = /"Round (\d+)!"/;
+
+  function merkinRound(text) {
+    const m = (text || '').match(MERKIN_ROUND);
+    if (!m) return null;
+    const n = Number(m[1]);
+    return n >= 1 && n <= 15 ? n : null;
+  }
+
+  // THE ADVICE, DOM-free so it can be reasoned about and unit-tested.
+  // `armed` is the list of weapon keys whose skills are in KoL's dropdown right
+  // now -- normally one, and none once the sack special has disarmed you.
+  // Returns { tone, headline, lines }, tone as the rotation handler's
+  // 'go' | 'turn' | 'stop'.
+  function merkinAdvice(sub, read, armed, round) {
+    const role = sub.role;
+    const want = MERKIN_WEAPONS[role.weapon];
+    const held = armed || [];
+    const ready = held.indexOf(role.weapon) !== -1;
+    const lines = [];
+    let tone;
+    let headline;
+
+    if (read.telegraph && ready) {
+      tone = 'go';
+      headline = 'Counter with ' + read.telegraph.skillName + ' NOW — otherwise ' +
+        read.telegraph.threat;
+      lines.push('Nothing is cast for you. The button below only picks the skill in KoL\'s ' +
+        'own dropdown; you press the skill button yourself.');
+    } else if (read.telegraph) {
+      tone = 'stop';
+      headline = read.telegraph.skillName + ' is what stops this, and you haven\'t got it.';
+      lines.push('That skill comes from the ' + want.name + ', and it is not in your skill ' +
+        'dropdown — so either it is not equipped, or his "sack" special has already taken it.');
+    } else if (ready) {
+      tone = 'turn';
+      headline = 'No telegraph this round. You are holding the right weapon for a ' +
+        role.name + '.';
+      lines.push('Keep the fight going and watch for one of the three sentences below. The ' +
+        'counter has to go in on the round straight after the telegraph.');
+    } else {
+      tone = 'stop';
+      headline = 'Wrong weapon: a ' + role.name + ' is countered with the ' + want.name + '.';
+      lines.push('None of the ' + want.name + '\'s skills are in your dropdown. Run away and ' +
+        're-equip — fleeing or losing here puts you back against the SAME gladiator, so it ' +
+        'costs a turn and nothing else.');
+    }
+
+    if (!ready && held.length) {
+      const other = MERKIN_WEAPONS[held[0]];
+      const forWhom = MERKIN_COUNTERS[held[0]];
+      lines.push('You look to be holding the ' + other.name + ', which is the one for a ' +
+        forWhom + '.');
+    }
+
+    if (read.landed) {
+      lines.push('His "' + read.landed.word + '" special went through: ' + read.landed.after);
+    }
+
+    if (sub.champion) {
+      lines.push('This is a champion — he pulls one of his three specials every single round, ' +
+        'so expect a telegraph on each one.');
+    } else if (round != null) {
+      lines.push('Round ' + round + ' of 15. The sets of three get harder: rounds 1-3 use no ' +
+        'specials, 4-6 one, 7-9 two, 10-12 all three, and 13-15 are the champions.');
+    }
+
+    const nextRole = MERKIN_ROLES[role.next];
+    lines.push('Next round is a ' + nextRole.name + ', and that one wants the ' +
+      MERKIN_WEAPONS[nextRole.weapon].name + '.');
+
+    return { tone: tone, headline: headline, lines: lines };
+  }
+
+  // --- reading the page ----------------------------------------------------
+
+  // Which gladiatorial weapons' skills KoL is offering right now.
+  function merkinArmed() {
+    return Object.keys(MERKIN_WEAPON_SKILLS).filter((key) =>
+      MERKIN_WEAPON_SKILLS[key].some((id) => !!findActionSelect({ value: id })));
+  }
+
+  // The cell holding the telegraph, for the highlight.
+  function merkinCueElement(special) {
+    for (const td of document.querySelectorAll('td')) {
+      if ((td.textContent || '').indexOf(special.text) !== -1) return td;
+    }
+    return null;
+  }
+
+  // --- the handler ---------------------------------------------------------
+
+  const counterHandler = {
+    locate() {
+      const sub = merkinGladiator();
+      if (!sub) return null;
+      // Above the block of combat buttons, same as the 'combat' handler and for
+      // the same reason: the advice has to be read before they are pressed.
+      const form = document.querySelector(
+        'form[name=useitem], form[name=skill], form[name=attack]');
+      const mount = (form && form.closest && (form.closest('center') || form)) || null;
+      return { sub: sub, mount: mount, before: !!form, body: null };
+    },
+
+    // Same reason as the 'combat' handler: the button only exists on the round
+    // a telegraph fires, and there is a three-row reference table besides, so
+    // this brings its own body rather than using the bar's single button.
+    extras(puzzle, ctx, say) {
+      const body = document.createElement('div');
+      body.style.cssText = 'margin-top:5px';
+      ctx.body = body;
+      ctx.say = say;
+      return body;
+    },
+
+    apply(puzzle, ctx, say) {
+      const text = document.body ? (document.body.textContent || '') : '';
+      const role = ctx.sub.role;
+      const read = merkinRead(role, text);
+      const advice = merkinAdvice(ctx.sub, read, merkinArmed(), merkinRound(text));
+
+      if (read.telegraph) {
+        const cue = merkinCueElement(read.telegraph);
+        if (cue) markCue(cue);
+      }
+      say(advice.headline, ROT_TONE[advice.tone]);
+
+      const body = ctx.body;
+      if (!body) return;
+      body.textContent = '';
+      advice.lines.forEach((line) => {
+        const p = document.createElement('div');
+        p.style.cssText = 'margin-top:3px;color:' + (ROT_TONE[advice.tone] || '#333');
+        p.textContent = line;
+        body.appendChild(p);
+      });
+
+      // The reference table sits here on every round, not only the one that
+      // fires: between rounds the useful question is "which of his three was
+      // that, and what am I watching for next".
+      body.appendChild(merkinTable(role, read.telegraph));
+
+      const found = read.telegraph && findActionSelect({ value: read.telegraph.skill });
+      if (!found) return;
+      const skillName = read.telegraph.skillName;
+      body.appendChild(rotButton('Select ' + skillName, false, () => {
+        found.select.value = found.option.value;
+        found.select.dispatchEvent(new Event('change', { bubbles: true }));
+        ctx.say(skillName + ' is selected. Press the skill button yourself — this script ' +
+          'never does.', ROT_TONE.go);
+      }));
+    },
+  };
+
+  // The three specials of whoever you are fighting, with the one that fired
+  // marked. Same shape as the Sven lookup table and there for the same reason.
+  function merkinTable(role, firedSpecial) {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'margin-top:8px;padding-top:5px;border-top:1px dotted #99a';
+
+    const head = document.createElement('div');
+    head.style.cssText = 'text-align:left;font-weight:bold';
+    head.textContent = 'A ' + role.name + '\'s three specials — countered with the ' +
+      MERKIN_WEAPONS[role.weapon].name;
+    wrap.appendChild(head);
+
+    const table = document.createElement('table');
+    table.style.cssText = 'width:100%;font-size:10px;text-align:left;border-collapse:collapse';
+
+    const hr = table.insertRow();
+    ['He does this…', 'Counter', 'Or else'].forEach((label) => {
+      const th = document.createElement('th');
+      th.textContent = label;
+      th.style.cssText = 'text-align:left;color:#666;font-weight:normal;padding:1px 3px';
+      hr.appendChild(th);
+    });
+
+    role.specials.forEach((s) => {
+      const fired = !!firedSpecial && firedSpecial.word === s.word;
+      const tr = table.insertRow();
+      tr.style.cssText = 'vertical-align:top;color:' + (fired ? '#060' : '#333') +
+        (fired ? ';font-weight:bold' : '');
+
+      const c1 = tr.insertCell();
+      c1.style.cssText = 'padding:1px 3px';
+      c1.textContent = (fired ? '→ ' : '') + '…' + s.text + '…';
+
+      const c2 = tr.insertCell();
+      c2.style.cssText = 'padding:1px 3px;white-space:nowrap';
+      c2.textContent = s.skillName;
+
+      const c3 = tr.insertCell();
+      c3.style.cssText = 'padding:1px 3px';
+      c3.textContent = s.threat;
+    });
+
+    wrap.appendChild(table);
+    return wrap;
+  }
+
+
+  // === the Mer-kin dreadscroll (the scholar path) ==========================
+  //
+  // The other half of the Mer-kin Deepcity quest. You get the dreadscroll from
+  // the Mer-kin Library and reading it aloud correctly makes you High Priest --
+  // but it is a prophecy with EIGHT words that "fade, and flicker, and shift",
+  // rendered as eight dropdowns (pro1..pro8) of four options each. Get all
+  // eight right and the quest is done; get any wrong and you take Deep-Tainted
+  // Mind and have to wait it out. Both outcomes cost an adventure.
+  //
+  // The eight right words are rolled per ascension, so there is no answer to
+  // put in a table here -- what there is instead is bookkeeping, which is
+  // exactly the shape of the Sven Golly entry. Each slot has its own source in
+  // the world, and a clue only turns up when you happen to do the thing:
+  //
+  //   1 adjective   Mer-kin Library, the book with a word scrawled in blood
+  //   2 ___fish     using a Mer-kin healscroll in combat
+  //   3 House of    casting Deep Dark Visions
+  //   4 direction   using a Mer-kin knucklebone
+  //   5 colour      using a Mer-kin killscroll in combat
+  //   6 adjective   Mer-kin Library, the book about <blank> creatures
+  //   7 animal      eating sushi while carrying Mer-kin worktea
+  //   8 the birth   Mer-kin Library, the book with one phrase over and over
+  //
+  // (Three of those are the library's card catalogue, which is why the scholar
+  // path runs through the library at all. The healscroll and killscroll only
+  // give a word once you have studied Mer-kin wordquizzes -- each 10% of
+  // vocabulary adds 10% to the chance -- and the wordquizzes also thin the
+  // catalogue down until only the three clue books are left.)
+  //
+  // So this does three things, none of which submits anything:
+  //
+  //   HARVEST. Every page the script sees is scanned for the eight clue
+  //   sentences and the word each one carries is filed against its slot. The
+  //   sentences come from KoLmafia's DreadScrollManager, which reads the same
+  //   messages; the difference is that we match the CONTEXT and then look for
+  //   one of the four known words, instead of pulling whatever sits inside a
+  //   <b> tag. That is deliberate -- it does not depend on KoL's markup, and it
+  //   cannot mistake a word for a clue when the four options are all on screen
+  //   at once, which is exactly what the dreadscroll page looks like.
+  //
+  //   DEDUCE. A failed reading is not a wasted turn: the length of the
+  //   Deep-Tainted Mind you get is three adventures per WRONG word, so every
+  //   failure says how many of your eight picks were right. That plus the clues
+  //   is a Mastermind position, and `dreadSolve` filters all 4^8 arrangements
+  //   against it. Slots the deduction pins down are as good as clued.
+  //
+  //   REPORT. A bar on the scroll itself, a bar on the card catalogue, and a
+  //   panel behind the menu button (the tracker is useful between visits, not
+  //   only when the scroll is open).
+  //
+  // UNVERIFIED against a live page: the dropdown option LABELS. The words below
+  // are KoLmafia's -- it decorates this same choice by matching option text --
+  // but the wiki transcribes the second option of slot 1 as "double" where
+  // KoLmafia has "doubled", and nothing available outside the game settles it.
+  // `dreadMatchOption` is therefore deliberately loose (exact, then either
+  // string a prefix of the other) and every slot carries the clue wording and
+  // the dropdown wording separately, since half of them genuinely differ.
+
+  const DREAD_KEY = 'tm-merkin-dread';
+  const DREAD_STALE_MS = 60 * 24 * 60 * 60 * 1000; // rolled per ascension
+
+  // The eight slots, in the order they appear in the prophecy -- which is also
+  // the order of KoLmafia's CLUE_DATA, so the two can be compared line by line.
+  //   `clue`    what KoL prints in the clue message.
+  //   `word`    what the dreadscroll's own dropdown shows.
+  //   `alt`     a second spelling to accept in the dropdown; see the note above.
+  //   `gate`    a phrase that must be on the page before we read a clue from it.
+  //   `harvest` pulls the clue word out, anchored on its own sentence.
+  const DREAD_SLOTS = [
+    {
+      n: 1,
+      label: 'the adjective',
+      source: 'Mer-kin Library — the book with a word scrawled inside the cover',
+      library: true,
+      gate: 'somebody has scrawled',
+      harvest: /somebody has scrawled\s*["'“”]?\s*([A-Za-z][A-Za-z-]*)/i,
+      options: [
+        { clue: 'LONELY', word: 'lonely' },
+        { clue: 'DOUBLED', word: 'doubled', alt: 'double' },
+        { clue: 'THRICE-CURSED', word: 'thrice-cursed' },
+        { clue: 'FOURTH', word: 'fourth' },
+      ],
+    },
+    {
+      n: 2,
+      label: 'the fish',
+      source: 'a Mer-kin healscroll used in combat',
+      gate: 'a magnificent',
+      harvest: /a magnificent\s+([a-z]+fish)\b/i,
+      options: [
+        { clue: 'starfish', word: 'starfish' },
+        { clue: 'moonfish', word: 'moonfish' },
+        { clue: 'sunfish', word: 'sunfish' },
+        { clue: 'planetfish', word: 'planetfish' },
+      ],
+    },
+    {
+      n: 3,
+      label: 'the House',
+      source: 'casting Deep Dark Visions',
+      // Gated hard: all four Houses are printed on the dreadscroll page itself,
+      // so without the vision's own sentence this would read a clue off the
+      // form we are standing in front of.
+      gate: 'visions wash over you',
+      harvest: /\bthe House of (Cards|Blues|Pancakes|Pain)\b/i,
+      options: [
+        { clue: 'Cards', word: 'Cards' },
+        { clue: 'Blues', word: 'Blues' },
+        { clue: 'Pancakes', word: 'Pancakes' },
+        { clue: 'Pain', word: 'Pain' },
+      ],
+    },
+    {
+      n: 4,
+      label: 'the Current',
+      source: 'a Mer-kin knucklebone',
+      gate: 'it bounces straight',
+      harvest: /it bounces straight\s+([a-z]+)/i,
+      options: [
+        { clue: 'north', word: 'Northern' },
+        { clue: 'south', word: 'Southern' },
+        { clue: 'east', word: 'Eastern' },
+        { clue: 'west', word: 'Western' },
+      ],
+    },
+    {
+      n: 5,
+      label: 'the colour',
+      source: 'a Mer-kin killscroll used in combat',
+      gate: 'recognize one of them',
+      harvest: /recognize one of them:\s*["'“”]?\s*([a-z]+)/i,
+      options: [
+        { clue: 'red', word: 'as red as blood' },
+        { clue: 'black', word: 'as black as ink' },
+        { clue: 'green', word: 'as green as bile' },
+        { clue: 'yellow', word: 'as yellow as piss' },
+      ],
+    },
+    {
+      n: 6,
+      label: 'the creature\'s adjective',
+      source: 'Mer-kin Library — the book about a kind of creature',
+      library: true,
+      gate: 'a lot of references to',
+      harvest: /a lot of references to\s+([a-z-]+)\s+creatures/i,
+      options: [
+        { clue: 'blind', word: 'blind' },
+        { clue: 'giant', word: 'giant' },
+        { clue: 'finless', word: 'finless' },
+        { clue: 'two-headed', word: 'two-headed' },
+      ],
+    },
+    {
+      n: 7,
+      label: 'the creature',
+      source: 'eating sushi while carrying Mer-kin worktea',
+      gate: 'the leaves in the bottom',
+      harvest: /the leaves in the bottom look just like\s+(an?\s+[a-z]+)/i,
+      options: [
+        { clue: 'an eel', word: 'eel' },
+        { clue: 'a turtle', word: 'turtle' },
+        { clue: 'a shark', word: 'shark' },
+        { clue: 'a whale', word: 'whale' },
+      ],
+    },
+    {
+      n: 8,
+      label: 'the birth',
+      source: 'Mer-kin Library — the book with one phrase over and over',
+      library: true,
+      gate: 'consists of the phrase',
+      harvest: /consists of the phrase\s+(.{1,44}?)\s+over and over/i,
+      options: [
+        { clue: 'one thousand squirming young', word: 'one thousand squirming young' },
+        { clue: 'two and twenty stillborn spawn', word: 'two and twenty stillborn spawn' },
+        { clue: 'conjoined triplets', word: 'conjoined triplets' },
+        { clue: 'a brand new dance craze', word: 'a brand new dance craze' },
+      ],
+    },
+  ];
+
+  // Nine separators around the eight holes; joining them with the picks is the
+  // prophecy as KoL prints it (and as KoLmafia's getScrollText assembles it).
+  const DREAD_TEMPLATE = [
+    'When the ', ' ', ' is in the House of ', ',\nand the ', ' Current runs ',
+    ',\nwhen a ', ' ', ' births ', ',\nthe Elder shall awaken.',
+  ];
+
+  // How many turns of Deep-Tainted Mind mean how many wrong words. KoL grants
+  // three per wrong word, but the reading itself burns the first turn -- and
+  // two of them if you surfaced without Fishy -- so the number on screen can be
+  // 3x, 3x-1 or 3x-2. Ceiling divides all three back to x, and nothing else
+  // does, which is why this is not a plain division.
+  function dreadWrongFromDuration(turns) {
+    const n = Number(turns);
+    if (!isFinite(n) || n < 1) return null;
+    const wrong = Math.ceil(n / 3);
+    return wrong >= 1 && wrong <= 8 ? wrong : null;
+  }
+
+  // --- the solver (DOM-free, unit-tested) ----------------------------------
+
+  // Everything still consistent with what we know: the confirmed clues, and how
+  // many words each failed reading got wrong. There are only 4^8 = 65,536
+  // arrangements, so this brute-forces rather than deducing -- it runs in a few
+  // milliseconds and cannot be subtly wrong the way hand-rolled deduction can.
+  //
+  // `known` is eight entries, 0 for unknown or 1-4 for a confirmed option.
+  // `guesses` is [{ picks: [8 x 1-4], wrong: n }]; a guess with an unreadable
+  // pick is ignored rather than half-applied, and counted in `ignored` so the
+  // UI can say so instead of quietly dropping it.
+  //
+  // Returns { count, alive, pinned, solution, used, ignored }:
+  //   count     arrangements still possible (0 means the inputs contradict).
+  //   alive     per slot, the option numbers that survive somewhere.
+  //   pinned    per slot, the option number when only one survives, else 0.
+  //   solution  the eight picks when exactly one arrangement is left, else null.
+  function dreadSolve(known, guesses) {
+    const fixed = [];
+    for (let i = 0; i < 8; i++) {
+      const k = Number((known || [])[i]) || 0;
+      fixed.push(k >= 1 && k <= 4 ? k : 0);
+    }
+
+    const all = guesses || [];
+    const usable = all.filter((g) => g && Array.isArray(g.picks) && g.picks.length === 8 &&
+      g.picks.every((p) => p >= 1 && p <= 4) &&
+      Number.isFinite(Number(g.wrong)) && g.wrong >= 0 && g.wrong <= 8);
+
+    const alive = [];
+    for (let i = 0; i < 8; i++) alive.push({});
+    let count = 0;
+    let solution = null;
+    const combo = new Array(8);
+
+    (function walk(slot) {
+      if (slot === 8) {
+        for (const g of usable) {
+          let right = 0;
+          for (let i = 0; i < 8; i++) if (g.picks[i] === combo[i]) right++;
+          if (right !== 8 - g.wrong) return;
+        }
+        count++;
+        if (count === 1) solution = combo.slice();
+        for (let i = 0; i < 8; i++) alive[i][combo[i]] = true;
+        return;
+      }
+      if (fixed[slot]) {
+        combo[slot] = fixed[slot];
+        walk(slot + 1);
+        return;
+      }
+      for (let v = 1; v <= 4; v++) {
+        combo[slot] = v;
+        walk(slot + 1);
+      }
+    })(0);
+
+    const aliveLists = alive.map((set) =>
+      [1, 2, 3, 4].filter((v) => set[v]));
+    return {
+      count: count,
+      alive: aliveLists,
+      pinned: aliveLists.map((l) => (l.length === 1 ? l[0] : 0)),
+      solution: count === 1 ? solution : null,
+      used: usable.length,
+      ignored: all.length - usable.length,
+    };
+  }
+
+  // The prophecy as it currently reads. `picks` is eight entries, 0 for a word
+  // we cannot name yet. DOM-free so the assembly can be tested.
+  function dreadProphecy(picks) {
+    let out = DREAD_TEMPLATE[0];
+    for (let i = 0; i < 8; i++) {
+      const v = Number((picks || [])[i]) || 0;
+      out += v ? DREAD_SLOTS[i].options[v - 1].word : '???';
+      out += DREAD_TEMPLATE[i + 1];
+    }
+    return out;
+  }
+
+  // --- persistence ---------------------------------------------------------
+
+  function freshDread() {
+    return {
+      v: 1,
+      known: [0, 0, 0, 0, 0, 0, 0, 0],
+      guesses: [],         // { picks: [8], wrong: n, t }
+      catalog: {},         // card-catalogue option -> slot index, or -1 for a dud
+      pending: null,       // picks stashed when "Read Aloud" was pressed
+      pendingCatalog: null, // { option, t } stashed when a book was pressed
+      done: false,
+      t: Date.now(),
+    };
+  }
+
+  function loadDread() {
+    try {
+      const rec = JSON.parse(localStorage.getItem(charKey(DREAD_KEY)));
+      if (!rec || rec.v !== 1) return freshDread();
+      // The words are rolled per ascension, so an old record would be
+      // confidently wrong. Same reasoning as the pyramid's staleness check.
+      if (!rec.t || Date.now() - rec.t > DREAD_STALE_MS) return freshDread();
+      if (!Array.isArray(rec.known) || rec.known.length !== 8) rec.known = freshDread().known;
+      if (!Array.isArray(rec.guesses)) rec.guesses = [];
+      if (!rec.catalog || typeof rec.catalog !== 'object') rec.catalog = {};
+      return rec;
+    } catch (e) {
+      return freshDread();
+    }
+  }
+
+  function saveDread(rec) {
+    rec.t = Date.now();
+    try {
+      localStorage.setItem(charKey(DREAD_KEY), JSON.stringify(rec));
+    } catch (e) {
+      console.error('Quest helper: could not save Mer-kin dreadscroll clues.', e);
+    }
+  }
+
+  // --- harvesting clues off whatever page we are on ------------------------
+
+  // Which option a clue word names, or 0. The clue wording is matched, not the
+  // dropdown wording, and loosely: KoL prints the slot-1 words in capitals and
+  // the worktea one with its article.
+  function dreadClueIndex(slot, found) {
+    const want = String(found || '').trim().toLowerCase().replace(/[.,!"'“”]+$/, '');
+    if (!want) return 0;
+    for (let i = 0; i < slot.options.length; i++) {
+      const o = slot.options[i];
+      const clue = o.clue.toLowerCase();
+      if (clue === want || clue.replace(/^an?\s+/, '') === want.replace(/^an?\s+/, '')) {
+        return i + 1;
+      }
+    }
+    return 0;
+  }
+
+  // One pass over the page text for all eight clue sentences. DOM-free so it
+  // can be run against fixtures. Returns { slotIndex: optionNumber }.
+  function dreadHarvest(text) {
+    const found = {};
+    const t = text || '';
+    DREAD_SLOTS.forEach((slot, i) => {
+      if (slot.gate && t.indexOf(slot.gate) === -1) return;
+      const m = t.match(slot.harvest);
+      if (!m) return;
+      const n = dreadClueIndex(slot, m[1]);
+      if (n) found[i] = n;
+    });
+    return found;
+  }
+
+  // How a reading of the scroll turned out, read off the result page. DOM-free.
+  // Returns 'won', a number of wrong words, or null when this page says neither.
+  function dreadOutcome(text) {
+    const t = text || '';
+    if (t.indexOf('you\'re the Mer-kin High Priest now') !== -1) return 'won';
+    const i = t.indexOf('Deep-Tainted Mind');
+    if (i === -1) return null;
+    const m = t.slice(i).match(/\((?:duration:\s*)?(\d+)\s+Adventures?\)/i);
+    if (!m) return null;
+    return dreadWrongFromDuration(m[1]);
+  }
+
+  // A card-catalogue book that turned out to hold no clue. Ten of the thirteen
+  // read this way, and knowing which ones is worth as much as knowing which
+  // three do -- every press costs an adventure either way.
+  const DREAD_CATALOG_DUD = 'you\'re just not sure what';
+  const DREAD_PENDING_MS = 10 * 60 * 1000;
+
+  // Run on every page the script sees. Everything here is additive and quiet:
+  // it files clues, closes out a reading we stashed, and writes nothing to the
+  // page. A clue already recorded is left alone rather than overwritten, so a
+  // stale page in a back-button history cannot un-learn something.
+  function harvestDreadClues() {
+    const text = document.body ? (document.body.textContent || '') : '';
+    if (!text) return;
+
+    const clues = dreadHarvest(text);
+    const clued = Object.keys(clues);
+    const dud = text.indexOf(DREAD_CATALOG_DUD) !== -1;
+    const outcome = dreadOutcome(text);
+    if (!clued.length && !dud && outcome == null) return;
+
+    const rec = loadDread();
+    const pendingBook = rec.pendingCatalog &&
+      Date.now() - (rec.pendingCatalog.t || 0) < DREAD_PENDING_MS
+      ? rec.pendingCatalog.option : null;
+
+    clued.forEach((k) => {
+      const i = Number(k);
+      // The catalogue's books are regenerated per ascension, so the only way to
+      // learn which button gives which clue is to watch what came back from the
+      // one that was pressed. Recorded even when the word itself is old news.
+      if (DREAD_SLOTS[i].library && pendingBook != null) rec.catalog[pendingBook] = i;
+      if (!rec.known[i]) rec.known[i] = clues[i];
+    });
+    if (pendingBook != null && dud && !clued.length) rec.catalog[pendingBook] = -1;
+    if (pendingBook != null && (clued.length || dud)) rec.pendingCatalog = null;
+
+    if (outcome != null) {
+      const picks = rec.pending;
+      rec.pending = null;
+      if (outcome === 'won') {
+        rec.done = true;
+        // A correct reading names all eight words outright, which beats every
+        // other source -- so it overwrites, where a clue would not.
+        if (picks && picks.length === 8 && picks.every((p) => p >= 1 && p <= 4)) {
+          rec.known = picks.slice();
+        }
+      } else if (picks) {
+        rec.guesses.push({ picks: picks, wrong: outcome, t: Date.now() });
+        if (rec.guesses.length > 40) rec.guesses = rec.guesses.slice(-40);
+      }
+    }
+
+    saveDread(rec);
+  }
+
+  // --- reading and writing the scroll's own form ---------------------------
+
+  // Does this dropdown option name that word? Loose on purpose -- see the
+  // UNVERIFIED note above: exact match first, then either string being a prefix
+  // of the other, which is what covers "double" against "doubled".
+  function dreadMatchOption(optionText, option) {
+    const got = String(optionText || '').trim().toLowerCase();
+    if (!got) return false;
+    const words = [option.word];
+    if (option.alt) words.push(option.alt);
+    return words.some((w) => {
+      const want = w.toLowerCase();
+      return got === want || got.indexOf(want) === 0 || want.indexOf(got) === 0;
+    });
+  }
+
+  // The eight dropdowns, in prophecy order. KoL names them pro1..pro8 (which is
+  // how KoLmafia reads a failed reading back out of the submitted URL); the
+  // by-content fallback is there because a select is only useful to us if we
+  // can tell WHICH slot it is, and its own options say that unambiguously.
+  function dreadSelects() {
+    const selects = Array.from(document.querySelectorAll('select'));
+    return DREAD_SLOTS.map((slot, i) => {
+      const named = document.querySelector('select[name="pro' + (i + 1) + '"]');
+      if (named) return named;
+      return selects.find((sel) => {
+        const texts = Array.from(sel.options).map((o) => o.textContent);
+        return slot.options.every((o) => texts.some((t) => dreadMatchOption(t, o)));
+      }) || null;
+    });
+  }
+
+  // Which of a slot's four words a dropdown is currently showing, or 0.
+  function dreadSelected(sel, slot) {
+    if (!sel || sel.selectedIndex < 0) return 0;
+    const text = sel.options[sel.selectedIndex].textContent;
+    for (let i = 0; i < slot.options.length; i++) {
+      if (dreadMatchOption(text, slot.options[i])) return i + 1;
+    }
+    return 0;
+  }
+
+  // Put `picks` into the dropdowns. Zero means "leave that one alone" -- we
+  // never guess at a word we cannot name. Returns how many were set, and which
+  // slots refused. Nothing is submitted: the player presses Read Aloud.
+  function dreadFillForm(picks) {
+    const selects = dreadSelects();
+    let set = 0;
+    const failed = [];
+    DREAD_SLOTS.forEach((slot, i) => {
+      const want = Number(picks[i]) || 0;
+      if (!want) return;
+      const sel = selects[i];
+      const opt = sel && Array.from(sel.options)
+        .find((o) => dreadMatchOption(o.textContent, slot.options[want - 1]));
+      if (!opt) { failed.push(slot.n); return; }
+      if (sel.value !== opt.value) {
+        sel.value = opt.value;
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      set++;
+    });
+    return { set: set, failed: failed };
+  }
+
+  // Hook "Read Aloud" so the eight picks are stashed before the page goes away.
+  // Same shape and the same reason as the pyramid's descend hook: clicking
+  // navigates, and the result page no longer carries the form, so the only
+  // moment the picks can be read is on the way out. Nothing is clicked for you.
+  function trackReadAloud(el) {
+    if (el.dataset && el.dataset.tmQhDreadTracked) return;
+    let done = false;
+    const record = () => {
+      if (done) return;
+      done = true;
+      const selects = dreadSelects();
+      const picks = DREAD_SLOTS.map((slot, i) => dreadSelected(selects[i], slot));
+      const rec = loadDread();
+      // All eight or none: a half-read guess cannot be scored against the
+      // number of wrong words, and a wrong score would poison the deduction.
+      rec.pending = picks.every((p) => p >= 1 && p <= 4) ? picks : null;
+      saveDread(rec);
+    };
+    el.addEventListener('click', record, true);
+    const form = el.form || (el.closest && el.closest('form'));
+    if (form) form.addEventListener('submit', record, true);
+    if (el.dataset) el.dataset.tmQhDreadTracked = '1';
+  }
+
+  // --- the shared tracker body ---------------------------------------------
+
+  // The panel is drawn into the mainpane document when it is opened from the
+  // menu frame, so every node here is created from a passed-in document rather
+  // than the ambient one.
+  function mkEl(d, tag, css, text) {
+    const e = d.createElement(tag);
+    if (css) e.style.cssText = css;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function dreadButton(d, label, state, onClick) {
+    const b = mkEl(d, 'button', null, label);
+    b.type = 'button'; // never submit the form we live next to
+    b.className = 'button';
+    let css = 'margin:2px 2px 0 0;padding:1px 5px;font-size:10px;cursor:pointer';
+    if (state === 'on') css += ';font-weight:bold;color:#060;outline:2px solid #060';
+    else if (state === 'out') css += ';color:#999;text-decoration:line-through';
+    b.style.cssText = css;
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
+  // What the tracker currently believes, in one object: the record, the
+  // solver's verdict, and the merged picks (a clue, or a slot the failures
+  // pinned down on their own -- both are equally certain).
+  function dreadView() {
+    const rec = loadDread();
+    const solve = dreadSolve(rec.known, rec.guesses);
+    const picks = rec.known.map((k, i) => k || solve.pinned[i]);
+    return {
+      rec: rec,
+      solve: solve,
+      picks: picks,
+      pinned: picks.filter((p) => p).length,
+    };
+  }
+
+  // The status line both the bar and the panel lead with.
+  function dreadSummary(view) {
+    if (view.rec.done) {
+      return { tone: 'go', text: 'Done — you read it correctly and you are the High Priest.' };
+    }
+    if (view.solve.count === 0) {
+      return {
+        tone: 'stop',
+        text: 'These clues contradict each other — no arrangement fits all of them. One ' +
+          'recorded reading or hand-set word must be wrong; clear the readings below.',
+      };
+    }
+    if (view.pinned === 8) {
+      return { tone: 'go', text: 'All eight words are pinned down. This reading will work.' };
+    }
+    return {
+      tone: 'turn',
+      text: view.pinned + ' of 8 words pinned down — ' + view.solve.count +
+        ' arrangement' + (view.solve.count === 1 ? '' : 's') + ' still fit' +
+        (view.solve.count === 1 ? 's' : '') + '.',
+    };
+  }
+
+  // The eight slot rows: what each word is, where the clue comes from, and the
+  // four candidates with their state. Clicking a candidate sets it by hand,
+  // which is the escape hatch for a clue we failed to read off the page.
+  function dreadSlotList(d, view, repaint) {
+    const wrap = mkEl(d, 'div', 'text-align:left');
+
+    DREAD_SLOTS.forEach((slot, i) => {
+      const block = mkEl(d, 'div', 'margin-top:6px');
+
+      const head = mkEl(d, 'div');
+      const b = mkEl(d, 'b', null, slot.n + '. ' + slot.label);
+      head.appendChild(b);
+      head.appendChild(mkEl(d, 'span', 'color:#666', ' — ' + slot.source));
+      block.appendChild(head);
+
+      const row = mkEl(d, 'div');
+      slot.options.forEach((opt, j) => {
+        const n = j + 1;
+        const isKnown = view.picks[i] === n;
+        const isOut = !isKnown && view.solve.count > 0 &&
+          view.solve.alive[i].indexOf(n) === -1;
+        row.appendChild(dreadButton(d, opt.word, isKnown ? 'on' : (isOut ? 'out' : ''), () => {
+          const rec = loadDread();
+          rec.known[i] = rec.known[i] === n ? 0 : n;
+          saveDread(rec);
+          repaint();
+        }));
+      });
+      if (view.rec.known[i]) {
+        row.appendChild(dreadButton(d, 'clear', '', () => {
+          const rec = loadDread();
+          rec.known[i] = 0;
+          saveDread(rec);
+          repaint();
+        }));
+      }
+      block.appendChild(row);
+      wrap.appendChild(block);
+    });
+
+    return wrap;
+  }
+
+  // The failed readings, which are data and not just history: each one says how
+  // many of its eight picks were right, and that is what the solver runs on.
+  function dreadGuessList(d, view, repaint) {
+    const wrap = mkEl(d, 'div', 'margin-top:8px;padding-top:5px;border-top:1px dotted #99a;' +
+      'text-align:left');
+    wrap.appendChild(mkEl(d, 'div', 'font-weight:bold', 'Failed readings'));
+
+    if (!view.rec.guesses.length) {
+      wrap.appendChild(mkEl(d, 'div', 'color:#666',
+        'None recorded. Each failure tells you how many words you had right — three turns ' +
+        'of Deep-Tainted Mind per wrong word — so a bad reading is not a wasted turn.'));
+      return wrap;
+    }
+
+    view.rec.guesses.forEach((g, idx) => {
+      const line = mkEl(d, 'div', 'margin-top:3px');
+      const words = g.picks.map((p, i) => DREAD_SLOTS[i].options[p - 1].word).join(' / ');
+      line.appendChild(mkEl(d, 'span', null,
+        words + ' — ' + g.wrong + ' wrong (' + (8 - g.wrong) + ' right)'));
+      line.appendChild(mkEl(d, 'span', null, ' '));
+      line.appendChild(dreadButton(d, 'forget', '', () => {
+        const rec = loadDread();
+        rec.guesses.splice(idx, 1);
+        saveDread(rec);
+        repaint();
+      }));
+      wrap.appendChild(line);
+    });
+
+    if (view.solve.ignored) {
+      wrap.appendChild(mkEl(d, 'div', 'color:#a00;margin-top:3px',
+        view.solve.ignored + ' recorded reading(s) could not be scored and are being ' +
+        'ignored.'));
+    }
+    return wrap;
+  }
+
+  // === 'dreadscroll' handler ===============================================
+
+  const dreadscrollHandler = {
+    locate() {
+      const first = dreadSelects().find((s) => s) || null;
+      const form = (first && first.closest && first.closest('form')) || null;
+      return { form: form, mount: form, body: null };
+    },
+
+    // Its own body, like the rotation and Sven handlers: eight rows of state
+    // plus the hand corrections do not fit on one status line.
+    extras(puzzle, ctx, say) {
+      const body = document.createElement('div');
+      body.style.cssText = 'margin-top:5px';
+      ctx.body = body;
+      ctx.say = say;
+      return body;
+    },
+
+    apply(puzzle, ctx, say) {
+      const readAloud = findOption(/read aloud/i);
+      if (readAloud) trackReadAloud(readAloud);
+
+      const paint = () => {
+        const view = dreadView();
+        const summary = dreadSummary(view);
+        say(summary.text, ROT_TONE[summary.tone]);
+
+        const body = ctx.body;
+        if (!body) return;
+        body.textContent = '';
+
+        const scroll = mkEl(document, 'div',
+          'margin-top:4px;padding:4px;background:#fff;border:1px solid #ccd;text-align:left;' +
+          'white-space:pre-wrap', dreadProphecy(view.picks));
+        body.appendChild(scroll);
+
+        if (view.pinned < 8) {
+          const missing = DREAD_SLOTS
+            .filter((s, i) => !view.picks[i])
+            .map((s) => s.n + ' (' + s.source + ')');
+          body.appendChild(mkEl(document, 'div', 'margin-top:4px;color:#a00;text-align:left',
+            'Still unknown: ' + missing.join('; ') + '. Reading now costs a turn and three ' +
+            'more per wrong word — but it does tell you how many you had right, and that is ' +
+            'recorded here automatically.'));
+        }
+
+        const fill = rotButton('Fill in the ' + view.pinned + ' known word' +
+          (view.pinned === 1 ? '' : 's'), false, () => {
+          const res = dreadFillForm(view.picks);
+          if (res.failed.length) {
+            say('Set ' + res.set + ', but could not find the right option for slot ' +
+              res.failed.join(', ') + ' — pick those by hand.', true);
+          } else {
+            say('Set ' + res.set + ' of 8. Press "Read Aloud" yourself — this script never ' +
+              'submits.', ROT_TONE.go);
+          }
+        });
+        if (!view.pinned) fill.disabled = true;
+        body.appendChild(fill);
+
+        body.appendChild(dreadSlotList(document, view, paint));
+        body.appendChild(dreadGuessList(document, view, paint));
+      };
+
+      paint();
+    },
+  };
+
+  // === 'catalog' handler ===================================================
+  //
+  // Playing the Catalog Card, the Mer-kin Library noncombat that feeds three of
+  // the eight clues. Thirteen books at zero vocabulary, one fewer per 10% of
+  // Mer-kin vocabulary learned, until only the three that carry clues are left
+  // -- and every press costs an adventure whether or not the book says
+  // anything. The titles are generated per ascension, so nothing here can be
+  // pre-tabulated; what CAN be learned is which button gave which clue, which
+  // is why the option is stashed on the way out and matched up when the result
+  // page is harvested.
+
+  function trackCatalog(el, option) {
+    if (el.dataset && el.dataset.tmQhCatalogTracked) return;
+    let done = false;
+    const record = () => {
+      if (done) return;
+      done = true;
+      const rec = loadDread();
+      rec.pendingCatalog = { option: option, t: Date.now() };
+      saveDread(rec);
+    };
+    el.addEventListener('click', record, true);
+    const form = el.form || (el.closest && el.closest('form'));
+    if (form) form.addEventListener('submit', record, true);
+    if (el.dataset) el.dataset.tmQhCatalogTracked = '1';
+  }
+
+  // The choice's own option buttons, as [{ el, option, label }]. A choice.php
+  // option is a submit button inside a form carrying `option=N`.
+  function catalogOptions() {
+    const out = [];
+    Array.from(document.querySelectorAll('form')).forEach((form) => {
+      const which = form.querySelector('input[name="whichchoice"][value="704"]');
+      const opt = form.querySelector('input[name="option"]');
+      const btn = form.querySelector('input[type="submit"], button');
+      if (!which || !opt || !btn) return;
+      out.push({
+        el: btn,
+        option: String(opt.value),
+        label: ((btn.tagName === 'INPUT' ? btn.value : btn.textContent) || '').trim(),
+      });
+    });
+    return out;
+  }
+
+  const catalogHandler = {
+    locate() {
+      const options = catalogOptions();
+      if (!options.length) return null;
+      const mount = options[0].el.closest && options[0].el.closest('table');
+      return { options: options, mount: mount || null, body: null };
+    },
+
+    extras(puzzle, ctx, say) {
+      const body = document.createElement('div');
+      body.style.cssText = 'margin-top:5px';
+      ctx.body = body;
+      ctx.say = say;
+      return body;
+    },
+
+    apply(puzzle, ctx, say) {
+      const view = dreadView();
+      ctx.options.forEach((o) => trackCatalog(o.el, o.option));
+
+      const library = DREAD_SLOTS
+        .map((slot, i) => ({ slot: slot, i: i }))
+        .filter((x) => x.slot.library);
+      const want = library.filter((x) => !view.picks[x.i]);
+
+      if (!want.length) {
+        say('The library has nothing left for you — all three of its words are known. ' +
+          'Every book here still costs an adventure.', ROT_TONE.stop);
+      } else {
+        say('Still needed from this catalogue: ' +
+          want.map((x) => x.slot.n + ' (' + x.slot.label + ')').join(', ') + '.',
+        ROT_TONE.turn);
+      }
+
+      const body = ctx.body;
+      if (!body) return;
+      body.textContent = '';
+
+      library.forEach((x) => {
+        const have = view.picks[x.i];
+        const line = mkEl(document, 'div', 'text-align:left;color:' + (have ? '#060' : '#333'));
+        line.textContent = (have ? '✓ ' : '• ') + x.slot.n + '. ' + x.slot.label + ' — ' +
+          (have ? x.slot.options[have - 1].word : 'not yet found');
+        body.appendChild(line);
+      });
+
+      // What each button has given before, this ascension. The titles are
+      // regenerated per ascension so this is learned, never looked up -- and
+      // only the pressed button can be attributed, so it fills in slowly.
+      const seen = ctx.options.filter((o) => view.rec.catalog[o.option] !== undefined);
+      if (seen.length) {
+        const note = mkEl(document, 'div', 'margin-top:5px;text-align:left;color:#666');
+        note.appendChild(mkEl(document, 'div', 'font-weight:bold', 'Books you have opened'));
+        seen.forEach((o) => {
+          const i = view.rec.catalog[o.option];
+          const slot = i >= 0 ? DREAD_SLOTS[i] : null;
+          note.appendChild(mkEl(document, 'div', null,
+            o.label + ' → ' + (slot ? 'word ' + slot.n + ' (' + slot.label + ')'
+              : 'no clue, just mysticality')));
+        });
+        body.appendChild(note);
+      }
+
+      body.appendChild(mkEl(document, 'div', 'margin-top:5px;text-align:left;color:#666',
+        'Each Mer-kin wordquiz you study removes one of the books with no clue in it, so ' +
+        'the three that matter get easier to hit. Every choice here costs an adventure, ' +
+        'including the duds.'));
+    },
+  };
+
+  // === the menu button and its panel =======================================
+  //
+  // The clue tracker is wanted BETWEEN visits to the scroll -- while deciding
+  // whether another trip to the library is worth an adventure, or whether to
+  // burn a killscroll on this Mer-kin -- so it cannot live only on choice 703.
+  // It gets a button in the shared menu row, like auto-combat.js's, and opens
+  // the same tracker body there.
+  //
+  // Two things follow from running in the menu frame. The panel is drawn into
+  // the MAINPANE document (the menu frame is a few pixels tall and would clip
+  // it), which is why everything above takes its document as an argument. And
+  // localStorage is per-origin, so the clues filed away by the copy of this
+  // script running in the mainpane are the same ones read here.
+
+  const MERKIN_BUTTON_ID = 'tm-merkin-btn';
+  const MERKIN_PANEL_ID = 'tm-merkin-panel';
+
+  // Shared button row under the edit icon, created by whichever of the menu
+  // scripts runs first; each claims its slot with CSS `order`, so the
+  // left-to-right arrangement doesn't depend on load order. (Checklist is 1,
+  // IotM 2, Auto 3 -- see auto-combat.js's copy of this function.)
+  function menuButtonRow() {
+    let row = document.getElementById('tm-kol-menu-btns');
+    if (row) return row;
+    const fixed = document.getElementById('fixedawesome');
+    const editLink = document.querySelector('#fixedawesome a.config');
+    if (!fixed || !editLink) return null;
+    row = document.createElement('div');
+    row.id = 'tm-kol-menu-btns';
+    row.style.cssText = [
+      'position:absolute', 'top:31px', 'left:' + Math.max(0, editLink.offsetLeft) + 'px',
+      'z-index:3', 'display:flex', 'gap:3px', 'align-items:flex-start',
+    ].join(';');
+    fixed.appendChild(row);
+    return row;
+  }
+
+  function merkinPanelDoc() {
+    try {
+      const mp = top.frames['mainpane'];
+      if (mp && mp.document && mp.document.body) return mp.document;
+    } catch (e) { /* cross-frame access failed; fall back */ }
+    return document.body ? document : null;
+  }
+
+  function closeMerkinPanel() {
+    const d = merkinPanelDoc();
+    const old = d && d.getElementById(MERKIN_PANEL_ID);
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+  }
+
+  function openMerkinPanel() {
+    closeMerkinPanel();
+    const d = merkinPanelDoc();
+    if (!d) return;
+
+    const pop = mkEl(d, 'div', [
+      'position:fixed', 'left:20px', 'top:20px', 'z-index:100000',
+      'width:430px', 'max-height:80vh', 'overflow-y:auto', 'padding:8px',
+      'background:#f5f5ff', 'border:1px solid blue', 'border-radius:4px',
+      'box-shadow:0 2px 6px rgba(0,0,0,0.3)',
+      'font-family:arial,sans-serif', 'font-size:11px',
+    ].join(';'));
+    pop.id = MERKIN_PANEL_ID;
+
+    const head = mkEl(d, 'div', 'display:flex;justify-content:space-between;' +
+      'align-items:center;border-bottom:1px solid #ccd');
+    head.appendChild(mkEl(d, 'div', 'font-weight:bold', 'Mer-kin dreadscroll'));
+    const close = mkEl(d, 'button', 'cursor:pointer;font-size:11px', 'close');
+    close.type = 'button';
+    close.addEventListener('click', closeMerkinPanel);
+    head.appendChild(close);
+    pop.appendChild(head);
+
+    const body = mkEl(d, 'div');
+    pop.appendChild(body);
+
+    function paint() {
+      body.textContent = '';
+      const view = dreadView();
+      const summary = dreadSummary(view);
+
+      body.appendChild(mkEl(d, 'div',
+        'margin-top:4px;padding:4px;background:#fff;border:1px solid #ccd;' +
+        'white-space:pre-wrap', dreadProphecy(view.picks)));
+      body.appendChild(mkEl(d, 'div',
+        'margin-top:4px;font-weight:bold;color:' + ROT_TONE[summary.tone], summary.text));
+
+      body.appendChild(dreadSlotList(d, view, paint));
+      body.appendChild(dreadGuessList(d, view, paint));
+
+      const foot = mkEl(d, 'div', 'margin-top:8px;padding-top:5px;' +
+        'border-top:1px dotted #99a;text-align:left');
+      foot.appendChild(mkEl(d, 'div', 'color:#666',
+        'Clues are filed automatically from the pages that print them; the buttons above ' +
+        'are for correcting one by hand. Nothing here is ever submitted for you.'));
+      if (view.rec.guesses.length) {
+        foot.appendChild(dreadButton(d, 'Clear recorded readings', '', () => {
+          const rec = loadDread();
+          rec.guesses = [];
+          saveDread(rec);
+          paint();
+        }));
+      }
+      foot.appendChild(dreadButton(d, 'Reset everything', '', () => {
+        const w = d.defaultView || window;
+        if (!w.confirm('Forget every Mer-kin clue and reading for this character?')) return;
+        saveDread(freshDread());
+        paint();
+        syncMerkinButton();
+      }));
+      body.appendChild(foot);
+
+      syncMerkinButton();
+    }
+
+    paint();
+    d.body.appendChild(pop);
+  }
+
+  // The button doubles as the readout: how far along the eight words are is the
+  // one thing worth knowing without opening anything.
+  function syncMerkinButton() {
+    const btn = document.getElementById(MERKIN_BUTTON_ID);
+    if (!btn) return;
+    let view;
+    try {
+      view = dreadView();
+    } catch (e) {
+      return;
+    }
+    const done = view.rec.done;
+    btn.textContent = done ? 'Mer-kin ✓' : 'Mer-kin ' + view.pinned + '/8';
+    btn.style.backgroundColor = done || view.pinned === 8 ? '#d8f0d8' :
+      (view.solve.count === 0 ? '#ffd9a0' : 'white');
+    btn.title = done ? 'Mer-kin dreadscroll: read correctly' :
+      'Mer-kin dreadscroll: ' + view.pinned + ' of 8 words pinned down';
+  }
+
+  function addMerkinButton() {
+    if (document.getElementById(MERKIN_BUTTON_ID)) return; // idempotency guard
+
+    const btn = document.createElement('button');
+    btn.id = MERKIN_BUTTON_ID;
+    btn.type = 'button';
+    btn.textContent = 'Mer-kin';
+    btn.style.cssText = [
+      'padding:0 4px', 'font-size:9px', 'font-family:arial', 'height:22px',
+      'cursor:pointer', 'white-space:nowrap', 'background-color:white',
+    ].join(';');
+    btn.addEventListener('click', () => {
+      const d = merkinPanelDoc();
+      if (d && d.getElementById(MERKIN_PANEL_ID)) closeMerkinPanel();
+      else openMerkinPanel();
+    });
+
+    const row = menuButtonRow();
+    if (row) {
+      btn.style.order = '4'; // right of checklist (1), IotM (2) and Auto (3)
+      row.appendChild(btn);
+      syncMerkinButton();
+      return;
+    }
+
+    // Text-mode topmenu fallback, same ladder auto-combat.js walks down.
+    const anchor = document.getElementById('tm-autocombat-btn') ||
+      document.getElementById('tm-iotm-btn') ||
+      document.getElementById('tm-checklist-btn');
+    if (anchor) {
+      anchor.insertAdjacentElement('afterend', btn);
+      syncMerkinButton();
+      return;
+    }
+    for (const a of document.querySelectorAll('a')) {
+      const t = a.textContent.trim().toLowerCase().replace(/^\[|\]$/g, '');
+      if (t === 'edit') {
+        a.insertAdjacentElement('afterend', btn);
+        syncMerkinButton();
+        return;
+      }
+    }
+  }
+
   const HANDLERS = {
     selects: selectsHandler,
     tiles: tilesHandler,
     rotation: rotationHandler,
     combat: combatHandler,
     sven: svenHandler,
+    counter: counterHandler,
+    dreadscroll: dreadscrollHandler,
+    catalog: catalogHandler,
   };
 
   // === The 8-Bit Realm score (charpane) ====================================
@@ -1852,6 +3367,24 @@
     return { bar, say };
   }
 
+  // The menu frame is not a puzzle page at all -- it carries the Mer-kin
+  // dreadscroll button and nothing else -- so it dispatches here, and so does
+  // the charpane below it.
+  if (ON_MENU) {
+    addMerkinButton();
+    return;
+  }
+
+  // A dreadscroll clue word can turn up on any of half a dozen unrelated pages,
+  // so this runs on every one of them and before anything else. It only reads
+  // the page and files what it finds; a failure here must not take the puzzle
+  // handlers down with it.
+  try {
+    harvestDreadClues();
+  } catch (e) {
+    console.error('Quest helper: could not read Mer-kin clues from this page.', e);
+  }
+
   // The charpane is a different page with a different job: no puzzle can be on
   // it, and the 8-Bit box brings its own markup rather than the bar's, so it
   // dispatches here and nothing below applies.
@@ -1871,8 +3404,8 @@
   const { bar, say } = buildBar(puzzle, ctx, handler);
   // Sit right below the puzzle's own form/table when we found one; otherwise at
   // the top of the page. A handler can ask to go ABOVE its mount instead --
-  // 'combat' does, because its mount is the block of combat buttons and the
-  // advice has to be read before they're pressed.
+  // 'combat' and 'counter' do, because their mount is the block of combat
+  // buttons and the advice has to be read before they're pressed.
   if (ctx.mount && ctx.mount.parentNode) {
     ctx.mount.parentNode.insertBefore(bar, ctx.before ? ctx.mount : ctx.mount.nextSibling);
   } else if (document.body) {
