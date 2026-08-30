@@ -82,13 +82,14 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
 - **The shared menu button row** (`#tm-kol-menu-btns`) is a piece of markup two scripts
   co-own: `daily-checklist.js` and `iotm.js` each carry an identical copy of `getButtonRow()`,
   and whichever runs first creates it. Each button claims a fixed slot with CSS **`order`**
-  (checklist 1, IotM 2), which is what makes the arrangement independent of load order. The
-  container is a **two-row grid with `grid-auto-flow: column`**, so buttons stack downwards
-  rather than widening the strip. The copies must stay byte-identical: edit one and the layout
-  starts depending on which script loaded first. Each also has a text-mode-topmenu fallback
+  (checklist 1, IotM 2), which is what makes the left-to-right arrangement independent of load
+  order. The container is a plain flex row, which is what the menu frame has room for — two
+  buttons side by side. The copies must stay byte-identical: edit one and the layout starts
+  depending on which script loaded first. Each also has a text-mode-topmenu fallback
   that inserts its button after the other's (by id) or after the plain `edit` link when
   `#fixedawesome` isn't there at all.
-  **The menu frame is small, and it filled up.** A fourth button ran off its right edge, so
+  **The menu frame is small, and it filled up.** A third and fourth button ran off its right
+  edge, and stacking them into a 2x2 block only traded that for a row too tall for the frame, so
   `auto-combat.js` and `quest-helper.js` moved theirs to the **charpane** instead, each under
   the sidebar block it belongs to — Auto under Last Adventure, Mer-kin under Current Quest.
   Both hang off KoL's own markup, taken from KoLmafia's charpane fixtures

@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/iotm.js
-// @version      1.30
+// @version      1.31
 // @description  Adds an "IotM" button to the KoL icon menu that opens a small popup of Item-of-the-Month actions: fire the Codpiece (inventory.php?action=docodpiece), play ball at the baseball diamond (highlighted when a ball is available), drink from the Cup of 13s, and open the Allied Radio Backpack. Also highlights the worthwhile pitch buttons on the Play Ball! choice (choice.php whichchoice=1598), adds sort buttons to the Cup of 13s ingredient dropdowns (choice.php whichchoice=1601), adds a one-click request table to the Request Supply Drop choice for both the Allied Radio Backpack and the handheld Allied radio (choice.php, detected by the request field), and keeps the Eternity Codpiece decoration tools (choice.php whichchoice=1588) for setting every gem slot at once, filtering the gem list by category (including a "Mr. Store items" category with an "Insert all" button that puts the four IotM gems alphabetically into slots 1-4), emptying every slot at once, and saving/loading gem setups.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -608,14 +608,13 @@
 
   // Shared button row under the edit icon. The IotM and daily-checklist scripts
   // each install independently, so they cooperate through a single
-  // absolutely-positioned grid container (created by whichever runs first) and
-  // claim their slot with CSS `order` -- making the arrangement independent of
-  // DOM insertion order / which script loads first. The grid is two rows deep
-  // and flows by column, so slots 1 and 2 stack in the first column and a third
-  // would start a second column rather than widening the strip. Two scripts use
-  // it now (checklist 1, IotM 2); Auto and Mer-kin moved to the charpane when
-  // four buttons ran off the right edge of the menu frame. Returns the row, or
-  // null in text-mode topmenu where #fixedawesome is absent.
+  // absolutely-positioned flex container (created by whichever runs first) and
+  // claim their slot with CSS `order` -- making the left-to-right arrangement
+  // independent of DOM insertion order / which script loads first. Two scripts
+  // use it (checklist 1, IotM 2), which is what the strip has room for: Auto and
+  // Mer-kin moved to the charpane when a fourth button ran off the right edge of
+  // the menu frame. Returns the row, or null in text-mode topmenu where
+  // #fixedawesome is absent.
   function getButtonRow() {
     let row = document.getElementById('tm-kol-menu-btns');
     if (row) return row;
@@ -632,15 +631,9 @@
       'top:31px',
       'left:' + Math.max(0, editLink.offsetLeft) + 'px',
       'z-index:3',
-      // Two rows, filled top-to-bottom and only then left-to-right, so the
-      // buttons stack instead of forming an ever-wider strip -- the strip is
-      // what ran off the right edge of the menu frame.
-      'display:grid',
-      'grid-template-rows:repeat(2, auto)',
-      'grid-auto-flow:column',
-      'gap:2px 3px',
-      'justify-items:start',
-      'align-items:start',
+      'display:flex',
+      'gap:3px',
+      'align-items:flex-start'
     ].join(';');
     fixed.appendChild(row);
     return row;
@@ -653,7 +646,7 @@
     const row = getButtonRow();
     if (row) {
       // Sit to the right of the checklist button (order 1) when both load.
-      btn.style.order = '2';       // under the checklist (1)
+      btn.style.order = '2';       // right of the checklist (1)
       btn.style.backgroundColor = 'white';
       row.appendChild(btn);
       return;

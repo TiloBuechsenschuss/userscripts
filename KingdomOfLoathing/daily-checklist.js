@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/daily-checklist.js
-// @version      1.23
+// @version      1.24
 // @description  Adds a Checklist button next to the IotM button that opens a daily to-do list popup. Items can carry a KoL action link (pwd filled live) and be greyed out when not relevant to the current run. A persistent ronin / post-ronin toggle auto-disables the tasks that only apply to one phase. Checked items reset each day (or manually).
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -802,14 +802,13 @@
 
   // Shared button row under the edit icon. The daily-checklist and iotm
   // scripts each install independently, so they cooperate through a single
-  // absolutely-positioned grid container (created by whichever runs first) and
-  // claim their slot with CSS `order` -- making the arrangement independent of
-  // DOM insertion order / which script loads first. The grid is two rows deep
-  // and flows by column, so slots 1 and 2 stack in the first column and a third
-  // would start a second column rather than widening the strip. Two scripts use
-  // it now (checklist 1, IotM 2); Auto and Mer-kin moved to the charpane when
-  // four buttons ran off the right edge of the menu frame. Returns the row, or
-  // null in text-mode topmenu where #fixedawesome is absent.
+  // absolutely-positioned flex container (created by whichever runs first) and
+  // claim their slot with CSS `order` -- making the left-to-right arrangement
+  // independent of DOM insertion order / which script loads first. Two scripts
+  // use it (checklist 1, IotM 2), which is what the strip has room for: Auto and
+  // Mer-kin moved to the charpane when a fourth button ran off the right edge of
+  // the menu frame. Returns the row, or null in text-mode topmenu where
+  // #fixedawesome is absent.
   function getButtonRow() {
     let row = document.getElementById('tm-kol-menu-btns');
     if (row) return row;
@@ -826,15 +825,9 @@
       'top:31px',
       'left:' + Math.max(0, editLink.offsetLeft) + 'px',
       'z-index:3',
-      // Two rows, filled top-to-bottom and only then left-to-right, so the
-      // buttons stack instead of forming an ever-wider strip -- the strip is
-      // what ran off the right edge of the menu frame.
-      'display:grid',
-      'grid-template-rows:repeat(2, auto)',
-      'grid-auto-flow:column',
-      'gap:2px 3px',
-      'justify-items:start',
-      'align-items:start',
+      'display:flex',
+      'gap:3px',
+      'align-items:flex-start'
     ].join(';');
     fixed.appendChild(row);
     return row;
@@ -847,7 +840,7 @@
     const row = getButtonRow();
     if (row) {
       // Sit to the left; the iotm button (order 2) lines up to our right.
-      btn.style.order = '1';       // top of the first column
+      btn.style.order = '1';       // leftmost
       btn.style.backgroundColor = 'white';
       row.appendChild(btn);
       return;
