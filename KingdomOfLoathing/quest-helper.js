@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/quest-helper.js
-// @version      1.7
+// @version      1.8
 // @description  Helper for puzzle-y quest choice adventures and combat cues. It never submits or clicks anything on its own -- it fills in, highlights or explains the known-correct answer and leaves the actual move to you. Currently: Drawn Onward (choice 872), the photo frames in Dr. Awkward's office, sets the four photo dropdowns to the correct order; Beginning at the Beginning of Beginning (the Hidden Temple tile floor, tiles.php) glows the tile to step on in each row, spelling B-A-N-A-N-A-S from the bottom up, numbered in step order; Control Freak (choice 929), the pyramid control room, tracks the Lower Chambers rotation and tells you how many more times to turn the wheel, when to go down instead, and when to stop turning. Talk to Sven Golly (pandamonium.php?action=sven) gets an overview of the band -- who craves and hates what, which of the six items each one accepts, which of those you're carrying and where the rest drop -- plus a button per give that fills the dropdowns. On fight.php it watches the combat text for the one round where a move only works right now: a Junkyard gremlin presenting Yossarian's tool (use the molybdenum magnet) and a raver pulling his special dance move (cast Gothy Handwave), highlighting the message and offering to pick the item/skill in the dropdown for you. In the Mer-kin Colosseum it reads the gladiator's telegraph and names the skill that counters it -- Net Gain/Loss/Neutrality, Blade Sling/Roller/Runner or Ball Bust/Sweat/Sack -- says which of the three gladiatorial weapons this opponent needs, and warns when the one you are holding is the wrong one. For the scholar path it tracks the Mer-kin dreadscroll: the eight prophecy words are filed automatically from the pages that print them (the library card catalogue, a healscroll or killscroll in combat, a knucklebone, Deep Dark Visions, sushi with worktea), each failed reading is scored from the length of the Deep-Tainted Mind it cost and fed into a solver, and a "Mer-kin" button in the menu row opens the tracker anywhere. On the scroll itself it fills in every word it can name and leaves "Read Aloud" to you. Also reads the 8-Bit Realm Score in the charpane and turns its colour into a link to the zone that is currently paying double, with what to boost there.
 // @match        https://www.kingdomofloathing.com/choice.php*
 // @match        https://kingdomofloathing.com/choice.php*
@@ -2934,8 +2934,9 @@
 
   // Shared button row under the edit icon, created by whichever of the menu
   // scripts runs first; each claims its slot with CSS `order`, so the
-  // left-to-right arrangement doesn't depend on load order. (Checklist is 1,
-  // IotM 2, Auto 3 -- see auto-combat.js's copy of this function.)
+  // arrangement doesn't depend on load order. The grid is two rows deep and
+  // flows by column, so 1/2 stack in the first column and 3/4 in the second.
+  // (Checklist is 1, IotM 2, Auto 3 -- see auto-combat.js's copy.)
   function menuButtonRow() {
     let row = document.getElementById('tm-kol-menu-btns');
     if (row) return row;
@@ -2946,7 +2947,13 @@
     row.id = 'tm-kol-menu-btns';
     row.style.cssText = [
       'position:absolute', 'top:31px', 'left:' + Math.max(0, editLink.offsetLeft) + 'px',
-      'z-index:3', 'display:flex', 'gap:3px', 'align-items:flex-start',
+      'z-index:3',
+      // Two rows, filled top-to-bottom and only then left-to-right: `order` 1
+      // and 2 land in the first column, 3 and 4 in the second, so four buttons
+      // make a 2x2 block. A single strip of four overflowed the menu frame and
+      // cut the last one off.
+      'display:grid', 'grid-template-rows:repeat(2, auto)', 'grid-auto-flow:column',
+      'gap:2px 3px', 'justify-items:start', 'align-items:start',
     ].join(';');
     fixed.appendChild(row);
     return row;
@@ -3073,7 +3080,7 @@
 
     const row = menuButtonRow();
     if (row) {
-      btn.style.order = '4'; // right of checklist (1), IotM (2) and Auto (3)
+      btn.style.order = '4'; // under Auto (3), in the second column
       row.appendChild(btn);
       syncMerkinButton();
       return;

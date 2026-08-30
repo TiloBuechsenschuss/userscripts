@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/daily-checklist.js
-// @version      1.22
+// @version      1.23
 // @description  Adds a Checklist button next to the IotM button that opens a daily to-do list popup. Items can carry a KoL action link (pwd filled live) and be greyed out when not relevant to the current run. A persistent ronin / post-ronin toggle auto-disables the tasks that only apply to one phase. Checked items reset each day (or manually).
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -802,10 +802,12 @@
 
   // Shared button row under the edit icon. The daily-checklist and iotm
   // scripts each install independently, so they cooperate through a single
-  // absolutely-positioned flex container (created by whichever runs first) and
-  // claim their slot with CSS `order` -- making the left-to-right arrangement
-  // independent of DOM insertion order / which script loads first. Returns the
-  // row, or null in text-mode topmenu where #fixedawesome is absent.
+  // absolutely-positioned grid container (created by whichever runs first) and
+  // claim their slot with CSS `order` -- making the arrangement independent of
+  // DOM insertion order / which script loads first. The grid is two rows deep
+  // and flows by column, so the four slots read 1/2 down the first column and
+  // 3/4 down the second. Returns the row, or null in text-mode topmenu where
+  // #fixedawesome is absent.
   function getButtonRow() {
     let row = document.getElementById('tm-kol-menu-btns');
     if (row) return row;
@@ -822,9 +824,16 @@
       'top:31px',
       'left:' + Math.max(0, editLink.offsetLeft) + 'px',
       'z-index:3',
-      'display:flex',
-      'gap:3px',
-      'align-items:flex-start'
+      // Two rows, filled top-to-bottom and only then left-to-right: `order` 1
+      // and 2 land in the first column, 3 and 4 in the second, so four buttons
+      // make a 2x2 block. A single strip of four overflowed the menu frame and
+      // cut the last one off.
+      'display:grid',
+      'grid-template-rows:repeat(2, auto)',
+      'grid-auto-flow:column',
+      'gap:2px 3px',
+      'justify-items:start',
+      'align-items:start',
     ].join(';');
     fixed.appendChild(row);
     return row;
@@ -837,7 +846,7 @@
     const row = getButtonRow();
     if (row) {
       // Sit to the left; the iotm button (order 2) lines up to our right.
-      btn.style.order = '1';
+      btn.style.order = '1';       // top of the first column
       btn.style.backgroundColor = 'white';
       row.appendChild(btn);
       return;

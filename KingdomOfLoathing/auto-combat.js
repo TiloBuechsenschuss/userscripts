@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/auto-combat.js
-// @version      0.2
+// @version      0.3
 // @description  Adds an "Auto" button next to the IotM button that opens a small panel: pick a zone, say how many adventures, press Start, and it adventures there for you. Fights are handed to your "Auto-Attack until finished" combat macro when you have one saved, and fall back to attacking round by round when you don't. Choice adventures work like the Twilight Heroes script: the first time one comes up the run pauses and the panel offers its options (annotated with what the zone's wiki page says each does); pick one and it's remembered, and answered by itself from then on. A "remembered choices" list lets you review or forget any of them. Turns are counted from api.php's adventure total rather than from requests sent, and anything it doesn't recognise stops the run rather than guessing. First zone: The Haunted Bedroom.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -1249,8 +1249,9 @@
 
   // Shared button row under the edit icon, created by whichever of the menu
   // scripts runs first; each claims its slot with CSS `order`, so the
-  // left-to-right arrangement doesn't depend on load order. (Checklist is 1,
-  // IotM is 2 -- see iotm.js's copy of this function.)
+  // arrangement doesn't depend on load order. The grid is two rows deep and
+  // flows by column, so 1/2 stack in the first column and 3/4 in the second.
+  // (Checklist is 1, IotM is 2 -- see iotm.js's copy of this function.)
   function getButtonRow() {
     let row = document.getElementById('tm-kol-menu-btns');
     if (row) return row;
@@ -1264,9 +1265,16 @@
       'top:31px',
       'left:' + Math.max(0, editLink.offsetLeft) + 'px',
       'z-index:3',
-      'display:flex',
-      'gap:3px',
-      'align-items:flex-start',
+      // Two rows, filled top-to-bottom and only then left-to-right: `order` 1
+      // and 2 land in the first column, 3 and 4 in the second, so four buttons
+      // make a 2x2 block. A single strip of four overflowed the menu frame and
+      // cut the last one off.
+      'display:grid',
+      'grid-template-rows:repeat(2, auto)',
+      'grid-auto-flow:column',
+      'gap:2px 3px',
+      'justify-items:start',
+      'align-items:start',
     ].join(';');
     fixed.appendChild(row);
     return row;
@@ -1321,7 +1329,7 @@
     const btn = makeButton();
     const row = getButtonRow();
     if (row) {
-      btn.style.order = '3';       // right of checklist (1) and IotM (2)
+      btn.style.order = '3';       // top of the second column, right of IotM (2)
       row.appendChild(btn);
       return;
     }

@@ -79,6 +79,17 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   filter categories by **matching text in the `<option>` label**, never by item ID; the Mr. Store
   (IotM) bucket therefore matches each gem by its item name *or* its enchantment, since it isn't
   verified in-game which of the two KoL renders there.
+- **The shared menu button row** (`#tm-kol-menu-btns`) is the one piece of markup four
+  scripts co-own: `daily-checklist.js`, `iotm.js`, `auto-combat.js` and `quest-helper.js` each
+  carry an identical copy of `getButtonRow()`, and whichever runs first creates it. Each button
+  claims a fixed slot with CSS **`order`** (checklist 1, IotM 2, Auto 3, Mer-kin 4), which is
+  what makes the arrangement independent of load order. The container is a **two-row grid with
+  `grid-auto-flow: column`**, so the slots read *down* the first column and then down the
+  second — a 2x2 block rather than one strip, because four buttons in a row ran off the right
+  edge of the menu frame and cut the last one off. The four copies must stay byte-identical:
+  edit one and the layout starts depending on which script loaded first. Each script also has
+  a text-mode-topmenu fallback that inserts its button after the previous script's (by id) or
+  after the plain `edit` link when `#fixedawesome` isn't there at all.
 - `quest-helper.js` is the other `choice.php` script: a small registry of puzzle answers
   (`PUZZLES`, keyed by `whichchoice`) with a UI bar injected only when a matching choice is
   on screen. It deliberately **never submits** — each entry's button only fills the form in,
@@ -230,8 +241,8 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   **Report** — a bar on the scroll (which fills in only the words it can name, and leaves
   "Read Aloud" to the player), a `catalog` bar on Playing the Catalog Card (choice 704) saying
   which of the library's three words are still outstanding and, learned per ascension, which
-  book button gave which, and a **`Mer-kin` button in the shared menu row** (`order:4`, right
-  of Auto) opening the tracker anywhere — the clue tracker is wanted between visits, not only
+  book button gave which, and a **`Mer-kin` button in the shared menu row** (`order:4`, under
+  Auto in the second column) opening the tracker anywhere — the clue tracker is wanted between visits, not only
   when the scroll is open. That is why the file now also matches `topmenu`/`awesomemenu`; the
   panel renders into the *mainpane* document like auto-combat.js's, which is why every render
   helper takes its document as an argument.
@@ -354,8 +365,8 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   returned promise now, because this feature is async and try/catch alone would let a
   rejection escape.
 
-- `auto-combat.js` adds an "Auto" button to the shared menu button row (`order:3`, right of
-  the checklist and IotM) opening a panel that adventures a chosen zone for a chosen number of
+- `auto-combat.js` adds an "Auto" button to the shared menu button row (`order:3`, top of the
+  second column) opening a panel that adventures a chosen zone for a chosen number of
   turns. One zone so far (The Haunted Bedroom); the machinery is finished, the zone list isn't.
   It runs in the **menu frame** and talks to the server with `fetch`, rather than navigating a
   frame the way `TwilightHeroes/auto-combat.js` does — the topmenu frame is the only one that
