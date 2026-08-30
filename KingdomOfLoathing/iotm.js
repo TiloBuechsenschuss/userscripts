@@ -611,9 +611,11 @@
   // absolutely-positioned grid container (created by whichever runs first) and
   // claim their slot with CSS `order` -- making the arrangement independent of
   // DOM insertion order / which script loads first. The grid is two rows deep
-  // and flows by column, so the four slots read 1/2 down the first column and
-  // 3/4 down the second. Returns the row, or null in text-mode topmenu where
-  // #fixedawesome is absent.
+  // and flows by column, so slots 1 and 2 stack in the first column and a third
+  // would start a second column rather than widening the strip. Two scripts use
+  // it now (checklist 1, IotM 2); Auto and Mer-kin moved to the charpane when
+  // four buttons ran off the right edge of the menu frame. Returns the row, or
+  // null in text-mode topmenu where #fixedawesome is absent.
   function getButtonRow() {
     let row = document.getElementById('tm-kol-menu-btns');
     if (row) return row;
@@ -630,10 +632,9 @@
       'top:31px',
       'left:' + Math.max(0, editLink.offsetLeft) + 'px',
       'z-index:3',
-      // Two rows, filled top-to-bottom and only then left-to-right: `order` 1
-      // and 2 land in the first column, 3 and 4 in the second, so four buttons
-      // make a 2x2 block. A single strip of four overflowed the menu frame and
-      // cut the last one off.
+      // Two rows, filled top-to-bottom and only then left-to-right, so the
+      // buttons stack instead of forming an ever-wider strip -- the strip is
+      // what ran off the right edge of the menu frame.
       'display:grid',
       'grid-template-rows:repeat(2, auto)',
       'grid-auto-flow:column',

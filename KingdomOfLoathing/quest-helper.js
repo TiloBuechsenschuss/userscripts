@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/quest-helper.js
-// @version      1.8
-// @description  Helper for puzzle-y quest choice adventures and combat cues. It never submits or clicks anything on its own -- it fills in, highlights or explains the known-correct answer and leaves the actual move to you. Currently: Drawn Onward (choice 872), the photo frames in Dr. Awkward's office, sets the four photo dropdowns to the correct order; Beginning at the Beginning of Beginning (the Hidden Temple tile floor, tiles.php) glows the tile to step on in each row, spelling B-A-N-A-N-A-S from the bottom up, numbered in step order; Control Freak (choice 929), the pyramid control room, tracks the Lower Chambers rotation and tells you how many more times to turn the wheel, when to go down instead, and when to stop turning. Talk to Sven Golly (pandamonium.php?action=sven) gets an overview of the band -- who craves and hates what, which of the six items each one accepts, which of those you're carrying and where the rest drop -- plus a button per give that fills the dropdowns. On fight.php it watches the combat text for the one round where a move only works right now: a Junkyard gremlin presenting Yossarian's tool (use the molybdenum magnet) and a raver pulling his special dance move (cast Gothy Handwave), highlighting the message and offering to pick the item/skill in the dropdown for you. In the Mer-kin Colosseum it reads the gladiator's telegraph and names the skill that counters it -- Net Gain/Loss/Neutrality, Blade Sling/Roller/Runner or Ball Bust/Sweat/Sack -- says which of the three gladiatorial weapons this opponent needs, and warns when the one you are holding is the wrong one. For the scholar path it tracks the Mer-kin dreadscroll: the eight prophecy words are filed automatically from the pages that print them (the library card catalogue, a healscroll or killscroll in combat, a knucklebone, Deep Dark Visions, sushi with worktea), each failed reading is scored from the length of the Deep-Tainted Mind it cost and fed into a solver, and a "Mer-kin" button in the menu row opens the tracker anywhere. On the scroll itself it fills in every word it can name and leaves "Read Aloud" to you. Also reads the 8-Bit Realm Score in the charpane and turns its colour into a link to the zone that is currently paying double, with what to boost there.
+// @version      1.9
+// @description  Helper for puzzle-y quest choice adventures and combat cues. It never submits or clicks anything on its own -- it fills in, highlights or explains the known-correct answer and leaves the actual move to you. Currently: Drawn Onward (choice 872), the photo frames in Dr. Awkward's office, sets the four photo dropdowns to the correct order; Beginning at the Beginning of Beginning (the Hidden Temple tile floor, tiles.php) glows the tile to step on in each row, spelling B-A-N-A-N-A-S from the bottom up, numbered in step order; Control Freak (choice 929), the pyramid control room, tracks the Lower Chambers rotation and tells you how many more times to turn the wheel, when to go down instead, and when to stop turning. Talk to Sven Golly (pandamonium.php?action=sven) gets an overview of the band -- who craves and hates what, which of the six items each one accepts, which of those you're carrying and where the rest drop -- plus a button per give that fills the dropdowns. On fight.php it watches the combat text for the one round where a move only works right now: a Junkyard gremlin presenting Yossarian's tool (use the molybdenum magnet) and a raver pulling his special dance move (cast Gothy Handwave), highlighting the message and offering to pick the item/skill in the dropdown for you. In the Mer-kin Colosseum it reads the gladiator's telegraph and names the skill that counters it -- Net Gain/Loss/Neutrality, Blade Sling/Roller/Runner or Ball Bust/Sweat/Sack -- says which of the three gladiatorial weapons this opponent needs, and warns when the one you are holding is the wrong one. For the scholar path it tracks the Mer-kin dreadscroll: the eight prophecy words are filed automatically from the pages that print them (the library card catalogue, a healscroll or killscroll in combat, a knucklebone, Deep Dark Visions, sushi with worktea), each failed reading is scored from the length of the Deep-Tainted Mind it cost and fed into a solver, and a "Mer-kin" button in the charpane, under the Current Quest block, opens the tracker anywhere. On the scroll itself it fills in every word it can name and leaves "Read Aloud" to you. Also reads the 8-Bit Realm Score in the charpane and turns its colour into a link to the zone that is currently paying double, with what to boost there.
 // @match        https://www.kingdomofloathing.com/choice.php*
 // @match        https://kingdomofloathing.com/choice.php*
 // @match        https://www.kingdomofloathing.com/fight.php*
@@ -25,10 +25,6 @@
 // @match        https://kingdomofloathing.com/runskillz.php*
 // @match        https://www.kingdomofloathing.com/sushi.php*
 // @match        https://kingdomofloathing.com/sushi.php*
-// @match        https://www.kingdomofloathing.com/topmenu.php*
-// @match        https://kingdomofloathing.com/topmenu.php*
-// @match        https://www.kingdomofloathing.com/awesomemenu.php*
-// @match        https://kingdomofloathing.com/awesomemenu.php*
 // @run-at       document-idle
 // @grant        none
 // ==/UserScript==
@@ -46,18 +42,14 @@
   // combat cues, which aren't puzzles either but are the same shape: the answer is
   // knowable from the page and the game doesn't say it out loud. pandamonium.php
   // is here for Sven Golly's band, which is a puzzle with its own endpoint --
-  // no whichchoice, so it gates on its own form being present. The rest are the
-  // Mer-kin dreadscroll's doing: its clue words are printed by an item
-  // use (inv_use/inventory), a skill cast (runskillz) and a plate of sushi, and
-  // the tracker itself hangs off a button in the menu frame.
-  if (!/\/(choice|tiles|adventure|charpane|fight|pandamonium|inv_use|inventory|runskillz|sushi|topmenu|awesomemenu)\.php/i
+  // no whichchoice, so it gates on its own form being present. The last four
+  // are the Mer-kin dreadscroll's doing: its clue words are printed by an item
+  // use (inv_use/inventory), a skill cast (runskillz) and a plate of sushi.
+  if (!/\/(choice|tiles|adventure|charpane|fight|pandamonium|inv_use|inventory|runskillz|sushi)\.php/i
     .test(location.pathname)) {
     return;
   }
-  // The menu frame gets the Mer-kin button and nothing else, so the bar's guard
-  // (and everything else below) does not apply there.
-  const ON_MENU = /\/(topmenu|awesomemenu)\.php/i.test(location.pathname);
-  if (!ON_MENU && document.getElementById('tm-questhelper-bar')) return; // idempotency guard
+  if (document.getElementById('tm-questhelper-bar')) return; // idempotency guard
 
   // NOTE on styling: KoL's Content-Security-Policy allows inline style ATTRIBUTES
   // (the game uses them everywhere) but blocks script-injected stylesheets, so CSS
@@ -2915,49 +2907,26 @@
     },
   };
 
-  // === the menu button and its panel =======================================
+  // === the charpane button and its panel ===================================
   //
   // The clue tracker is wanted BETWEEN visits to the scroll -- while deciding
   // whether another trip to the library is worth an adventure, or whether to
   // burn a killscroll on this Mer-kin -- so it cannot live only on choice 703.
-  // It gets a button in the shared menu row, like auto-combat.js's, and opens
-  // the same tracker body there.
+  // It gets a button in the CHARPANE, under the Current Quest block, which is
+  // both where you are already looking for quest state and somewhere with room
+  // (the menu frame's one strip of space ran out at four buttons).
   //
-  // Two things follow from running in the menu frame. The panel is drawn into
-  // the MAINPANE document (the menu frame is a few pixels tall and would clip
-  // it), which is why everything above takes its document as an argument. And
-  // localStorage is per-origin, so the clues filed away by the copy of this
-  // script running in the mainpane are the same ones read here.
+  // The charpane is torn down and rebuilt on most turns, which costs nothing
+  // here: the button owns no state, the tracker lives in localStorage, and this
+  // script runs afresh on every charpane load and re-injects it (the id guard
+  // makes that a no-op when one is already up).
+  //
+  // The PANEL is drawn into the MAINPANE document instead -- the sidebar is
+  // about 140px wide and would clip it -- which is why every render helper
+  // above takes its document as an argument rather than using the ambient one.
 
   const MERKIN_BUTTON_ID = 'tm-merkin-btn';
   const MERKIN_PANEL_ID = 'tm-merkin-panel';
-
-  // Shared button row under the edit icon, created by whichever of the menu
-  // scripts runs first; each claims its slot with CSS `order`, so the
-  // arrangement doesn't depend on load order. The grid is two rows deep and
-  // flows by column, so 1/2 stack in the first column and 3/4 in the second.
-  // (Checklist is 1, IotM 2, Auto 3 -- see auto-combat.js's copy.)
-  function menuButtonRow() {
-    let row = document.getElementById('tm-kol-menu-btns');
-    if (row) return row;
-    const fixed = document.getElementById('fixedawesome');
-    const editLink = document.querySelector('#fixedawesome a.config');
-    if (!fixed || !editLink) return null;
-    row = document.createElement('div');
-    row.id = 'tm-kol-menu-btns';
-    row.style.cssText = [
-      'position:absolute', 'top:31px', 'left:' + Math.max(0, editLink.offsetLeft) + 'px',
-      'z-index:3',
-      // Two rows, filled top-to-bottom and only then left-to-right: `order` 1
-      // and 2 land in the first column, 3 and 4 in the second, so four buttons
-      // make a 2x2 block. A single strip of four overflowed the menu frame and
-      // cut the last one off.
-      'display:grid', 'grid-template-rows:repeat(2, auto)', 'grid-auto-flow:column',
-      'gap:2px 3px', 'justify-items:start', 'align-items:start',
-    ].join(';');
-    fixed.appendChild(row);
-    return row;
-  }
 
   function merkinPanelDoc() {
     try {
@@ -3069,7 +3038,7 @@
     btn.type = 'button';
     btn.textContent = 'Mer-kin';
     btn.style.cssText = [
-      'padding:0 4px', 'font-size:9px', 'font-family:arial', 'height:22px',
+      'padding:0 5px', 'font-size:10px', 'font-family:arial', 'height:18px',
       'cursor:pointer', 'white-space:nowrap', 'background-color:white',
     ].join(';');
     btn.addEventListener('click', () => {
@@ -3078,31 +3047,37 @@
       else openMerkinPanel();
     });
 
-    const row = menuButtonRow();
-    if (row) {
-      btn.style.order = '4'; // under Auto (3), in the second column
-      row.appendChild(btn);
-      syncMerkinButton();
-      return;
-    }
+    placeMerkinButton(btn);
+    syncMerkinButton();
+  }
 
-    // Text-mode topmenu fallback, same ladder auto-combat.js walks down.
-    const anchor = document.getElementById('tm-autocombat-btn') ||
-      document.getElementById('tm-iotm-btn') ||
-      document.getElementById('tm-checklist-btn');
-    if (anchor) {
-      anchor.insertAdjacentElement('afterend', btn);
-      syncMerkinButton();
-      return;
-    }
-    for (const a of document.querySelectorAll('a')) {
-      const t = a.textContent.trim().toLowerCase().replace(/^\[|\]$/g, '');
-      if (t === 'edit') {
-        a.insertAdjacentElement('afterend', btn);
-        syncMerkinButton();
-        return;
-      }
-    }
+  // Where the button goes, in the charpane's own terms. `#nudgeblock` is the
+  // "Current Quest:" block -- the questlog link, then a scrolling list of
+  // nudges -- and KoL emits it under that id in BOTH the compact and the
+  // expanded pane, so one anchor covers both. (Markup from KoLmafia's charpane
+  // fixtures, test_charpane_basic.html / test_charpane_compact.html.)
+  // Appending to it puts us below the nudge list, which is what "under the
+  // current quest" means on screen.
+  //
+  // Each step falls through to the next and the last one always works: an
+  // unrecognised charpane still gets a usable button rather than none.
+  function placeMerkinButton(btn) {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'text-align:center;margin:2px 0';
+    wrap.appendChild(btn);
+
+    const nudge = document.getElementById('nudgeblock');
+    if (nudge) { nudge.appendChild(wrap); return; }
+
+    // No id (an older pane, or one KoL has since changed): find the label.
+    const label = Array.from(document.querySelectorAll('a'))
+      .find((a) => /current quest/i.test(a.textContent || ''));
+    const block = label && label.closest && label.closest('center');
+    if (block) { block.appendChild(wrap); return; }
+
+    console.warn('Quest helper: no current-quest block in the charpane, ' +
+                 'placing the Mer-kin button at the bottom of the sidebar.');
+    if (document.body) document.body.appendChild(wrap);
   }
 
   const HANDLERS = {
@@ -3374,14 +3349,6 @@
     return { bar, say };
   }
 
-  // The menu frame is not a puzzle page at all -- it carries the Mer-kin
-  // dreadscroll button and nothing else -- so it dispatches here, and so does
-  // the charpane below it.
-  if (ON_MENU) {
-    addMerkinButton();
-    return;
-  }
-
   // A dreadscroll clue word can turn up on any of half a dozen unrelated pages,
   // so this runs on every one of them and before anything else. It only reads
   // the page and files what it finds; a failure here must not take the puzzle
@@ -3393,10 +3360,23 @@
   }
 
   // The charpane is a different page with a different job: no puzzle can be on
-  // it, and the 8-Bit box brings its own markup rather than the bar's, so it
-  // dispatches here and nothing below applies.
+  // it, and both of the things it does carry -- the 8-Bit box and the Mer-kin
+  // button -- bring their own markup rather than the bar's, so it dispatches
+  // here and nothing below applies.
   if (/\/charpane\.php/i.test(location.pathname)) {
-    showEightBit();
+    // Two unrelated features sharing one branch, so they get one try/catch
+    // each: a charpane KoL has changed under one of them must not cost you the
+    // other. Same rule as ux-enhancers.js's FEATURES registry.
+    try {
+      showEightBit();
+    } catch (e) {
+      console.error('Quest helper: could not read the 8-Bit Realm score.', e);
+    }
+    try {
+      addMerkinButton();
+    } catch (e) {
+      console.error('Quest helper: could not add the Mer-kin button.', e);
+    }
     return;
   }
 

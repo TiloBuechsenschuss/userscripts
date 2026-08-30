@@ -79,17 +79,27 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   filter categories by **matching text in the `<option>` label**, never by item ID; the Mr. Store
   (IotM) bucket therefore matches each gem by its item name *or* its enchantment, since it isn't
   verified in-game which of the two KoL renders there.
-- **The shared menu button row** (`#tm-kol-menu-btns`) is the one piece of markup four
-  scripts co-own: `daily-checklist.js`, `iotm.js`, `auto-combat.js` and `quest-helper.js` each
-  carry an identical copy of `getButtonRow()`, and whichever runs first creates it. Each button
-  claims a fixed slot with CSS **`order`** (checklist 1, IotM 2, Auto 3, Mer-kin 4), which is
-  what makes the arrangement independent of load order. The container is a **two-row grid with
-  `grid-auto-flow: column`**, so the slots read *down* the first column and then down the
-  second — a 2x2 block rather than one strip, because four buttons in a row ran off the right
-  edge of the menu frame and cut the last one off. The four copies must stay byte-identical:
-  edit one and the layout starts depending on which script loaded first. Each script also has
-  a text-mode-topmenu fallback that inserts its button after the previous script's (by id) or
-  after the plain `edit` link when `#fixedawesome` isn't there at all.
+- **The shared menu button row** (`#tm-kol-menu-btns`) is a piece of markup two scripts
+  co-own: `daily-checklist.js` and `iotm.js` each carry an identical copy of `getButtonRow()`,
+  and whichever runs first creates it. Each button claims a fixed slot with CSS **`order`**
+  (checklist 1, IotM 2), which is what makes the arrangement independent of load order. The
+  container is a **two-row grid with `grid-auto-flow: column`**, so buttons stack downwards
+  rather than widening the strip. The copies must stay byte-identical: edit one and the layout
+  starts depending on which script loaded first. Each also has a text-mode-topmenu fallback
+  that inserts its button after the other's (by id) or after the plain `edit` link when
+  `#fixedawesome` isn't there at all.
+  **The menu frame is small, and it filled up.** A fourth button ran off its right edge, so
+  `auto-combat.js` and `quest-helper.js` moved theirs to the **charpane** instead, each under
+  the sidebar block it belongs to — Auto under Last Adventure, Mer-kin under Current Quest.
+  Both hang off KoL's own markup, taken from KoLmafia's charpane fixtures
+  (`test_charpane_basic.html` / `test_charpane_compact.html`), and both cover the *compact*
+  and *expanded* panes, which are laid out differently: the quest block is `#nudgeblock` in
+  both, but "Last Adventure:" is its own `<center>` only in the expanded pane — compact hangs
+  the zone off the stats table's `Adv:` row in a `#lastadvmenu` hover menu, so the button goes
+  after that table instead. Every placement falls through to a last resort that always works,
+  because an unrecognised charpane should still get a usable button rather than none. Note the
+  charpane is **rebuilt on most turns**, so a charpane button must be re-injected on every load
+  (the id guard makes that a no-op) and must own no state.
 - `quest-helper.js` is the other `choice.php` script: a small registry of puzzle answers
   (`PUZZLES`, keyed by `whichchoice`) with a UI bar injected only when a matching choice is
   on screen. It deliberately **never submits** — each entry's button only fills the form in,
@@ -241,11 +251,12 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   **Report** — a bar on the scroll (which fills in only the words it can name, and leaves
   "Read Aloud" to the player), a `catalog` bar on Playing the Catalog Card (choice 704) saying
   which of the library's three words are still outstanding and, learned per ascension, which
-  book button gave which, and a **`Mer-kin` button in the shared menu row** (`order:4`, under
-  Auto in the second column) opening the tracker anywhere — the clue tracker is wanted between visits, not only
-  when the scroll is open. That is why the file now also matches `topmenu`/`awesomemenu`; the
-  panel renders into the *mainpane* document like auto-combat.js's, which is why every render
-  helper takes its document as an argument.
+  book button gave which, and a **`Mer-kin` button in the charpane**, under the Current Quest
+  block, opening the tracker anywhere — the clue tracker is wanted between visits, not only
+  when the scroll is open. The button is stateless (the tracker is in `localStorage`) so the
+  charpane rebuilding on every turn costs nothing; the *panel* renders into the **mainpane**
+  document, because the sidebar is ~140px wide and would clip it, and that is why every render
+  helper takes its document as an argument rather than using the ambient one.
   The picks are stashed on the way out of "Read Aloud" and scored on the next page load —
   the same hook-the-navigating-option pattern as the pyramid's descend option, and for the
   same reason: the result page no longer carries the form.
@@ -365,11 +376,18 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   returned promise now, because this feature is async and try/catch alone would let a
   rejection escape.
 
-- `auto-combat.js` adds an "Auto" button to the shared menu button row (`order:3`, top of the
-  second column) opening a panel that adventures a chosen zone for a chosen number of
+- `auto-combat.js` adds an "Auto" button to the **charpane**, under the Last Adventure
+  readout, opening a panel that adventures a chosen zone for a chosen number of
   turns. One zone so far (The Haunted Bedroom); the machinery is finished, the zone list isn't.
-  It runs in the **menu frame** and talks to the server with `fetch`, rather than navigating a
-  frame the way `TwilightHeroes/auto-combat.js` does — the topmenu frame is the only one that
+  It is deliberately a **two-frame script**: the button is in the charpane but the engine runs
+  in the **menu frame**, and the only thing crossing between them is a small object the menu
+  half publishes as `window.tmAutoCombat` (`toggle()` / `state()`). The charpane half owns no
+  state and looks that object up *per click* rather than caching it — the menu frame outlives
+  the charpane but not the reverse, so a captured reference to a torn-down frame would be worse
+  than none — and if it can't find an engine it says so rather than silently doing nothing.
+  The engine reaches the other way through `buttonEl()` to keep the label in step with the run,
+  failing quiet when the charpane is mid-reload. It talks to the server with `fetch`, rather
+  than navigating a frame the way `TwilightHeroes/auto-combat.js` does — the topmenu frame is the only one that
   isn't torn down while you adventure, so it's the only place a driver loop can live. That's
   what lets the run survive the player clicking around in the mainpane, and it's why `RUN` is
   module-scope while the panel (rendered into the mainpane document, as `iotm.js`'s popup is)

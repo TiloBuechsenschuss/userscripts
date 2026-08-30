@@ -3,12 +3,14 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/auto-combat.js
-// @version      0.3
-// @description  Adds an "Auto" button next to the IotM button that opens a small panel: pick a zone, say how many adventures, press Start, and it adventures there for you. Fights are handed to your "Auto-Attack until finished" combat macro when you have one saved, and fall back to attacking round by round when you don't. Choice adventures work like the Twilight Heroes script: the first time one comes up the run pauses and the panel offers its options (annotated with what the zone's wiki page says each does); pick one and it's remembered, and answered by itself from then on. A "remembered choices" list lets you review or forget any of them. Turns are counted from api.php's adventure total rather than from requests sent, and anything it doesn't recognise stops the run rather than guessing. First zone: The Haunted Bedroom.
+// @version      0.4
+// @description  Adds an "Auto" button to the charpane, under the Last Adventure readout, that opens a small panel: pick a zone, say how many adventures, press Start, and it adventures there for you. Fights are handed to your "Auto-Attack until finished" combat macro when you have one saved, and fall back to attacking round by round when you don't. Choice adventures work like the Twilight Heroes script: the first time one comes up the run pauses and the panel offers its options (annotated with what the zone's wiki page says each does); pick one and it's remembered, and answered by itself from then on. A "remembered choices" list lets you review or forget any of them. Turns are counted from api.php's adventure total rather than from requests sent, and anything it doesn't recognise stops the run rather than guessing. First zone: The Haunted Bedroom.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
 // @match        https://www.kingdomofloathing.com/topmenu.php*
 // @match        https://kingdomofloathing.com/topmenu.php*
+// @match        https://www.kingdomofloathing.com/charpane.php*
+// @match        https://kingdomofloathing.com/charpane.php*
 // @grant        none
 
 // ==/UserScript==
@@ -17,11 +19,17 @@
   'use strict';
 
   // Bundled-loader safety: the all-in-one loader @requires every KoL script and
-  // runs them on the union of all matched pages. Guard our own page(s)
-  // explicitly, or the button would be dropped into sibling frames (charpane,
-  // mainpane, ...). A no-op for the standalone install, whose @match already
-  // scopes it here.
-  if (!/\/(awesomemenu|topmenu)\.php/i.test(location.pathname)) return;
+  // runs them on the union of all matched pages. Guard our own pages
+  // explicitly, or this would be dropped into the mainpane too. A no-op for the
+  // standalone install, whose @match already scopes it here.
+  //
+  // TWO pages, and the halves they run are different: the engine lives in the
+  // menu frame (see the block comment below) and the button lives in the
+  // charpane (see "the charpane button" near the bottom). Everything in between
+  // is defined on both and used by whichever half needs it.
+  const ON_MENU = /\/(awesomemenu|topmenu)\.php/i.test(location.pathname);
+  const ON_CHARPANE = /\/charpane\.php/i.test(location.pathname);
+  if (!ON_MENU && !ON_CHARPANE) return;
 
   // ===================================================================
   // WHY THIS RUNS IN THE MENU FRAME
@@ -45,6 +53,13 @@
   // by re-submitting the real forms and letting the page reload each round. TH
   // is a plain-page game with no frame that outlives a turn, so it has to work
   // that way; here the menu frame gives us somewhere better to stand.
+  //
+  // The BUTTON, on the other hand, is in the charpane -- the menu frame's one
+  // strip of space ran out at four buttons. That makes this script a two-frame
+  // affair: engine here, button there, and a small published object
+  // (`window.tmAutoCombat`) as the only thing that crosses between them. The
+  // charpane half owns no state, so the charpane reloading mid-run costs
+  // nothing but a repaint.
   // ===================================================================
 
   const ORIGIN = location.origin;
@@ -1056,13 +1071,21 @@
 
     d.body.appendChild(pop);
 
-    // Anchor under the button. The menu frame and the mainpane share the
-    // window's left origin, so the button's x maps across; pin near the top.
-    const r = anchorBtn.getBoundingClientRect();
-    let left = r.left - pop.offsetWidth + r.width;
-    if (left < 2) left = 2;
-    pop.style.left = left + 'px';
-    pop.style.top = '4px';
+    // Anchor under the button when the click came from a button in THIS
+    // frame. It no longer usually does -- the button is in the charpane, whose
+    // left origin is not the mainpane's, so its rect would place the panel
+    // somewhere meaningless. No anchor, no guess: a fixed corner instead.
+    const r = anchorBtn && anchorBtn.getBoundingClientRect ?
+      anchorBtn.getBoundingClientRect() : null;
+    if (r) {
+      let left = r.left - pop.offsetWidth + r.width;
+      if (left < 2) left = 2;
+      pop.style.left = left + 'px';
+      pop.style.top = '4px';
+    } else {
+      pop.style.left = '20px';
+      pop.style.top = '20px';
+    }
 
     // Close on Escape only. An outside-click close (iotm.js's rule) is wrong
     // here: the panel is the only view of a run in progress -- and the only way
@@ -1245,52 +1268,69 @@
     d.body.appendChild(pop);
   }
 
-  // --- the menu button --------------------------------------------------
+  // --- the charpane button ----------------------------------------------
+  //
+  // The button sits in the CHARPANE, under the Last Adventure readout, while
+  // the engine above stays in the menu frame. That split exists because four
+  // buttons crowded into the menu frame's one strip ran off its right edge --
+  // the sidebar has room and is where you are already looking mid-run.
+  //
+  // It means the two halves are in different frames, and the charpane is torn
+  // down and rebuilt on most turns while the menu frame is not. So:
+  //
+  //   - the charpane copy of this script re-injects the button on every
+  //     charpane load (the id guard makes that a no-op if one is already up);
+  //   - it owns no state at all. Clicking it looks the engine up across the
+  //     frames and calls into it, so a stale button cannot drive a dead engine;
+  //   - the engine reaches the other way through `buttonEl()` to keep the
+  //     button's label in step with the run, and fails quiet when the charpane
+  //     is mid-reload and there is no button to update.
 
-  // Shared button row under the edit icon, created by whichever of the menu
-  // scripts runs first; each claims its slot with CSS `order`, so the
-  // arrangement doesn't depend on load order. The grid is two rows deep and
-  // flows by column, so 1/2 stack in the first column and 3/4 in the second.
-  // (Checklist is 1, IotM is 2 -- see iotm.js's copy of this function.)
-  function getButtonRow() {
-    let row = document.getElementById('tm-kol-menu-btns');
-    if (row) return row;
-    const fixed = document.getElementById('fixedawesome');
-    const editLink = document.querySelector('#fixedawesome a.config');
-    if (!fixed || !editLink) return null;
-    row = document.createElement('div');
-    row.id = 'tm-kol-menu-btns';
-    row.style.cssText = [
-      'position:absolute',
-      'top:31px',
-      'left:' + Math.max(0, editLink.offsetLeft) + 'px',
-      'z-index:3',
-      // Two rows, filled top-to-bottom and only then left-to-right: `order` 1
-      // and 2 land in the first column, 3 and 4 in the second, so four buttons
-      // make a 2x2 block. A single strip of four overflowed the menu frame and
-      // cut the last one off.
-      'display:grid',
-      'grid-template-rows:repeat(2, auto)',
-      'grid-auto-flow:column',
-      'gap:2px 3px',
-      'justify-items:start',
-      'align-items:start',
-    ].join(';');
-    fixed.appendChild(row);
-    return row;
+  const MENU_API = 'tmAutoCombat';
+
+  // The engine's half, wherever it is. Looked up per click rather than cached:
+  // the menu frame outlives the charpane, but not the other way round, and a
+  // captured reference to a torn-down frame is worse than no reference.
+  function engine() {
+    const wins = [];
+    try { wins.push(top.frames['topmenu']); } catch (e) { /* not reachable */ }
+    try { wins.push(top.frames['awesomemenu']); } catch (e) { /* not reachable */ }
+    try { Array.prototype.push.apply(wins, Array.prototype.slice.call(top.frames)); }
+    catch (e) { /* not reachable */ }
+    for (const w of wins) {
+      try { if (w && w[MENU_API]) return w[MENU_API]; } catch (e) { /* cross-origin */ }
+    }
+    return null;
+  }
+
+  // The button, whichever frame this copy of the script is running in. The
+  // engine calls this from the menu frame, so it has to cross into the
+  // charpane -- and tolerate the charpane not being there.
+  function buttonEl() {
+    if (ON_CHARPANE) return document.getElementById(BUTTON_ID);
+    try {
+      const cp = top.frames['charpane'];
+      return (cp && cp.document && cp.document.getElementById(BUTTON_ID)) || null;
+    } catch (e) {
+      return null;
+    }
   }
 
   // The button doubles as the run's only indicator once the panel is closed --
   // which matters most when the run is parked on a choice, since it will wait
   // there forever until someone opens the panel and answers.
   function syncButton() {
-    const btn = document.getElementById(BUTTON_ID);
+    const btn = buttonEl();
     if (!btn) return;
-    if (RUN.pending) {
+    paintButton(btn, { active: RUN.active, pending: !!RUN.pending });
+  }
+
+  function paintButton(btn, state) {
+    if (state && state.pending) {
       btn.textContent = 'Auto ❗';
       btn.style.backgroundColor = '#ffd9a0';
       btn.title = 'Auto combat: waiting for you to pick a choice';
-    } else if (RUN.active) {
+    } else if (state && state.active) {
       btn.textContent = 'Auto ▶';
       btn.style.backgroundColor = '#d8f0d8';
       btn.title = 'Auto combat: running';
@@ -1308,54 +1348,107 @@
     btn.title = 'Auto combat';
     btn.textContent = 'Auto';
     btn.style.cssText = [
-      'padding:0 4px',
-      'font-size:9px',
+      'padding:0 5px',
+      'font-size:10px',
       'font-family:arial',
-      'height:22px',
+      'height:18px',
       'cursor:pointer',
       'white-space:nowrap',
       'background-color:white',
     ].join(';');
     btn.addEventListener('click', function () {
-      if (panelEl()) closePanel();
-      else openPanel(btn);
+      const api = engine();
+      if (!api) {
+        // Honest failure. A button that silently does nothing would read as a
+        // broken run rather than as a script that isn't loaded where it needs
+        // to be.
+        const w = window.alert ? window : (document.defaultView || window);
+        w.alert('Auto Combat isn\'t running in the menu frame, so there is no ' +
+          'engine for this button to talk to. Reload the game (F5) -- and check ' +
+          'the script is enabled on topmenu.php / awesomemenu.php.');
+        return;
+      }
+      api.toggle();
+      // The engine repaints from its own side too, but only once it has done
+      // something; do it now so the click feels connected.
+      const btnNow = document.getElementById(BUTTON_ID);
+      if (btnNow) paintButton(btnNow, api.state());
     });
     return btn;
   }
 
+  // Where the button goes, in the charpane's own terms. Both panes are
+  // covered, and they are laid out differently:
+  //
+  //   expanded -- "Last Adventure:" is its own <center> block, label then a
+  //               one-row table with the zone link. We append inside it.
+  //   compact  -- there is no such block; the last adventure is the "Adv:" row
+  //               of the stats table, with the zone in a hover menu
+  //               (#lastadvmenu). We go straight after that table, which puts
+  //               us in the same place on screen.
+  //
+  // Both markups are KoL's own, from KoLmafia's charpane fixtures
+  // (test_charpane_basic.html / test_charpane_compact.html). Each step falls
+  // through to the next, and the last one always works, so an unrecognised
+  // charpane still gets a usable button rather than none.
+  function placeCharpaneButton(btn) {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'text-align:center;margin:2px 0';
+    wrap.appendChild(btn);
+
+    // Expanded: the "Last Adventure:" block.
+    const anchors = Array.from(document.querySelectorAll('a'));
+    const label = anchors.find((a) => /^\s*last adventure/i.test(a.textContent || ''));
+    const block = label && label.closest && label.closest('center');
+    if (block) { block.appendChild(wrap); return; }
+
+    // Compact: after the stats table that carries the "Adv:" row.
+    const menu = document.getElementById('lastadvmenu');
+    const table = menu && menu.closest && menu.closest('table');
+    if (table && table.parentNode) {
+      table.insertAdjacentElement('afterend', wrap);
+      return;
+    }
+
+    // Neither shape found. The quest block is the next thing down the pane, so
+    // sitting just above it is still roughly where we meant to be.
+    const nudge = document.getElementById('nudgeblock');
+    if (nudge && nudge.parentNode) {
+      nudge.parentNode.insertBefore(wrap, nudge);
+      return;
+    }
+
+    console.warn('Auto Combat: no last-adventure block in the charpane, ' +
+                 'placing button at the top of the sidebar.');
+    document.body.insertBefore(wrap, document.body.firstChild);
+  }
+
   function addButton() {
     if (document.getElementById(BUTTON_ID)) return;   // idempotency guard
-
+    if (!document.body) return;
     const btn = makeButton();
-    const row = getButtonRow();
-    if (row) {
-      btn.style.order = '3';       // top of the second column, right of IotM (2)
-      row.appendChild(btn);
-      return;
-    }
+    placeCharpaneButton(btn);
+    const api = engine();
+    if (api) paintButton(btn, api.state());
+  }
 
-    // Text-mode topmenu fallback: sit after the IotM button if it's there, else
-    // after the checklist button, else after a plain "edit" link.
-    const anchor = document.getElementById('tm-iotm-btn') ||
-                   document.getElementById('tm-checklist-btn');
-    if (anchor) {
-      anchor.insertAdjacentElement('afterend', btn);
-      return;
-    }
-    for (const a of document.querySelectorAll('a')) {
-      const t = a.textContent.trim().toLowerCase().replace(/^\[|\]$/g, '');
-      if (t === 'edit') {
-        a.insertAdjacentElement('afterend', btn);
-        return;
-      }
-    }
-
-    console.warn('Auto Combat: no anchor point found, ' +
-                 'placing button at top of frame.');
-    document.body.insertBefore(btn, document.body.firstChild);
+  // The engine's half of the contract, published on the menu frame's window so
+  // the charpane copy can reach it. Deliberately tiny: open/close the panel,
+  // and say what the run is doing. Everything else stays in here.
+  function publishEngine() {
+    window[MENU_API] = {
+      toggle: function () {
+        if (panelEl()) closePanel();
+        else openPanel(null);
+      },
+      state: function () {
+        return { active: RUN.active, pending: !!RUN.pending };
+      },
+    };
   }
 
   function bootButton() {
+    if (ON_MENU) { publishEngine(); return; }
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', addButton);
     } else {
