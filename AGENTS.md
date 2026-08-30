@@ -379,7 +379,16 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
 
 - `auto-combat.js` adds an "Auto" button to the **charpane**, under the Last Adventure
   readout, opening a panel that adventures a chosen zone for a chosen number of
-  turns. One zone so far (The Haunted Bedroom); the machinery is finished, the zone list isn't.
+  turns. Two entries: The Haunted Bedroom, and **"wherever I adventured last"** — a `dynamic`
+  registry entry with no url of its own, which `resolveZone` turns into a real zone from
+  `api.php`'s `lastadv` block (falling back to the charpane's own last-adventure link) **once,
+  at the start of the run**. Once and not per turn, because after turn one the last zone *is*
+  this zone, so re-reading it could only let a stray click in the mainpane redirect a run
+  already in flight. Only `adventure.php?snarfblat=N` is accepted — plenty of KoL adventuring
+  goes through `place.php` urls carrying an `action`, and one of those is a door you open once,
+  not a zone you grind — and when the resolved snarfblat matches a registered entry the run
+  gets *that entry*, plan and hints and all, which is why the match is on the snarfblat and not
+  on the name.
   It is deliberately a **two-frame script**: the button is in the charpane but the engine runs
   in the **menu frame**, and the only thing crossing between them is a small object the menu
   half publishes as `window.tmAutoCombat` (`toggle()` / `state()`). The charpane half owns no
@@ -396,8 +405,10 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   reload**: a half-remembered run that restarts itself is worse than one that stops.
   Zone-specific behaviour hangs off a `ZONES` entry — `guard` (refuse/stop before a turn),
   `combat` (per-round policy, returning an action object rather than a URL), `hints`
-  (annotations for the choice prompt), `onResult` (bookkeeping, and the zone's own "we're
-  done" signal). Add a zone as an entry, not as a branch.
+  (annotations for the choice prompt), `plan` (choices answered without asking), `onResult`
+  (bookkeeping, and the zone's own "we're done" signal). Add a zone as an entry, not as a branch.
+  Note the split between the two choice fields: **`hints` never picks anything and `plan`
+  always does**, so wiki knowledge that might be stale belongs in the first.
   Combat defaults to handing the whole fight to a saved combat macro named **"Auto-Attack
   until finished"** (`MACRO_NAMES`, matched case- and punctuation-insensitively against the
   fight page's own `select[name=whichmacro]`, so the id always comes off the page) — KoL runs
@@ -411,6 +422,19 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   and the Stop button wakes the parked promise rather than setting a flag nothing will read.
   `usableRemembered` re-asks when the stored option isn't on offer, which is the normal case
   here: several bedroom options are conditional on equipment or are rare.
+  A zone's **`plan`** is that same decision written down in advance, and it is consulted
+  *before* the remembered pick (it's the more deliberate of the two and the one that gets
+  maintained; a pick remembered from before the zone had a plan shouldn't quietly outrank it).
+  Steps are tried in order and the first one the page is **actually offering** wins — which is
+  how "the ghost key if you have one, otherwise the top drawer" is expressed, since the
+  ghost-key options aren't rendered at all without a key, the same conditional-option fact
+  `usableRemembered` exists for. Every step is checked **twice**, against the option number
+  *and* the button's label: the numbers come from the wiki and the labels come from the page,
+  so a drifted number matches nothing and the run falls through to asking. That failure
+  direction is the point — on the rustic nightstand the button next to the right one starts the
+  jilted mistress fight, the single option in the zone that spends a turn. A step with no
+  `option` matches on the label alone, for a choice whose numbering nobody has written down
+  (Lights Out in the Bedroom, which is why it has a plan step but no `hints`).
   Three rules exist because this spends turns, which don't come back. **Turns spent are
   measured**, from `api.php?what=status`'s adventure total before and after each cycle, never
   counted from requests sent: free fights, the bedroom's free post-combat choices and
@@ -585,8 +609,13 @@ Current tests:
   near-miss, that a remembered option the page isn't offering falls back to asking, and the
   Haunted Bedroom's option numbering — "Ignore it" is option 6 on four nightstands and 4 on the
   fifth, which is why the engine reads the value off the hidden input rather than counting
-  buttons. Note it re-exposes the internals by replacing the single `bootButton();` line; move
-  that line and this test needs the same edit.
+  buttons. It also covers the bedroom's `plan`: that the substat drawers are taken without
+  asking, that the ghost-key step is skipped by *not being on the page* rather than by any
+  inventory check, that the mahogany's bottom drawer and the rustic's jilted mistress are never
+  picked, and both directions of the number/label agreement rule. Plus the last-zone reading:
+  `lastadv` parsing, and that a `place.php` action url is not a grindable zone. Note it
+  re-exposes the internals by replacing the single `bootButton();` line; move that line and
+  this test needs the same edit.
 - `KingdomOfLoathing/test/iotm-cup13-sort.test.mjs` — asserts `iotm.js`'s Cup-of-13s option
   parser and each ingredient sort order (advs / effect / inventory / name). If you touch that
   parsing or the sort comparators, add/adjust a case here.

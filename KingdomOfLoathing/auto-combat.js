@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/auto-combat.js
-// @version      0.4
-// @description  Adds an "Auto" button to the charpane, under the Last Adventure readout, that opens a small panel: pick a zone, say how many adventures, press Start, and it adventures there for you. Fights are handed to your "Auto-Attack until finished" combat macro when you have one saved, and fall back to attacking round by round when you don't. Choice adventures work like the Twilight Heroes script: the first time one comes up the run pauses and the panel offers its options (annotated with what the zone's wiki page says each does); pick one and it's remembered, and answered by itself from then on. A "remembered choices" list lets you review or forget any of them. Turns are counted from api.php's adventure total rather than from requests sent, and anything it doesn't recognise stops the run rather than guessing. First zone: The Haunted Bedroom.
+// @version      0.5
+// @description  Adds an "Auto" button to the charpane, under the Last Adventure readout, that opens a small panel: pick a zone, say how many adventures, press Start, and it adventures there for you. Fights are handed to your "Auto-Attack until finished" combat macro when you have one saved, and fall back to attacking round by round when you don't. Choice adventures work like the Twilight Heroes script: the first time one comes up the run pauses and the panel offers its options (annotated with what the zone's wiki page says each does); pick one and it's remembered, and answered by itself from then on. A "remembered choices" list lets you review or forget any of them. Turns are counted from api.php's adventure total rather than from requests sent, and anything it doesn't recognise stops the run rather than guessing. Two zones: The Haunted Bedroom, whose nightstands are answered from a built-in plan (the drawer with the substats in it, and the ghost key ahead of it where the key is worth more), and "wherever I adventured last", which reads your last adventure from api.php when you press Start and grinds there with the ordinary ask-once-then-remember handling.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
 // @match        https://www.kingdomofloathing.com/topmenu.php*
@@ -120,11 +120,18 @@
   //   key       Stable id. Used in the prefs blob, so don't rename casually.
   //   name      Label in the dropdown.
   //   url       Path that spends the adventure, usually
-  //             'adventure.php?snarfblat=<id>'.
+  //             'adventure.php?snarfblat=<id>'. Absent on a dynamic entry,
+  //             which resolves its own url when the run starts.
+  //   dynamic   Optional. The entry has no fixed zone; resolveZone turns it
+  //             into a real one at the start of each run. Exactly one entry
+  //             uses this (see 'last-zone').
   //   note      Optional one-liner shown under the dropdown.
   //   hints     Optional { whichchoice: { option: 'what it does' } }. Pure
   //             annotation, shown beside each option when the run stops to ask
   //             -- it NEVER picks anything. Wiki knowledge goes here.
+  //   plan      Optional { whichchoice: [ step, ... ] }. Choices answered
+  //             without asking, in preference order. This one DOES pick --
+  //             see "PRE-PICKED CHOICES" below for the rules it picks under.
   //   guard(ctx)     Optional. Called before each turn; return a string to stop
   //                  with that reason, or null to proceed.
   //   combat(ctx)    Optional. Per-round policy returning an ACTION. Falls back
@@ -200,7 +207,81 @@
         },
         // Lights Out in the Bedroom (897) is deliberately absent -- the wiki
         // has no outcomes for its options, so there is nothing honest to say.
+        // It is in the plan below anyway, because "leave" needs no outcome
+        // table to be the right answer.
       },
+      // What to do with each nightstand, decided in advance. Read
+      // "PRE-PICKED CHOICES" first: every step is checked against BOTH the
+      // option number and the button's label, and a disagreement falls
+      // through to asking rather than to guessing.
+      //
+      // These are the stat-farming answers -- the drawer the substats are in,
+      // with the ghost key ahead of it wherever the key is worth more than
+      // any drawer. The key options are listed first and the drawer second
+      // for exactly one reason: those options are not on the page at all
+      // unless you are carrying a key, so the second step is what "if
+      // possible" means here.
+      plan: {
+        // One Simple Nightstand -> bottom drawer (Muscle substats).
+        '876': [
+          { option: '2', match: /bottom drawer/i, why: 'bottom drawer' },
+        ],
+        // One Mahogany Nightstand -> ghost key (Meat), else the top drawer.
+        // Never the bottom one: that is the mouth full of teeth, which costs
+        // HP and gives nothing.
+        '877': [
+          { option: '4', match: /ghost key|unlock/i, why: 'ghost key' },
+          { option: '1', match: /top drawer/i, why: 'top drawer' },
+        ],
+        // One Ornate Nightstand -> bottom drawer (Mysticality substats).
+        '878': [
+          { option: '2', match: /bottom drawer/i, why: 'bottom drawer' },
+        ],
+        // One Rustic Nightstand -> top drawer (Moxie substats). Note what is
+        // NOT here: option 3 starts the jilted mistress fight, the one thing
+        // in this zone that spends a turn.
+        '879': [
+          { option: '1', match: /top drawer/i, why: 'top drawer' },
+        ],
+        // One Elegant Nightstand -> ghost key (100 of each substat), else
+        // leave it alone. The gown is a once-per-ascension drop and the
+        // nightstick is not worth the request.
+        '880': [
+          { option: '3', match: /ghost key|unlock/i, why: 'ghost key' },
+          { option: '6', match: /ignore/i, why: 'ignore it' },
+        ],
+        // Lights Out in the Bedroom: get out, whatever it is offering. This
+        // step carries no option number on purpose -- the wiki documents no
+        // outcomes for this choice, so there is no number to trust, and the
+        // label is the only thing here that is real.
+        //
+        // Anchored at the start of the label, because this has to read as an
+        // instruction to leave and not as a word that happens to appear in
+        // one. "Leave" gets the extra clause for that reason and no other: on
+        // its own or in front of an object it is the exit, but "Leave no
+        // drawer unopened" is the opposite of the exit, and starts the same
+        // way. Anything this doesn't recognise stops and asks, which for a
+        // choice nobody has written down is the right place to end up.
+        '897': [
+          {
+            match: /^\s*(flee|run away|get out|go back|leave\s*[.!]*$|leave\s+(the|this|that|it|them|here)\b)/i,
+            why: 'leave',
+          },
+        ],
+      },
+    },
+    {
+      // "Wherever I adventured last." No url of its own: resolveZone reads
+      // one from api.php's lastadv block when the run starts, and if that
+      // lands on a zone this registry already knows about, the run gets that
+      // entry's plan and hints too. Everything else falls back to the
+      // ask-once-then-remember handling, which is the whole reason this entry
+      // can exist without a table of every zone in the Kingdom behind it.
+      key: 'last-zone',
+      dynamic: true,
+      name: 'Wherever I adventured last',
+      note: 'Reads your last adventure when you press Start, then stays ' +
+            'there. Unfamiliar choices still stop and ask.',
     },
   ];
 
@@ -341,6 +422,55 @@
     if (!known || !known.option) return null;
     const opt = String(known.option);
     return options.some(o => String(o.value) === opt) ? opt : null;
+  }
+
+  // ===================================================================
+  // PRE-PICKED CHOICES (a zone's `plan`)
+  //
+  // A remembered pick is a decision the player made once, at the prompt. A
+  // PLAN is the same decision written down in advance, for a zone whose
+  // choices have a known right answer -- the Haunted Bedroom, where every
+  // encounter is a nightstand and the answer is always the drawer with the
+  // substats in it. Without it the bedroom asks five questions before it can
+  // grind, which for a zone this well documented is asking the player to type
+  // out the wiki.
+  //
+  //   zone.plan = { '<whichchoice>': [ step, step, ... ] }
+  //   step      = { option: '<value>', match: /label/, why: 'for the log' }
+  //
+  // Steps are tried in order and the first one the page is actually OFFERING
+  // wins. That ordering is how "the ghost key if you have one, otherwise the
+  // top drawer" is expressed: the ghost-key options are simply not rendered
+  // without a key in inventory, so the step below it is what happens. Same
+  // rule, and the same reason, as usableRemembered.
+  //
+  // Every step is checked TWICE -- the option number has to be on the page AND
+  // its label has to match. The numbers come from the wiki (they are the same
+  // ones `hints` is keyed by); the labels come from the page. If the wiki has
+  // drifted the two disagree, no step matches, and the run falls through to
+  // asking you. That is the failure this is built to have: a plan that has
+  // gone stale must not confidently press the wrong button, and on this zone
+  // the wrong button is a jilted mistress fight that costs a turn.
+  //
+  // A step with no `option` matches on the label alone, for a choice whose
+  // numbering nobody has written down.
+  // ===================================================================
+
+  function planSteps(zone, which) {
+    return (zone && zone.plan && zone.plan[String(which)]) || null;
+  }
+
+  function planPick(zone, which, options) {
+    const steps = planSteps(zone, which);
+    if (!steps) return null;
+    for (const step of steps) {
+      for (const o of options) {
+        if (step.option !== undefined && String(o.value) !== String(step.option)) continue;
+        if (!step.match.test(o.text || '')) continue;
+        return { option: String(o.value), label: o.text, why: step.why };
+      }
+    }
+    return null;
   }
 
   // ===================================================================
@@ -573,6 +703,67 @@
   }
 
   // ===================================================================
+  // WHERE YOU WERE LAST
+  //
+  // Two sources, because neither is certain on its own.
+  //
+  // api.php?what=status carries a `lastadv` block -- the game's own record of
+  // where you were, and the one the charpane's "Last Adventure" line is drawn
+  // from:
+  //   "lastadv":{"id":"393","name":"The Haunted Bedroom",
+  //              "link":"adventure.php?snarfblat=393",
+  //              "container":"place.php?whichplace=manor2"}
+  // UNVERIFIED against a live dump (the field comes from KoLmafia's
+  // ApiRequest), which is why this returns null on anything it doesn't
+  // recognise instead of throwing, and why the charpane is read as a second
+  // opinion rather than not at all.
+  // ===================================================================
+
+  function readLastAdventure(status) {
+    const a = status && status.raw && status.raw.lastadv;
+    if (!a || typeof a !== 'object') return null;
+    const link = typeof a.link === 'string' ? a.link : '';
+    if (!link) return null;
+    return {
+      url: link.replace(/^\//, ''),
+      name: typeof a.name === 'string' ? a.name : '',
+    };
+  }
+
+  // The charpane's own last-adventure link, in whichever pane shape the player
+  // uses: expanded keeps it in the "Last Adventure:" block, compact hides it
+  // in the `#lastadvmenu` hover menu off the "Adv:" row (the same two shapes
+  // placeCharpaneButton has to tell apart). Both are an ordinary
+  // `<a href="adventure.php?snarfblat=...">`, so the menu is checked first and
+  // the rest of the pane after. A charpane mid-reload just means null, and the
+  // caller stops with a reason rather than adventuring somewhere it guessed.
+  function lastAdventureFromCharpane() {
+    try {
+      const cp = top.frames['charpane'];
+      const d = cp && cp.document;
+      if (!d) return null;
+      const sel = 'a[href*="adventure.php?snarfblat="]';
+      const menu = d.getElementById('lastadvmenu');
+      const a = (menu && menu.querySelector(sel)) || d.querySelector(sel);
+      if (!a) return null;
+      return {
+        url: String(a.getAttribute('href') || '').replace(/^\//, ''),
+        name: a.textContent.trim(),
+      };
+    } catch (e) {
+      return null;                     // cross-frame access failed
+    }
+  }
+
+  // The snarfblat in an adventure url, or null for anything that isn't one.
+  // Doubles as the "is this a zone we can re-request in a loop?" test -- see
+  // resolveZone for why that question has to be asked.
+  function snarfblatOf(url) {
+    const m = /adventure\.php\?(?:[^#]*&)?snarfblat=(\d+)/i.exec(String(url || ''));
+    return m ? m[1] : null;
+  }
+
+  // ===================================================================
   // THE ENGINE
   // ===================================================================
 
@@ -592,6 +783,50 @@
       log: log,
       stop: function (reason) { throw Stop(reason); },
     }, extra || {});
+  }
+
+  // Turn the "wherever I adventured last" entry into a real zone. A no-op for
+  // every other entry.
+  //
+  // Resolved ONCE, at the start of a run, and never again: after the first
+  // turn the last zone IS this zone, so re-reading it could only do harm --
+  // it would let a stray click in the mainpane silently redirect a run that is
+  // already going, which is a much worse failure than refusing to start.
+  //
+  // Only `adventure.php?snarfblat=N` is accepted. A lot of KoL's adventuring
+  // happens through place.php urls carrying an `action`, and those are not
+  // things to re-request in a loop -- one of them is a door you open once, not
+  // a zone you grind. Stopping, with the link quoted back, is the honest
+  // answer there.
+  //
+  // If the resolved zone is one this registry already knows, we hand back that
+  // ENTRY rather than a bare url, so the run gets its plan, hints, guard and
+  // combat policy. Matching on the snarfblat and not on the name is what makes
+  // that safe.
+  async function resolveZone(zone, status) {
+    if (!zone.dynamic) return zone;
+
+    const last = readLastAdventure(status) || lastAdventureFromCharpane();
+    if (!last) {
+      throw Stop('I can\'t tell where you adventured last -- ' +
+                 'pick a zone from the list instead');
+    }
+    const snarf = snarfblatOf(last.url);
+    if (!snarf) {
+      throw Stop('your last adventure (' + (last.name || last.url) + ') isn\'t ' +
+                 'a plain adventure.php zone, so I won\'t re-request it in a ' +
+                 'loop -- pick a zone from the list instead');
+    }
+
+    const known = ZONES.filter(z => snarfblatOf(z.url) === snarf)[0];
+    if (known) {
+      log('last zone: ' + known.name + ' -- running it with its own settings');
+      return known;
+    }
+    const name = last.name || ('snarfblat ' + snarf);
+    log('last zone: ' + name + ' -- nothing special known about it, so ' +
+        'choices will stop and ask');
+    return { key: zone.key, name: name, url: 'adventure.php?snarfblat=' + snarf };
   }
 
   // Fight one combat through to its end.
@@ -714,15 +949,35 @@
         throw Stop('choice ' + which + ' offers no options I can read');
       }
 
+      // The zone's plan first, then what you taught it, then ask. When both
+      // exist the plan wins: it is the more deliberate of the two, it is the
+      // one that gets maintained alongside the zone, and a pick remembered
+      // from before the zone had a plan should not quietly outrank it.
+      // ("remembered choices…" still lists that pick, and forgetting it is
+      // how you tell the two apart.)
+      const planned = planPick(RUN.zone, which, options);
       const known = rememberedChoice(which);
-      let option = usableRemembered(known, options);
-      if (option) {
-        log('choice ' + which + (name ? ' (' + name + ')' : '') +
-            ' -> remembered option ' + option +
-            (known.label ? ': ' + known.label : ''));
-      } else if (known) {
-        log('choice ' + which + ' is not offering your remembered option ' +
-            known.option + ' this time; asking again.', 'warn');
+      let option = null;
+
+      if (planned) {
+        option = planned.option;
+        log('choice ' + which + (name ? ' (' + name + ')' : '') + ' -> ' +
+            planned.why + ' (option ' + option +
+            (planned.label ? ': ' + planned.label : '') + ')');
+      } else {
+        if (planSteps(RUN.zone, which)) {
+          log('choice ' + which + ' is not offering anything ' + RUN.zone.name +
+              '\'s plan recognises; falling back.', 'warn');
+        }
+        option = usableRemembered(known, options);
+        if (option) {
+          log('choice ' + which + (name ? ' (' + name + ')' : '') +
+              ' -> remembered option ' + option +
+              (known.label ? ': ' + known.label : ''));
+        } else if (known) {
+          log('choice ' + which + ' is not offering your remembered option ' +
+              known.option + ' this time; asking again.', 'warn');
+        }
       }
 
       if (option === null) {
@@ -792,12 +1047,19 @@
     RUN.log = [];
     RUN.pending = null;
     log('starting: ' + turns + ' adventure' + (turns === 1 ? '' : 's') +
-        ' in ' + zone.name);
+        (zone.dynamic ? ' where you were last' : ' in ' + zone.name));
 
     let stoppedBecause = null;
 
     try {
       let status = await getStatus();
+
+      // A dynamic entry becomes a real zone here and stays that way for the
+      // rest of the run (see resolveZone). Everything below -- the guard, the
+      // plan, the status line -- reads the resolved one.
+      zone = await resolveZone(zone, status);
+      RUN.zone = zone;
+
       RUN.startAdv = status.adventures;
 
       if (status.adventures !== null && status.adventures < turns) {
@@ -983,11 +1245,27 @@
     zoneSel.value = prefs.zone;
     pop.appendChild(zoneSel);
 
-    const note = el(d, 'div', 'color:#555;font-size:11px;min-height:13px');
+    const note = el(d, 'div', 'color:#555;font-size:11px;min-height:26px');
     pop.appendChild(note);
+
+    // "Wherever I adventured last" is the one entry whose label doesn't say
+    // where it will go, so the note answers that -- which costs an api.php
+    // read. `noteSeq` is why: the answer can land after the player has already
+    // picked a different zone (or closed the panel), and a note describing a
+    // zone that is no longer selected would be worse than no note at all.
+    let noteSeq = 0;
     function syncNote() {
       const z = zoneByKey(zoneSel.value);
-      note.textContent = (z && z.note) || '';
+      const base = (z && z.note) || '';
+      note.textContent = base;
+      const mine = ++noteSeq;
+      if (!z || !z.dynamic) return;
+      getStatus().then(function (status) {
+        if (mine !== noteSeq || !note.isConnected) return;
+        const last = readLastAdventure(status) || lastAdventureFromCharpane();
+        note.textContent = base + ' Right now that is ' +
+          (last ? (last.name || last.url) : 'somewhere I can\'t read') + '.';
+      }).catch(function () { /* leave the plain note up */ });
     }
     zoneSel.addEventListener('change', syncNote);
     syncNote();

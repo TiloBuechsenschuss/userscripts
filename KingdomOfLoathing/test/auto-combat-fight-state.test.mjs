@@ -27,6 +27,16 @@
 //   - The Haunted Bedroom's option numbering, where "Ignore it" is 6 on four of
 //     the five nightstands and 4 on the fifth. Counting buttons down the page
 //     instead of reading the option value would answer the wrong thing.
+//   - The bedroom's pre-picked plan, above all its two failure directions: a
+//     plan step is only taken when the option number AND the label agree, so a
+//     stale wiki number falls through to asking instead of pressing the wrong
+//     button -- and on the rustic nightstand the wrong button is the jilted
+//     mistress, the one option in the zone that spends a turn. The ghost-key
+//     steps are ordered first precisely because those options vanish from the
+//     page when you aren't carrying a key, which is what makes "the key if
+//     possible, otherwise the drawer" fall out of ordering alone.
+//   - The last-zone entry's url reading: only 'adventure.php?snarfblat=N' is a
+//     zone we may re-request in a loop, and a place.php action url is not.
 //
 //   node KingdomOfLoathing/test/auto-combat-fight-state.test.mjs
 
@@ -55,7 +65,8 @@ const wrapped = src
   .replace('  bootButton();',
     '  return { fightOverIn, hasFightForms, fightOver, inFight, pageKind, ' +
     'normalizeName, findMacroId, fightFields, describeAction, blockerIn, ' +
-    'usableRemembered, ZONES, MACRO_NAMES };');
+    'usableRemembered, planSteps, planPick, snarfblatOf, readLastAdventure, ' +
+    'ZONES, MACRO_NAMES };');
 
 if (!wrapped.includes('globalThis.__ac') || wrapped.includes('\n  bootButton();')) {
   console.log('FAIL | could not re-expose the internals; the anchors in ' +
@@ -324,6 +335,176 @@ check('the ghost key option number differs per nightstand', [
 // run's turn count will look wrong to whoever picked it.
 check('the jilted mistress option is flagged as costing a turn',
   /COSTS A TURN/.test(bedroom.hints['879']['3']), true);
+
+// ---------------------------------------------------------------------------
+// The bedroom's pre-picked plan
+//
+// The option lists below are what the page offers, in the shape
+// readChoiceOptions hands back. Labels are the page's own button text; the
+// ghost-key options are present only in the "carrying a key" variants, because
+// that is exactly how KoL renders them.
+// ---------------------------------------------------------------------------
+
+const pick = (which, options) => {
+  const got = api.planPick(bedroom, which, options);
+  return got && got.option;
+};
+
+const SIMPLE = [
+  { value: '1', text: 'Open the top drawer' },
+  { value: '2', text: 'Open the bottom drawer' },
+  { value: '4', text: 'Ignore it' },
+];
+const SIMPLE_KEYED = SIMPLE.concat(
+  [{ value: '3', text: 'Unlock the nightstand with your ghost key' }]);
+
+const MAHOGANY = [
+  { value: '1', text: 'Open the top drawer' },
+  { value: '2', text: 'Open the bottom drawer' },
+  { value: '6', text: 'Ignore it' },
+];
+const MAHOGANY_KEYED = MAHOGANY.concat(
+  [{ value: '4', text: 'Unlock the nightstand with your ghost key' }]);
+
+const ORNATE = [
+  { value: '1', text: 'Open the top drawer' },
+  { value: '2', text: 'Open the bottom drawer' },
+  { value: '4', text: 'Take the camera' },
+  { value: '6', text: 'Ignore it' },
+];
+
+const RUSTIC = [
+  { value: '1', text: 'Open the top drawer' },
+  { value: '2', text: 'Open the bottom drawer' },
+  { value: '3', text: 'Look behind the nightstand' },
+  { value: '6', text: 'Ignore it' },
+];
+
+const ELEGANT = [
+  { value: '1', text: 'Open the top drawer' },
+  { value: '2', text: 'Open the bottom drawer' },
+  { value: '6', text: 'Ignore it' },
+];
+const ELEGANT_KEYED = ELEGANT.concat(
+  [{ value: '3', text: 'Unlock the nightstand with your ghost key' }]);
+
+check('the substat drawers are taken without asking', [
+  pick('876', SIMPLE),        // bottom: Muscle
+  pick('878', ORNATE),        // bottom: Mysticality
+  pick('879', RUSTIC),        // top: Moxie
+], ['2', '2', '1']);
+
+// The whole reason the ghost-key step is listed FIRST rather than guarded by
+// some inventory check: without a key the option isn't on the page, so the
+// next step in the list is what happens.
+check('the ghost key is taken when it is on offer, and skipped when it is not', [
+  pick('877', MAHOGANY_KEYED), pick('877', MAHOGANY),
+  pick('880', ELEGANT_KEYED),  pick('880', ELEGANT),
+], ['4', '1', '3', '6']);
+
+// The mahogany's bottom drawer is a mouth full of teeth and the rustic's
+// "look behind" is the jilted mistress -- the one option in the zone that
+// costs a turn. Neither may ever be the answer.
+check('the two options that cost you something are never picked', [
+  pick('877', MAHOGANY) === '2',
+  pick('879', RUSTIC) === '3',
+], [false, false]);
+
+// The simple nightstand's key option is worth less than nothing to a stat run
+// (a flat 200 Muscle vs. substats), so it is deliberately NOT in the plan --
+// having a key must not change what happens here.
+check('a key in inventory does not change the simple nightstand', [
+  pick('876', SIMPLE), pick('876', SIMPLE_KEYED),
+], ['2', '2']);
+
+// Lights Out has no documented option numbers, so its step matches on the
+// label alone -- and takes whatever number that label happens to carry.
+check('Lights Out is left on the label alone, whatever its number', [
+  pick('897', [{ value: '1', text: 'Investigate the noise' },
+               { value: '2', text: 'Flee' }]),
+  pick('897', [{ value: '3', text: 'Leave the room' },
+               { value: '5', text: 'Open the wardrobe' }]),
+], ['2', '3']);
+
+// ...but the word alone is not the instruction. "Leave no drawer unopened"
+// opens every drawer; it starts with the same word as the way out and means
+// the opposite, so the step has to read further than the first word.
+check('a label that only starts with "leave" is not a way out',
+  pick('897', [{ value: '1', text: 'Leave no drawer unopened' }]), null);
+
+check('...while the ordinary ways of saying it all read as one', [
+  pick('897', [{ value: '1', text: 'Leave' }]),
+  pick('897', [{ value: '1', text: 'Leave the room' }]),
+  pick('897', [{ value: '1', text: 'Get out of there' }]),
+  pick('897', [{ value: '1', text: 'Run away!' }]),
+], ['1', '1', '1', '1']);
+
+// The failure direction this design exists for. If the wiki number has drifted
+// away from the page's label, no step matches and the run asks instead of
+// pressing whatever is sitting at that number now.
+check('a number that no longer matches its label falls through to asking', [
+  pick('879', [{ value: '1', text: 'Look behind the nightstand' },
+               { value: '2', text: 'Open the top drawer' }]),
+  pick('877', [{ value: '4', text: 'Punch the nightstand' }]),
+], [null, null]);
+
+check('an option with no readable label is never taken',
+  pick('878', [{ value: '2', text: '' }]), null);
+
+// planSteps is what separates "this zone has nothing to say about that choice"
+// from "it does, and none of it applied" -- the second one warns in the log.
+check('planSteps tells a missing plan from a plan that did not match', [
+  !!api.planSteps(bedroom, '879'),
+  !!api.planSteps(bedroom, '1336'),
+  !!api.planSteps({ name: 'somewhere else' }, '879'),
+], [true, false, false]);
+
+check('every nightstand and Lights Out are planned for',
+  Object.keys(bedroom.plan).sort(),
+  ['876', '877', '878', '879', '880', '897']);
+
+// ---------------------------------------------------------------------------
+// Wherever I adventured last
+// ---------------------------------------------------------------------------
+
+const lastZone = api.ZONES.find(z => z.key === 'last-zone');
+
+check('the dynamic entry carries no url to adventure at', [
+  !!lastZone, lastZone && !!lastZone.dynamic, lastZone && lastZone.url,
+], [true, true, undefined]);
+
+// api.php's lastadv block, in the shape KoLmafia's ApiRequest reads it.
+check('the last adventure is read out of api.php\'s lastadv block',
+  api.readLastAdventure({ raw: { lastadv: {
+    id: '393', name: 'The Haunted Bedroom',
+    link: 'adventure.php?snarfblat=393',
+    container: 'place.php?whichplace=manor2',
+  } } }),
+  { url: 'adventure.php?snarfblat=393', name: 'The Haunted Bedroom' });
+
+check('a status with no lastadv, or a junk one, reads as "I don\'t know"', [
+  api.readLastAdventure({ raw: {} }),
+  api.readLastAdventure({ raw: { lastadv: {} } }),
+  api.readLastAdventure({}),
+  api.readLastAdventure(null),
+], [null, null, null, null]);
+
+// Only a snarfblat zone may be re-requested in a loop. A place.php action url
+// is a door you open once, not a zone you grind, so it reads as null and the
+// run stops with a reason instead of hammering it.
+check('only adventure.php?snarfblat urls count as a grindable zone', [
+  api.snarfblatOf('adventure.php?snarfblat=393'),
+  api.snarfblatOf('/adventure.php?snarfblat=393&pwd=abc'),
+  api.snarfblatOf('adventure.php?pwd=abc&snarfblat=27'),
+  api.snarfblatOf('place.php?whichplace=manor2&action=manor2_ladys'),
+  api.snarfblatOf('adventure.php?snarfblat='),
+  api.snarfblatOf(null),
+], ['393', '393', '27', null, null, null]);
+
+// This is how a resolved last zone finds its way back to a registered entry
+// (and so to its plan and hints): by snarfblat, not by name.
+check('a resolved snarfblat matches the registered bedroom entry',
+  api.snarfblatOf(bedroom.url), '393');
 
 // ---------------------------------------------------------------------------
 // Blockers
