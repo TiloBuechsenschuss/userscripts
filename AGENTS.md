@@ -498,6 +498,138 @@ navigation. Two consequences:
   live in one `TITLE_SELECTORS` array. Two things are deliberately NOT matched: the unscoped
   `.media__heading` (reused all over the SPA — would over-badge), and `.branch__title`, the per-choice
   titles inside an opened storylet (they're choices, not articles — left unlinked by request).
+- `ux-enhancers.js` is the FL grab-bag, the counterpart of `KingdomOfLoathing/ux-enhancers.js` —
+  but note **what a feature is scoped by differs**. KoL is server-rendered, so each of its
+  features declares the `.php` path it belongs to and runs once; FL has one URL and no
+  navigation, so a feature here is scoped by *the markup it finds* and is re-run on the debounced
+  observer. Adding one: write an idempotent `run()` that bails when its markup is absent, add a
+  `{ name, run }` entry to `FEATURES`, and give it **its own badge class and dataset flag** so
+  two features can decorate the same element without fighting over one flag.
+  Shared plumbing worth reusing rather than re-deriving: `makeBadge`/`attachBadge` (badge
+  described as a pure `{text, color, title}` spec, drawn by shared code), `headingName`, and
+  `eachCardName`, which walks all three shapes an opportunity card's name takes. Those three
+  selectors (`.hand__card-container` + `.hand__image`'s `alt`, `.hand .small-card__body
+  .media__heading`, `.storylet-root__heading`) are **shared with `wiki-links.js`**, so the two
+  files rise and fall together — if a selector moves, fix it in both.
+  Three things about the badge plumbing are deliberate and load-bearing. **A badge sits beside a
+  heading, never inside it**, because `wiki-links.js` derives its wiki title from the heading's
+  `textContent`; conversely `headingName()` skips `.fl-wiki-link` children and anything carrying
+  the shared `.fl-ux-badge` class, so a heading already wearing a "W" (or another feature's
+  badge) still reads as the plain name. That pair is what makes the two scripts load-order
+  independent, and `wiki-links.js` owns a card's **top-right** corner while this one takes the
+  top-left. **`attachBadge`'s flag stores the value it drew for, not a boolean**: React reuses a
+  `.hand__card-container` node for the next card when you play one, so a boolean would leave the
+  old card's badge on the new card — a changed value redraws, and a `null` spec clears it.
+  A feature that wants a screen rather than a decoration registers a **panel** instead: the
+  `launcher` feature mounts a `position:fixed` "⚙ UX" button on `document.body` whose menu is
+  built from the `PANELS` registry (`{ id, icon, label, hint, render }`, `render()` called fresh
+  on every open so a live panel never has to invalidate a cache). The button is floating **on
+  purpose** — there's no verified selector for FL's own header, and a fixed button needs none,
+  survives a React re-render and can't shove the game's chrome around; `mountLauncher` is the
+  only place to change if a header anchor is ever wanted. It is idempotent by `#fl-ux-launcher`
+  id guard, and sits first in `FEATURES` so it's on screen from the initial pass. Escape closes
+  the menu then the panel; an outside click closes only the menu, because a panel is a reference
+  table you read *while* playing and a stray click shouldn't throw it away. `h()` (a four-line
+  hyperscript) and `wikiLink()` are there so a panel is written as nodes, not an innerHTML
+  string.
+  `spite-card-ratings` rates the opportunity cards of The Crowds of Spite from a `SPITE_CARDS`
+  table transcribed from *The Crowds of Spite (Guide)* on the wiki. New or corrected cards go in
+  `SPITE_CARDS` and nowhere else. Its **area gate** reads `currentArea()` — FL states the area in
+  the screen-reader greeting (`#accessible-sidebar .welcome`: *"It's ‹name›! Welcome to Spite,
+  delicious friend!"*), which is on every page including /myself and /possessions. The gate is
+  **permissive on purpose and the direction matters**: only "Spite" is verified as the wording,
+  while `The Crowds of Spite` and the four route names (Tenterhooks, Smashtile Alley,
+  Blythenhale, Strung-Up Street) are guesses at what the promenade may call itself. So an
+  unrecognised area — or none readable — still gets badges, falling back to card-name matching;
+  only `LONDON_ELSEWHERE`, areas we positively recognise as somewhere else, turns them off. A
+  wrong guess costs a stray badge in Spite's neighbours, never a missing one mid-promenade. If
+  the greeting turns out to name the route, `SPITE_AREAS` is the only thing to change.
+  Note the gate is why `attachBadge`'s flag records **`'+'`/`'-'` plus the value** rather than the
+  value alone: clearing a badge from a host already flagged with that same name would otherwise
+  be a no-op, and walking out of Spite mid-hand would leave the ratings behind.
+  The `factions` panel's static half is `FACTIONS`, transcribing the *Factions (Guide)*
+  Faction-Item table (the item that converts Favours to Renown, its shop, its price) and the
+  Renown-item ladder (10/25/40, for 3/5/7 Favours), including the wiki's best-in-slot marks and
+  — kept as two *separate* flags because they are different warnings — `upperRiver` (the three
+  underlined items that permanently add an Upper River card) versus `replacesCard` (the two that
+  add one but lock another, so the deck is unchanged).
+  Its live half reads the **Myself tab**, whose markup is verified against real game HTML in both
+  layouts (identical for qualities, so one selector set covers both):
+  `li.quality-item` → `img[alt]` + `.quality-item__name`. The **alt is the key**, and that is the
+  whole trick: the visible text glues the level and a free-text suffix onto the name with no
+  separator you can trust (`Renown: Society 34/55 -  Known in the homes…` has a double space;
+  `Renown: Rubbery Men 12/55 - !kathakathoti!` has punctuation where prose should be), so the
+  parser strips the alt off the front instead of hunting for where the name ends. FL's faction
+  names match `FACTIONS[].name` exactly for all twelve. A text-only fallback exists for a missing
+  alt, anchored on the `Renown:`/`Favours:`/`Connected:` prefixes so a quality whose name contains
+  a number can't be mis-split.
+  **Three rules here are load-bearing.** (1) FL doesn't render a quality you have none of, so
+  absent means 0 — *except* when the tab's search box (`input.input--item-search`) has text in it,
+  which filters the list, and then absent must stay unknown. That guard is why the zero is safe at
+  all. (2) Never fabricate a number: every unknown renders as a dash and an unknown Renown item as
+  a `–` pip rather than the `◇` "not held" pip — three states, so an unknown is never mistaken for
+  a no. A "0 Favours" that really means "couldn't tell" is worse than no panel, and Favours
+  genuinely can be 0. (3) The values are read where they're shown but wanted everywhere else, so
+  the last good read is cached in `localStorage` (`fl-ux-factions`) by the `faction-capture`
+  feature — always **labelled with its age** in the panel, and discarded if the character name
+  (from `#accessible-sidebar .welcome a[href^="/profile/"]`, present on every page) doesn't match.
+  Which items you hold comes from the **Possessions tab**, also verified in both layouts: every
+  item is a `[data-quality-id]` wrapping something with an `aria-label` whose first
+  semicolon-field is the name (`Ornate Typewriter × 2; A Fine, Elegant…`). Reading *every*
+  `[data-quality-id]` rather than a per-section selector is deliberate — inventory
+  (`li.item`), the equip drawer (`li.available-item-list__item`) and **the slot you are actually
+  wearing** (`div.equipped-item`) are three different shapes, and missing the third would tell
+  anyone wearing their Renown item that they don't have it. The ids would be a better key than
+  names, but only the ids of items you *own* are visible, so the full table can't be built from
+  them; the names matched the wiki exactly for all nineteen faction/Renown items in the capture.
+  `itemStatus()` turns those two readings into one of six states — `claimed` / `ready` /
+  `unlocked` / `locked` / `unheld` / `unknown` — and it is pure, so the arithmetic behind the
+  highlight is testable. `ready` (Renown gate passed **and** the Favours in hand) is the one the
+  column exists for. The glyphs are **split by whether there is anything to do**, not by state
+  count: `ready` and `unlocked` — the two whose Renown gate you have already passed — are both
+  exclamation marks, and everything you cannot act on stays a hollow `◇` and recedes. Fill then
+  separates the two: `ready` is solid dark-on-green (go now), `unlocked` is an outline in brown
+  (nearly — save the Favours). Colour alone was tried for both and read as decoration; a hollow
+  diamond among hollow diamonds was too quiet either way. `ready` also gets an accent edge on the
+  row and a named list at the top of the panel. Keep `unheld` and `unknown` distinct from each other and from `locked` — they
+  are three different reasons for a hollow pip and collapsing them re-introduces the "0 means we
+  couldn't tell" problem in another form.
+  `fullFavours()` is the same idea for the other direction: Favours cap at 7 and everything past
+  the cap is destroyed, so a capped faction is the only thing on the page **actively costing you
+  something while you read it**. It gets the same filled-badge treatment (a plain colour change
+  reads as decoration) but in orange rather than green — a different kind of urgency, and never
+  the same colour as `ready`. It reads the cap off what was scraped (`favoursCap`) rather than
+  assuming 7. Both states want the row's left edge; **`ready` wins**, because when an item is
+  collectable *and* the Favours are capped they are the same action.
+- **The "use" button** opens the Faction Item on Possessions rather than spending anything. Every
+  item there wraps a `[role="button"][tabindex]` that FL's own React handler is bound to, so
+  `findItemNode()` locates it by name and clicks it; the options panel is FL's own and *you* pick
+  the option. Getting there matters: FL's visible nav is a real
+  `a.cursor-pointer[href="/possessions"]` driven by the router, so clicking it changes route
+  **without a reload** and both the panel and this script survive; `location.assign` is only the
+  fallback and does reload. Because either path may reload, the request is parked in
+  `sessionStorage` (`fl-ux-pending-item`, 30s expiry) instead of a variable, and the
+  `pending-item` feature finishes it on whichever scan first sees the Possessions markup — one
+  mechanism for both routes. If the page arrives and the item genuinely isn't there, it stops
+  retrying and fills the search box with the name instead (via the native value setter plus an
+  `input` event, since React ignores a plain `value =`), so you can see what was looked for.
+- **Refreshing the Factions panel: `fetch` does not work, and that is settled.** Fallen London is
+  client-rendered — `GET /myself` returns a ~4.7KB shell whose `#root` holds a loading splash and
+  no quality list (checked against the live site, not assumed). So `refreshFactionState()` uses a
+  hidden off-screen **iframe** instead: point it at the route, let the app boot inside it, poll
+  `contentDocument` until the markup appears, then read it. It's off-screen rather than
+  `display:none` because a `display:none` iframe may skip layout and never run the app. The two
+  routes load sequentially (two SPA boots at once is a lot of work), each extractor waits for
+  markup that is actually *complete* — a faction quality present, >20 possessions — so a
+  half-rendered page can't bank a page of false zeroes, and everything is behind a 20s timeout
+  whose failure path is "no refresh", never a wrong number. This is **confirmed working in-game**
+  (2026-09-02) — keep every guard regardless; they are what make the failure mode "the panel you
+  already had" rather than a wrong number.
+  The script carries **`@noframes`** (and so does the loader) so it doesn't boot a second copy of
+  itself inside that iframe. Auto-refresh is on by default, throttled by `stateIsFresh` (skip if
+  under a minute old), and switchable off in the panel — `fl-ux-auto-refresh`. Panels get a
+  `ctx.rerender()` that rebuilds only the body, so a refresh landing doesn't flicker the header
+  or lose scroll position.
 
 ## Verifying a change
 
@@ -631,6 +763,42 @@ Current tests:
   `So-So Spooky Resistance`) stay out of the Mr. Store bucket, and the pre-existing buckets
   still resolve. Also covers `planMrStore`, the "Insert all" planner (removal phase, consecutive
   slot packing, unowned gems). Add a case when a new IotM gem or category shows up.
+- `FallenLondon/test/ux-crowds-of-spite.test.mjs` — asserts `ux-enhancers.js`'s Crowds of Spite
+  ratings against the wiki guide's table, plus the traps that would silently break the badge:
+  name matching squashes punctuation (`A... pickpocket?`, `A Constable!`, `The Rat-Catcher`)
+  without colliding two cards; `headingName()` ignores a `wiki-links.js` "W" already inside the
+  heading *and* any `.fl-ux-badge` (so a future feature's badge needs no change there); and
+  re-attaching to a container React has reused for a different card redraws the badge rather
+  than leaving the old rating (or, for a card outside the area, clears it). It also pins that
+  the two trophyless cards get a word rather than a `+null`, that the dagger marks exactly the
+  two inferior-skill-table targets, and that two features badging one element don't clobber each
+  other's flag. It also drives the **area gate** through a settable greeting: Spite in, a
+  recognised elsewhere out, an unknown or unreadable area still in (the permissive direction),
+  and a badge drawn in Spite actually coming off when you leave. Extend it whenever you touch
+  `SPITE_CARDS`; a new feature with its own pure logic gets its own `ux-*.test.mjs` beside it.
+- `FallenLondon/test/ux-factions.test.mjs` — asserts `ux-enhancers.js`'s Factions panel. Its stub
+  DOM is rich enough to **actually build the panel** (and carries a tiny selector matcher), which
+  is the only way to catch a typo in a few hundred hand-built nodes without loading the live site;
+  `getElementById` really searches the tree, or the launcher's id guard would pass vacuously. It
+  holds **verbatim `li.quality-item` markup from a real /myself page**, picked for the awkward
+  cases — the double-spaced `Renown: Society 34/55 -  Known in the homes…` and
+  `Renown: Rubbery Men 12/55 - !kathakathoti!` — so the file is the repo's record of what FL
+  emits; keep them verbatim. It pins the transcribed wiki data (a typo there is invisible in-game
+  until you've spent Favours on the wrong thing), that `upperRiver` and `replacesCard` stay
+  disjoint, the cache round-trip (banked on load, offered as stale off-tab, discarded for another
+  character), and above all the **no-fabricated-numbers** contract: absent means 0 only on an
+  unfiltered list, a filtered one leaves absent unknown, and with nothing readable at all not one
+  cell shows a number. Treat those checks as load-bearing. Note the capture won't re-scrape an
+  unchanged list, so the cache assertions ride on the IIFE's own first scan rather than calling
+  it again. It also holds **verbatim `/possessions` markup** for all three owned-item shapes
+  (inventory with a `× 2` quantity, the equip drawer, and the worn slot) and pins that all three
+  count. `itemStatus` is covered state by state, including both ways of not knowing; note the
+  `readyItems` case builds its own state rather than using the capture, because the captured
+  character happens to have nothing collectable and the check would pass while proving nothing.
+  The "use" path is exercised end to end: clicked directly when already on Possessions, parked
+  and routed via the nav link otherwise, replayed exactly once when the page arrives, abandoned
+  (not retried forever) for an item that isn't there, and dropped when stale. Update it when you
+  touch `FACTIONS` or either scrape.
 
 The re-expose trick (rename `(function () {` and `return { ... }` the helpers before `})()`) is
 how a test reaches an IIFE's internals — copy an existing test when adding one, and put it in the

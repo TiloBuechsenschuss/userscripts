@@ -3,15 +3,17 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/all-in-one/fallen-london.js
-// @version      0.2
+// @version      0.8
 // @description  Single-install loader for the Fallen London userscripts in this repo. It carries no logic of its own; it @requires each individual script straight from GitHub so installing this one file gives you all of them.
 //
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 //
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/wiki-links.js
+// @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
 //
 // @run-at       document-idle
+// @noframes
 // @grant        none
 // ==/UserScript==
 
