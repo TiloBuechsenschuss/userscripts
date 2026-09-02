@@ -524,10 +524,40 @@ navigation. Two consequences:
   `launcher` feature mounts a `position:fixed` "⚙ UX" button on `document.body` whose menu is
   built from the `PANELS` registry (`{ id, icon, label, hint, render }`, `render()` called fresh
   on every open so a live panel never has to invalidate a cache). The button is floating **on
-  purpose** — there's no verified selector for FL's own header, and a fixed button needs none,
-  survives a React re-render and can't shove the game's chrome around; `mountLauncher` is the
-  only place to change if a header anchor is ever wanted. It is idempotent by `#fl-ux-launcher`
-  id guard, and sits first in `FEATURES` so it's on screen from the initial pass. Escape closes
+  purpose** — nothing is injected into FL's chrome, so it survives a React re-render and can't
+  shove anything around. What it is *fixed to* is no longer the bottom-right corner, though:
+  on the narrow layout that corner is FL's own fixed bottom bar, and the button sat on top of
+  it. It is now placed relative to **FL's travel control** — the big Travel button on the wide
+  layout, the compass on the narrow one — by `positionLauncher`, and the rule lives in
+  `launcherPlacement`, which is **pure** (anchor box, bar box, viewport, button size, and
+  whether the space beside it is crowded, in; `right`/`bottom` out) so it is unit-tested
+  without a layout engine. The rule: *beside* the control, bottoms level, when the space to its
+  left is both free and big enough; otherwise stacked against it with right edges level —
+  *above* it by preference, *below* when it sits too near the top of the screen for above to
+  fit. Either way it clears the whole **bar**, not just the icon in it, which is the actual bug.
+  Every result is clamped to the viewport, so a control that scrolls out of view can't take the
+  launcher with it. `enclosingBar` is what decides "in a bar": the nearest `fixed`/`sticky`
+  ancestor that spans the width, touches the top or bottom edge, and isn't the whole screen.
+  `TRAVEL_SELECTORS` is **verified** (2026-09-02) and there are three shapes because FL renders
+  a different travel control per layout, quoted verbatim in the script: wide desktop is
+  `button.travel-button--infobar` in the sidebar's `div.travel`; narrower desktop is a
+  **classless** `button.button--primary` that only its container
+  `div.storylets__welcome-and-travel` names; mobile is the compass,
+  `li.banner-item > button.banner__button[title="Map"]` wrapping an `i.fa-compass`. The
+  classless one is why the accessible-name backstop (anything clickable named "Travel") stays.
+  If everything misses, `findTravelAnchor` returns null, and null is a *supported* outcome, not
+  a failure: the launcher goes back to the corner but is still lifted clear of a bottom bar,
+  found with no selector at all by `document.elementsFromPoint` at the bottom edge of the
+  screen. Two subtleties in the resolver. **Choosing** an anchor requires it to be in the
+  viewport (`inViewport`) but **keeping** one only requires it to be drawn (`rendered`) — the
+  first is how the hidden layout's travel button is refused on a phone, the second is why the
+  wide layout's Travel button, which scrolls away with the sidebar, doesn't make the launcher
+  jump to the corner and back on every scroll (it clamps instead). And `crowdedLeft` counts
+  **siblings only**, deliberately: what is left of the compass is the next banner icon and must
+  not be sat on, while what is left of the sidebar's Travel button is the main content column,
+  which a floating button has always been free to overlap. It is idempotent by
+  `#fl-ux-launcher` id guard — an already-mounted launcher just repositions — and sits first
+  in `FEATURES` so it's on screen from the initial pass. Escape closes
   the menu then the panel; an outside click closes only the menu, because a panel is a reference
   table you read *while* playing and a stray click shouldn't throw it away. `h()` (a four-line
   hyperscript) and `wikiLink()` are there so a panel is written as nodes, not an innerHTML
@@ -696,6 +726,11 @@ Confirmed live by the author:
 - The **"use" button** — it opens the Faction Item's options. So `findItemNode` → `.click()` on
   FL's `[role="button"]` is the right handle, and getting to Possessions works.
 - The **Crowds of Spite card ratings on a real hand** — badges appear on live opportunity cards.
+- The **travel control's markup**, all three layouts (reported 2026-09-02, in response to the
+  launcher covering the narrow layout's bottom bar): `.travel-button--infobar`, the classless
+  button in `.storylets__welcome-and-travel`, and `li.banner-item > button[title="Map"]` with
+  its `i.fa-compass`. That is a *capture*, not a sighting of the launcher beside them — whether
+  the button lands beside, above or below each of the three is still unconfirmed in-game.
 - The **area gate**. The greeting during a promenade was captured verbatim (*"Welcome to The
   Crowds of Spite, delicious friend!"*), so `SPITE_AREAS` is now a verified exact list rather than
   a permissive guess.
@@ -874,6 +909,17 @@ Current tests:
   It also builds the whole panel, the way `ux-factions.test.mjs` does, since that is the only way
   to catch a typo in a few hundred hand-built nodes -- including that a multi-region card is
   listed under each of its regions while an everywhere card is listed once.
+- `FallenLondon/test/ux-launcher-placement.test.mjs` — asserts `ux-enhancers.js`'s
+  `launcherPlacement`, the pure half of where the "⚙ UX" button sits. It is organised around
+  the three real travel controls: wide desktop (beside the sidebar button, bottoms level),
+  narrower desktop (above it, because the welcome text shares its row), and mobile (above the
+  whole bar, right edges level with the compass — including an explicit "the launcher clears the
+  bar" check, which is the bug the rule exists for). Then the fallbacks: a *top* bar leaves no
+  room above so the launcher goes below it, and with no travel control at all the corner returns
+  — lifted over a bottom bar, left alone for a top one. It closes with a sweep over viewports ×
+  bars × anchors × crowding asserting nothing ever lands off screen, and pins that all three
+  verified selectors are still in `TRAVEL_SELECTORS`. There is deliberately no `window` in its
+  stub, which is how the impure `positionLauncher` bails and only the rule is under test.
 - `FallenLondon/test/ux-factions.test.mjs` — asserts `ux-enhancers.js`'s Factions panel. Its stub
   DOM is rich enough to **actually build the panel** (and carries a tiny selector matcher), which
   is the only way to catch a typo in a few hundred hand-built nodes without loading the live site;

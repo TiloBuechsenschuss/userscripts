@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      1.0
-// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A floating "UX" button opens a menu of reference panels; the first is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, where the safe docks are, the three winds and the dreams they start, and the whole card table, searchable. Built as a feature registry so further tweaks can be added as entries.
+// @version      1.1
+// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A "UX" button parked beside Fallen London's own travel control -- the big Travel button on the wide layout, the compass on the narrow one, so it never covers the bottom bar -- opens a menu of reference panels; the first is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, where the safe docks are, the three winds and the dreams they start, and the whole card table, searchable. Built as a feature registry so further tweaks can be added as entries.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 // @run-at       document-idle
@@ -1709,14 +1709,14 @@
 
   // === shared: the launcher ==============================================
   //
-  // A floating button, bottom-right, that opens a menu of reference PANELS.
+  // A floating button, parked beside FL's own travel control, that opens a
+  // menu of reference PANELS.
   //
   // It is deliberately `position:fixed` on document.body rather than injected
-  // into Fallen London's own header. There is no verified selector for the
-  // header, and a floating button needs none -- it cannot be knocked out by a
-  // React re-render, works in both the wide and the narrow layout, and can't
-  // shove the game's own chrome around. If a header anchor is ever wanted,
-  // `mountLauncher` is the only place that has to change.
+  // into Fallen London's own chrome: nothing injected there survives a React
+  // re-render, and nothing of the game's gets shoved around this way. Only the
+  // POINT it is fixed to is read off the game -- see "where the launcher sits"
+  // below, which is the one place that decides it.
 
   const UI = {
     bg: '#1c1a17',
@@ -1759,8 +1759,273 @@
     }, extra || {});
   }
 
+  // --- where the launcher sits -------------------------------------------
+  //
+  // It used to be pinned to the bottom-right corner of the viewport, full
+  // stop. On the narrow (mobile) layout that is exactly where Fallen London
+  // puts its own fixed bottom bar, so the "UX" button sat on top of it.
+  //
+  // It is still `position:fixed` on `document.body` -- nothing is injected
+  // into FL's chrome, so a React re-render still cannot knock it out and it
+  // still cannot shove anything around -- but the point it is fixed to is now
+  // computed from FL's own TRAVEL control. All three of its shapes are
+  // VERIFIED against real markup (2026-09-02), and there are three because FL
+  // renders a different one per layout:
+  //
+  //   wide desktop, in the right-hand sidebar's `div.travel`:
+  //     <button class="button button--primary travel-button--infobar"
+  //             type="button">Travel</button>
+  //
+  //   narrower desktop, above the storylet list -- note this one has NO class
+  //   of its own, only its container names it:
+  //     <div class="storylets__welcome-and-travel"> ...
+  //       <button class="button button--primary" type="button">Travel</button>
+  //
+  //   mobile, the compass in the banner:
+  //     <li class="banner-item"><button class="button--link banner__button"
+  //           title="Map" type="button">
+  //       <i class="fa fa-compass fa-3x icon--has-transition"></i>
+  //       <span class="u-visually-hidden">Map</span></button></li>
+  //
+  // The mobile one is the reason `crowdedLeft` exists: it is one `li` in a row
+  // of them, so the space beside it belongs to the next icon along, and the
+  // launcher has to go over the row rather than into it.
+  //
+  // If every selector misses, `findTravelAnchor` returns null and the launcher
+  // goes back to the corner -- lifted clear of a bottom bar if one can be
+  // found, which is the complaint that started this. Null is a supported
+  // outcome, not a failure.
+
+  const LAUNCHER_GAP = 8;   // breathing room between the launcher and the anchor
+  const LAUNCHER_EDGE = 8;  // and never closer than this to a viewport edge
+
+  const TRAVEL_SELECTORS = [
+    // Wide desktop: the sidebar's Travel button, by its own class and then by
+    // its container, since only one of the two has to survive a reskin.
+    '.travel-button--infobar',
+    '.travel button.button--primary',
+    // Narrower desktop: the button with no class of its own.
+    '.storylets__welcome-and-travel button',
+    // Mobile: the compass. Both the `title` and the visually-hidden label say
+    // "Map"; the icon is the `.fa-compass` inside it.
+    'button[title="Map"]',
+    '.banner__button .fa-compass',
+    '.fa-compass',
+  ];
+
+  let launcherRoot = null;
+  let launcherPanelHost = null;
+  let launcherButton = null;
+  let launcherBound = false;
+  let travelAnchor = null;
+
+  // No viewport means nothing to position against -- which is also how this
+  // file is evaluated outside a browser, by the tests.
+  function viewportSize() {
+    if (typeof window === 'undefined') return null;
+    if (!window.innerWidth || !window.innerHeight) return null;
+    return { width: window.innerWidth, height: window.innerHeight };
+  }
+
+  // Drawn at all. FL renders the layout it isn't using as `display:none`, so a
+  // zero-sized box is how the wide layout's Travel button reads on a phone.
+  function rendered(el) {
+    if (!el || !el.isConnected || !el.getBoundingClientRect) return false;
+    const r = el.getBoundingClientRect();
+    return r.width > 0 && r.height > 0;
+  }
+
+  // Stricter, and only used when CHOOSING an anchor: it also has to be on
+  // screen. An anchor already chosen is kept even after it scrolls away (the
+  // wide layout's Travel button scrolls with the sidebar), because letting go
+  // of it there would make the launcher jump to the corner and back on every
+  // scroll; the placement clamps instead.
+  function inViewport(el) {
+    if (!rendered(el)) return false;
+    const view = viewportSize();
+    if (!view) return true;
+    const r = el.getBoundingClientRect();
+    return r.right > 0 && r.left < view.width && r.bottom > 0 && r.top < view.height;
+  }
+
+  // The clickable thing rather than the icon inside it: `.fa-compass` is an
+  // `<i>` in the middle of the button we actually want to sit beside.
+  function clickableOf(el) {
+    return (el.closest && el.closest('a, button, [role="button"]')) || el;
+  }
+
+  function findTravelAnchor() {
+    if (rendered(travelAnchor)) return travelAnchor;
+    travelAnchor = null;
+    const ours = document.getElementById(LAUNCHER_ID);
+    for (const sel of TRAVEL_SELECTORS) {
+      let hits;
+      try {
+        hits = document.querySelectorAll(sel);
+      } catch (e) {
+        continue; // a selector this browser will not parse is just skipped
+      }
+      for (const hit of hits) {
+        const el = clickableOf(hit);
+        if ((ours && ours.contains(el)) || !inViewport(el)) continue;
+        travelAnchor = el;
+        return travelAnchor;
+      }
+    }
+    // Backstop for the one shape that has no class of its own: anything
+    // clickable whose accessible name is "Travel". Name first, rect second --
+    // this sweep sees every clickable element on the page, and the rect is the
+    // half that costs a layout.
+    for (const el of document.querySelectorAll('a, button, [role="button"]')) {
+      const name = (el.getAttribute('aria-label') || el.title || el.textContent || '')
+        .replace(/\s+/g, ' ').trim().toLowerCase();
+      if (!/^travel\b/.test(name)) continue;
+      if ((ours && ours.contains(el)) || !inViewport(el)) continue;
+      travelAnchor = el;
+      return travelAnchor;
+    }
+    return null;
+  }
+
+  // The bar the travel control lives in, if it lives in one: the nearest
+  // `fixed`/`sticky` ancestor that spans the width, touches the top or the
+  // bottom edge, and isn't the whole screen. It matters because clearing the
+  // compass is not the same as clearing the bar the compass sits in.
+  function enclosingBar(el, view) {
+    if (typeof window === 'undefined' || !window.getComputedStyle) return null;
+    for (let node = el; node && node !== document.body; node = node.parentElement) {
+      const pos = window.getComputedStyle(node).position;
+      if (pos !== 'fixed' && pos !== 'sticky') continue;
+      const r = node.getBoundingClientRect();
+      if (r.width >= view.width * 0.9
+        && r.height < view.height / 2
+        && (r.bottom >= view.height - 4 || r.top <= 4)) return r;
+    }
+    return null;
+  }
+
+  // With no travel control to walk up from, look for the bar directly: what is
+  // under the bottom edge of the screen? That needs no selector at all, which
+  // is the point -- it is the safety net for FL having renamed everything.
+  function bottomBarAt(view) {
+    if (!document.elementsFromPoint) return null;
+    const stack = document.elementsFromPoint(Math.round(view.width / 2), view.height - 2) || [];
+    for (const el of stack) {
+      if (launcherRoot && launcherRoot.contains && launcherRoot.contains(el)) continue;
+      const bar = enclosingBar(el, view);
+      if (bar) return bar;
+    }
+    return null;
+  }
+
+  // Is the space immediately left of the travel control already spoken for by
+  // something in its OWN container? That is the mobile compass exactly: one
+  // `li.banner-item` among several, where sitting beside it means sitting on
+  // the next icon. Siblings only, deliberately -- on the wide layout what is
+  // left of the sidebar's Travel button is the main content column, and
+  // floating over that is fine and always has been.
+  function crowdedLeft(el, box, size) {
+    const cell = (el.closest && el.closest('li, td')) || el;
+    const parent = cell.parentElement;
+    if (!parent) return false;
+    const wanted = box.left - LAUNCHER_GAP - size.width;
+    for (const sib of parent.children) {
+      if (sib === cell || sib.contains(el)) continue;
+      const r = sib.getBoundingClientRect();
+      if (!r.width || !r.height) continue;
+      if (r.top < box.bottom && r.bottom > box.top && r.left < box.left && r.right > wanted) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Pure: boxes in, offsets out, so the placement rule can be reasoned about
+  // (and tested) without a layout engine. All CSS pixels; the result is the
+  // `right`/`bottom` the fixed launcher gets, measured from those edges.
+  //
+  //   anchor   the travel control's box, or null if it could not be found
+  //   bar      the full-width fixed bar it sits in, or null
+  //   view     { width, height } of the viewport
+  //   size     { width, height } of the launcher button
+  //   crowded  whether the space beside it belongs to its own neighbours
+  function launcherPlacement(anchor, bar, view, size, crowded) {
+    const gap = LAUNCHER_GAP;
+    const edge = LAUNCHER_EDGE;
+    // Clamped, so a travel control at a screen edge -- or one that has
+    // scrolled out of view -- can never carry the launcher off with it.
+    function fit(right, bottom, side) {
+      return {
+        side: side,
+        right: Math.min(Math.max(edge, right), Math.max(edge, view.width - size.width - edge)),
+        bottom: Math.min(Math.max(edge, bottom), Math.max(edge, view.height - size.height - edge)),
+      };
+    }
+    if (!anchor) {
+      // The old corner, but clear of a BOTTOM bar if there is one: that
+      // overlap is the bug this whole section exists for, and it is worth
+      // fixing even when the travel control itself cannot be found. A bar at
+      // the top of the screen is not in the corner's way.
+      const clears = bar && bar.bottom >= view.height - 4;
+      return fit(16, clears ? view.height - bar.top + gap : 16, 'corner');
+    }
+    // Beside it, bottoms level, is what reads as "next to" -- when the space
+    // is actually free and the launcher fits in it.
+    if (!bar && !crowded && anchor.left - gap - size.width >= edge) {
+      return fit(view.width - anchor.left + gap, view.height - anchor.bottom, 'beside');
+    }
+    // Otherwise stack it against the control, right edges level, clearing the
+    // whole bar rather than just the icon in it. Above by preference; below
+    // when the control is too near the top of the screen for above to fit,
+    // which is what a travel control in a top banner gets.
+    const right = view.width - anchor.right;
+    const top = bar ? Math.min(bar.top, anchor.top) : anchor.top;
+    const foot = bar ? Math.max(bar.bottom, anchor.bottom) : anchor.bottom;
+    if (top - gap - size.height >= edge) return fit(right, view.height - top + gap, 'above');
+    return fit(right, view.height - foot - gap - size.height, 'below');
+  }
+
+  function positionLauncher() {
+    const root = launcherRoot;
+    if (!root || !root.isConnected || !root.style) return;
+    const view = viewportSize();
+    if (!view) return;
+    const anchor = findTravelAnchor();
+    const box = anchor ? anchor.getBoundingClientRect() : null;
+    const size = {
+      width: (launcherButton && launcherButton.offsetWidth) || 90,
+      height: (launcherButton && launcherButton.offsetHeight) || 40,
+    };
+    const at = launcherPlacement(
+      box,
+      anchor ? enclosingBar(anchor, view) : bottomBarAt(view),
+      view,
+      size,
+      anchor ? crowdedLeft(anchor, box, size) : false);
+    root.style.right = at.right + 'px';
+    root.style.bottom = at.bottom + 'px';
+    // The panel hangs off the same corner, so it only has the width left of
+    // that corner to live in -- otherwise moving the launcher inwards pushes
+    // the panel off the other edge.
+    if (launcherPanelHost) {
+      launcherPanelHost.style.maxWidth = Math.max(240, view.width - at.right - 16) + 'px';
+    }
+  }
+
+  let positionQueued = false;
+  function schedulePosition() {
+    if (positionQueued) return;
+    positionQueued = true;
+    requestAnimationFrame(function () {
+      positionQueued = false;
+      positionLauncher();
+    });
+  }
+
   function mountLauncher() {
-    if (document.getElementById(LAUNCHER_ID)) return;
+    // Already up: just make sure it is still beside the travel control,
+    // which moves when FL swaps layout or re-renders its own chrome.
+    if (document.getElementById(LAUNCHER_ID)) { positionLauncher(); return; }
 
     const panelHost = h('div', {
       css: 'display:none;margin-bottom:8px;width:min(660px,calc(100vw - 32px));'
@@ -1860,6 +2125,17 @@
     });
 
     document.body.appendChild(root);
+    launcherRoot = root;
+    launcherPanelHost = panelHost;
+    launcherButton = button;
+    // A resize or a scroll moves the travel control without changing the
+    // DOM, so the debounced scan alone would not notice either.
+    if (!launcherBound && typeof window !== 'undefined' && window.addEventListener) {
+      launcherBound = true;
+      window.addEventListener('resize', schedulePosition);
+      window.addEventListener('scroll', schedulePosition, true);
+    }
+    positionLauncher();
   }
 
   // === panel: factions ===================================================
