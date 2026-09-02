@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      0.8
+// @version      0.9
 // @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A floating "UX" button opens a menu of reference panels; the first is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. Built as a feature registry so further tweaks can be added as entries.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -408,48 +408,37 @@
   }
 
   // The area gate. FL states the area in the screen-reader greeting on every
-  // page ("Welcome to Spite, delicious friend!" -- verified), and the card
-  // table alone was previously the only thing keeping these badges off the
-  // rest of London.
+  // page, and during a promenade that greeting reads, verbatim:
   //
-  // It is deliberately PERMISSIVE, and the direction of that matters. Only
-  // "Spite" is verified as the greeting's wording; the four route names are
-  // what the promenade *might* call itself once you are walking one, and
-  // "The Crowds of Spite" is the area's own name -- none of those three are
-  // confirmed. So an area we don't recognise, or can't read at all, still gets
-  // badges (falling back to the card-name matching, which is what shipped
-  // before); only an area we positively recognise as somewhere else turns them
-  // off. A wrong guess here therefore costs a stray badge in Spite's
-  // neighbours, never a missing one during a promenade.
+  //   "It's <name>! Welcome to The Crowds of Spite, delicious friend!"
   //
-  // If the greeting turns out to name the route, add it here -- this list is
-  // the only thing to change.
+  // CONFIRMED in-game (2026-09-02), which is what let this be tightened from
+  // "allow anything we don't recognise" to an exact list. It used to carry the
+  // four route names (The Tenterhooks, Smashtile Alley, Blythenhale,
+  // Strung-Up Street) as guesses at what the promenade might call itself, plus
+  // a LONDON_ELSEWHERE deny-list to make the permissive default survivable.
+  // Both are gone, on the evidence of the same capture: the accessible map
+  // (`#accessible-sidebar .accessible-map-menu`) lists every area you can
+  // reach, and it contains "Spite", "The Crowds of Spite" and "Area-Diving in
+  // Spite" but NONE of the four route names -- so the routes are storylets
+  // inside the area, not areas, and the greeting never names one.
+  //
+  // "Spite" is the parent area and is kept for the boundary either side of a
+  // promenade; it costs nothing, since the cards only exist in the Crowds.
   const SPITE_AREAS = [
-    'Spite',
     'The Crowds of Spite',
-    'The Tenterhooks',
-    'Smashtile Alley',
-    'Blythenhale',
-    'Strung-Up Street',
+    'Spite',
   ].map(normalizeName);
 
-  // Areas we are confident are NOT the promenade. Everything else is allowed
-  // through, so this is the list that actually does the gating.
-  const LONDON_ELSEWHERE = [
-    'Veilgarden', 'Watchmakers Hill', 'Ladybones Road', 'The Flit', 'The Shuttered Palace',
-    'Wolfstack Docks', 'Mrs Plenty’s Carnival', "Mrs Plenty's Carnival",
-    'The University', 'The Forgotten Quarter', 'The Empress’ Shadow',
-    'Your Lodgings', 'The Bazaar Side-Streets', 'Bazaar Side-Streets',
-    'The Labyrinth of Tigers', 'The Royal Bethlehem Hotel', 'Doubt Street',
-    'New Newgate Prison', 'The Tomb-Colonies', 'The Iron Republic',
-    'The Mirror-Marches', 'Zee', 'The Blue Kingdom',
-  ].map(normalizeName);
-
+  // The one remaining fail-open: if the greeting can't be read at all -- FL
+  // renamed the block, say -- fall back to allowing badges, since the card
+  // table still scopes them and losing the feature outright is the worse
+  // outcome. An area that IS readable and isn't ours now blocks, which is the
+  // whole point of the tightening.
   function inCrowdsOfSpite() {
     const area = normalizeName(currentArea());
-    if (!area) return true;                       // can't tell -- don't remove a feature
-    if (SPITE_AREAS.indexOf(area) !== -1) return true;
-    return LONDON_ELSEWHERE.indexOf(area) === -1; // unrecognised -- allow
+    if (!area) return true;
+    return SPITE_AREAS.indexOf(area) !== -1;
   }
 
   function spiteCardRatings() {
@@ -780,7 +769,8 @@
   //
   // Read off the Myself tab (/myself). Selectors verified against real game
   // HTML in BOTH the wide and the narrow layout -- for qualities the two are
-  // identical, so one set covers both:
+  // identical, so one set covers both -- and CONFIRMED LIVE in-game
+  // (2026-09-02): the Renown and Favours the panel showed were the right ones.
   //
   //   <li class="quality-item">
   //     <div class="icon icon--circular quality-item__icon" data-branch-id="133830">
@@ -842,8 +832,10 @@
 
   // --- what you own ------------------------------------------------------
   //
-  // The Possessions tab (/possessions). Verified against real game HTML, and
-  // again byte-identical between the two layouts. Every item is a
+  // The Possessions tab (/possessions). Verified against real game HTML, again
+  // byte-identical between the two layouts, and CONFIRMED LIVE in-game
+  // (2026-09-02): held / not-held came out right for a real character. Every
+  // item is a
   // `[data-quality-id]` wrapping something with an `aria-label` whose first
   // semicolon-separated field is the name:
   //
@@ -1218,6 +1210,8 @@
   }
 
   // --- using a Faction Item ----------------------------------------------
+  //
+  // CONFIRMED WORKING in-game (2026-09-02): this opens the item's options.
   //
   // The item lives on the Possessions tab, where every item is a
   // `[data-quality-id]` wrapping a `[role="button"][tabindex]` that FL's own

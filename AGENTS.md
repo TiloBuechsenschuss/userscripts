@@ -535,15 +535,19 @@ navigation. Two consequences:
   `spite-card-ratings` rates the opportunity cards of The Crowds of Spite from a `SPITE_CARDS`
   table transcribed from *The Crowds of Spite (Guide)* on the wiki. New or corrected cards go in
   `SPITE_CARDS` and nowhere else. Its **area gate** reads `currentArea()` — FL states the area in
-  the screen-reader greeting (`#accessible-sidebar .welcome`: *"It's ‹name›! Welcome to Spite,
-  delicious friend!"*), which is on every page including /myself and /possessions. The gate is
-  **permissive on purpose and the direction matters**: only "Spite" is verified as the wording,
-  while `The Crowds of Spite` and the four route names (Tenterhooks, Smashtile Alley,
-  Blythenhale, Strung-Up Street) are guesses at what the promenade may call itself. So an
-  unrecognised area — or none readable — still gets badges, falling back to card-name matching;
-  only `LONDON_ELSEWHERE`, areas we positively recognise as somewhere else, turns them off. A
-  wrong guess costs a stray badge in Spite's neighbours, never a missing one mid-promenade. If
-  the greeting turns out to name the route, `SPITE_AREAS` is the only thing to change.
+  the screen-reader greeting (`#accessible-sidebar .welcome`), which is on every page including
+  /myself and /possessions. During a promenade it reads, verbatim and **confirmed in-game**:
+  *"It's ‹name›! Welcome to The Crowds of Spite, delicious friend!"*
+  That is what let the gate become an **exact list** (`SPITE_AREAS` = the promenade plus its
+  parent area "Spite"). It started permissive — carrying the four route names as guesses plus a
+  `LONDON_ELSEWHERE` deny-list — and both are now gone, on evidence from the same capture: FL's
+  accessible map (`#accessible-sidebar .accessible-map-menu`) lists every area you can reach, and
+  it holds "Spite", "The Crowds of Spite" and "Area-Diving in Spite" but **none** of the four
+  route names — so the routes are storylets inside the area, not areas, and the greeting never
+  names one. That menu is also the place to get any area's exact spelling if you need one.
+  Matching is against the whole normalised name, never a substring: "Area-Diving in Spite" is a
+  real and different area. One fail-open remains — a greeting that can't be read at all still
+  gets badges, since the card table scopes them and losing the feature outright is worse.
   Note the gate is why `attachBadge`'s flag records **`'+'`/`'-'` plus the value** rather than the
   value alone: clearing a badge from a host already flagged with that same name would otherwise
   be a no-op, and walking out of Spite mid-hand would leave the ratings behind.
@@ -630,6 +634,30 @@ navigation. Two consequences:
   under a minute old), and switchable off in the panel — `fl-ux-auto-refresh`. Panels get a
   `ctx.rerender()` that rebuilds only the body, so a refresh landing doesn't flicker the header
   or lose scroll position.
+
+**What in `FallenLondon/ux-enhancers.js` has actually been run in the game** (as of 2026-09-02).
+Worth keeping current, because "verified against a capture" and "seen working live" are different
+claims and this file makes both.
+
+Confirmed live by the author:
+
+- The floating launcher mounts, the menu opens, the Factions panel renders. The
+  `position:fixed`-on-`body` approach survives FL's routing.
+- The **Myself scrape** — the Renown and Favours shown were the correct ones for a real character.
+- The **Possessions scrape** — held / not-held and the `✦` on owned Faction Items came out right.
+- The **background refresh via hidden iframe**, including that `@noframes` stops the script
+  booting a second copy of itself inside it (no doubled launcher was seen).
+- The pip states as rendered: filled `!`, outlined `!`, `◇`, `◆`, and the capped-Favours badge.
+- The **"use" button** — it opens the Faction Item's options. So `findItemNode` → `.click()` on
+  FL's `[role="button"]` is the right handle, and getting to Possessions works.
+- The **Crowds of Spite card ratings on a real hand** — badges appear on live opportunity cards.
+- The **area gate**. The greeting during a promenade was captured verbatim (*"Welcome to The
+  Crowds of Spite, delicious friend!"*), so `SPITE_AREAS` is now a verified exact list rather than
+  a permissive guess.
+
+Nothing in this script is currently unverified in-game. Keep it that way: when you add something
+that rests on markup you have only reasoned about, say so here and in the code, and move it up
+only on a report.
 
 ## Verifying a change
 

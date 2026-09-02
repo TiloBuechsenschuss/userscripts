@@ -300,37 +300,54 @@ check('and re-rating one feature leaves the other\'s badge alone',
   shared.children.map((c) => c.textContent), ['x', '+2']);
 
 // --- the area gate ---------------------------------------------------------
+//
+// The greeting reads "It's <name>! Welcome to The Crowds of Spite, delicious
+// friend!" during a promenade -- confirmed in-game, which is what allows this
+// to be an exact list rather than the permissive one it started as.
 
-check('the area comes out of the screen-reader greeting', api.currentArea(), 'Spite');
+area = 'The Crowds of Spite';
+check('the area comes out of the screen-reader greeting',
+  api.currentArea(), 'The Crowds of Spite');
 
-check("Spite and the promenade's own names are in", ['Spite', 'The Crowds of Spite',
-  'Strung-Up Street', 'Blythenhale'].map((a) => { area = a; return api.inCrowdsOfSpite(); }),
-  [true, true, true, true]);
+check('the promenade and its parent area are in',
+  ['The Crowds of Spite', 'Spite'].map((a) => { area = a; return api.inCrowdsOfSpite(); }),
+  [true, true]);
 
-check('somewhere we positively recognise as elsewhere is out',
-  ['Veilgarden', 'The Flit', 'Wolfstack Docks'].map((a) => {
+check('anywhere else in London is out',
+  ['Veilgarden', 'The Flit', 'Wolfstack Docks', 'Mahogany Hall'].map((a) => {
     area = a; return api.inCrowdsOfSpite();
-  }), [false, false, false]);
+  }), [false, false, false, false]);
 
-// The gate is permissive on purpose: only "Spite" is verified as the wording,
-// so an unknown area must keep working rather than silently lose the feature.
+// "Area-Diving in Spite" is a real, separate Spite area in FL's own map menu.
+// It is not the promenade, and matching on a bare "Spite" substring would have
+// let it through -- which is why the check is an exact list, not a contains.
+check('a different Spite area is not the promenade', (() => {
+  area = 'Area-Diving in Spite'; return api.inCrowdsOfSpite();
+})(), false);
+
+// The gate used to allow anything it did not recognise, because only "Spite"
+// was verified. It no longer does: the exact wording is known.
 area = 'Some Zailing Port We Have Never Heard Of';
-check('an unrecognised area still gets badges', api.inCrowdsOfSpite(), true);
+check('an unrecognised area no longer gets badges', api.inCrowdsOfSpite(), false);
+
+// The one remaining fail-open. If FL renames the greeting block there is
+// nothing to read, and losing the feature outright is worse than a stray badge
+// -- the card table still scopes it.
 area = null;
-check('...and so does a page with no greeting to read at all',
+check('a page with no greeting at all still gets badges',
   [api.currentArea(), api.inCrowdsOfSpite()], [null, true]);
 
-// A badge drawn in Spite must come off when you leave, not linger on the hand.
-area = 'Spite';
+// A badge drawn in the promenade must come off when you leave, not linger.
+area = 'The Crowds of Spite';
 const gated = makeEl('div');
 rate(gated, 'Jack!');
-check('in Spite the card is rated', gated.children.map((c) => c.textContent), ['+9']);
+check('in the promenade the card is rated', gated.children.map((c) => c.textContent), ['+9']);
 area = 'Veilgarden';
 api.attachBadge(gated, {
   cls: api.SPITE_CLASS, flag: api.SPITE_FLAG, value: 'Jack!', spec: null, place: 'append',
 });
-check("out of Spite the same card's badge is cleared", gated.children.length, 0);
-area = 'Spite';
+check("out of the promenade the same card's badge is cleared", gated.children.length, 0);
+area = 'The Crowds of Spite';
 
 // --- the extension point ---------------------------------------------------
 
