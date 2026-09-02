@@ -551,6 +551,51 @@ navigation. Two consequences:
   Note the gate is why `attachBadge`'s flag records **`'+'`/`'-'` plus the value** rather than the
   value alone: clearing a badge from a host already flagged with that same name would otherwise
   be a no-op, and walking out of Spite mid-hand would leave the ratings behind.
+  `zee-card-ratings` does the same job for **Zailing the Unterzee**, and it is the bigger of
+  the two: `ZEE_CARDS` transcribes every card in *Category:Cards - Zailing the Unterzee* (81
+  entries, ~220 options) from the individual card and option pages rather than from the guide's
+  summary, because that summary is a "cards that don't raise Troubled Waters" table and goes
+  stale against the pages. Where the two disagreed the page won -- the guide says A Spit of
+  Land's island stop is Troubled Waters -2, its own option page says -1, and -1 is what is in the
+  table. Corrections go in `ZEE_CARDS` and nowhere else.
+  **The thing to understand before touching `bestZeeLine` is why it ranks the way it does.**
+  Cheapest Troubled Waters first, more progress only as the tie-break. That is not the obvious
+  order (you are out there to arrive) and the first cut had it the other way round; the case that
+  settled it is `Navigating the Snares`, where progress-first recommends "You have places to be"
+  -- half an action saved for six change points, at Zee Peril 250. Almost every line at zee makes
+  full progress anyway, so the number that actually separates the cards in your hand is what they
+  cost, and the thing that ends a voyage badly is Troubled Waters reaching 8. When the cheapest
+  line is the slow one the badge admits it with a speed mark rather than hiding it.
+  Inside that rule sits one exception, and it is there to avoid *understating* a cost, never to
+  invent one: a **Luck** option is ranked on its expected value, because that is the only case
+  where the wiki gives both outcomes and the odds. A Spit of Land's island stop buys a point on a
+  success and costs eight on a failure; ranked on the -1 it advertises, the badge talks you into
+  the worse half of the card. A stat challenge gets no such treatment -- the difficulty depends on
+  your stats, which this script does not read -- so it keeps its success value, and the badge's
+  `?` is what says so. `twFail` exists only on the thirteen Luck options that have a numeric
+  failure; don't spread it.
+  Two more rules are load-bearing. `bestZeeLine` **ignores every option behind a `need` or behind
+  piracy**, because a badge quoting a line you cannot take is worse than no badge; a card with
+  nothing else falls back to the best gated line and returns `gated: true` so the caller can say
+  so. And `zeeHasBetterGated` is the complement -- the marker means "there is something cheaper
+  here that I refused to promise you", which is the whole story of The Killing Wind (a bad coin
+  flip, unless you have a Zubmarine).
+  The **area gate is deliberately weaker than the Spite one**: `SPITE_AREAS` rests on a greeting
+  captured verbatim in-game, while `ZEE_AREAS` is a *guess* at what the same greeting says at zee,
+  assembled from the wiki's region names. So `inZee()` only ever confirms -- it never returns
+  "definitely not at zee" -- and exactly one card leans on it: `strictZee` on **The Sound of
+  Wings**, which is the one name Fallen London deals in eight other places. Everything else is
+  scoped by the card table, the way `spite-card-ratings` started out. Capture a greeting from a
+  real voyage and this can be tightened the way `SPITE_AREAS` was.
+  The `zailing` panel is the reference half: routes and what they cost in actions per ship, Zee
+  Peril per region, the Troubled Waters ladder and the six zee-threat/black-card pairs, the safe
+  docks (with the warning that being a port is not being a dock), the three winds, your current
+  hand ranked, and the whole card table with a live text filter. The filter matches
+  `row.dataset.zeeSearch` rather than `textContent`, so a term can hit an option the collapsed row
+  does not show, and it hides a region heading whose rows have all gone.
+  Note the two badge features can never collide on one card -- no name is in both tables, and a
+  test asserts it -- which is what lets both take the card container's top-left corner.
+
   The `factions` panel's static half is `FACTIONS`, transcribing the *Factions (Guide)*
   Faction-Item table (the item that converts Favours to Renown, its shop, its price) and the
   Renown-item ladder (10/25/40, for 3/5/7 Favours), including the wiki's best-in-slot marks and
@@ -655,9 +700,19 @@ Confirmed live by the author:
   Crowds of Spite, delicious friend!"*), so `SPITE_AREAS` is now a verified exact list rather than
   a permissive guess.
 
-Nothing in this script is currently unverified in-game. Keep it that way: when you add something
-that rests on markup you have only reasoned about, say so here and in the code, and move it up
-only on a report.
+**Not** verified in-game (added 2026-09-02, reasoned about only):
+
+- The **Zailing card ratings and the Zailing panel**. They reuse machinery that *is* confirmed
+  (`eachCardName`'s three card shapes, `attachBadge`, the launcher and its panel host), so the
+  risk is not the markup -- it is the transcription and `ZEE_AREAS`. Nobody has yet read the
+  screen-reader greeting during a voyage, so it is not known whether it names the region
+  ("Welcome to The Sea of Voices"), the ocean, or something else entirely; `inZee()` is written
+  to fail closed on the one card that leans on it and open on everything else. Move this up on a
+  report, and say what the greeting actually said.
+
+Everything else in this script is confirmed live. Keep it that way: when you add something that
+rests on markup you have only reasoned about, say so here and in the code, and move it up only
+on a report.
 
 ## Verifying a change
 
@@ -804,6 +859,21 @@ Current tests:
   recognised elsewhere out, an unknown or unreadable area still in (the permissive direction),
   and a badge drawn in Spite actually coming off when you leave. Extend it whenever you touch
   `SPITE_CARDS`; a new feature with its own pure logic gets its own `ux-*.test.mjs` beside it.
+- `FallenLondon/test/ux-zailing.test.mjs` — asserts `ux-enhancers.js`'s Zailing feature. Two
+  halves. The first is the transcription: the routes, the Zee Peril per region, the eight black
+  cards, that every zee-threat names a card that actually exists, and the handful of numbers a
+  voyage is planned around (Your False-Star's free -5, the Giant of the Unterzee's flat 80, the
+  Snares' slow line, and A Spit of Land's -1, which is pinned *because* the guide's table says
+  -2). It also pins that no name is in both `ZEE_CARDS` and `SPITE_CARDS`, which is what stops
+  two features drawing in the same corner. The second half is the ranking, and it is the part to
+  extend before touching `bestZeeLine`: cheapest Troubled Waters first with progress as the
+  tie-break, the expected-value treatment of Luck options with its arithmetic pinned outright,
+  gated and piracy lines never quoted, and a card with nothing else admitting `gated` rather than
+  going quiet. Then the badge marks, the two prefix-matched bounty cards, the `strictZee` gate in
+  all three greeting states, and redraw-on-reuse (React hands the next card the same container).
+  It also builds the whole panel, the way `ux-factions.test.mjs` does, since that is the only way
+  to catch a typo in a few hundred hand-built nodes -- including that a multi-region card is
+  listed under each of its regions while an everywhere card is listed once.
 - `FallenLondon/test/ux-factions.test.mjs` — asserts `ux-enhancers.js`'s Factions panel. Its stub
   DOM is rich enough to **actually build the panel** (and carries a tiny selector matcher), which
   is the only way to catch a typo in a few hundred hand-built nodes without loading the live site;

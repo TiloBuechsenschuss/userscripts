@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      0.9
-// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A floating "UX" button opens a menu of reference panels; the first is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. Built as a feature registry so further tweaks can be added as entries.
+// @version      1.0
+// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A floating "UX" button opens a menu of reference panels; the first is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, where the safe docks are, the three winds and the dreams they start, and the whole card table, searchable. Built as a feature registry so further tweaks can be added as entries.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 // @run-at       document-idle
@@ -465,6 +465,1248 @@
     });
   }
 
+  // === feature: Zailing the Unterzee card ratings ========================
+  //
+  // Rates the opportunity cards you draw while zailing. Zailing is a race
+  // between two numbers: Zailing... (progress towards your destination, 80 for
+  // a direct route, 160 or 220 across regions) and Troubled Waters, which at 8
+  // kills you. Zee cards are NOT discardable, so the only decision you ever
+  // make out there is which of the cards in your hand to play next -- which is
+  // exactly what a badge on each card can answer.
+  //
+  // Everything below is transcribed from Zailing (Guide) and from the
+  // individual card and option pages under Category:Cards - Zailing the
+  // Unterzee on fallenlondon.wiki. Where the guide's summary table and a
+  // card's own page disagreed, the card page won (it is the page the wiki
+  // keeps up to date): the guide says A Spit of Land's island stop is -2
+  // Troubled Waters, its own option page says -1, and -1 is what is here.
+  //
+  // To add or correct a card: edit ZEE_CARDS. Nothing else knows the names.
+
+  // How far you have to get, and roughly what that costs in actions. From the
+  // guide's "Gaining progress" table. Most options give Zailing Speed + 1-5,
+  // and a failure usually gives half of that.
+  const ZEE_ROUTES = [
+    { name: 'Direct route', of: 'a destination in the region you are already in', need: 80, tramp: '2', other: '1.5', clipper: '1.5, rarely 1' },
+    { name: 'Along the currents', of: 'a region reached the way the currents run (anticlockwise)', need: 160, tramp: '3.5', other: '3', clipper: '2.5, rarely 2' },
+    { name: 'Through the Snares', of: 'the shortcut across the middle; needs Zeefaring 3', need: 160, tramp: '3.5', other: '3', clipper: '2.5, rarely 2' },
+    { name: 'Against the currents', of: 'a region reached the wrong way round', need: 220, tramp: '5', other: '4', clipper: '3' },
+  ];
+
+  // Zee Peril per region: the difficulty of every broad challenge out there.
+  // The narrow column is what a skill challenge (Zeefaring, Shapeling Arts...)
+  // scales to; the Zeefaring checks on the non-piracy cards do not scale.
+  const ZEE_REGIONS = [
+    { name: 'Home Waters', peril: 100, narrow: 3, note: 'London and Mutton Island are here' },
+    { name: "Shepherd's Wash", peril: 110, narrow: 3, note: 'Southern Wind is found here' },
+    { name: 'Stormbones', peril: 110, narrow: 3, note: 'Northern Wind is found here' },
+    { name: 'The Sea of Voices', peril: 150, narrow: 5, note: 'passing by discovers Mangrove College' },
+    { name: 'The Salt Steppe', peril: 200, narrow: 9, note: 'Eastern Wind is found here; passing by discovers the Khanate' },
+    { name: 'The Pillared Sea', peril: 210, narrow: 9, note: 'passing by discovers Irem' },
+    { name: 'The Snares', peril: 250, narrow: 12, note: 'needs Zeefaring 3; passing by discovers Corsair’s Forest' },
+  ];
+
+  // The six zee-threats. Each one on its own does little; each one TOGETHER
+  // with Troubled Waters 7 puts its own black card in your hand, and black
+  // cards are urgent, so they crowd out everything else until you clear them.
+  const ZEE_MENACES = [
+    { name: 'Rumbling Stomachs', from: 'your crew going hungry', card: 'A Worrying Appetite' },
+    { name: 'Silent Stalker', from: 'zee-monsters noticing you', card: 'Signs of Pursuit' },
+    { name: 'Creeping Fear', from: 'frightening your crew', card: 'A Growing Concern' },
+    { name: 'Groaning Hull', from: 'damaging the ship', card: 'Taking in Water' },
+    { name: 'Mutinous Whispers', from: 'disrespecting your crew', card: 'Signs of Disloyalty' },
+    { name: 'Unwelcome on the Waters', from: 'failed piracy', card: 'Zeeborne Pariahs' },
+  ];
+
+  // Safe docks: arriving at one wipes Troubled Waters and every zee-threat
+  // (not Wounds or Nightmares). From the guide's location table -- note that
+  // being a port is not the same as being safe: Port Cecil, Godfall, Irem,
+  // Gaider's Mourn and Tanah-Chook are all ports and none of them is a reset.
+  const ZEE_SAFE_DOCKS = [
+    { region: 'Home Waters', names: ['Wolfstack Docks (London)', 'Mutton Island'] },
+    { region: "Shepherd's Wash", names: ['The Convent (Abbey Rock)', 'The Court of the Wakeful Eye', 'Heartscross House (Port Carnelian)', 'Apis Meet (Fate)'] },
+    { region: 'The Sea of Voices', names: ['Polythreme Docks'] },
+    { region: 'The Salt Steppe', names: ['The Copper Quarter (Khan’s Heart)'] },
+    { region: 'Stormbones', names: ['The Chapel of Lights — which puts you in Your Lodgings'] },
+    { region: 'The Pillared Sea', names: ['none'] },
+    { region: 'The Snares', names: ['none'] },
+  ];
+
+  // The three winds, each of which starts a dream storyline back in London.
+  const ZEE_WINDS = [
+    { name: 'Southern Wind', where: "Shepherd's Wash", card: 'The Light of the Mountain', dream: 'I Shot the Albatross', cost: '15 CP of Nightmares over 11 cards' },
+    { name: 'Northern Wind', where: 'Stormbones', card: 'A Wind from the North', dream: 'Betwixt Us and the Sun', cost: '16-19 CP of Nightmares over 11 cards' },
+    { name: 'Eastern Wind', where: 'The Salt Steppe', card: 'A Distant Gleam', dream: 'Upon a Painted Sea', cost: 'no Nightmares at all, over 11 cards' },
+  ];
+
+  // --- the cards ---------------------------------------------------------
+  //
+  // Each entry is one opportunity card:
+  //
+  //   where      'any' (drawn in every region) or the regions it belongs to.
+  //   freq       the wiki's Frequency. 'High Urgency' is a black/sinister
+  //              card: urgent, so it is dealt before anything else.
+  //   urgent     set on those, because it changes how the badge reads -- an
+  //              urgent card is not a choice, it is a blockage.
+  //   strictZee  only badge this card when the area actually reads as a zee
+  //              region (see inZee below). Exactly one card needs it.
+  //   prefix     match on the card's opening words instead of the whole name,
+  //              for the two piracy cards whose title carries your quarry's
+  //              ship type.
+  //   cardNeeds  what has to be true for the card to be in your deck at all.
+  //
+  // and each option:
+  //
+  //   ch     the challenge, if any. A broad one ("Watchful vs Zee Peril") is
+  //          against the region's Zee Peril, so it gets harder the further
+  //          out you are; a narrow one ("Zeefaring 5") mostly does not.
+  //   need   what the option is gated on. `piracy` marks the ones gated on
+  //          Corsair's Colours or a bounty -- a whole separate game the
+  //          Zailing guide deliberately does not cover.
+  //   hidden the option disappears when this is true.
+  //   tw     Troubled Waters change in CP on a success (or outright, for an
+  //          option with no challenge). `twRange` keeps the wiki's wording
+  //          when it recorded a range, `twText` when it sets a level instead.
+  //   prog   Zailing progress as a multiple of your Zailing Speed: 1, 0.5, 0
+  //          for none, and 'flat80' for the one option in the whole deck that
+  //          ignores your ship and simply hands you 80.
+  //   fail   what a failed challenge costs. `rare` is the rare success.
+  const ZEE_CARDS = [
+    // --- Drawn anywhere at zee ---
+    {
+      name: 'A Blank Space on the Charts',
+      where: ['any'],
+      freq: 'High Urgency',
+      urgent: true,
+      cardNeeds: 'Troubled Waters 7, Zailing... 60',
+      note: 'Black card: drawn at Troubled Waters 7 whatever your other menaces are.',
+      opts: [
+        { text: 'There\'s an island here', ch: 'Luck 50%', tw: -5, prog: 0, men: 'Creeping Fear', fail: 'Troubled Waters set to 4, no progress, Creeping Fear, Nightmares +3' },
+        { text: 'Fortuitous fragments', need: 'Partial Map 2 x', tw: null, twText: 'Troubled Waters set to 5', prog: 0, gain: 'costs Partial Map 2' },
+        { text: 'Search the uncharted waters for your quarry', ch: 'Zeefaring 6', need: 'Chasing Down Your Bounty, Corsair\'s Colours 2', tw: -1, prog: 1, gain: 'Chasing Down Your Bounty', rare: 'TW -2-6, full speed', fail: 'TW -5, half speed, Creeping Fear', piracy: true },
+      ],
+    },
+    {
+      name: 'A Bounty Upon Your Head',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'Corsair\'s Colours 2, Chasing Down Your Bounty',
+      opts: [
+        { text: 'Open fire!', ch: 'Zeefaring 13', tw: 5, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold [See below]', rare: 'TW +3, full speed', fail: 'TW +12, half speed, Unwelcome on the Waters', piracy: true },
+        { text: 'Signal the HMS Ramillies for support', ch: 'Zeefaring 11', need: 'The Crew of HMS Ramillies', tw: 5, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold [See below]', rare: 'TW +3, full speed', fail: 'TW +12, half speed, Unwelcome on the Waters', piracy: true },
+        { text: 'Evade them!', ch: 'Zailing Speed vs Zee Peril', tw: 2, twRange: '+2-3', prog: 1, fail: 'TW +8, full speed, Unwelcome on the Waters', piracy: true },
+      ],
+    },
+    {
+      name: 'A Corvette of Her Majesty\'s Navy',
+      where: ['any'],
+      freq: 'Standard',
+      note: 'The semaphore line is full speed for -2 Troubled Waters, but it is hidden above Suspicion 5. Flying Corsair\'s Colours replaces the card with a piracy version.',
+      opts: [
+        { text: 'Exchange pleasantries via semaphore', hidden: 'Suspicion 5, Corsair\'s Colours 2', tw: -2, prog: 1 },
+        { text: 'They\'re not slowing', ch: 'Zailing Speed vs Zee Peril', need: 'Suspicion 5', tw: 3, prog: 1, men: 'Suspicion +3', fail: 'TW +9, full speed, Silent Stalker' },
+        { text: 'Rely on the Commodore\'s old codes', ch: 'A Player of Chess 5', need: 'Overworked Commodore 1 x, A Player of Chess', tw: null, twText: 'Troubled Waters falls by an amount the wiki does not record', prog: 1, men: 'clears Suspicion -3', fail: 'TW +8, full speed, Suspicion +4' },
+        { text: 'Exchange information via semaphore', ch: 'Persuasive vs Zee Peril', need: 'Chasing Down Your Bounty', tw: -2, prog: 1, gain: 'Chasing Down Your Bounty +8', fail: 'TW +6, half speed, Suspicion +2, Unwelcome on the Waters', piracy: true },
+        { text: 'Take them for all they\'ve got', ch: 'Zeefaring 5', need: 'Corsair\'s Colours 2', tw: 4, prog: 1, men: 'Suspicion +1, Unwelcome on the Waters', gain: 'Pieces of Plunder Weighing Down Your Hold 250', rare: 'TW +4, full speed', fail: 'TW +8, half speed, Suspicion +4, Unwelcome on the Waters', piracy: true },
+      ],
+    },
+    {
+      name: 'A Dream of a Cup',
+      where: ['any'],
+      freq: 'Infrequent',
+      cardNeeds: 'Delighted, Nightmares',
+      opts: [
+        { text: 'Drink the wine', need: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall exactly 6', tw: 0, prog: 0, men: 'Nightmares +3', gain: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall +4' },
+        { text: 'Awaken from a familiar dream', need: 'Still Waiting on the Host', tw: 0, prog: 0, men: 'clears Nightmares -3', gain: 'costs Having Recurring Dreams: Rosy Colours Leaping on the Wall' },
+      ],
+    },
+    {
+      name: 'A Dream of a Table',
+      where: ['any'],
+      freq: 'Infrequent',
+      cardNeeds: 'Delighted, Nightmares',
+      opts: [
+        { text: 'Join them at their table', need: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall exactly 5', tw: 0, prog: 0, men: 'Nightmares +3', gain: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall +6' },
+        { text: 'Awaken from a familiar dream', need: 'Still Waiting on the Host', tw: 0, prog: 0, men: 'clears Nightmares -3', gain: 'costs Having Recurring Dreams: Rosy Colours Leaping on the Wall' },
+      ],
+    },
+    {
+      name: 'A Dream of Ascent',
+      where: ['any'],
+      freq: 'Infrequent',
+      cardNeeds: 'Delighted, Nightmares',
+      opts: [
+        { text: 'Fly higher', need: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall exactly 4', tw: 0, prog: 0, men: 'Nightmares +3', gain: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall +5' },
+        { text: 'Awaken from a familiar dream', need: 'Still Waiting on the Host', tw: 0, prog: 0, men: 'clears Nightmares -3', gain: 'costs Having Recurring Dreams: Rosy Colours Leaping on the Wall' },
+      ],
+    },
+    {
+      name: 'A Dream of Designs',
+      where: ['any'],
+      freq: 'Infrequent',
+      cardNeeds: 'Delighted, Nightmares',
+      opts: [
+        { text: 'Sunbathe in the light', need: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall exactly 7', tw: 0, prog: 0, men: 'Nightmares +3', gain: 'Still Waiting on the Host, Whirring Contraption 11, Whirring Contraption 4' },
+        { text: 'Awaken from a familiar dream', need: 'Still Waiting on the Host', tw: 0, prog: 0, men: 'clears Nightmares -3', gain: 'costs Having Recurring Dreams: Rosy Colours Leaping on the Wall' },
+      ],
+    },
+    {
+      name: 'A Dream of Stained-Glass',
+      where: ['any'],
+      freq: 'Infrequent',
+      cardNeeds: 'Delighted, Nightmares',
+      opts: [
+        { text: 'Look into the light', need: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall 1-2', tw: 0, prog: 0, men: 'Nightmares +2', gain: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall +3' },
+        { text: 'Awaken from a familiar dream', need: 'Still Waiting on the Host', tw: 0, prog: 0, men: 'clears Nightmares -3', gain: 'costs Having Recurring Dreams: Rosy Colours Leaping on the Wall' },
+      ],
+    },
+    {
+      name: 'A Dream of Sunbeams',
+      where: ['any'],
+      freq: 'Infrequent',
+      cardNeeds: 'Delighted, Nightmares',
+      opts: [
+        { text: 'Stare through the glare', need: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall exactly 0', tw: 0, prog: 0, men: 'Nightmares +2', gain: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall +3' },
+        { text: 'Awaken from a familiar dream', need: 'Still Waiting on the Host', tw: 0, prog: 0, men: 'clears Nightmares -3', gain: 'costs Having Recurring Dreams: Rosy Colours Leaping on the Wall' },
+      ],
+    },
+    {
+      name: 'A Flock of Prophets',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'Chasing Down Your Bounty, Corsair\'s Colours 2',
+      opts: [
+        { text: 'Take auspices', ch: 'Zeefaring 13', tw: 4, prog: 1, gain: 'Chasing Down Your Bounty [See below]', rare: 'full speed', fail: 'TW +10, half speed', piracy: true },
+        { text: 'Zail around them', tw: 2, prog: 1, piracy: true },
+      ],
+    },
+    {
+      name: 'A Giant Angler Crab',
+      where: ['any'],
+      freq: 'Infrequent',
+      note: '"Ready the guns" is the good line if you have Monstrous Anatomy 3 - full speed and -2 Troubled Waters.',
+      opts: [
+        { text: 'Full reverse! Turn us away!', ch: 'Shadowy vs Zee Peril', tw: 0, prog: 0.5, fail: 'TW +8, half speed, Silent Stalker' },
+        { text: 'Ready the guns and fire at its soft spots', ch: 'Monstrous Anatomy 3', tw: -2, prog: 1, fail: 'TW +8, no progress, Silent Stalker 1' },
+        { text: 'Pursue it to its spawning grounds', ch: 'Shadowy vs Zee Peril', need: 'Zailing to Destination: Angler Crab Spawning Grounds', tw: 2, prog: 1, note: 'Zailing Speed + a flat 11 rather than the usual +1-5.', fail: 'TW +2, half speed' },
+        { text: 'Reach for your harpoon; call for ramming speed!', need: 'A Notched Bone Harpoon', tw: 1, prog: 0, men: 'clears Rumbling Stomachs', gain: 'Deep-zee Catch 5' },
+      ],
+    },
+    {
+      name: 'A Growing Concern',
+      where: ['any'],
+      freq: 'High Urgency',
+      urgent: true,
+      cardNeeds: 'Troubled Waters 7, Creeping Fear',
+      note: 'Black card: Troubled Waters 7 plus Creeping Fear.',
+      opts: [
+        { text: 'Investigate', ch: 'Luck 50%', tw: -5, prog: 0, fail: 'Troubled Waters set to 5, no progress, Nightmares +8' },
+        { text: 'Double the zailors\' rations', need: 'Crate of Incorruptible Biscuits 1 x, Foxfire Candle Stub 100 x, Bottle of Greyfields 1882 100 x', tw: null, twText: 'Troubled Waters set to 5', prog: 0, men: 'Rumbling Stomachs', gain: 'costs Crate of Incorruptible Biscuits 1, costs Foxfire Candle Stub 100, costs Bottle of Greyfields 1882 100' },
+      ],
+    },
+    {
+      name: 'A Huge Terrible Beast of the Unterzee!',
+      where: ['any'],
+      freq: 'Infrequent',
+      note: 'Both lines leave your crew with Rumbling Stomachs, which is one of the six menaces that turns Troubled Waters 7 into a black card.',
+      opts: [
+        { text: 'Delicious, delicious lumps', ch: 'Dangerous vs Zee Peril', tw: 0, prog: 1, men: 'Rumbling Stomachs', gain: 'Appalling Secret 2, Unaccountably Peckish 1, Someone Is Coming +1, Tale of Terror!! 4', fail: 'TW +10, no progress, Rumbling Stomachs' },
+        { text: 'Steam on by', tw: 3, twRange: '+3-5', prog: 1, men: 'Silent Stalker' },
+      ],
+    },
+    {
+      name: 'A Message in a Bottle',
+      where: ['any'],
+      freq: 'Very Infrequent',
+      cardNeeds: 'Corsair\'s Colours',
+      opts: [
+        { text: 'Unfurl the paper', tw: 0, prog: 0, gain: 'Directions to a Hidden Stash for one of eight ports', piracy: true },
+      ],
+    },
+    {
+      name: 'A Navigation Error',
+      where: ['any'],
+      freq: 'Infrequent',
+      note: 'A success on any of the first three lines is full speed for no Troubled Waters; the failures cost +8 or +9 and half the progress.',
+      opts: [
+        { text: 'Correct your course', ch: 'Watchful vs Zee Peril', tw: 0, prog: 1, gain: 'Map Scrap 10', fail: 'TW +8, half speed' },
+        { text: 'Listen to the Zee', ch: 'Zeefaring 5', need: 'Zeefaring', tw: 0, prog: 1, gain: 'Map Scrap 12', fail: 'TW +9, half speed' },
+        { text: 'Consider what you learned from the Starved Men', ch: 'Watchful vs Zee Peril', need: 'Written in the Glim (Quality) 3000', tw: 0, prog: 1, gain: 'Map Scrap 13', fail: 'TW +9, half speed' },
+        { text: 'Let your own star guide you', ch: 'Persuasive vs Zee Peril', need: 'A False-Star of your Own', tw: -5, prog: 1, fail: 'full speed' },
+        { text: 'Use your disorientation to your advantage', ch: 'Zeefaring 5', need: 'Chasing Down Your Bounty, Corsair\'s Colours 2', tw: 2, twRange: '+2-3', prog: 1, gain: 'Chasing Down Your Bounty [See below]', rare: 'TW -1, full speed', fail: 'TW +8, full speed', piracy: true },
+      ],
+    },
+    {
+      name: 'A Promising Wreck',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'Corsair\'s Colours 2',
+      opts: [
+        { text: 'Dive for salvage', ch: 'Zeefaring 13', tw: 2, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold [see below], Unprovenanced Artefact 1', rare: 'full speed', fail: 'TW +8, half speed, Creeping Fear', piracy: true },
+        { text: 'Zail on by', tw: 4, prog: 1, piracy: true },
+      ],
+    },
+    {
+      name: 'A Ragtag Flotilla',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'Remaining Mass of the Ravenous Lifeberg',
+      note: 'Only appears while a Ravenous Lifeberg is loose in the world.',
+      opts: [
+        { text: 'Hail a ship and inquire about their purpose', tw: -2, prog: 0.5, gain: 'Tale of Terror!! 1' },
+        { text: 'Steam on by', tw: 4, prog: 1 },
+      ],
+    },
+    {
+      name: 'A Ship of Zealots',
+      where: ['any'],
+      freq: 'Infrequent',
+      cardNeeds: 'Troubled Waters 4-7',
+      note: 'Only drawn at Troubled Waters 4-7.',
+      opts: [
+        { text: 'See them off', ch: 'Dangerous vs Zee Peril', tw: 2, prog: 1, fail: 'TW +10, full speed' },
+        { text: 'Race away from these lunatics', need: 'Zailing Speed 75', tw: 1, prog: 1 },
+        { text: 'Preach a variant creed', ch: 'Mithridacy 3', tw: 2, prog: 1, fail: 'TW +10, half speed' },
+        { text: 'Signal your experience on the Samaritan', need: 'The Banker\'s Daughter', tw: 2, prog: 1 },
+        { text: 'Send them down to the Fathomking\'s court', ch: 'Zeefaring 5', need: 'Corsair\'s Colours 2', tw: 2, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold [See below], Pieces of Plunder Weighing Down Your Hold [See below]', fail: 'TW +8, half speed', piracy: true },
+      ],
+    },
+    {
+      name: 'A Sighting of the (Bounty)',
+      prefix: 'A Sighting of the',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'Chasing Down Your Bounty, Corsair\'s Colours 2',
+      note: 'Piracy card. In game the name carries your quarry\'s ship type in place of "(Bounty)", so it is matched on its opening words.',
+      opts: [
+        { text: 'Follow that ship!', ch: 'Zeefaring 13', tw: 4, prog: 1, gain: 'Chasing Down Your Bounty [See below]', rare: 'TW +2, full speed', fail: 'TW +10, half speed', piracy: true },
+        { text: 'Let them pass over the horizon', tw: 6, prog: 1, piracy: true },
+      ],
+    },
+    {
+      name: 'A Spit of Land',
+      where: ['any'],
+      freq: 'Infrequent',
+      note: 'A coin flip: -1 Troubled Waters at half speed, or +8 at half speed.',
+      opts: [
+        { text: 'Steam on by', hidden: 'Rumbling Stomachs', tw: 1, prog: 1 },
+        { text: 'Stop briefly at the island', ch: 'Luck 50%', tw: -1, twFail: 8, prog: 0.5, fail: 'TW +8, half speed' },
+        { text: 'Stop at the behest of your crew', need: 'Shipful of Schemers', tw: 1, prog: 0.5, gain: 'Vienna Opening 1' },
+        { text: 'The Heart\'s suggestion', need: 'The Cladery Heart', tw: -1, prog: 1, gain: 'Tin of Zzoup 1' },
+      ],
+    },
+    {
+      name: 'A Wily Zailor',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'An Experienced Zailor:',
+      note: 'Not an ordinary voyage: this card belongs to a journey measured in Approaching Journey\'s End rather than Zailing..., so it makes no Zailing progress.',
+      opts: [
+        { text: 'Zail around the Pelagic Upheavals', tw: 4, prog: 0, gain: 'Approaching Journey\'s End +6' },
+        { text: 'Skirt the Howling Shoals', need: 'An Experienced Zailor: A Well-Known Navigator', tw: 4, prog: 0, gain: 'Approaching Journey\'s End +7' },
+        { text: 'Steam straight through the Beechey Currents', need: 'An Experienced Zailor: A Zee-Voyager of Note', tw: 4, prog: 0, gain: 'Approaching Journey\'s End +8, Zee-Ztory 1' },
+        { text: '"I\'ll be in my bunk." (8 FATE)', need: 'An Experienced Zailor: A Seasoned Captain, A Well-Known Navigator or A Zee-Voyager of Note', tw: 0, prog: 0 },
+      ],
+    },
+    {
+      name: 'A Worrying Appetite',
+      where: ['any'],
+      freq: 'High Urgency',
+      urgent: true,
+      cardNeeds: 'Troubled Waters 7, Rumbling Stomachs',
+      note: 'Black card: Troubled Waters 7 plus Rumbling Stomachs. The one black-card option that raises Troubled Waters instead of lowering it is "You, too, have an appetite".',
+      opts: [
+        { text: 'Scour the hold for anything edible', ch: 'Luck 50%', tw: -5, twFail: 10, prog: 0, fail: 'TW +10, no progress, Nightmares +8' },
+        { text: 'You, too, have an appetite', need: 'Unaccountably Peckish 1', tw: 2, prog: 0, men: 'Nightmares +1, clears Rumbling Stomachs', gain: 'Unaccountably Peckish 1' },
+      ],
+    },
+    {
+      name: 'An Architect\'s Dream',
+      where: ['any'],
+      freq: 'Infrequent',
+      cardNeeds: 'Delighted, Nightmares',
+      opts: [
+        { text: 'Hand him a hammer', need: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall exactly 3', tw: 0, prog: 0, men: 'Nightmares +2', gain: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall +4' },
+        { text: 'Awaken from a familiar dream', need: 'Still Waiting on the Host', tw: 0, prog: 0, men: 'clears Nightmares -3', gain: 'costs Having Recurring Dreams: Rosy Colours Leaping on the Wall' },
+      ],
+    },
+    {
+      name: 'Bearing Witness to a Pilgrimage',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'The Midnight Whale: Distance from the Gant Pole 1000',
+      opts: [
+        { text: 'Hail a passing steamship', tw: 0, prog: 0.5, gain: 'Romantic Notion 25' },
+        { text: 'Steam on by', tw: 4, prog: 1, note: 'Full Zailing Speed, but without the usual +1-5 bonus.' },
+      ],
+    },
+    {
+      name: 'Cornering the (Bounty) at Last',
+      prefix: 'Cornering the',
+      where: ['any'],
+      freq: 'High Urgency',
+      urgent: true,
+      cardNeeds: 'Chasing Down Your Bounty 15',
+      note: 'Piracy card. In game the name carries your quarry\'s ship type in place of "(Bounty)", so it is matched on its opening words.',
+      opts: [
+        { text: 'Strike them down', ch: 'Zeefaring 11', need: 'Chosen Bounty Ship Type 100', tw: 3, prog: 0, gain: 'A Prolific Pirate 1, costs Chasing Down Your Bounty, Pieces of Plunder Weighing Down Your Hold [See below], In Pursuit of Wrack-Iron 1', fail: 'TW +12, no progress, Unwelcome on the Waters', piracy: true },
+        { text: 'Call off the approach', tw: -7, prog: 0, men: 'Wounds +2', gain: 'costs Chasing Down Your Bounty', piracy: true },
+      ],
+    },
+    {
+      name: 'Creaking from Above',
+      where: ['any'],
+      freq: 'Standard',
+      opts: [
+        { text: 'Glim-fall!', ch: 'Luck 50%', tw: 2, twFail: 9, prog: 1, men: 'Silent Stalker', gain: 'Shard of Glim (2 x Zee Peril), Someone Is Coming +1', fail: 'TW +9, full speed, Silent Stalker' },
+      ],
+    },
+    {
+      name: 'Passing a Lightship',
+      where: ['any'],
+      freq: 'Infrequent',
+      note: '"Zail on" is a rare thing: full speed for no Troubled Waters at all, with no challenge.',
+      opts: [
+        { text: 'Stop and exchange news', need: 'Zee-Ztory 7 x', tw: 0, prog: 0, gain: 'costs Zee-Ztory 7, Tale of Terror!! 2-10, Scrap of Incendiary Gossip 1-10' },
+        { text: 'Zail on', tw: 0, prog: 1 },
+        { text: 'Stop and exchange news', ch: 'Shadowy vs Zee Peril', need: 'Chasing Down Your Bounty, Corsair\'s Colours 2', tw: 0, prog: 1, gain: 'Chasing Down Your Bounty [See below]', fail: 'TW +7, half speed, Unwelcome on the Waters', piracy: true },
+      ],
+    },
+    {
+      name: 'Rats in the hold',
+      where: ['any'],
+      freq: 'Infrequent',
+      opts: [
+        { text: 'Negotiate with them', ch: 'Persuasive vs Zee Peril', tw: 0, prog: 1, fail: 'TW +8, full speed, Creeping Fear' },
+        { text: 'Fill the hold with traps', ch: 'Dangerous vs Zee Peril', tw: 2, prog: 1, gain: 'Rat on a String 50', fail: 'TW +8, full speed, Mutinous Whispers' },
+        { text: 'Permit Blackpelt to deal with them', need: 'Blackpelt, Venge-Pirate', tw: 0, prog: 1, gain: 'Rat on a String 4, Maniac\'s Prayer 13' },
+        { text: 'Go on a rat-catching expedition', need: 'A Notched Bone Harpoon or Ratting Piece', tw: 0, prog: 1, gain: 'Rat on a String 100' },
+        { text: 'Question them about other ships', ch: 'Dangerous vs Zee Peril', need: 'Chasing Down Your Bounty, Corsair\'s Colours 2', tw: 3, prog: 1, gain: 'Chasing Down Your Bounty [See below]', rare: 'TW +2-3, full speed', fail: 'TW +6, full speed', piracy: true },
+      ],
+    },
+    {
+      name: 'Share your Research with a Fellow Scholar',
+      where: ['any', 'The Sea of Voices'],
+      freq: 'Infrequent',
+      cardNeeds: 'Embarking on a Voyage of Scientific Discovery 3',
+      note: 'Belongs to a journey measured in Approaching Journey\'s End rather than Zailing...',
+      opts: [
+        { text: 'Correspond with a Fellow Scholar', need: 'Sulky Bat 10 x, Page of Cryptopalaeontological Notes 50 x, Page of Prelapsarian Archaeological Notes 50 x, Page of Theosophistical Notes 50 x, Embarking on a Voyage of Scientific Discovery 3', tw: 2, prog: 0, gain: 'Approaching Journey\'s End +3, 20 of each Page of Notes, Sulky Bat 4-8' },
+      ],
+    },
+    {
+      name: 'Signs of Disloyalty',
+      where: ['any'],
+      freq: 'High Urgency',
+      urgent: true,
+      cardNeeds: 'Troubled Waters 7, Mutinous Whispers',
+      note: 'Black card: Troubled Waters 7 plus Mutinous Whispers.',
+      opts: [
+        { text: 'A few private conversations', ch: 'Luck 50%', tw: -5, twFail: 2, prog: 0.5, fail: 'TW +2, half speed' },
+        { text: 'Double their pay', need: 'Shard of Glim 250 x, Moon-Pearl 250 x', tw: null, twText: 'Troubled Waters set to 5', prog: 0, gain: 'costs Shard of Glim 250, costs Moon-Pearl 250' },
+        { text: 'Remind them of their right and proper duty', ch: 'Persuasive vs Zee Peril', need: 'Most Presentable Company', tw: null, twText: 'Troubled Waters set to 5', prog: 0.5, fail: 'TW +2, half speed' },
+        { text: 'Put your money where your mouth is', ch: 'Luck 40%', need: 'High-Rolling Rantipoles, Corsair\'s Colours 2, Pieces of Plunder Weighing Down Your Hold 500 x', tw: -2, prog: 0.5, gain: 'Pieces of Plunder Weighing Down Your Hold 550', fail: 'Troubled Waters set to 5, half speed, clears Mutinous Whispers', piracy: true },
+      ],
+    },
+    {
+      name: 'Signs of Pursuit',
+      where: ['any'],
+      freq: 'High Urgency',
+      urgent: true,
+      cardNeeds: 'Troubled Waters 7, Silent Stalker',
+      note: 'Black card: Troubled Waters 7 plus Silent Stalker. Its challenge is Dangerous against a difficulty well above Zee Peril.',
+      opts: [
+        { text: 'Turn around and confront it', ch: 'Dangerous vs Zee Peril', tw: -5, prog: 0.5, fail: 'Troubled Waters set to 5, no progress, clears Silent Stalker, Groaning Hull' },
+        { text: 'Throw bait overboard', need: 'Deep-zee Catch 10 x', hidden: 'Rumbling Stomachs', tw: null, twText: 'Troubled Waters set to 5', prog: 0, men: 'Rumbling Stomachs', gain: 'costs Deep-zee Catch 10' },
+      ],
+    },
+    {
+      name: 'Spiralling Into Sorrow',
+      where: ['any'],
+      freq: 'Frequent',
+      cardNeeds: 'Associating with a Youthful Naturalist exactly 590, Spiralling Regrets',
+      opts: [
+        { text: 'Dive with the (diving-bell)', need: 'Appalling Secret', hidden: 'Wounds, A Consignment of Capricious Cargo', tw: null, twText: 'Troubled Waters set to 0', prog: 0, gain: 'Associating with a Youthful Naturalist, Shard of Glim 777, costs Zee Peril' },
+      ],
+    },
+    {
+      name: 'Submerge',
+      where: ['any', 'The Sea of Voices'],
+      freq: 'Standard',
+      cardNeeds: 'Zubmarine 1 x',
+      note: 'Belongs to a journey measured in Approaching Journey\'s End rather than Zailing...',
+      opts: [
+        { text: 'Run deep, run quiet', tw: -4, prog: 0, gain: 'Approaching Journey\'s End +2, Approaching the Gates of the Garden +?' },
+      ],
+    },
+    {
+      name: 'Taking in Water',
+      where: ['any'],
+      freq: 'High Urgency',
+      urgent: true,
+      cardNeeds: 'Troubled Waters 7, Groaning Hull',
+      note: 'Black card: Troubled Waters 7 plus Groaning Hull. The Luck 70% raises Troubled Waters either way; the brass repair is the real fix.',
+      opts: [
+        { text: 'Seal the compartment and run the pumps', ch: 'Luck 70%', tw: 2, twFail: 3, prog: 0.5, fail: 'TW +3, no progress, Wounds +3' },
+        { text: 'Stop and make field repairs', need: 'Nevercold Brass Sliver 500 x', tw: -7, prog: 0, men: 'clears Groaning Hull, Creeping Fear', gain: 'costs Nevercold Brass Sliver 500' },
+      ],
+    },
+    {
+      name: 'The Clinging Coral Mass',
+      where: ['any'],
+      freq: 'Infrequent',
+      opts: [
+        { text: '"Put your backs into it, lads!"', ch: 'Persuasive vs Zee Peril', tw: 2, prog: 1, rare: 'full speed', fail: 'TW +10, full speed, Mutinous Whispers' },
+        { text: 'Grab a hammer yourself', ch: 'Dangerous vs Zee Peril', tw: 2, prog: 1, fail: 'TW +10, full speed, Mutinous Whispers' },
+      ],
+    },
+    {
+      name: 'The Fleet of Truth',
+      where: ['any'],
+      freq: 'Infrequent',
+      cardNeeds: 'Embarking on a Voyage of Scientific Discovery 3, Troubled Waters 3-7',
+      opts: [
+        { text: 'Villainy!', ch: 'Dangerous vs Zee Peril', tw: 4, prog: 1, gain: 'Page of Cryptopalaeontological Notes 5, Page of Prelapsarian Archaeological Notes 5, Page of Theosophistical Notes 5', fail: 'TW +8, full speed' },
+        { text: 'Subterfuge', ch: 'Shadowy vs Zee Peril', need: 'Fraught Research Assistant', tw: 4, prog: 1, gain: 'Page of Cryptopalaeontological Notes 7, Page of Prelapsarian Archaeological Notes 7, Page of Theosophistical Notes 7', fail: 'TW +8, full speed' },
+        { text: 'Engage in a little bit of \'peer review\'', ch: 'Persuasive vs Zee Peril', need: 'Chasing Down Your Bounty, Corsair\'s Colours 2', tw: 2, prog: 1, gain: 'Chasing Down Your Bounty [See below]', rare: 'full speed', fail: 'TW +8, half speed, Unwelcome on the Waters', piracy: true },
+        { text: 'Hatch plans with two Shifty Scholars', need: 'Associating with a Youthful Naturalist 510-549, Favour in High Places 2 x', hidden: 'Organic Comprehension', tw: 2, prog: 0.5, gain: 'Organic Comprehension, costs Favour in High Places 2' },
+        { text: 'Rendezvous with two Shifty Scholars', need: 'Associating with a Youthful Naturalist 510-549, Organic Comprehension exactly 7', tw: 2, prog: 0.5, men: 'Silent Stalker', gain: 'Organic Comprehension, Associating with a Youthful Naturalist 10, Unearthly Fossil 10' },
+      ],
+    },
+    {
+      name: 'The Killing Wind',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'Troubled Waters 4-7',
+      note: 'Only drawn at Troubled Waters 4-7. Without Zubmersibility the only line is a coin flip that costs +4 on a success and +12 on a failure - leave it in hand while you can.',
+      opts: [
+        { text: 'Outrun the storm front', ch: 'Luck 50%', tw: 4, twFail: 12, prog: 1, men: 'Creeping Fear', fail: 'TW +12, no progress, Creeping Fear' },
+        { text: 'Make ready to dive', need: 'Zubmersibility', tw: -2, prog: 1, gain: 'Zee-Ztory 3–6' },
+        { text: 'Chart a course through the storm using your Storm in a Teacup', ch: 'Luck 60%', need: 'Ornamental Storm in a Teacup', tw: null, twText: 'Troubled Waters up by an unrecorded amount', twFail: 10, prog: 1, men: 'Creeping Fear', gain: 'Zee-Ztory 2', fail: 'TW +10, no progress, Creeping Fear' },
+      ],
+    },
+    {
+      name: 'The Sound of Wings',
+      where: ['any'],
+      freq: 'Infrequent',
+      strictZee: true,
+      cardNeeds: 'Wings of Change',
+      note: 'Fallen London draws a card of this name in eight different places; only the Unterzee one is described here, which is why it is only badged when the area reads as a zee region.',
+      opts: [
+        { text: 'Full power to the engines!', ch: 'Zeefaring 7', tw: 0, prog: 1, men: 'Wounds 2-3', gain: 'Royal-Blue Feather 6, Aeolian Scream 1', fail: 'TW +6, half speed, Wounds 3, Nightmares 1-3' },
+        { text: 'Confront it', hidden: 'Wings of Change (Not here. Not even with cannonfire.)', tw: 0, prog: 0 },
+      ],
+    },
+    {
+      name: 'Toward the Canal',
+      where: ['any'],
+      freq: 'Very Infrequent',
+      cardNeeds: 'A Person of Some Importance - is: A Shattering Force, A Legendary Charisma, An Invisible Eminence, An Extraordinary Mind, A Paramount Presence',
+      opts: [
+        { text: 'Contemplate the journey', tw: 0, prog: 1 },
+        { text: 'Commit to the choice', need: 'The Date - After Certain Neathy Affairs are Complete', tw: 0, prog: 0 },
+      ],
+    },
+    {
+      name: 'What do the Drownies Sing?',
+      where: ['any'],
+      freq: 'Standard',
+      note: 'With a Faceted Decanter of Drownie Effluvia and Kataleptic Toxicology, this is full speed for -5 Troubled Waters.',
+      opts: [
+        { text: 'Keep the crew from listening', ch: 'Persuasive vs Zee Peril', tw: 2, prog: 1, fail: 'TW +9, full speed, Creeping Fear' },
+        { text: 'Drown out the drownies', ch: 'Dangerous vs Zee Peril', tw: 2, prog: 1, fail: 'TW +9, full speed, Groaning Hull' },
+        { text: 'Cure the ignorance of your zailors', ch: 'Kataleptic Toxicology 3', need: 'A Faceted Decanter of Drownie Effluvia, Kataleptic Toxicology', tw: -5, prog: 1, fail: 'TW +12, full speed, Creeping Fear' },
+        { text: 'Listen to the songs, and for your quarry', ch: 'Monstrous Anatomy 13', need: 'Chasing Down Your Bounty, Corsair\'s Colours 2', tw: 2, prog: 1, gain: 'Chasing Down Your Bounty', rare: 'full speed', fail: 'TW +6, half speed, Nightmares +4, Silent Stalker', piracy: true },
+      ],
+    },
+    {
+      name: 'When the Carousing Stops',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'Corsair\'s Colours 2',
+      opts: [
+        { text: 'Discipline your crew', ch: 'Dangerous vs Zee Peril', tw: 4, prog: 1, fail: 'TW +10, half speed, Mutinous Whispers', piracy: true },
+        { text: 'Restart the party', ch: 'Persuasive vs Zee Peril', tw: 4, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold [see below], Bottle of Broken Giant 1844 1', rare: 'TW +2, full speed', fail: 'TW +10, half speed, Mutinous Whispers', piracy: true },
+      ],
+    },
+    {
+      name: 'Your False-Star',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'Looked Upon Fondly',
+      note: 'The best card in the deck: full Zailing Speed and Troubled Waters -5, no challenge, no cost. Needs the Looked Upon Fondly quality from the Fingerkings.',
+      opts: [
+        { text: 'Navigate by the light of your star', tw: -5, prog: 1 },
+      ],
+    },
+    {
+      name: 'Zeeborne Pariahs',
+      where: ['any'],
+      freq: 'High Urgency',
+      urgent: true,
+      cardNeeds: 'Troubled Waters 7, Unwelcome on the Waters',
+      note: 'Black card: Troubled Waters 7 plus Unwelcome on the Waters, which comes from failed piracy.',
+      opts: [
+        { text: 'Evade them!', ch: 'Luck 70%', tw: 2, twFail: 4, prog: 0.5, fail: 'TW +4, no progress, Wounds +4' },
+        { text: 'Put your crew to work disguising the ship', need: 'Inkling of Identity 50 x', tw: -7, prog: 0, men: 'clears Unwelcome on the Waters, Mutinous Whispers', gain: 'costs Inkling of Identity 50' },
+      ],
+    },
+
+    // --- Home Waters ---
+    {
+      name: 'A Steamer full of Passengers',
+      where: ['Home Waters', 'Shepherd\'s Wash'],
+      freq: 'Standard',
+      cardNeeds: 'Zailing on: Home Waters or Shepherd\'s Wash',
+      opts: [
+        { text: 'Steam past them', tw: 2, prog: 1 },
+        { text: 'Invite them aboard for a party', need: 'Luxurious', tw: 0, prog: 0, men: 'Scandal +2', gain: 'Hedonist, Pair of Scarlet Stockings of Dubious Origin 1, Secluded Address 6, costs Austere -3' },
+        { text: 'Recognise your quarry', ch: 'Dangerous vs Zee Peril', need: 'A List of Aliases, Writ in Gant', tw: 5, prog: 1, gain: 'Piece of Rostygold 250', fail: 'TW +2, full speed' },
+        { text: 'Rob them blind', ch: 'Dangerous vs Zee Peril', need: 'Corsair\'s Colours 2', tw: 2, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold 300', rare: 'TW +1, full speed', fail: 'TW +8, half speed, Unwelcome on the Waters', piracy: true },
+      ],
+    },
+    {
+      name: 'Amber in the Water',
+      where: ['Home Waters'],
+      freq: 'Abundant',
+      cardNeeds: 'The Lorn-Fluke\'s Fury, Wayland\'s Teeth Involvement Flag 2',
+      opts: [
+        { text: 'Identify a course through less viscous waters', ch: 'Zeefaring + Kataleptic Toxicology 20', tw: 2, prog: 1, fail: 'TW +7, half speed, Creeping Fear' },
+        { text: 'Revel in the delays', need: 'Luxurious', tw: 0, prog: 0.5, gain: 'Nodule of Warm Amber 10, Nodule of Deep Amber 200' },
+        { text: 'Mount your Fluke-Core upon the prow', need: 'Fluke-Core 1 x', tw: 2, prog: 1 },
+      ],
+    },
+    {
+      name: 'Enspired Shallows',
+      where: ['Home Waters'],
+      freq: 'Abundant',
+      cardNeeds: 'The Lorn-Fluke\'s Fury, Wayland\'s Teeth Involvement Flag 2',
+      opts: [
+        { text: 'Chart a careful course', ch: 'Zeefaring + Shapeling Arts 20', tw: 2, prog: 1, fail: 'TW +7, a third speed, Groaning Hull' },
+        { text: 'Navigate with the aid of your amber vision', need: 'Amber Vision of the Sea of Spines', tw: 1, prog: 1 },
+        { text: 'Barrel through', ch: 'Zailing Speed vs Zee Peril', tw: 2, prog: 1, fail: 'TW +7, no progress, Groaning Hull' },
+      ],
+    },
+    {
+      name: 'She\'s Going Down!',
+      where: ['Home Waters'],
+      freq: 'Standard',
+      note: 'Rescuing them spends the action for no progress, but it is -2 Troubled Waters and a point of Steadfast.',
+      opts: [
+        { text: 'Stop and rescue them', tw: -2, prog: 0, gain: 'Steadfast Quirk cap=10, costs Heartless -3' },
+        { text: 'Let the Unterzee have them', tw: 1, prog: 1, gain: 'Heartless Quirk cap=10, costs Magnanimous -3' },
+        { text: 'Loot the wreckage', ch: 'Zeefaring 5', need: 'Corsair\'s Colours 2', tw: 3, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold 250', rare: 'TW +2, full speed', fail: 'TW +8, full speed, Creeping Fear', piracy: true },
+      ],
+    },
+    {
+      name: 'Shipcatcher Webs',
+      where: ['Home Waters'],
+      freq: 'Abundant',
+      cardNeeds: 'Wayland\'s Teeth Involvement Flag 2 , Saplings in the Forest of Years',
+      opts: [
+        { text: 'Extrapolate a pattern from fragments', ch: 'Zeefaring 20', tw: 3, prog: 1, fail: 'TW +7, half speed, Creeping Fear' },
+        { text: 'Take the time to cut it down', need: 'Luxurious', tw: 0, prog: 0.5, gain: 'Silk Scrap 100, Whisper-Satin Scrap 4' },
+        { text: 'Look upon the labyrinth as a spider would', need: 'at least one of: Senatorial Gauze, A Disquieting Suspicion That You Might Be Spiders, Spider-Infested Eyeball', tw: 1, prog: 1 },
+      ],
+    },
+    {
+      name: 'Spiders in the Shallows',
+      where: ['Home Waters'],
+      freq: 'Abundant',
+      cardNeeds: 'Saplings in the Forest of Years',
+      opts: [
+        { text: 'Dive, dive, dive!', need: 'Zubmersibility', tw: 2, prog: 1 },
+        { text: 'Blast them apart', ch: 'Zeefaring 20', tw: 1, prog: 1, fail: 'TW +7, half speed, Silent Stalker' },
+        { text: 'Let your arachnid allies plead your case', need: 'at least one of: Fairly Tame Sorrow-Spider, Luxuriantly Coiffed Sorrow-Spider, Senatorial Spider, Spider of Silken Marvels ("You require but one arachnid ally." when locked)', tw: 2, prog: 1 },
+      ],
+    },
+    {
+      name: 'The Ebb and Flow of Regret',
+      where: ['Home Waters', 'Shepherd\'s Wash', 'The Sea of Voices', 'The Salt Steppe', 'The Pillared Sea', 'Stormbones', 'The Snares'],
+      freq: 'Abundant',
+      cardNeeds: 'Associating with a Youthful Naturalist 580-587, Spiralling Regrets',
+      note: 'An Evolution storyline card: one "Chart the sorrows of ..." option per region, each building the Comprehension of that region. The wiki lists its options under per-region headings rather than as one set, so no per-option numbers are transcribed here.',
+      opts: [
+      ],
+    },
+    {
+      name: 'Tongues of Flame',
+      where: ['Home Waters'],
+      freq: 'Abundant',
+      cardNeeds: 'The Lorn-Fluke\'s Fury, Wayland\'s Teeth Involvement Flag 2',
+      opts: [
+        { text: 'Dive, dive, dive!', need: 'Zubmersibility', tw: 1, prog: 1 },
+        { text: 'Weave through the warring sigils', ch: 'Zeefaring + A Scholar of the Correspondence 20', tw: 2, twRange: '+2-3', prog: 1, fail: 'TW +7, a third speed, Creeping Fear' },
+        { text: 'Lead your vessel on a merry dance through the fires', need: 'The Rose Giveth Its Verses to Devils and Also to You', tw: 1, twRange: '+1-2', prog: 1 },
+      ],
+    },
+    {
+      name: 'Venom-Tides',
+      where: ['Home Waters'],
+      freq: 'Abundant',
+      cardNeeds: 'Wayland\'s Teeth Involvement Flag 2 , Saplings in the Forest of Years',
+      opts: [
+        { text: 'Charge on through', ch: 'Zailing Speed vs Zee Peril', tw: 1, prog: 1, fail: 'TW +6, half speed, Groaning Hull' },
+        { text: 'Neutralise the toxins', ch: 'Zeefaring 20', tw: 2, prog: 1, fail: 'TW +7, half speed, Rumbling Stomachs' },
+        { text: 'Go for a swim', need: 'Water in the Blood', tw: 1, prog: 1 },
+      ],
+    },
+
+    // --- Shepherd's Wash ---
+    {
+      name: 'A Corsair Galley',
+      where: ['Shepherd\'s Wash'],
+      freq: 'Standard',
+      opts: [
+        { text: 'Full steam ahead!', ch: 'Zailing Speed vs Zee Peril', tw: 3, prog: 1, fail: 'TW +10, half speed, Groaning Hull' },
+        { text: 'Fire a warning shot', ch: 'Dangerous vs Zee Peril', tw: 2, prog: 1, fail: 'TW +12, half speed, Groaning Hull' },
+        { text: 'Fight back!', ch: 'Artisan of the Red Science 6', need: 'Corsair\'s Colours 2', tw: 4, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold 300', rare: 'TW +2, full speed', fail: 'TW +10, a quarter speed, Unwelcome on the Waters', piracy: true },
+      ],
+    },
+    {
+      name: 'Row, row, row',
+      where: ['Shepherd\'s Wash'],
+      freq: 'Standard',
+      note: '"Ask the monks from where they hail" is one of the two ways to discover Godfall.',
+      opts: [
+        { text: 'Zail on by', ch: 'Zailing Speed vs Zee Peril', tw: 0, prog: 1, fail: 'TW +8, half speed' },
+        { text: 'Brawl with the monks', ch: 'Dangerous vs Zee Peril', tw: 0, prog: 0, gain: 'Bottle of Broken Giant 1844 1, Zee-Ztory 2', fail: 'TW +8, no progress' },
+        { text: 'Ask the monks from where they hail', need: 'Cellar of Wine 1 x, Bottle of Morelways 1872 100 x', hidden: 'Discovered: Godfall', tw: 0, prog: 0, gain: 'costs Cellar of Wine 1, costs Bottle of Morelways 1872 100, Discovered: Godfall' },
+        { text: 'Gather your crew and engage in a proper dust-up', ch: 'Dangerous vs Zee Peril', need: 'Staunch Comrades', tw: 0, prog: 0.5, gain: 'Apostate\'s Psalm 1, Bottle of Morelways 1872 20', fail: 'TW +6, no progress, Wounds +2' },
+      ],
+    },
+    {
+      name: 'The Light of the Mountain',
+      where: ['Shepherd\'s Wash'],
+      freq: 'Standard',
+      note: 'The card that first grants Southern Wind, which starts I Shot the Albatross back in London.',
+      opts: [
+        { text: 'Fix a looking-glass on the Mountain', tw: 2, prog: 1, gain: 'Southern Wind +4 CP, or +1 CP if already present, Memory of Distant Shores 5' },
+      ],
+    },
+    {
+      name: 'The Wax-Wind',
+      where: ['Shepherd\'s Wash'],
+      freq: 'Standard',
+      note: 'Also grants Southern Wind. Hiding belowdecks is -2 Troubled Waters but spends the action; with Zubmersibility, "Dive!" is -1 and full speed.',
+      opts: [
+        { text: 'Shut off the engines and hide belowdecks', tw: -2, prog: 0, gain: 'Zee-Ztory 1' },
+        { text: 'Zail into the wind', ch: 'Shadowy vs Zee Peril', tw: 2, prog: 0.5, gain: 'Southern Wind, Zee-Ztory 1', fail: 'TW +4, no progress' },
+        { text: 'Dive!', need: 'Zubmersibility', tw: -1, prog: 1, gain: 'Southern Wind' },
+        { text: 'Zail into the eye of the storm', ch: 'Zeefaring 5', need: 'Zeefaring, Stormy-Eyed', tw: 0, prog: 0.5, gain: 'Memory of Distant Shores 1, Zee-Ztory 1, Memory of Light 1, Southern Wind' },
+      ],
+    },
+
+    // --- The Sea of Voices ---
+    {
+      name: 'A Good Meal',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      cardNeeds: 'Embarking on a Voyage of Scientific Discovery 3',
+      opts: [
+        { text: 'And a little bonus', tw: 3, prog: 1, gain: 'Page of Cryptopalaeontological Notes 3, Page of Prelapsarian Archaeological Notes 3, Page of Theosophistical Notes 3, Moon-Pearl 1' },
+      ],
+    },
+    {
+      name: 'A Hazard to Shipping',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      opts: [
+        { text: 'Set a course around the thing', ch: 'Watchful vs Zee Peril', tw: 2, prog: 1, rare: 'full speed', fail: 'TW +2, half speed, Silent Stalker' },
+      ],
+    },
+    {
+      name: 'A Light in the Fog',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      opts: [
+        { text: 'Get as close as you dare', tw: 3, prog: 0.5, gain: 'Walking the Falling Cities +5, Zee-Ztory 5' },
+        { text: 'Keep away from the lighthouse', tw: 1, prog: 1 },
+        { text: 'Listen for news of your quarry', ch: 'Watchful vs Zee Peril', need: 'Chasing Down Your Bounty, Corsair\'s Colours 2', tw: 3, prog: 1, gain: 'Chasing Down Your Bounty +10', rare: 'full speed', fail: 'TW +8, full speed, Groaning Hull', piracy: true },
+      ],
+    },
+    {
+      name: 'Crossing Paths',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      opts: [
+        { text: 'Hail the ship and have a chat with the captain', tw: -2, prog: 0.5, gain: 'Zee-Ztory 1, Walking the Falling Cities +5' },
+        { text: 'Demand to duel the steamer\'s captain', ch: 'Zeefaring 6', need: 'Corsair\'s Colours 2, Flexile Sabre', tw: 3, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold 350', rare: 'TW +1, full speed', fail: 'TW +7, half speed', piracy: true },
+        { text: 'Steam on by', tw: 4, prog: 1 },
+      ],
+    },
+    {
+      name: 'Fury of the Unterzee: Lost but not Alone',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      cardNeeds: 'Troubled Waters 10',
+      note: 'Drawn at Troubled Waters 10, on a voyage measured in Approaching Journey\'s End.',
+      opts: [
+        { text: 'A tapping on the hull', ch: 'Luck 50%', tw: -2, twRange: '-2-6', prog: 0, gain: 'Approaching Journey\'s End +2-6', fail: 'Troubled Waters cleared, no progress, Nightmares +3' },
+        { text: 'Avert what comes', need: 'Ostentatious Diamond 20 x, Whispered Hint 100 x', tw: -5, prog: 0, gain: 'Approaching Journey\'s End +2, costs Whispered Hint 100, costs Ostentatious Diamond 20' },
+      ],
+    },
+    {
+      name: 'Fury of the Unterzee: Taken',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      cardNeeds: 'Troubled Waters 10',
+      note: 'Drawn at Troubled Waters 10, on a voyage measured in Approaching Journey\'s End.',
+      opts: [
+        { text: 'Oh no', ch: 'Luck 50%', tw: -5, prog: 0, gain: 'Walking the Falling Cities, Approaching Journey\'s End +2', fail: 'Troubled Waters cleared, no progress' },
+        { text: 'Use your store of sea-lore', need: 'Zee-Ztory 20 x', tw: 0, prog: 0, gain: 'Approaching Journey\'s End, costs Zee-Ztory 20' },
+      ],
+    },
+    {
+      name: 'Listen to the Wind',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      opts: [
+        { text: 'Listen to the Voices', ch: 'Luck 50%', hidden: 'Aeolian Sensitivity', tw: 2, twFail: 7, prog: 1, gain: 'Eastern Wind +1, Northern Wind +1, Southern Wind +1, Zee-Ztory 1, Walking the Falling Cities +5', fail: 'TW +7, full speed, Creeping Fear' },
+        { text: 'Listen closely to the Voices', ch: 'Luck 60%', need: 'Aeolian Sensitivity', tw: 2, twFail: 7, prog: 1, gain: 'Zee-Ztory 1, Walking the Falling Cities +5, Eastern Wind +1, Northern Wind +1, Southern Wind +1', fail: 'TW +7, full speed, Creeping Fear' },
+        { text: 'Steam the way the voices tell you', need: 'A Scholar of the Correspondence 1', tw: 3, prog: 1 },
+      ],
+    },
+    {
+      name: 'Meeting a Local Steamer',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      opts: [
+        { text: 'Hail the steamer to exchange news', tw: -2, prog: 0.5, gain: 'Zee-Ztory 1, Walking the Falling Cities +5' },
+        { text: 'Steam on by', tw: 2, prog: 1 },
+        { text: 'I say, must you do that?', need: 'Luxurious', tw: -1, prog: 1, gain: 'Zee-Ztory 4' },
+        { text: 'Hail the steamer to exchange news, and let your Boots translate', need: 'Polythremean Captain\'s Boots', tw: 1, prog: 1, gain: 'Zee-Ztory 3, Walking the Falling Cities +5' },
+        { text: 'Board her!', ch: 'Persuasive vs Zee Peril', need: 'Corsair\'s Colours 2, Russet Brachiator', tw: 3, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold 350', rare: 'TW +2, full speed', fail: 'TW +7, half speed', piracy: true },
+      ],
+    },
+    {
+      name: 'The Giant of the Unterzee',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      note: 'The jackpot. A success is a flat Zailing... 80 - an entire direct leg in one action - for Troubled Waters +5. A failure is only half speed and +8.',
+      opts: [
+        { text: 'Erm, hello?', ch: 'Persuasive vs Zee Peril', tw: 5, prog: 'flat80', fail: 'TW +8, half speed' },
+      ],
+    },
+    {
+      name: 'The Iceberg',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      cardNeeds: 'Troubled Waters 4 - 7',
+      note: 'Only drawn at Troubled Waters 4-7. With Zubmersibility it is full speed and -2 Troubled Waters.',
+      opts: [
+        { text: 'Keep a prudent distance', ch: 'Luck 50%', tw: 4, twFail: 8, prog: 1, gain: 'Walking the Falling Cities +5', fail: 'TW +8, no progress, Creeping Fear' },
+        { text: 'Have a look around under the iceberg', need: 'Zubmersibility 1 x', tw: -2, prog: 1, gain: 'Zee-Ztory 2, Walking the Falling Cities +5' },
+      ],
+    },
+    {
+      name: 'Unfinished Pirates!',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      cardNeeds: 'Troubled Waters 4 - 7',
+      note: 'Only drawn at Troubled Waters 4-7.',
+      opts: [
+        { text: 'Repel Boarders!', ch: 'Dangerous vs Zee Peril', tw: 3, prog: 0.5, gain: 'Zee-Ztory 1', fail: 'TW +9, half speed, Groaning Hull' },
+        { text: 'Show them the might of your broadside', ch: 'Zeefaring 7', need: 'Corsair\'s Colours 2', tw: 4, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold 350', rare: 'TW +2, full speed', fail: 'TW +8, half speed, Unwelcome on the Waters', piracy: true },
+        { text: 'Outpace them', need: 'Zailing Speed 75 x', tw: 4, prog: 1 },
+      ],
+    },
+
+    // --- The Salt Steppe ---
+    {
+      name: 'A Chelonite Hunting Ketch',
+      where: ['The Salt Steppe'],
+      freq: 'Standard',
+      note: 'None of these lines make any Zailing progress at all - this is a trading card, not a travelling one.',
+      opts: [
+        { text: 'Hail them and purchase a bag of assorted bones', need: 'Moon-Pearl 500 x, Shard of Glim 500 x', tw: 0, prog: 0, gain: 'costs Moon-Pearl 500, costs Shard of Glim 500, Fin Bones, Collected 1-9, Withered Tentacle 2-10, Crustacean Pincer 1-5', rare: 'no progress' },
+        { text: 'Offer to help a Sharp Hunter', need: 'Chirurgical Touch', tw: 0, prog: 0, gain: 'Crystallised Curio 2' },
+        { text: 'Hail them and exchange stories', need: 'Zee-Ztory 10 x', tw: 0, prog: 0, gain: 'costs Zee-Ztory 10, Tale of Terror!! 15, costs Zee-Ztory 10, Extraordinary Implication 3' },
+        { text: 'Regale them with tales of your own hunts', need: 'A Notched Bone Harpoon, Tale of Terror!! 10 x', tw: -4, prog: 0, gain: 'costs Tale of Terror!! 10, Moon-Pearl 250, Shard of Glim 250, Fin Bones, Collected 5' },
+        { text: 'Open fire!', ch: 'Zeefaring 11', need: 'Corsair\'s Colours 2', tw: 3, prog: 0, gain: 'Pieces of Plunder Weighing Down Your Hold 400', fail: 'TW +6, no progress, Groaning Hull', piracy: true },
+        { text: 'Exchange sightings of elusive beasts', ch: 'Monstrous Anatomy 11', need: 'Chasing Down Your Bounty, Corsair\'s Colours 2', tw: 0, prog: 0, gain: 'Chasing Down Your Bounty', fail: 'no progress, Nightmares +2', piracy: true },
+      ],
+    },
+    {
+      name: 'A Distant Gleam',
+      where: ['The Salt Steppe'],
+      freq: 'Standard',
+      note: '"Fix a looking-glass on the horizon" first grants Eastern Wind, which starts Upon a Painted Sea in London - the only wind storyline that adds no Nightmares.',
+      opts: [
+        { text: 'Fix a looking-glass on the horizon', tw: 2, prog: 1, gain: 'Eastern Wind +4, Memory of Distant Shores 5' },
+        { text: 'Measure the measureless', ch: 'Artisan of the Red Science 10', need: 'Artisan of the Red Science', tw: 0, prog: 1, men: 'Nightmares +1', gain: 'Extraordinary Implication 1, Eastern Wind +1', fail: 'TW +9, half speed, Nightmares +4' },
+        { text: 'Release your Uttermost Eel into the waters', ch: 'Zeefaring 10', need: 'Uttermost Eel 1 x, Zeefaring', tw: 0, prog: 1, men: 'Nightmares +1', gain: 'Eastern Wind +2, Memory of a Much Lesser Self 1', fail: 'TW +9, half speed, Nightmares +3' },
+      ],
+    },
+    {
+      name: 'A Khaganian Patrol Vessel',
+      where: ['The Salt Steppe'],
+      freq: 'Standard',
+      opts: [
+        { text: 'Give them a wide berth', ch: 'Shadowy vs Zee Peril', tw: 0, prog: 1, fail: 'TW +8, half speed' },
+        { text: 'Brazenly hail them', ch: 'Persuasive vs Zee Peril', tw: 0, prog: 0.5, men: 'clears Suspicion -2', fail: 'half speed, Suspicion +3' },
+        { text: 'Record their position', need: 'Shrine to Saint Joshua', tw: 0, prog: 0.5, gain: 'Moves in the Great Game [see below]' },
+        { text: 'Encode signals to a Subtle Machinist', ch: 'A Player of Chess 7', need: 'Associating with a Youthful Naturalist 510-549, Favour in High Places 1 x', hidden: 'Mechanical Comprehension', tw: 2, prog: 0.5, gain: 'Mechanical Comprehension, Whirring Contraption 20, Nevercold Brass Sliver 5000, Memory of Distant Shores 100', fail: 'TW +2, half speed, Suspicion +2, Unwelcome on the Waters' },
+        { text: 'Hail them with their own passphrases', ch: 'A Player of Chess 11', need: 'Chasing Down Your Bounty', tw: 4, prog: 1, gain: 'Chasing Down Your Bounty', fail: 'TW +10, half speed, Unwelcome on the Waters, Suspicion +2', piracy: true },
+        { text: 'Man the cannons!', ch: 'Zeefaring 11', tw: 4, prog: 1, men: 'Suspicion +2, Unwelcome on the Waters', gain: 'Pieces of Plunder Weighing Down Your Hold 400', rare: 'TW +3, full speed', fail: 'TW +10, half speed, Suspicion +3, Unwelcome on the Waters', piracy: true },
+      ],
+    },
+
+    // --- The Pillared Sea ---
+    {
+      name: 'Becalmed',
+      where: ['The Pillared Sea'],
+      freq: 'Standard',
+      note: '"Cross the threshold" is not a zailing option: it drowns you into Parabola for Wounds +7-8 and sets The Mirror\'s Hunger.',
+      opts: [
+        { text: 'Shut off every light aboard; full steam ahead!', tw: 2, prog: 1, gain: 'Eastern Wind +1' },
+        { text: 'Look into the glassy water', ch: 'Luck 50%', tw: 0, prog: 0.5, men: 'Nightmares +1-4', gain: 'Having Recurring Dreams: Death by Water +1', fail: 'half speed, Nightmares +5' },
+        { text: 'Cross the threshold', need: 'Glasswork (Glasswork 5), Access to a Parabolan Base-Camp', hidden: 'The Mirror\'s Hunger', tw: 0, prog: 0 },
+      ],
+    },
+    {
+      name: 'Of the Pillars',
+      where: ['The Pillared Sea'],
+      freq: 'Standard',
+      note: 'A Luck 90% for full speed and -2 Troubled Waters. The 10% failure is expensive: +8 Troubled Waters and +8 Nightmares.',
+      opts: [
+        { text: 'You will look towards her shores', ch: 'Luck 90%', tw: -2, twFail: 8, prog: 1, gain: 'Eastern Wind +1, Northern Wind +1', fail: 'TW +8, full speed, Nightmares +8' },
+        { text: 'You will turn your helm away from her', tw: 0, prog: 0.5 },
+        { text: 'You will change currency', need: 'Justificande Coin 25 x', tw: 0, prog: 1, gain: 'costs Justificande Coin 25, Oneiromantic Revelation 1' },
+      ],
+    },
+    {
+      name: 'Ripples of Future Voyages',
+      where: ['The Pillared Sea'],
+      freq: 'Standard',
+      cardNeeds: 'Corsair\'s Colours 2',
+      opts: [
+        { text: 'You will remember finding your quarry', ch: 'Zeefaring 12', need: 'Chasing Down Your Bounty', tw: 3, prog: 1, gain: 'Chasing Down Your Bounty +15', fail: 'TW +8, half speed', piracy: true },
+        { text: 'You will remember great riches', ch: 'Mithridacy 12', tw: 3, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold 450', fail: 'TW +8, half speed', piracy: true },
+        { text: 'You will remember your safe return', ch: 'Zailing Speed vs Zee Peril', tw: -2, prog: 1, fail: 'TW +4, full speed', piracy: true },
+      ],
+    },
+
+    // --- Stormbones ---
+    {
+      name: 'A Coral Commotion',
+      where: ['Stormbones'],
+      freq: 'Standard',
+      note: '"Find a quicker route into Port Cecil" is one of the two ways to discover Port Cecil.',
+      opts: [
+        { text: 'Scavenge amidst the scrum of boats', ch: 'Luck 50%', tw: 3, twFail: 8, prog: 0.5, gain: 'Silk Scrap 50', rare: 'TW +2, half speed', fail: 'TW +8, half speed, Creeping Fear' },
+        { text: 'Weave through the throng', ch: 'Zailing Speed vs Zee Peril', tw: 3, prog: 1, fail: 'TW +10, full speed, Groaning Hull' },
+        { text: 'Find a quicker route into Port Cecil', need: 'Embarking on a Voyage of Scientific Discovery 2', hidden: 'Discovered: The Principles of Coral', tw: 0, prog: 0.5, gain: 'Discovered: The Principles of Coral' },
+      ],
+    },
+    {
+      name: 'A Mountain of the Unterzee',
+      where: ['Stormbones'],
+      freq: 'Standard',
+      opts: [
+        { text: '"Hard to port! Reverse engines!"', ch: 'Zailing Speed vs Zee Peril', tw: 3, prog: 1, men: 'Silent Stalker', gain: 'Appalling Secret 5', fail: 'TW +10, full speed, Silent Stalker' },
+        { text: '"Hold!"', need: 'The Cladery Heart', tw: -1, prog: 0, gain: 'Carved Ball of Stygian Ivory 1' },
+      ],
+    },
+    {
+      name: 'A Tiny Coral Island',
+      where: ['Stormbones'],
+      freq: 'Standard',
+      opts: [
+        { text: 'Record it and move on', tw: 3, prog: 1 },
+        { text: 'What\'s that down there?', need: 'Zubmersibility', tw: -2, prog: 1, gain: 'Appalling Secret 5' },
+        { text: 'Recognise its shape', ch: 'Shapeling Arts 3', need: 'Shapeling Arts', tw: 0, prog: 1, gain: 'Shapeling Arts +1 CP, if present, Cryptic Clue 25', fail: 'TW +3, full speed' },
+      ],
+    },
+    {
+      name: 'A Wind from the North',
+      where: ['Stormbones'],
+      freq: 'Standard',
+      note: '"Listen to the wind" first grants Northern Wind, which starts Betwixt Us and the Sun in London. It costs +6 Troubled Waters.',
+      opts: [
+        { text: 'Keep your crew on course', ch: 'Persuasive vs Zee Peril', tw: 0, prog: 1, gain: 'Northern Wind +1', fail: 'TW +12, half speed, Creeping Fear' },
+        { text: 'Help them', ch: 'Dangerous vs Zee Peril', tw: 0, prog: 1, gain: 'Northern Wind +1', fail: 'TW +5, half speed, Wounds +5' },
+        { text: 'Listen to the wind', tw: 6, prog: 1, gain: 'Northern Wind +3 CP, or +1 CP if already present, Unaccountably Peckish 1' },
+      ],
+    },
+    {
+      name: 'Sighting a Lifeberg',
+      where: ['Stormbones'],
+      freq: 'Standard',
+      note: '"Zail quickly past" is full speed for no Troubled Waters; the 2 Nightmares are usually the cheaper price.',
+      opts: [
+        { text: 'Keep your distance; make observations', ch: 'Watchful vs Zee Peril', tw: 0, prog: 0.5, gain: 'Tale of Terror!! 1, Zee-Ztory 1, Northern Wind +1', fail: 'TW +8, half speed' },
+        { text: 'Ram the lifeberg and claim a piece of it!', need: 'A Notched Bone Harpoon', tw: 0, prog: 0, gain: 'Northern Wind +3 CP, or +1 CP if already present, Extraordinary Implication 1' },
+        { text: 'Zail quickly past the lifeberg', ch: 'Zailing Speed vs Zee Peril', tw: 0, prog: 1, men: 'Nightmares +2', fail: 'TW +8, no progress, Groaning Hull 1' },
+      ],
+    },
+
+    // --- The Snares ---
+    {
+      name: 'A Fellow Mourner',
+      where: ['The Snares'],
+      freq: 'Standard',
+      cardNeeds: 'Corsair\'s Colours 2',
+      opts: [
+        { text: 'Coordinate with your sister-ship\'s Prophet', ch: 'Dangerous vs Zee Peril', need: 'Chasing Down Your Bounty', tw: 2, prog: 1, gain: 'Chasing Down Your Bounty', rare: 'full speed', fail: 'TW +10, half speed', piracy: true },
+        { text: 'Load the cannons!', ch: 'Zeefaring 13', tw: 4, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold 500', rare: 'TW +3, full speed', fail: 'TW +10, half speed', piracy: true },
+        { text: 'Zail on by', tw: 6, prog: 1, piracy: true },
+      ],
+    },
+    {
+      name: 'A Pirate Steamer!',
+      where: ['The Snares'],
+      freq: 'Standard',
+      opts: [
+        { text: 'All power to the engines!', ch: 'Shadowy vs Zee Peril', tw: 4, prog: 1, fail: 'TW +18, half speed, Groaning Hull' },
+        { text: 'Ready the guns!', ch: 'Dangerous vs Zee Peril', tw: 4, prog: 1, fail: 'TW +16, no progress' },
+        { text: 'Flash a pass-sign of the Mourn', ch: 'Zeefaring 13', need: 'Corsair\'s Colours 2, Chasing Down Your Bounty', tw: 2, prog: 1, gain: 'Chasing Down Your Bounty +16', rare: 'TW -2-3, full speed', fail: 'TW +12, a quarter speed', piracy: true },
+      ],
+    },
+    {
+      name: 'Navigating the Snares',
+      where: ['The Snares'],
+      freq: 'Standard',
+      note: '"Slow and steady" is half speed for zero Troubled Waters - the safe line, and the reason the Snares can be less punishing than the long way round.',
+      opts: [
+        { text: 'Slow and steady does it', tw: 0, prog: 0.5 },
+        { text: 'You have places to be', ch: 'Shadowy vs Zee Peril', tw: 6, prog: 1, men: 'Mutinous Whispers', fail: 'TW +14, half speed, Groaning Hull' },
+        { text: 'Follow a route set by the HMS Ramillies', ch: 'Watchful vs Zee Peril', need: 'The Crew of HMS Ramillies', tw: 6, prog: 1, men: 'Creeping Fear', fail: 'TW +12, half speed, Unwelcome on the Waters' },
+      ],
+    },
+  ];
+
+  // Two of the piracy cards are titled after your quarry -- in game "A
+  // Sighting of the (Bounty)" reads "A Sighting of the Screaming Nun" or
+  // whatever your target happens to be -- so those match on their opening
+  // words instead of the whole name. Everything else matches exactly, through
+  // the same punctuation-squashing normaliser the Spite table uses.
+  const ZEE_BY_NAME = new Map();
+  const ZEE_BY_PREFIX = [];
+  for (const card of ZEE_CARDS) {
+    if (card.prefix) ZEE_BY_PREFIX.push([normalizeName(card.prefix), card]);
+    else ZEE_BY_NAME.set(normalizeName(card.name), card);
+  }
+
+  function lookupZeeCard(name) {
+    const key = normalizeName(name);
+    if (!key) return null;
+    const exact = ZEE_BY_NAME.get(key);
+    if (exact) return exact;
+    for (const pair of ZEE_BY_PREFIX) {
+      if (key.indexOf(pair[0] + ' ') === 0) return pair[1];
+    }
+    return null;
+  }
+
+  // How much of your Zailing Speed an option is worth. 'flat80' scores above
+  // full speed because 80 is a whole direct leg -- more than any ship's speed.
+  function zeeProgScore(prog) {
+    if (prog === 'flat80') return 2;
+    return typeof prog === 'number' ? prog : 0;
+  }
+
+  // What an option costs in Troubled Waters, for ranking purposes.
+  //
+  // Two deliberate rules here. An option whose change the wiki records as a
+  // level ("set to 5") rather than a number of CP scores as 0: we know it is a
+  // change but not its size, and inventing one would be worse than ranking it
+  // neutrally. And a LUCK challenge is scored on its expected value, because
+  // it is the one case where the wiki states both outcomes and the odds: A
+  // Spit of Land's island stop buys a point on a success and costs eight on a
+  // failure, so quoting the -1 alone would recommend a coin flip that is
+  // actually the worse half of the card. A stat challenge gets no such
+  // treatment -- the difficulty is your business, not this table's -- so it
+  // keeps its success value and the badge's "?" says as much.
+  function zeeTwScore(opt) {
+    const base = typeof opt.tw === 'number' ? opt.tw : 0;
+    const luck = opt.ch && /^Luck (\d+)%$/.exec(opt.ch);
+    if (!luck || typeof opt.twFail !== 'number') return base;
+    const odds = Number(luck[1]) / 100;
+    return odds * base + (1 - odds) * opt.twFail;
+  }
+
+  // The line the badge speaks for. Options behind a `need` are left out --
+  // their numbers would promise something you may not have -- unless the card
+  // has no unconditional line at all, in which case the best gated one is used
+  // and `gated` says so.
+  //
+  // Cheapest Troubled Waters first, more progress only as the tie-break. That
+  // is the guide's own framing (its one big table is "cards that do not
+  // increase Troubled Waters"), and it is the right way round: almost every
+  // line at zee makes full progress anyway, so the number that actually varies
+  // between the cards in your hand is what they cost you, and the thing that
+  // ends a voyage badly is Troubled Waters reaching 8. Ranking progress first
+  // instead would have the badge recommending "You have places to be" in the
+  // Snares -- half an action saved for six change points, in the deadliest
+  // water in the game. When the cheapest line is also the slow one, the badge
+  // says so with its speed mark rather than hiding it.
+  //
+  // Pure, so the arithmetic behind every badge is testable without a DOM.
+  function bestZeeLine(card) {
+    const open = card.opts.filter(function (o) { return !o.need && !o.piracy; });
+    const pool = open.length ? open : card.opts;
+    if (!pool.length) return null;
+    let best = pool[0];
+    for (const opt of pool) {
+      const dt = zeeTwScore(opt) - zeeTwScore(best);
+      if (dt < 0 || (dt === 0 && zeeProgScore(opt.prog) > zeeProgScore(best.prog))) best = opt;
+    }
+    return { opt: best, gated: !open.length };
+  }
+
+  // Is there a cheaper line on this card that the badge deliberately refused
+  // to quote, because it is gated on an item, a quality or piracy? That is the
+  // other half of the question. The Killing Wind is the case this exists for:
+  // what the badge can offer you is a coin flip that costs +4 on a success and
+  // +12 on a failure, while a Zubmarine turns the same card into -2 at full
+  // speed. The badge will not promise you a submarine, but it can point at the
+  // tooltip.
+  function zeeHasBetterGated(card, chosen) {
+    return card.opts.some(function (o) {
+      return o !== chosen && (o.need || o.piracy) && zeeTwScore(o) < zeeTwScore(chosen);
+    });
+  }
+
+  const ZEE_CLASS = 'fl-ux-zee';
+  const ZEE_FLAG = 'flUxZee';
+
+  // Colours read as a cost, not a rating: green is cheap, red is expensive,
+  // and the black cards get the dark green of their own sinister border
+  // whatever their numbers say, because what matters about them is that they
+  // are blocking your hand.
+  const ZEE_URGENT_COLOR = '#25493a';
+  const ZEE_UNKNOWN_COLOR = '#5b5b5b';
+  function zeeColor(tw) {
+    if (typeof tw !== 'number') return ZEE_UNKNOWN_COLOR;
+    if (tw <= -2) return '#2f6b3f';
+    if (tw <= 0) return '#4a7a3c';
+    if (tw <= 2) return '#7a733a';
+    if (tw <= 4) return '#8a6d3b';
+    if (tw <= 7) return '#a1622c';
+    return '#8a3b3b';
+  }
+
+  const ZEE_SPEED_MARK = { 0.5: '½', 0.25: '¼', 0: '·' };
+  const ZEE_GATED_MARK = '▾';
+
+  function zeeSpeedWord(prog) {
+    if (prog === 'flat80') return 'a flat Zailing… 80, whatever your ship';
+    if (prog === 1) return 'full Zailing Speed';
+    if (prog === 0.5) return 'half Zailing Speed';
+    if (prog === 0.25) return 'a quarter of Zailing Speed';
+    return 'no progress';
+  }
+
+  function zeeTwWord(opt) {
+    if (opt.twText) return opt.twText;
+    if (typeof opt.tw !== 'number') return 'Troubled Waters unrecorded';
+    const value = opt.twRange || (opt.tw > 0 ? '+' + opt.tw : String(opt.tw));
+    return opt.tw === 0 ? 'no Troubled Waters' : 'Troubled Waters ' + value + ' CP';
+  }
+
+  function zeeOptionLine(opt) {
+    const bits = [opt.text];
+    if (opt.ch) bits.push('[' + opt.ch + ']');
+    if (opt.need) bits.push('(needs ' + opt.need + ')');
+    if (opt.hidden) bits.push('(hidden while: ' + opt.hidden + ')');
+    let line = '  • ' + bits.join(' ') + '\n      ' + zeeTwWord(opt) + ', ' + zeeSpeedWord(opt.prog);
+    if (opt.men) line += ', ' + opt.men;
+    if (opt.gain) line += '\n      gives: ' + opt.gain;
+    if (opt.note) line += '\n      ' + opt.note;
+    if (opt.rare) line += '\n      rare success: ' + opt.rare;
+    if (opt.fail) line += '\n      failure: ' + opt.fail;
+    return line;
+  }
+
+  // What to draw for a card. Kept pure (card in, { text, color, title } out)
+  // so the whole badge can be asserted on without a browser.
+  function zeeBadgeSpec(card) {
+    const best = bestZeeLine(card);
+    if (!best) {
+      return {
+        text: '?',
+        color: ZEE_UNKNOWN_COLOR,
+        title: card.name + '\n' + (card.note || 'No options transcribed for this card.'),
+      };
+    }
+    const opt = best.opt;
+    const mark = ZEE_SPEED_MARK[opt.prog] || (opt.prog === 'flat80' ? '★' : '');
+    const value = typeof opt.tw !== 'number' ? '→' : (opt.tw > 0 ? '+' + opt.tw : String(opt.tw));
+    const text = mark + value + (opt.ch ? '?' : '') + (zeeHasBetterGated(card, opt) ? ZEE_GATED_MARK : '');
+
+    const lines = [card.name];
+    lines.push((card.where.indexOf('any') !== -1 ? 'Anywhere at zee' : card.where.join(' / '))
+      + ' · ' + card.freq + (card.urgent ? ' · URGENT: dealt before every other zee card' : ''));
+    if (card.cardNeeds) lines.push('In your deck while: ' + card.cardNeeds);
+    if (card.note) lines.push(card.note);
+    lines.push('');
+    lines.push('Best line without anything special in hand'
+      + (best.gated ? ' — there is none, so this one is gated:' : ':'));
+    // The menaces go in the headline too, not only in the list below it. The
+    // badge speaks about Troubled Waters and nothing else, so a line that is
+    // cheap in Troubled Waters and expensive in Nightmares (Becalmed's, for
+    // one) would otherwise read as free right where you are most likely to
+    // stop reading.
+    lines.push('  ' + opt.text + ' — ' + zeeTwWord(opt) + ', ' + zeeSpeedWord(opt.prog)
+      + (opt.men ? ', ' + opt.men : '')
+      + (opt.ch ? ' (on a success of ' + opt.ch + ')' : ''));
+    if (zeeHasBetterGated(card, opt)) {
+      lines.push('  ' + ZEE_GATED_MARK + ' a cheaper line exists here, behind something you may or may not have — see below.');
+    }
+    lines.push('');
+    lines.push('Every option:');
+    for (const o of card.opts) lines.push(zeeOptionLine(o));
+    lines.push('');
+    lines.push('Zee cards cannot be discarded. Troubled Waters resets at a safe dock; at 8 it kills you.');
+    return { text: text, color: card.urgent ? ZEE_URGENT_COLOR : zeeColor(opt.tw), title: lines.join('\n') };
+  }
+
+  // The area gate, and it is a weaker one than the Crowds of Spite feature's
+  // on purpose. That gate rests on a greeting captured verbatim in-game; this
+  // list is a GUESS at what the same greeting says at zee, assembled from the
+  // region names the wiki uses. So it only ever says "yes, definitely a zee
+  // region" or "can't tell" -- never "no" -- and the card table stays the real
+  // scope, exactly as the Spite feature started out.
+  //
+  // If a greeting from a real voyage is ever captured, this can be tightened
+  // into an exact list the way SPITE_AREAS was.
+  const ZEE_AREAS = [
+    'The Broad Unterzee', 'The Unterzee', 'Zailing the Unterzee',
+    'Home Waters', "Shepherd's Wash", 'The Sea of Voices',
+    'The Salt Steppe', 'The Salt Steppes', 'The Pillared Sea',
+    'Stormbones', 'The Snares',
+  ].map(normalizeName);
+
+  function inZee() {
+    const area = normalizeName(currentArea());
+    return !!area && ZEE_AREAS.indexOf(area) !== -1;
+  }
+
+  // One card is named "The Sound of Wings" and Fallen London deals a different
+  // card of that same name in eight other places, so that one waits until the
+  // area confirms we are at zee. Everything else is scoped by its name alone.
+  function zeeCardFor(name) {
+    const card = lookupZeeCard(name);
+    if (!card) return null;
+    if (card.strictZee && !inZee()) return null;
+    return card;
+  }
+
+  function zeeCardRatings() {
+    eachCardName(function (host, name, place, style) {
+      const card = zeeCardFor(name);
+      attachBadge(host, {
+        cls: ZEE_CLASS,
+        flag: ZEE_FLAG,
+        value: name,
+        spec: card ? zeeBadgeSpec(card) : null,
+        place: place,
+        style: style,
+      });
+    });
+  }
+
   // === shared: the launcher ==============================================
   //
   // A floating button, bottom-right, that opens a menu of reference PANELS.
@@ -499,6 +1741,13 @@
       label: 'Factions',
       hint: 'Renown, Favours, Renown items and each faction’s Faction Item',
       render: renderFactionsPanel,
+    },
+     {
+      id: 'zailing',
+      icon: '⚓',
+      label: 'Zailing',
+      hint: 'Routes, Zee Peril, Troubled Waters and every card at zee',
+      render: renderZailingPanel,
     },
   ];
 
@@ -1761,6 +3010,272 @@
     return body;
   }
 
+  // === panel: zailing ====================================================
+  //
+  // The reference half of the zailing work: the numbers that decide a voyage
+  // before any single card does -- how much Zailing... a route needs, what Zee
+  // Peril each region sets every broad challenge to, which menace turns
+  // Troubled Waters 7 into which black card, and where the nearest reset is --
+  // plus the whole card table the badges are drawn from, searchable.
+  //
+  // It opens with whatever zee cards are on screen right now, ranked, because
+  // that is the question you actually have while the panel is open.
+
+  function zeeHandRows() {
+    const seen = new Map();
+    eachCardName(function (host, name) {
+      const card = zeeCardFor(name);
+      if (card && !seen.has(card.name)) seen.set(card.name, card);
+    });
+    const cards = Array.from(seen.values());
+    cards.sort(function (a, b) {
+      // Urgent first: they are dealt before everything else anyway, so a hand
+      // holding one is really a hand of one.
+      if (!!a.urgent !== !!b.urgent) return a.urgent ? -1 : 1;
+      const la = bestZeeLine(a), lb = bestZeeLine(b);
+      if (!la || !lb) return la ? -1 : 1;
+      // Same order the badge is chosen in: cheapest first, faster to break a tie.
+      const dt = zeeTwScore(la.opt) - zeeTwScore(lb.opt);
+      if (dt) return dt;
+      return zeeProgScore(lb.opt.prog) - zeeProgScore(la.opt.prog);
+    });
+    return cards;
+  }
+
+  function zeeBadgeNode(card) {
+    return makeBadge(zeeBadgeSpec(card), ZEE_CLASS);
+  }
+
+  function zeeCardRow(card) {
+    const best = bestZeeLine(card);
+    const opt = best && best.opt;
+    const row = h('tr', null, [
+      h('td', { css: TD + 'white-space:nowrap;' }, [
+        wikiLink(card.name, card.name),
+        card.urgent ? h('span', { css: 'color:#7fae92;margin-left:5px;', title: 'A black card: urgent, so it is dealt before every other zee card.' }, ['urgent']) : null,
+      ]),
+      h('td', { css: TD + 'text-align:center;' }, [zeeBadgeNode(card)]),
+      h('td', { css: TD + 'color:' + UI.dim + ';' }, [
+        opt ? h('div', null, [
+          h('span', { css: 'color:' + UI.text + ';' }, [opt.text]),
+          ' — ' + zeeTwWord(opt) + ', ' + zeeSpeedWord(opt.prog) + (opt.ch ? ' (' + opt.ch + ')' : ''),
+        ]) : null,
+        best && best.gated ? h('div', { css: 'color:#8a6b3b;' }, ['Every line here is gated on something.']) : null,
+        card.note ? h('div', null, [card.note]) : null,
+      ]),
+    ]);
+    // The search box filters on this rather than on textContent, so a term can
+    // match an option you can't see in the collapsed row.
+    row.dataset.zeeSearch = (card.name + ' ' + card.where.join(' ') + ' ' + (card.note || '') + ' '
+      + card.opts.map(function (o) { return o.text + ' ' + (o.need || '') + ' ' + (o.gain || ''); }).join(' ')).toLowerCase();
+    return row;
+  }
+
+  function renderZailingPanel() {
+    const hand = zeeHandRows();
+
+    const section = function (title, children) {
+      return h('div', { css: 'margin-top:14px;' }, [
+        h('div', {
+          css: 'font:bold 11px ' + UI.font + ';letter-spacing:.06em;text-transform:uppercase;'
+            + 'color:' + UI.accent + ';margin-bottom:5px;',
+        }, [title]),
+        children,
+      ]);
+    };
+    const table = function (heads, rows) {
+      return h('table', { css: 'width:100%;border-collapse:collapse;' }, [
+        h('thead', null, [h('tr', null, heads.map(function (head) {
+          return h('th', { css: TH + (head.right ? 'text-align:right;' : ''), title: head.title || '' }, [head.text]);
+        }))]),
+        h('tbody', null, rows),
+      ]);
+    };
+
+    // --- the hand ---------------------------------------------------------
+    const handBlock = hand.length
+      ? h('div', {
+          css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent
+            + ';background:' + UI.bgAlt + ';font-size:12px;line-height:1.6;',
+        }, [
+          h('div', { css: 'color:' + UI.accent + ';font-weight:bold;' }, [
+            hand.length === 1 ? '1 zee card on screen' : hand.length + ' zee cards on screen',
+            h('span', { css: 'color:' + UI.dim + ';font-weight:normal;' }, [' — best first']),
+          ]),
+          hand.map(function (card) {
+            const best = bestZeeLine(card);
+            return h('div', null, [
+              zeeBadgeNode(card),
+              h('span', { css: 'margin-left:6px;' }, [card.name]),
+              best ? h('span', { css: 'color:' + UI.dim + ';' },
+                [' — ' + best.opt.text + ' (' + zeeTwWord(best.opt) + ', ' + zeeSpeedWord(best.opt.prog) + ')']) : null,
+            ]);
+          }),
+        ])
+      : h('div', {
+          css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.line
+            + ';background:' + UI.bgAlt + ';color:' + UI.dim + ';font-size:12px;line-height:1.5;',
+        }, ['No zee cards on screen. Everything below is reference material for when there are.']);
+
+    // --- the searchable card table ---------------------------------------
+    const REGION_ORDER = ['any', 'Home Waters', "Shepherd's Wash", 'The Sea of Voices',
+      'The Salt Steppe', 'The Pillared Sea', 'Stormbones', 'The Snares'];
+    const REGION_TITLE = { any: 'Drawn anywhere at zee' };
+    const cardRows = [];
+    for (const region of REGION_ORDER) {
+      const inRegion = ZEE_CARDS.filter(function (c) {
+        return c.where.indexOf(region) !== -1 && (region === 'any' || c.where.indexOf('any') === -1);
+      });
+      if (!inRegion.length) continue;
+      const header = h('tr', null, [h('td', {
+        colSpan: 3,
+        css: 'padding:8px 8px 3px;font:bold 11px ' + UI.font + ';letter-spacing:.05em;'
+          + 'text-transform:uppercase;color:' + UI.dim + ';border-bottom:1px solid ' + UI.line + ';',
+      }, [REGION_TITLE[region] || region])]);
+      header.dataset.zeeGroup = '1';
+      cardRows.push(header);
+      for (const card of inRegion) cardRows.push(zeeCardRow(card));
+    }
+
+    const search = h('input', {
+      type: 'text',
+      placeholder: 'filter cards, options, requirements…',
+      css: 'flex:1;min-width:140px;box-sizing:border-box;padding:3px 7px;background:' + UI.bgAlt
+        + ';color:' + UI.text + ';border:1px solid ' + UI.line + ';border-radius:3px;font:12px ' + UI.font + ';',
+      on: {
+        input: function (e) {
+          const term = String(e.currentTarget.value || '').trim().toLowerCase();
+          for (const row of cardRows) {
+            if (row.dataset.zeeGroup) continue;
+            row.hidden = !!term && row.dataset.zeeSearch.indexOf(term) === -1;
+          }
+          // A region heading with nothing left under it is just noise.
+          let group = null, shown = 0;
+          for (const row of cardRows) {
+            if (row.dataset.zeeGroup) {
+              if (group) group.hidden = shown === 0;
+              group = row; shown = 0;
+            } else if (!row.hidden) shown++;
+          }
+          if (group) group.hidden = shown === 0;
+        },
+      },
+    });
+
+    return h('div', { css: 'padding:0 12px 12px;' }, [
+      handBlock,
+
+      section('Getting there', h('div', null, [
+        table([
+          { text: 'Route' },
+          { text: 'Zailing…', right: true, title: 'How much Zailing... the leg needs.' },
+          { text: 'Tramp Steamer', right: true, title: 'Rusty Tramp Steamer, Zailing Speed 45.' },
+          { text: 'Most ships', right: true, title: 'Zailing Speed 55.' },
+          { text: 'Zee-Clipper', right: true, title: 'Swift Zee-Clipper or Ogedei-class Liner, Zailing Speed 75.' },
+        ], ZEE_ROUTES.map(function (r) {
+          return h('tr', null, [
+            h('td', { css: TD }, [
+              h('div', { css: 'color:' + UI.text + ';' }, [r.name]),
+              h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [r.of]),
+            ]),
+            h('td', { css: TD + 'text-align:right;' }, [String(r.need)]),
+            h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' }, [r.tramp]),
+            h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' }, [r.other]),
+            h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' }, [r.clipper]),
+          ]);
+        })),
+        h('div', { css: 'margin-top:5px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+          'Actions are the guide’s averages. Crossing a region gives a Zee Leg; only the last '
+          + 'leg, inside your destination’s own region, is the 80.',
+        ]),
+      ])),
+
+      section('Where you are', h('div', null, [
+        table([
+          { text: 'Region' },
+          { text: 'Zee Peril', right: true, title: 'Every broad challenge out there — Watchful, Shadowy, Dangerous, Persuasive — is set to this.' },
+          { text: 'Narrow', right: true, title: 'What a skill challenge scales to. The non-piracy Zeefaring checks do not scale at all.' },
+          { text: '' },
+        ], ZEE_REGIONS.map(function (r) {
+          return h('tr', null, [
+            h('td', { css: TD }, [wikiLink(r.name, r.name)]),
+            h('td', { css: TD + 'text-align:right;' }, [String(r.peril)]),
+            h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' }, [String(r.narrow)]),
+            h('td', { css: TD + 'color:' + UI.dim + ';' }, [r.note]),
+          ]);
+        })),
+      ])),
+
+      section('Troubled Waters', h('div', null, [
+        h('div', { css: 'color:' + UI.dim + ';font-size:12px;line-height:1.6;' }, [
+          h('div', null, ['1–5 Calm Seas · 6–7 Lashing Waves · ',
+            h('span', { css: 'color:#c98a8a;' }, ['8 is a Demise at Zee']),
+            ' — it kills you or drives you mad, and it takes precedence over arriving.']),
+          h('div', null, ['Docking somewhere safe wipes it, and every zee-threat with it. Wounds and Nightmares stay.']),
+          h('div', null, ['At 7 you start drawing black cards — one per zee-threat you are carrying. '
+            + 'They are urgent, so with two of them your hand holds nothing else.']),
+        ]),
+        h('div', { css: 'margin-top:8px;' }, [table([
+          { text: 'Zee-threat' }, { text: 'Comes from' }, { text: 'Its black card at Troubled Waters 7' },
+        ], ZEE_MENACES.map(function (m) {
+          return h('tr', null, [
+            h('td', { css: TD }, [wikiLink(m.name, m.name)]),
+            h('td', { css: TD + 'color:' + UI.dim + ';' }, [m.from]),
+            h('td', { css: TD }, [wikiLink(m.card, m.card)]),
+          ]);
+        }))]),
+      ])),
+
+      section('Safe docks', h('div', { css: 'color:' + UI.dim + ';font-size:12px;line-height:1.7;' },
+        ZEE_SAFE_DOCKS.map(function (d) {
+          return h('div', null, [
+            h('span', { css: 'color:' + UI.text + ';' }, [d.region + ': ']),
+            d.names.join(' · '),
+          ]);
+        }).concat([
+          h('div', { css: 'margin-top:5px;' }, ['Being a port is not the same as being safe — Port Cecil, '
+            + 'Godfall, Irem, Gaider’s Mourn and Tanah-Chook are all ports and none of them resets anything.']),
+        ]))),
+
+      section('The winds', h('div', null, [
+        table([{ text: 'Wind' }, { text: 'First found' }, { text: 'On the card' }, { text: 'Dream it starts in London' }],
+          ZEE_WINDS.map(function (w) {
+            return h('tr', null, [
+              h('td', { css: TD }, [wikiLink(w.name, w.name)]),
+              h('td', { css: TD + 'color:' + UI.dim + ';' }, [w.where]),
+              h('td', { css: TD }, [wikiLink(w.card, w.card)]),
+              h('td', { css: TD + 'color:' + UI.dim + ';' }, [
+                h('div', null, [wikiLink('Having Recurring Dreams: ' + w.dream, w.dream)]),
+                h('div', { css: 'font-size:11px;' }, [w.cost]),
+              ]),
+            ]);
+          })),
+        h('div', { css: 'margin-top:5px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+          'A finished dream storyline pays an Oneiric Pearl and resets. Winds survive docking.',
+        ]),
+      ])),
+
+      section('Every zee card', h('div', null, [
+        h('div', { css: 'display:flex;align-items:center;gap:8px;margin-bottom:6px;' }, [search]),
+        table([{ text: 'Card' }, { text: '' }, { text: 'Best line with nothing special in hand' }], cardRows),
+      ])),
+
+      h('div', { css: 'margin-top:12px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+        h('div', null, ['The badge is the Troubled Waters cost, in change points, of the best line you '
+          + 'can take with nothing special in hand. ',
+          h('b', null, ['?']), ' means that is a challenge’s success value; ',
+          h('b', null, ['½']), ' that the line only makes half progress; ',
+          h('b', null, ['·']), ' that it makes none; ',
+          h('b', null, ['★']), ' the one line that hands you a flat 80; ',
+          h('b', null, [ZEE_GATED_MARK]), ' that a cheaper line exists behind an item, a quality or piracy.']),
+        h('div', null, ['Options behind an item or a quality are in the tooltip but never in the badge, '
+          + 'and piracy lines (Corsair’s Colours, a bounty) are left out of it too.']),
+        h('div', { css: 'margin-top:6px;' }, ['Data from ',
+          wikiLink('Zailing (Guide)', 'Zailing (Guide)'), ' and the individual card pages on the Fallen London wiki.']),
+      ]),
+    ]);
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -1772,6 +3287,7 @@
     // Finishes a "use" click that had to change route to get to Possessions.
     { name: 'pending-item', run: runPendingItem },
     { name: 'spite-card-ratings', run: spiteCardRatings },
+    { name: 'zee-card-ratings', run: zeeCardRatings },
   ];
 
   // === dispatch ==========================================================

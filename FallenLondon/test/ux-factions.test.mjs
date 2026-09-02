@@ -727,11 +727,12 @@ session.clear();
 
 // --- the launcher ----------------------------------------------------------
 
-check('the menu offers the Factions panel', api.PANELS.map((p) => p.id), ['factions']);
+check('the menu offers the Factions and Zailing panels',
+  api.PANELS.map((p) => p.id), ['factions', 'zailing']);
 
 check('the registry holds the launcher, both background jobs and the card ratings',
   api.FEATURES.map((f) => f.name),
-  ['launcher', 'faction-capture', 'pending-item', 'spite-card-ratings']);
+  ['launcher', 'faction-capture', 'pending-item', 'spite-card-ratings', 'zee-card-ratings']);
 
 check('loading the script mounts one floating root on the body',
   [fakeDoc.body.children.length, fakeDoc.body.children[0].id], [1, api.LAUNCHER_ID]);
