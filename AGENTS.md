@@ -538,6 +538,16 @@ navigation. Two consequences:
   Every result is clamped to the viewport, so a control that scrolls out of view can't take the
   launcher with it. `enclosingBar` is what decides "in a bar": the nearest `fixed`/`sticky`
   ancestor that spans the width, touches the top or bottom edge, and isn't the whole screen.
+  The placement also returns **`down`**, which way the menu and the panels stack away from the
+  button. They open toward whichever side has more room, and that is not cosmetic: the stack used
+  to always grow upward, so once the button was pinned near the *top* of the screen — a compass in
+  a top banner, or the sidebar's Travel button, which is high up — the menu opened off-screen and
+  read as a dead button. The children are in DOM order **panel, menu, button** exactly so that one
+  flag flips the lot: `down` swaps `flex-direction` to `column-reverse`, pins the root by
+  `top` instead of `bottom` (it now grows from the button's top edge), and moves the 8px gap to
+  the other side of each piece. `positionLauncher` also caps the panel's `max-height` to the
+  room on that side — the old flat `70vh` was a promise the layout couldn't keep once the button
+  could be anywhere.
   `TRAVEL_SELECTORS` is **verified** (2026-09-02) and there are three shapes because FL renders
   a different travel control per layout, quoted verbatim in the script: wide desktop is
   `button.travel-button--infobar` in the sidebar's `div.travel`; narrower desktop is a
@@ -918,7 +928,9 @@ Current tests:
   room above so the launcher goes below it, and with no travel control at all the corner returns
   — lifted over a bottom bar, left alone for a top one. It closes with a sweep over viewports ×
   bars × anchors × crowding asserting nothing ever lands off screen, and pins that all three
-  verified selectors are still in `TRAVEL_SELECTORS`. There is deliberately no `window` in its
+  verified selectors are still in `TRAVEL_SELECTORS`. A section of its own covers `down`,
+  including the invariant behind it — the stack never opens toward the *smaller* of the two
+  gaps. There is deliberately no `window` in its
   stub, which is how the impure `positionLauncher` bails and only the rule is under test.
 - `FallenLondon/test/ux-factions.test.mjs` — asserts `ux-enhancers.js`'s Factions panel. Its stub
   DOM is rich enough to **actually build the panel** (and carries a tiny selector matcher), which

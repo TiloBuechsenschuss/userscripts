@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      1.1
+// @version      1.2
 // @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A "UX" button parked beside Fallen London's own travel control -- the big Travel button on the wide layout, the compass on the narrow one, so it never covers the bottom bar -- opens a menu of reference panels; the first is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, where the safe docks are, the three winds and the dreams they start, and the whole card table, searchable. Built as a feature registry so further tweaks can be added as entries.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -1815,6 +1815,7 @@
 
   let launcherRoot = null;
   let launcherPanelHost = null;
+  let launcherMenu = null;
   let launcherButton = null;
   let launcherBound = false;
   let travelAnchor = null;
@@ -1949,16 +1950,32 @@
   //   view     { width, height } of the viewport
   //   size     { width, height } of the launcher button
   //   crowded  whether the space beside it belongs to its own neighbours
+  //
+  // Out: `{ side, right, bottom, down }` -- the two fixed offsets, the name of
+  // the rule that produced them (for reading, and for the tests), and which
+  // way the menu and panels stack away from the button.
   function launcherPlacement(anchor, bar, view, size, crowded) {
     const gap = LAUNCHER_GAP;
     const edge = LAUNCHER_EDGE;
     // Clamped, so a travel control at a screen edge -- or one that has
     // scrolled out of view -- can never carry the launcher off with it.
+    //
+    // `down` is the other half of the answer: the menu and the panels stack
+    // AWAY from the button, and which way that is depends on where the button
+    // ended up. Pinned near the top of the screen -- a compass in a top
+    // banner, or a Travel button high in the sidebar -- a stack that opened
+    // upward would be off the top of the screen, which is no menu at all. So
+    // it opens towards whichever side has more room.
     function fit(right, bottom, side) {
+      const atRight = Math.min(Math.max(edge, right), Math.max(edge, view.width - size.width - edge));
+      const atBottom = Math.min(Math.max(edge, bottom), Math.max(edge, view.height - size.height - edge));
       return {
         side: side,
-        right: Math.min(Math.max(edge, right), Math.max(edge, view.width - size.width - edge)),
-        bottom: Math.min(Math.max(edge, bottom), Math.max(edge, view.height - size.height - edge)),
+        right: atRight,
+        bottom: atBottom,
+        // Room below the button (its own `bottom` offset) against room above
+        // it (everything left over once the button and that offset are taken).
+        down: atBottom > view.height - atBottom - size.height,
       };
     }
     if (!anchor) {
@@ -2003,12 +2020,28 @@
       size,
       anchor ? crowdedLeft(anchor, box, size) : false);
     root.style.right = at.right + 'px';
-    root.style.bottom = at.bottom + 'px';
-    // The panel hangs off the same corner, so it only has the width left of
-    // that corner to live in -- otherwise moving the launcher inwards pushes
-    // the panel off the other edge.
+    // Opening downward means the root grows from the BUTTON's top edge, so it
+    // is pinned by `top` instead, and `column-reverse` puts the button back
+    // at the head of the stack. (The children are in DOM order panel, menu,
+    // button precisely so one flag flips the whole thing.)
+    const top = view.height - at.bottom - size.height;
+    root.style.flexDirection = at.down ? 'column-reverse' : 'column';
+    root.style.top = at.down ? top + 'px' : 'auto';
+    root.style.bottom = at.down ? 'auto' : at.bottom + 'px';
+    // The gap between the stacked pieces has to move to the other side with
+    // them, or it sits between the menu and nothing.
+    const stackGap = at.down
+      ? LAUNCHER_GAP + 'px 0 0 0'
+      : '0 0 ' + LAUNCHER_GAP + 'px 0';
+    if (launcherMenu) launcherMenu.style.margin = stackGap;
+    // The panel hangs off the same corner, so it only has the room left on
+    // that side to live in -- otherwise moving the launcher inwards pushes it
+    // off the other edge, and a panel taller than the room left scrolls the
+    // page instead of scrolling inside itself.
     if (launcherPanelHost) {
+      launcherPanelHost.style.margin = stackGap;
       launcherPanelHost.style.maxWidth = Math.max(240, view.width - at.right - 16) + 'px';
+      launcherPanelHost.style.maxHeight = Math.max(160, (at.down ? at.bottom : top) - 3 * LAUNCHER_GAP) + 'px';
     }
   }
 
@@ -2127,6 +2160,7 @@
     document.body.appendChild(root);
     launcherRoot = root;
     launcherPanelHost = panelHost;
+    launcherMenu = menu;
     launcherButton = button;
     // A resize or a scroll moves the travel control without changing the
     // DOM, so the debounced scan alone would not notice either.

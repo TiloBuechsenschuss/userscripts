@@ -29,6 +29,13 @@
 // path matters -- it is what a future FL reskin gets -- and it still has to fix
 // the reported bug on its own.
 //
+// The result also carries `down`: which way the menu and panels stack away
+// from the button. They used to always open upward, which is invisible when the
+// button is pinned near the TOP of the screen -- exactly what the mobile compass
+// and a high sidebar Travel button both do. It opens toward whichever side has
+// the room, and the DOM order (panel, menu, button) plus `column-reverse` is
+// what lets one flag flip the whole stack.
+//
 // Everything is clamped to the viewport, so a control that has scrolled out of
 // view can never carry the launcher out with it.
 //
@@ -129,7 +136,7 @@ const travelInfobar = box(1180, 120, 180, 48);
 check('the sidebar Travel button, with its own column beside it, puts the launcher beside it',
   place(travelInfobar, null, DESKTOP, DESKTOP_BUTTON, false),
   // 8px left of its left edge (1440 - 1180 + 8), bottoms level (900 - 168)
-  { side: 'beside', right: 268, bottom: 732 });
+  { side: 'beside', right: 268, bottom: 732, down: true });
 
 {
   const at = place(travelInfobar, null, DESKTOP, DESKTOP_BUTTON, false);
@@ -147,7 +154,7 @@ const travelInRow = box(940, 200, 90, 40);
 check('a Travel button whose own row is beside it goes above it, not over the greeting',
   place(travelInRow, null, LAPTOP, DESKTOP_BUTTON, true),
   // right edges level (1100 - 1030), 8px above its top (900 - 200 + 8)
-  { side: 'above', right: 70, bottom: 708 });
+  { side: 'above', right: 70, bottom: 708, down: true });
 
 check('the same button with the space free would have gone beside it',
   place(travelInRow, null, LAPTOP, DESKTOP_BUTTON, false).side,
@@ -163,7 +170,7 @@ const compass = box(300, 790, 40, 40);
 check('the compass in the bottom bar puts the launcher above the bar, not in it',
   place(compass, bottomBar, PHONE, PHONE_BUTTON, true),
   // right edges level (390 - 340), above the BAR's top rather than the compass's
-  { side: 'above', right: 50, bottom: 72 });
+  { side: 'above', right: 50, bottom: 72, down: false });
 
 {
   const at = place(compass, bottomBar, PHONE, PHONE_BUTTON, true);
@@ -189,7 +196,7 @@ const topCompass = box(300, 8, 40, 40);
 check('a travel control in a top bar has no room above it, so the launcher goes below',
   place(topCompass, topBar, PHONE, PHONE_BUTTON, true),
   // right edges level, top edge 8px under the bar: 844 - 56 - 8 - 36
-  { side: 'below', right: 50, bottom: 744 });
+  { side: 'below', right: 50, bottom: 744, down: true });
 
 {
   const at = place(topCompass, topBar, PHONE, PHONE_BUTTON, true);
@@ -201,7 +208,7 @@ check('a travel control in a top bar has no room above it, so the launcher goes 
 
 check('a control too close to the left edge falls back to stacking',
   place(box(12, 100, 48, 40), null, PHONE, PHONE_BUTTON, false),
-  { side: 'above', right: 302, bottom: 752 });
+  { side: 'above', right: 302, bottom: 752, down: true });
 
 check('the room test counts the launcher\'s own width, not just the gap',
   // 96px of clearance: an 8px screen edge, an 80px button and an 8px gap.
@@ -212,15 +219,45 @@ check('the room test counts the launcher\'s own width, not just the gap',
 
 check('no travel control and no bar is the old bottom-right corner',
   place(null, null, PHONE, PHONE_BUTTON, false),
-  { side: 'corner', right: 16, bottom: 16 });
+  { side: 'corner', right: 16, bottom: 16, down: false });
 
 check('no travel control but a bottom bar still lifts the launcher clear of it',
   place(null, bottomBar, PHONE, PHONE_BUTTON, false),
-  { side: 'corner', right: 16, bottom: 72 });
+  { side: 'corner', right: 16, bottom: 72, down: false });
 
 check('a bar at the top is not in the corner\'s way, so the corner stays put',
   place(null, topBar, PHONE, PHONE_BUTTON, false),
-  { side: 'corner', right: 16, bottom: 16 });
+  { side: 'corner', right: 16, bottom: 16, down: false });
+
+// --- which way the menu opens ----------------------------------------------
+
+check('a button above the bottom bar opens the menu upward, into the screen',
+  place(compass, bottomBar, PHONE, PHONE_BUTTON, true).down, false);
+
+check('THE BUG: a button under a top bar opens DOWNWARD, or the menu is off-screen',
+  place(topCompass, topBar, PHONE, PHONE_BUTTON, true).down, true);
+
+check('the sidebar Travel button is high up, so that menu opens downward too',
+  place(travelInfobar, null, DESKTOP, DESKTOP_BUTTON, false).down, true);
+
+{
+  // The direction is only ever "whichever side has more room", so whatever the
+  // placement decided, the stack can never be the taller of the two gaps.
+  const views = [DESKTOP, LAPTOP, PHONE];
+  const anchors = [null, travelInfobar, travelInRow, compass, topCompass];
+  const wrongWay = [];
+  for (const view of views) {
+    for (const bar of [null, bottomBar, topBar]) {
+      for (const anchor of anchors) {
+        const size = { width: 96, height: 40 };
+        const at = place(anchor, bar, view, size, false);
+        const above = view.height - at.bottom - size.height;
+        if ((at.down ? at.bottom : above) < (at.down ? above : at.bottom)) wrongWay.push(at);
+      }
+    }
+  }
+  check('the stack always opens toward the side with more room', wrongWay, []);
+}
 
 // --- clamping --------------------------------------------------------------
 
