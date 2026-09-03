@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      1.7
-// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A "UX" button docked INTO Fallen London's own chrome beside its travel control -- under the big Travel button on the wide layout, as one more icon in the banner on the narrow one -- so it takes up space in the page like any other control and covers nothing. It opens a menu of reference panels; the last line of that menu switches it back to floating over the page if you preferred it that way, and it falls back to floating on its own if Fallen London's chrome cannot be found. The first panel is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, where the safe docks are, the three winds and the dreams they start, and the whole card table, searchable. (4) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, coloured from grey to gold, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth when Full Fathom Five can be read or you set it in the panel, and otherwise shows the range across the depths rather than a number it cannot justify. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold while any of the three items it turns into is still missing, with how many of that coral you are already carrying in brackets so two coral cards never read alike. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. A third panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, and how many actions it takes to reach each Devotion level, which of the twenty-eight collectable items you are still missing (the fifteen coral items, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. Built as a feature registry so further tweaks can be added as entries.
+// @version      1.8
+// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A "UX" button docked INTO Fallen London's own chrome beside its travel control -- under the big Travel button on the wide layout, as one more icon in the banner on the narrow one -- so it takes up space in the page like any other control and covers nothing. It opens a menu of reference panels; the last line of that menu switches it back to floating over the page if you preferred it that way, and it falls back to floating on its own if Fallen London's chrome cannot be found. The first panel is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, where the safe docks are, the three winds and the dreams they start, and the whole card table, searchable. (4) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, coloured from grey to gold, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth when Full Fathom Five can be read or you set it in the panel, and otherwise shows the range across the depths rather than a number it cannot justify. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. A third panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, and how many actions it takes to reach each Devotion level, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. Built as a feature registry so further tweaks can be added as entries.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 // @run-at       document-idle
@@ -2559,15 +2559,15 @@
     if (opt.coral) {
       const coral = FOTZ_CORAL_BY_NAME.get(opt.coral);
       if (!coral) return [];
-      // A coral whose three items have not been published yet. The BADGE's
-      // question is "should I take this card?", and the answer is an
-      // unambiguous yes -- it is new this year and nobody can already hold
-      // what does not exist -- so it counts as missing here, under a
-      // placeholder name. (The CHECKLIST asks a different question, "how many
-      // do I still need", and refuses to count items it cannot name: see
-      // `fotzCollection`. The two differ on purpose.)
+      // A coral whose three items have not been published yet: nobody can
+      // hold what does not exist, so it is missing.
       if (!coral.variants) return [coral.pendingLabel || coral.slot];
-      return coral.variants.filter(function (v) { return !holdings.has(v); });
+      // **Any one of the three finishes it.** The three versions of a coral
+      // item are mechanically identical -- same slot, same stats, different
+      // name and description -- so a second one is a change of outfit, not a
+      // reward. Holding one means this card has nothing left to give you.
+      const got = coral.variants.some(function (v) { return holdings.has(v); });
+      return got ? [] : [coral.slot];
     }
     if (opt.item) return holdings.has(opt.item) ? [] : [opt.item];
     if (opt.bride) return holdings.bride ? [] : [FOTZ_BRIDE_QUALITY];
@@ -2749,26 +2749,25 @@
         // becomes one item, so needing three variants and holding one coral
         // means two more dives -- that subtraction is the useful form of the
         // number, and there is room for it here where there is none on a badge.
+        const done = coral && coral.variants
+          && !fotzMissingFrom(opt, holdings).length;
         if (coralHeld) {
-          const gone = coral && coral.variants ? fotzMissingFrom(opt, holdings).length : null;
-          const short = gone == null ? null : gone - coralHeld;
           lines.push('  You are holding ' + coralHeld + ' ' + opt.coral
             + (coralHeld === 1 ? '' : 's') + ' already'
-            + (short == null ? '.'
-              : (gone === 0
-                ? ' — spare, since you already hold all three of its items.'
-                : (short > 0
-                  ? ' — ' + short + ' more ' + (short === 1 ? 'is' : 'are')
-                    + ' needed to cover what is missing.'
-                  : ' — enough to cover everything still missing here.'))));
+            + (done ? ' — spare, since you already have the item it becomes.'
+              : (coral && coral.variants ? ' — one is all it takes.' : '.')));
         }
         if (coral && !coral.variants) {
           lines.push('  ' + opt.coral + ' → one of three ' + coral.slot + ' in week two.');
           lines.push('  ' + coral.pending);
         } else {
+          // The three are the same item wearing different names, so which one
+          // you get is a question of taste. Said plainly, because the Sights
+          // bands below otherwise look like something you have to plan around.
           lines.push('  ' + opt.coral + ' → one of three '
-            + (coral ? coral.slot + ' items' : 'items') + ' in week two, and which one is '
-            + 'decided by Sights at the Festival: '
+            + (coral ? coral.slot : 'items') + ' in week two. All three are mechanically '
+            + 'identical, so any one of them finishes this card for good.');
+          lines.push('  Which name you get is decided by Sights at the Festival: '
             + FOTZ_BANDS.map(function (band, i) {
               return band.lo + '–' + band.hi + ' ' + (coral ? coral.variants[i] : '?');
             }).join(', ') + '.');
@@ -5382,54 +5381,55 @@
     groups.push({
       key: 'coral',
       title: 'Coral equipment',
-      hint: 'Dive for the coral in week one, break it open in week two. Which of the '
-        + 'three you get is decided by Sights at the Festival at that moment — and '
-        + 'breaking one re-rolls Sights, so you cannot line two up in a row.',
+      hint: 'Dive for the coral in week one, break it open in week two. Each coral becomes '
+        + 'one of three items — and the three are mechanically IDENTICAL, differing only in '
+        + 'name and description, so holding any one of them is the whole prize. They are '
+        + 'counted that way here: one item per coral, not three.',
       corals: FOTZ_CORALS.map(function (coral) {
         const inHand = countOf(coral.coral);
-        // A coral whose items are not published yet gets ONE row saying so,
-        // and it is `count: false` -- "missing 3 of 31" would be counting
-        // items nobody can name, which is the same fabrication as a made-up
-        // number. `held` is null for the same reason: you cannot check a name
-        // you do not have. The badge still stars the card, because "take this,
-        // it is new" is a different and answerable question.
-        if (!coral.variants) {
-          return {
-            coral: coral,
-            inHand: inHand,
-            pending: true,
-            rows: [{
-              name: coral.pendingLabel || coral.slot,
-              slot: coral.slot,
-              held: null,
-              count: false,
-              band: null,
-              how: coral.pending,
-              note: coral.pending,
-            }],
-          };
-        }
+        // ONE row per coral, not one per variant. The three versions of a
+        // coral item have the same stats and the same slot; only the name and
+        // the flavour differ, so collecting all three is a matter of taste
+        // rather than of getting anything. Counting them as three would put
+        // ten items nobody needs into the "missing" headline.
+        //
+        // `which` is which of the three you actually hold, kept for display:
+        // the variant detail is still worth SHOWING, it is just not worth
+        // COUNTING. A coral whose items are not published yet has no names to
+        // check at all, so it stays unknown rather than missing.
+        const which = coral.variants
+          ? coral.variants.filter(function (name) { return holds(name) === true; })
+          : [];
+        const have = !coral.variants ? null
+          : (held ? which.length > 0 : null);
         return {
           coral: coral,
           inHand: inHand,
-          rows: coral.variants.map(function (name, i) {
-            const have = holds(name);
-            const band = FOTZ_BANDS[i];
-            return {
-              name: name,
-              slot: coral.slot,
-              held: have,
-              count: true,
-              band: i,
-              // "Do this now" -- you are holding the coral and Sights is
-              // sitting in the band that pays out the one you're missing.
-              ready: have === false && !!inHand && sightsBand === i,
-              how: 'Break a ' + coral.coral + ' while Sights at the Festival is '
-                + band.lo + '–' + band.hi + ', or trade a duplicate to ' + band.trader + '.',
-              fate: coral.fate,
-              bis: coral.bis,
-            };
-          }),
+          pending: !coral.variants,
+          which: which,
+          rows: [{
+            name: coral.slot,
+            slot: coral.slot,
+            coralName: coral.coral,
+            held: have,
+            count: true,
+            variants: coral.variants,
+            which: which,
+            pending: !coral.variants,
+            // "Do this now": you are holding the coral and have none of the
+            // three items. Which of them you would get no longer matters, so
+            // this no longer waits on Sights sitting in a particular band --
+            // any band pays out something you don't have.
+            ready: have === false && !!inHand,
+            how: coral.variants
+              ? 'Dive a ' + coral.coral + ' off ' + coral.card + ', then break it open in '
+                + 'week two. Any of the three is the same item mechanically; Sights at the '
+                + 'Festival decides which name you get.'
+              : coral.pending,
+            note: coral.variants ? null : coral.pending,
+            fate: coral.fate,
+            bis: coral.bis,
+          }],
         };
       }),
     });
@@ -5587,12 +5587,11 @@
       // advice then falls back to the Favour case rather than inventing a
       // count -- there is no honest answer to "how many do you need" when we
       // cannot tell what you have.
-      // How many different corals are still worth diving for. A `pending` one
-      // always counts: its items cannot exist yet, so you certainly need the
-      // coral -- and unlike the checklist total, this needs no name, only a
-      // count, so there is nothing being fabricated.
+      // How many different corals are still worth diving for -- one each, and
+      // only while you hold none of its three items. A `pending` one always
+      // counts: its items cannot exist yet, so you certainly need the coral.
       coralsWanted: !held ? null : groups[0].corals.filter(function (entry) {
-        return entry.pending || entry.rows.some(function (row) { return row.held === false; });
+        return entry.pending || entry.rows[0].held === false;
       }).length,
     };
   }
@@ -5856,9 +5855,10 @@
             ? entry.from : entry.from + '–' + entry.to)
             + (entry.pending
               ? '\nAll three of its items are still unpublished — see the checklist below.'
-              : (entry.coral ? '\n' + entry.missing.length
-                + (entry.missing.length === 1 ? ' variant' : ' variants')
-                + ' still missing: ' + entry.missing.join(', ') : ''))
+              : (entry.coral
+                ? '\nBecomes one of three ' + entry.missing[0] + ', all mechanically '
+                  + 'identical, and you have none of them yet.'
+                : ''))
             + (entry.held
               ? '\nYou are already holding ' + entry.held + ' of the coral itself.' : ''),
           css: 'display:inline-block;margin:2px 5px 2px 0;padding:1px 6px;border-radius:3px;'
@@ -5867,8 +5867,10 @@
             + ';color:' + UI.text + ';font-size:11px;white-space:nowrap;',
         }, [
           entry.bride ? 'the Pentamerous Bride' : entry.label,
-          entry.coral && !entry.pending && entry.missing.length < 3
-            ? h('span', { css: 'color:' + UI.dim + ';' }, [' ×' + entry.missing.length])
+          // A coral you are already carrying is a different prospect from one
+          // you have never seen -- same as the card badge's brackets.
+          entry.held
+            ? h('span', { css: 'color:' + UI.dim + ';' }, [' (' + entry.held + ')'])
             : null,
           entry.last && shallow
             ? h('span', { css: 'color:' + COLOR_FULL + ';' }, [' · last chance'])
@@ -6076,37 +6078,38 @@
                 : null,
             ]),
             table(null, entry.rows.map(function (row) {
-              // A coral whose three items aren't published yet has one row and
-              // no Sights bands to show -- there is nothing to map them to.
-              if (row.band == null) {
-                return h('tr', null, [
-                  h('td', { css: TD + 'text-align:center;width:1%;' }, [fotzPip(row)]),
-                  h('td', { css: TD, colSpan: 3 }, [
-                    h('span', { css: 'color:' + UI.text + ';' },
-                      ['Three ' + entry.coral.slot + ', names not published yet']),
-                    h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [row.note]),
-                  ]),
-                ]);
-              }
-              const band = FOTZ_BANDS[row.band];
               return h('tr', null, [
                 h('td', { css: TD + 'text-align:center;width:1%;' }, [fotzPip(row)]),
                 h('td', { css: TD }, [
-                  wikiLink(row.name, row.name),
+                  h('span', { css: 'color:' + UI.text + ';' }, [
+                    row.pending
+                      ? 'Three ' + row.slot + ', names not published yet'
+                      : 'Any one of three ' + row.slot,
+                  ]),
                   row.bis
                     ? h('div', { css: 'color:' + UI.accent + ';font-size:11px;' }, [row.bis])
                     : null,
+                  // The variant detail is worth SHOWING even though it is no
+                  // longer worth counting: the one you hold is ticked, and the
+                  // Sights band that pays each name is in its tooltip, for the
+                  // times you do want a particular one.
+                  row.variants
+                    ? h('div', { css: 'font-size:11px;margin-top:2px;' },
+                      row.variants.map(function (name, i) {
+                        const mine = row.which.indexOf(name) !== -1;
+                        const band = FOTZ_BANDS[i];
+                        return h('span', {
+                          title: name + ' — Sights at the Festival ' + band.lo + '–' + band.hi
+                            + ' when you break the coral open, or trade a spare to '
+                            + band.trader
+                            + (collection.sightsBand === i ? '\nYour Sights is in this band now.'
+                              : ''),
+                          css: 'margin-right:8px;white-space:nowrap;color:'
+                            + (mine ? UI.accent : UI.dim) + ';',
+                        }, [mine ? '✓ ' + name : name]);
+                      }))
+                    : h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [row.note]),
                 ]),
-                h('td', {
-                  css: TD + 'font-size:11px;white-space:nowrap;color:'
-                    + (collection.sightsBand === row.band ? COLOR_READY : UI.dim) + ';',
-                  title: 'Sights at the Festival ' + band.lo + '–' + band.hi
-                    + ' when you break the coral open'
-                    + (collection.sightsBand === row.band ? ' — where your Sights is now' : ''),
-                }, ['Sights ' + band.lo + '–' + band.hi]),
-                h('td', {
-                  css: TD + 'font-size:11px;color:' + UI.dim + ';',
-                }, ['or trade a spare to ' + band.trader]),
               ]);
             })),
           ]);

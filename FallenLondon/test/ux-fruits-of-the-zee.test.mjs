@@ -429,28 +429,12 @@ check('a coral card is labelled rather than scored — it pays no Favour',
     spec('A Graveyard of Derelict Debris', 2, holdingCorals).text
       !== spec('A Reef of Wrecks', 2, holdingCorals).text, true);
 
-  // One coral becomes one item, so the subtraction is the actionable form —
-  // and there is room for it in the tooltip where there is none on a badge.
-  check('the tooltip turns the count into how many more dives it needs',
-    /holding 2 Grasping Corals already — 1 more is needed/
-      .test(spec('A Reef of Wrecks', 2, holdingCorals).title), true);
+  check('the tooltip says one coral is all it takes, since the three are the same item',
+    /one is all it takes/.test(spec('A Reef of Wrecks', 2, holdingCorals).title), true);
 
-  check('and says so when you already have enough',
-    (() => {
-      const held = {
-        has: (n) => n !== 'Loomweavers',
-        count: () => 3,
-        bride: false,
-        sig: 'plenty',
-      };
-      return /enough to cover everything still missing/
-        .test(spec('A Reef of Wrecks', 2, held).title);
-    })(), true);
-
-  // "Enough to cover everything still missing" is nonsense when nothing is
-  // missing — a coral held after the set is complete is simply spare.
-  check('a coral held with the set already complete is called spare, not "enough"',
-    /spare, since you already hold all three/
+  // A coral held once the item is already yours is not progress, it is spare.
+  check('a coral held after the item is already yours is called spare',
+    /spare, since you already have the item it becomes/
       .test(spec('A Reef of Wrecks', 2,
         { has: () => true, count: () => 2, bride: true, sig: 'done' }).title),
     true);
@@ -496,14 +480,27 @@ check('a coral badge spells out the Sights bands',
 check('an unread Possessions list yields null, never an empty list',
   api.fotzMissingFrom(card('A Shattered Prow').opts[1], null), null);
 
-const halfHeld = {
-  has: (n) => n === 'Gossamer Palms' || n === 'Loomweavers',
-  bride: false,
-  sig: 'half',
-};
-check('a coral only reports the variants you actually lack',
-  api.fotzMissingFrom(card('A Reef of Wrecks').opts[0], halfHeld),
-  ['Mournclimber’s Wraps']);
+// **Any one of the three finishes a coral.** The three versions of a coral
+// item are mechanically identical — same slot, same stats, different name and
+// description — so a second is a change of outfit, not a reward. Counting them
+// as three put ten items nobody needs into the "missing" headline.
+const oneVariant = { has: (n) => n === 'Gossamer Palms', bride: false, sig: 'one' };
+check('holding one of the three finishes the coral outright',
+  api.fotzMissingFrom(card('A Reef of Wrecks').opts[0], oneVariant), []);
+
+check('...and it does not matter which of the three it is',
+  ['Gossamer Palms', 'Mournclimber’s Wraps', 'Loomweavers'].map((v) =>
+    api.fotzMissingFrom(card('A Reef of Wrecks').opts[0],
+      { has: (n) => n === v, bride: false, sig: v }).length),
+  [0, 0, 0]);
+
+check('holding none of them leaves the slot outstanding, named once',
+  api.fotzMissingFrom(card('A Reef of Wrecks').opts[0], holdingNone), ['Gloves']);
+
+check('a variant from a DIFFERENT coral does not finish this one',
+  api.fotzMissingFrom(card('A Reef of Wrecks').opts[0],
+    { has: (n) => n === 'Peaceable Cowl', bride: false, sig: 'other' }),
+  ['Gloves']);
 
 check('a pure economy claim is never "missing" anything',
   api.fotzMissingFrom(card('A Cabin-Fragment').opts[0], holdingNone), []);
@@ -617,24 +614,29 @@ setCharacter();
 const state = api.readFotzState();
 const collection = api.fotzCollection(state);
 
-check('the collection is the 15 coral items, the 6 dive items, the 6 stall '
-  + 'items and the Litter-Cyst',
-  collection.total, 28);
+// Six corals (ONE item each, not three), six dive items, six stall items and
+// the Litter-Cyst. It was 28 while the three variants of each coral counted
+// separately, which put ten items nobody needs into the headline.
+check('the collection is one item per coral, plus the dive, stall and Bride items',
+  [collection.total, collection.groups[0].corals.length,
+    collection.groups[0].corals.every((c) => c.rows.length === 1)],
+  [19, 6, true]);
 
-// The unpublished Luggage is deliberately NOT in that 28: "missing 3 of 31"
-// would be counting items nobody can name, which is the same fabrication as a
-// made-up number. It gets one row, unknown rather than missing.
-check('the unpublished coral gets one row, counted towards nothing',
+// The unpublished coral is now countable in a way it wasn't: it is ONE item
+// (any of three Luggage), not three unnamed ones, so counting it fabricates
+// nothing. Whether you HOLD it still can't be checked without a name, so it
+// stays unknown rather than missing.
+check('the unpublished coral counts as one item, of unknown ownership',
   (() => {
     const entry = collection.groups[0].corals.find((c) => c.coral.variants == null);
     return [!!entry.pending, entry.rows.length, entry.rows[0].count, entry.rows[0].held];
   })(),
-  [true, 1, false, null]);
+  [true, 1, true, null]);
 
-// ...but it IS wanted, because you certainly need to dive for the coral, and
-// counting how many needs no name at all.
 check('and it still counts towards how many corals are worth diving for',
-  collection.coralsWanted, 6);
+  // Five: this character holds a Gossamer Palms, which finishes the Grasping
+  // Coral outright, leaving four published corals and the unpublished one.
+  collection.coralsWanted, 5);
 
 check('the ships and the Fate items are listed but never counted',
   collection.groups.filter((g) => g.key === 'ships' || g.key === 'fate')
@@ -644,19 +646,35 @@ check('the Amber does not count until the Litter-Cyst it replaces is yours',
   collection.groups.find((g) => g.key === 'bride').rows.map((r) => [r.name, r.count]),
   [['Weeping Litter-Cyst', true], ['Nodule of Fecund Amber', false]]);
 
-check('two held, twenty-six still missing, nothing unknown',
-  [collection.missing, collection.unknown], [26, 0]);
+check('two held, sixteen still missing, and the unpublished one unknown',
+  [collection.missing, collection.unknown], [16, 1]);
 
 check('the two it knows you have are the ones on the Possessions list',
   collection.groups.flatMap((g) => (g.rows || g.corals.flatMap((c) => c.rows)))
     .filter((r) => r.held).map((r) => r.name),
-  ['Gossamer Palms', 'Wrecking Boots']);
+  // "Gloves", not "Gossamer Palms": the Gossamer Palms it found finishes the
+  // whole Grasping Coral, and the slot is what you actually gained.
+  ['Gloves', 'Wrecking Boots']);
 
-check('a coral in hand plus Sights in the right band is something to do NOW',
-  collection.ready.map((r) => r.name).includes('Mournclimber’s Wraps'), true);
+check('the variant it found is still shown, just not counted',
+  collection.groups[0].corals.find((c) => c.coral.coral === 'Grasping Coral').which,
+  ['Gossamer Palms']);
 
-check('...but not the variant whose band your Sights is nowhere near',
-  collection.ready.map((r) => r.name).includes('Loomweavers'), false);
+// This character holds a Grasping Coral AND a Gossamer Palms, so the Gloves
+// are already done — a coral in hand with the item already yours is spare, not
+// something to go and do.
+check('a coral in hand is not "do this now" once its item is already yours',
+  collection.ready.map((r) => r.name).includes('Gloves'), false);
+
+// "Do this now" no longer waits on Sights sitting in a particular band: once
+// ANY of the three finishes the coral, every band pays out something you
+// haven't got, so holding the coral is the whole condition.
+check('...but a coral in hand with none of its items is, whatever Sights says',
+  [0, 40, 90].map((sights) => api.fotzCollection({
+    values: new Map([['Sights at the Festival', sights]]),
+    held: new Map([['grasping coral', { name: 'Grasping Coral', count: 1 }]]),
+  }).ready.map((r) => r.name)),
+  [['Gloves'], ['Gloves'], ['Gloves']]);
 
 check('with 260 Favour the stall items you can afford are ready too',
   collection.ready.filter((r) => r.how.includes('Island Stalls')).map((r) => r.name),
@@ -706,7 +724,7 @@ check('with no Possessions read, nothing is "missing" and everything is unknown'
   (() => {
     const blank = api.fotzCollection(null);
     return [blank.total, blank.missing, blank.unknown];
-  })(), [28, 0, 28]);
+  })(), [19, 0, 19]);
 
 // --- three features, one corner -------------------------------------------
 
@@ -927,13 +945,24 @@ check('the unpublished coral is flagged, so nothing prints "×1 of 3 left"',
     .filter((e) => e.pending).map((e) => [e.label, e.missing]),
   [['Rust-Eaten Ration', ['Luggage']]]);
 
-check('a coral carries which of its variants are still missing',
+check('one variant in hand takes its coral off the list at every depth',
   (() => {
-    const held = { has: (n) => n === 'Loomweavers' || n === 'Gossamer Palms', bride: false, sig: 'x' };
+    const held = { has: (n) => n === 'Loomweavers', bride: false, sig: 'x' };
     const split = api.fotzSplitUniques(api.fotzUniquesByDepth(held));
+    return [
+      split.everywhere.some((e) => e.label === 'Grasping Coral'),
+      split.everywhere.map((e) => e.label),
+    ];
+  })(),
+  [false, ['Gorgonian Reef-Rock', 'Barnacled Headpiece', 'Spinebound Oddity',
+    'Pedestrian Polyp', 'Rust-Eaten Ration']]);
+
+check('and what a coral still owes you is one slot, not a list of names',
+  (() => {
+    const split = api.fotzSplitUniques(api.fotzUniquesByDepth(nothingHeld));
     return split.everywhere.find((e) => e.label === 'Grasping Coral').missing;
   })(),
-  ['Mournclimber’s Wraps']);
+  ['Gloves']);
 
 // --- badging the branches in the game --------------------------------------
 //

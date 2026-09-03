@@ -747,6 +747,20 @@ navigation. Two consequences:
   `✓` you hold it all, `?` your Possessions have never been read so neither can be said (a
   dash would read as a minus sign in front of the number). A
   treasure-only card carries no mark at all rather than an unearned tick.
+  **One of the three is the whole prize** (changed 2026-09-03, on the author's report). The
+  three versions of a coral item are mechanically identical -- same slot, same stats, differing
+  only in name and description -- so holding any one of them finishes that coral for good and a
+  second is a change of outfit rather than a reward. `fotzMissingFrom` therefore returns `[]`
+  for a coral as soon as one variant is held, and the checklist counts **one item per coral, not
+  three**: the collection went from 28 to 19, which took ten items nobody needs out of the
+  headline. It also simplified `ready`, which used to wait on Sights sitting in the band that
+  paid the particular variant you lacked; now that any band pays out something you haven't got,
+  holding the coral is the entire condition.
+  The variant detail is still **shown** -- the panel ticks the one you hold and keeps each name's
+  Sights band in its tooltip -- it is simply not **counted**. That distinction is the whole
+  design: it costs nothing to keep the information for someone who does want a particular look,
+  and it costs a great deal of noise to make everyone else collect three of everything.
+
   **The best thing in these tables is the Sights mapping**, and it did not come from the guide.
   Which of the three versions of a coral item you get is *not* random: the five *Offer the King
   your <coral>* option pages each list three outcomes keyed to **Sights at the Festival** --
