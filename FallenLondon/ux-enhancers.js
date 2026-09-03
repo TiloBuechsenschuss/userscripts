@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      1.2
-// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A "UX" button parked beside Fallen London's own travel control -- the big Travel button on the wide layout, the compass on the narrow one, so it never covers the bottom bar -- opens a menu of reference panels; the first is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, where the safe docks are, the three winds and the dreams they start, and the whole card table, searchable. Built as a feature registry so further tweaks can be added as entries.
+// @version      1.5
+// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A "UX" button docked INTO Fallen London's own chrome beside its travel control -- under the big Travel button on the wide layout, as one more icon in the banner on the narrow one -- so it takes up space in the page like any other control and covers nothing. It opens a menu of reference panels; the last line of that menu switches it back to floating over the page if you preferred it that way, and it falls back to floating on its own if Fallen London's chrome cannot be found. The first panel is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, where the safe docks are, the three winds and the dreams they start, and the whole card table, searchable. (4) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, coloured from grey to gold, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth when Full Fathom Five can be read or you set it in the panel, and otherwise shows the range across the depths rather than a number it cannot justify. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold while any of the three items it turns into is still missing. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. A third panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, and how many actions it takes to reach each Devotion level, which of the twenty-eight collectable items you are still missing (the fifteen coral items, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. Built as a feature registry so further tweaks can be added as entries.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 // @run-at       document-idle
@@ -90,20 +90,45 @@
 
   // === shared: where you are =============================================
   //
-  // Fallen London keeps a screen-reader-only block at the top of every page:
+  // Two places say it, and both are verified against real markup.
   //
-  //   <div id="accessible-sidebar" class="accessible-sidebar u-visually-hidden">
-  //     <h1 class="welcome"><span>It's <a href="/profile/TheFairUnknown">…</a>!</span>
-  //      Welcome to Spite, delicious friend!</h1>
+  // 1. The screen-reader-only block at the top of every page:
   //
-  // Verified identical on /myself and /possessions, in both the wide and the
-  // narrow layout. It is the only place the current area is stated in plain
-  // text, and it is there no matter which tab you are on.
+  //      <div id="accessible-sidebar" class="accessible-sidebar u-visually-hidden">
+  //        <h1 class="welcome"><span>It's <a href="/profile/TheFairUnknown">…</a>!</span>
+  //         Welcome to Spite, delicious friend!</h1>
+  //
+  //    Verified identical on /myself and /possessions, in both the wide and
+  //    the narrow layout, and it is there no matter which tab you are on --
+  //    which is what makes it the primary. The area has to be dug out of the
+  //    sentence, hence the regex.
+  //
+  // 2. The wide layout's VISIBLE greeting, in the sidebar's `div.travel`
+  //    (captured 2026-09-03, on Mutton Island during the Fruits of the Zee):
+  //
+  //      <p class="heading heading--3"><span>It's <a …>TheFairUnknown</a>!</span>
+  //        <br>Welcome to</p>
+  //      <p class="heading heading--2 welcome__current-area">Mutton Island,</p>
+  //      <p class="heading heading--3">delicious friend!</p>
+  //
+  //    Here the area sits in an element of its OWN, `.welcome__current-area`,
+  //    with nothing to parse but a trailing comma -- so where the sentence in
+  //    (1) is split across three paragraphs and its regex can't match, this
+  //    still reads cleanly. It is the backstop rather than the primary only
+  //    because it belongs to the wide layout's sidebar and nothing has
+  //    confirmed it exists in the narrow one.
   function currentArea(doc) {
-    const el = (doc || document).querySelector('#accessible-sidebar .welcome');
+    const d = doc || document;
+    const el = d.querySelector('#accessible-sidebar .welcome');
     const text = el ? el.textContent.replace(/\s+/g, ' ') : '';
     const m = text.match(/Welcome to (.+?),\s*delicious friend/i);
-    return m ? m[1].trim() : null;
+    if (m) return m[1].trim();
+
+    const visible = d.querySelector('.welcome__current-area');
+    // Trailing comma from "Mutton Island," -- and a trailing full stop or
+    // exclamation mark too, since nothing promises the punctuation.
+    const name = visible ? visible.textContent.replace(/\s+/g, ' ').trim().replace(/[,.;!]+$/, '').trim() : '';
+    return name || null;
   }
 
   // === shared: badges ====================================================
@@ -1707,6 +1732,1075 @@
     });
   }
 
+  // === feature: Fruits of the Zee Festival card ratings ==================
+  //
+  // Rates the opportunity cards you draw while wreck-diving at the Fruits of
+  // the Zee Festival (Mutton Island, the first weeks of September).
+  //
+  // The festival is two weeks and the cards belong to the first one. You raise
+  // Fivefold Devotion on the shore, then dive from The Fishing Boats, Empty;
+  // each card in the hand offers ONE treasure you may claim, and "Dive deeper"
+  // is free but ends the dive if it fails. In the second week you trade what
+  // you hauled up for Thalassic Favour and spend that on equipment. So a card
+  // is worth two different things at once, and the badge says both:
+  //
+  //   * its TRADE-IN VALUE -- the Thalassic Favour the treasure is worth at
+  //     the Fruit Market, which is what pays for everything in week two; and
+  //   * whether it is a RARE ITEM you do not own yet -- the five corals, each
+  //     of which trades for one of three unique pieces of equipment, and the
+  //     six pieces of equipment from festivals past that only turn up while
+  //     diving. Those are the reason to keep diving once the Favour is banked,
+  //     and which of them you are still missing is the whole point of the
+  //     Fruits of the Zee panel further down.
+  //
+  // THE AWKWARD PART IS DEPTH. Almost every value here depends on Full Fathom
+  // Five -- A Cabin-Fragment pays 50 Favour at depth 1 and 400 at depth 5, and
+  // A Shattered Prow offers a Nuncian Pocket Watch at depths 2-4 but the
+  // Scrimshander Carving Knife only at 5 -- so a badge that ignored depth
+  // would be quoting the wrong number most of the time. `fotzDepth` is
+  // therefore three-tiered (see it below): a live read of the quality if FL
+  // happens to be rendering it, a depth you set yourself in the panel, or
+  // nothing -- and with nothing the badge shows the RANGE across the depths
+  // and says so, rather than picking a number it cannot justify. Same rule as
+  // everywhere else here: never state a figure we can't stand behind.
+  //
+  // Everything below is transcribed from Fruits of the Zee Festival (Guide),
+  // its /Item Comparison subpage, and the individual card and option pages on
+  // the Fallen London wiki. Corrections go in these tables and nowhere else.
+  //
+  // **Re-read the guide, don't trust a copy of it.** The wiki gains this
+  // year's content as the festival runs: A Graveyard of Derelict Debris and
+  // its Rust-Eaten Ration were added to the guide's own card table within a
+  // day of this being transcribed, and the first anyone knew of it was a card
+  // turning up unbadged in a real hand. When a card comes up unbadged, the
+  // guide is the first place to look, not the last.
+
+  // Which of the three versions of a coral item you get is NOT random, which
+  // is the single most useful thing on this page: it is decided by Sights at
+  // the Festival at the moment you break the coral open. Verified on all five
+  // option pages (Offer the King your <coral>), which each list three
+  // outcomes:
+  //
+  //   Sights  1- 33 -> the Itinerant Zubmariner's stock ("above and below the
+  //                    zee" -- Saviour's Rocks, Rosegate, the Corsair's Forest)
+  //   Sights 34- 66 -> the Pirate-Poet's stock (Gaider's Mourn)
+  //   Sights 67-100 -> the Enigmatic Angler's stock (Irem)
+  //
+  // and the three traders in The Fruit Market swap coral items like-for-like,
+  // each handing out the band that is theirs and accepting the other two. So a
+  // variant you are missing has two routes: break a coral while Sights is in
+  // its band, or trade a duplicate to that band's trader. Note that breaking
+  // coral open re-rolls Sights, so you cannot line up two in a row.
+  //
+  // The guide's own summary table lists the three variants in a different
+  // order for several of the corals. The option pages win, per the usual rule.
+  const FOTZ_BANDS = [
+    { lo: 1, hi: 33, trader: 'the Itinerant Zubmariner' },
+    { lo: 34, hi: 66, trader: 'the Pirate-Poet' },
+    { lo: 67, hi: 100, trader: 'the Enigmatic Angler' },
+  ];
+
+  // The five corals. Each is claimed from one card at any depth, and traded
+  // (An Audience with the King-in-Coral -> Present him with a shard of coral)
+  // for one of three items that are mechanically identical to each other.
+  const FOTZ_CORALS = [
+    {
+      coral: 'Barnacled Headpiece', card: 'Among the Deep-Fish', slot: 'Hat', fate: 30,
+      variants: ['Aria of Tranquillity', 'Crab-Clawed Tricorne', 'Peaceable Cowl'],
+      bis: 'Strict best-in-slot for Troubled Waters reduction.',
+    },
+    {
+      coral: 'Gorgonian Reef-Rock', card: 'A Rusting Anchor', slot: 'Clothing', fate: null,
+      variants: ['Concealing Skirt', 'Henchman’s Greatcoat', 'Obscurant’s Shawl'],
+    },
+    {
+      coral: 'Grasping Coral', card: 'A Reef of Wrecks', slot: 'Gloves', fate: 30,
+      variants: ['Gossamer Palms', 'Mournclimber’s Wraps', 'Loomweavers'],
+      bis: 'Shared best-in-slot with the Bazaar’s Pair of Lenguals.',
+    },
+    {
+      coral: 'Pedestrian Polyp', card: 'Old Wounds', slot: 'Boots', fate: 15,
+      variants: ['Scrimshaw Sabatons', 'Bright-Buckled Boots', 'Riddlefisher’s Footsteps'],
+    },
+    {
+      coral: 'Spinebound Oddity', card: 'An Obscured Glitter', slot: 'Adornment', fate: 20,
+      variants: ['‘Rosegate Blend’ Roll-ups', 'Mourning Locket', 'Justificande Cufflinks'],
+      bis: 'Strict best-in-slot for Shadowy.',
+    },
+    // THIS YEAR'S NEW ONE, and the reason to re-read the guide rather than
+    // trusting a transcription taken a day earlier: it was added to the wiki
+    // between the two (found 2026-09-03, after a card in a real hand came up
+    // unbadged). Its three items are NOT published -- the guide's own table
+    // says "(Coming in week 2)" three times and the page carries an
+    // `{{Incomplete}}` banner -- so `variants` is null rather than guessed at,
+    // and everything downstream has to cope with not knowing them.
+    {
+      coral: 'Rust-Eaten Ration', card: 'A Graveyard of Derelict Debris', slot: 'Luggage',
+      fate: null,
+      variants: null,
+      pendingLabel: 'Luggage',
+      pending: 'New this year, and the three Luggage it becomes are not published yet — the '
+        + 'wiki says "coming in week 2" and lists no names. The item raises Dangerous and '
+        + 'Monstrous Anatomy, per the game’s own instruction text on the option.',
+    },
+  ];
+
+  // --- week one, before the diving: Supplication on the Shore ------------
+  //
+  // You cannot dive at all below Fivefold Devotion 5, and how much higher you
+  // go decides how deep you can get. Devotion comes from one storylet,
+  // Supplication on the Shore, whose five options are worth **exactly the same
+  // 4 CP each** -- so the only thing that separates them is which base
+  // attribute the economy item scales off, and which item that is. Pick the
+  // one matching your best stat; there is no other consideration.
+  //
+  // **You do not get to choose freely**, which is the thing the guide's table
+  // does not tell you and a capture of the live storylet does: every option is
+  // gated on a window of *Airs of a Barren Zee*, and Airs is re-rolled by the
+  // action you just took. Typically two of the five are on offer at a time. So
+  // the useful question is not "which is best" but "which of the ones in front
+  // of me right now matches my best stat" -- and that is a question you have
+  // while looking at the storylet, not while reading a table, which is why
+  // these get badged in the game as well as listed in the panel.
+  //
+  // The windows and the ids come from the five option pages; the two the game
+  // showed with a requirement icon (Airs 60-100 and "outside 21-79") agree
+  // with them exactly, which is the check that they are real.
+  //
+  // The four attributes, with a glyph apiece. `color` is for text on the
+  // panel's dark ground, `badge` for white text on a filled badge -- the same
+  // hue at two weights, since one value cannot do both legibly. The stat's
+  // name is always rendered beside the glyph, so a font without the emoji
+  // loses nothing.
+  const FOTZ_STATS = {
+    Watchful: { icon: '👁', color: '#6f9fd8', badge: '#3d6591' },
+    Shadowy: { icon: '🗝', color: '#9b83c9', badge: '#5f4b8b' },
+    Dangerous: { icon: '⚔', color: '#c2645a', badge: '#8f3f36' },
+    Persuasive: { icon: '🎭', color: '#c9a04a', badge: '#8a6420' },
+  };
+
+  const FOTZ_SUPPLICATION = [
+    {
+      text: 'Construct toy boats to scuttle on the reef', id: 259469,
+      gain: 'Zee-Ztory', stat: 'Shadowy', airs: '0–40',
+    },
+    {
+      text: 'Sacrifice landed victuals to the zee', id: 259492,
+      gain: 'Cryptic Clue', stat: 'Watchful', airs: '20–60',
+    },
+    {
+      text: 'Gather flotsam for the King-in-Coral', id: 259493,
+      gain: 'Memory of Distant Shores', stat: 'Watchful', airs: '40–80',
+      note: 'Memories turn in 40 at a time with 2 Sworn Statements, which is what makes '
+        + 'this the option to take if you are also grinding Skulls in Coral in Jericho Locks.',
+    },
+    {
+      text: 'Perform in a Mutton Island mystery play', id: 259494,
+      gain: 'Maniac’s Prayer', stat: 'Persuasive', airs: '60–100',
+    },
+    {
+      text: 'Assist in the preparation of a well-rite', id: 259531,
+      gain: 'Tale of Terror!!', stat: 'Dangerous', airs: '0–20 or 80+',
+    },
+  ];
+
+  // The other two branches on the same storylet. Neither raises Devotion by
+  // the usual 4, so neither belongs in the table above -- but both are on
+  // screen beside the ones that do, and an unlabelled option next to labelled
+  // ones reads as an oversight. `strict` on the Chef because his name is the
+  // one here generic enough to belong to some other storylet.
+  const FOTZ_SUPPLICATION_OTHER = [
+    {
+      text: 'Speak to the Custodial Chef', id: 259471, strict: true,
+      badge: 'free', note: 'Costs no action and gives nothing: the Chef opening proceedings.',
+    },
+    {
+      text: 'Seek out one of the Fathomking’s servants', id: 259496,
+      badge: '7 Fate', warn: true,
+      note: 'Sets Fivefold Devotion straight to 11, the cap — which is otherwise 17 '
+        + 'supplications. Quoted from the game’s own description of the branch.',
+    },
+  ];
+
+  const FOTZ_BRANCHES = FOTZ_SUPPLICATION.concat(FOTZ_SUPPLICATION_OTHER);
+
+  const FOTZ_BRANCH_BY_NAME = new Map(
+    FOTZ_BRANCHES.map(function (o) { return [normalizeName(o.text), o]; }));
+
+  function lookupFotzBranch(name) {
+    return FOTZ_BRANCH_BY_NAME.get(normalizeName(name)) || null;
+  }
+
+  // Every option, every time. There is no variation to model.
+  const FOTZ_DEVOTION_CP = 4;
+
+  // Fivefold Devotion is a pyramidal quality: going from level n to n+1 costs
+  // n+1 CP, so reaching L costs L(L+1)/2 altogether. At 4 CP an action that is
+  // 4 actions to the minimum of 5 and 17 to the cap of 11 -- and a dive itself
+  // is 2 more (one to leave the boat, one to claim the treasure).
+  //
+  // Pure, and worth being pure: the whole ladder is checked against the
+  // guide's own table, which reads 5 (6 Act) through to 11 (19 Act).
+  function fotzDevotionCP(level) {
+    return (level * (level + 1)) / 2;
+  }
+
+  function fotzDevotionLadder() {
+    const rows = [];
+    for (let level = 5; level <= 11; level++) {
+      const actions = Math.ceil(fotzDevotionCP(level) / FOTZ_DEVOTION_CP);
+      rows.push({ level: level, cp: fotzDevotionCP(level), actions: actions, dive: actions + 2 });
+    }
+    return rows;
+  }
+
+  // How many more supplications from where you are now. `from` may be null --
+  // we then have no idea, and neither does the caller. It is an upper bound
+  // either way: FL shows the level but not the change points inside it, so
+  // this assumes you have just this moment arrived at `from`.
+  function fotzActionsToDevotion(from, to) {
+    if (from == null || from >= to) return 0;
+    return Math.ceil((fotzDevotionCP(to) - fotzDevotionCP(from)) / FOTZ_DEVOTION_CP);
+  }
+
+  // Where to stop, which depends entirely on what you are diving FOR. The
+  // guide's recommendations: corals are found at every depth, so the more
+  // different ones you still need the less depth is worth paying for -- but
+  // Favour scales hard with depth, and 10 is where Favour per action peaks.
+  function fotzDevotionAdvice(coralsWanted) {
+    if (coralsWanted >= 3) {
+      return {
+        level: 5,
+        why: 'Three or more corals still missing: they turn up at every depth, so dive '
+          + 'as often and as cheaply as possible.',
+      };
+    }
+    if (coralsWanted === 2) {
+      return { level: 7, why: 'Two corals still missing: 7 is the guide’s balance point.' };
+    }
+    if (coralsWanted === 1) {
+      return { level: 8, why: 'One coral still missing: 8 buys the consistency to find it.' };
+    }
+    return {
+      level: 10,
+      why: 'No corals left to find, so this is a Favour run: 10 is where Favour per '
+        + 'action peaks, diving deeper until a card pays 300 or more.',
+    };
+  }
+
+  // Pure economy treasure: worth nothing but the Favour it trades for. These
+  // are the Fruit Market's numbers (Treasures to Trade), which are also what
+  // the diving table's "Total Favour Value" column adds up to.
+  const FOTZ_TREASURES = [
+    { name: 'Witch-Stone', favour: 10 },
+    { name: 'Collection of Zee-Glass', favour: 20 },
+    { name: 'Salt-Smoothed Shiv', favour: 50 },
+    { name: 'Sodden Mass', favour: 100 },
+    {
+      name: 'Skull in Coral', favour: 125,
+      note: 'Also a usable Osteology skull, and the one treasure that survives the '
+        + 'end of the festival. Limited to ten trade-ins.',
+    },
+    {
+      name: 'Urchin Spine', favour: 125,
+      note: 'Replaces Skull in Coral once ten have been received.',
+    },
+    { name: 'Long-Lost Zee Trunk', favour: 200 },
+  ];
+
+  // The six pieces of equipment from festivals past that turn up while diving.
+  // `favour` is what trading a DUPLICATE back pays; `stall` is what buying one
+  // at the Island Stalls costs in week two -- always the cheaper of the two,
+  // which is the argument for diving them up rather than buying them.
+  const FOTZ_EQUIPMENT = [
+    {
+      name: 'A Cured Jillyfleur Cloak', slot: 'Clothing', card: 'Well-Disguised Trinkets',
+      depths: [1, 2], favour: 100, stall: 50, fate: 10,
+      note: 'Early-game; outclassed by Far Khanate Lacquered Armour. Unlocks one of '
+        + 'several ways into the Clay Tailor Club.',
+    },
+    {
+      name: 'Wrecking Boots', slot: 'Boots', card: 'Tangled in the Rigging',
+      depths: [2, 3], favour: 100, stall: 50, fate: 10,
+      note: 'Early-game, no uses; a peer of the Bazaar’s Pair of Ratskin Boots.',
+    },
+    {
+      name: 'Nuncian Pocket Watch', slot: 'Weapon', card: 'A Shattered Prow',
+      depths: [2, 4], favour: 150, stall: 75, fate: 10,
+      bis: 'Shared best-in-slot for Respectable.',
+      note: 'Unlocks Hillchanger Tower options in Ealing Gardens and the Railway.',
+    },
+    {
+      name: 'Semi-Automated Mary Lloyd', slot: 'Transport', card: 'Tangled in the Rigging',
+      depths: [4, 5], favour: 200, stall: 100, fate: 30,
+      bis: 'Strict non-Fate, non-Hellworm best-in-slot for BDR.',
+    },
+    {
+      name: 'A Faceted Decanter of Drownie Effluvia', slot: 'Weapon',
+      card: 'Well-Disguised Trinkets', depths: [3, 5], favour: 300, stall: 150, fate: 5,
+      note: 'Unlocks Cure the ignorance of your zailors while Zailing — Troubled Waters '
+        + 'down on a Kataleptic Toxicology check, and progress with it.',
+    },
+    {
+      name: 'Scrimshander Carving Knife', slot: 'Weapon', card: 'A Shattered Prow',
+      depths: [5, 5], favour: 400, stall: 200, fate: 5,
+      note: 'No stats. Unlocks Carve away some evidence of age, which removes '
+        + 'Skeleton: Antiquity.',
+    },
+  ];
+
+  // Week two only: the Island Stalls, for Thalassic Favour. Nothing here can be
+  // dived for. The prices are the stall table's in the guide; where the Item
+  // Comparison page disagrees (it says 250 for the Lamp-cat, 30 Fate for the
+  // Guinea-Pig) the price list is what this follows.
+  const FOTZ_STALL = [
+    {
+      name: 'A Submerged Rector', slot: 'Companion', favour: 100, fate: 15,
+      note: 'Early-game Persuasive companion. Unlocks options in the Upper River, the '
+        + 'Evenlode and Burrow-infra-Mump.',
+    },
+    {
+      name: 'Keelgraspers', slot: 'Gloves', favour: 150, fate: 10,
+      bis: 'Shared best-in-slot for BDR.',
+    },
+    {
+      name: 'Sun-Seared Silken Gloves', slot: 'Gloves', favour: 150, fate: 10,
+      bis: 'Shared best-in-slot for A Player of Chess and for BDR.',
+    },
+    {
+      name: 'Inquisitive Lamp-cat', slot: 'Companion', favour: 200, fate: 15,
+      note: 'Unremarkable now, but its Hallowmas upgrade (Feline Pariah) is shared '
+        + 'best-in-slot for Monstrous Anatomy and Shadowy.',
+    },
+    {
+      name: 'The Forsaken Crown of a Grand Devil', slot: 'Hat', favour: 250, fate: 30,
+      bis: 'Shared best-in-slot for Artisan of the Red Science.',
+    },
+    {
+      name: 'Corpulent Carriage', slot: 'Transport', favour: 250, fate: 30,
+      bis: 'Shared best-in-slot for Monstrous Anatomy.',
+    },
+  ];
+
+  // The four festival ships, bought with your current ship plus Favour. The
+  // 500-1920 spread is which class you are trading in: a Zubmarine, a Majestic
+  // Pleasure Yacht or another festival ship brings every one of these to 500.
+  const FOTZ_SHIPS = [
+    {
+      name: 'Obstinate-class Cruiser', slot: 'Ship', peer: 'Rusty Tramp Steamer', fate: 20,
+      note: 'The only ship that reduces Troubled Waters, and it adds Dangerous and Dreaded.',
+    },
+    {
+      name: 'Ogedei-class Liner', slot: 'Ship', peer: 'Swift Zee-Clipper', fate: 20,
+      note: 'As fast as the Clipper, plus Dangerous and Dreaded.',
+    },
+    {
+      name: 'Nyx-class Zubmersible', slot: 'Ship', peer: 'Zubmarine', fate: 20,
+      note: 'A Shadowy, Dreaded Zubmarine.',
+    },
+    {
+      name: 'Il-Altun-class Yacht', slot: 'Ship', peer: 'Majestic Pleasure Yacht', fate: 20,
+      note: 'The Yacht, plus Persuasive.',
+    },
+  ];
+
+  // Reaching the bottom of the trench reveals Her Fivefold Symmetry, and
+  // begging audience there earns the Accomplishment. In week two that is what
+  // lets the King-in-Coral hand the Litter-Cyst over.
+  const FOTZ_BRIDE_QUALITY = 'Discovered: the Pentamerous Bride';
+  const FOTZ_BRIDE_ITEMS = [
+    {
+      name: 'Weeping Litter-Cyst', slot: 'Transport',
+      how: 'Dive to Full Fathom Five 5, beg audience with the Pentamerous Bride, then '
+        + 'Accept a briny gift from the King-in-Coral in week two.',
+      bis: 'Shared best-in-slot for Zeefaring.',
+    },
+    {
+      name: 'Nodule of Fecund Amber', slot: null,
+      how: 'Accept a fecund gift instead — offered only once you already hold the '
+        + 'Litter-Cyst from a previous festival.',
+      note: 'Not equipment: a Most Valuable rubbery item, sells for 312.50.',
+    },
+  ];
+
+  // Fate-only, from the King-in-Coral's Hoard. Listed so the checklist is
+  // honest about being a complete roster, but never counted as "missing":
+  // these cost money rather than actions, and several are obtainable elsewhere.
+  const FOTZ_FATE_ITEMS = [
+    { name: 'Pre-Emptive Guinea-Pig', slot: 'Weapon', fate: 20 },
+    { name: '‘For Your Own Good’ Compass', slot: 'Weapon', fate: 15 },
+    {
+      name: 'Mutersalt', slot: 'Weapon', fate: 15,
+      note: 'Also free during the Railway, from the Liberationist marshland track.',
+    },
+    {
+      name: 'Consignment of Scintillack Snuff', slot: 'Weapon', fate: 10,
+      note: 'Don’t buy it here — get it from Balmoral and research the recipe.',
+    },
+    {
+      name: 'Viscountess’ Bejewelled Collar', slot: 'Adornment', fate: 10,
+      note: 'Also from the Sacroboscan Calendar.',
+    },
+    {
+      name: 'Viscount’s Bejewelled Collar', slot: 'Adornment', fate: 10,
+      note: 'Also from the Sacroboscan Calendar.',
+    },
+    {
+      name: 'Bloodstained Eolith', slot: null, fate: 15,
+      note: 'Also a rare failure when disambiguating Eoliths in your lab.',
+    },
+    {
+      name: 'Sinning Jenny’s Forsaken Wimple!', slot: 'Hat', fate: null,
+      note: 'A different item from Sinning Jenny’s Forsaken Wimple, for reasons known '
+        + 'only to Failbetter.',
+    },
+  ];
+
+  // Pure Favour-to-Echoes conversions at the stalls: a guaranteed E0.1 per
+  // Favour, which is the floor every other use of Favour is judged against.
+  const FOTZ_ECONOMY = [
+    { name: 'Oneiric Pearl', favour: 625 },
+    { name: 'Baited Riddle', favour: 625 },
+    { name: 'Vestige of a Starlit Reverie', favour: 3125 },
+    { name: 'Sample of Lacreous Affection', favour: 3125 },
+  ];
+
+  // The qualities worth reading off the Myself tab for this festival. Every
+  // one is a real quality (checked on the wiki), not an item -- Thalassic
+  // Favour included, which is why it is absent from the possessions scrape.
+  const FOTZ_QUALITIES = [
+    'Thalassic Favour',
+    'Fivefold Devotion',
+    'Full Fathom Five',
+    'Sights at the Festival',
+    'A Fruitless Harvest',
+    // Decides which supplication options you are offered, and is re-rolled by
+    // every one you take.
+    'Airs of a Barren Zee',
+    FOTZ_BRIDE_QUALITY,
+  ];
+
+  // --- the card table ----------------------------------------------------
+  //
+  // One entry per card in the diving deck, plus the storylet at the bottom of
+  // the trench. Each `opts` entry is one claim you can make and the depths it
+  // is offered at, so "what can I take from this card at depth 3" is a filter
+  // rather than a special case; A Cabin-Fragment pays a different amount at
+  // every one of the five, so it simply has five entries with the same text.
+  //
+  //   favour  the Thalassic Favour the reward trades for, in total
+  //   gain    what you actually receive
+  //   coral   a coral, i.e. one of three unique items in week two
+  //   item    a named unique piece of equipment
+  //   bride   the Accomplishment at the bottom of the trench
+  //
+  // `min` is the card's own Full Fathom Five requirement, which is also the
+  // only depth signal available without reading a quality (see `fotzDepth`).
+  // `strict` marks the two names generic enough that some other card in London
+  // could plausibly share one; those are badged only where we can tell we are
+  // at the festival -- the same treatment The Sound of Wings gets at zee.
+  const FOTZ_CARDS = [
+    {
+      name: 'A Reef of Wrecks',
+      opts: [{
+        text: 'Claim a piece of cast-off coral', depths: [1, 5], favour: 0,
+        coral: 'Grasping Coral',
+      }],
+    },
+    {
+      name: 'A Rusting Anchor',
+      opts: [{
+        text: 'Claim a piece of layered coral', depths: [1, 5], favour: 0,
+        coral: 'Gorgonian Reef-Rock',
+      }],
+    },
+    {
+      name: 'Among the Deep-Fish',
+      opts: [{
+        text: 'Claim a piece of cast-off coral', depths: [1, 5], favour: 0,
+        coral: 'Barnacled Headpiece',
+      }],
+    },
+    {
+      name: 'An Obscured Glitter',
+      opts: [{
+        text: 'Claim a piece of shining coral', depths: [1, 5], favour: 0,
+        coral: 'Spinebound Oddity',
+      }],
+    },
+    {
+      name: 'Old Wounds', strict: true,
+      opts: [{
+        text: 'Claim a piece of cast-off coral', depths: [1, 5], favour: 0,
+        coral: 'Pedestrian Polyp',
+      }],
+    },
+    {
+      name: 'A Graveyard of Derelict Debris',
+      opts: [{
+        text: 'Claim a piece of bulbous coral', depths: [1, 5], favour: 0,
+        coral: 'Rust-Eaten Ration',
+      }],
+    },
+    {
+      name: 'A Cabin-Fragment',
+      opts: [
+        { text: 'Take what you can', depths: [1, 1], favour: 50, gain: 'Witch-Stone ×5' },
+        { text: 'Take what you can', depths: [2, 2], favour: 100, gain: 'Witch-Stone ×10' },
+        {
+          text: 'Take what you can', depths: [3, 3], favour: 200,
+          gain: 'Witch-Stone ×10, Collection of Zee-Glass ×5',
+        },
+        {
+          text: 'Take what you can', depths: [4, 4], favour: 300,
+          gain: 'Collection of Zee-Glass ×5, Long-Lost Zee Trunk',
+        },
+        {
+          text: 'Take what you can', depths: [5, 5], favour: 400,
+          gain: 'Witch-Stone ×10, Collection of Zee-Glass ×5, Long-Lost Zee Trunk',
+        },
+      ],
+    },
+    {
+      name: 'Easy Pickings', strict: true,
+      opts: [
+        {
+          text: 'Claim an assortment of cast-off oddments', depths: [1, 1], favour: 100,
+          gain: 'Sodden Mass',
+        },
+        {
+          text: 'Claim an assortment of cast-off oddments', depths: [2, 3], favour: 150,
+          gain: 'Sodden Mass, Salt-Smoothed Shiv',
+        },
+        {
+          text: 'Claim an assortment of cast-off oddments', depths: [4, 5], favour: 300,
+          gain: 'Sodden Mass ×2, Salt-Smoothed Shiv ×2',
+        },
+      ],
+    },
+    {
+      name: 'Unlucky Prisoner',
+      opts: [
+        {
+          text: 'Rummage through the remains', depths: [1, 1], favour: 50,
+          gain: 'Salt-Smoothed Shiv',
+        },
+        {
+          text: 'Rummage through the remains', depths: [2, 2], favour: 100,
+          gain: 'Salt-Smoothed Shiv ×2',
+        },
+        {
+          text: 'Rummage through the remains', depths: [3, 3], favour: 150,
+          gain: 'Salt-Smoothed Shiv ×3',
+        },
+        {
+          text: 'Rummage through the remains', depths: [4, 4], favour: 125,
+          gain: 'Skull in Coral (or Urchin Spine)',
+        },
+        {
+          text: 'Rummage through the remains', depths: [5, 5], favour: 175,
+          gain: 'Skull in Coral (or Urchin Spine), Salt-Smoothed Shiv',
+        },
+      ],
+      note: 'The only card that pays a Skull in Coral, which is the one treasure that '
+        + 'outlives the festival.',
+    },
+    {
+      name: 'Tangled in the Rigging', min: 2,
+      opts: [
+        {
+          text: 'Liberate the Wrecking Boots', depths: [2, 3], favour: 100,
+          item: 'Wrecking Boots',
+        },
+        {
+          text: 'Retrieve a Semi-Automated Mary Lloyd', depths: [4, 5], favour: 200,
+          item: 'Semi-Automated Mary Lloyd',
+        },
+      ],
+    },
+    {
+      name: 'Well-Disguised Trinkets',
+      opts: [
+        {
+          text: 'Snatch a Cured Jillyfleur Cloak', depths: [1, 2], favour: 100,
+          item: 'A Cured Jillyfleur Cloak',
+        },
+        {
+          text: 'Retrieve a Faceted Decanter of Drownie Effluvia', depths: [3, 5], favour: 300,
+          item: 'A Faceted Decanter of Drownie Effluvia',
+        },
+      ],
+    },
+    {
+      name: 'A Shattered Prow', min: 2,
+      opts: [
+        {
+          text: 'Dive for a Nuncian Pocket Watch', depths: [2, 4], favour: 150,
+          item: 'Nuncian Pocket Watch',
+        },
+        {
+          text: 'Pry free a Scrimshander Carving Knife', depths: [5, 5], favour: 400,
+          item: 'Scrimshander Carving Knife',
+        },
+      ],
+    },
+    // Not a card: the storylet the bottom of the trench reveals. It is in this
+    // table because `eachCardName` decorates an opened storylet's heading too,
+    // and because this is the one place at the festival where the right move
+    // is to take NO treasure -- the Accomplishment is worth more.
+    {
+      name: 'Her Fivefold Symmetry', min: 5, storylet: true,
+      opts: [{
+        text: 'Beg audience with this ancient power', depths: [5, 5], favour: 0,
+        bride: true, gain: 'Discovered: the Pentamerous Bride, and no item',
+      }],
+      note: 'Foregoes a treasure. The Accomplishment is what lets the King-in-Coral '
+        + 'hand you a Weeping Litter-Cyst in week two.',
+    },
+  ];
+
+  const FOTZ_BY_NAME = new Map(
+    FOTZ_CARDS.map(function (c) { return [normalizeName(c.name), c]; }));
+
+  const FOTZ_CORAL_BY_NAME = new Map(
+    FOTZ_CORALS.map(function (c) { return [c.coral, c]; }));
+
+  function lookupFotzCard(name) {
+    return FOTZ_BY_NAME.get(normalizeName(name)) || null;
+  }
+
+  // --- where you are -----------------------------------------------------
+  //
+  // **Both halves are now CONFIRMED**, captured verbatim in-game 2026-09-03,
+  // which makes this an exact list of the SPITE_AREAS kind rather than the
+  // permissive guess it started as:
+  //
+  //   on the island   "It's ‹name›! Welcome to Mutton Island, delicious friend!"
+  //   mid-dive        "It's ‹name›! Welcome to the Royal Approach, delicious friend!"
+  //
+  // Note the game writes the second with a lower-case "the". It does not
+  // matter -- `normalizeName` folds case -- but it is worth knowing that the
+  // wiki's `location = The Royal Approach` and the game's greeting are the
+  // same string only after normalising.
+  //
+  // Wreckers' Cove is the one entry still unread: the week-two market lives
+  // there by name, though the storylets are filed under Mutton Island, so it
+  // is kept in case the greeting changes for the market. An extra entry can
+  // only widen the allow-list, never wrongly block; a MISSING one would
+  // wrongly block, which is the risk that matters now that this list is
+  // allowed to say no.
+  const FOTZ_AREAS = [
+    'Mutton Island',
+    'The Royal Approach',
+    'Wreckers’ Cove',
+    'Wreckers\' Cove',
+  ].map(normalizeName);
+
+  // The one you are actually underwater in. Separate from the list above
+  // because it answers a different question -- see `forgetStaleDepth`.
+  const FOTZ_DIVE_AREAS = ['The Royal Approach'].map(normalizeName);
+
+  function inFotzArea() {
+    const area = normalizeName(currentArea());
+    return !!area && FOTZ_AREAS.indexOf(area) !== -1;
+  }
+
+  function inDiveArea() {
+    const area = normalizeName(currentArea());
+    return !!area && FOTZ_DIVE_AREAS.indexOf(area) !== -1;
+  }
+
+  // The sturdier confirmation, and the one that needs no unverified markup at
+  // all: nine of the eleven card names could not plausibly belong to anything
+  // else in London, so one of them in the hand proves where you are. A
+  // three-card dive hand can hardly avoid holding at least one.
+  function fotzHandConfirms() {
+    let seen = false;
+    eachCardName(function (host, name) {
+      if (seen) return;
+      const card = lookupFotzCard(name);
+      if (card && !card.strict) seen = true;
+    });
+    return seen;
+  }
+
+  // THREE answers, not two, and the middle one is the point of having captured
+  // both greetings:
+  //
+  //   'yes'      the greeting names a festival area, or the hand proves it
+  //   'no'       the greeting names somewhere else entirely -- badge nothing
+  //   'unknown'  there is no greeting to read; the card table is the only scope
+  //
+  // 'no' is new. Until both areas were confirmed this could only ever say yes,
+  // because refusing on an unverified list risked blacking out the feature in
+  // the very place it is for. Now it can refuse, which is what keeps a Fruits
+  // of the Zee badge off a card somewhere else in London that happens to share
+  // a name -- the same tightening `SPITE_AREAS` got.
+  function fotzWhere() {
+    if (!normalizeName(currentArea())) return 'unknown';
+    if (inFotzArea()) return 'yes';
+    // Somewhere unexpected, but an unmistakable dive hand still outranks a
+    // list that might be missing an area nobody has visited yet.
+    return fotzHandConfirms() ? 'yes' : 'no';
+  }
+
+  // --- how deep you are --------------------------------------------------
+  //
+  // Full Fathom Five, 1 to 5, and nearly everything the badge says turns on
+  // it. Three sources, best first:
+  //
+  //  1. A LIVE quality read. `readQualities` finds `li.quality-item`, which is
+  //     verified markup on the Myself tab. **In practice this never fires**:
+  //     a hand captured mid-dive (2026-09-03) shows FL renders no quality
+  //     items anywhere on the diving screen, so the depth is only ever the one
+  //     you set yourself. It is kept because it costs one failed
+  //     `querySelectorAll` and would start working for nothing if FL ever put
+  //     the quality on that screen -- but do not plan around it.
+  //     It is deliberately live-only, with no fall back to the cache: a banked
+  //     depth from three minutes ago is a WRONG answer rather than a stale
+  //     one, because it changes with every successful dive.
+  //  2. What you set yourself in the panel, kept in sessionStorage -- a dive
+  //     is one sitting, and a depth should not outlive the tab.
+  //  3. Nothing. Then the badge shows the range across every depth and says
+  //     so. The card table still gives a FLOOR (A Shattered Prow and Tangled
+  //     in the Rigging need depth 2, Her Fivefold Symmetry depth 5), which is
+  //     used to trim impossible depths out of that range -- but never to
+  //     invent a single depth.
+  const FOTZ_DEPTH_KEY = 'fl-ux-fotz-depth';
+  const FOTZ_QUALITY_DEPTH = 'Full Fathom Five';
+
+  function fotzLiveDepth() {
+    let scan = null;
+    try {
+      scan = readQualities();
+    } catch (e) {
+      return null;
+    }
+    if (!scan) return null;
+    const q = scan.values.get(FOTZ_QUALITY_DEPTH);
+    if (!q || !(q.level >= 1) || q.level > 5) return null;
+    return q.level;
+  }
+
+  function fotzSetDepth(depth) {
+    try {
+      if (depth == null) sessionStorage.removeItem(FOTZ_DEPTH_KEY);
+      else sessionStorage.setItem(FOTZ_DEPTH_KEY, String(depth));
+    } catch (e) { /* private mode; the badge just stays on the range */ }
+  }
+
+  function fotzChosenDepth() {
+    try {
+      const raw = sessionStorage.getItem(FOTZ_DEPTH_KEY);
+      const n = raw == null ? NaN : Number(raw);
+      return n >= 1 && n <= 5 ? n : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // The floor the hand itself proves, or null. Only ever a lower bound.
+  function fotzDepthFloor() {
+    let floor = 0;
+    eachCardName(function (host, name) {
+      const card = lookupFotzCard(name);
+      if (card && card.min && card.min > floor) floor = card.min;
+    });
+    return floor || null;
+  }
+
+  // A depth you set by hand outlives the dive it was set for -- it is kept for
+  // the whole tab session -- and the moment you surface it is not stale, it is
+  // WRONG: the next dive starts at 1. Until the mid-dive greeting was captured
+  // there was no way to notice you had left. Now there is, so leaving the
+  // Royal Approach throws the setting away and the badges go back to showing
+  // the range until you say otherwise.
+  //
+  // Only ever acts on a greeting it can actually read. An unreadable one means
+  // "no idea where you are", which is not grounds for discarding anything.
+  function forgetStaleDepth() {
+    const area = normalizeName(currentArea());
+    if (!area || inDiveArea()) return;
+    if (fotzChosenDepth() != null) fotzSetDepth(null);
+  }
+
+  // { depth, source } -- source is 'quality', 'set', or null for neither.
+  function fotzDepth() {
+    const live = fotzLiveDepth();
+    if (live) return { depth: live, source: 'quality' };
+    const chosen = fotzChosenDepth();
+    if (chosen) return { depth: chosen, source: 'set' };
+    return { depth: null, source: null };
+  }
+
+  // --- reading a card ----------------------------------------------------
+
+  function fotzOptionAt(opt, depth) {
+    return depth >= opt.depths[0] && depth <= opt.depths[1];
+  }
+
+  // Every claim this card offers at `depth`; at a known depth that is always
+  // exactly one, which is what lets the badge be a single number. With no
+  // depth it is every claim, minus any the floor rules out.
+  function fotzOptionsAt(card, depth, floor) {
+    if (depth) return card.opts.filter(function (o) { return fotzOptionAt(o, depth); });
+    if (!floor) return card.opts.slice();
+    return card.opts.filter(function (o) { return o.depths[1] >= floor; });
+  }
+
+  // What one claim would hand you that you haven't already got. `holdings` is
+  // the ownership reading; when it is null nothing is known, and this returns
+  // null so the badge can say as much instead of guessing. Pure, so the marks
+  // are testable.
+  //
+  //   holdings = { has(name) -> bool, bride: bool, sig: string }
+  function fotzMissingFrom(opt, holdings) {
+    if (!holdings) return null; // can't tell
+    if (opt.coral) {
+      const coral = FOTZ_CORAL_BY_NAME.get(opt.coral);
+      if (!coral) return [];
+      // A coral whose three items have not been published yet. The BADGE's
+      // question is "should I take this card?", and the answer is an
+      // unambiguous yes -- it is new this year and nobody can already hold
+      // what does not exist -- so it counts as missing here, under a
+      // placeholder name. (The CHECKLIST asks a different question, "how many
+      // do I still need", and refuses to count items it cannot name: see
+      // `fotzCollection`. The two differ on purpose.)
+      if (!coral.variants) return [coral.pendingLabel || coral.slot];
+      return coral.variants.filter(function (v) { return !holdings.has(v); });
+    }
+    if (opt.item) return holdings.has(opt.item) ? [] : [opt.item];
+    if (opt.bride) return holdings.bride ? [] : [FOTZ_BRIDE_QUALITY];
+    return []; // pure economy treasure: nothing to collect
+  }
+
+  // Does this card offer anything collectable at all? Independent of what you
+  // own, so a treasure-only card stays unmarked rather than wearing a tick it
+  // hasn't earned.
+  function fotzOffersRare(opts) {
+    return opts.some(function (o) { return !!(o.coral || o.item || o.bride); });
+  }
+
+  const FOTZ_CLASS = 'fl-ux-fotz';
+  const FOTZ_FLAG = 'flUxFotz';
+  const FOTZ_MARK_NEED = '★';   // something here you haven't got
+  const FOTZ_MARK_DONE = '✓';   // you hold everything this card offers
+  // '?' rather than the '–' the Factions pips use for an unknown: this mark is a
+  // PREFIX to a number, and '–400' reads as minus four hundred.
+  const FOTZ_MARK_UNSURE = '?'; // no Possessions read, so no claim either way
+
+  // Colour is the trade-in value, so a hand ranks itself at a glance. The two
+  // kinds that pay no Favour at all -- a coral, and the Bride at the bottom of
+  // the trench -- are coloured by whether you still NEED them instead, since
+  // for those the Favour column isn't the question being asked.
+  const FOTZ_COLOR_NEED = '#b8912f'; // the gold the launcher uses
+  const FOTZ_COLOR_HELD = '#4a5560';
+  const FOTZ_COLOR_UNSURE = '#6b6b6b';
+
+  function fotzColor(favour) {
+    if (favour >= 400) return '#b8912f';
+    if (favour >= 300) return '#357a62';
+    if (favour >= 175) return '#54783e';
+    if (favour >= 125) return '#78733a';
+    if (favour >= 100) return '#7a5c3a';
+    return '#6b6b6b';
+  }
+
+  function fotzRangeText(favours) {
+    const lo = Math.min.apply(null, favours);
+    const hi = Math.max.apply(null, favours);
+    return lo === hi ? String(lo) : lo + '–' + hi;
+  }
+
+  function fotzDepthWord(opt) {
+    return opt.depths[0] === opt.depths[1]
+      ? 'Depth ' + opt.depths[0]
+      : 'Depths ' + opt.depths[0] + '–' + opt.depths[1];
+  }
+
+  // The badge, as a pure { text, color, title } spec. `depth` may be null.
+  function fotzBadgeSpec(card, depth, source, floor, holdings) {
+    const opts = fotzOptionsAt(card, depth, floor);
+    if (!opts.length) return null; // nothing claimable at this depth
+
+    const rare = fotzOffersRare(opts);
+    let missing = [];
+    let unsure = false;
+    for (const opt of opts) {
+      const gone = fotzMissingFrom(opt, holdings);
+      if (gone == null) unsure = true;
+      else missing = missing.concat(gone);
+    }
+    const mark = !rare ? ''
+      : (unsure ? FOTZ_MARK_UNSURE : (missing.length ? FOTZ_MARK_NEED : FOTZ_MARK_DONE));
+
+    const favours = opts.map(function (o) { return o.favour; })
+      .filter(function (v) { return v > 0; });
+    const value = favours.length ? fotzRangeText(favours) : null;
+    const label = value != null ? value
+      : (opts.some(function (o) { return o.bride; }) ? 'Bride' : 'coral');
+
+    const color = value != null
+      ? fotzColor(Math.max.apply(null, favours))
+      : (unsure ? FOTZ_COLOR_UNSURE : (missing.length ? FOTZ_COLOR_NEED : FOTZ_COLOR_HELD));
+
+    const lines = [card.name];
+    lines.push(depth
+      ? 'Your depth: ' + depth + (source === 'quality'
+        ? ' (read from Full Fathom Five)'
+        : ' (as set in the Fruits of the Zee panel)')
+      : 'Depth unknown, so every depth is listed'
+        + (floor ? ', from ' + floor + ' up — this hand proves at least that' : '')
+        + '. Set it in ⚙ UX → Fruits of the Zee for one exact figure.');
+
+    for (const opt of opts) {
+      let line = (depth ? '' : fotzDepthWord(opt) + ': ') + opt.text;
+      if (opt.favour > 0) line += ' — ' + opt.favour + ' Favour';
+      if (opt.gain) line += ' (' + opt.gain + ')';
+      lines.push(line);
+      if (opt.coral) {
+        const coral = FOTZ_CORAL_BY_NAME.get(opt.coral);
+        if (coral && !coral.variants) {
+          lines.push('  ' + opt.coral + ' → one of three ' + coral.slot + ' in week two.');
+          lines.push('  ' + coral.pending);
+        } else {
+          lines.push('  ' + opt.coral + ' → one of three '
+            + (coral ? coral.slot + ' items' : 'items') + ' in week two, and which one is '
+            + 'decided by Sights at the Festival: '
+            + FOTZ_BANDS.map(function (band, i) {
+              return band.lo + '–' + band.hi + ' ' + (coral ? coral.variants[i] : '?');
+            }).join(', ') + '.');
+        }
+      }
+      if (opt.item) {
+        lines.push('  ' + opt.item + (holdings
+          ? (holdings.has(opt.item) ? ' — you already have one.' : ' — you do NOT have one yet.')
+          : ' — whether you have one is unknown; open the Fruits of the Zee panel to '
+            + 'read your Possessions.'));
+      }
+    }
+    if (missing.length) {
+      lines.push(FOTZ_MARK_NEED + ' Still missing: ' + missing.join(', ') + '.');
+    } else if (rare && !unsure) {
+      lines.push(FOTZ_MARK_DONE + ' You already hold everything this card offers.');
+    }
+    if (card.note) lines.push(card.note);
+    lines.push('One card’s reward per dive. Diving deeper is free, but failing the dive '
+      + 'ends it and hands you menaces.');
+
+    return { text: mark ? mark + label : label, color: color, title: lines.join('\n') };
+  }
+
+  // --- badging the supplication branches ---------------------------------
+  //
+  // The one place in this script that decorates a storylet's OPTIONS rather
+  // than a card. Markup captured 2026-09-03, verbatim:
+  //
+  //   <div class="media branch media--branch" data-branch-id="259494">
+  //     <div class="media__left branch__left"> … </div>
+  //     <div class="media__body branch__body"><div>
+  //       <div class="branch__plan-buttonlet"> … </div>
+  //       <h2 class="media__heading heading heading--3 branch__title">Perform
+  //         in a Mutton Island mystery play</h2>
+  //
+  // The badge goes AFTER the `h2`, the same way it does for a card heading --
+  // never inside it, so anything reading the heading's text still sees the
+  // plain name. (`wiki-links.js` deliberately leaves `.branch__title` alone,
+  // so nothing else is decorating these.)
+  //
+  // Note the game already tells you what an option is gated on, with its own
+  // requirement icons. What it never says is which of your attributes the
+  // reward scales off -- and since Airs decides which options you are even
+  // offered, that is the whole decision. So that is all the badge says.
+
+  const FOTZ_BRANCH_CLASS = 'fl-ux-fotz-branch';
+  const FOTZ_BRANCH_FLAG = 'flUxFotzBranch';
+  const FOTZ_BRANCH_SELECTOR = '.branch__title';
+
+  // The storylet these branches belong to, from the same capture: the game
+  // prefixes the wiki's title, so it reads "Fruits of the Zee: Supplication on
+  // the Shore". Matched loosely on the distinctive half.
+  function onSupplicationStorylet() {
+    const heads = document.querySelectorAll('.storylet-root__heading');
+    for (const head of heads) {
+      if (normalizeName(headingName(head)).indexOf('supplication on the shore') !== -1) return true;
+    }
+    return false;
+  }
+
+  function fotzBranchSpec(opt) {
+    const stat = opt.stat ? FOTZ_STATS[opt.stat] : null;
+    const lines = [opt.text];
+    if (stat) {
+      lines.push('Scales off ' + opt.stat + ': the better your base ' + opt.stat
+        + ', the more of it you get.');
+      lines.push('Gives: ' + opt.gain + ', and Fivefold Devotion +4 CP.');
+      lines.push('Offered while Airs of a Barren Zee is ' + opt.airs + '.');
+      lines.push('Every option here pays the same +4 CP, so the attribute is the only '
+        + 'thing that separates them — but Airs decides which are on offer, and it is '
+        + 're-rolled each time you act, so you cannot always have the one you want.');
+    }
+    if (opt.note) lines.push(opt.note);
+
+    return {
+      text: stat ? stat.icon + ' ' + opt.stat : opt.badge,
+      color: stat ? stat.badge : (opt.warn ? '#8a3b3b' : '#4a5560'),
+      title: lines.join('\n'),
+    };
+  }
+
+  function fotzSupplicationBranches() {
+    const here = onSupplicationStorylet();
+    document.querySelectorAll(FOTZ_BRANCH_SELECTOR).forEach(function (head) {
+      const name = headingName(head);
+      const opt = name ? lookupFotzBranch(name) : null;
+      // A name generic enough to belong elsewhere is only badged where the
+      // storylet above it confirms where we are.
+      const spec = opt && (!opt.strict || here) ? fotzBranchSpec(opt) : null;
+      attachBadge(head, {
+        cls: FOTZ_BRANCH_CLASS,
+        flag: FOTZ_BRANCH_FLAG,
+        value: name,
+        spec: spec,
+        place: 'after',
+      });
+    });
+  }
+
+  function fotzCardRatings() {
+    // Surfacing invalidates a depth you set by hand, and this is the pass that
+    // notices. Before the depth is read, so the badges never quote it once.
+    forgetStaleDepth();
+
+    const where = fotzWhere();
+    const at = fotzDepth();
+    const floor = at.depth ? null : fotzDepthFloor();
+    const holdings = fotzHoldings();
+    eachCardName(function (host, name, place, style) {
+      const card = lookupFotzCard(name);
+      // Three gates, narrowest first. Somewhere the greeting places OUTSIDE
+      // the festival, nothing is ours -- and clearing rather than skipping is
+      // what takes the badges off a hand you walked away with. Where the
+      // greeting can't be read at all the card table is the only scope, and
+      // the two generic names sit that one out, the same way The Sound of
+      // Wings does when we can't tell we're at zee.
+      const spec = card && where !== 'no' && (!card.strict || where === 'yes')
+        ? fotzBadgeSpec(card, at.depth, at.source, floor, holdings)
+        : null;
+      attachBadge(host, {
+        cls: FOTZ_CLASS,
+        flag: FOTZ_FLAG,
+        // The flag has to move when the DEPTH or your holdings change, not
+        // only when the card does -- otherwise setting your depth leaves every
+        // badge already in the hand quoting the old one.
+        value: name + '@' + (at.depth || 'x') + '/' + (holdings ? holdings.sig : 'x'),
+        spec: spec,
+        place: place,
+        style: style,
+      });
+    });
+  }
+
   // === shared: the launcher ==============================================
   //
   // A floating button, parked beside FL's own travel control, that opens a
@@ -1729,6 +2823,11 @@
   };
 
   const LAUNCHER_ID = 'fl-ux-launcher';
+  // The button has an id of its own because it no longer lives inside the
+  // root: docked, it is somewhere in Fallen London's chrome, and both the
+  // travel-anchor search and the outside-click handler have to recognise it
+  // there.
+  const LAUNCHER_BUTTON_ID = 'fl-ux-launcher-button';
 
   // A panel is a screen of its own behind the launcher menu. Add one by
   // pushing a { id, icon, label, hint, render } entry: `render()` returns the
@@ -1748,6 +2847,14 @@
       label: 'Zailing',
       hint: 'Routes, Zee Peril, Troubled Waters and every card at zee',
       render: renderZailingPanel,
+    },
+    {
+      id: 'fruits-of-the-zee',
+      icon: '🐚',
+      label: 'Fruits of the Zee',
+      hint: 'What the festival still owes you, what your treasures trade for, and '
+        + 'what every diving card pays',
+      render: renderFotzPanel,
     },
   ];
 
@@ -1817,8 +2924,31 @@
   let launcherPanelHost = null;
   let launcherMenu = null;
   let launcherButton = null;
+  let launcherDock = null;    // the wrapper the button sits in inside FL's chrome
+  let launcherDocked = false; // ...or false, when it is floating after all
   let launcherBound = false;
   let travelAnchor = null;
+
+  // Docked by default. The floating button was the original design and it is
+  // still the fallback -- but a fixed button is over the page by definition,
+  // and beside the wide layout's Travel button that means over the storylet
+  // column. Docking puts it IN the page, where it takes up space like any
+  // other control and covers nothing.
+  const DOCK_KEY = 'fl-ux-launcher-dock';
+
+  function dockPreferred() {
+    try {
+      return localStorage.getItem(DOCK_KEY) !== 'float';
+    } catch (e) {
+      return true;
+    }
+  }
+
+  function setDockPreferred(on) {
+    try {
+      localStorage.setItem(DOCK_KEY, on ? 'dock' : 'float');
+    } catch (e) { /* private mode; it just won't be remembered */ }
+  }
 
   // No viewport means nothing to position against -- which is also how this
   // file is evaluated outside a browser, by the tests.
@@ -1859,6 +2989,15 @@
     if (rendered(travelAnchor)) return travelAnchor;
     travelAnchor = null;
     const ours = document.getElementById(LAUNCHER_ID);
+    // Our own button has to be skipped explicitly now that it can be DOCKED
+    // into the very containers these selectors look in: parked in
+    // `.storylets__welcome-and-travel`, it is a `button` inside
+    // `.storylets__welcome-and-travel` and matches. Taking ourselves for the
+    // travel control would be a quiet little infinite regress.
+    const mine = document.getElementById(LAUNCHER_BUTTON_ID);
+    const isOurs = function (el) {
+      return !!((ours && ours.contains(el)) || (mine && (mine === el || mine.contains(el))));
+    };
     for (const sel of TRAVEL_SELECTORS) {
       let hits;
       try {
@@ -1868,20 +3007,25 @@
       }
       for (const hit of hits) {
         const el = clickableOf(hit);
-        if ((ours && ours.contains(el)) || !inViewport(el)) continue;
+        if (isOurs(el) || !inViewport(el)) continue;
         travelAnchor = el;
         return travelAnchor;
       }
     }
     // Backstop for the one shape that has no class of its own: anything
-    // clickable whose accessible name is "Travel". Name first, rect second --
-    // this sweep sees every clickable element on the page, and the rect is the
-    // half that costs a layout.
+    // clickable whose accessible name is the travel control's. Name first,
+    // rect second -- this sweep sees every clickable element on the page, and
+    // the rect is the half that costs a layout.
+    //
+    // "View map" is in there because that is what the wide layout's
+    // `.travel-button--infobar` actually says (captured 2026-09-03); the
+    // classless one this backstop is really for has never been read, so it
+    // takes both wordings rather than betting on the older one.
     for (const el of document.querySelectorAll('a, button, [role="button"]')) {
       const name = (el.getAttribute('aria-label') || el.title || el.textContent || '')
         .replace(/\s+/g, ' ').trim().toLowerCase();
-      if (!/^travel\b/.test(name)) continue;
-      if ((ours && ours.contains(el)) || !inViewport(el)) continue;
+      if (!/^(travel\b|view map\b)/.test(name)) continue;
+      if (isOurs(el) || !inViewport(el)) continue;
       travelAnchor = el;
       return travelAnchor;
     }
@@ -2002,11 +3146,212 @@
     return fit(right, view.height - foot - gap - size.height, 'below');
   }
 
+  // --- docking it into the page ------------------------------------------
+  //
+  // The floating button was over the page by definition, and beside the wide
+  // layout's Travel button that means over the storylet column -- `crowdedLeft`
+  // counts siblings only, so overlapping the main content was allowed on
+  // purpose. Docking is the fix: put the button INTO Fallen London's chrome,
+  // where it takes up space like any other control and covers nothing.
+  //
+  // Where: beside the travel control, because that is the one piece of FL's
+  // chrome whose markup is verified in all three layouts, and because a second
+  // navigation control belongs next to the first. Two shapes, and the mobile
+  // banner is the difference: there the control is one `li.banner-item` in a
+  // row of them, so ours has to be another `li` in the same row rather than a
+  // stray button inside theirs. Everywhere else it goes in beside the travel
+  // button, as the last child of its container.
+  //
+  // Why this is safe against React, which owns those containers: we only ever
+  // APPEND, and only our own node. React tracks its children by reference, not
+  // by index, so an extra node at the end of a container it manages does not
+  // disturb its inserts or its removes -- and if a re-render drops ours, the
+  // next debounced scan puts it back, which is the same re-mount loop the
+  // floating version has always relied on.
+  // Split out from `findDockHost` so the CHOICE -- which of the two shapes,
+  // whose container, and whereabouts in it -- can be tested with a few fake
+  // nodes instead of a layout engine. The `UL`/`OL` test is what keeps `li`
+  // mode honest: a bare `closest('li')` would also fire for a Travel button
+  // that merely happens to sit inside some list somewhere up the tree.
+  //
+  // `after` is the node to sit immediately behind, or null for "append". It
+  // exists because appending is WRONG for the wide layout, which was reported
+  // and then confirmed from real markup (2026-09-03): `div.travel` is not a
+  // little box around the Travel button, it is the whole right-hand column --
+  // the welcome heading, the "View map" button, a Steam ad, and two `.snippet`
+  // blocks. Appending to it put the launcher at the bottom of all that, a
+  // screenful below the control it is supposed to be beside. So in `span` mode
+  // the anchor itself is what we sit behind. The banner keeps appending: there
+  // the container really is just the row of icons, and adding one to the end
+  // of it is exactly right.
+  function dockHostFor(anchor) {
+    if (!anchor || !anchor.parentElement) return null;
+    const item = anchor.closest && anchor.closest('li');
+    if (item && item.parentElement && /^[OU]L$/.test(item.parentElement.tagName)) {
+      return {
+        container: item.parentElement, tag: 'li', className: item.className || '', after: null,
+      };
+    }
+    return { container: anchor.parentElement, tag: 'span', className: '', after: anchor };
+  }
+
+  function findDockHost() {
+    return dockHostFor(findTravelAnchor());
+  }
+
+  // Three looks for one button, because it ends up in three different sorts of
+  // company: floating over the page, standing beside the Travel button, or
+  // lined up with the icons in the mobile banner -- where a pill reading
+  // "⚙ UX" would be twice the width of everything next to it, so it loses the
+  // word and keeps the cog. `launcherLook` is what stops this being rewritten
+  // on every scan.
+  let launcherLook = null;
+  function styleLauncherButton(look) {
+    if (launcherLook === look) return;
+    launcherLook = look;
+    const style = launcherButton.style;
+    const banner = look === 'banner';
+    const docked = look !== 'float';
+    launcherButton.textContent = banner ? '⚙' : '⚙ UX';
+    style.alignSelf = docked ? 'auto' : 'flex-end';
+    style.margin = docked ? (banner ? '0 0 0 4px' : '4px 0 4px 8px') : '0';
+    style.padding = docked ? (banner ? '5px 9px' : '6px 12px') : '10px 18px';
+    style.fontSize = docked ? (banner ? '15px' : '13px') : '15px';
+    // The shadow is what lifts a floating button off the page. Docked, it is
+    // ON the page, and the shadow just reads as grubby.
+    style.boxShadow = docked ? 'none' : '0 2px 12px rgba(0,0,0,.55)';
+  }
+
+  // Put the button where it belongs, and move it when FL swaps layout. Called
+  // on every scan, so it must be idempotent and must not thrash the DOM: every
+  // branch here checks where the node already is before moving it.
+  function dockLauncher() {
+    if (!launcherRoot || !launcherButton) return;
+    const host = dockPreferred() ? findDockHost() : null;
+
+    if (!host) {
+      // Floating: the button goes back inside the popover root, which is the
+      // pre-dock behaviour and the fallback whenever FL's chrome can't be
+      // found. `launcherPlacement` then does the whole job, as it always did.
+      if (launcherDock) {
+        launcherDock.remove();
+        launcherDock = null;
+      }
+      if (launcherButton.parentNode !== launcherRoot) launcherRoot.appendChild(launcherButton);
+      styleLauncherButton('float');
+      launcherDocked = false;
+      return;
+    }
+
+    if (!launcherDock || launcherDock.tagName !== host.tag.toUpperCase()) {
+      if (launcherDock) launcherDock.remove();
+      launcherDock = h(host.tag, {
+        // Wearing the container's own item class (`banner-item`) is what makes
+        // the button line up with the icons already in the row.
+        className: host.className,
+        css: 'display:inline-flex;align-items:center;justify-content:center;'
+          + 'margin:0;padding:0;list-style:none;',
+      });
+    } else if (launcherDock.className !== host.className) {
+      launcherDock.className = host.className;
+    }
+    if (launcherButton.parentNode !== launcherDock) launcherDock.appendChild(launcherButton);
+    // Where in the container, not just which container: `host.after` means sit
+    // immediately behind that node, and drifting away from it (React inserting
+    // something between the two on a re-render) has to count as being in the
+    // wrong place, or the launcher walks off down the sidebar again.
+    // `previousElementSibling`, not `previousSibling`: a stray whitespace text
+    // node between the two would otherwise read as "misplaced" forever and
+    // re-insert on every single scan.
+    const misplaced = host.after
+      ? launcherDock.previousElementSibling !== host.after
+      : launcherDock.parentNode !== host.container;
+    if (misplaced) {
+      if (host.after) host.container.insertBefore(launcherDock, host.after.nextSibling);
+      else host.container.appendChild(launcherDock);
+    }
+    styleLauncherButton(host.tag === 'li' ? 'banner' : 'inline');
+    launcherDocked = true;
+  }
+
+  // Pure, like `launcherPlacement`, and the docked mode's half of the same
+  // job. The button is part of the page now, so the only thing left to place
+  // is the popover -- the menu and the panel -- which still has to be
+  // `position:fixed`, because a 660px reference table cannot live inside a
+  // sidebar column.
+  //
+  //   anchor  the docked button's box
+  //   view    { width, height } of the viewport
+  //   want    { width } the popover would like to be
+  //
+  // Out: `{ down, right, top, bottom, maxWidth, maxHeight }`. Exactly one of
+  // `top`/`bottom` is a number and the other is null -- that is the pin, the
+  // same one-flag trick the floating rule uses. The anchor is clamped into the
+  // viewport first, because a DOCKED button scrolls with the page and the
+  // popover must not be dragged off the screen with it.
+  function popoverPlacement(anchor, view, want) {
+    const gap = LAUNCHER_GAP;
+    const edge = LAUNCHER_EDGE;
+    const top = Math.min(Math.max(anchor.top, 0), view.height);
+    const foot = Math.min(Math.max(anchor.bottom, 0), view.height);
+    const above = top - gap - edge;
+    const below = view.height - foot - gap - edge;
+    const down = below >= above;
+
+    // Right-aligned with the button, then pulled back in far enough that the
+    // popover's LEFT edge stays on screen too.
+    const width = Math.min((want && want.width) || 660, Math.max(240, view.width - 2 * edge));
+    const right = Math.min(
+      Math.max(edge, view.width - anchor.right),
+      Math.max(edge, view.width - width - edge));
+
+    return {
+      down: down,
+      right: right,
+      top: down ? Math.min(Math.max(edge, foot + gap), Math.max(edge, view.height - 120)) : null,
+      bottom: down ? null : Math.max(edge, view.height - top + gap),
+      maxWidth: width,
+      maxHeight: Math.max(160, down ? below : above),
+    };
+  }
+
+  // The stack's gap has to move to the other side with it, or it sits between
+  // the menu and nothing; and the panel only ever has the room on its own side
+  // to live in, or a panel taller than that scrolls the page instead of
+  // scrolling inside itself.
+  function applyLauncherStack(down, maxWidth, maxHeight) {
+    const stackGap = down ? LAUNCHER_GAP + 'px 0 0 0' : '0 0 ' + LAUNCHER_GAP + 'px 0';
+    if (launcherMenu) launcherMenu.style.margin = stackGap;
+    if (launcherPanelHost) {
+      launcherPanelHost.style.margin = stackGap;
+      launcherPanelHost.style.maxWidth = Math.max(240, maxWidth) + 'px';
+      launcherPanelHost.style.maxHeight = Math.max(160, maxHeight) + 'px';
+    }
+  }
+
   function positionLauncher() {
     const root = launcherRoot;
     if (!root || !root.isConnected || !root.style) return;
     const view = viewportSize();
     if (!view) return;
+
+    // Docked: the button is in the page and needs no placing at all. Only the
+    // popover does, and it hangs off wherever the button ended up.
+    if (launcherDocked) {
+      // Mid-re-render, FL may have taken the button away for a moment. Leave
+      // the popover exactly where it is rather than falling through to the
+      // floating rule, which would fling it across the screen and back once
+      // the next scan re-docks.
+      if (!rendered(launcherButton)) return;
+      const at = popoverPlacement(launcherButton.getBoundingClientRect(), view, { width: 660 });
+      root.style.right = at.right + 'px';
+      root.style.flexDirection = at.down ? 'column-reverse' : 'column';
+      root.style.top = at.down ? at.top + 'px' : 'auto';
+      root.style.bottom = at.down ? 'auto' : at.bottom + 'px';
+      applyLauncherStack(at.down, at.maxWidth, at.maxHeight - 2 * LAUNCHER_GAP);
+      return;
+    }
+
     const anchor = findTravelAnchor();
     const box = anchor ? anchor.getBoundingClientRect() : null;
     const size = {
@@ -2028,21 +3373,13 @@
     root.style.flexDirection = at.down ? 'column-reverse' : 'column';
     root.style.top = at.down ? top + 'px' : 'auto';
     root.style.bottom = at.down ? 'auto' : at.bottom + 'px';
-    // The gap between the stacked pieces has to move to the other side with
-    // them, or it sits between the menu and nothing.
-    const stackGap = at.down
-      ? LAUNCHER_GAP + 'px 0 0 0'
-      : '0 0 ' + LAUNCHER_GAP + 'px 0';
-    if (launcherMenu) launcherMenu.style.margin = stackGap;
     // The panel hangs off the same corner, so it only has the room left on
     // that side to live in -- otherwise moving the launcher inwards pushes it
-    // off the other edge, and a panel taller than the room left scrolls the
-    // page instead of scrolling inside itself.
-    if (launcherPanelHost) {
-      launcherPanelHost.style.margin = stackGap;
-      launcherPanelHost.style.maxWidth = Math.max(240, view.width - at.right - 16) + 'px';
-      launcherPanelHost.style.maxHeight = Math.max(160, (at.down ? at.bottom : top) - 3 * LAUNCHER_GAP) + 'px';
-    }
+    // off the other edge.
+    applyLauncherStack(
+      at.down,
+      view.width - at.right - 16,
+      (at.down ? at.bottom : top) - 3 * LAUNCHER_GAP);
   }
 
   let positionQueued = false;
@@ -2055,10 +3392,42 @@
     });
   }
 
+  let remountQueued = false;
+  function scheduleRemount() {
+    if (remountQueued) return;
+    remountQueued = true;
+    requestAnimationFrame(function () {
+      remountQueued = false;
+      mountLauncher();
+    });
+  }
+
+  // Three steps, and they are separate because they answer to different
+  // things: the pieces are built once, the button is re-docked whenever FL
+  // re-renders or swaps layout (which is every scan), and the popover is
+  // re-placed whenever anything moves at all.
   function mountLauncher() {
-    // Already up: just make sure it is still beside the travel control,
-    // which moves when FL swaps layout or re-renders its own chrome.
-    if (document.getElementById(LAUNCHER_ID)) { positionLauncher(); return; }
+    buildLauncher();
+    dockLauncher();
+    positionLauncher();
+  }
+
+  function buildLauncher() {
+    // Already up. Note the guard is the popover root, which lives on the body
+    // and is ours alone; the BUTTON is a separate question, because FL can
+    // take that one away from us at any re-render -- `dockLauncher` is what
+    // notices and puts it back.
+    if (document.getElementById(LAUNCHER_ID)) return;
+
+    // Building means every reference below is about to be replaced, and the
+    // dock wrapper has to go with them: it belongs to the button we are
+    // discarding, and reusing it would re-attach that dead button alongside
+    // the new one. (Only reachable if something removes our root from the
+    // body, which FL itself does not do -- but "we rebuilt half of it" is a
+    // bad state to leave reachable at all.)
+    if (launcherDock) launcherDock.remove();
+    launcherDock = null;
+    launcherDocked = false;
 
     const panelHost = h('div', {
       css: 'display:none;margin-bottom:8px;width:min(660px,calc(100vw - 32px));'
@@ -2067,41 +3436,100 @@
         + 'box-shadow:0 6px 24px rgba(0,0,0,.55);font:13px ' + UI.font + ';',
     });
 
+    // Last line of the menu, under a rule: which of the two placements you
+    // want. It is here rather than in a settings screen because it is the
+    // answer to "this thing is in my way", and that is a thought you have
+    // while looking at the button, not while looking for preferences.
+    const dockToggle = h('button', {
+      type: 'button',
+      style: btnStyle({ color: UI.dim, font: '12px ' + UI.font }),
+      on: {
+        click: function () {
+          setDockPreferred(!dockPreferred());
+          syncDockToggle();
+          dockLauncher();
+          positionLauncher();
+        },
+        mouseenter: function (e) { e.currentTarget.style.background = UI.bgAlt; },
+        mouseleave: function (e) { e.currentTarget.style.background = 'transparent'; },
+      },
+    });
+
+    function syncDockToggle() {
+      const docked = dockPreferred();
+      dockToggle.textContent = docked ? '⤓  Docked in the page' : '⤢  Floating over the page';
+      dockToggle.title = docked
+        ? 'The button sits in Fallen London’s own chrome, beside Travel, and takes up '
+          + 'space there. Click to float it over the page instead.'
+        : 'The button floats over the page beside the travel control. Click to dock it '
+          + 'into Fallen London’s chrome instead, where it covers nothing.';
+    }
+    syncDockToggle();
+
     const menu = h('div', {
       css: 'display:none;margin-bottom:8px;min-width:230px;background:' + UI.bg
         + ';border:1px solid ' + UI.line + ';border-radius:4px;overflow:hidden;'
         + 'box-shadow:0 6px 24px rgba(0,0,0,.55);',
-    }, PANELS.map(function (panel) {
-      return h('button', {
-        type: 'button',
-        title: panel.hint || '',
-        style: btnStyle(),
-        on: {
-          click: function () { closeMenu(); openPanel(panel); },
-          mouseenter: function (e) { e.currentTarget.style.background = UI.bgAlt; },
-          mouseleave: function (e) { e.currentTarget.style.background = 'transparent'; },
-        },
-      }, [panel.icon + '  ' + panel.label]);
-    }));
+    }, [
+      PANELS.map(function (panel) {
+        return h('button', {
+          type: 'button',
+          title: panel.hint || '',
+          style: btnStyle(),
+          on: {
+            click: function () { closeMenu(); openPanel(panel); },
+            mouseenter: function (e) { e.currentTarget.style.background = UI.bgAlt; },
+            mouseleave: function (e) { e.currentTarget.style.background = 'transparent'; },
+          },
+        }, [panel.icon + '  ' + panel.label]);
+      }),
+      h('div', { css: 'border-top:1px solid ' + UI.line + ';' }, [dockToggle]),
+    ]);
 
     const button = h('button', {
+      id: LAUNCHER_BUTTON_ID,
       type: 'button',
       title: 'Fallen London UX Enhancers',
-      css: 'align-self:flex-end;padding:10px 18px;border:1px solid ' + UI.line
+      css: 'padding:10px 18px;border:1px solid ' + UI.line
         + ';border-radius:20px;background:' + UI.bg + ';color:' + UI.accent
         + ';font:bold 15px ' + UI.font + ';letter-spacing:.04em;cursor:pointer;'
-        + 'box-shadow:0 2px 12px rgba(0,0,0,.55);',
+        + 'white-space:nowrap;line-height:normal;'
+        // See the root below: this is not optional, and leaving it off is what
+        // made the floating button unclickable (reported 2026-09-03).
+        + 'pointer-events:auto;',
       on: { click: toggleMenu },
     }, ['⚙ UX']);
 
+    // The button is NOT a child of this root any more unless it is floating --
+    // `dockLauncher` decides, and moves it. What is always here is the
+    // popover: the panel and the menu, in that DOM order, so one
+    // `flex-direction` flip re-stacks the pair when it has to open downward.
     const root = h('div', {
       id: LAUNCHER_ID,
       css: 'position:fixed;right:16px;bottom:16px;z-index:99999;'
-        + 'display:flex;flex-direction:column;align-items:flex-end;',
-    }, [panelHost, menu, button]);
+        + 'display:flex;flex-direction:column;align-items:flex-end;'
+        + 'pointer-events:none;',
+    }, [panelHost, menu]);
 
+    // The root is a fixed box sized to whatever the popover needs, so it would
+    // otherwise swallow clicks on the game behind it. `none` on the root and
+    // `auto` on each real child is the fix -- and EVERY child has to opt back
+    // in, which is the trap: the floating button is a child of this root too
+    // (docked, it isn't, which is why this went unnoticed), and without its
+    // own `auto` it inherited `none` and stopped responding to clicks. Since
+    // the docked/floating choice is remembered in localStorage, that left no
+    // way to open the menu and switch back -- not even by reloading. If you
+    // ever add a fourth thing in here, opt it in as well.
+    panelHost.style.pointerEvents = 'auto';
+    menu.style.pointerEvents = 'auto';
+    button.style.pointerEvents = 'auto';
+
+    // Both openers re-place the popover on the way out: it hangs off the
+    // button, and the button has been free to move (it is in the page now, and
+    // the page scrolls) since the last time anything was placed.
     function toggleMenu() {
       menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+      positionLauncher();
     }
     function closeMenu() { menu.style.display = 'none'; }
     function closePanel() {
@@ -2142,6 +3570,7 @@
       ctx.rerender();
       panelHost.style.display = 'block';
       panelHost.scrollTop = 0;
+      positionLauncher();
     }
 
     // Escape closes the menu first, then the panel. Clicking anywhere outside
@@ -2153,8 +3582,13 @@
       if (menu.style.display !== 'none') closeMenu();
       else closePanel();
     });
+    // The button is no longer inside `root`, so it has to be excused here by
+    // name: without this, its own click would open the menu and this handler
+    // would immediately shut it again.
     document.addEventListener('click', function (e) {
-      if (!root.contains(e.target)) closeMenu();
+      if (root.contains(e.target)) return;
+      if (button === e.target || button.contains(e.target)) return;
+      closeMenu();
     });
 
     document.body.appendChild(root);
@@ -2162,14 +3596,18 @@
     launcherPanelHost = panelHost;
     launcherMenu = menu;
     launcherButton = button;
-    // A resize or a scroll moves the travel control without changing the
-    // DOM, so the debounced scan alone would not notice either.
+    launcherLook = null; // a fresh button has none of the old one's styling
+    styleLauncherButton('float');
+    // A resize or a scroll moves things without changing the DOM, so the
+    // debounced scan alone would not notice either. Resize goes through the
+    // full mount, because FL can swap layout on a media query alone -- no
+    // mutation, but the container the button is docked in has just become
+    // `display:none` and it needs re-docking into the one that replaced it.
     if (!launcherBound && typeof window !== 'undefined' && window.addEventListener) {
       launcherBound = true;
-      window.addEventListener('resize', schedulePosition);
+      window.addEventListener('resize', scheduleRemount);
       window.addEventListener('scroll', schedulePosition, true);
     }
-    positionLauncher();
   }
 
   // === panel: factions ===================================================
@@ -2416,25 +3854,52 @@
   // wiki's exactly for all nineteen faction and Renown items in the capture.
   const OWNED_MARKER = '[data-quality-id]';
 
+  const ITEM_COUNT_RE = /\s*[×x]\s*(\d+)\s*$/;
+
   function itemNameFromLabel(label) {
-    return String(label || '').split(';')[0].replace(/\s*[×x]\s*\d+\s*$/, '').trim();
+    return String(label || '').split(';')[0].replace(ITEM_COUNT_RE, '').trim();
   }
 
-  // Returns a Set of normalised item names, or null when this isn't the
-  // Possessions tab. The null matters: the Myself tab has no
-  // `[data-quality-id]` at all, so an empty result there would otherwise read
-  // as "you own nothing".
-  function readPossessions(doc) {
+  // How many of it you hold. The label only carries "× N" when N > 1, and an
+  // equipped item never carries one, so a bare name means one.
+  function itemCountFromLabel(label) {
+    const m = ITEM_COUNT_RE.exec(String(label || '').split(';')[0]);
+    return m ? Number(m[1]) : 1;
+  }
+
+  // Every item on the Possessions tab as a Map of normalised name ->
+  // { name, count }, or null when this isn't that tab. The null matters: the
+  // Myself tab has no `[data-quality-id]` at all, so an empty result there
+  // would otherwise read as "you own nothing".
+  //
+  // Counts are taken as a MAX and never summed, because the same item shows up
+  // more than once: an item you are wearing is both `div.equipped-item` and a
+  // row in the equip drawer. Summing would report two of everything equipped.
+  function readPossessionCounts(doc) {
     const d = doc || document;
     const nodes = d.querySelectorAll(OWNED_MARKER);
     if (!nodes.length) return null;
-    const owned = new Set();
+    const held = new Map();
     nodes.forEach(function (el) {
       const labelled = el.getAttribute('aria-label') != null ? el : el.querySelector('[aria-label]');
-      const name = labelled && itemNameFromLabel(labelled.getAttribute('aria-label'));
-      if (name) owned.add(normalizeName(name));
+      const label = labelled && labelled.getAttribute('aria-label');
+      const name = label && itemNameFromLabel(label);
+      if (!name) return;
+      const key = normalizeName(name);
+      const count = itemCountFromLabel(label);
+      const seen = held.get(key);
+      if (!seen) held.set(key, { name: name, count: count });
+      else if (count > seen.count) seen.count = count;
     });
-    return owned;
+    return held;
+  }
+
+  // Returns a Set of normalised item names, or null when this isn't the
+  // Possessions tab. The set is exactly the counts' keys -- one reader, so the
+  // two can't drift apart.
+  function readPossessions(doc) {
+    const held = readPossessionCounts(doc);
+    return held ? new Set(held.keys()) : null;
   }
 
   // The player's own name, from the screen-reader sidebar's "It's <name>!"
@@ -2691,7 +4156,10 @@
   // One refresh at a time, and never two of these racing each other.
   let refreshing = null;
 
-  function refreshFactionState() {
+  // Refreshes everything both panels read, off the same two page loads --
+  // booting the SPA twice for the Factions panel and twice more for Fruits of
+  // the Zee would be silly, so one pass banks both.
+  function refreshBackgroundState() {
     if (refreshing) return refreshing;
     refreshing = (async function () {
       let changed = false;
@@ -2710,14 +4178,16 @@
           return null;
         });
         if (bankQualities(scan)) changed = true;
+        if (bankFotzQualities(scan)) changed = true;
       }
       const here = readPossessions();
       if (!here || !here.size) {
-        const owned = await loadInFrame('/possessions', function (doc) {
-          const got = readPossessions(doc);
+        const held = await loadInFrame('/possessions', function (doc) {
+          const got = readPossessionCounts(doc);
           return got && got.size > 20 ? got : null;
         });
-        if (bankPossessions(owned)) changed = true;
+        if (bankPossessions(held ? new Set(held.keys()) : null)) changed = true;
+        if (bankItemCounts(held)) changed = true;
       }
       return changed;
     })().catch(function (e) {
@@ -3151,7 +4621,7 @@
     let busy = false;
     if (ctx && autoRefreshEnabled() && !stateIsFresh(state)) {
       busy = true;
-      refreshFactionState().then(function () { ctx.rerender(); });
+      refreshBackgroundState().then(function () { ctx.rerender(); });
     }
 
     // Say plainly where the numbers came from and how old they are. A stale
@@ -3251,7 +4721,7 @@
               if (busy || !ctx) return;
               busy = true;
               ctx.rerender();
-              refreshFactionState().then(function () { ctx.rerender(); });
+              refreshBackgroundState().then(function () { ctx.rerender(); });
             },
           },
         }, [busy ? 'Refreshing…' : 'Refresh']),
@@ -3586,6 +5056,1134 @@
     ]);
   }
 
+  // === panel: Fruits of the Zee ==========================================
+  //
+  // The checklist half of the festival work, and the reason the badges can say
+  // "you still need this": what the festival has to give, and which of it you
+  // already hold.
+  //
+  // It reads the same two pages the Factions panel does and through the same
+  // plumbing -- qualities off the Myself tab, items off Possessions, both
+  // banked in localStorage and refreshable in a hidden frame -- so opening
+  // this panel from the middle of a dive still has something to say. Every
+  // reading is labelled with its age, and an item whose ownership can't be
+  // established is a dash, never a "no". Thalassic Favour is a QUALITY, not an
+  // item, which is why it comes from the first scrape and not the second.
+
+  const FOTZ_CACHE_KEY = 'fl-ux-fotz';
+  const COUNTS_KEY = 'fl-ux-item-counts';
+
+  // Bumped whenever anything the badges depend on is re-banked. `fotzHoldings`
+  // is called once per card per scan, so it memoises on this rather than
+  // re-parsing a few hundred cached item names on every DOM mutation.
+  let fotzGen = 0;
+
+  // The festival's own qualities, off a Myself scrape. Same rule as the
+  // factions scrape: FL doesn't render a quality you have none of, so absent
+  // means 0 -- but only while the tab's search box is empty, because a
+  // filtered list makes absent mean "not on screen" instead.
+  function fotzFromQualities(scan) {
+    const values = {};
+    const zeroIsSafe = !scan.filtered;
+    for (const name of FOTZ_QUALITIES) {
+      const q = scan.values.get(name);
+      if (q) values[name] = q.level;
+      else if (zeroIsSafe) values[name] = 0;
+    }
+    return values;
+  }
+
+  function bankFotzQualities(scan) {
+    if (!scan) return false;
+    const values = fotzFromQualities(scan);
+    if (!Object.keys(values).length) return false;
+    saveCache(FOTZ_CACHE_KEY, {
+      v: 1, at: Date.now(), character: characterName() || null,
+      partial: scan.filtered, values: values,
+    });
+    fotzGen++;
+    return true;
+  }
+
+  // `held` is readPossessionCounts' Map. Stored as an array of pairs, since a
+  // Map doesn't survive JSON.
+  function bankItemCounts(held) {
+    if (!held || !held.size) return false;
+    const rows = [];
+    held.forEach(function (rec, key) { rows.push([key, rec.name, rec.count]); });
+    saveCache(COUNTS_KEY, {
+      v: 1, at: Date.now(), character: characterName() || null, held: rows,
+    });
+    fotzGen++;
+    return true;
+  }
+
+  // The counterpart of `captureFactionState`: watch for the two tabs going by
+  // and bank what they say. Separate from it, and with its own signature, so
+  // the factions plumbing stays exactly as it was.
+  let lastFotzSig = null;
+  function captureFotzState() {
+    const items = document.querySelectorAll('li.quality-item');
+    const owned = document.querySelectorAll(OWNED_MARKER);
+    if (!items.length && !owned.length) { lastFotzSig = null; return; }
+    const search = document.querySelector('input.input--item-search');
+    const sig = items.length + '/' + owned.length + '|' + (search ? search.value : '');
+    if (sig === lastFotzSig) return;
+    lastFotzSig = sig;
+    if (items.length) bankFotzQualities(readQualities());
+    if (owned.length) bankItemCounts(readPossessionCounts());
+  }
+
+  function loadCounts() {
+    const rec = loadCache(COUNTS_KEY, 1);
+    if (!rec || !Array.isArray(rec.held)) return null;
+    const held = new Map();
+    for (const row of rec.held) held.set(row[0], { name: row[1], count: row[2] });
+    return { at: rec.at, held: held };
+  }
+
+  // Everything this panel shows, live where it can be and banked where it
+  // can't. Any field may be missing; the renderer draws a dash for it. Field
+  // names match the factions state so `stateIsFresh` covers both.
+  function readFotzState() {
+    let qualities = null;
+    const scan = readQualities();
+    if (scan) {
+      const values = fotzFromQualities(scan);
+      if (Object.keys(values).length) {
+        qualities = {
+          live: true, at: Date.now(), character: characterName(),
+          partial: scan.filtered, values: values,
+        };
+      }
+    }
+    if (!qualities) {
+      const rec = loadCache(FOTZ_CACHE_KEY, 1);
+      if (rec) {
+        qualities = {
+          live: false, at: rec.at, character: rec.character,
+          partial: !!rec.partial, values: rec.values,
+        };
+      }
+    }
+
+    let items = null;
+    const live = readPossessionCounts();
+    if (live && live.size) {
+      items = { live: true, at: Date.now(), held: live };
+    } else {
+      const rec = loadCounts();
+      if (rec) items = { live: false, at: rec.at, held: rec.held };
+    }
+
+    if (!qualities && !items) return null;
+    return {
+      live: !!(qualities && qualities.live),
+      at: qualities ? qualities.at : null,
+      character: (qualities && qualities.character) || null,
+      partial: !!(qualities && qualities.partial),
+      values: new Map(Object.entries((qualities && qualities.values) || {})),
+      itemsLive: !!(items && items.live),
+      itemsAt: items ? items.at : null,
+      held: items ? items.held : null,
+    };
+  }
+
+  // What the BADGES need, and nothing more: can we answer "do you have this?"
+  // and "have you met the Bride?". Null means we cannot, and the badge then
+  // says so rather than guessing.
+  let holdingsMemo = null;
+  function fotzHoldings() {
+    if (holdingsMemo && holdingsMemo.gen === fotzGen) return holdingsMemo.value;
+    let value = null;
+    try {
+      value = buildFotzHoldings();
+    } catch (e) {
+      value = null;
+    }
+    holdingsMemo = { gen: fotzGen, value: value };
+    return value;
+  }
+
+  function buildFotzHoldings() {
+    const live = readPossessionCounts();
+    const items = (live && live.size) ? { held: live } : loadCounts();
+    if (!items) return null;
+    const held = items.held;
+    // The Bride is an Accomplishment, so it comes off the quality scrape, not
+    // possessions -- and an unreadable one has to stay false rather than
+    // become an unknown, or the storylet at the bottom of the trench would
+    // never get a mark at all. It errs towards "go and do it".
+    let bride = false;
+    const scan = readQualities();
+    if (scan) {
+      const q = scan.values.get(FOTZ_BRIDE_QUALITY);
+      if (q && q.level > 0) bride = true;
+    } else {
+      const rec = loadCache(FOTZ_CACHE_KEY, 1);
+      if (rec && rec.values && rec.values[FOTZ_BRIDE_QUALITY] > 0) bride = true;
+    }
+    return {
+      has: function (name) { return held.has(normalizeName(name)); },
+      count: function (name) {
+        const rec = held.get(normalizeName(name));
+        return rec ? rec.count : 0;
+      },
+      bride: bride,
+      sig: String(fotzGen),
+    };
+  }
+
+  // --- the collection ----------------------------------------------------
+  //
+  // One flat row per collectable thing, grouped for display. `count` is
+  // whether the row belongs in the "you are missing N of M" headline: the
+  // Fate-only items don't (they cost money, not actions), the ships don't (you
+  // can only own one at a time), and the Nodule of Fecund Amber doesn't until
+  // you already hold the Litter-Cyst it is the consolation prize for.
+  //
+  // `held` is true / false / null, and null is a real answer meaning "your
+  // Possessions have never been read". Pure apart from the state it is handed,
+  // so the arithmetic in the headline is testable.
+  function fotzCollection(state) {
+    const held = state && state.held;
+    const holds = function (name) {
+      if (!held) return null;
+      return held.has(normalizeName(name));
+    };
+    const countOf = function (name) {
+      if (!held) return null;
+      const rec = held.get(normalizeName(name));
+      return rec ? rec.count : 0;
+    };
+    const quality = function (name) {
+      const v = state && state.values ? state.values.get(name) : undefined;
+      return typeof v === 'number' ? v : null;
+    };
+
+    const favour = quality('Thalassic Favour');
+    const sights = quality('Sights at the Festival');
+    const bandOf = function (value) {
+      if (value == null) return null;
+      for (let i = 0; i < FOTZ_BANDS.length; i++) {
+        if (value >= FOTZ_BANDS[i].lo && value <= FOTZ_BANDS[i].hi) return i;
+      }
+      return null;
+    };
+    const sightsBand = bandOf(sights);
+
+    const groups = [];
+
+    // 1. The coral equipment: the year's actual prize, and the only part of
+    //    the collection where the game tells you exactly how to get the piece
+    //    you are missing.
+    groups.push({
+      key: 'coral',
+      title: 'Coral equipment',
+      hint: 'Dive for the coral in week one, break it open in week two. Which of the '
+        + 'three you get is decided by Sights at the Festival at that moment — and '
+        + 'breaking one re-rolls Sights, so you cannot line two up in a row.',
+      corals: FOTZ_CORALS.map(function (coral) {
+        const inHand = countOf(coral.coral);
+        // A coral whose items are not published yet gets ONE row saying so,
+        // and it is `count: false` -- "missing 3 of 31" would be counting
+        // items nobody can name, which is the same fabrication as a made-up
+        // number. `held` is null for the same reason: you cannot check a name
+        // you do not have. The badge still stars the card, because "take this,
+        // it is new" is a different and answerable question.
+        if (!coral.variants) {
+          return {
+            coral: coral,
+            inHand: inHand,
+            pending: true,
+            rows: [{
+              name: coral.pendingLabel || coral.slot,
+              slot: coral.slot,
+              held: null,
+              count: false,
+              band: null,
+              how: coral.pending,
+              note: coral.pending,
+            }],
+          };
+        }
+        return {
+          coral: coral,
+          inHand: inHand,
+          rows: coral.variants.map(function (name, i) {
+            const have = holds(name);
+            const band = FOTZ_BANDS[i];
+            return {
+              name: name,
+              slot: coral.slot,
+              held: have,
+              count: true,
+              band: i,
+              // "Do this now" -- you are holding the coral and Sights is
+              // sitting in the band that pays out the one you're missing.
+              ready: have === false && !!inHand && sightsBand === i,
+              how: 'Break a ' + coral.coral + ' while Sights at the Festival is '
+                + band.lo + '–' + band.hi + ', or trade a duplicate to ' + band.trader + '.',
+              fate: coral.fate,
+              bis: coral.bis,
+            };
+          }),
+        };
+      }),
+    });
+
+    // 2. Equipment from festivals past: dive for it, or buy it back cheaper
+    //    than the trade-in value at the stalls.
+    groups.push({
+      key: 'dive',
+      title: 'Equipment from festivals past',
+      hint: 'Only these six turn up while diving. Buying one at the stalls always '
+        + 'costs less Favour than trading a spare one in pays, so dive first.',
+      rows: FOTZ_EQUIPMENT.map(function (item) {
+        const have = holds(item.name);
+        return {
+          name: item.name,
+          slot: item.slot,
+          held: have,
+          count: true,
+          spare: countOf(item.name) == null ? null : Math.max(0, countOf(item.name) - 1),
+          spareEach: item.favour,
+          ready: have === false && favour != null && favour >= item.stall,
+          how: 'Dive to depth ' + (item.depths[0] === item.depths[1]
+            ? item.depths[0] : item.depths[0] + '–' + item.depths[1])
+            + ' and take it off ' + item.card + ', or buy it at the Island Stalls for '
+            + item.stall + ' Favour.',
+          favour: item.stall,
+          fate: item.fate,
+          bis: item.bis,
+          note: item.note,
+        };
+      }),
+    });
+
+    // 3. The stalls: week two, Favour only, nothing here can be dived up.
+    groups.push({
+      key: 'stall',
+      title: 'Island Stalls only',
+      hint: 'Week two, for Thalassic Favour. None of these can be dived for.',
+      rows: FOTZ_STALL.map(function (item) {
+        const have = holds(item.name);
+        return {
+          name: item.name,
+          slot: item.slot,
+          held: have,
+          count: true,
+          ready: have === false && favour != null && favour >= item.favour,
+          how: item.favour + ' Favour at the Island Stalls.',
+          favour: item.favour,
+          fate: item.fate,
+          bis: item.bis,
+          note: item.note,
+        };
+      }),
+    });
+
+    // 4. The bottom of the trench.
+    groups.push({
+      key: 'bride',
+      title: 'The Pentamerous Bride',
+      hint: 'Dive all the way down, take no treasure, and beg audience. The '
+        + 'Accomplishment is what the King-in-Coral pays out on in week two.',
+      rows: FOTZ_BRIDE_ITEMS.map(function (item, i) {
+        const have = holds(item.name);
+        // The Amber is what you get INSTEAD of the Litter-Cyst, so it is only
+        // part of the collection once the Cyst is already yours.
+        const applies = i === 0 || holds(FOTZ_BRIDE_ITEMS[0].name) === true;
+        return {
+          name: item.name,
+          slot: item.slot,
+          held: have,
+          count: i === 0,
+          dim: !applies,
+          how: item.how,
+          bis: item.bis,
+          note: item.note,
+        };
+      }),
+    });
+
+    // 5. The ships. Listed, never counted -- one ship at a time.
+    groups.push({
+      key: 'ships',
+      title: 'Festival ships',
+      hint: 'Traded for your current ship plus 500–1920 Favour. Trading in a '
+        + 'Zubmarine, a Majestic Pleasure Yacht or another festival ship brings every '
+        + 'one of them down to 500. Not counted below: you can only have one ship.',
+      rows: FOTZ_SHIPS.map(function (ship) {
+        return {
+          name: ship.name,
+          slot: 'Ship',
+          held: holds(ship.name),
+          count: false,
+          how: 'Trade your current ship plus 500–1920 Favour to the Green-Gilled '
+            + 'Shipwright. Replaces ' + ship.peer + '.',
+          fate: ship.fate,
+          note: ship.note,
+        };
+      }),
+    });
+
+    // 6. Fate. Listed for completeness, never counted.
+    groups.push({
+      key: 'fate',
+      title: 'Fate only',
+      hint: 'From the King-in-Coral’s Hoard, for Fate rather than Favour. Not counted '
+        + 'below — and several are obtainable elsewhere for nothing.',
+      rows: FOTZ_FATE_ITEMS.map(function (item) {
+        return {
+          name: item.name,
+          slot: item.slot,
+          held: holds(item.name),
+          count: false,
+          how: item.fate ? item.fate + ' Fate.' : 'Fate, at the Hoard.',
+          fate: item.fate,
+          note: item.note,
+        };
+      }),
+    });
+
+    // The headline. Only `count` rows, and an unknown is neither missing nor
+    // held -- it is counted as unknown and said so, because "you are missing
+    // 28 of 28" would be a lie told to someone who simply hasn't opened
+    // Possessions yet.
+    let total = 0;
+    let missing = 0;
+    let unknown = 0;
+    const wanted = [];
+    for (const group of groups) {
+      const rows = group.rows || group.corals.reduce(function (all, c) {
+        return all.concat(c.rows);
+      }, []);
+      for (const row of rows) {
+        if (!row.count) continue;
+        total++;
+        if (row.held === false) { missing++; wanted.push(row); }
+        else if (row.held == null) unknown++;
+      }
+    }
+
+    return {
+      groups: groups,
+      total: total,
+      missing: missing,
+      unknown: unknown,
+      wanted: wanted,
+      ready: wanted.filter(function (r) { return r.ready; }),
+      favour: favour,
+      sights: sights,
+      sightsBand: sightsBand,
+      devotion: quality('Fivefold Devotion'),
+      // How many of the five corals still have something you haven't got. It
+      // is the one number that decides how much Devotion is worth raising, so
+      // it comes out of the collection rather than being counted again in the
+      // renderer. An unreadable Possessions list leaves it null, and the
+      // advice then falls back to the Favour case rather than inventing a
+      // count -- there is no honest answer to "how many do you need" when we
+      // cannot tell what you have.
+      // How many different corals are still worth diving for. A `pending` one
+      // always counts: its items cannot exist yet, so you certainly need the
+      // coral -- and unlike the checklist total, this needs no name, only a
+      // count, so there is nothing being fabricated.
+      coralsWanted: !held ? null : groups[0].corals.filter(function (entry) {
+        return entry.pending || entry.rows.some(function (row) { return row.held === false; });
+      }).length,
+    };
+  }
+
+  // What your treasures would fetch at the Fruit Market, and what your spare
+  // equipment would. Both vanish when the festival ends (equipment aside,
+  // which now survives), so this is the "cash in before it's gone" number.
+  function fotzLedger(state) {
+    const held = state && state.held;
+    const countOf = function (name) {
+      if (!held) return null;
+      const rec = held.get(normalizeName(name));
+      return rec ? rec.count : 0;
+    };
+    const rows = [];
+    let total = 0;
+    for (const treasure of FOTZ_TREASURES) {
+      const n = countOf(treasure.name);
+      if (!n) continue;
+      total += n * treasure.favour;
+      rows.push({ name: treasure.name, each: treasure.favour, count: n,
+        subtotal: n * treasure.favour, note: treasure.note });
+    }
+    const spares = [];
+    for (const item of FOTZ_EQUIPMENT) {
+      const n = countOf(item.name);
+      if (n == null || n < 2) continue;
+      const extra = n - 1;
+      total += extra * item.favour;
+      spares.push({ name: item.name, each: item.favour, count: extra,
+        subtotal: extra * item.favour });
+    }
+    return { rows: rows, spares: spares, total: total, known: !!held };
+  }
+
+  // --- rendering ---------------------------------------------------------
+
+  const FOTZ_PIP_HELD = '◆';
+  const FOTZ_PIP_MISSING = '◇';
+  const FOTZ_PIP_UNKNOWN = '–';
+
+  // Same three-state rule as the factions pips: filled when you have it,
+  // hollow when you don't, a dash when there is no source for the answer. A
+  // hollow pip you could act on RIGHT NOW is promoted to a filled "!" in the
+  // ready colour, which is the one thing this panel exists to point at.
+  function fotzPip(row) {
+    if (row.held == null) {
+      return h('span', {
+        title: 'Not known — your Possessions have not been read yet.',
+        css: 'color:' + UI.dim + ';font-size:13px;',
+      }, [FOTZ_PIP_UNKNOWN]);
+    }
+    if (row.held) {
+      return h('span', {
+        title: 'You have this.',
+        css: 'color:' + UI.accent + ';font-size:13px;',
+      }, [FOTZ_PIP_HELD]);
+    }
+    if (row.ready) {
+      return h('span', {
+        title: 'You can get this right now.',
+        css: 'display:inline-block;color:#17190c;background:' + COLOR_READY
+          + ';border-radius:3px;padding:0 5px;font-weight:bold;',
+      }, ['!']);
+    }
+    return h('span', {
+      title: 'You do not have this yet.',
+      css: 'color:' + UI.dim + ';font-size:13px;',
+    }, [FOTZ_PIP_MISSING]);
+  }
+
+  function fotzItemRow(row) {
+    return h('tr', { css: row.dim ? 'opacity:.55;' : '' }, [
+      h('td', { css: TD + 'text-align:center;width:1%;' }, [fotzPip(row)]),
+      h('td', { css: TD }, [
+        wikiLink(row.name, row.name),
+        row.slot ? h('span', { css: 'color:' + UI.dim + ';font-size:11px;' },
+          [' · ' + row.slot]) : null,
+        row.bis ? h('div', { css: 'color:' + UI.accent + ';font-size:11px;' }, [row.bis]) : null,
+        row.spare ? h('div', { css: 'color:' + UI.dim + ';font-size:11px;' },
+          [row.spare + (row.spare === 1 ? ' spare' : ' spares') + ' — worth '
+            + (row.spare * row.spareEach) + ' Favour traded back']) : null,
+      ]),
+      h('td', { css: TD + 'color:' + UI.dim + ';font-size:11px;line-height:1.5;' }, [
+        row.held ? null : h('div', null, [row.how]),
+        row.note ? h('div', null, [row.note]) : null,
+        row.fate ? h('div', null, ['Or ' + row.fate + ' Fate at the Hoard.']) : null,
+      ]),
+    ]);
+  }
+
+  // The cards on screen, ranked the way the badge colours them: the ones
+  // offering something you still need first, then by trade-in value.
+  function fotzHandRows(depth, source, floor, holdings) {
+    const seen = new Map();
+    eachCardName(function (host, name) {
+      const card = lookupFotzCard(name);
+      if (card && !seen.has(card.name)) seen.set(card.name, card);
+    });
+    const rated = [];
+    for (const card of seen.values()) {
+      const opts = fotzOptionsAt(card, depth, floor);
+      if (!opts.length) continue;
+      let missing = [];
+      for (const opt of opts) {
+        const gone = fotzMissingFrom(opt, holdings);
+        if (gone) missing = missing.concat(gone);
+      }
+      const favours = opts.map(function (o) { return o.favour; });
+      rated.push({
+        card: card,
+        opts: opts,
+        missing: missing,
+        best: Math.max.apply(null, favours),
+        spec: fotzBadgeSpec(card, depth, source, floor, holdings),
+      });
+    }
+    rated.sort(function (a, b) {
+      if (!!a.missing.length !== !!b.missing.length) return a.missing.length ? -1 : 1;
+      return b.best - a.best;
+    });
+    return rated;
+  }
+
+  function renderFotzPanel(ctx) {
+    const state = readFotzState();
+    const at = fotzDepth();
+    const floor = at.depth ? null : fotzDepthFloor();
+    const collection = fotzCollection(state);
+    const ledger = fotzLedger(state);
+    const hand = fotzHandRows(at.depth, at.source, floor, fotzHoldings());
+
+    let busy = false;
+    if (ctx && autoRefreshEnabled() && !stateIsFresh(state)) {
+      busy = true;
+      refreshBackgroundState().then(function () { ctx.rerender(); });
+    }
+
+    const section = function (title, children) {
+      return h('div', { css: 'margin-top:14px;' }, [
+        h('div', {
+          css: 'font:bold 11px ' + UI.font + ';letter-spacing:.06em;text-transform:uppercase;'
+            + 'color:' + UI.accent + ';margin-bottom:5px;',
+        }, [title]),
+        children,
+      ]);
+    };
+    const note = function (text) {
+      return h('div', { css: 'color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, text);
+    };
+    const table = function (heads, rows) {
+      return h('table', { css: 'width:100%;border-collapse:collapse;' }, [
+        heads ? h('thead', null, [h('tr', null, heads.map(function (head) {
+          return h('th', { css: TH + (head.right ? 'text-align:right;' : '') }, [head.text]);
+        }))]) : null,
+        h('tbody', null, rows),
+      ]);
+    };
+
+    // --- your numbers, and where they came from --------------------------
+    const value = function (name) {
+      const v = state && state.values ? state.values.get(name) : undefined;
+      return typeof v === 'number' ? String(v) : '–';
+    };
+    const stat = function (label, name, title) {
+      return h('div', { title: title || '', css: 'min-width:96px;' }, [
+        h('div', { css: 'color:' + UI.dim + ';font-size:10px;letter-spacing:.05em;'
+          + 'text-transform:uppercase;' }, [label]),
+        h('div', { css: 'color:' + UI.text + ';font:bold 15px ' + UI.font + ';' },
+          [value(name)]),
+      ]);
+    };
+
+    const banners = [];
+
+    banners.push(h('div', {
+      css: 'margin:10px 0 0;padding:8px 10px;background:' + UI.bgAlt
+        + ';border-left:3px solid ' + UI.accent + ';display:flex;gap:14px;flex-wrap:wrap;',
+    }, [
+      stat('Favour', 'Thalassic Favour', 'Thalassic Favour — what week two is paid in.'),
+      stat('Devotion', 'Fivefold Devotion', 'Fivefold Devotion — 5 to dive at all, 11 is the cap.'),
+      stat('Depth', 'Full Fathom Five', 'Full Fathom Five — how deep you are right now.'),
+      stat('Sights', 'Sights at the Festival',
+        'Sights at the Festival — decides which of the three coral items you get.'),
+      stat('Airs', 'Airs of a Barren Zee',
+        'Airs of a Barren Zee — decides which supplication options you are offered, '
+          + 'and is re-rolled every time you take one.'),
+      stat('Harvest', 'A Fruitless Harvest', 'A Fruitless Harvest — the festival’s own story.'),
+    ]));
+
+    if (!state) {
+      banners.push(h('div', {
+        css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent
+          + ';background:' + UI.bgAlt + ';color:' + UI.dim + ';font-size:12px;line-height:1.5;',
+      }, [
+        'Nothing read yet. Open the ',
+        h('a', { href: '/myself', css: 'color:' + UI.text + ';' }, ['Myself']),
+        ' and ',
+        h('a', { href: '/possessions', css: 'color:' + UI.text + ';' }, ['Possessions']),
+        ' tabs once — or press Refresh — and both will be remembered here.',
+      ]));
+    }
+
+    // --- the headline: what you are still missing ------------------------
+    if (collection.ready.length) {
+      banners.push(h('div', {
+        css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + COLOR_READY
+          + ';background:#23280f;color:' + UI.text + ';font-size:12px;line-height:1.6;',
+      }, [
+        h('div', { css: 'color:' + COLOR_READY + ';font-weight:bold;' }, [
+          h('span', {
+            css: 'display:inline-block;color:#17190c;background:' + COLOR_READY
+              + ';border-radius:3px;padding:0 5px;margin-right:6px;',
+          }, ['!']),
+          collection.ready.length === 1
+            ? '1 thing you can collect right now'
+            : collection.ready.length + ' things you can collect right now',
+        ]),
+        collection.ready.map(function (row) {
+          return h('div', null, [
+            wikiLink(row.name, row.name),
+            h('span', { css: 'color:' + UI.dim + ';' }, [' — ' + row.how]),
+          ]);
+        }),
+      ]));
+    }
+
+    banners.push(h('div', {
+      css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent
+        + ';background:' + UI.bgAlt + ';font-size:12px;line-height:1.6;',
+    }, [
+      h('div', { css: 'color:' + UI.accent + ';font-weight:bold;' }, [
+        collection.unknown === collection.total
+          ? 'The festival collection is ' + collection.total + ' items'
+          : 'Missing ' + collection.missing + ' of ' + collection.total
+            + ' festival items'
+            + (collection.unknown ? ' (' + collection.unknown + ' unknown)' : ''),
+      ]),
+      collection.unknown === collection.total
+        ? note(['Which of them you hold is not known yet — read your Possessions and '
+          + 'this becomes a checklist.'])
+        : (collection.missing
+          ? h('div', { css: 'color:' + UI.dim + ';' }, [
+            collection.wanted.map(function (r) { return r.name; }).join(', '), '.'])
+          : note(['Nothing left to collect. The ships and the Fate items below are not '
+            + 'counted.'])),
+    ]));
+
+    if (state && state.partial) {
+      banners.push(h('div', {
+        css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid #8a6b3b;background:'
+          + UI.bgAlt + ';color:' + UI.dim + ';font-size:12px;line-height:1.5;',
+      }, ['The Myself tab’s search box is filtering the list — anything not on screen '
+        + 'is shown as – rather than guessed at 0.']));
+    }
+
+    // Where the numbers came from, plus the two controls, exactly as the
+    // Factions panel does it.
+    banners.push(h('div', {
+      css: 'margin:10px 0 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;'
+        + 'color:' + UI.dim + ';font-size:11px;',
+    }, [
+      h('span', null, [
+        'Qualities: ' + (state && state.live ? 'live'
+          : (state && state.at ? ageText(state.at) : 'never read'))
+        + '  ·  items: ' + (state && state.itemsAt
+          ? (state.itemsLive ? 'live' : ageText(state.itemsAt)) : 'never read')
+        + (state && state.character ? '  ·  ' + state.character : ''),
+      ]),
+      h('button', {
+        type: 'button',
+        disabled: busy,
+        title: 'Load /myself and /possessions in a hidden frame and re-read them.',
+        css: 'border:1px solid ' + UI.line + ';border-radius:3px;background:transparent;color:'
+          + (busy ? UI.dim : UI.accent) + ';font:11px ' + UI.font + ';padding:1px 7px;'
+          + 'cursor:' + (busy ? 'default' : 'pointer') + ';',
+        on: {
+          click: function () {
+            if (busy || !ctx) return;
+            busy = true;
+            ctx.rerender();
+            refreshBackgroundState().then(function () { ctx.rerender(); });
+          },
+        },
+      }, [busy ? 'Refreshing…' : 'Refresh']),
+      h('label', {
+        title: 'Refresh automatically when this panel opens on stale numbers.',
+        css: 'display:inline-flex;align-items:center;gap:4px;cursor:pointer;',
+      }, [
+        h('input', {
+          type: 'checkbox',
+          checked: autoRefreshEnabled(),
+          on: { change: function (e) { setAutoRefresh(!!e.currentTarget.checked); } },
+        }),
+        'auto',
+      ]),
+    ]));
+
+    // --- the depth control -----------------------------------------------
+    //
+    // Here rather than nowhere because the badges cannot be exact without it
+    // and FL may never show us Full Fathom Five. It is deliberately not
+    // remembered past the tab: a stale depth is a wrong badge.
+    const depthButton = function (n) {
+      const on = at.source === 'set' && at.depth === n;
+      return h('button', {
+        type: 'button',
+        title: n == null ? 'Let the depth be read from the game, if it can be.'
+          : 'You are at Full Fathom Five ' + n + '.',
+        css: 'border:1px solid ' + (on ? UI.accent : UI.line) + ';border-radius:3px;'
+          + 'background:' + (on ? UI.accent : 'transparent') + ';color:'
+          + (on ? '#17190c' : UI.text) + ';font:' + (on ? 'bold ' : '') + '12px ' + UI.font
+          + ';padding:2px 9px;cursor:pointer;',
+        on: {
+          click: function () {
+            fotzSetDepth(n);
+            if (ctx) ctx.rerender();
+          },
+        },
+      }, [n == null ? 'auto' : String(n)]);
+    };
+
+    const depthBlock = h('div', {
+      css: 'margin:10px 0 0;padding:8px 10px;background:' + UI.bgAlt
+        + ';border-left:3px solid ' + (at.depth ? UI.accent : UI.line) + ';font-size:12px;',
+    }, [
+      h('div', { css: 'display:flex;align-items:center;gap:6px;flex-wrap:wrap;' }, [
+        h('span', { css: 'color:' + UI.dim + ';margin-right:4px;' }, ['Your dive depth:']),
+        depthButton(null), depthButton(1), depthButton(2), depthButton(3),
+        depthButton(4), depthButton(5),
+        h('span', { css: 'color:' + (at.depth ? UI.accent : UI.dim) + ';margin-left:4px;' }, [
+          at.source === 'quality' ? 'read from Full Fathom Five: ' + at.depth
+            : (at.source === 'set' ? 'set to ' + at.depth
+              : (floor ? 'unknown, at least ' + floor : 'unknown')),
+        ]),
+      ]),
+      note([at.depth
+        ? 'Every badge is showing the figure for depth ' + at.depth + '.'
+        : 'Without a depth the badges show the range across every depth. Fallen London '
+          + 'only states Full Fathom Five where it feels like it, so set it here and '
+          + 'the badges become exact. Cleared when the tab closes.']),
+    ]);
+    banners.push(depthBlock);
+
+    // --- the hand ---------------------------------------------------------
+    const handBlock = hand.length
+      ? h('div', {
+        css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent
+          + ';background:' + UI.bgAlt + ';font-size:12px;line-height:1.6;',
+      }, [
+        h('div', { css: 'color:' + UI.accent + ';font-weight:bold;' }, [
+          hand.length === 1 ? '1 festival card on screen'
+            : hand.length + ' festival cards on screen',
+          h('span', { css: 'color:' + UI.dim + ';font-weight:normal;' },
+            [' — what you still need first, then by value']),
+        ]),
+        hand.map(function (rated) {
+          return h('div', null, [
+            rated.spec ? makeBadge(rated.spec, FOTZ_CLASS) : null,
+            h('span', { css: 'margin-left:6px;' }, [rated.card.name]),
+            h('span', { css: 'color:' + UI.dim + ';' }, [
+              ' — ' + rated.opts.map(function (o) {
+                return o.text + (o.favour ? ' (' + o.favour + ')' : '');
+              }).join(' / '),
+            ]),
+            rated.missing.length
+              ? h('div', { css: 'color:' + COLOR_READY + ';' },
+                ['   ' + FOTZ_MARK_NEED + ' ' + rated.missing.join(', ')])
+              : null,
+          ]);
+        }),
+      ])
+      : h('div', {
+        css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.line
+          + ';background:' + UI.bgAlt + ';color:' + UI.dim + ';font-size:12px;line-height:1.5;',
+      }, ['No festival cards on screen. Everything below is the checklist and the '
+        + 'reference tables for when there are.']);
+    banners.push(handBlock);
+
+    // --- the checklist ----------------------------------------------------
+    const groupBlocks = collection.groups.map(function (group) {
+      const inner = group.corals
+        ? group.corals.map(function (entry) {
+          return h('div', { css: 'margin-top:8px;' }, [
+            h('div', { css: 'font-size:12px;color:' + UI.text + ';' }, [
+              wikiLink(entry.coral.coral, entry.coral.coral),
+              h('span', { css: 'color:' + UI.dim + ';font-size:11px;' }, [
+                ' · ' + entry.coral.slot + ' · from ',
+              ]),
+              wikiLink(entry.coral.card, entry.coral.card,
+                { color: UI.dim, fontSize: '11px' }),
+              entry.inHand
+                ? h('span', {
+                  css: 'margin-left:6px;color:' + COLOR_READY + ';font-size:11px;',
+                }, [entry.inHand + ' in hand'])
+                : null,
+            ]),
+            table(null, entry.rows.map(function (row) {
+              // A coral whose three items aren't published yet has one row and
+              // no Sights bands to show -- there is nothing to map them to.
+              if (row.band == null) {
+                return h('tr', null, [
+                  h('td', { css: TD + 'text-align:center;width:1%;' }, [fotzPip(row)]),
+                  h('td', { css: TD, colSpan: 3 }, [
+                    h('span', { css: 'color:' + UI.text + ';' },
+                      ['Three ' + entry.coral.slot + ', names not published yet']),
+                    h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [row.note]),
+                  ]),
+                ]);
+              }
+              const band = FOTZ_BANDS[row.band];
+              return h('tr', null, [
+                h('td', { css: TD + 'text-align:center;width:1%;' }, [fotzPip(row)]),
+                h('td', { css: TD }, [
+                  wikiLink(row.name, row.name),
+                  row.bis
+                    ? h('div', { css: 'color:' + UI.accent + ';font-size:11px;' }, [row.bis])
+                    : null,
+                ]),
+                h('td', {
+                  css: TD + 'font-size:11px;white-space:nowrap;color:'
+                    + (collection.sightsBand === row.band ? COLOR_READY : UI.dim) + ';',
+                  title: 'Sights at the Festival ' + band.lo + '–' + band.hi
+                    + ' when you break the coral open'
+                    + (collection.sightsBand === row.band ? ' — where your Sights is now' : ''),
+                }, ['Sights ' + band.lo + '–' + band.hi]),
+                h('td', {
+                  css: TD + 'font-size:11px;color:' + UI.dim + ';',
+                }, ['or trade a spare to ' + band.trader]),
+              ]);
+            })),
+          ]);
+        })
+        : table(null, group.rows.map(fotzItemRow));
+
+      return h('div', { css: 'margin-top:12px;' }, [
+        h('div', {
+          css: 'font:bold 11px ' + UI.font + ';letter-spacing:.06em;text-transform:uppercase;'
+            + 'color:' + UI.accent + ';',
+        }, [group.title]),
+        note([group.hint]),
+        inner,
+      ]);
+    });
+
+    // --- the ledger -------------------------------------------------------
+    const ledgerBlock = !ledger.known
+      ? note(['Your Possessions have not been read, so there is nothing to total up yet.'])
+      : (ledger.rows.length || ledger.spares.length
+        ? h('div', null, [
+          table([{ text: 'Treasure' }, { text: 'Held', right: true },
+            { text: 'Each', right: true }, { text: 'Favour', right: true }],
+          ledger.rows.map(function (row) {
+            return h('tr', null, [
+              h('td', { css: TD }, [
+                wikiLink(row.name, row.name),
+                row.note ? h('div', { css: 'color:' + UI.dim + ';font-size:11px;' },
+                  [row.note]) : null,
+              ]),
+              h('td', { css: TD + 'text-align:right;' }, [String(row.count)]),
+              h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' },
+                [String(row.each)]),
+              h('td', { css: TD + 'text-align:right;' }, [String(row.subtotal)]),
+            ]);
+          }).concat(ledger.spares.map(function (row) {
+            return h('tr', null, [
+              h('td', { css: TD }, [
+                wikiLink(row.name, row.name),
+                h('span', { css: 'color:' + UI.dim + ';font-size:11px;' }, [' · spare']),
+              ]),
+              h('td', { css: TD + 'text-align:right;' }, [String(row.count)]),
+              h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' },
+                [String(row.each)]),
+              h('td', { css: TD + 'text-align:right;' }, [String(row.subtotal)]),
+            ]);
+          })).concat([
+            h('tr', null, [
+              h('td', { css: TD + 'font-weight:bold;' }, ['Total']),
+              h('td', { css: TD }, ['']),
+              h('td', { css: TD }, ['']),
+              h('td', {
+                css: TD + 'text-align:right;font-weight:bold;color:' + UI.accent + ';',
+              }, [String(ledger.total)]),
+            ]),
+          ])),
+          note(['With the ' + (collection.favour == null ? '–' : collection.favour)
+            + ' Favour you already hold, that is '
+            + (collection.favour == null ? ledger.total + ' plus whatever you have'
+              : collection.favour + ledger.total)
+            + '. Treasures left over when the festival ends become Memories of Distant '
+            + 'Shores at 10 Favour to 1, so trade them.']),
+        ])
+        : note(['No festival treasures on hand. Everything you dive up shows here with '
+          + 'what it trades for.']));
+
+    // --- reference --------------------------------------------------------
+    const depthTable = table(
+      [{ text: 'Card' }, { text: 'Take' }, { text: 'Depth' },
+        { text: 'Favour', right: true }, { text: 'You get' }],
+      FOTZ_CARDS.filter(function (c) { return !c.storylet; }).reduce(function (rows, card) {
+        return rows.concat(card.opts.map(function (opt, i) {
+          const here = at.depth && fotzOptionAt(opt, at.depth);
+          return h('tr', { css: here ? 'background:' + UI.bgAlt + ';' : '' }, [
+            h('td', { css: TD + 'white-space:nowrap;' },
+              [i === 0 ? wikiLink(card.name, card.name) : '']),
+            h('td', { css: TD + 'font-size:11px;' }, [opt.text]),
+            h('td', { css: TD + 'white-space:nowrap;font-size:11px;color:' + UI.dim + ';' },
+              [opt.depths[0] === opt.depths[1] ? String(opt.depths[0])
+                : opt.depths[0] + '–' + opt.depths[1]]),
+            h('td', { css: TD + 'text-align:right;' },
+              [opt.favour ? String(opt.favour) : '—']),
+            h('td', { css: TD + 'font-size:11px;color:' + UI.dim + ';' },
+              [opt.gain || opt.coral || opt.item || '']),
+          ]);
+        }));
+      }, []));
+
+    // --- raising Devotion -------------------------------------------------
+    //
+    // The five supplication options all pay the same 4 CP, so the table is
+    // really a lookup from "which stat am I best at" to "which option". The
+    // stat is the column that matters, which is why it leads and wears a
+    // colour; the name is always spelled out beside the glyph so a font
+    // without the emoji loses nothing.
+    const statPip = function (name) {
+      const stat = FOTZ_STATS[name];
+      return h('span', { css: 'white-space:nowrap;color:' + (stat ? stat.color : UI.text) + ';' }, [
+        h('span', {
+          css: 'font-size:13px;margin-right:5px;',
+          title: name,
+        }, [stat ? stat.icon : '?']),
+        name,
+      ]);
+    };
+
+    const advice = fotzDevotionAdvice(
+      collection.coralsWanted == null ? 0 : collection.coralsWanted);
+    const ladder = fotzDevotionLadder();
+    const toGo = fotzActionsToDevotion(collection.devotion, advice.level);
+
+    const supplicationBlock = h('div', null, [
+      note(['Every option on ', wikiLink('Supplication on the Shore', 'Supplication on the Shore'),
+        ' pays the same ', h('b', null, ['+4 CP']), ' of Fivefold Devotion, so the only thing '
+        + 'that separates them is which attribute the economy item scales off. But you are only '
+        + 'offered the ones whose ', h('b', null, ['Airs of a Barren Zee']), ' window you are in '
+        + '— usually two of the five — and taking one re-rolls Airs, so you cannot always have '
+        + 'the one you want. These are badged in the game as well, on the options themselves.']),
+      table(
+        [{ text: 'Scales off' }, { text: 'Option' }, { text: 'You get' }, { text: 'Offered at' }],
+        FOTZ_SUPPLICATION.map(function (opt) {
+          return h('tr', null, [
+            h('td', { css: TD + 'white-space:nowrap;' }, [statPip(opt.stat)]),
+            h('td', { css: TD }, [
+              wikiLink(opt.text, opt.text),
+              opt.note
+                ? h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [opt.note])
+                : null,
+            ]),
+            h('td', { css: TD + 'white-space:nowrap;' }, [wikiLink(opt.gain, opt.gain)]),
+            h('td', {
+              css: TD + 'white-space:nowrap;font-size:11px;color:' + UI.dim + ';',
+              title: 'Airs of a Barren Zee ' + opt.airs,
+            }, ['Airs ' + opt.airs]),
+          ]);
+        })),
+      note(['Two more branches share the storylet and raise no Devotion: ',
+        wikiLink('Speak to the Custodial Chef', 'Speak to the Custodial Chef'),
+        ' costs nothing and gives nothing, and seeking out one of the Fathomking’s servants '
+        + 'sets Devotion straight to 11 for 7 Fate — which is otherwise 17 supplications.']),
+
+      // How far to take it, and how far that is from here.
+      h('div', {
+        css: 'margin-top:10px;padding:8px 10px;border-left:3px solid ' + UI.accent
+          + ';background:' + UI.bgAlt + ';font-size:12px;line-height:1.6;',
+      }, [
+        h('div', { css: 'color:' + UI.accent + ';font-weight:bold;' }, [
+          'Stop at Fivefold Devotion ' + advice.level,
+          collection.devotion != null
+            ? h('span', { css: 'color:' + UI.dim + ';font-weight:normal;' }, [
+              collection.devotion >= advice.level
+                ? ' — you are at ' + collection.devotion + '. Go diving.'
+                : ' — you are at ' + collection.devotion + ', so at most '
+                  + toGo + (toGo === 1 ? ' more action' : ' more actions') + '.',
+            ])
+            : null,
+        ]),
+        note([advice.why]),
+        collection.coralsWanted == null
+          ? note(['(Counted as a Favour run: your Possessions have not been read, so how '
+            + 'many corals you still need is not known.)'])
+          : null,
+        collection.devotion != null && collection.devotion < advice.level
+          ? note(['"At most" because Fallen London shows the level but not the change points '
+            + 'inside it, so this assumes you have only just reached ' + collection.devotion
+            + '.'])
+          : null,
+      ]),
+
+      table(
+        [{ text: 'Devotion' }, { text: 'CP', right: true },
+          { text: 'Supplications', right: true }, { text: 'With the dive', right: true }],
+        ladder.map(function (row) {
+          const here = collection.devotion === row.level;
+          const target = advice.level === row.level;
+          return h('tr', {
+            css: target ? 'background:' + UI.bgAlt + ';' : '',
+          }, [
+            h('td', { css: TD + 'color:' + (target ? UI.accent : UI.text) + ';' }, [
+              String(row.level),
+              here ? h('span', { css: 'color:' + COLOR_READY + ';' }, [' ← you']) : null,
+              row.level === 5
+                ? h('span', { css: 'color:' + UI.dim + ';font-size:11px;' }, [' minimum'])
+                : null,
+              row.level === 11
+                ? h('span', { css: 'color:' + UI.dim + ';font-size:11px;' }, [' cap'])
+                : null,
+            ]),
+            h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' }, [String(row.cp)]),
+            h('td', { css: TD + 'text-align:right;' }, [String(row.actions)]),
+            h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' }, [String(row.dive)]),
+          ]);
+        })),
+      note(['Devotion is pyramidal, so each level costs one more change point than the last. '
+        + 'A dive itself is 2 actions on top — one to leave the boat, one to claim the '
+        + 'treasure. Diving deeper is free, but failing the attempt ends the dive.']),
+    ]);
+
+    const stallTable = table([{ text: 'Item' }, { text: 'Favour', right: true }],
+      FOTZ_STALL.concat(FOTZ_EQUIPMENT.map(function (e) {
+        return { name: e.name, favour: e.stall, slot: e.slot };
+      })).sort(function (a, b) { return a.favour - b.favour; })
+        .map(function (item) {
+          const afford = collection.favour != null && collection.favour >= item.favour;
+          return h('tr', null, [
+            h('td', { css: TD }, [wikiLink(item.name, item.name)]),
+            h('td', {
+              css: TD + 'text-align:right;color:' + (afford ? COLOR_READY : UI.dim) + ';',
+              title: afford ? 'You can afford this now.' : '',
+            }, [String(item.favour)]),
+          ]);
+        }));
+
+    const body = h('div', { css: 'padding:0 12px 12px;' }, [
+      banners,
+
+      section('Still missing', h('div', null, groupBlocks)),
+
+      section('Treasures to trade', ledgerBlock),
+
+      section('Raising Fivefold Devotion', supplicationBlock),
+
+      section('What each card pays, by depth', h('div', null, [
+        depthTable,
+        note(['One reward per dive. The wiki’s best all-round line is to raise Fivefold '
+          + 'Devotion to 10 and then keep diving until a card worth 300 Favour or more '
+          + 'turns up, or you hit the bottom.']),
+      ])),
+
+      section('Buying it instead', h('div', null, [
+        stallTable,
+        note([
+          'Plus a wrecked shipment for 95 Favour — a random parcel of saleable items '
+            + 'worth about 9.4 Echoes, so a shade under the flat 0.1 Echo per Favour '
+            + 'guaranteed by ',
+          FOTZ_ECONOMY.map(function (item, i) {
+            return h('span', null, [
+              i ? (i === FOTZ_ECONOMY.length - 1 ? ' and ' : ', ') : '',
+              wikiLink(item.name, item.name),
+              h('span', { css: 'color:' + UI.dim + ';' }, [' (' + item.favour + ')']),
+            ]);
+          }),
+          '.',
+        ]),
+      ])),
+
+      h('div', { css: 'margin-top:12px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+        h('div', null, ['The badge on a card is the Thalassic Favour its treasure trades '
+          + 'for. ', h('b', null, [FOTZ_MARK_NEED]), ' means it also offers something you '
+          + 'have not got; ', h('b', null, [FOTZ_MARK_DONE]), ' that you already hold '
+          + 'everything it offers; ', h('b', null, [FOTZ_MARK_UNSURE]),
+        ' that your Possessions have not been read, so neither can be said. A coral or '
+          + 'the Bride pays no Favour, so those are labelled instead and coloured by '
+          + 'whether you still need them.']),
+        h('div', { css: 'margin-top:6px;' }, ['Data from ',
+          wikiLink('Fruits of the Zee Festival (Guide)', 'Fruits of the Zee Festival (Guide)'),
+          ', its Item Comparison subpage, and the individual card and option pages on the '
+          + 'Fallen London wiki.']),
+      ]),
+    ]);
+
+    return body;
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -3594,10 +6192,17 @@
     // what it says, so the Factions panel has something to show from anywhere
     // else in London.
     { name: 'faction-capture', run: captureFactionState },
+    // The same job for the festival: its qualities (Thalassic Favour, Sights,
+    // the depth) off Myself, and how many of each item you hold off
+    // Possessions, which is what lets a card badge say "you still need this".
+    { name: 'fotz-capture', run: captureFotzState },
     // Finishes a "use" click that had to change route to get to Possessions.
     { name: 'pending-item', run: runPendingItem },
     { name: 'spite-card-ratings', run: spiteCardRatings },
     { name: 'zee-card-ratings', run: zeeCardRatings },
+    { name: 'fotz-card-ratings', run: fotzCardRatings },
+    // The only feature that decorates a storylet's OPTIONS rather than cards.
+    { name: 'fotz-supplication', run: fotzSupplicationBranches },
   ];
 
   // === dispatch ==========================================================

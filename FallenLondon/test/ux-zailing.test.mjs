@@ -444,10 +444,11 @@ check('with an empty hand the panel says so rather than showing a blank list',
 
 check('the zee ratings are registered alongside the other features',
   api.FEATURES.map((f) => f.name),
-  ['launcher', 'faction-capture', 'pending-item', 'spite-card-ratings', 'zee-card-ratings']);
+  ['launcher', 'faction-capture', 'fotz-capture', 'pending-item',
+    'spite-card-ratings', 'zee-card-ratings', 'fotz-card-ratings', 'fotz-supplication']);
 
 check('the Zailing panel is in the launcher menu',
-  api.PANELS.map((p) => p.id), ['factions', 'zailing']);
+  api.PANELS.map((p) => p.id), ['factions', 'zailing', 'fruits-of-the-zee']);
 
 console.log(failures ? '\n' + failures + ' FAILURE(S)' : '\nAll checks passed.');
 process.exit(failures ? 1 : 0);

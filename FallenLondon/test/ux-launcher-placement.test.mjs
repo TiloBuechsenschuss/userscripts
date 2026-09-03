@@ -100,8 +100,9 @@ class FakeObserver { observe() {} }
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { launcherPlacement, LAUNCHER_GAP, LAUNCHER_EDGE, TRAVEL_SELECTORS,'
-    + ' FEATURES }; })();');
+    'return { launcherPlacement, popoverPlacement, findDockHost, dockHostFor, dockLauncher,'
+    + ' dockPreferred, setDockPreferred, LAUNCHER_GAP, LAUNCHER_EDGE, LAUNCHER_ID,'
+    + ' LAUNCHER_BUTTON_ID, TRAVEL_SELECTORS, FEATURES }; })();');
 const fn = new Function(
   'document', 'MutationObserver', 'requestAnimationFrame', 'getComputedStyle', 'console',
   wrapped + '\nreturn globalThis.__flux;');
@@ -292,6 +293,171 @@ check('the sidebar Travel button is high up, so that menu opens downward too',
   check('no combination of viewport, bar, anchor and crowding goes off screen',
     offScreen, []);
 }
+
+// --- docked mode: placing the popover, not the button ----------------------
+//
+// The button is part of the page now (see `dockLauncher`), so the only thing
+// left to place is the popover — the menu and the panel. Different rule,
+// `popoverPlacement`, and it is pure for the same reason this one is.
+//
+// The two things it must never do: leave the screen, and open into the smaller
+// of the two gaps. A DOCKED button scrolls with the page, so its box can be
+// anywhere at all — including entirely off the top or bottom — and the popover
+// still has to end up somewhere readable.
+
+const pop = (anchor, view, want) => api.popoverPlacement(anchor, view, view ? want : null);
+const WANT = { width: 660 };
+
+{
+  // A button docked beside the sidebar's Travel control, high on the page.
+  const at = pop(box(1264, 168, 96, 34), DESKTOP, WANT);
+  check('with the page below it, the popover opens downward from the button',
+    [at.down, at.top, at.bottom], [true, 202 + api.LAUNCHER_GAP, null]);
+  check('and hangs off the button\'s right edge',
+    DESKTOP.width - at.right, 1360);
+  check('with the room below it to be tall in',
+    at.maxHeight, DESKTOP.height - 202 - api.LAUNCHER_GAP - api.LAUNCHER_EDGE);
+}
+
+{
+  // The same button near the bottom of the screen: there is more room above.
+  const at = pop(box(1264, 800, 96, 34), DESKTOP, WANT);
+  check('with the page above it, the popover opens upward instead',
+    [at.down, at.top, at.bottom], [false, null, DESKTOP.height - 800 + api.LAUNCHER_GAP]);
+}
+
+{
+  // A narrow phone: the popover is wider than the screen allows, so it is
+  // pinned to both margins rather than to the button.
+  const view = { width: 380, height: 720 };
+  const at = pop(box(300, 8, 72, 32), view, WANT);
+  check('on a narrow screen the popover shrinks to the viewport, not to the button',
+    [at.maxWidth, at.right], [view.width - 2 * api.LAUNCHER_EDGE, api.LAUNCHER_EDGE]);
+  check('a button in a top banner opens the popover downward',
+    at.down, true);
+}
+
+{
+  // The docked button has scrolled clean off the top of the page.
+  const at = pop(box(1264, -400, 96, 34), DESKTOP, WANT);
+  check('a button scrolled off the top cannot drag the popover off with it',
+    [at.down, at.top >= api.LAUNCHER_EDGE, at.maxHeight >= 160], [true, true, true]);
+}
+
+{
+  // ...and clean off the bottom.
+  const at = pop(box(1264, 1600, 96, 34), DESKTOP, WANT);
+  check('nor can one scrolled off the bottom',
+    [at.down, at.bottom >= api.LAUNCHER_EDGE, at.maxHeight >= 160], [false, true, true]);
+}
+
+{
+  // The exhaustive sweep, the same shape as the floating one above.
+  const bad = [];
+  for (const view of [{ width: 1440, height: 900 }, { width: 380, height: 720 },
+    { width: 1024, height: 500 }]) {
+    for (const left of [-200, 0, 40, view.width - 100, view.width + 50]) {
+      for (const top of [-500, -10, 0, 60, view.height - 20, view.height + 200]) {
+        const at = pop(box(left, top, 96, 34), view, WANT);
+        const pinned = at.down ? at.top : at.bottom;
+        if (pinned == null || pinned < 0 || at.right < 0) { bad.push(at); continue; }
+        if (at.right + at.maxWidth > view.width) bad.push(at);
+        if (at.maxHeight < 160 || at.maxWidth < 240) bad.push(at);
+      }
+    }
+  }
+  check('no button position puts the popover off screen or squeezes it to nothing',
+    bad, []);
+}
+
+check('the popover always opens into the larger of the two gaps',
+  [box(1264, 100, 96, 34), box(1264, 700, 96, 34), box(1264, 440, 96, 34)]
+    .map((b) => {
+      const at = pop(b, DESKTOP, WANT);
+      const above = b.top;
+      const below = DESKTOP.height - b.bottom;
+      return at.down === (below >= above);
+    }),
+  [true, true, true]);
+
+// --- docked mode: which container the button goes into ---------------------
+//
+// `dockHostFor` is the decision half of `findDockHost`, split out so it can be
+// fed a few fake nodes. Two shapes: the mobile banner, where the travel
+// control is one `li` in a row of them and ours has to be another `li` in the
+// same row, and everywhere else, where it goes in beside the travel button as
+// the last child of its container. The `UL`/`OL` test is what keeps `li` mode
+// honest — a bare `closest('li')` would also fire for a Travel button that
+// merely happens to sit inside some list further up the tree.
+
+function fakeNode(tag, className, parent, li) {
+  return {
+    tagName: tag,
+    className: className || '',
+    parentElement: parent || null,
+    closest: (sel) => (sel === 'li' ? li || null : null),
+  };
+}
+
+{
+  // Wide desktop: <div class="travel"><button class="travel-button--infobar">
+  // `div.travel` is the whole right-hand column (captured 2026-09-03), so
+  // `after` is what keeps the launcher next to the button instead of at the
+  // bottom of the ad and the snippets that follow it.
+  const travelDiv = fakeNode('DIV', 'travel');
+  const travelBtn = fakeNode('BUTTON', 'travel-button--infobar', travelDiv);
+  const host = api.dockHostFor(travelBtn);
+  check('the sidebar Travel button docks the launcher into its own container',
+    [host.container === travelDiv, host.tag, host.className], [true, 'span', '']);
+  check('...immediately behind the button, not at the end of the column',
+    host.after === travelBtn, true);
+}
+
+{
+  // Narrower desktop: the classless button in .storylets__welcome-and-travel
+  const row = fakeNode('DIV', 'storylets__welcome-and-travel');
+  const host = api.dockHostFor(fakeNode('BUTTON', 'button button--primary', row));
+  check('the classless Travel button docks into the welcome-and-travel row',
+    [host.container === row, host.tag], [true, 'span']);
+}
+
+{
+  // Mobile: <ul><li class="banner-item"><button title="Map">
+  const bannerList = fakeNode('UL', 'banner');
+  const item = fakeNode('LI', 'banner-item', bannerList);
+  const host = api.dockHostFor(fakeNode('BUTTON', 'banner__button', item, item));
+  check('the compass gets the launcher its own <li> in the same banner row',
+    [host.container === bannerList, host.tag, host.className],
+    [true, 'li', 'banner-item']);
+  check('...appended to the row, because there the container really is just the row',
+    host.after, null);
+}
+
+{
+  // A travel control that merely happens to be inside a list item somewhere:
+  // NOT the banner, because the item's parent isn't a list.
+  const div = fakeNode('DIV', 'wrapper');
+  const strayItem = fakeNode('LI', 'something', div);
+  const host = api.dockHostFor(fakeNode('BUTTON', '', div, strayItem));
+  check('an <li> whose parent is not a list is not the banner',
+    host.tag, 'span');
+}
+
+check('nothing to dock into is a supported answer, not a crash',
+  [api.dockHostFor(null), api.dockHostFor(fakeNode('BUTTON', '', null))],
+  [null, null]);
+
+check('docking is the default, and the preference survives a round trip',
+  (() => {
+    const first = api.dockPreferred();
+    api.setDockPreferred(false);
+    const floated = api.dockPreferred();
+    api.setDockPreferred(true);
+    return [first, floated, api.dockPreferred()];
+  })(),
+  // No `localStorage` in this stub at all, so every read falls back to the
+  // default -- which is the point: an unreadable store must not un-dock it.
+  [true, true, true]);
 
 // --- the selectors ---------------------------------------------------------
 

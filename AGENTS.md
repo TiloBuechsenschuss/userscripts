@@ -521,23 +521,80 @@ navigation. Two consequences:
   `.hand__card-container` node for the next card when you play one, so a boolean would leave the
   old card's badge on the new card — a changed value redraws, and a `null` spec clears it.
   A feature that wants a screen rather than a decoration registers a **panel** instead: the
-  `launcher` feature mounts a `position:fixed` "⚙ UX" button on `document.body` whose menu is
-  built from the `PANELS` registry (`{ id, icon, label, hint, render }`, `render()` called fresh
-  on every open so a live panel never has to invalidate a cache). The button is floating **on
-  purpose** — nothing is injected into FL's chrome, so it survives a React re-render and can't
-  shove anything around. What it is *fixed to* is no longer the bottom-right corner, though:
-  on the narrow layout that corner is FL's own fixed bottom bar, and the button sat on top of
-  it. It is now placed relative to **FL's travel control** — the big Travel button on the wide
-  layout, the compass on the narrow one — by `positionLauncher`, and the rule lives in
-  `launcherPlacement`, which is **pure** (anchor box, bar box, viewport, button size, and
-  whether the space beside it is crowded, in; `right`/`bottom` out) so it is unit-tested
-  without a layout engine. The rule: *beside* the control, bottoms level, when the space to its
-  left is both free and big enough; otherwise stacked against it with right edges level —
-  *above* it by preference, *below* when it sits too near the top of the screen for above to
-  fit. Either way it clears the whole **bar**, not just the icon in it, which is the actual bug.
-  Every result is clamped to the viewport, so a control that scrolls out of view can't take the
-  launcher with it. `enclosingBar` is what decides "in a bar": the nearest `fixed`/`sticky`
-  ancestor that spans the width, touches the top or bottom edge, and isn't the whole screen.
+  `launcher` feature mounts a "⚙ UX" button whose menu is built from the `PANELS` registry
+  (`{ id, icon, label, hint, render }`, `render()` called fresh on every open so a live panel
+  never has to invalidate a cache).
+
+  **The button is DOCKED into FL's own chrome, not floating over it** (changed 2026-09-03, on a
+  report that it kept covering things). It used to be `position:fixed` on `document.body` — and
+  that was deliberate, since nothing injected into FL's chrome survives a React re-render — but
+  a fixed button is over the page by definition, and beside the wide layout's Travel button that
+  means over the storylet column: `crowdedLeft` counts *siblings only*, so overlapping the main
+  content was allowed on purpose. Docking is the fix. `dockLauncher` appends the button beside
+  **FL's travel control**, which is the one piece of its chrome whose markup is verified in all
+  three layouts, and `dockHostFor` (pure, so the choice is testable) picks between the two
+  shapes: its own `li` when the control is one `li.banner-item` in the mobile banner's row —
+  guarded on the parent actually being a `UL`/`OL`, or a Travel button that merely happens to
+  sit inside some list would get one too — and otherwise a plain wrapper in the control's own
+  container.
+  **Whereabouts in that container is the other half of the answer, and appending is wrong.** The
+  first cut appended, and on the wide layout that put the launcher a screenful down the page
+  (reported, then confirmed from real markup, 2026-09-03): `div.travel` is not a little box
+  around the travel button, it is the **whole right-hand column** — the welcome heading, the
+  button, a Steam ad, and two `.snippet` blocks. So `dockHostFor` also returns `after`, the node
+  to sit immediately behind, and in `span` mode that is the anchor itself. The banner keeps
+  appending (`after: null`), because there the container really is just the row of icons.
+  `dockLauncher` then treats **drifting away from the anchor** as being in the wrong place, not
+  just being in the wrong container — React inserting something between the two on a re-render
+  would otherwise walk the launcher back down the sidebar one render at a time. The check is
+  `previousElementSibling`, not `previousSibling`, or a stray whitespace text node would read as
+  misplaced forever and re-insert on every scan.
+  One more thing that capture settled: the wide layout's `.travel-button--infobar` says **"View
+  map"**, not "Travel". The class selector finds it either way, but the accessible-name backstop
+  — which exists for the *classless* narrow-desktop button, whose wording nobody has read — now
+  takes both wordings rather than betting on the older one.
+  Three things make that safe against the React tree it is now inside. We only ever **append**,
+  and only our own node: React tracks its children by reference rather than by index, so an
+  extra node at the end of a container it manages disturbs neither its inserts nor its removes.
+  If a re-render drops ours anyway, the next debounced scan puts it back — `mountLauncher` is
+  now three steps (`buildLauncher` once, `dockLauncher` every scan, `positionLauncher` whenever
+  anything moves) precisely so re-docking is cheap and idempotent, and `resize` goes through the
+  whole mount rather than just the placement because FL can swap layout on a media query alone —
+  no mutation, but the container the button was docked in has just become `display:none`.
+  And the button carries `LAUNCHER_BUTTON_ID` so `findTravelAnchor` can refuse it: docked into
+  `.storylets__welcome-and-travel` it matches `.storylets__welcome-and-travel button` literally,
+  and anchoring to itself would be a quiet little regress.
+  **Floating is still the fallback and still the whole rule it always was.** With no travel
+  control to dock beside, `dockLauncher` puts the button back inside the popover root and
+  `launcherPlacement` does the original job: *beside* the control, bottoms level, when the space
+  to its left is both free and big enough; otherwise stacked against it with right edges level —
+  *above* by preference, *below* when it sits too near the top of the screen for above to fit —
+  clearing the whole **bar**, not just the icon in it, which was the bug that rule was written
+  for. It is pure (anchor box, bar box, viewport, button size, crowding in; `right`/`bottom`
+  out) and unit-tested without a layout engine, and every result is clamped to the viewport. The
+  last line of the launcher menu switches between the two by hand (`fl-ux-launcher-dock`,
+  docked by default) — it is there rather than in a settings screen because "this thing is in my
+  way" is a thought you have while looking at the button.
+  **`pointer-events` on the popover root is a contract, and breaking it bricked the script
+  once** (reported and fixed 2026-09-03). The root is a `position:fixed` box sized to whatever
+  the popover needs, so it carries `pointer-events:none` to stop it swallowing clicks on the game
+  behind it, and **every real child has to opt back in with `auto`**. The button was the child
+  that didn't — and because it is only inside the root while *floating*, docked mode hid it
+  completely. Undocking therefore killed the one control that could undock it, and since the
+  choice is remembered in `localStorage`, reloading didn't help either: there was no way back
+  without devtools. A test now pins that every child of the root opts in. The general lesson is
+  worth more than the specific fix: **a remembered preference whose only control lives behind
+  that preference has to be fail-safe**, because getting it wrong is not a cosmetic bug, it is a
+  one-way door.
+  What the popover — the menu and the panel — needs is a rule of its own, since docked there is
+  no longer anything to place *but* the popover: `popoverPlacement` is that, equally pure, and
+  it hangs the popover off the docked button's box, opening into whichever of the two gaps is
+  larger and clamping the button's box into the viewport first. That clamp is load-bearing in a
+  way the floating one is not: a docked button **scrolls with the page**, so its box can be
+  anywhere at all, including entirely off-screen, and the popover must not be dragged off with
+  it. `enclosingBar` still decides "in a bar" for the floating rule: the nearest
+  `fixed`/`sticky` ancestor that spans the width, touches the top or bottom edge, and isn't the
+  whole screen.
   The placement also returns **`down`**, which way the menu and the panels stack away from the
   button. They open toward whichever side has more room, and that is not cosmetic: the stack used
   to always grow upward, so once the button was pinned near the *top* of the screen — a compass in
@@ -574,9 +631,16 @@ navigation. Two consequences:
   string.
   `spite-card-ratings` rates the opportunity cards of The Crowds of Spite from a `SPITE_CARDS`
   table transcribed from *The Crowds of Spite (Guide)* on the wiki. New or corrected cards go in
-  `SPITE_CARDS` and nowhere else. Its **area gate** reads `currentArea()` — FL states the area in
-  the screen-reader greeting (`#accessible-sidebar .welcome`), which is on every page including
-  /myself and /possessions. During a promenade it reads, verbatim and **confirmed in-game**:
+  `SPITE_CARDS` and nowhere else. Its **area gate** reads `currentArea()`, which now has **two** verified
+  sources. The primary is the screen-reader greeting (`#accessible-sidebar .welcome`), which is
+  on every page including /myself and /possessions, and which states the area inside a sentence
+  — hence the regex. The backstop is the wide layout's **visible** greeting in the sidebar's
+  `div.travel` (captured 2026-09-03), where FL splits that same sentence across three
+  paragraphs and gives the area an element of its own,
+  `p.welcome__current-area` → `"Mutton Island,"`. Nothing to parse there but a trailing comma,
+  and it is exactly where the regex cannot reach, so the two complement each other. It is the
+  backstop rather than the primary only because it belongs to the wide sidebar and nobody has
+  confirmed it exists in the narrow layout. During a promenade it reads, verbatim and **confirmed in-game**:
   *"It's ‹name›! Welcome to The Crowds of Spite, delicious friend!"*
   That is what let the gate become an **exact list** (`SPITE_AREAS` = the promenade plus its
   parent area "Spite"). It started permissive — carrying the four route names as guesses plus a
@@ -620,8 +684,31 @@ navigation. Two consequences:
   so. And `zeeHasBetterGated` is the complement -- the marker means "there is something cheaper
   here that I refused to promise you", which is the whole story of The Killing Wind (a bad coin
   flip, unless you have a Zubmarine).
-  The **area gate is deliberately weaker than the Spite one**: `SPITE_AREAS` rests on a greeting
-  captured verbatim in-game, while `ZEE_AREAS` is a *guess* at what the same greeting says at zee,
+  The Fruits of the Zee gate is now the **fully tightened** kind, both halves captured
+  verbatim in-game (2026-09-03):
+
+  > on the island — *"It's ‹name›! Welcome to Mutton Island, delicious friend!"*
+  > mid-dive — *"It's ‹name›! Welcome to the Royal Approach, delicious friend!"*
+
+  Note the game writes the second with a lower-case "the" where the wiki writes
+  `location = The Royal Approach`; `normalizeName` is what makes those the same string. With
+  both known, `fotzWhere()` returns **three** answers rather than two — `'yes'`, `'no'`,
+  `'unknown'` — and `'no'` is what the captures bought. Until then the gate could only ever
+  confirm, because refusing on an unverified list risks blacking the feature out in the very
+  place it exists for; now a greeting that names somewhere else clears every badge, exactly as
+  `SPITE_AREAS` does. `'unknown'` (no greeting readable at all) still falls back to the card
+  table as the only scope, with `Old Wounds` and `Easy Pickings` sitting that case out. One
+  escape hatch survives inside `'no'`: an unmistakable dive hand outranks the list, so an area
+  nobody has visited yet cannot black the feature out either.
+  The second capture bought something else, and it is not a gate at all. A depth you set by
+  hand lives in `sessionStorage` for the whole tab, so the moment you surface it is not stale
+  but **wrong** — the next dive starts at 1. `forgetStaleDepth()` throws it away on leaving the
+  Royal Approach, which is a thing that could not be detected before, and the badges go back to
+  showing the range. It acts only on a greeting it can read: an unreadable one means "no idea
+  where you are", which is not grounds for discarding anything.
+
+  The zee **area gate is deliberately weaker than the Spite one**: `SPITE_AREAS` rests on a
+  greeting captured verbatim in-game, while `ZEE_AREAS` is a *guess* at what the same greeting says at zee,
   assembled from the wiki's region names. So `inZee()` only ever confirms -- it never returns
   "definitely not at zee" -- and exactly one card leans on it: `strictZee` on **The Sound of
   Wings**, which is the one name Fallen London deals in eight other places. Everything else is
@@ -633,8 +720,105 @@ navigation. Two consequences:
   hand ranked, and the whole card table with a live text filter. The filter matches
   `row.dataset.zeeSearch` rather than `textContent`, so a term can hit an option the collapsed row
   does not show, and it hides a region heading whose rows have all gone.
-  Note the two badge features can never collide on one card -- no name is in both tables, and a
-  test asserts it -- which is what lets both take the card container's top-left corner.
+  Note the three badge features can never collide on one card -- no name is in more than one
+  table, and a test asserts it -- which is what lets all of them take the card container's
+  top-left corner.
+
+  `fotz-card-ratings` is the third, for the **Fruits of the Zee Festival** (Mutton Island, the
+  first weeks of September), and it answers two questions at once because a diving card is worth
+  two different things: the **Thalassic Favour** its treasure trades for in week two, and whether
+  it is a **rare item you haven't got**. Colour is the Favour, a `★` is the item, and the two are
+  independent on purpose -- a coral is worth nothing in Favour and can still be the best card in
+  the hand.
+  **The depth is the hard part, and `fotzDepth` is where the honesty lives.** Nearly every value
+  at this festival is set by *Full Fathom Five*: A Cabin-Fragment pays 50 Favour at depth 1 and
+  400 at depth 5, and A Shattered Prow trades a Nuncian Pocket Watch at depths 2-4 but the
+  Scrimshander Carving Knife only at 5. Three sources, best first: a **live** `readQualities`
+  read (verified markup, but whether FL renders `li.quality-item` in the dive's own sidebar is
+  *not* verified, so it may never fire); a depth **you set** in the panel, in `sessionStorage`
+  because a dive is one sitting; or nothing, and then the badge shows the **range** across the
+  depths and says so. The live read deliberately does **not** fall back to the cache: a banked
+  depth is a *wrong* answer rather than a stale one, because it changes with every dive. The card
+  table still yields a **floor** (`min`: A Shattered Prow and Tangled in the Rigging need depth 2,
+  Her Fivefold Symmetry 5), which trims impossible depths out of the range but never collapses it
+  to a guess. At any *known* depth every card offers exactly one claim -- a test pins that, and it
+  is what lets the badge be a single number.
+  Ownership has the same three-state discipline as the Factions pips: `★` you lack something here,
+  `✓` you hold it all, `?` your Possessions have never been read so neither can be said (a
+  dash would read as a minus sign in front of the number). A
+  treasure-only card carries no mark at all rather than an unearned tick.
+  **The best thing in these tables is the Sights mapping**, and it did not come from the guide.
+  Which of the three versions of a coral item you get is *not* random: the five *Offer the King
+  your <coral>* option pages each list three outcomes keyed to **Sights at the Festival** --
+  1-33 the Itinerant Zubmariner's stock, 34-66 the Pirate-Poet's (Gaider's Mourn), 67-100 the
+  Enigmatic Angler's (Irem) -- and the three traders in The Fruit Market swap coral items
+  like-for-like, each handing out its own band and accepting the other two. So a variant you are
+  missing has two named routes. The guide's summary table lists several corals' variants in a
+  *different order*; the option pages win, the same rule that settled A Spit of Land at zee. Note
+  breaking a coral open re-rolls Sights, so two cannot be lined up in a row.
+  The **area gate is the weak kind**, like `ZEE_AREAS`: `FOTZ_AREAS` is a guess from the wiki's
+  `location` fields, so `inFotzArea()` only ever *confirms*. What carries the weight instead is
+  `fotzHandConfirms()`, which needs no unverified markup at all -- nine of the eleven card names
+  could not plausibly belong to anything else in London, so one of them in the hand proves where
+  you are. Only the two generic names (`strict`: **Old Wounds**, **Easy Pickings**) are gated on
+  that; everything else is scoped by the card table.
+  The `fruits-of-the-zee` panel is the checklist half, and the reason the badges can say "you
+  still need this". `fotzCollection` is pure and turns a state reading into grouped rows plus the
+  "missing N of M" headline. **What counts is a decision, not an oversight**: the Fate items don't
+  (they cost money, not actions), the four ships don't (you can only own one), and the Nodule of
+  Fecund Amber doesn't until you already hold the Litter-Cyst it is the consolation prize for --
+  leaving 28. An unknown is counted as *unknown*, never as missing, or someone who has not opened
+  Possessions would be told they are missing all 28. `ready` is the panel's headline in the same
+  sense as the Factions panel's: a coral in hand while Sights sits in the band that pays the
+  variant you lack, or a stall item you have the Favour for.
+  Week one's other half, **Supplication on the Shore**, is the one thing in this script badged
+  on a storylet's OPTIONS rather than on cards -- `fotz-supplication`, which walks
+  `.branch__title` and hangs the badge after the heading, never inside it. The markup is a
+  capture (2026-09-03): `h2.branch__title` inside `div.media.branch.media--branch`.
+  **Why it has to be in the game and not only in the panel** is the thing the guide's table
+  does not say and the capture does: every option is gated on a window of *Airs of a Barren
+  Zee* (0-40, 20-60, 40-80, 60-100, and 0-20/80+), and taking one **re-rolls Airs** -- so
+  usually only two of the five are on offer, and the question is never "which is best" but
+  "which of the ones in front of me right now matches my best stat". The five windows come from
+  the option pages; the two the game drew its own requirement icon for (Airs 60-100, and
+  "anything outside of 21-79") agree with them exactly, which is what makes the other three
+  trustworthy. The badge says only the attribute, deliberately: the game already draws the
+  requirements itself, and what it never says is which stat the reward scales off.
+  Two branches share the storylet and raise no Devotion, so they are labelled rather than
+  scored -- the Custodial Chef (free, nothing) and the Fathomking's servant (7 Fate, Devotion
+  straight to 11, otherwise 17 supplications). Only the Chef is `strict`: his is the one name
+  here generic enough to belong to another storylet, so he is badged only where the
+  `.storylet-root__heading` above confirms the place. Note the game PREFIXES that heading --
+  it reads "Fruits of the Zee: Supplication on the Shore", not the wiki's title.
+  `FOTZ_STATS` carries **two** colours per attribute, `color` for text on the panel's dark
+  ground and `badge` for white text on a filled badge, because one hue cannot do both legibly;
+  a test pins that they differ.
+  The panel carries the same table, and the point
+  of that table is that there is nothing to choose: all five options pay the same 4 CP of
+  Fivefold Devotion, so the only difference is which base attribute the economy item scales
+  off. The stat therefore leads the table and wears the colour. `fotzDevotionLadder` is pure
+  and *derived* rather than transcribed -- Devotion is pyramidal, so reaching level L costs
+  L(L+1)/2 change points at 4 a go, plus 2 actions for the dive itself -- and the test checks
+  it against the **guide's** own optimum table (5 (6 Act) through 11 (19 Act)), which pins the
+  formula to an independent source rather than to itself. `fotzDevotionAdvice` turns the
+  guide's recommendations into one number, reading `coralsWanted` off the collection: corals
+  turn up at every depth, so the more of them you still need the less depth is worth paying
+  for (3+ -> 5, two -> 7, one -> 8, none -> 10 and dive for Favour). An unreadable Possessions
+  list leaves `coralsWanted` **null** and the advice falls back to the Favour case *saying so*
+  -- there is no honest answer to "how many do you still need" when we cannot tell what you
+  have.
+  `fotzLedger` totals what your
+  treasures and *spare* equipment would fetch, which needs quantities -- hence
+  `readPossessionCounts`, which `readPossessions` is now defined in terms of so the two cannot
+  drift. Counts are a **max, never a sum**: an item you are wearing appears both as
+  `div.equipped-item` and as a row in the equip drawer.
+  Two shared pieces moved for this. `refreshFactionState` is now **`refreshBackgroundState`** and
+  banks both panels' readings off the same two page loads -- booting the SPA twice more for this
+  panel would have been silly. And `fotzHoldings()` is memoised on a `fotzGen` counter bumped
+  whenever anything is re-banked, because unlike the panels it runs once per card on every
+  debounced scan and would otherwise re-parse a few hundred cached item names each time. The
+  badge's `attachBadge` value carries the depth and that generation, not just the card name, so
+  setting your depth redraws a hand that is already on screen.
 
   The `factions` panel's static half is `FACTIONS`, transcribing the *Factions (Guide)*
   Faction-Item table (the item that converts Favours to Renown, its shop, its price) and the
@@ -739,13 +923,42 @@ Confirmed live by the author:
 - The **travel control's markup**, all three layouts (reported 2026-09-02, in response to the
   launcher covering the narrow layout's bottom bar): `.travel-button--infobar`, the classless
   button in `.storylets__welcome-and-travel`, and `li.banner-item > button[title="Map"]` with
-  its `i.fa-compass`. That is a *capture*, not a sighting of the launcher beside them — whether
-  the button lands beside, above or below each of the three is still unconfirmed in-game.
+  its `i.fa-compass`. All three are now also confirmed as DOCK HOSTS — see the entry below.
 - The **area gate**. The greeting during a promenade was captured verbatim (*"Welcome to The
   Crowds of Spite, delicious friend!"*), so `SPITE_AREAS` is now a verified exact list rather than
   a permissive guess.
+- The **docked launcher button** (2026-09-03). Reported working in all three layouts: its own
+  `li` in the mobile banner, beside the classless Travel button on the narrow desktop, and --
+  after the `after` fix -- directly under the wide sidebar's "View map" button rather than at
+  the bottom of the whole column. The floating fallback and the menu's dock/float toggle work
+  too, including the `pointer-events` fix that had made the floating button unclickable.
+- The **Supplication on the Shore option badges** (2026-09-03). The one place this script
+  decorates a storylet OPTION rather than a card, so `.branch__title` and the
+  after-the-heading hang are confirmed as a path in their own right.
+- The **Fruits of the Zee card badges on a real dive hand, and the panel** (2026-09-03).
+- **SETTLED, and the answer is no: the dive depth cannot read itself** (2026-09-03). A hand
+  captured mid-dive shows Fallen London renders no `li.quality-item` anywhere on that screen,
+  so `fotzLiveDepth()` never fires and the badges read `100–300` rather than a single figure
+  until the depth is set by hand in the panel. `fotzDepth`'s first tier is therefore dead weight
+  in practice -- keep it (it costs one failed `querySelectorAll` and would start working for
+  free if FL ever renders qualities there), but do not expect it. If this is worth improving,
+  the honest options are to make the manual control cheaper to reach than
+  "menu → panel → click a number" five times a dive, or to find some other depth-varying thing
+  on the dive screen to read; the same capture shows `.hand__card-container` carries a
+  **`data-event-id`** (`354153` for Well-Disguised Trinkets, matching the wiki's card ID), which
+  is a far better key than the name and is worth remembering for other reasons.
+- **Both festival areas**, from the same sort of capture (2026-09-03): *"Welcome to Mutton
+  Island, delicious friend!"* on the island and *"Welcome to the Royal Approach, delicious
+  friend!"* mid-dive. `FOTZ_AREAS` is now an exact, verified list that is allowed to say no --
+  and knowing when you have surfaced is what lets a hand-set dive depth be discarded rather
+  than quietly going wrong.
+- A **second source for `currentArea()`** (2026-09-03), from the wide layout's sidebar:
+  `p.welcome__current-area` holds the area on its own (`"Mutton Island,"`) where the
+  screen-reader block states it inside a sentence. FL splits that sentence across three
+  paragraphs in the visible greeting, so the regex cannot reach it and the element can -- the
+  two complement each other rather than duplicating.
 
-**Not** verified in-game (added 2026-09-02, reasoned about only):
+**Not** verified in-game (reasoned about only):
 
 - The **Zailing card ratings and the Zailing panel**. They reuse machinery that *is* confirmed
   (`eachCardName`'s three card shapes, `attachBadge`, the launcher and its panel host), so the
@@ -754,6 +967,12 @@ Confirmed live by the author:
   ("Welcome to The Sea of Voices"), the ocean, or something else entirely; `inZee()` is written
   to fail closed on the one card that leans on it and open on everything else. Move this up on a
   report, and say what the greeting actually said.
+
+- The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
+  table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
+  looking at the screen can confirm: a wrong number renders exactly as well as a right one. They
+  are pinned by tests against the wiki, and the Sights-band mapping in particular came off the
+  five option pages rather than the guide's summary table, which disagrees with them.
 
 Everything else in this script is confirmed live. Keep it that way: when you add something that
 rests on markup you have only reasoned about, say so here and in the code, and move it up only
@@ -928,7 +1147,9 @@ Current tests:
   room above so the launcher goes below it, and with no travel control at all the corner returns
   — lifted over a bottom bar, left alone for a top one. It closes with a sweep over viewports ×
   bars × anchors × crowding asserting nothing ever lands off screen, and pins that all three
-  verified selectors are still in `TRAVEL_SELECTORS`. A section of its own covers `down`,
+  verified selectors are still in `TRAVEL_SELECTORS`. It also covers `popoverPlacement`, the
+  docked mode's rule — the popover opens into the larger of the two gaps and survives a button
+  scrolled clean off either end of the page — and `dockHostFor`, which picks the container. A section of its own covers `down`,
   including the invariant behind it — the stack never opens toward the *smaller* of the two
   gaps. There is deliberately no `window` in its
   stub, which is how the impure `positionLauncher` bails and only the rule is under test.
@@ -955,6 +1176,33 @@ Current tests:
   and routed via the nav link otherwise, replayed exactly once when the page arrives, abandoned
   (not retried forever) for an item that isn't there, and dropped when stale. Update it when you
   touch `FACTIONS` or either scrape.
+- `FallenLondon/test/ux-launcher-docking.test.mjs` — asserts `ux-enhancers.js`'s launcher
+  **docking**, which is the half `ux-launcher-placement.test.mjs` can't reach: that one covers
+  the two placement rules, which are pure, and this one covers moving a button in and out of
+  FL's own chrome, which is not. Its stub is a small but real DOM — parent links, `contains`,
+  `closest`, a selector matcher, `getBoundingClientRect`, a **live** `isConnected` — with two
+  fake FL layouts built from the markup the script quotes as verified. It pins that the button
+  docks into the right container in both shapes (a wrapper beside the sidebar's Travel button,
+  its own `li` in the banner's row), that a second `mountLauncher` adds nothing (it runs on
+  every debounced DOM change, so a duplicate would multiply), that a React re-render dropping
+  the button is repaired by the next scan **without** building a second launcher, that a whole
+  layout swap re-docks it, that the float toggle takes the wrapper back out of FL's chrome, and
+  that `findTravelAnchor` refuses our own button even when it is the only thing the selector can
+  still find. A real latent bug fell out of writing it: a rebuilt launcher reused the previous
+  run's dock wrapper and re-attached the dead button with it.
+- `FallenLondon/test/ux-fruits-of-the-zee.test.mjs` — asserts `ux-enhancers.js`'s Fruits of the
+  Zee feature. Its stub DOM builds both the qualities and the possessions markup and is rich
+  enough to **actually build the panel**, in both the mid-festival and the nothing-ever-read
+  states. The bulk of it is the **per-depth Favour table**, walked depth by depth for all eleven
+  cards, plus the invariant that makes the badge possible at all: at a known depth a card offers
+  *exactly one* claim. Then the three ownership marks as three distinct states (a dash is not a
+  tick), the range-not-a-guess rule and that a proven floor trims the range without collapsing it,
+  the Sights → variant mapping and that the bands tile 1..100, the Fruit Market prices (with the
+  invariant that buying at the stalls always costs less than trading a spare back pays), that
+  counts are a max rather than a sum, and the collection arithmetic — what counts towards the
+  headline and what deliberately does not. It also holds the cross-feature check that no card name
+  appears in two of `SPITE_CARDS`, `ZEE_CARDS` and `FOTZ_CARDS`. Update it when you touch any of
+  the `FOTZ_*` tables.
 
 The re-expose trick (rename `(function () {` and `return { ... }` the helpers before `})()`) is
 how a test reaches an IIFE's internals — copy an existing test when adding one, and put it in the
