@@ -219,6 +219,7 @@ const wrapped = src
     + ' FOTZ_MARK_NEED, FOTZ_MARK_DONE, FOTZ_MARK_UNSURE, FOTZ_CLASS,'
     + ' lookupFotzCard, fotzOptionsAt, fotzBadgeSpec, fotzMissingFrom, fotzColor,'
     + ' fotzCollection, fotzLedger, readFotzState, fotzHoldings, captureFotzState,'
+    + ' fotzUniquesByDepth, fotzSplitUniques,'
     + ' fotzSetDepth, fotzDepth, fotzDepthFloor, readPossessionCounts, itemCountFromLabel,'
     + ' normalizeName, SPITE_CARDS, ZEE_CARDS, FEATURES, PANELS,'
     + ' inFotzArea, inDiveArea, fotzWhere, forgetStaleDepth, fotzCardRatings,'
@@ -405,6 +406,58 @@ check('a coral card is labelled rather than scored — it pays no Favour',
   [spec('A Reef of Wrecks', 2, holdingNone).text,
     spec('A Reef of Wrecks', 2, holdingAll).text],
   [api.FOTZ_MARK_NEED + 'coral', api.FOTZ_MARK_DONE + 'coral']);
+
+// Every coral card otherwise wears an identical `★coral`, which flattens a
+// real difference: a coral you have never seen and one you already have two of
+// are not the same card to draw. Reported 2026-09-03 — A Graveyard of Derelict
+// Debris and A Reef of Wrecks read the same with a Rust-Eaten Ration in hand.
+{
+  const holdingCorals = {
+    has: () => false,
+    count: (n) => (n === 'Rust-Eaten Ration' ? 1 : (n === 'Grasping Coral' ? 2 : 0)),
+    bride: false,
+    sig: 'corals',
+  };
+  check('the coral you are already holding is counted on the badge',
+    [spec('A Graveyard of Derelict Debris', 2, holdingCorals).text,
+      spec('A Reef of Wrecks', 2, holdingCorals).text,
+      spec('Old Wounds', 2, holdingCorals).text],
+    [api.FOTZ_MARK_NEED + 'coral (1)', api.FOTZ_MARK_NEED + 'coral (2)',
+      api.FOTZ_MARK_NEED + 'coral']);
+
+  check('...so two coral cards no longer read identically',
+    spec('A Graveyard of Derelict Debris', 2, holdingCorals).text
+      !== spec('A Reef of Wrecks', 2, holdingCorals).text, true);
+
+  // One coral becomes one item, so the subtraction is the actionable form —
+  // and there is room for it in the tooltip where there is none on a badge.
+  check('the tooltip turns the count into how many more dives it needs',
+    /holding 2 Grasping Corals already — 1 more is needed/
+      .test(spec('A Reef of Wrecks', 2, holdingCorals).title), true);
+
+  check('and says so when you already have enough',
+    (() => {
+      const held = {
+        has: (n) => n !== 'Loomweavers',
+        count: () => 3,
+        bride: false,
+        sig: 'plenty',
+      };
+      return /enough to cover everything still missing/
+        .test(spec('A Reef of Wrecks', 2, held).title);
+    })(), true);
+
+  // "Enough to cover everything still missing" is nonsense when nothing is
+  // missing — a coral held after the set is complete is simply spare.
+  check('a coral held with the set already complete is called spare, not "enough"',
+    /spare, since you already hold all three/
+      .test(spec('A Reef of Wrecks', 2,
+        { has: () => true, count: () => 2, bride: true, sig: 'done' }).title),
+    true);
+}
+
+check('holdings with no count at all still produce a badge, just without the number',
+  spec('A Reef of Wrecks', 2, holdingNone).text, api.FOTZ_MARK_NEED + 'coral');
 
 check('a coral you need is gold and one you don\'t recedes',
   spec('A Reef of Wrecks', 2, holdingNone).color
@@ -777,6 +830,110 @@ check('where to stop depends on how many corals you still need',
 
 check('every piece of advice explains itself',
   [0, 1, 2, 3].every((n) => !!api.fotzDevotionAdvice(n).why), true);
+
+// --- what is still down there, by depth ------------------------------------
+//
+// A dive commits you to a depth and pays one reward, so "what am I missing"
+// and "how deep should I go" are different questions. The one that costs
+// people items is the second: some uniques are only SHALLOW, and diving past
+// them throws them away for that dive.
+
+const nothingHeld = { has: () => false, bride: false, sig: 'none' };
+const everythingHeld = { has: () => true, bride: true, sig: 'all' };
+
+check('currency-only cards never appear — they are the whole point of the filter',
+  api.fotzUniquesByDepth(nothingHeld)
+    .flatMap((row) => row.entries.map((e) => e.card))
+    .filter((name) => ['A Cabin-Fragment', 'Easy Pickings', 'Unlucky Prisoner'].includes(name)),
+  []);
+
+check('the equipment turns up at exactly the depths the card table gives it',
+  api.fotzUniquesByDepth(nothingHeld).map((row) => [
+    row.depth,
+    row.entries.filter((e) => !e.coral && !e.bride).map((e) => e.label),
+  ]),
+  [
+    [1, ['A Cured Jillyfleur Cloak']],
+    [2, ['Wrecking Boots', 'A Cured Jillyfleur Cloak', 'Nuncian Pocket Watch']],
+    [3, ['Wrecking Boots', 'A Faceted Decanter of Drownie Effluvia', 'Nuncian Pocket Watch']],
+    [4, ['Semi-Automated Mary Lloyd', 'A Faceted Decanter of Drownie Effluvia',
+      'Nuncian Pocket Watch']],
+    [5, ['Semi-Automated Mary Lloyd', 'A Faceted Decanter of Drownie Effluvia',
+      'Scrimshander Carving Knife']],
+  ]);
+
+check('the Bride is at the bottom and nowhere else',
+  api.fotzUniquesByDepth(nothingHeld)
+    .filter((row) => row.entries.some((e) => e.bride)).map((row) => row.depth),
+  [5]);
+
+// The mark that matters: this is the last depth you can still take it.
+check('"last chance" lands on the depth an item drops out after',
+  api.fotzUniquesByDepth(nothingHeld).flatMap((row) => row.entries
+    .filter((e) => e.last && e.to < 5)
+    .map((e) => [row.depth, e.label])),
+  [
+    [2, 'A Cured Jillyfleur Cloak'],
+    [3, 'Wrecking Boots'],
+    [4, 'Nuncian Pocket Watch'],
+  ]);
+
+check('and nothing is marked "last chance" at the bottom, where nothing is lost',
+  api.fotzUniquesByDepth(nothingHeld)[4].entries.filter((e) => e.last && e.to < 5), []);
+
+// ...with one exception, and it is the right one: the coral whose three items
+// are not published cannot be "held", because there is no name to hold. It
+// stays listed however much you own, which is the useful answer — you do still
+// need to dive for it.
+check('what you already hold drops out of every depth, bar the unpublished coral',
+  api.fotzUniquesByDepth(everythingHeld)
+    .map((row) => row.entries.map((e) => e.label)),
+  [
+    ['Rust-Eaten Ration'], ['Rust-Eaten Ration'], ['Rust-Eaten Ration'],
+    ['Rust-Eaten Ration'], ['Rust-Eaten Ration'],
+  ]);
+
+check('holding one thing removes only that thing',
+  (() => {
+    const held = { has: (n) => n === 'Scrimshander Carving Knife', bride: false, sig: 'x' };
+    return api.fotzUniquesByDepth(held)[4].entries.map((e) => e.label);
+  })(),
+  // depth 5, minus the Knife: the six corals, the Mary Lloyd, the Decanter, the Bride
+  ['Grasping Coral', 'Gorgonian Reef-Rock', 'Barnacled Headpiece', 'Spinebound Oddity',
+    'Pedestrian Polyp', 'Rust-Eaten Ration', 'Semi-Automated Mary Lloyd',
+    'A Faceted Decanter of Drownie Effluvia', 'Discovered: the Pentamerous Bride']);
+
+check('an unread Possessions list yields nothing, rather than "you need everything"',
+  api.fotzUniquesByDepth(null).flatMap((row) => row.entries), []);
+
+// The corals are at every depth, so listing them five times says nothing.
+check('the corals are split off and stated once',
+  (() => {
+    const split = api.fotzSplitUniques(api.fotzUniquesByDepth(nothingHeld));
+    return [
+      split.everywhere.map((e) => e.label),
+      split.byDepth.map((row) => row.entries.length),
+    ];
+  })(),
+  [
+    ['Grasping Coral', 'Gorgonian Reef-Rock', 'Barnacled Headpiece', 'Spinebound Oddity',
+      'Pedestrian Polyp', 'Rust-Eaten Ration'],
+    // and what is left per depth is the depth-specific stuff only
+    [1, 3, 3, 3, 4],
+  ]);
+
+check('the unpublished coral is flagged, so nothing prints "×1 of 3 left"',
+  api.fotzUniquesByDepth(nothingHeld)[0].entries
+    .filter((e) => e.pending).map((e) => [e.label, e.missing]),
+  [['Rust-Eaten Ration', ['Luggage']]]);
+
+check('a coral carries which of its variants are still missing',
+  (() => {
+    const held = { has: (n) => n === 'Loomweavers' || n === 'Gossamer Palms', bride: false, sig: 'x' };
+    const split = api.fotzSplitUniques(api.fotzUniquesByDepth(held));
+    return split.everywhere.find((e) => e.label === 'Grasping Coral').missing;
+  })(),
+  ['Mournclimber’s Wraps']);
 
 // --- badging the branches in the game --------------------------------------
 //

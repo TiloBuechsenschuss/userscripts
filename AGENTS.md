@@ -807,6 +807,26 @@ navigation. Two consequences:
   list leaves `coralsWanted` **null** and the advice falls back to the Favour case *saying so*
   -- there is no honest answer to "how many do you still need" when we cannot tell what you
   have.
+  The coral badges carry **`(N)`, how many of that coral you are already holding** (reported
+  2026-09-03: two coral cards read identically with one of the corals in hand). It comes from
+  `fotzHoldings().count`, which had been built and never used. The brackets are omitted at zero,
+  so an untouched hand stays as quiet as it was, and the tooltip carries the actionable form the
+  badge has no room for -- one coral becomes one item, so holding two while three variants are
+  missing means one more dive. Note a badge can read `✓coral (2)`: the tick is about the ITEMS
+  and the number about the CORAL, so it means "done, and two spares", and the tooltip says that
+  rather than "enough to cover what is missing", which would be nonsense with nothing missing.
+  `fotzUniquesByDepth` answers the question the checklist cannot: a dive **commits you to a
+  depth** and pays exactly one reward, and the unique rewards are not spread evenly down the
+  trench. Some are only at the bottom (the Scrimshander Knife is depth 5 and nowhere else) and
+  -- the half that actually costs people items -- some are only in the **shallows**: A Cured
+  Jillyfleur Cloak is depths 1-2, so diving past 2 throws it away for that dive. The panel
+  therefore marks an entry **last chance** at the deepest depth it still appears at. Currency-only
+  cards fall out for nothing, which is what the request asked for: `fotzMissingFrom` already
+  returns an empty list for anything paying only Favour, so A Cabin-Fragment, Easy Pickings and
+  Unlucky Prisoner never reach the block. It is derived from `FOTZ_CARDS` rather than from a
+  second table -- the depths are stated there once and must not be stated twice --
+  and `fotzSplitUniques` lifts out the entries spanning depths 1-5 (the corals) so they are
+  named once above the table instead of five times inside it.
   `fotzLedger` totals what your
   treasures and *spare* equipment would fetch, which needs quantities -- hence
   `readPossessionCounts`, which `readPossessions` is now defined in terms of so the two cannot
