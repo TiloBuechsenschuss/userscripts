@@ -89,7 +89,17 @@ function makeEl(tag) {
       const i = this.parentNode.children.indexOf(this);
       return i >= 0 ? this.parentNode.children[i + 1] || null : null;
     },
-    addEventListener() {},
+    // Recorded rather than swallowed: the badges bind a tap handler whose
+    // whole job is to keep the click off the card underneath, and a stub that
+    // dropped the listener would let that regress silently.
+    listeners: {},
+    addEventListener(type, fn) {
+      (this.listeners[type] = this.listeners[type] || []).push(fn);
+    },
+    dispatch(type, ev) {
+      (this.listeners[type] || []).forEach((fn) => fn(ev));
+      return ev;
+    },
     setAttribute(k, v) { this.attrs[k] = v; },
     getAttribute(k) { return Object.prototype.hasOwnProperty.call(this.attrs, k) ? this.attrs[k] : null; },
     // Understands the three shapes ux-enhancers.js actually asks for:
@@ -194,7 +204,12 @@ const fakeDoc = {
     }
     return null;
   },
-  getElementById: () => null,
+  // Answers for the tap-to-read panel only. Widening it would change what
+  // the launcher's own mount sees during this file's evaluation, which is not
+  // what is under test here.
+  getElementById: (id) => (id === 'fl-ux-tip'
+    ? fakeDoc.body.children.find((c) => c.id === id) || null
+    : null),
   createElement: (tag) => makeEl(tag),
   createTextNode: (t) => ({ nodeType: 3, nodeValue: String(t), text: String(t) }),
   addEventListener() {},
@@ -215,7 +230,7 @@ const wrapped = src
     + ' FOTZ_STALL, FOTZ_SHIPS, FOTZ_FATE_ITEMS, FOTZ_BRIDE_ITEMS, FOTZ_QUALITIES,'
     + ' FOTZ_STATS, FOTZ_SUPPLICATION, fotzDevotionLadder, fotzActionsToDevotion,'
     + ' FOTZ_SUPPLICATION_OTHER, lookupFotzBranch, fotzBranchSpec, fotzSupplicationBranches,'
-    + ' fotzDevotionAdvice,'
+    + ' fotzDiveAdvice, FOTZ_DIVE_PLAN, FOTZ_FAVOUR_RUN, pruneTip,'
     + ' FOTZ_MARK_NEED, FOTZ_MARK_DONE, FOTZ_MARK_UNSURE, FOTZ_CLASS,'
     + ' lookupFotzCard, fotzOptionsAt, fotzBadgeSpec, fotzMissingFrom, fotzColor,'
     + ' fotzCollection, fotzLedger, readFotzState, fotzHoldings, captureFotzState,'
@@ -391,13 +406,66 @@ check('a treasure-only card carries no ownership mark at all',
   ['200', '200', '200']);
 
 check('a card offering something you lack is starred',
-  spec('A Shattered Prow', 5, holdingNone).text, api.FOTZ_MARK_NEED + '400');
+  spec('A Shattered Prow', 5, holdingNone).text, api.FOTZ_MARK_NEED + '400 · item');
 
 check('the same card is ticked once you have it',
-  spec('A Shattered Prow', 5, holdingAll).text, api.FOTZ_MARK_DONE + '400');
+  spec('A Shattered Prow', 5, holdingAll).text, api.FOTZ_MARK_DONE + '400 · item');
 
 check('and it is a dash, not a tick, when Possessions have never been read',
-  spec('A Shattered Prow', 5, null).text, api.FOTZ_MARK_UNSURE + '400');
+  spec('A Shattered Prow', 5, null).text, api.FOTZ_MARK_UNSURE + '400 · item');
+
+// A card offering a named piece of unique equipment used to read exactly like
+// A Cabin-Fragment, which is only ever worth its Favour. It now carries the
+// coral's label as well -- `400 · item (3)` -- so the figure, what it is and
+// how many are already yours are all on the badge. The figure stays in FRONT,
+// where every other card carries it, and stays in the tooltip: a spare IS its
+// trade-in value, and the colour ramp has six steps, so it can separate 400
+// from 100 but never 300 from 400.
+{
+  const holdingItems = {
+    has: (n) => n === 'Scrimshander Carving Knife' || n === 'Wrecking Boots',
+    count: (n) => (n === 'Scrimshander Carving Knife' ? 3 : (n === 'Wrecking Boots' ? 1 : 0)),
+    bride: false,
+    sig: 'items',
+  };
+  check('a unique item is labelled, with the spares you are sitting on in brackets',
+    [spec('A Shattered Prow', 5, holdingItems).text,
+      spec('Tangled in the Rigging', 2, holdingItems).text,
+      spec('Well-Disguised Trinkets', 1, holdingItems).text],
+    [api.FOTZ_MARK_DONE + '400 · item (3)', api.FOTZ_MARK_DONE + '100 · item (1)',
+      api.FOTZ_MARK_NEED + '100 · item']);
+
+  check('...but the colour is still the trade-in ramp, not a need/held flag',
+    [spec('A Shattered Prow', 5, holdingItems).color,
+      spec('Well-Disguised Trinkets', 1, holdingItems).color],
+    [api.fotzColor(400), api.fotzColor(100)]);
+
+  check('...and the Favour it trades for is still in the tooltip',
+    /Pry free a Scrimshander Carving Knife — 400 Favour/
+      .test(spec('A Shattered Prow', 5, holdingItems).title), true);
+
+  check('a spare is called what it is: trade-in stock, priced',
+    /you already have 3, so 2 of them are spare and worth 400 Favour each/
+      .test(spec('A Shattered Prow', 5, holdingItems).title), true);
+
+  check('one of a kind is just "one" — nothing spare about it',
+    /Wrecking Boots — you already have one\./
+      .test(spec('Tangled in the Rigging', 2, holdingItems).title), true);
+
+  // With no depth two different items are in play, so one of their counts
+  // would be a number picked out of a hat. The bracket spans them instead.
+  check('with no depth the bracket spans the items the card could offer',
+    spec('A Shattered Prow', null, holdingItems).text,
+    api.FOTZ_MARK_NEED + '150–400 · item (0–3)');
+
+  check('a currency-only card keeps its figure — there is nothing else to say',
+    spec('A Cabin-Fragment', 5, holdingItems).text, '400');
+
+  check('...and the figure leads, so a hand still scans as a column of numbers',
+    [spec('A Cabin-Fragment', 5, holdingItems).text,
+      spec('A Shattered Prow', 5, holdingItems).text]
+      .every((t) => /^[^0-9]?[0-9]/.test(t)), true);
+}
 
 check('the three marks are three different glyphs',
   new Set([api.FOTZ_MARK_NEED, api.FOTZ_MARK_DONE, api.FOTZ_MARK_UNSURE]).size, 3);
@@ -638,6 +706,51 @@ check('and it still counts towards how many corals are worth diving for',
   // Coral outright, leaving four published corals and the unpublished one.
   collection.coralsWanted, 5);
 
+// The reported bug (2026-09-04): a coral sitting in your hold is one you have
+// no reason to dive for again. One coral becomes one item and the three items
+// are mechanically identical, so a second of the same kind is a duplicate of a
+// duplicate — but `coralsWanted` only looked at the ITEMS, which in week one
+// nobody has yet, so a diver carrying one of each was told three or more were
+// missing and sent back to depth 1.
+{
+  const before = ownedEls;
+  ownedEls = api.FOTZ_CORALS.map((c) => ownedEl(c.coral, 1));
+  const carrying = api.fotzCollection(api.readFotzState());
+  ownedEls = before;
+
+  check('a coral already in your hold is not one to dive for again',
+    carrying.coralsWanted, 0);
+
+  check('...including the unpublished one, whose items cannot be held at all',
+    carrying.groups[0].corals.filter((c) => c.pending).map((c) => c.inHand), [1]);
+
+  // Depth 1 is still right here, but for a REASON, and a different one: this
+  // character has no Cured Jillyfleur Cloak, which is depths 1-2 and gone the
+  // moment you dive past it. What has stopped is being held at depth 1 by
+  // corals that are already in the hold.
+  {
+    const a = api.fotzDiveAdvice(
+      { corals: carrying.coralsWanted, items: carrying.itemsWanted });
+    check('...and depth 1 now stands on the shallow item, not on the corals',
+      [a.stage, a.depth, a.corals, a.items], [1, 1, 0, ['A Cured Jillyfleur Cloak']]);
+  }
+
+  check('...so with the shallow item in hand too, the advice finally moves on',
+    (() => {
+      const before2 = ownedEls;
+      ownedEls = api.FOTZ_CORALS.map((c) => ownedEl(c.coral, 1))
+        .concat([ownedEl('A Cured Jillyfleur Cloak', 1)]);
+      const next = api.fotzCollection(api.readFotzState());
+      ownedEls = before2;
+      const a = api.fotzDiveAdvice({ corals: next.coralsWanted, items: next.itemsWanted });
+      return [a.stage, a.level, a.depth];
+    })(), [2, 8, 2]);
+
+  // Holding the coral is not holding the item: the checklist still wants it.
+  check('...but the items themselves are still counted as missing',
+    carrying.groups[0].corals.every((c) => c.rows[0].held !== true), true);
+}
+
 check('the ships and the Fate items are listed but never counted',
   collection.groups.filter((g) => g.key === 'ships' || g.key === 'fate')
     .every((g) => g.rows.every((r) => !r.count)), true);
@@ -841,13 +954,78 @@ check('counting up from where you already are costs only the difference',
 check('an unknown Devotion asks for no actions rather than guessing at some',
   api.fotzActionsToDevotion(null, 10), 0);
 
-check('where to stop depends on how many corals you still need',
-  [5, 3, 2, 1, 0].map((n) => api.fotzDevotionAdvice(n).level),
-  // three or more: dive cheap and often. Then 7, then 8. None: it's a Favour run.
-  [5, 5, 7, 8, 10]);
+// --- where to stop, and how deep to go -------------------------------------
+//
+// The plan is from a comment on the guide (cs-comment-99376, by the player
+// whose Monte Carlo produced the Favour-per-action figures the guide quotes):
+// four collecting stages in DEPTH ORDER, then a Favour grind. It replaced a
+// ladder keyed on the coral count alone, which had nothing to say about the
+// six dive-only items and, worse, kept sending a diver who already held every
+// coral back to depth 1.
+const ALL_DIVE_ITEMS = api.FOTZ_EQUIPMENT.map((e) => e.name);
+const without = (...names) => ALL_DIVE_ITEMS.filter((n) => !names.includes(n));
+const stageOf = (corals, items) => {
+  const a = api.fotzDiveAdvice({ corals, items });
+  return [a.stage, a.level, a.depth];
+};
 
-check('every piece of advice explains itself',
-  [0, 1, 2, 3].every((n) => !!api.fotzDevotionAdvice(n).why), true);
+check('corals outstanding is stage 1 — Devotion 5, depth 1, dive cheap and often',
+  stageOf(3, ALL_DIVE_ITEMS), [1, 5, 1]);
+
+// The Cloak is depths 1-2, so it has to be collected while you are still
+// shallow; a deeper dive throws it away for that dive. Ordering the stages by
+// depth is what gets that right without a special case for it.
+check('...and it stays stage 1 for the Jillyfleur Cloak alone, which is depths 1–2',
+  stageOf(0, ['A Cured Jillyfleur Cloak']), [1, 5, 1]);
+
+check('then the Boots and the Watch at Devotion 8, depth 2',
+  stageOf(0, without('A Cured Jillyfleur Cloak')), [2, 8, 2]);
+
+check('then the Mary Lloyd and the Decanter at Devotion 10, depth 4',
+  stageOf(0, ['Semi-Automated Mary Lloyd', 'A Faceted Decanter of Drownie Effluvia']),
+  [3, 10, 4]);
+
+check('then the Scrimshander alone at Devotion 11, depth 5 — it is nowhere else',
+  stageOf(0, ['Scrimshander Carving Knife']), [4, 11, 5]);
+
+// The reported bug, in one line: one of every coral in hand and nothing left
+// to collect used to read as "three or more corals missing", which is stage 1.
+check('nothing left to collect is the Favour run, not another shallow dive',
+  stageOf(0, []), [5, 9, null]);
+
+check('...and it lays out all three Favour-run options, best first',
+  api.fotzDiveAdvice({ corals: 0, items: [] }).alternatives
+    .map((a) => [a.level, a.fpa]),
+  [[9, 15.4], [10, 14.6], [11, 14.3]]);
+
+check('an unread Possessions list counts as a Favour run rather than a guess',
+  stageOf(null, []), [5, 9, null]);
+
+check('every piece of advice explains itself, and names what it is waiting on',
+  [[3, ALL_DIVE_ITEMS], [0, without('A Cured Jillyfleur Cloak')],
+    [0, ['Scrimshander Carving Knife']], [0, []]]
+    .every(([c, i]) => {
+      const a = api.fotzDiveAdvice({ corals: c, items: i });
+      return !!a.why && a.items.every((n) => a.why.includes(n));
+    }), true);
+
+// A stage that sent you to a depth its own items are not offered at would be
+// worse than no advice at all.
+check('every item a stage sends you for is claimable at that stage’s depth',
+  api.FOTZ_DIVE_PLAN.every((plan) => plan.items.every((name) => {
+    const opt = api.FOTZ_CARDS
+      .reduce((all, c) => all.concat(c.opts), [])
+      .find((o) => o.item === name);
+    return !!opt && opt.depths[0] <= plan.depth && plan.depth <= opt.depths[1];
+  })), true);
+
+check('the four stages account for all six dive-only items, once each',
+  api.FOTZ_DIVE_PLAN.reduce((all, p) => all.concat(p.items), []).sort(),
+  ALL_DIVE_ITEMS.slice().sort());
+
+check('the stages run shallow to deep, and the Devotion rises with them',
+  api.FOTZ_DIVE_PLAN.every((p, i, all) => i === 0
+    || (p.depth > all[i - 1].depth && p.level > all[i - 1].level)), true);
 
 // --- what is still down there, by depth ------------------------------------
 //
@@ -1076,6 +1254,61 @@ check('exactly the Chef is gated on knowing which storylet this is',
   api.fotzSupplicationBranches();
   check('running it again badges nothing twice',
     branchHeadings.map((head) => head.parentNode.children.length), [2, 2, 2, 2]);
+
+  // --- reading a badge on a phone -----------------------------------------
+  //
+  // A `title` is invisible on a touch screen: no hover, and a long press
+  // raises the selection menu instead. So the same text opens on TAP -- and
+  // the tap must not reach the card underneath, which on the wide hand layout
+  // sits directly below the badge and PLAYS when clicked. That is an action
+  // spent for good on a tap meant to read a tooltip, so both halves are
+  // pinned here.
+  {
+    const badge = branchHeadings[1].nextElementSibling;
+    const fire = () => {
+      const ev = { stopped: false, defaulted: false, target: badge,
+        stopPropagation() { this.stopped = true; },
+        preventDefault() { this.defaulted = true; } };
+      badge.dispatch('click', ev);
+      return ev;
+    };
+    const tip = () => fakeDoc.body.children.filter((c) => c.id === 'fl-ux-tip');
+
+    check('the badge keeps its title, so the desktop hover is untouched',
+      badge.title, api.fotzBranchSpec(
+        api.lookupFotzBranch('Perform in a Mutton Island mystery play')).title);
+
+    const first = fire();
+    check('a tap opens the title as a panel', tip().length, 1);
+    check('...carrying the whole tooltip, not a summary',
+      tip()[0].textContent, badge.title);
+    check('...and the tap is swallowed, so the card underneath is not played',
+      [first.stopped, first.defaulted], [true, true]);
+
+    fire();
+    check('tapping the same badge again closes it', tip().length, 0);
+
+    fire();
+    check('...and a third tap opens it once more, never twice over',
+      tip().length, 1);
+
+    // React reuses these nodes: play a card and the badge the panel belongs to
+    // is gone, leaving a panel hanging over something unrelated.
+    badge.isConnected = false;
+    api.pruneTip();
+    check('a panel whose badge has been re-rendered away goes with it',
+      tip().length, 0);
+    badge.isConnected = undefined;
+
+    // The three touch/pointer starts are stopped as well: anything bound to
+    // one of those fires before a click ever happens.
+    ['pointerdown', 'mousedown', 'touchstart'].forEach((type) => {
+      const ev = { stopped: false, stopPropagation() { this.stopped = true; } };
+      badge.dispatch(type, ev);
+      check(type + ' is swallowed too, before any click can be synthesised',
+        ev.stopped, true);
+    });
+  }
 
   // Away from the storylet, the Chef's generic name loses its badge while the
   // distinctive ones keep theirs.

@@ -520,6 +520,27 @@ navigation. Two consequences:
   top-left. **`attachBadge`'s flag stores the value it drew for, not a boolean**: React reuses a
   `.hand__card-container` node for the next card when you play one, so a boolean would leave the
   old card's badge on the new card — a changed value redraws, and a `null` spec clears it.
+  **The `title` also opens on tap** (added 2026-09-04, on a report that it was unreachable on a
+  phone). A badge's whole argument lives in its `title`, and on a touch screen a `title` is
+  invisible: there is no hover, and a long press raises the text-selection menu instead — so on
+  a phone the challenges, the option lists and the Sights bands simply were not readable.
+  `makeBadge` therefore keeps `title` for the desktop hover and *also* binds a tap that opens
+  the same text as a fixed, `pre-wrap` panel (`showTip`/`hideTip`, one `#fl-ux-tip` at a time,
+  placed under the badge or above it when the bottom of the screen is nearer). Three things
+  there are load-bearing. **The tap must not reach the card**: on the wide hand layout the badge
+  is positioned over `.hand__card-container`, and a click that got through *plays the card* — an
+  action spent for good on a tap meant to read a tooltip — so `click` is stopped and defaulted
+  and `pointerdown`/`mousedown`/`touchstart` are stopped too (passively; they only ever stop
+  propagation), which works because React listens at its own root rather than on the node.
+  **The dismissal handler is capture-phase and exempts badges**, or it would clear `tipAnchor`
+  before the badge's own handler could see that the tip being opened is the one already open,
+  and a second tap on the same badge could never close it. **That stopped propagation is also
+  why the launcher's outside-click handler is capture-phase**: on the bubble it never saw a
+  badge tap at all, so the menu stayed open behind one. `pruneTip` runs at the top of `scan` so
+  a panel whose badge React has since re-rendered away goes with it rather than hanging over an
+  unrelated card, and a scroll or resize closes it rather than chasing the anchor. **Confirmed
+  in-game by the author on 2026-09-04**, phone included — so, unusually for this repo, the
+  placement and the swallowed tap are known to work rather than merely reasoned about.
   A feature that wants a screen rather than a decoration registers a **panel** instead: the
   `launcher` feature mounts a "⚙ UX" button whose menu is built from the `PANELS` registry
   (`{ id, icon, label, hint, render }`, `render()` called fresh on every open so a live panel
@@ -814,13 +835,35 @@ navigation. Two consequences:
   and *derived* rather than transcribed -- Devotion is pyramidal, so reaching level L costs
   L(L+1)/2 change points at 4 a go, plus 2 actions for the dive itself -- and the test checks
   it against the **guide's** own optimum table (5 (6 Act) through 11 (19 Act)), which pins the
-  formula to an independent source rather than to itself. `fotzDevotionAdvice` turns the
-  guide's recommendations into one number, reading `coralsWanted` off the collection: corals
-  turn up at every depth, so the more of them you still need the less depth is worth paying
-  for (3+ -> 5, two -> 7, one -> 8, none -> 10 and dive for Favour). An unreadable Possessions
-  list leaves `coralsWanted` **null** and the advice falls back to the Favour case *saying so*
-  -- there is no honest answer to "how many do you still need" when we cannot tell what you
-  have.
+  formula to an independent source rather than to itself.   **Where to stop, and how deep to go, follows a comment on the guide** --
+  [cs-comment-99376](https://fallenlondon.wiki/wiki/Fruits_of_the_Zee_Festival_(Guide)#cs-comment-99376),
+  by the player whose Monte Carlo produced the Favour-per-action figures the guide itself
+  quotes (rewritten 2026-09-04, on the author's report). `FOTZ_DIVE_PLAN` is its four
+  collecting stages, each pairing a Devotion with the depth that pays the items still
+  outstanding -- 5/depth 1 for the corals, 8/depth 2 for the Wrecking Boots and Nuncian Watch,
+  10/depth 4 for the Mary Lloyd and the Decanter, 11/depth 5 for the Scrimshander -- and
+  `FOTZ_FAVOUR_RUN` is the grind that follows once nothing is left to collect (Devotion 9 at
+  15.4 FPA, ahead of 10 at depths 3-5 on 14.6 and 11 on 14.3, the last of which never drowns
+  you). `fotzDiveAdvice` walks the stages **in order and takes the first with anything
+  outstanding**, which is what gets the shallow-only items right *without a special case*: the
+  Cured Jillyfleur Cloak is depths 1-2 and sits in stage 1, so it is collected while you are
+  still up there rather than thrown away by a deeper dive. A test pins that every item a stage
+  sends you for is actually claimable at that stage's depth, that the four stages account for
+  all six dive-only items exactly once, and that depth and Devotion both rise across them.
+  This replaced a ladder keyed on the coral count alone (3+ -> 5, two -> 7, one -> 8, none ->
+  10), which had no source but a reading of the guide's prose and nothing at all to say about
+  the six dive-only items.
+  **A coral already in your hold is not one to dive for** (fixed in the same pass, and the
+  bug that prompted it). `coralsWanted` asked only whether you held one of a coral's three
+  ITEMS -- which in week one nobody does, since the corals cannot be broken open yet -- so a
+  diver carrying one of each was told three or more were missing and sent back to depth 1
+  indefinitely. One coral becomes one item and the three items are mechanically identical, so
+  a second coral of the same kind is a duplicate of a duplicate: `entry.inHand` now ends it,
+  the `pending` coral included, whose items are unpublished and so can never read as held
+  while the coral itself reads perfectly well. An unreadable Possessions list still leaves
+  `coralsWanted` **null**, and the advice still falls back to the Favour case *saying so* --
+  there is no honest answer to "how many do you still need" when we cannot tell what you have.
+  **Confirmed in-game by the author on 2026-09-04.**
   The coral badges carry **`(N)`, how many of that coral you are already holding** (reported
   2026-09-03: two coral cards read identically with one of the corals in hand). It comes from
   `fotzHoldings().count`, which had been built and never used. The brackets are omitted at zero,
@@ -829,6 +872,20 @@ navigation. Two consequences:
   missing means one more dive. Note a badge can read `✓coral (2)`: the tick is about the ITEMS
   and the number about the CORAL, so it means "done, and two spares", and the tooltip says that
   rather than "enough to cover what is missing", which would be nonsense with nothing missing.
+  **A card offering a named unique item carries the same label** (`400 · item (3)`, added on
+  the author's report). Those three cards -- Tangled in the Rigging, Well-Disguised Trinkets,
+  A Shattered Prow -- do pay Favour, so they used to wear that figure alone and read exactly
+  like A Cabin-Fragment, which is only ever worth its Favour. The figure **stays, and stays in
+  front**, where every other card carries it: the first attempt replaced it with the label and
+  leaned on colour to carry the value, which does not hold up -- a spare IS its trade-in value,
+  and `fotzColor` is a six-step ramp that separates 400 from 100 but never 300 from 400. Colour
+  is deliberately still `fotzColor(favour)` rather than the need/held hues the coral and the
+  Bride use, which would only repeat what the `★`/`✓` already says. The brackets share
+  `fotzHeldSuffix` with the corals, so the same rules hold -- omitted at zero, omitted when
+  Possessions have never been read -- and with the depth unknown, where two different items are
+  in play, it is a **range** (`item (0–3)`) rather than one item's count passed off as the
+  card's. For a unique item the bracket counts **spares**: one finishes the collection, so
+  `✓400 · item (3)` means two are trade-in stock at 400 apiece, and the tooltip says so.
   `fotzUniquesByDepth` answers the question the checklist cannot: a dive **commits you to a
   depth** and pays exactly one reward, and the unique rewards are not spread evenly down the
   trench. Some are only at the bottom (the Scrimshander Knife is depth 5 and nowhere else) and
@@ -1235,8 +1292,12 @@ Current tests:
   invariant that buying at the stalls always costs less than trading a spare back pays), that
   counts are a max rather than a sum, and the collection arithmetic — what counts towards the
   headline and what deliberately does not. It also holds the cross-feature check that no card name
-  appears in two of `SPITE_CARDS`, `ZEE_CARDS` and `FOTZ_CARDS`. Update it when you touch any of
-  the `FOTZ_*` tables.
+  appears in two of `SPITE_CARDS`, `ZEE_CARDS` and `FOTZ_CARDS`. It also pins the **dive plan**
+  (each stage's items really are claimable at that stage's depth, the four stages cover all six
+  dive-only items once each, and a coral already in hand is not one to dive for) and the
+  **tap-to-read** half of the badges (the tap is swallowed both ways, a second tap closes, and a
+  panel whose badge was re-rendered away is pruned) — for which its stub records event listeners
+  rather than dropping them. Update it when you touch any of the `FOTZ_*` tables.
 
 The re-expose trick (rename `(function () {` and `return { ... }` the helpers before `})()`) is
 how a test reaches an IIFE's internals — copy an existing test when adding one, and put it in the
