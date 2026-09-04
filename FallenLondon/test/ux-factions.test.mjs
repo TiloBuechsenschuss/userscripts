@@ -733,7 +733,8 @@ check('the menu offers the Factions, Zailing and Fruits of the Zee panels',
 check('the registry holds the launcher, the background jobs and the card ratings',
   api.FEATURES.map((f) => f.name),
   ['launcher', 'faction-capture', 'fotz-capture', 'pending-item',
-    'spite-card-ratings', 'zee-card-ratings', 'fotz-card-ratings', 'fotz-supplication']);
+    'spite-card-ratings', 'zee-card-ratings', 'fotz-card-ratings', 'fotz-depth-control',
+    'fotz-supplication']);
 
 check('loading the script mounts one floating root on the body',
   [fakeDoc.body.children.length, fakeDoc.body.children[0].id], [1, api.LAUNCHER_ID]);

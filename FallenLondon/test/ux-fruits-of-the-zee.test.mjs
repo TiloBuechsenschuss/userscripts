@@ -233,9 +233,12 @@ const wrapped = src
     + ' fotzDiveAdvice, FOTZ_DIVE_PLAN, FOTZ_FAVOUR_RUN, pruneTip,'
     + ' FOTZ_MARK_NEED, FOTZ_MARK_DONE, FOTZ_MARK_UNSURE, FOTZ_CLASS,'
     + ' lookupFotzCard, fotzOptionsAt, fotzBadgeSpec, fotzMissingFrom, fotzColor,'
+    + ' FOTZ_FAVOUR_COLORS, FOTZ_INK, FOTZ_COLOR_NEED, FOTZ_COLOR_HELD, FOTZ_COLOR_UNSURE,'
     + ' fotzCollection, fotzLedger, readFotzState, fotzHoldings, captureFotzState,'
     + ' fotzUniquesByDepth, fotzSplitUniques,'
-    + ' fotzSetDepth, fotzDepth, fotzDepthFloor, readPossessionCounts, itemCountFromLabel,'
+    + ' fotzSetDepth, fotzDepth, fotzDepthFloor, fotzReadDepth, depthSourceText,'
+    + ' FOTZ_READ_FRESH_MS, showDepthControl, nextDepthChoice, fotzDepthControls,'
+    + ' readPossessionCounts, itemCountFromLabel,'
     + ' normalizeName, SPITE_CARDS, ZEE_CARDS, FEATURES, PANELS,'
     + ' inFotzArea, inDiveArea, fotzWhere, forgetStaleDepth, fotzCardRatings,'
     + ' currentArea }; })();');
@@ -525,9 +528,61 @@ check('a card that offers nothing at this depth gets no badge',
     spec('Tangled in the Rigging', 1, holdingNone)],
   [null, null]);
 
-check('the colour ramp rises with the trade-in value',
-  [50, 100, 125, 175, 300, 400].map((v) => api.fotzColor(v))
-    .every((c, i, all) => i === 0 || c !== all[i - 1]), true);
+// Reworked 2026-09-04: six dark bands could not separate the eight figures
+// this festival pays, so 125 and 150 came out identical and so did 175 and
+// 200 — two pairs of cards a hand could not be ranked by. "Adjacent steps
+// differ" was the old check and it passed happily through both.
+check('every Favour figure the card table pays has a colour of its own',
+  (() => {
+    const paid = [...new Set(api.FOTZ_CARDS
+      .flatMap((c) => c.opts.map((o) => o.favour || 0))
+      .filter((v) => v > 0))].sort((a, b) => a - b);
+    const colours = paid.map((v) => api.fotzColor(v));
+    return [paid.length, new Set(colours).size];
+  })(), [8, 8]);
+
+check('the ramp is still ordered — a bigger figure never reuses a smaller one’s colour',
+  [50, 100, 125, 150, 175, 200, 300, 400].map((v) => api.fotzColor(v))
+    .every((c, i, all) => all.indexOf(c) === i), true);
+
+// The three states a card that pays no Favour at all can be in. Held and
+// unsure have to be told apart from each other and from every figure on the
+// ramp; "need" is deliberately the same gold as 400, because on a coral card
+// it means the same thing and the badge reads "coral", never a number.
+check('held and unsure are distinct from each other and from the whole ramp',
+  (() => {
+    const ramp = api.FOTZ_FAVOUR_COLORS.map((step) => step[1]);
+    return [
+      api.FOTZ_COLOR_HELD !== api.FOTZ_COLOR_UNSURE,
+      ramp.includes(api.FOTZ_COLOR_HELD),
+      ramp.includes(api.FOTZ_COLOR_UNSURE),
+      api.FOTZ_COLOR_NEED === api.fotzColor(400),
+    ];
+  })(), [true, false, false, true]);
+
+// The badges sit on Fallen London's dark card ARTWORK, which is what made the
+// old dark ramp disappear into it. Every colour here is therefore light — and
+// white text on a light background is no more readable than a dark badge on a
+// dark card, so every Fruits of the Zee badge carries dark ink instead.
+function luminance(hex) {
+  const chan = (i) => {
+    const v = parseInt(hex.substr(i, 2), 16) / 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * chan(1) + 0.7152 * chan(3) + 0.0722 * chan(5);
+}
+function contrast(a, b) {
+  const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p);
+  return (x + 0.05) / (y + 0.05);
+}
+check('every badge colour is light, and readable against the ink it is drawn with',
+  api.FOTZ_FAVOUR_COLORS.map((step) => step[1])
+    .concat([api.FOTZ_COLOR_HELD, api.FOTZ_COLOR_UNSURE])
+    .every((c) => contrast(c, api.FOTZ_INK) > 4.5 && contrast(c, '#ffffff') < 3.5), true);
+
+check('and the spec hands that ink to makeBadge rather than leaving it white',
+  api.fotzBadgeSpec(card('A Cabin-Fragment'), 5, 'set', null, holdingNone).ink,
+  api.FOTZ_INK);
 
 check('every card produces a usable badge at some depth',
   api.FOTZ_CARDS.every((c) => [1, 2, 3, 4, 5].some((d) => {
@@ -867,10 +922,41 @@ check('exactly the two generic names are gated on knowing where you are',
   ['Old Wounds', 'Easy Pickings']);
 
 // --- the depth setting -----------------------------------------------------
+//
+// THREE sources now, and the order between them is the whole point:
+//
+//   quality  a live read off the markup on screen. It cannot be stale, so it
+//            wins -- but Fallen London renders Full Fathom Five on the Myself
+//            tab and nowhere near the diving screen, so it almost never fires.
+//   set      what you said, in the panel or on the in-page control. It beats
+//            the bank because you know you have just dived and the bank does
+//            not.
+//   read     what the last Myself scrape banked -- which is what opening the
+//            panel goes and fetches -- and ONLY while it is inside
+//            `FOTZ_READ_FRESH_MS`. Past that it is not a stale answer, it is a
+//            wrong one: every successful dive changes the number.
+//
+// The expiry is the half most worth pinning. Dropping it would leave someone
+// who dived six times an hour ago being told, in a confident single figure,
+// what a card pays at a depth they left long since.
 
-check('the depth defaults to unknown', api.fotzDepth(), { depth: null, source: null });
+const FOTZ_CACHE_KEY = 'fl-ux-fotz';
+const bankedBefore = store.get(FOTZ_CACHE_KEY);
+function bankDepth(level, ageMs) {
+  store.set(FOTZ_CACHE_KEY, JSON.stringify({
+    v: 1,
+    at: Date.now() - (ageMs || 0),
+    character: 'TheFairUnknown',
+    partial: false,
+    values: { 'Full Fathom Five': level },
+  }));
+}
+store.delete(FOTZ_CACHE_KEY);
 
-check('setting it in the panel is remembered, and clearing it goes back to auto',
+check('the depth defaults to unknown',
+  api.fotzDepth(), { depth: null, source: null, at: null });
+
+check('setting it is remembered, and clearing it goes back to auto',
   (() => {
     api.fotzSetDepth(4);
     const set = api.fotzDepth();
@@ -878,7 +964,7 @@ check('setting it in the panel is remembered, and clearing it goes back to auto'
     const cleared = api.fotzDepth();
     return [set, cleared];
   })(),
-  [{ depth: 4, source: 'set' }, { depth: null, source: null }]);
+  [{ depth: 4, source: 'set', at: null }, { depth: null, source: null, at: null }]);
 
 check('a live Full Fathom Five beats what you set, because it cannot be stale',
   (() => {
@@ -889,7 +975,7 @@ check('a live Full Fathom Five beats what you set, because it cannot be stale',
     api.fotzSetDepth(null);
     return got;
   })(),
-  { depth: 5, source: 'quality' });
+  { depth: 5, source: 'quality', at: null });
 
 check('a nonsense depth is refused rather than trusted',
   (() => {
@@ -897,7 +983,87 @@ check('a nonsense depth is refused rather than trusted',
     const got = api.fotzDepth();
     session.delete('fl-ux-fotz-depth');
     return got;
-  })(), { depth: null, source: null });
+  })(), { depth: null, source: null, at: null });
+
+check('a fresh Myself reading is used, and says so',
+  (() => {
+    bankDepth(3, 5000);
+    const got = api.fotzDepth();
+    store.delete(FOTZ_CACHE_KEY);
+    return [got.depth, got.source, typeof got.at];
+  })(), [3, 'read', 'number']);
+
+check('what you set beats the banked reading, because you know you have dived',
+  (() => {
+    bankDepth(3, 5000);
+    api.fotzSetDepth(5);
+    const got = api.fotzDepth();
+    api.fotzSetDepth(null);
+    store.delete(FOTZ_CACHE_KEY);
+    return got;
+  })(), { depth: 5, source: 'set', at: null });
+
+check('a banked reading past the freshness window is dropped, not shown stale',
+  (() => {
+    bankDepth(3, api.FOTZ_READ_FRESH_MS + 1000);
+    const got = api.fotzDepth();
+    store.delete(FOTZ_CACHE_KEY);
+    return got;
+  })(), { depth: null, source: null, at: null });
+
+// The scrape writes 0 for a quality Fallen London did not render, and 0 is
+// "not diving" rather than a depth.
+check('a banked Full Fathom Five of 0 is not a depth',
+  (() => {
+    bankDepth(0, 1000);
+    const got = api.fotzReadDepth();
+    store.delete(FOTZ_CACHE_KEY);
+    return got;
+  })(), null);
+
+check('every source words itself differently, and no source says how deep it is',
+  [
+    api.depthSourceText({ depth: 4, source: 'quality', at: null }, null),
+    api.depthSourceText({ depth: 4, source: 'set', at: null }, null),
+    api.depthSourceText({ depth: 4, source: 'read', at: Date.now() }, null),
+    api.depthSourceText({ depth: null, source: null, at: null }, null),
+    api.depthSourceText({ depth: null, source: null, at: null }, 2),
+  ],
+  ['read from Full Fathom Five: 4', 'set to 4', 'read off Myself moments ago: 4',
+    'unknown', 'unknown, at least 2']);
+
+if (bankedBefore == null) store.delete(FOTZ_CACHE_KEY);
+else store.set(FOTZ_CACHE_KEY, bankedBefore);
+
+// --- the in-page depth control ---------------------------------------------
+//
+// Two mounts, both gated on being in the Royal Approach: the badges are only
+// ever wrong about a depth while you are down there, and `forgetStaleDepth`
+// has already thrown a hand-set depth away by the time you are not.
+
+check('the control is shown in the Royal Approach and nowhere else',
+  (() => {
+    const was = area;
+    area = 'the Royal Approach';
+    const diving = api.showDepthControl();
+    area = 'Mutton Island';
+    const ashore = api.showDepthControl();
+    area = was;
+    return [diving, ashore];
+  })(), [true, false]);
+
+// The one-button (mobile banner) form. Anything that is not a hand-set depth
+// starts the cycle at 1 rather than stepping off a number you did not choose,
+// and 5 wraps back to auto so there is always a way out of the override.
+check('the one-button form cycles auto -> 1 .. 5 -> auto',
+  [
+    api.nextDepthChoice({ depth: null, source: null, at: null }),
+    api.nextDepthChoice({ depth: 3, source: 'read', at: Date.now() }),
+    api.nextDepthChoice({ depth: 1, source: 'set', at: null }),
+    api.nextDepthChoice({ depth: 4, source: 'set', at: null }),
+    api.nextDepthChoice({ depth: 5, source: 'set', at: null }),
+  ],
+  [1, 1, 2, 5, null]);
 
 // --- Supplication on the Shore --------------------------------------------
 //
@@ -1378,7 +1544,8 @@ check('and for one whose Myself and Possessions have never been read',
 check('the feature list, in order',
   api.FEATURES.map((f) => f.name),
   ['launcher', 'faction-capture', 'fotz-capture', 'pending-item',
-    'spite-card-ratings', 'zee-card-ratings', 'fotz-card-ratings', 'fotz-supplication']);
+    'spite-card-ratings', 'zee-card-ratings', 'fotz-card-ratings', 'fotz-depth-control',
+    'fotz-supplication']);
 
 check('the panel list, in order',
   api.PANELS.map((p) => p.id),
@@ -1442,7 +1609,7 @@ check('a hand-set depth survives while you are still down there',
     api.fotzCardRatings();
     return api.fotzDepth();
   })(),
-  { depth: 4, source: 'set' });
+  { depth: 4, source: 'set', at: null });
 
 check('...and is thrown away the moment you surface',
   (() => {
@@ -1450,7 +1617,7 @@ check('...and is thrown away the moment you surface',
     api.fotzCardRatings();
     return api.fotzDepth();
   })(),
-  { depth: null, source: null });
+  { depth: null, source: null, at: null });
 
 check('an unreadable greeting is not grounds for discarding it',
   (() => {
@@ -1462,7 +1629,7 @@ check('an unreadable greeting is not grounds for discarding it',
     area = 'Mutton Island';
     return got;
   })(),
-  { depth: 3, source: 'set' });
+  { depth: 3, source: 'set', at: null });
 
 // The greeting the gate rests on, verbatim from a capture taken at the
 // festival (2026-09-03). This is the record of what FL actually emits — keep

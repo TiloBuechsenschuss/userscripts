@@ -354,7 +354,8 @@ area = 'The Crowds of Spite';
 check('the card ratings are registered alongside the other features',
   api.FEATURES.map((f) => f.name),
   ['launcher', 'faction-capture', 'fotz-capture', 'pending-item',
-    'spite-card-ratings', 'zee-card-ratings', 'fotz-card-ratings', 'fotz-supplication']);
+    'spite-card-ratings', 'zee-card-ratings', 'fotz-card-ratings', 'fotz-depth-control',
+    'fotz-supplication']);
 
 console.log(failures ? '\n' + failures + ' FAILURE(S)' : '\nAll checks passed.');
 process.exit(failures ? 1 : 0);

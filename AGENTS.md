@@ -754,16 +754,92 @@ navigation. Two consequences:
   **The depth is the hard part, and `fotzDepth` is where the honesty lives.** Nearly every value
   at this festival is set by *Full Fathom Five*: A Cabin-Fragment pays 50 Favour at depth 1 and
   400 at depth 5, and A Shattered Prow trades a Nuncian Pocket Watch at depths 2-4 but the
-  Scrimshander Carving Knife only at 5. Three sources, best first: a **live** `readQualities`
-  read (verified markup, but whether FL renders `li.quality-item` in the dive's own sidebar is
-  *not* verified, so it may never fire); a depth **you set** in the panel, in `sessionStorage`
-  because a dive is one sitting; or nothing, and then the badge shows the **range** across the
-  depths and says so. The live read deliberately does **not** fall back to the cache: a banked
-  depth is a *wrong* answer rather than a stale one, because it changes with every dive. The card
-  table still yields a **floor** (`min`: A Shattered Prow and Tangled in the Rigging need depth 2,
-  Her Fivefold Symmetry 5), which trims impossible depths out of the range but never collapses it
-  to a guess. At any *known* depth every card offers exactly one claim -- a test pins that, and it
-  is what lets the badge be a single number.
+  Scrimshander Carving Knife only at 5. **Four** answers, best first:
+
+  1. a **live** `readQualities` read. Settled in 2026-09-03 as dead weight in practice — FL
+     renders no `li.quality-item` on the diving screen — but it costs one failed
+     `querySelectorAll`, so it stays.
+  2. a depth **you set**, in `sessionStorage` because a dive is one sitting. Set from the panel
+     or, in the Royal Approach, from the in-page control below.
+  3. a **banked** Myself read, `source: 'read'` (added 2026-09-04). `/myself` *does* render the
+     quality — verified against a real capture, `<img alt="Full Fathom Five">` in the usual
+     `li.quality-item` — and `FOTZ_QUALITIES` has always banked it; what changed is that
+     `fotzDepth` will now use the bank, and opening the festival panel goes and *fetches* it,
+     exactly the way it fetches which items you hold. Gated hard on `FOTZ_READ_FRESH_MS`
+     (60s): past that window an old reading is not stale, it is **wrong**, because every
+     successful dive changes the number. It sits **below** what you set by hand for the same
+     reason — you know you have just dived and the bank does not.
+  4. nothing, and then the badge shows the **range** across the depths and says so.
+
+  The live read still deliberately does not fall back to the bank *itself*: tier 3 is a separate
+  answer with its own expiry and its own label, so a reading that came off Myself never
+  masquerades as one taken on the spot. The card table yields a **floor** (`min`: A Shattered
+  Prow and Tangled in the Rigging need depth 2, Her Fivefold Symmetry 5), which trims impossible
+  depths out of the range but never collapses it to a guess. At any *known* depth every card
+  offers exactly one claim -- a test pins that, and it is what lets the badge be a single number.
+  `depthSourceText` is the one wording for all four, shared so the panel and the in-page control
+  can never disagree, and the badge flag carries the **source** as well as the depth: the same
+  number read off Myself and set by hand have different tooltips behind them.
+  Opening the panel in the Royal Approach forces the /myself fetch even when the banked numbers
+  are fresh by the panel's usual standard (`wantsDepthRefresh`, which `stateIsFresh` deliberately
+  knows nothing about -- that predicate is shared with the Factions panel, which has no such
+  problem). It is stamped rather than re-derived, because a refresh ends in a re-render which
+  asks the question again: a refresh that banked nothing would otherwise boot the SPA forever.
+
+  **The `fotz-depth-control` feature is the other half**, and it is what makes the depth cheap
+  enough to keep correct (2026-09-04). It is the panel's own six buttons, in the page, shown only
+  while `showDepthControl()` says you are in the Royal Approach -- gated on the greeting, with
+  the same "an unmistakable dive hand outranks an unreadable greeting" escape hatch `fotzWhere`
+  keeps. It mounts in **two** places, which answer different questions: **docked** beside FL's
+  travel control by exactly the launcher's rules (`findDockHost`), and **in-page** immediately
+  above `.hand`. The docked one sits *behind `launcherDock`* where that exists, so the two never
+  fight for the one spot after the travel anchor. In the **mobile banner** a row of six buttons
+  would be wider than the whole icon strip, so there it collapses to one button showing the depth
+  and cycling `auto → 1 → … → 5 → auto` -- which is also the fastest thing on a phone, since
+  going a level deeper becomes one tap. The in-page row is **inserted** rather than appended,
+  which is the one place this is less conservative than the launcher's docking; React tracks its
+  children by reference, so a foreign node between two of them survives, and a re-render that
+  does take ours is undone by the next scan.
+  **The control is a LIGHT BLUE card, not `UI`'s dark chrome** (2026-09-04, on request), and the
+  reason is where it lives: a panel is a screen of ours that you opened, and dark is right there,
+  but this sits in Fallen London's own page — over the dark storylet column, beside the travel
+  control — where one more dark box is one more thing to look past. It also puts the control in
+  the same visual family as the badges it governs, whose ramp starts at aqua and light blue. A
+  light card forces dark text, the same trade `FOTZ_INK` makes: `UI.text` is a cream for a
+  near-black background and is illegible on this, so the control has its own five constants
+  (`DEPTH_BG` / `DEPTH_EDGE` / `DEPTH_INK` / `DEPTH_DIM` / `DEPTH_ON`), all of them checked to
+  clear 4.5:1 — and that check is a test, because "use `UI.text` like everything else does" is
+  the natural wrong edit. `styleDepthCard` is shared by both mounts so the docked chip and the
+  in-page row cannot drift apart; they differ only in margin, and in the row spanning the column
+  so it reads as a header for the cards under it. The chosen depth is a solid `DEPTH_ON` chip and
+  the other five are outlines — the one distinction the control has to make at a glance.
+  Two things there are load-bearing. The control is redrawn by the same debounced scan whose
+  MutationObserver its own writes trigger, so **every mount is signature-guarded** (`depthSig`,
+  the same trick `attachBadge`'s flag uses) or it is an infinite loop -- and the signature
+  carries a 15-second age *bucket*, not the timestamp, so "read off Myself 2 minutes ago" is
+  allowed to age without redrawing on every scan. And the click is **swallowed** the way a badge
+  tap is: the docked form is inside FL's chrome and the in-page one sits directly over a hand of
+  cards. Setting a depth reaches three things -- the controls, the badges (via a scan, since
+  their flag carries the depth) and `launcherPanelCtx`, the open panel behind all this.
+  **The badge palette was reworked 2026-09-04**, on a report that several badges were barely
+  visible and too many cards looked alike. Both were true, and for two different reasons. The old
+  `fotzColor` was six dark, desaturated bands — greens, browns, a grey — drawn on top of Fallen
+  London's dark card *artwork*, so the low end vanished into it; and six bands cannot separate
+  the **eight** figures this festival pays, so 125 and 150 came out the same colour, and 175 and
+  200 did too. `FOTZ_FAVOUR_COLORS` is now one colour per figure, all of them light, ordered as a
+  single rotation of the hue wheel — aqua, light blue, periwinkle, orchid, magenta, rose, orange,
+  gold — which keeps both properties at once: adjacent steps are plainly different colours *and*
+  the sequence still reads as a ladder. Light backgrounds are why `makeBadge` gained an optional
+  **`spec.ink`** (default `#fff`, so the Spite and Zailing palettes are untouched): every colour
+  here is under 3:1 against white and over 5.5:1 against `FOTZ_INK`, so these badges carry dark
+  text. A test pins the whole rule — one colour per figure paid, no colour reused up the ramp,
+  and the contrast in both directions — because "adjacent steps differ", which is what the old
+  test checked, passed happily through both duplicated pairs.
+  `FOTZ_COLOR_NEED` is the same gold as 400 **on purpose**: on a coral card it means the same
+  thing, and the two cannot be confused because a coral badge reads `coral` and never a figure.
+  Held and unsure are the only neutrals left, and are the two that should not shout — but they
+  were lifted well clear of the old `#4a5560`, which was close enough to the page to read as a
+  smudge.
   Ownership has the same three-state discipline as the Factions pips: `★` you lack something here,
   `✓` you hold it all, `?` your Possessions have never been read so neither can be said (a
   dash would read as a minus sign in front of the number). A
@@ -995,7 +1071,7 @@ navigation. Two consequences:
   `ctx.rerender()` that rebuilds only the body, so a refresh landing doesn't flicker the header
   or lose scroll position.
 
-**What in `FallenLondon/ux-enhancers.js` has actually been run in the game** (as of 2026-09-02).
+**What in `FallenLondon/ux-enhancers.js` has actually been run in the game** (as of 2026-09-04).
 Worth keeping current, because "verified against a capture" and "seen working live" are different
 claims and this file makes both.
 
@@ -1038,6 +1114,12 @@ Confirmed live by the author:
   on the dive screen to read; the same capture shows `.hand__card-container` carries a
   **`data-event-id`** (`354153` for Well-Disguised Trinkets, matching the wiki's card ID), which
   is a far better key than the name and is worth remembering for other reasons.
+  **Both of those were taken, 2026-09-04.** A `/myself` capture confirms the quality *is*
+  rendered there in the ordinary `li.quality-item` shape, so the panel now loads it in the
+  background the way it loads Possessions (`fotzDepth` tier 3, 60-second expiry); and the manual
+  control moved into the page as `fotz-depth-control`, docked beside the Travel button and again
+  above the hand, one tap per level. The card's `data-event-id` is still unused and still the
+  better key.
 - **Both festival areas**, from the same sort of capture (2026-09-03): *"Welcome to Mutton
   Island, delicious friend!"* on the island and *"Welcome to the Royal Approach, delicious
   friend!"* mid-dive. `FOTZ_AREAS` is now an exact, verified list that is allowed to say no --
@@ -1048,6 +1130,24 @@ Confirmed live by the author:
   screen-reader block states it inside a sentence. FL splits that sentence across three
   paragraphs in the visible greeting, so the regex cannot reach it and the element can -- the
   two complement each other rather than duplicating.
+- The **dive depth, end to end** (2026-09-04). Reported working by the author, which settles the
+  three parts of it together: `fotzDepth`'s banked **`'read'`** tier -- the panel loads `/myself`
+  in the hidden frame and Full Fathom Five comes back off it, so a dive no longer starts with
+  the badges quoting a range; the **`fotz-depth-control`** feature in both of its mounts, docked
+  beside the travel control and above the hand, including that the tap sets the depth and every
+  badge in the hand re-quotes itself; and `wantsDepthRefresh` forcing that fetch on every panel
+  open in the Royal Approach without looping. This is the answer to the 2026-09-03 "SETTLED, and
+  the answer is no" entry above: the depth still cannot read itself on the diving screen, but it
+  no longer has to.
+- The **Fruits of the Zee badge palette** (2026-09-04). The reworked `FOTZ_FAVOUR_COLORS` -- one
+  light colour per Favour figure, dark-inked -- was reported as legible on real card art, which
+  is the claim the old dark ramp failed: the author's report is what started it (*"some are
+  barely visible"*), and the eight distinct colours are confirmed distinguishable in a live hand
+  rather than merely distinct in a contrast calculation.
+- The **light blue depth card** (2026-09-04). `DEPTH_BG` and its four companions, on both mounts.
+  Confirmed readable in the page, which is the half a contrast ratio cannot settle -- the
+  question was never white-on-blue, it was whether a light card reads as *ours* against FL's
+  dark chrome. It does.
 
 **Not** verified in-game (reasoned about only):
 
@@ -1281,6 +1381,13 @@ Current tests:
   that `findTravelAnchor` refuses our own button even when it is the only thing the selector can
   still find. A real latent bug fell out of writing it: a rebuilt launcher reused the previous
   run's dock wrapper and re-attached the dead button with it.
+  It also covers the **Fruits of the Zee depth control** (2026-09-04), which docks by the same
+  rules and is the second thing to want the one spot after the travel control: that it queues up
+  behind `launcherDock` rather than fighting it for that place, that it is as idempotent as the
+  launcher is — it is redrawn by the scan its own writes trigger, so a rebuild every pass would
+  be an infinite loop, not just a stray node — that both copies (docked, and above the hand)
+  repair themselves, that the banner gets one cycling button instead of a row of six, and that
+  surfacing removes both.
 - `FallenLondon/test/ux-fruits-of-the-zee.test.mjs` — asserts `ux-enhancers.js`'s Fruits of the
   Zee feature. Its stub DOM builds both the qualities and the possessions markup and is rich
   enough to **actually build the panel**, in both the mid-festival and the nothing-ever-read
@@ -1297,7 +1404,12 @@ Current tests:
   dive-only items once each, and a coral already in hand is not one to dive for) and the
   **tap-to-read** half of the badges (the tap is swallowed both ways, a second tap closes, and a
   panel whose badge was re-rendered away is pruned) — for which its stub records event listeners
-  rather than dropping them. Update it when you touch any of the `FOTZ_*` tables.
+  rather than dropping them. It also pins the **four depth sources and the order between them**
+  (a live read beats a hand-set depth, a hand-set depth beats a banked Myself read, and a banked
+  read past `FOTZ_READ_FRESH_MS` is dropped rather than shown stale — that expiry is the half
+  most worth having a test for), that a banked `Full Fathom Five` of 0 is "not diving" rather
+  than a depth, `depthSourceText`'s wording per source, and the in-page control's gate and its
+  one-button cycle. Update it when you touch any of the `FOTZ_*` tables.
 
 The re-expose trick (rename `(function () {` and `return { ... }` the helpers before `})()`) is
 how a test reaches an IIFE's internals — copy an existing test when adding one, and put it in the

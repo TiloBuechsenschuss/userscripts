@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      2.0
-// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A "UX" button docked INTO Fallen London's own chrome beside its travel control -- under the big Travel button on the wide layout, as one more icon in the banner on the narrow one -- so it takes up space in the page like any other control and covers nothing. It opens a menu of reference panels; the last line of that menu switches it back to floating over the page if you preferred it that way, and it falls back to floating on its own if Fallen London's chrome cannot be found. The first panel is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, where the safe docks are, the three winds and the dreams they start, and the whole card table, searchable. (4) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, coloured from grey to gold, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth when Full Fathom Five can be read or you set it in the panel, and otherwise shows the range across the depths rather than a number it cannot justify. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. A third panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. Built as a feature registry so further tweaks can be added as entries.
+// @version      2.3
+// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A "UX" button docked INTO Fallen London's own chrome beside its travel control -- under the big Travel button on the wide layout, as one more icon in the banner on the narrow one -- so it takes up space in the page like any other control and covers nothing. It opens a menu of reference panels; the last line of that menu switches it back to floating over the page if you preferred it that way, and it falls back to floating on its own if Fallen London's chrome cannot be found. The first panel is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, where the safe docks are, the three winds and the dreams they start, and the whole card table, searchable. (4) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: beside Fallen London’s own Travel button, where the UX button docks, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. A third panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. Built as a feature registry so further tweaks can be added as entries.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 // @run-at       document-idle
@@ -236,6 +236,10 @@
 
   // A badge is described by a plain { text, color, title } spec, so the
   // deciding (per feature, pure, testable) stays separate from the drawing.
+  // `spec.ink` is the text colour, and defaults to white because that is what
+  // every badge here used to be. It exists because a badge is only legible on
+  // Fallen London's dark card art if its background is LIGHT, and white text on
+  // a light background is not legible at all -- see FOTZ_INK.
   function makeBadge(spec, extraClass) {
     const el = document.createElement('span');
     el.className = extraClass ? BADGE_CLASS + ' ' + extraClass : BADGE_CLASS;
@@ -250,7 +254,7 @@
     el.style.cssText =
       'display:inline-block;margin-left:4px;padding:0 4px;' +
       'font-family:arial,sans-serif;font-size:10px;font-weight:bold;' +
-      'line-height:14px;color:#fff;border-radius:2px;' +
+      'line-height:14px;color:' + (spec.ink || '#fff') + ';border-radius:2px;' +
       'background:' + spec.color + ';' +
       'text-shadow:none;white-space:nowrap;vertical-align:middle;cursor:help;' +
       'touch-action:manipulation;-webkit-tap-highlight-color:transparent;' +
@@ -2664,9 +2668,23 @@
   //     It is deliberately live-only, with no fall back to the cache: a banked
   //     depth from three minutes ago is a WRONG answer rather than a stale
   //     one, because it changes with every successful dive.
-  //  2. What you set yourself in the panel, kept in sessionStorage -- a dive
-  //     is one sitting, and a depth should not outlive the tab.
-  //  3. Nothing. Then the badge shows the range across every depth and says
+  //  2. What you set yourself, kept in sessionStorage -- a dive is one
+  //     sitting, and a depth should not outlive the tab. Set from the panel
+  //     or, while you are in the Royal Approach, from the control this script
+  //     puts in the page: beside Fallen London's own travel button, the way
+  //     the UX button docks, and again above the diving hand.
+  //  3. A BANKED quality read, off the Myself tab -- the one place Full
+  //     Fathom Five is reliably rendered. CONFIRMED WORKING in-game
+  //     (2026-09-04): the panel fetches it and the depth comes back, so a
+  //     dive no longer opens with the badges quoting a range. Opening the
+  //     Fruits of the Zee panel loads
+  //     /myself in a hidden frame the same way it loads /possessions, so this
+  //     is normally seconds old. It is used ONLY inside `FOTZ_READ_FRESH_MS`,
+  //     because the number changes with every successful dive: past that
+  //     window an old reading is not stale, it is wrong, and no answer beats
+  //     a wrong one. It sits BELOW what you set by hand for the same reason --
+  //     you know you have just dived, and the bank does not.
+  //  4. Nothing. Then the badge shows the range across every depth and says
   //     so. The card table still gives a FLOOR (A Shattered Prow and Tangled
   //     in the Rigging need depth 2, Her Fivefold Symmetry depth 5), which is
   //     used to trim impossible depths out of that range -- but never to
@@ -2729,13 +2747,67 @@
     if (fotzChosenDepth() != null) fotzSetDepth(null);
   }
 
-  // { depth, source } -- source is 'quality', 'set', or null for neither.
+  // How long a depth read off the Myself tab is worth anything. One dive
+  // changes it, so this is deliberately short -- it is the window in which the
+  // reading the panel just took is still the reading rather than a memory of
+  // one.
+  const FOTZ_READ_FRESH_MS = 60 * 1000;
+
+  // The banked Myself reading, or null. Null covers every doubt: no bank, no
+  // timestamp, a stale one, or a level outside 1-5 (0 is what the scrape
+  // writes when you are not diving at all, and that is not a depth).
+  function fotzReadDepth() {
+    let rec = null;
+    try {
+      rec = loadCache(FOTZ_CACHE_KEY, 1);
+    } catch (e) {
+      return null;
+    }
+    if (!rec || !rec.values || !(rec.at > 0)) return null;
+    if (Date.now() - rec.at > FOTZ_READ_FRESH_MS) return null;
+    const n = rec.values[FOTZ_QUALITY_DEPTH];
+    if (!(n >= 1) || n > 5) return null;
+    return { depth: n, at: rec.at };
+  }
+
+  // { depth, source, at } -- source is 'quality', 'set', 'read', or null for
+  // none of them. `at` is when a 'read' was taken, and null for the others.
   function fotzDepth() {
     const live = fotzLiveDepth();
-    if (live) return { depth: live, source: 'quality' };
+    if (live) return { depth: live, source: 'quality', at: null };
     const chosen = fotzChosenDepth();
-    if (chosen) return { depth: chosen, source: 'set' };
-    return { depth: null, source: null };
+    if (chosen) return { depth: chosen, source: 'set', at: null };
+    const read = fotzReadDepth();
+    if (read) return { depth: read.depth, source: 'read', at: read.at };
+    return { depth: null, source: null, at: null };
+  }
+
+  // Opening the festival panel while you are actually down there has to go and
+  // LOOK, even when the banked numbers are fresh by the panel's usual standard:
+  // every figure on that screen is quoted at a depth that changed the last time
+  // you acted, and Full Fathom Five is only ever rendered on the Myself tab.
+  // `stateIsFresh` is left alone -- it is shared with the Factions panel, which
+  // has no such problem.
+  //
+  // The timestamp is what stops this being a loop. A refresh ends in a
+  // re-render, which asks this again; a refresh that banked nothing (a
+  // logged-out iframe, say) would still answer "go and look", and the panel
+  // would boot the SPA over and over.
+  let depthRefreshAt = 0;
+  function wantsDepthRefresh() {
+    if (!inDiveArea()) return false;
+    if (readQualities()) return false; // the Myself tab is already on screen
+    return Date.now() - depthRefreshAt > FOTZ_READ_FRESH_MS;
+  }
+
+  // One phrase for where the depth came from, shared by the panel and the
+  // in-page control so the two can never word it differently. The badge
+  // tooltip says it in its own words, because it has a whole line for it.
+  function depthSourceText(at, floor) {
+    if (at.source === 'quality') return 'read from Full Fathom Five: ' + at.depth;
+    if (at.source === 'set') return 'set to ' + at.depth;
+    if (at.source === 'read') return 'read off Myself ' + ageText(at.at) + ': ' + at.depth;
+    return floor ? 'unknown, at least ' + floor : 'unknown';
   }
 
   // --- reading a card ----------------------------------------------------
@@ -2871,17 +2943,57 @@
   // kinds that pay no Favour at all -- a coral, and the Bride at the bottom of
   // the trench -- are coloured by whether you still NEED them instead, since
   // for those the Favour column isn't the question being asked.
-  const FOTZ_COLOR_NEED = '#b8912f'; // the gold the launcher uses
-  const FOTZ_COLOR_HELD = '#4a5560';
-  const FOTZ_COLOR_UNSURE = '#6b6b6b';
+  //
+  // REWORKED 2026-09-04, on the author's report that several of these were
+  // barely visible and that too many cards shared a colour. Both were true.
+  // The replacement is CONFIRMED legible on real card art, in a live hand --
+  // which is the half a contrast ratio cannot settle.
+  // The old ramp was six dark, desaturated bands -- greens, browns and a grey
+  // -- drawn over Fallen London's dark card ARTWORK, which is what made the
+  // low end disappear; and six bands cannot separate the eight figures this
+  // festival actually pays, so 125 and 150 came out the same colour, and so
+  // did 175 and 200.
+  //
+  // The rule now: one colour per figure, every one of them LIGHT enough to sit
+  // on artwork, and the eight ordered as a single rotation of the hue wheel
+  // from aqua round through blue, violet and rose to gold. That keeps the two
+  // properties that matter at once -- adjacent steps are plainly different
+  // colours, and the sequence still reads as a ladder rather than a set of
+  // unrelated labels.
+  //
+  // Light backgrounds are why FOTZ_INK exists. Every colour below is under
+  // 3:1 against white and over 5.5:1 against this near-black, so the badges
+  // carry dark text; `makeBadge` defaults to white for the other features,
+  // whose palettes are still dark.
+  const FOTZ_INK = '#14181c';
 
+  const FOTZ_FAVOUR_COLORS = [
+    [400, '#f0c23c'], // gold
+    [300, '#ef9440'], // orange
+    [200, '#ef7a86'], // rose
+    [175, '#e878c0'], // magenta
+    [150, '#c07ad8'], // orchid
+    [125, '#8f8ae8'], // periwinkle
+    [100, '#5aa6e8'], // light blue
+    [0, '#5fd3e0'],   // aqua -- 50, and anything below it
+  ];
+
+  // Gold twice over, and deliberately: a coral you still need is the prize on
+  // that card the way 400 Favour is the prize on a numbered one. They cannot
+  // be confused, because a coral badge reads "coral" and never a figure.
+  const FOTZ_COLOR_NEED = '#f0c23c';
+  // Held and unsure are the two that should NOT shout, so they are the only
+  // neutrals left -- but lifted well clear of the old #4a5560, which was so
+  // close to the page that a badge wearing it read as a smudge.
+  const FOTZ_COLOR_HELD = '#8797a8';
+  const FOTZ_COLOR_UNSURE = '#9a9a9a';
+
+  // Thresholds rather than an exact lookup, so a figure the table does not
+  // currently pay still lands somewhere sensible instead of nowhere. The last
+  // entry is `0`, so this always returns.
   function fotzColor(favour) {
-    if (favour >= 400) return '#b8912f';
-    if (favour >= 300) return '#357a62';
-    if (favour >= 175) return '#54783e';
-    if (favour >= 125) return '#78733a';
-    if (favour >= 100) return '#7a5c3a';
-    return '#6b6b6b';
+    for (const step of FOTZ_FAVOUR_COLORS) if (favour >= step[0]) return step[1];
+    return FOTZ_FAVOUR_COLORS[FOTZ_FAVOUR_COLORS.length - 1][1];
   }
 
   function fotzRangeText(favours) {
@@ -2973,10 +3085,14 @@
     lines.push(depth
       ? 'Your depth: ' + depth + (source === 'quality'
         ? ' (read from Full Fathom Five)'
-        : ' (as set in the Fruits of the Zee panel)')
+        : (source === 'read'
+          ? ' (read off the Myself tab — a dive changes it, so correct it on the '
+            + 'depth control if you have gone deeper)'
+          : ' (as you set it)'))
       : 'Depth unknown, so every depth is listed'
         + (floor ? ', from ' + floor + ' up — this hand proves at least that' : '')
-        + '. Set it in ⚙ UX → Fruits of the Zee for one exact figure.');
+        + '. Set it on the depth control beside the Travel button, or in '
+        + '⚙ UX → Fruits of the Zee, for one exact figure.');
 
     for (const opt of opts) {
       let line = (depth ? '' : fotzDepthWord(opt) + ': ') + opt.text;
@@ -3039,7 +3155,12 @@
     lines.push('One card’s reward per dive. Diving deeper is free, but failing the dive '
       + 'ends it and hands you menaces.');
 
-    return { text: mark ? mark + label : label, color: color, title: lines.join('\n') };
+    return {
+      text: mark ? mark + label : label,
+      color: color,
+      ink: FOTZ_INK,
+      title: lines.join('\n'),
+    };
   }
 
   // --- badging the supplication branches ---------------------------------
@@ -3143,8 +3264,11 @@
         flag: FOTZ_FLAG,
         // The flag has to move when the DEPTH or your holdings change, not
         // only when the card does -- otherwise setting your depth leaves every
-        // badge already in the hand quoting the old one.
-        value: name + '@' + (at.depth || 'x') + '/' + (holdings ? holdings.sig : 'x'),
+        // badge already in the hand quoting the old one. The SOURCE is in here
+        // as well: the same depth read off Myself and set by hand are the same
+        // number with a different tooltip behind it.
+        value: name + '@' + (at.depth || 'x') + (at.source || '-')
+          + '/' + (holdings ? holdings.sig : 'x'),
         spec: spec,
         place: place,
         style: style,
@@ -3278,6 +3402,10 @@
   let launcherDock = null;    // the wrapper the button sits in inside FL's chrome
   let launcherDocked = false; // ...or false, when it is floating after all
   let launcherBound = false;
+  // The open panel's render context, or null. The in-page depth control needs
+  // it: setting the depth there has to redraw a Fruits of the Zee panel that
+  // happens to be open behind the page, not leave it quoting the old one.
+  let launcherPanelCtx = null;
   let travelAnchor = null;
 
   // Docked by default. The floating button was the original design and it is
@@ -3886,6 +4014,7 @@
     function closePanel() {
       panelHost.style.display = 'none';
       panelHost.textContent = '';
+      launcherPanelCtx = null;
     }
     // The header stays put and only the body is rebuilt, so a panel that
     // refreshes itself doesn't make the whole thing flicker or lose its
@@ -3918,6 +4047,7 @@
           panelHost.scrollTop = top;
         },
       };
+      launcherPanelCtx = ctx;
       ctx.rerender();
       panelHost.style.display = 'block';
       panelHost.scrollTop = 0;
@@ -5995,8 +6125,9 @@
     const hand = fotzHandRows(at.depth, at.source, floor, fotzHoldings());
 
     let busy = false;
-    if (ctx && autoRefreshEnabled() && !stateIsFresh(state)) {
+    if (ctx && autoRefreshEnabled() && (!stateIsFresh(state) || wantsDepthRefresh())) {
       busy = true;
+      depthRefreshAt = Date.now();
       refreshBackgroundState().then(function () { ctx.rerender(); });
     }
 
@@ -6280,17 +6411,22 @@
         h('span', { css: 'color:' + UI.dim + ';margin-right:4px;' }, ['Your dive depth:']),
         depthButton(null), depthButton(1), depthButton(2), depthButton(3),
         depthButton(4), depthButton(5),
-        h('span', { css: 'color:' + (at.depth ? UI.accent : UI.dim) + ';margin-left:4px;' }, [
-          at.source === 'quality' ? 'read from Full Fathom Five: ' + at.depth
-            : (at.source === 'set' ? 'set to ' + at.depth
-              : (floor ? 'unknown, at least ' + floor : 'unknown')),
-        ]),
+        h('span', { css: 'color:' + (at.depth ? UI.accent : UI.dim) + ';margin-left:4px;' },
+          [depthSourceText(at, floor)]),
       ]),
       note([at.depth
         ? 'Every badge is showing the figure for depth ' + at.depth + '.'
+          + (at.source === 'read'
+            ? ' That reading came off the Myself tab, which opening this panel reloads — '
+              + 'but a dive changes it, so set it here the moment you go deeper.'
+            : '')
         : 'Without a depth the badges show the range across every depth. Fallen London '
-          + 'only states Full Fathom Five where it feels like it, so set it here and '
-          + 'the badges become exact. Cleared when the tab closes.']),
+          + 'only states Full Fathom Five on the Myself tab, never on the diving screen, '
+          + 'so set it here and the badges become exact. Cleared when the tab closes.',
+      ]),
+      note(['The same buttons are in the page while you are in the Royal Approach — '
+        + 'beside Fallen London’s Travel button and above your hand — so you need '
+        + 'not open this panel to correct the depth mid-dive.']),
     ]);
     banners.push(depthBlock);
 
@@ -6673,6 +6809,272 @@
     return body;
   }
 
+  // === feature: the depth control, in the page ===========================
+  //
+  // CONFIRMED WORKING in-game (2026-09-04), both mounts: the tap sets the
+  // depth and every badge in the hand re-quotes itself.
+  //
+  // Full Fathom Five decides every figure the festival badges quote, and
+  // Fallen London does not render it on the diving screen at all -- so the
+  // panel has always carried a control for setting it by hand. This is that
+  // control, in the page, where the dive is: you go one deeper, you tap the
+  // next number, and every badge in the hand is right again without opening
+  // anything.
+  //
+  // It appears in TWO places on purpose, because they are reached differently:
+  //
+  //   docked  beside Fallen London's travel control, exactly where the UX
+  //           button docks and by the same rules (`findDockHost`), so it is
+  //           part of the chrome and always in the same spot. In the mobile
+  //           banner a row of six buttons would be wider than the whole icon
+  //           strip, so there it collapses to ONE button that shows the depth
+  //           and cycles auto -> 1 -> ... -> 5 -> auto -- which is also the
+  //           quickest thing on a phone, since going a level deeper is then
+  //           one tap.
+  //   in-page above the diving hand, which is where you are already looking.
+  //
+  // Only in the Royal Approach. Anywhere else both are removed -- and
+  // `forgetStaleDepth` has thrown the setting away by then, so the control and
+  // the badges can never disagree about it.
+  //
+  // Everything here has to be IDEMPOTENT and quiet, because it is redrawn by
+  // the same debounced scan whose MutationObserver its own writes would
+  // trigger: rebuilding the buttons on every scan is an infinite loop. Hence
+  // the signature flag -- the same trick `attachBadge` uses, a dataset entry
+  // holding the value the node was last drawn for.
+
+  const DEPTH_ROW_ID = 'fl-ux-depth-row';
+  const DEPTH_DOCK_ID = 'fl-ux-depth-dock';
+  const DEPTH_SIG_FLAG = 'flUxDepthSig';
+  const DEPTH_CHOICES = [null, 1, 2, 3, 4, 5];
+
+  // A LIGHT BLUE card, not the dark chrome `UI` gives the panels (changed
+  // 2026-09-04, on the author's request, and confirmed in the page). The reason it differs is where it
+  // lives: a panel is a screen of ours that you opened, and dark is right
+  // there, but this thing sits in Fallen London's own page -- over the dark
+  // storylet column, beside the travel control -- where one more dark box is
+  // one more thing to look past. Light blue reads as ours, and as a control.
+  //
+  // It also puts the control in the same visual family as the badges it
+  // governs, whose ramp starts at aqua and light blue.
+  //
+  // A light card means dark text, the same trade FOTZ_INK makes: `UI.text` is
+  // a cream meant for a near-black background and is illegible on this.
+  const DEPTH_BG = '#cfe6f7';   // the card
+  const DEPTH_EDGE = '#8fbfe0'; // its border, and an unchosen button's
+  const DEPTH_INK = '#14181c';  // everything written on it
+  const DEPTH_DIM = '#476076';  // ...except the quieter half, which is this
+  const DEPTH_ON = '#1b6499';   // the depth you actually chose
+
+  let depthRow = null;
+  let depthDock = null;
+
+  // In the Royal Approach. The greeting is the gate; where there is no
+  // greeting to read at all, an unmistakable dive hand still proves it -- the
+  // same escape hatch `fotzWhere` keeps.
+  function showDepthControl() {
+    if (inDiveArea()) return true;
+    return !normalizeName(currentArea()) && fotzHandConfirms();
+  }
+
+  // Where the one-button form goes next. Anything but a hand-set depth starts
+  // the cycle at 1 rather than stepping off a number you did not choose.
+  function nextDepthChoice(at) {
+    if (at.source !== 'set') return 1;
+    const i = DEPTH_CHOICES.indexOf(at.depth);
+    return DEPTH_CHOICES[(i + 1) % DEPTH_CHOICES.length];
+  }
+
+  // What the drawn control depends on. The age BUCKET rather than the
+  // timestamp: a banked reading says how old it is in words, so those words
+  // have to be allowed to change -- but only every so often, or this would
+  // redraw on every scan and the observer would never settle.
+  function depthSig(at, floor) {
+    const age = at.at ? Math.floor((Date.now() - at.at) / 15000) : 'x';
+    return [at.depth || 'x', at.source || '-', floor || 'x', age].join('/');
+  }
+
+  // Setting the depth has to reach three things: these controls, the badges
+  // (whose flag carries the depth, so a scan is enough to redraw them), and a
+  // Fruits of the Zee panel that happens to be open behind all this.
+  function setDepthFromControl(n) {
+    fotzSetDepth(n);
+    try {
+      fotzDepthControls();
+    } catch (e) { /* the scan below gets another go at it */ }
+    if (launcherPanelCtx) {
+      try {
+        launcherPanelCtx.rerender();
+      } catch (e) { /* ditto */ }
+    }
+    schedule();
+  }
+
+  // The docked form sits inside Fallen London's own chrome and the in-page one
+  // sits directly above a hand of cards. Neither click is the game's to hear.
+  function depthTap(handler) {
+    return function (e) {
+      if (e && e.preventDefault) e.preventDefault();
+      if (e && e.stopPropagation) e.stopPropagation();
+      handler();
+    };
+  }
+
+  // The chosen depth is a solid blue chip on the light card; the rest are
+  // outlines. That is the one distinction the control has to make at a glance,
+  // and it survives being the only thing you can see out of the corner of an
+  // eye while you are reading the cards themselves.
+  function depthChoiceButton(n, at) {
+    const on = at.source === 'set' && at.depth === n;
+    return h('button', {
+      type: 'button',
+      title: n == null
+        ? 'Stop overriding it — read the depth off Full Fathom Five where that is possible.'
+        : 'You are at Full Fathom Five ' + n + '.',
+      css: 'border:1px solid ' + (on ? DEPTH_ON : DEPTH_EDGE) + ';border-radius:3px;'
+        + 'background:' + (on ? DEPTH_ON : 'transparent') + ';color:'
+        + (on ? '#ffffff' : DEPTH_INK) + ';font:' + (on ? 'bold ' : '') + '12px ' + UI.font
+        + ';padding:1px 7px;margin:0;line-height:1.5;cursor:pointer;',
+      on: { click: depthTap(function () { setDepthFromControl(n); }) },
+    }, [n == null ? 'auto' : String(n)]);
+  }
+
+  // The card itself, wherever it is drawn. Both mounts share this so the
+  // docked copy and the in-page one cannot drift apart.
+  function styleDepthCard(host, at) {
+    host.style.cssText = 'display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;'
+      + 'box-sizing:border-box;padding:5px 9px;border-radius:4px;'
+      + 'background:' + DEPTH_BG + ';border:1px solid ' + DEPTH_EDGE + ';'
+      + 'border-left:3px solid ' + (at.depth ? DEPTH_ON : DEPTH_EDGE) + ';'
+      + 'color:' + DEPTH_INK + ';list-style:none;vertical-align:middle;';
+  }
+
+  function fillDepthRow(host, at, floor) {
+    host.textContent = '';
+    host.appendChild(h('span', { css: 'color:' + DEPTH_DIM + ';font:11px ' + UI.font + ';' },
+      ['Dive depth:']));
+    for (const n of DEPTH_CHOICES) host.appendChild(depthChoiceButton(n, at));
+    host.appendChild(h('span', {
+      css: 'color:' + (at.depth ? DEPTH_ON : DEPTH_DIM) + ';font:11px ' + UI.font + ';',
+    }, [depthSourceText(at, floor)]));
+  }
+
+  function fillDepthCycle(host, at, floor) {
+    const next = nextDepthChoice(at);
+    host.textContent = '';
+    host.appendChild(h('button', {
+      type: 'button',
+      title: 'Dive depth: ' + depthSourceText(at, floor) + '. Tap for '
+        + (next == null ? 'auto' : next) + '.',
+      css: 'border:0;border-radius:3px;background:transparent;color:'
+        + (at.depth ? DEPTH_ON : DEPTH_DIM) + ';font:' + (at.depth ? 'bold ' : '') + '15px '
+        + UI.font + ';padding:0 2px;margin:0;line-height:1;cursor:pointer;',
+      on: { click: depthTap(function () { setDepthFromControl(next); }) },
+    }, ['🌊' + (at.depth || '?')]));
+  }
+
+  // Docked by the same rules as the UX button -- and BEHIND it where it is
+  // there, since the launcher claims the place immediately after the travel
+  // control and the two must not fight over it.
+  function dockDepthControl(at, floor) {
+    const host = dockPreferred() ? findDockHost() : null;
+    if (!host) {
+      if (depthDock) {
+        depthDock.remove();
+        depthDock = null;
+      }
+      return;
+    }
+    const banner = host.tag === 'li';
+    if (!depthDock || depthDock.tagName !== host.tag.toUpperCase()) {
+      if (depthDock) depthDock.remove();
+      depthDock = h(host.tag, { id: DEPTH_DOCK_ID, className: host.className });
+    } else if (depthDock.className !== host.className) {
+      depthDock.className = host.className;
+    }
+    const sig = (banner ? 'banner' : 'row') + '/' + depthSig(at, floor);
+    if (depthDock.dataset[DEPTH_SIG_FLAG] !== sig) {
+      // The wrapper IS the card, in both shapes -- in the banner it is one
+      // light blue chip in the row of icons, which is what a control of ours
+      // should look like there. `margin` is the one thing the two disagree on:
+      // the banner packs its items tight and the sidebar does not.
+      styleDepthCard(depthDock, at);
+      depthDock.style.margin = banner ? '0 0 0 4px' : '4px 0 4px 8px';
+      if (banner) fillDepthCycle(depthDock, at, floor);
+      else fillDepthRow(depthDock, at, floor);
+      depthDock.dataset[DEPTH_SIG_FLAG] = sig;
+    }
+    const after = (launcherDock && launcherDock.parentNode === host.container)
+      ? launcherDock : host.after;
+    const misplaced = after
+      ? depthDock.previousElementSibling !== after
+      : depthDock.parentNode !== host.container;
+    if (misplaced) {
+      if (after) host.container.insertBefore(depthDock, after.nextSibling);
+      else host.container.appendChild(depthDock);
+    }
+  }
+
+  // Above the hand. `.hand` is the block both layouts wrap the cards in -- the
+  // same markup `eachCardName`'s first two selectors hang off -- with the
+  // full-width layout's card container as the fallback if that is all there is.
+  //
+  // INSERTED rather than appended, which is the one place this is less
+  // conservative than the launcher's docking: the control belongs above the
+  // cards, not under them. React tracks its children by reference, so a
+  // foreign node between two of them survives its inserts and its removes; and
+  // if a re-render does take ours, the next scan puts it back.
+  function mountDepthRow(at, floor) {
+    const card = document.querySelector('.hand__card-container');
+    const hand = document.querySelector('.hand') || (card ? card.parentElement : null);
+    if (!hand || !hand.parentNode) {
+      if (depthRow) {
+        depthRow.remove();
+        depthRow = null;
+      }
+      return;
+    }
+    if (!depthRow) {
+      depthRow = h('div', {
+        id: DEPTH_ROW_ID,
+        title: 'Every Fruits of the Zee badge below is quoted at this depth.',
+      });
+    }
+    const sig = depthSig(at, floor);
+    if (depthRow.dataset[DEPTH_SIG_FLAG] !== sig) {
+      styleDepthCard(depthRow, at);
+      // The one difference from the docked copy: above the hand it spans the
+      // column rather than shrink-wrapping, so it reads as a header for the
+      // cards under it instead of a stray chip floating over them.
+      depthRow.style.display = 'flex';
+      depthRow.style.width = '100%';
+      depthRow.style.margin = '0 0 8px';
+      fillDepthRow(depthRow, at, floor);
+      depthRow.dataset[DEPTH_SIG_FLAG] = sig;
+    }
+    if (depthRow.parentNode !== hand.parentNode || depthRow.nextElementSibling !== hand) {
+      hand.parentNode.insertBefore(depthRow, hand);
+    }
+  }
+
+  function fotzDepthControls() {
+    if (!showDepthControl()) {
+      if (depthRow) {
+        depthRow.remove();
+        depthRow = null;
+      }
+      if (depthDock) {
+        depthDock.remove();
+        depthDock = null;
+      }
+      return;
+    }
+    const at = fotzDepth();
+    const floor = at.depth ? null : fotzDepthFloor();
+    dockDepthControl(at, floor);
+    mountDepthRow(at, floor);
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -6690,6 +7092,10 @@
     { name: 'spite-card-ratings', run: spiteCardRatings },
     { name: 'zee-card-ratings', run: zeeCardRatings },
     { name: 'fotz-card-ratings', run: fotzCardRatings },
+    // How deep you are, set in the page rather than behind the launcher. AFTER
+    // the ratings, because `fotzCardRatings` is where `forgetStaleDepth` runs:
+    // a depth thrown away on surfacing is gone before the control can draw it.
+    { name: 'fotz-depth-control', run: fotzDepthControls },
     // The only feature that decorates a storylet's OPTIONS rather than cards.
     { name: 'fotz-supplication', run: fotzSupplicationBranches },
   ];

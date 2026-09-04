@@ -32,6 +32,17 @@
 //  - The docked button is never mistaken for the travel control itself. Parked
 //    in `.storylets__welcome-and-travel` it matches one of TRAVEL_SELECTORS
 //    literally, which would be a quiet little infinite regress.
+//  - The Fruits of the Zee DEPTH CONTROL, which docks by the same rules and is
+//    the second thing to want the one spot beside the travel control: it has to
+//    queue up behind the launcher rather than fight it for that place, be as
+//    idempotent as the launcher is (it is redrawn by the scan its own writes
+//    trigger, so a rebuild every pass would be an infinite loop), collapse to
+//    one button in the mobile banner, and be gone entirely once you surface.
+//  - Its palette. The control is a LIGHT card in a dark page, which is the
+//    whole point of it (it has to read as a control of ours rather than as one
+//    more dark box) -- and a light card means every colour written on it has
+//    to be a dark one. Reaching for `UI.text`, the cream the panels use, would
+//    leave it unreadable while looking perfectly reasonable in a diff.
 //
 //   node FallenLondon/test/ux-launcher-docking.test.mjs
 
@@ -78,6 +89,13 @@ function makeEl(tag) {
       if (!this.parentNode) return null;
       const i = this.parentNode.children.indexOf(this);
       return i > 0 ? this.parentNode.children[i - 1] : null;
+    },
+    // Its mirror image, which the depth control uses: it has to sit
+    // immediately BEFORE the hand rather than immediately after an anchor.
+    get nextElementSibling() {
+      if (!this.parentNode) return null;
+      const i = this.parentNode.children.indexOf(this);
+      return i >= 0 ? this.parentNode.children[i + 1] || null : null;
     },
     get nextSibling() {
       if (!this.parentNode) return null;
@@ -296,7 +314,9 @@ const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
     'return { mountLauncher, dockLauncher, positionLauncher, findTravelAnchor,'
-    + ' dockPreferred, setDockPreferred, LAUNCHER_ID, LAUNCHER_BUTTON_ID }; })();');
+    + ' dockPreferred, setDockPreferred, LAUNCHER_ID, LAUNCHER_BUTTON_ID,'
+    + ' fotzDepthControls, fotzSetDepth, DEPTH_ROW_ID, DEPTH_DOCK_ID,'
+    + ' DEPTH_BG, DEPTH_EDGE, DEPTH_INK, DEPTH_DIM, DEPTH_ON }; })();');
 const api = new Function(
   'document', 'MutationObserver', 'requestAnimationFrame', 'getComputedStyle', 'console',
   'URLSearchParams', 'localStorage', 'sessionStorage', 'location', 'Event', 'window',
@@ -477,6 +497,163 @@ check('docking again returns it to the banner row',
   check('with room above, it is pinned by bottom instead',
     [root().style.top, root().style.bottom, root().style.flexDirection],
     ['auto', '108px', 'column']);
+}
+
+// --- the Fruits of the Zee depth control ----------------------------------
+//
+// Same docking rules as the launcher, so the same risks -- plus one that is
+// its own: two of our controls now want the place immediately after the travel
+// control, and only one of them can have it.
+
+const depthDock = () => doc.getElementById(api.DEPTH_DOCK_ID);
+const depthRow = () => doc.getElementById(api.DEPTH_ROW_ID);
+
+// The area is what gates the control, and the stub reaches it through the wide
+// layout's own `p.welcome__current-area` -- the second of the two sources
+// `currentArea` knows, and the only one this stub's selector matcher can see.
+function setArea(where) {
+  const p = doc.querySelector('.welcome__current-area');
+  if (p) p.remove();
+  if (where == null) return;
+  const el = doc.body.appendChild(makeEl('p'));
+  el.className = 'heading heading--2 welcome__current-area';
+  el.textContent = where + ',';
+}
+
+{
+  layout = wideLayout();
+  api.mountLauncher();
+  setArea('Mutton Island');
+  api.fotzDepthControls();
+  check('ashore there is no depth control at all', [depthDock(), depthRow()], [null, null]);
+
+  setArea('the Royal Approach');
+  const hand = doc.body.appendChild(makeEl('div'));
+  hand.className = 'hand';
+  api.fotzDepthControls();
+
+  check('in the Royal Approach it docks beside the travel control, behind the UX button',
+    [depthDock().tagName, depthDock().parentNode === layout.travel,
+      depthDock().previousElementSibling === dock()],
+    ['SPAN', true, true]);
+
+  check('and it is the panel\'s own six buttons: auto and the five depths',
+    depthDock().querySelectorAll('button').map((b) => b.textContent),
+    ['auto', '1', '2', '3', '4', '5']);
+
+  check('with a second copy in the page, immediately above the hand',
+    [depthRow().parentNode === doc.body, depthRow().nextElementSibling === hand,
+      depthRow().querySelectorAll('button').length],
+    [true, true, 6]);
+
+  // The one that would be an infinite loop in the game rather than a stray
+  // node: this is redrawn by the same debounced scan its own writes trigger.
+  const before = layout.travel.children.length;
+  api.fotzDepthControls();
+  api.fotzDepthControls();
+  check('running it again adds nothing, moves nothing and rebuilds nothing',
+    [layout.travel.children.length, layout.travel.children.indexOf(depthDock()),
+      depthDock().querySelectorAll('button').length, doc.body.children.length],
+    [before, 3, 6, 5]);
+
+  // Setting a depth DOES have to redraw -- the buttons carry which one is on.
+  api.fotzSetDepth(3);
+  api.fotzDepthControls();
+  check('setting the depth redraws it, and the label says where the depth came from',
+    depthDock().textContent.includes('set to 3'), true);
+  api.fotzSetDepth(null);
+  api.fotzDepthControls();
+
+  // React owns these containers; the launcher repairs itself and so must this.
+  depthDock().remove();
+  depthRow().remove();
+  api.fotzDepthControls();
+  check('a re-render can take either copy, and the next scan puts both back',
+    [depthDock().previousElementSibling === dock(), depthRow().nextElementSibling === hand],
+    [true, true]);
+
+  setArea('Mutton Island');
+  api.fotzDepthControls();
+  check('surfacing takes both away again', [depthDock(), depthRow()], [null, null]);
+}
+
+// A row of six buttons is wider than the whole banner, so on a phone the
+// docked copy is one button that cycles through the depths instead.
+{
+  layout = bannerLayout();
+  api.mountLauncher();
+  setArea('the Royal Approach');
+  api.fotzDepthControls();
+
+  check('in the banner it is its own <li> in the row, with a single button',
+    [depthDock().tagName, depthDock().className, depthDock().parentNode === layout.list,
+      depthDock().querySelectorAll('button').length],
+    ['LI', 'banner-item', true, 1]);
+
+  check('and it is behind the UX button, not in front of it',
+    depthDock().previousElementSibling === dock(), true);
+
+  setArea(null);
+}
+
+// --- the light blue card ---------------------------------------------------
+//
+// The control is deliberately not `UI`'s dark chrome: it lives in Fallen
+// London's own page rather than inside a panel of ours. That makes the ink
+// rules the same trade `FOTZ_INK` makes on the badges, and worth pinning,
+// because "use UI.text like everything else does" is the natural wrong edit.
+
+function luminance(hex) {
+  const chan = (i) => {
+    const v = parseInt(hex.substr(i, 2), 16) / 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * chan(1) + 0.7152 * chan(3) + 0.0722 * chan(5);
+}
+function contrast(a, b) {
+  const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p);
+  return (x + 0.05) / (y + 0.05);
+}
+
+check('the card is light, and every colour written on it is readable against it',
+  [
+    luminance(api.DEPTH_BG) > 0.6,
+    contrast(api.DEPTH_INK, api.DEPTH_BG) >= 4.5,
+    contrast(api.DEPTH_DIM, api.DEPTH_BG) >= 4.5,
+    contrast(api.DEPTH_ON, api.DEPTH_BG) >= 4.5,
+    // The chosen depth is a solid chip, so its own label is white on DEPTH_ON.
+    contrast('#ffffff', api.DEPTH_ON) >= 4.5,
+  ],
+  [true, true, true, true, true]);
+
+{
+  layout = wideLayout();
+  api.mountLauncher();
+  setArea('the Royal Approach');
+  const hand = doc.body.appendChild(makeEl('div'));
+  hand.className = 'hand';
+  api.fotzSetDepth(2);
+  api.fotzDepthControls();
+
+  check('both copies wear it — the docked chip and the row above the hand',
+    [depthDock().style.cssText.includes(api.DEPTH_BG),
+      depthRow().style.cssText.includes(api.DEPTH_BG)],
+    [true, true]);
+
+  check('and neither reaches for the panels\' dark chrome instead',
+    [depthDock().style.cssText.includes('#1c1a17'),
+      depthRow().style.cssText.includes('#242119')],
+    [false, false]);
+
+  const chosen = depthRow().querySelectorAll('button').filter((b) => b.textContent === '2')[0];
+  const other = depthRow().querySelectorAll('button').filter((b) => b.textContent === '4')[0];
+  check('the depth you chose is a solid chip and the rest are outlines',
+    [chosen.style.cssText.includes('background:' + api.DEPTH_ON),
+      other.style.cssText.includes('background:transparent')],
+    [true, true]);
+
+  api.fotzSetDepth(null);
+  setArea(null);
 }
 
 console.log(failures ? '\n' + failures + ' check(s) FAILED.' : '\nAll checks passed.');
