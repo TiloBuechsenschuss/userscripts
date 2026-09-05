@@ -3,14 +3,12 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/auto-mine.js
-// @version      0.1
-// @description  A port of the loathers/oreo KoLmafia script to the browser: farms 1,970 carat gold in the Velvet / Gold Mine. Adds a "Mine" button to the charpane, next to Auto Combat's, which opens a panel where you pick a strategy (pjb, oreo, ev, ev-cluster), a visibility mode and a turn budget and press Start; the run then drives mining.php from the menu frame, choosing each square by oreo's expected-value model and finding a new cavern when nothing left is worth a turn. Whenever you are looking at mining.php yourself it also paints the same advice onto the mine: the recommended square, the route to it, and why. Unlike oreo it never buys, equips or heals anything -- it reads what you already have and refuses to start when something is missing.
+// @version      0.5
+// @description  A port of the loathers/oreo KoLmafia script to the browser: farms 1,970 carat gold in the Velvet / Gold Mine. Whenever you are looking at mining.php it paints its advice onto the mine -- the recommended square, the route to it, and why -- and puts a "Mine" button in that same advice box, which opens a panel where you pick a strategy (pjb, oreo, ev, ev-cluster), a visibility mode and a turn budget and press Start; the run then drives mining.php from the menu frame, choosing each square by oreo's expected-value model and finding a new cavern when nothing left is worth a turn. The panel also keeps a running total of the turns you have spent mining today, which starts over at each KoL rollover. Unlike oreo it never buys or equips anything -- it reads what you already have and refuses to start when something is missing. The one exception is healing: when HP reaches the floor it can press charpane-heal.js's own "heal" button and carry on, which you can switch off in the panel.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
 // @match        https://www.kingdomofloathing.com/topmenu.php*
 // @match        https://kingdomofloathing.com/topmenu.php*
-// @match        https://www.kingdomofloathing.com/charpane.php*
-// @match        https://kingdomofloathing.com/charpane.php*
 // @match        https://www.kingdomofloathing.com/mining.php*
 // @match        https://kingdomofloathing.com/mining.php*
 // @grant        none
@@ -25,21 +23,27 @@
   // explicitly. A no-op for the standalone install, whose @match already scopes
   // it here.
   //
-  // THREE pages, and the halves they run are different:
+  // TWO pages, and the halves they run are different:
   //
   //   menu frame  -- the engine and its panel. See "WHY THIS RUNS IN THE MENU
   //                  FRAME" below; same reasoning as auto-combat.js.
-  //   charpane    -- the button, and nothing else. Owns no state.
-  //   mining.php  -- the advisor overlay, which needs no button: if you are
-  //                  looking at the mine, you want to know where to dig.
+  //   mining.php  -- the advisor overlay, and the button that starts a run,
+  //                  which sits in the advisor's own box.
   //
-  // Everything above the page dispatch is defined on all three and used by
+  // The button used to live in the charpane, beside Auto Combat's, and it
+  // moved here on purpose: the mine is the only place a mining run makes sense
+  // to start, the advice already tells you what the run is about to do, and a
+  // button next to that advice reads as "do this" rather than as a control
+  // stranded three frames away from the thing it drives. The charpane is still
+  // READ across the frames -- for the character name and for charpane-heal.js's
+  // heal button -- but the script no longer runs there.
+  //
+  // Everything above the page dispatch is defined on both and used by
   // whichever half needs it. The strategy core in particular is shared: the
   // advisor and the engine must not be able to disagree about the best square.
   const ON_MENU = /\/(awesomemenu|topmenu)\.php/i.test(location.pathname);
-  const ON_CHARPANE = /\/charpane\.php/i.test(location.pathname);
   const ON_MINE = /\/mining\.php/i.test(location.pathname);
-  if (!ON_MENU && !ON_CHARPANE && !ON_MINE) return;
+  if (!ON_MENU && !ON_MINE) return;
 
   // ===================================================================
   // WHY THIS RUNS IN THE MENU FRAME
@@ -70,6 +74,10 @@
   const BUTTON_ID = 'tm-automine-btn';
   const PANEL_ID = 'tm-automine-panel';
   const ADVICE_ID = 'tm-automine-advice';
+  // The advice box is a row: the text on the left, the Mine button on the
+  // right. paintAdvice writes the text, so it needs its own node -- setting
+  // textContent on the box would take the button with it.
+  const ADVICE_TEXT_ID = 'tm-automine-advice-text';
   const MENU_API = 'tmAutoMine';
 
   const PREFS_KEY = 'tm-automine-prefs';
@@ -77,6 +85,19 @@
   // in THIS cavern turned out to hold. Suffixed with the character name so a
   // multi does not inherit someone else's cavern.
   const LAYOUT_KEY = 'tm-automine-layout';
+  // Turns spent mining today, also per character. Survives stopping and
+  // restarting the run, and the frameset reload that kills one.
+  const DAILY_KEY = 'tm-automine-daily';
+  // The last character name we managed to read. See characterName(): the name
+  // is what suffixes the two keys above, and it has to survive a charpane that
+  // is momentarily unreadable.
+  const CHARACTER_KEY = 'tm-automine-character';
+
+  // charpane-heal.js's button. We press that script's button rather than
+  // casting anything ourselves: it already knows which heal skills you own and
+  // in what order to try them, and a second copy of that list here would be a
+  // second copy to keep in step.
+  const HEAL_BUTTON_ID = 'tm-charpane-heal';
 
   // Pause between requests. KoL is a small game on modest hardware and this is
   // a bot loop; keep it civil. Raise it, don't lower it.
@@ -88,6 +109,14 @@
   // a loop that has stopped making progress.
   const CYCLE_BUDGET_FACTOR = 3;
   const CYCLE_BUDGET_CONSTANT = 40;
+
+  // Pressing the heal button is a click, not a promise -- charpane-heal.js
+  // casts in its own frame and tells us nothing -- so progress is read back
+  // from api.php. Poll this often, give up after this many polls, and give up
+  // early after this many polls in a row that did not move HP at all.
+  const HEAL_POLL_MS = 1500;
+  const HEAL_POLL_LIMIT = 40;
+  const HEAL_STALL_LIMIT = 4;
 
   // minin' dynamite, from KoLmafia's data/items.txt. Only ever counted, never
   // bought -- the script reads what you hold and uses it to discount a route,
@@ -217,8 +246,8 @@
   // Every connected six-square shape the ore vein could be, restricted to the
   // back four rows (oreo's `rowOf >= 2`), each weighted by the row weights.
   // There are 1226 of them and enumerating them costs about 10ms, which is
-  // cheap -- but the charpane is rebuilt on most turns and never needs this, so
-  // it is built on first use rather than at load.
+  // cheap -- but the menu frame loads with the game and does not need this
+  // until you start a run, so it is built on first use rather than at load.
   let oreClustersMemo = null;
   function oreClusters() {
     if (oreClustersMemo) return oreClustersMemo;
@@ -376,7 +405,15 @@
     }
 
     setDynamitePrice(price) {
-      if (!Number.isFinite(price) || price < 0) {
+      // Infinity is a legal price here, and it is the important one: it is the
+      // constructor's own default and what makeController passes whenever the
+      // panel's dynamite field is 0 or blank, meaning "a stick has no price I
+      // know, so never route through dull rock". Number.isFinite refused
+      // exactly that value, so the DEFAULT preferences threw on every
+      // controller ever built -- which took the advisor down, and with it the
+      // Mine button that lives in the advisor's box. Only NaN and negatives
+      // are actually wrong.
+      if (typeof price !== 'number' || Number.isNaN(price) || price < 0) {
         throw new Error('Dynamite price must be non-negative.');
       }
       this.dynamitePrice = price;
@@ -833,6 +870,50 @@
   // having none.
   // ===================================================================
 
+  // The name is READ from a frame that can be busy, and that is the whole
+  // difficulty. charpane-heal.js finishes by reloading the charpane, and while
+  // that reload is in flight the charpane has no charsheet.php link -- so a
+  // probe run at that moment used to answer 'unknown', the keys became
+  // `...:unknown`, and both stores silently switched to an empty bucket. The
+  // visible symptom was the day's turn count dropping to 0 just after a heal
+  // and coming back a moment later; the invisible one was turns and cavern
+  // observations being written to the stray bucket in between.
+  //
+  // So a probe that fails no longer answers: it falls through to the last name
+  // we knew. Four sources, in this order --
+  //
+  //   the pages        -- our own document, then the charpane. Asked FIRST,
+  //                       and not just out of habit: on a multi this is the
+  //                       only source that can tell you the frameset in front
+  //                       of you belongs to a different character now.
+  //   the cache        -- this frame resolved it earlier. This is the one that
+  //                       covers the charpane reload.
+  //   localStorage     -- an earlier frame did. Covers a menu frame that loads
+  //                       before the charpane has drawn.
+  //
+  // -- and 'unknown' only when all of them come up empty. api.php carries the
+  // name too, and getStatus() feeds it in here; that is the authoritative
+  // source and the one immune to what any frame happens to be doing.
+  let knownCharacterName = null;
+
+  function rememberCharacterName(name) {
+    const trimmed = typeof name === 'string' ? name.trim() : '';
+    if (!trimmed || trimmed === knownCharacterName) return;
+    knownCharacterName = trimmed;
+    writeJson(CHARACTER_KEY, { name: trimmed });
+    forgetUnknownBuckets();
+  }
+
+  // Anything already written under `:unknown` was written by this bug. It
+  // cannot be handed back to a character -- on a multi it could belong to
+  // either -- so it is dropped rather than merged into someone's total.
+  function forgetUnknownBuckets() {
+    try {
+      window.localStorage.removeItem(DAILY_KEY + ':unknown');
+      window.localStorage.removeItem(LAYOUT_KEY + ':unknown');
+    } catch (e) { /* storage unavailable; nothing to clean up */ }
+  }
+
   function characterName() {
     const probe = (doc) => {
       if (!doc || !doc.querySelector) return null;
@@ -842,13 +923,24 @@
     };
     try {
       const own = probe(document);
-      if (own) return own;
+      if (own) { rememberCharacterName(own); return knownCharacterName; }
     } catch (e) { /* no document to read */ }
     try {
       const cp = top.frames['charpane'];
       const name = cp && cp.document ? probe(cp.document) : null;
-      if (name) return name;
+      if (name) { rememberCharacterName(name); return knownCharacterName; }
     } catch (e) { /* cross-frame access failed */ }
+
+    if (knownCharacterName) return knownCharacterName;
+
+    const stored = readJson(CHARACTER_KEY, {});
+    if (typeof stored.name === 'string' && stored.name) {
+      knownCharacterName = stored.name;
+      return knownCharacterName;
+    }
+
+    // Never cached: this is "I could not tell", not an answer, and the next
+    // call must be free to do better.
     return 'unknown';
   }
 
@@ -879,6 +971,7 @@
     crystal: DEFAULT_VALUES.crystal,
     dynamite: 0,
     hpFloor: 60,
+    healLowHp: true,
   };
 
   function loadPrefs() {
@@ -886,6 +979,7 @@
     const prefs = Object.assign({}, DEFAULT_PREFS, stored);
     if (STRATEGIES.indexOf(prefs.strategy) === -1) prefs.strategy = DEFAULT_PREFS.strategy;
     if (VISIBILITIES.indexOf(prefs.visibility) === -1) prefs.visibility = DEFAULT_PREFS.visibility;
+    prefs.healLowHp = prefs.healLowHp !== false;
     return prefs;
   }
 
@@ -941,6 +1035,63 @@
     if (state && state.indexOf('o') === -1) clearLayout();
   }
 
+  // ---- turns spent today ----------------------------------------------
+  //
+  // "Today" is KoL's day, not the browser's: turns belong to the day they were
+  // spent in, and KoL's day ends at rollover (3:30am Arizona time), which for
+  // most players is the middle of an afternoon. api.php's status block carries
+  // `rollover`, the unix time of the NEXT rollover -- one value, constant for
+  // the whole of a KoL day and different on the next one, which is a day key
+  // as it stands. `daynumber` is the fallback if a future api.php drops it,
+  // and the browser's own date is the last resort.
+  //
+  // There is no midnight timer and nothing has to be running for the counter
+  // to start over: reading it with a day key that does not match the stored
+  // one IS the reset.
+  function localDayKey() {
+    const now = new Date();
+    return 'l' + now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate();
+  }
+
+  function dayKeyFromStatus(json) {
+    const rollover = num(json && json.rollover);
+    if (rollover) return 'r' + rollover;
+    const daynumber = num(json && json.daynumber);
+    if (daynumber) return 'd' + daynumber;
+    return localDayKey();
+  }
+
+  function dailyKey() {
+    return DAILY_KEY + ':' + characterName();
+  }
+
+  // { day: <day key>, turns: N }.
+  function loadDaily() {
+    const stored = readJson(dailyKey(), {});
+    const turns = Number(stored.turns);
+    return {
+      day: typeof stored.day === 'string' ? stored.day : null,
+      turns: Number.isFinite(turns) && turns > 0 ? turns : 0,
+    };
+  }
+
+  // The stored total, or 0 when it belongs to a day that is over. A null
+  // dayKey means "I have no status to compare against" -- show what is stored
+  // rather than a zero we cannot justify.
+  function dailyTurns(dayKey) {
+    const record = loadDaily();
+    if (dayKey && record.day !== dayKey) return 0;
+    return record.turns;
+  }
+
+  function addDailyTurns(dayKey, delta) {
+    const record = loadDaily();
+    const base = dayKey && record.day !== dayKey ? 0 : record.turns;
+    const next = { day: dayKey || record.day, turns: base + Math.max(0, delta) };
+    writeJson(dailyKey(), next);
+    return next.turns;
+  }
+
   function makeController(prefs, onWarning) {
     const controller = new StrategyController(
       prefs.strategy,
@@ -978,12 +1129,17 @@
     });
     if (!res.ok) throw new Error('api.php returned HTTP ' + res.status);
     const json = await res.json();
+    // The one source that does not depend on a frame being idle. Every key
+    // computed after this point is keyed to the right character even if the
+    // charpane is mid-reload.
+    rememberCharacterName(json.name);
     return {
       pwd: json.pwd,
       name: json.name,
       adventures: num(json.adventures),
       hp: num(json.hp),
       maxhp: num(json.maxhp),
+      dayKey: dayKeyFromStatus(json),
       raw: json,
     };
   }
@@ -1041,6 +1197,76 @@
   }
 
   // ===================================================================
+  // HEALING
+  //
+  // The script still buys and equips nothing. Healing is the one thing it can
+  // now do for itself, and it does it by pressing the "heal" button
+  // charpane-heal.js puts next to the HP line -- that script owns the list of
+  // heal skills and the order to try them in, and this one owns none of it.
+  //
+  // Two consequences worth knowing:
+  //
+  //   - No button means no healing. charpane-heal.js may not be installed, and
+  //     the charpane is rebuilt on most turns, so the button is looked up
+  //     fresh every time rather than held.
+  //   - The click returns immediately; the casting happens in the other frame
+  //     and reports nothing back, and it ends by reloading the charpane, which
+  //     destroys the very button we pressed. So progress is read from api.php
+  //     instead. If charpane-heal.js puts up an alert() (no skills found, say),
+  //     the tab's modal blocks everything until you dismiss it, and the poll
+  //     below simply waits it out.
+  // ===================================================================
+
+  function charpaneHealButton() {
+    try {
+      const cp = top.frames['charpane'];
+      return (cp && cp.document && cp.document.getElementById(HEAL_BUTTON_ID)) || null;
+    } catch (e) {
+      return null; // cross-frame access failed
+    }
+  }
+
+  // Press the button and wait for HP to clear `floor`. Resolves to the status
+  // read that cleared it, or null with a reason for the log.
+  async function healAboveFloor(floor, status) {
+    if (status.maxhp != null && status.maxhp <= floor) {
+      return { status: null, reason: 'your maximum HP of ' + status.maxhp + ' is at or below the floor' };
+    }
+    const btn = charpaneHealButton();
+    if (!btn) {
+      return { status: null, reason: 'no heal button in the charpane (is charpane-heal.js installed?)' };
+    }
+    log('HP is ' + status.hp + '; pressing the charpane heal button.');
+    // A disabled button is charpane-heal.js already healing. Don't press it
+    // again -- just wait on the same poll.
+    if (!btn.disabled) btn.click();
+
+    let last = status.hp;
+    let stalled = 0;
+    for (let poll = 0; poll < HEAL_POLL_LIMIT; poll++) {
+      await sleep(HEAL_POLL_MS);
+      // Stop is a whole minute away at the far end of this poll otherwise, and
+      // a Stop press that appears to do nothing reads as a hung run.
+      if (RUN.stopRequested) return { status: null, reason: 'stopped while healing' };
+      let now;
+      try {
+        now = await getStatus();
+      } catch (e) {
+        continue; // a failed read is not a failed heal; poll again
+      }
+      if (now.hp == null) continue;
+      if (now.hp > floor) return { status: now, reason: null };
+      if (now.hp === last) {
+        if (++stalled >= HEAL_STALL_LIMIT) break;
+      } else {
+        stalled = 0;
+        last = now.hp;
+      }
+    }
+    return { status: null, reason: 'healing did not get HP above ' + floor + ' (now ' + last + ')' };
+  }
+
+  // ===================================================================
   // THE ENGINE
   // ===================================================================
 
@@ -1052,6 +1278,8 @@
     resets: 0,
     cycle: 0,
     startAdv: null,
+    lastAdv: null, // previous adventure total, for the per-pass difference
+    today: dailyTurns(null), // turns spent mining today; see the daily store
     status: '',
     log: [],
     found: { gold: 0, ore: 0, crystal: 0, cave: 0 },
@@ -1095,6 +1323,22 @@
     return null;
   }
 
+  // Turns are MEASURED from api.php's adventure total rather than counted from
+  // requests sent, because a free mining action (Unaccompanied Miner, Loded)
+  // digs a square without costing one. `used` is this run's total and `today`
+  // adds each pass's difference to the day's, so stopping and starting again
+  // does not restart the daily count. Eating a lasagna mid-run raises the
+  // total; the difference is clamped at zero rather than crediting you turns.
+  function noteTurns(status) {
+    if (status.adventures == null) return;
+    if (RUN.startAdv != null) RUN.used = Math.max(0, RUN.startAdv - status.adventures);
+    const spent = RUN.lastAdv == null ? 0 : Math.max(0, RUN.lastAdv - status.adventures);
+    RUN.lastAdv = status.adventures;
+    RUN.today = spent > 0
+      ? addDailyTurns(status.dayKey, spent)
+      : dailyTurns(status.dayKey);
+  }
+
   function budget() {
     const asked = RUN.requested == null ? 200 : RUN.requested;
     return asked * CYCLE_BUDGET_FACTOR + CYCLE_BUDGET_CONSTANT;
@@ -1121,6 +1365,7 @@
     RUN.resets = 0;
     RUN.cycle = 0;
     RUN.startAdv = null;
+    RUN.lastAdv = null;
     RUN.log = [];
     RUN.found = { gold: 0, ore: 0, crystal: 0, cave: 0 };
 
@@ -1130,6 +1375,7 @@
     try {
       const status = await getStatus();
       RUN.startAdv = status.adventures;
+      noteTurns(status); // no turns yet; this seeds the baseline and the day
       pwd = status.pwd || null;
 
       controller.setDynamiteAvailable(await getDynamiteCount());
@@ -1156,19 +1402,32 @@
         const state = stateFromTiles(tiles);
         pwd = pwdFromHtml(html) || pwd;
 
-        const fresh = await getStatus();
+        let fresh = await getStatus();
+        // Account for the last dig before anything can stop the run, so turns
+        // already spent always land in the day's total.
+        noteTurns(fresh);
+
+        // Low HP is the one refusal the script can now do something about.
+        // Heal first, then let preflight judge the result -- if the heal did
+        // not clear the floor, the run stops exactly as it did before.
+        const floor = Number(prefs.hpFloor) || 0;
+        if (prefs.healLowHp && fresh.hp != null && fresh.hp <= floor) {
+          const healed = await healAboveFloor(floor, fresh);
+          if (healed.status) {
+            fresh = healed.status;
+            noteTurns(fresh);
+            log('healed to ' + fresh.hp + ' HP; carrying on.');
+          } else {
+            log(healed.reason, 'warn');
+          }
+        }
+
         const gate = preflight(state, tiles, pwd, fresh, prefs);
         if (gate) {
           stop('stopping: ' + gate);
           break;
         }
 
-        // Turns are MEASURED from api.php's adventure total rather than counted
-        // from requests sent, because a free mining action (Unaccompanied
-        // Miner, Loded) digs a square without costing one.
-        if (RUN.startAdv != null && fresh.adventures != null) {
-          RUN.used = Math.max(0, RUN.startAdv - fresh.adventures);
-        }
         // turns=0 is oreo's "free mining actions only": the moment a dig has
         // actually cost an adventure, the free ones are gone.
         if (RUN.requested === 0 && RUN.used > 0) {
@@ -1236,7 +1495,8 @@
       setStatus(
         'stopped after ' + RUN.used + ' turn(s), ' + RUN.resets + ' cavern(s): ' +
           RUN.found.gold + ' gold, ' + RUN.found.ore + ' velvet, ' +
-          RUN.found.crystal + ' crystal, ' + RUN.found.cave + ' cave-in(s)'
+          RUN.found.crystal + ' crystal, ' + RUN.found.cave + ' cave-in(s)' +
+          ' -- ' + RUN.today + ' turn(s) mined today'
       );
     }
   }
@@ -1285,6 +1545,17 @@
     input.type = 'text';
     input.value = value == null ? '' : String(value);
     row.appendChild(input);
+    return input;
+  }
+
+  function labelledCheckbox(doc, row, text, checked) {
+    const label = el(doc, 'label', 'color:#333;display:flex;gap:3px;align-items:center;cursor:pointer');
+    const input = el(doc, 'input');
+    input.type = 'checkbox';
+    input.checked = !!checked;
+    label.appendChild(input);
+    label.appendChild(el(doc, 'span', null, text));
+    row.appendChild(label);
     return input;
   }
 
@@ -1363,6 +1634,7 @@
     const miscRow = el(doc, 'div', 'display:flex;gap:6px;align-items:center');
     const dynamiteInput = labelledInput(doc, miscRow, 'dynamite', prefs.dynamite, 60);
     const hpInput = labelledInput(doc, miscRow, 'HP floor', prefs.hpFloor, 50);
+    const healBox = labelledCheckbox(doc, miscRow, 'heal at floor', prefs.healLowHp);
     pop.appendChild(miscRow);
     pop.appendChild(
       el(
@@ -1370,7 +1642,10 @@
         'div',
         'color:#555;font-size:11px',
         'Nothing is ever bought or equipped. Dynamite is the price of a stick you ' +
-          'already hold, used to discount a route through dull rock; 0 ignores it.'
+          'already hold, used to discount a route through dull rock; 0 ignores it. ' +
+          '"heal at floor" presses the charpane\'s own heal button when HP reaches ' +
+          'the floor instead of stopping; without it, or without charpane-heal.js, ' +
+          'the run stops there.'
       )
     );
 
@@ -1416,6 +1691,7 @@
         crystal: Number(crystalInput.value) || 0,
         dynamite: Number(dynamiteInput.value) || 0,
         hpFloor: Number(hpInput.value) || 0,
+        healLowHp: healBox.checked,
       };
       savePrefs(next);
       return next;
@@ -1433,7 +1709,9 @@
       stop('stop requested');
     });
     closeBtn.addEventListener('click', closePanel);
-    [strategySel, visSel].forEach((sel) => sel.addEventListener('change', collect));
+    [strategySel, visSel, healBox].forEach((input) =>
+      input.addEventListener('change', collect)
+    );
 
     doc.body.appendChild(pop);
 
@@ -1443,6 +1721,22 @@
     };
     panelRefs = { doc: doc, statusLine: statusLine, logBox: logBox };
     renderPanel();
+    refreshDailyDisplay();
+  }
+
+  // The daily total is stored with the day it belongs to, and only a status
+  // read can say which day it is now. Opening the panel while idle is
+  // therefore worth one api.php request: without it a panel opened the morning
+  // after a run would show yesterday's turns as today's.
+  function refreshDailyDisplay() {
+    if (RUN.active) return; // the run's own status reads keep this current
+    getStatus().then(
+      (status) => {
+        RUN.today = dailyTurns(status.dayKey);
+        renderPanel();
+      },
+      () => { /* offline or logged out; leave the stored total showing */ }
+    );
   }
 
   function renderPanel() {
@@ -1452,6 +1746,7 @@
       refs.statusLine.textContent =
         (RUN.active ? 'running' : 'idle') +
         ' -- ' + RUN.used + ' turn(s), ' + RUN.resets + ' cavern(s)' +
+        ' -- ' + RUN.today + ' turn(s) today' +
         (RUN.status ? ' -- ' + RUN.status : '');
       const lines = RUN.log.map((entry) => {
         const stamp = entry.t.toTimeString().slice(0, 8);
@@ -1468,13 +1763,17 @@
   }
 
   // ===================================================================
-  // THE CHARPANE BUTTON
+  // THE MINE BUTTON
   //
-  // Same split, and the same reasoning, as auto-combat.js: the menu frame's
-  // one strip of space is full, the sidebar has room, and it is where you are
-  // already looking. The button owns no state -- it looks the engine up across
-  // the frames on every click, so a button left over from a torn-down charpane
-  // cannot drive a dead engine.
+  // The button lives in the advisor's box on mining.php, at the right-hand end
+  // of the line that says which square to dig. Unlike auto-combat.js, whose
+  // button has to be reachable from wherever you happen to be fighting, this
+  // one has exactly one sensible home: you cannot mine from anywhere else, and
+  // the advice beside it is the run's first move spelled out.
+  //
+  // The button owns no state -- it looks the engine up across the frames on
+  // every click, so a button left over on a stale mine page cannot drive a
+  // dead engine.
   // ===================================================================
 
   function engine() {
@@ -1489,11 +1788,14 @@
     return null;
   }
 
+  // The engine paints the button from the menu frame, so it has to reach into
+  // the mainpane to find it -- and the mainpane is usually showing something
+  // else, in which case there is no button and nothing to paint.
   function buttonEl() {
-    if (ON_CHARPANE) return document.getElementById(BUTTON_ID);
+    if (ON_MINE) return document.getElementById(BUTTON_ID);
     try {
-      const cp = top.frames['charpane'];
-      return (cp && cp.document && cp.document.getElementById(BUTTON_ID)) || null;
+      const mp = top.frames['mainpane'];
+      return (mp && mp.document && mp.document.getElementById(BUTTON_ID)) || null;
     } catch (e) {
       return null;
     }
@@ -1523,13 +1825,18 @@
     btn.type = 'button';
     btn.title = 'Auto Mine (oreo)';
     btn.textContent = 'Mine';
+    // Roomier than the old sidebar button: the advice box is 520px of
+    // mainpane, not a strip of charpane, so the button no longer has to be
+    // 18px tall to fit.
     btn.style.cssText = [
-      'padding:0 5px',
-      'font-size:10px',
+      'flex:0 0 auto',
+      'padding:2px 10px',
+      'font-size:11px',
       'font-family:arial',
-      'height:18px',
       'cursor:pointer',
       'white-space:nowrap',
+      'border:1px solid #b8860b',
+      'border-radius:3px',
       'background-color:white',
     ].join(';');
     btn.addEventListener('click', function () {
@@ -1553,56 +1860,8 @@
     return btn;
   }
 
-  // Where the button goes. The first choice is beside Auto Combat's button,
-  // because the two are the same kind of thing and belong together and the
-  // sidebar has no room to waste; the rest repeats auto-combat's own chain, so
-  // an unrecognised charpane still gets a usable button rather than none.
-  function placeCharpaneButton(btn) {
-    const sibling = document.getElementById('tm-autocombat-btn');
-    if (sibling && sibling.parentNode) {
-      btn.style.marginLeft = '4px';
-      sibling.insertAdjacentElement('afterend', btn);
-      return;
-    }
-
-    const wrap = document.createElement('div');
-    wrap.style.cssText = 'text-align:center;margin:2px 0';
-    wrap.appendChild(btn);
-
-    const anchors = Array.from(document.querySelectorAll('a'));
-    const label = anchors.find((a) => /^\s*last adventure/i.test(a.textContent || ''));
-    const block = label && label.closest && label.closest('center');
-    if (block) { block.appendChild(wrap); return; }
-
-    const menu = document.getElementById('lastadvmenu');
-    const table = menu && menu.closest && menu.closest('table');
-    if (table && table.parentNode) {
-      table.insertAdjacentElement('afterend', wrap);
-      return;
-    }
-
-    const nudge = document.getElementById('nudgeblock');
-    if (nudge && nudge.parentNode) {
-      nudge.parentNode.insertBefore(wrap, nudge);
-      return;
-    }
-
-    console.warn('Auto Mine: no last-adventure block in the charpane, ' +
-                 'placing button at the top of the sidebar.');
-    document.body.insertBefore(wrap, document.body.firstChild);
-  }
-
-  function addButton() {
-    if (document.getElementById(BUTTON_ID)) return; // idempotency guard
-    if (!document.body) return;
-    const btn = makeButton();
-    placeCharpaneButton(btn);
-    const api = engine();
-    if (api) paintButton(btn, api.state());
-  }
-
   // The engine's half of the contract, published on the menu frame's window so
-  // the charpane copy can reach it. Deliberately tiny: open/close the panel,
+  // the mine page's copy can reach it. Deliberately tiny: open/close the panel,
   // and say whether a run is going.
   function publishEngine() {
     window[MENU_API] = {
@@ -1635,6 +1894,9 @@
 
   let advisorTimer = null;
 
+  // The advice box, and the Mine button inside it. One node builds both,
+  // because the button has no other home and an advice box without it would be
+  // a box you cannot act on.
   function adviceBox(doc) {
     let box = doc.getElementById(ADVICE_ID);
     if (box) return box; // idempotency guard
@@ -1651,7 +1913,21 @@
       'font-size:12px',
       'text-align:left',
       'color:#333',
+      'display:flex',
+      'gap:8px',
+      'align-items:center',
     ].join(';');
+
+    const text = doc.createElement('span');
+    text.id = ADVICE_TEXT_ID;
+    text.style.cssText = 'flex:1 1 auto';
+    box.appendChild(text);
+
+    const btn = makeButton();
+    box.appendChild(btn);
+    const api = engine();
+    if (api) paintButton(btn, api.state());
+
     const postload = doc.getElementById('postload');
     if (postload && postload.parentNode) {
       postload.insertAdjacentElement('beforebegin', box);
@@ -1661,9 +1937,16 @@
     return box;
   }
 
+  // Where paintAdvice writes. Falls back to the box itself only if the span is
+  // somehow missing, which would mean someone else rebuilt our node.
+  function adviceText(doc) {
+    return doc.getElementById(ADVICE_TEXT_ID) || adviceBox(doc);
+  }
+
   function paintAdvice(tiles, decision, state) {
     const doc = document;
-    const box = adviceBox(doc);
+    adviceBox(doc); // builds the box and its button on first paint
+    const line = adviceText(doc);
     const byIndex = new Map();
     tiles.forEach((tile) => byIndex.set(tile.index, tile));
 
@@ -1676,7 +1959,7 @@
     });
 
     if (decision.action === 'reset') {
-      box.textContent = 'Find a new cavern: ' + decision.reason + '.';
+      line.textContent = 'Find a new cavern: ' + decision.reason + '.';
       return;
     }
 
@@ -1707,7 +1990,7 @@
     // than quietly advising a square you cannot click.
     const reachable = !targetTile || targetTile.linked;
     const opened = state.split('o').length - 1;
-    box.textContent =
+    line.textContent =
       'Dig (' + decision.coordinate[0] + ',' + decision.coordinate[1] + ')' +
       (path.length > 1 ? ' -- ' + path.length + ' step route' : '') +
       '. ' + decision.reason + '.' +
@@ -1720,42 +2003,56 @@
   async function runAdvisor() {
     // oreo is a mine-6 script and its model does not describe the other mines,
     // so say nothing anywhere else rather than advise from the wrong numbers.
+    //
+    // These two refusals now also gate the Start button, which is the point:
+    // the button appears exactly where a run could be started, and in the
+    // Itznotyerzitz Mine or on an unreadable grid there is nothing to start.
     if (!/[?&]mine=6(\D|$)/.test(location.search)) return;
     const tiles = readTilesFromDoc(document);
     const state = stateFromTiles(tiles);
     if (!state) return; // not a mine grid; say nothing rather than guess
 
-    const prefs = loadPrefs();
-    forgetLayoutIfFreshCavern(state);
+    // The box, and the button inside it, BEFORE anything that can throw.
+    // Working out the advice used to come first and paint at the end, which
+    // was harmless while the button lived in the charpane -- a bad preference
+    // just meant no advice. Now the button is in this box, so the same throw
+    // took away the only way to open the panel and fix the preference that
+    // caused it. That is how one rejected dynamite price read as "the script
+    // is gone".
+    adviceBox(document);
 
-    let objectDetection = false;
-    if (prefs.visibility !== 'low') {
-      try {
-        objectDetection = hasObjectDetection(await getStatus());
-      } catch (e) {
-        objectDetection = false;
+    try {
+      const prefs = loadPrefs();
+      forgetLayoutIfFreshCavern(state);
+
+      let objectDetection = false;
+      if (prefs.visibility !== 'low') {
+        try {
+          objectDetection = hasObjectDetection(await getStatus());
+        } catch (e) {
+          objectDetection = false;
+        }
       }
-    }
 
-    const controller = makeController(prefs, function () {});
-    // The advisor deliberately assumes no dynamite: it cannot know whether you
-    // intend to spend a stick, and advising a route that is only worth it if
-    // you blow one would be advice you did not ask for.
-    controller.setDynamiteAvailable(0);
-    controller.update(state, objectDetection, layoutEntries());
-    paintAdvice(tiles, controller.decide(), state);
+      const controller = makeController(prefs, function () {});
+      // The advisor deliberately assumes no dynamite: it cannot know whether
+      // you intend to spend a stick, and advising a route that is only worth
+      // it if you blow one would be advice you did not ask for.
+      controller.setDynamiteAvailable(0);
+      controller.update(state, objectDetection, layoutEntries());
+      paintAdvice(tiles, controller.decide(), state);
+    } catch (error) {
+      // Say what went wrong where the advice would have been. The button is
+      // still there, so the panel is still reachable.
+      adviceText(document).textContent =
+        'Auto Mine could not work out a square: ' +
+        (error && error.message ? error.message : String(error)) +
+        ' -- open the panel and check the settings.';
+    }
   }
 
   function boot() {
     if (ON_MENU) { publishEngine(); return; }
-    if (ON_CHARPANE) {
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', addButton);
-      } else {
-        addButton();
-      }
-      return;
-    }
     if (ON_MINE) {
       // The grid is inside a div the page reveals in window.onload, so the
       // markup is there from the start even though it is display:none -- alt

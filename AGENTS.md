@@ -527,18 +527,43 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   generator and a sweep; it needs mall prices, and recalibrating means running oreo in KoLmafia
   and pasting the number into the panel's λ field), the Meat accounting, and every action that
   *acquires* something. oreo buys dynamite and potions of detection, equips the mining outfit,
-  and restores HP to survive cave-ins. **This script buys, equips and heals nothing.** It reads
+  and restores HP to survive cave-ins. **This script buys and equips nothing.** It reads
   what you already hold — dynamite from `api.php?what=inventory`, Object Detection from the
-  status effects — and each missing prerequisite is a named refusal instead. The drill and the
+  status effects — and each missing prerequisite is a named refusal instead. Healing is the
+  single exception, and it still casts nothing of its own: when HP reaches the panel's floor it
+  clicks **`charpane-heal.js`'s own `#tm-charpane-heal` button** in the charpane frame, because
+  that script already owns the list of heal skills and the order to try them in and a second
+  copy here would be a second copy to keep in step. The `heal at floor` checkbox turns it off,
+  and with it off — or with `charpane-heal.js` not installed, or a max HP below the floor — the
+  run stops at the floor exactly as it did before. The click is fire-and-forget (the other frame
+  reports nothing back and ends by reloading itself, destroying the button), so progress is
+  polled off `api.php` until HP clears the floor, stalls for four reads, or 40 reads pass. The drill and the
   15 Hot Resistance oreo checks for are not checked at all, on purpose: without them KoL does
   not render the mine page, so a readable grid *is* that check.
-  **Three frames, one file**, and the split follows auto-combat's: engine and panel in the menu
-  frame (the only one that survives a turn), the button in the charpane, and — new here — an
-  **advisor on `mining.php` itself**, which needs no button because looking at the mine is the
-  request. Both the engine and the advisor run the same controller, so they cannot disagree
-  about the best square; the advisor merely assumes no dynamite, since it can't know whether you
-  meant to spend a stick. The button places itself **after `#tm-autocombat-btn`** when that
-  exists, then falls through auto-combat's own chain.
+  **Two frames, one file**: engine and panel in the menu frame (the only one that survives a
+  turn), and an **advisor on `mining.php` itself**. Both run the same controller, so they cannot
+  disagree about the best square; the advisor merely assumes no dynamite, since it can't know
+  whether you meant to spend a stick.
+  The Start button lives **inside the advisor's box**, at the right-hand end of the line that
+  says which square to dig. It started out in the charpane beside Auto Combat's, and moved
+  because — unlike a fight, which can begin anywhere — a mining run has exactly one place it
+  makes sense to start, and the advice beside the button is the run's first move spelled out.
+  The script therefore **no longer runs on `charpane.php` at all** and its two `@match` lines are
+  gone; the charpane is still *read* across the frames, for the character name and for
+  `charpane-heal.js`'s button, which needs no `@match`. Consequences worth knowing: the button
+  appears only where `runAdvisor` gets as far as painting (mine 6, readable grid), which is
+  exactly where a run could start; and since the box is repainted on every load, the box is a
+  **row of two nodes** — a text span (`#tm-automine-advice-text`) and the button — because the
+  advisor writes `textContent`, and writing it on the box would delete the button. That is what
+  `test/auto-mine-advice-box.test.mjs` exists to catch.
+  The move also made the advisor **load-bearing**, which cost a second bug: `runAdvisor` used to
+  compute the advice and paint at the end, so a throw on the way meant no box — and therefore no
+  button, no panel, and no way to undo the preference that caused the throw. It now builds the
+  box **before** anything that can throw and reports the error into the span. The throw itself
+  was `setDynamitePrice` rejecting `Infinity` via `Number.isFinite`, when `Infinity` is exactly
+  what `makeController` passes for a dynamite field of 0 or blank (and what the constructor
+  already defaults to) — i.e. **the shipped defaults threw**. Keep the sentinel legal: only NaN
+  and negatives are wrong there.
   Two coordinate systems meet in here and mixing them up is the classic bug. KoL's is
   `(col,row)`, both 1..6, **row 1 at the top**; oreo's is a flat 0..35 with **index 0..5 as the
   front row** — KoL row 6, the one you stand in — which is what lets `isLegal` say "row 0 is
@@ -559,6 +584,19 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   a dig's result to "everything after `Results:`" reports gold on every page for the rest of the
   run once you have struck it. The scope has to end at the grid (`<div id='preload'>` /
   `<div id='postload'>`), not at the end of the document.
+  Both stores are **suffixed with the character name**, and `characterName()` is more careful
+  than it looks, for a reason that cost a real bug: the name is read from the charpane's
+  `charsheet.php` link, and `charpane-heal.js` finishes by **reloading the charpane**. During
+  that reload the link isn't there, the probe came up empty, and the old code answered
+  `'unknown'` — so every key became `...:unknown`, an empty bucket. The day's turn count read
+  back as 0 just after a heal and returned a moment later, and anything written in between went
+  to the stray bucket. Now a failed probe never answers: it falls through to a per-frame cache,
+  then to the name persisted under `tm-automine-character`, and `getStatus()` feeds `api.php`'s
+  own `name` in as the authoritative source. The live probe is still tried **first**, though —
+  a charpane that says someone else is a multi switching characters, not noise, and the cache
+  must not be sticky enough to hand character B character A's cavern. Stray `:unknown` buckets
+  are deleted rather than merged, since on a multi they could belong to either character.
+  `test/auto-mine-character-key.test.mjs` covers all of it.
   There is no `mineLayout6` here, so what each opened square held is kept in `localStorage`
   under `tm-automine-layout` (suffixed with the character name, like the pyramid state in
   `quest-helper.js`), cleared on a cavern reset and whenever the state shows nothing open — which
@@ -568,12 +606,30 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   Turns are **measured** from `api.php`'s adventure total, never counted from requests, because
   free mining actions (Unaccompanied Miner, Loded) dig without spending one; `turns=0` is oreo's
   "free actions only" and stops the moment a dig costs an adventure.
+  The panel also shows **turns mined today**, kept in `localStorage` under `tm-automine-daily`
+  (character-suffixed like the layout) as `{ day, turns }`. "Today" is **KoL's** day, not the
+  browser's: the day key is `api.php`'s `rollover` — the unix time of the *next* rollover, one
+  value that holds for the whole of a KoL day — with `daynumber` and then the local date as
+  fallbacks. Resetting at local midnight would cut a KoL day in half. There is no timer: reading
+  the counter with a day key that doesn't match the stored one *is* the reset, so nothing has to
+  be running at rollover. The run's own total is measured from the adventure count it started
+  with, but the day's is the **per-pass difference**, clamped at zero, so stopping and starting
+  again keeps counting and eating a lasagna mid-run credits no turns. Opening the panel while
+  idle spends one `api.php` read to learn the current day, or a panel opened the morning after a
+  run would show yesterday's turns as today's.
   **Confirmed working in-game** (2026-09-05): a live run in the Velvet / Gold Mine drove the
-  page, picked squares and reset caverns as intended. What that run did *not* exercise, and so
-  is still unverified, is the dynamite path — `api.php?what=inventory` returning a plain
-  `{itemId: count}` map is taken from convention rather than from a fixture. It fails safe (a
-  count of 0 means no route discount, never a different square), so a wrong read costs turns
-  rather than digging in the wrong place; check it there first if dynamite never seems to apply.
+  page, picked squares and reset caverns as intended. Confirmed again at 0.5, after the button
+  moved into the advice box: the button appears on `mining.php` and Start drives a run from
+  there. The **heal path is confirmed too**: a run that reached the HP floor pressed
+  `charpane-heal.js`'s button, cleared the floor and carried on, so the click-and-poll across
+  frames works against the real charpane.
+  Still **unverified in-game**, and worth saying plainly because each was written against a
+  fixture rather than a watched run: the daily counter actually rolling over (it has only been
+  seen counting *within* a day); and the dynamite
+  path — `api.php?what=inventory` returning a plain `{itemId: count}` map is taken from
+  convention rather than from a fixture. Dynamite fails safe (a count of 0 means no route
+  discount, never a different square), so a wrong read costs turns rather than digging in the
+  wrong place; check it there first if dynamite never seems to apply.
 
 **Twilight Heroes** is plain (non-frame) pages scraped from table layout. State that must
 survive the full-page reload after equip/unequip/use is stashed in `sessionStorage`
@@ -1319,6 +1375,38 @@ Current tests:
   calibration harness this port doesn't carry. It also pins the calibrated λ table and the
   1226 six-square ore veins. This file's job is to say the strategy still answers the way oreo's
   does, so when oreo changes, re-port from their file rather than editing numbers here.
+- `KingdomOfLoathing/test/auto-mine-advice-box.test.mjs` — asserts `auto-mine.js`'s advice box
+  on `mining.php`, which is also where the Start button lives. It pins the regression that
+  moving the button out of the charpane created: the advisor repaints its line on every load
+  by setting `textContent`, and doing that on the *box* deletes every child, so the button is
+  gone the first time any advice is painted. The box is a row of a text span and the button,
+  the advisor only ever writes to the span, and both a reset verdict and a dig verdict are
+  painted here to prove the button survives. It also pins the two ids other things key off and
+  that a second `adviceBox()` call adds no second button.
+  Its second half pins the *other* way the button vanishes: `makeController` must not throw for
+  the **shipped preferences**. It did — a dynamite field of 0 or blank becomes a price of
+  `Infinity`, and `setDynamitePrice` refused that through `Number.isFinite` — so the advisor
+  died before painting and took the button, and with it the panel, out of reach. Blank, 0,
+  unreadable text and a real price all have to build; negatives and NaN still have to be
+  refused. Verified to fail against the pre-fix `setDynamitePrice` before being kept.
+- `KingdomOfLoathing/test/auto-mine-character-key.test.mjs` — asserts `auto-mine.js`'s
+  `characterName()`, which suffixes both of its `localStorage` keys. It pins the reported bug:
+  a charpane mid-reload (what pressing `charpane-heal.js`'s button causes) has no
+  `charsheet.php` link, and answering `'unknown'` there switches both stores to an empty
+  bucket — the day's turns read 0 and come back a moment later. A failed probe must fall
+  through to the last known name; a probe that *succeeds with a different name* must still
+  win, or a multi inherits the other character's cavern. Both directions are pinned here,
+  along with `api.php` as the authoritative source and the cleanup of stray `:unknown`
+  buckets. Verified to fail against the pre-fix ordering before being kept.
+- `KingdomOfLoathing/test/auto-mine-daily.test.mjs` — asserts `auto-mine.js`'s daily turn
+  counter and its low-HP heal gate. The day key comes from `api.php`'s `rollover` first
+  (`daynumber`, then the browser's date, are fallbacks), because resetting on the *browser's*
+  midnight would cut a KoL day in half. It pins that reading the counter with a new day key is
+  the reset, that a free mining action adds nothing (the adventure total didn't move), that
+  eating adventures credits no turns, and that a run spanning rollover restarts the day's total
+  without restarting its own. On the heal side it pins the two refusals that must not turn into
+  a poll for something that cannot happen: a max HP at or below the floor, and no
+  `charpane-heal.js` button in the charpane.
 - `TwilightHeroes/test/quest-helper.test.mjs` — asserts `quest-helper.js`'s per-stage hint
   lookup resolves correctly. If you add quests/stages to that hint map (especially
   overlapping-text stages), add a case here too.
