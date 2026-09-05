@@ -267,6 +267,45 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   (the wiki's), and the assumption that the three champions reuse their own gladiator type's
   telegraphs — the wiki's boss pages still carry a NeedsSpading tag for exactly those, so a
   champion round that matches nothing falls back to the reference table instead of guessing.
+  A seventh type, `beerpong`, is **Insult Beer Pong** (`beerpong.php`), the last gate on
+  Arrr You Man Enough?. Like Sven Golly it has its own endpoint and no `whichchoice`, so it
+  gates on the retort form being present, which also keeps it quiet on the opening screen
+  and after the match. Old Don Rickets throws three insults and each has exactly one correct
+  retort; a single wrong answer ends the match. The eight pairs are a constant — they do not
+  reshuffle — and are taken from the wiki's table, which is byte-for-byte KoLmafia's
+  `BeerPongRequest.PIRATE_INSULTS`. The **order of `BEERPONG_INSULTS` is load-bearing**: the
+  form posts `response=N` where N is the 1-based index into it, so an entry inserted or
+  reordered starts answering with the wrong retort. Options 9-13 are the Monkey Island jokes;
+  they are kept in `BEERPONG_JOKES` purely so the file can say they always lose and so a
+  later edit can't promote one into the answer table.
+  The reason this is more than a lookup is that **KoL renders only the retorts you have
+  collected** (each is learned by being embarrassed by a pirate while carrying The Big Book
+  of Pirate Insults), so the dropdown *is* the record of what you know — the same thing
+  KoLmafia parses the form for. `beerpongKnown` reads it, and the bar reports how many of the
+  eight you own, which are missing, and your odds of taking a whole match
+  (`beerpongOdds`: three rounds drawn without replacement, so `n/8 * (n-1)/7 * (n-2)/6`, and
+  a flat **zero under three retorts** because it is then impossible rather than merely
+  unlikely — the numbers match the wiki's published table). When the answer to this round
+  isn't in the dropdown the bar says the match is already lost and offers no button, which is
+  the point: it sends you off to collect insults instead of feeding the game another
+  adventure.
+  Matching is exact, then **preposition-masked**, and never fuzzy — naming the wrong retort
+  loses the match as surely as picking a joke. The masking exists because the **Sword of
+  Procedural Prepositions**, itself a reward from this quest chain, swaps every preposition
+  on the page for a different one; `maskPrepositions` uses KoLmafia's own preposition list
+  and its trick of replacing them with a placeholder rather than deleting them, so word
+  positions still have to line up (the eight stay distinct under masking — a test pins that).
+  The insult itself is read with the three round patterns, which read nothing like each
+  other, and the round-1 preposition ("lobs his ball *at* your cups") is left open for the
+  same sword.
+  The form's markup is **confirmed against a live match** (2026-09-05) — the bar reads the
+  insult, names the retort and fills the dropdown on the real page. It was written without a
+  fixture, though (KoLmafia only ever builds `beerpong.php?response=N` and matches
+  `<form action=beerpong.php>` plus `<option value=N>`), so nothing depends on the select's
+  `name`: the form is found by its action and the select by its option values, each with a
+  fallback, and an unreadable dropdown reports that rather than claiming you know nothing.
+  Keep the fallbacks — they are what let this ship before the page was ever seen. Like every other handler here it **never
+  submits**: the button only picks the option, and you press Retort.
   The file's one non-puzzle feature is the **8-Bit Realm score**, and it deliberately sits
   outside the registry: it's on `charpane.php`, where no `whichchoice` exists and the bar
   doesn't fit, so it dispatches on its own just above `currentPuzzle()` and returns. The
@@ -476,6 +515,61 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   (all from KoLmafia's fight and choice fixtures), and the `BLOCKERS` wordings (wiki /
   KoLmafia string tables). A missed blocker fails in the wrong direction — the run keeps going
   — so that list is the first thing to correct when a run misbehaves.
+- `auto-mine.js` is a **port of the KoLmafia script [loathers/oreo](https://github.com/loathers/oreo)**
+  into the browser: it farms 1,970 carat gold in the Velvet / Gold Mine. Treat the
+  `THE STRATEGY CORE` section as a **translation of `oreo/src/strategy.ts`, not as our code** —
+  the row weights, the cluster weights, the 0.496 second-gold chance and the calibrated λ
+  constants (`ev` 3571; `ev-cluster` 3714 low-visibility / 3500 high) are all theirs. When oreo
+  changes, re-port and re-run the tests rather than tuning numbers here until they pass.
+  `test/auto-mine-strategy.test.mjs` is a direct port of oreo's own `test/strategy.test.ts`,
+  kept in its order, and is the thing that says the port is still faithful.
+  What is deliberately **not** ported: the λ calibration harness (a seeded synthetic board
+  generator and a sweep; it needs mall prices, and recalibrating means running oreo in KoLmafia
+  and pasting the number into the panel's λ field), the Meat accounting, and every action that
+  *acquires* something. oreo buys dynamite and potions of detection, equips the mining outfit,
+  and restores HP to survive cave-ins. **This script buys, equips and heals nothing.** It reads
+  what you already hold — dynamite from `api.php?what=inventory`, Object Detection from the
+  status effects — and each missing prerequisite is a named refusal instead. The drill and the
+  15 Hot Resistance oreo checks for are not checked at all, on purpose: without them KoL does
+  not render the mine page, so a readable grid *is* that check.
+  **Three frames, one file**, and the split follows auto-combat's: engine and panel in the menu
+  frame (the only one that survives a turn), the button in the charpane, and — new here — an
+  **advisor on `mining.php` itself**, which needs no button because looking at the mine is the
+  request. Both the engine and the advisor run the same controller, so they cannot disagree
+  about the best square; the advisor merely assumes no dynamite, since it can't know whether you
+  meant to spend a stick. The button places itself **after `#tm-autocombat-btn`** when that
+  exists, then falls through auto-combat's own chain.
+  Two coordinate systems meet in here and mixing them up is the classic bug. KoL's is
+  `(col,row)`, both 1..6, **row 1 at the top**; oreo's is a flat 0..35 with **index 0..5 as the
+  front row** — KoL row 6, the one you stand in — which is what lets `isLegal` say "row 0 is
+  always reachable". `coordinateToIndex`/`indexToCoordinate` convert. The `which` parameter is
+  `col + 8*row`, over the **8-wide grid including the unbreakable border**, not the 6-wide
+  interior.
+  The page contract is KoLmafia's `MineDecorator.java`, which is why the tests can assert
+  against the four state strings `MineDecoratorTest` pins to KoL's real responses. Squares carry
+  `alt='<Name> (col,row)'` (`Open Cavern` → `o`, `Promising Chunk of Wall` → `*`, `Rocky Wall`
+  → `X`); the state string is those 36 characters in KoL reading order; diggable squares are
+  wrapped in an `<a href='mining.php?...which=N...'>`, and that anchor is KoL's own statement of
+  reachability, which the advisor cross-checks `isLegal` against rather than trusting either
+  alone. There are **two readers** — regex over response text for the engine, DOM for the
+  advisor — because the callers have different things in hand; both go through `stateFromTiles`,
+  and the test asserts they agree.
+  The one that bit during development, and the reason `resultScope` exists: KoLmafia's relay
+  **redraws squares you have already opened with the art of what you found there**, so scoping
+  a dig's result to "everything after `Results:`" reports gold on every page for the rest of the
+  run once you have struck it. The scope has to end at the grid (`<div id='preload'>` /
+  `<div id='postload'>`), not at the end of the document.
+  There is no `mineLayout6` here, so what each opened square held is kept in `localStorage`
+  under `tm-automine-layout` (suffixed with the character name, like the pyramid state in
+  `quest-helper.js`), cleared on a cavern reset and whenever the state shows nothing open — which
+  is what keeps the advisor honest after *you* press Find New Cavern. A sparkle that yields no
+  item is recorded as a cave-in, which is how mafia reads it too, and it matters because it is
+  proof that square was not ore.
+  Turns are **measured** from `api.php`'s adventure total, never counted from requests, because
+  free mining actions (Unaccompanied Miner, Loded) dig without spending one; `turns=0` is oreo's
+  "free actions only" and stops the moment a dig costs an adventure.
+  Nothing in this script is **verified in-game**. The strategy is verified against oreo's tests
+  and the page reads against KoLmafia's fixtures, which is not the same thing.
 
 **Twilight Heroes** is plain (non-frame) pages scraped from table layout. State that must
 survive the full-page reload after equip/unequip/use is stashed in `sessionStorage`
@@ -1208,6 +1302,19 @@ node TwilightHeroes/test/quest-helper.test.mjs
 
 Current tests:
 
+- `KingdomOfLoathing/test/auto-mine-parse.test.mjs` — asserts `auto-mine.js`'s reading of
+  `mining.php`: the four 36-character state strings KoLmafia's `MineDecoratorTest` pins to KoL's
+  real responses, round-tripped through a rebuilt page; a verbatim two-row excerpt of the real
+  markup, which is the only thing pinning KoL's actual attribute order and quoting; that `which`
+  is `col + 8*row`; that a partial grid reads as *no* state rather than a short one; and that a
+  dig's result stops at the grid, because the mine redraws opened squares with the art of what
+  they held and an unscoped read reports gold forever after the first one. Extend it before
+  touching either reader.
+- `KingdomOfLoathing/test/auto-mine-strategy.test.mjs` — a direct port of loathers/oreo's
+  `test/strategy.test.ts`, kept in its order, minus the parts that need KoLmafia and minus the
+  calibration harness this port doesn't carry. It also pins the calibrated λ table and the
+  1226 six-square ore veins. This file's job is to say the strategy still answers the way oreo's
+  does, so when oreo changes, re-port from their file rather than editing numbers here.
 - `TwilightHeroes/test/quest-helper.test.mjs` — asserts `quest-helper.js`'s per-stage hint
   lookup resolves correctly. If you add quests/stages to that hint map (especially
   overlapping-text stages), add a case here too.

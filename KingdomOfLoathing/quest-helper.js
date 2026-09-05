@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/quest-helper.js
-// @version      1.9
-// @description  Helper for puzzle-y quest choice adventures and combat cues. It never submits or clicks anything on its own -- it fills in, highlights or explains the known-correct answer and leaves the actual move to you. Currently: Drawn Onward (choice 872), the photo frames in Dr. Awkward's office, sets the four photo dropdowns to the correct order; Beginning at the Beginning of Beginning (the Hidden Temple tile floor, tiles.php) glows the tile to step on in each row, spelling B-A-N-A-N-A-S from the bottom up, numbered in step order; Control Freak (choice 929), the pyramid control room, tracks the Lower Chambers rotation and tells you how many more times to turn the wheel, when to go down instead, and when to stop turning. Talk to Sven Golly (pandamonium.php?action=sven) gets an overview of the band -- who craves and hates what, which of the six items each one accepts, which of those you're carrying and where the rest drop -- plus a button per give that fills the dropdowns. On fight.php it watches the combat text for the one round where a move only works right now: a Junkyard gremlin presenting Yossarian's tool (use the molybdenum magnet) and a raver pulling his special dance move (cast Gothy Handwave), highlighting the message and offering to pick the item/skill in the dropdown for you. In the Mer-kin Colosseum it reads the gladiator's telegraph and names the skill that counters it -- Net Gain/Loss/Neutrality, Blade Sling/Roller/Runner or Ball Bust/Sweat/Sack -- says which of the three gladiatorial weapons this opponent needs, and warns when the one you are holding is the wrong one. For the scholar path it tracks the Mer-kin dreadscroll: the eight prophecy words are filed automatically from the pages that print them (the library card catalogue, a healscroll or killscroll in combat, a knucklebone, Deep Dark Visions, sushi with worktea), each failed reading is scored from the length of the Deep-Tainted Mind it cost and fed into a solver, and a "Mer-kin" button in the charpane, under the Current Quest block, opens the tracker anywhere. On the scroll itself it fills in every word it can name and leaves "Read Aloud" to you. Also reads the 8-Bit Realm Score in the charpane and turns its colour into a link to the zone that is currently paying double, with what to boost there.
+// @version      2.0
+// @description  Helper for puzzle-y quest choice adventures and combat cues. It never submits or clicks anything on its own -- it fills in, highlights or explains the known-correct answer and leaves the actual move to you. Currently: Drawn Onward (choice 872), the photo frames in Dr. Awkward's office, sets the four photo dropdowns to the correct order; Beginning at the Beginning of Beginning (the Hidden Temple tile floor, tiles.php) glows the tile to step on in each row, spelling B-A-N-A-N-A-S from the bottom up, numbered in step order; Control Freak (choice 929), the pyramid control room, tracks the Lower Chambers rotation and tells you how many more times to turn the wheel, when to go down instead, and when to stop turning. Talk to Sven Golly (pandamonium.php?action=sven) gets an overview of the band -- who craves and hates what, which of the six items each one accepts, which of those you're carrying and where the rest drop -- plus a button per give that fills the dropdowns. On fight.php it watches the combat text for the one round where a move only works right now: a Junkyard gremlin presenting Yossarian's tool (use the molybdenum magnet) and a raver pulling his special dance move (cast Gothy Handwave), highlighting the message and offering to pick the item/skill in the dropdown for you. In the Mer-kin Colosseum it reads the gladiator's telegraph and names the skill that counters it -- Net Gain/Loss/Neutrality, Blade Sling/Roller/Runner or Ball Bust/Sweat/Sack -- says which of the three gladiatorial weapons this opponent needs, and warns when the one you are holding is the wrong one. For the scholar path it tracks the Mer-kin dreadscroll: the eight prophecy words are filed automatically from the pages that print them (the library card catalogue, a healscroll or killscroll in combat, a knucklebone, Deep Dark Visions, sushi with worktea), each failed reading is scored from the length of the Deep-Tainted Mind it cost and fed into a solver, and a "Mer-kin" button in the charpane, under the Current Quest block, opens the tracker anywhere. On the scroll itself it fills in every word it can name and leaves "Read Aloud" to you. At Insult Beer Pong (beerpong.php) it reads Old Don Rickets' insult, names the one retort that answers it and offers to pick it in the dropdown, says outright when you have not collected that retort and the match is therefore lost, and reads the dropdown for which of the eight retorts you own and what your odds of winning a match are. Also reads the 8-Bit Realm Score in the charpane and turns its colour into a link to the zone that is currently paying double, with what to boost there.
 // @match        https://www.kingdomofloathing.com/choice.php*
 // @match        https://kingdomofloathing.com/choice.php*
 // @match        https://www.kingdomofloathing.com/fight.php*
@@ -17,6 +17,8 @@
 // @match        https://kingdomofloathing.com/charpane.php*
 // @match        https://www.kingdomofloathing.com/pandamonium.php*
 // @match        https://kingdomofloathing.com/pandamonium.php*
+// @match        https://www.kingdomofloathing.com/beerpong.php*
+// @match        https://kingdomofloathing.com/beerpong.php*
 // @match        https://www.kingdomofloathing.com/inv_use.php*
 // @match        https://kingdomofloathing.com/inv_use.php*
 // @match        https://www.kingdomofloathing.com/inventory.php*
@@ -42,10 +44,12 @@
   // combat cues, which aren't puzzles either but are the same shape: the answer is
   // knowable from the page and the game doesn't say it out loud. pandamonium.php
   // is here for Sven Golly's band, which is a puzzle with its own endpoint --
-  // no whichchoice, so it gates on its own form being present. The last four
+  // no whichchoice, so it gates on its own form being present. beerpong.php is
+  // the same shape: Insult Beer Pong's retort form is its own endpoint too.
+  // The last four
   // are the Mer-kin dreadscroll's doing: its clue words are printed by an item
   // use (inv_use/inventory), a skill cast (runskillz) and a plate of sushi.
-  if (!/\/(choice|tiles|adventure|charpane|fight|pandamonium|inv_use|inventory|runskillz|sushi)\.php/i
+  if (!/\/(choice|tiles|adventure|charpane|fight|pandamonium|beerpong|inv_use|inventory|runskillz|sushi)\.php/i
     .test(location.pathname)) {
     return;
   }
@@ -140,6 +144,21 @@
       auto: true,
       button: '',
       hint: 'Works out how many more times to turn the wheel, and when to stop.',
+    },
+
+    {
+      name: 'Insult Beer Pong',
+      // The Rickets match in Barrrney's Barrr (Arrr You Man Enough?). Its own
+      // endpoint, beerpong.php, with no whichchoice -- so it gates on the
+      // retort form being present, which also keeps it quiet on the opening
+      // screen and after the game is over.
+      page: /\/beerpong\.php/i,
+      choice: null,
+      detect: () => !!beerpongForm(),
+      type: 'beerpong',
+      auto: true,
+      button: '',
+      hint: 'Reads Rickets\' insult and names the retort that answers it.',
     },
 
     // --- combat cues (fight.php) -------------------------------------------
@@ -2907,6 +2926,316 @@
     },
   };
 
+  // === 'beerpong' handler ==================================================
+  //
+  // Insult Beer Pong (beerpong.php), the last gate on Arrr You Man Enough?:
+  // Old Don Rickets throws three insults and each one has exactly one correct
+  // retort. Get all three right and you win the match and the F'c'le with it;
+  // get one wrong and the whole game is over on the spot.
+  //
+  // Two things make this worth a helper rather than a table you keep in a tab:
+  //
+  //   - the insults do NOT reshuffle, so the answers are a constant (below,
+  //     from the wiki's table, which is also KoLmafia's PIRATE_INSULTS), but
+  //   - KoL only renders the retorts you have COLLECTED. Each one is learned by
+  //     being embarrassed by a pirate while carrying The Big Book of Pirate
+  //     Insults, so the dropdown is a different length for every player, and
+  //     the round is simply lost when the right answer isn't in it. Knowing
+  //     that *before* you pick is the actual value here: it tells you to go and
+  //     collect more insults instead of feeding the game another adventure.
+  //
+  // The option's value IS the 1-based index into the table -- the form posts it
+  // as `response` -- so the order of BEERPONG_INSULTS is load-bearing.
+  //
+  // CONFIRMED against a live match (2026-09-05): the bar reads the insult, names
+  // the retort and fills the dropdown on the real page. The markup was worked
+  // out without a fixture -- KoLmafia only ever builds the URL
+  // (`beerpong.php?response=N`) and matches `<form action=beerpong.php ...>`
+  // plus `<option value=N>` -- so nothing here depends on the select's `name`:
+  // the form is found by its action and the select by its option values, each
+  // with a fallback, and an unreadable page reports that instead of guessing.
+  // Keep it that way; the fallbacks are what survived the page being unknown.
+
+  const BEERPONG_INSULTS = [
+    {
+      rickets: 'Arrr, the power of me serve\'ll flay the skin from yer bones!',
+      retort: 'Obviously neither your tongue nor your wit is sharp enough for the job.',
+    },
+    {
+      rickets: 'Do ye hear that, ye craven blackguard? It be the sound of yer doom!',
+      retort: 'It can\'t be any worse than the smell of your breath!',
+    },
+    {
+      // KoL italicises "this" here; we read textContent, and flattenInsult
+      // strips tags anyway.
+      rickets: 'Suck on this, ye miserable, pestilent wretch!',
+      retort: 'That reminds me, tell your wife and sister I had a lovely time last night.',
+    },
+    {
+      rickets: 'The streets will run red with yer blood when I\'m through with ye!',
+      retort: 'I\'d\'ve thought yellow would be more your color.',
+    },
+    {
+      rickets: 'Yer face is as foul as that of a drowned goat!',
+      retort: 'I\'m not really comfortable being compared to your girlfriend that way.',
+    },
+    {
+      rickets: 'When I\'m through with ye, ye\'ll be crying like a little girl!',
+      retort: 'It\'s an honor to learn from such an expert in the field.',
+    },
+    {
+      rickets: 'In all my years I\'ve not seen a more loathsome worm than yerself!',
+      retort: 'Amazing! How do you manage to shave without using a mirror?',
+    },
+    {
+      rickets: 'Not a single man has faced me and lived to tell the tale!',
+      retort: 'It only seems that way because you haven\'t learned to count to one.',
+    },
+  ];
+
+  // Options 9-13, the Monkey Island jokes. They answer nothing and always lose
+  // the game; they're listed only so this file can say so, and so a future edit
+  // can't quietly promote one into the answer table.
+  const BEERPONG_JOKES = [
+    'How appropriate, you fight like a cow.',
+    'Look, a three-headed monkey!',
+    'I\'m rubber and you\'re glue.',
+    'I know you are, but what am I?',
+    'First you\'d better stop waving it around like a feather-duster.',
+  ];
+
+  // The Sword of Procedural Prepositions -- which is itself a reward from this
+  // quest chain -- swaps every preposition on the page for a different one, so
+  // an exact compare misses precisely when you're wielding it. KoLmafia's list,
+  // and KoLmafia's trick: mask them to a placeholder on both sides rather than
+  // deleting them, so word positions still have to line up.
+  const BEERPONG_PREPOSITIONS =
+    /\b(?:about|above|across|after|against|along|among|around|at|before|behind|below|beneath|beside|between|beyond|by|down|during|except|for|from|in|inside|into|like|near|of|off|on|onto|out|outside|over|past|through|throughout|to|under|up|upon|with|within|without)\b/g;
+
+  // Page text -> something two insults can be compared as. Tags go (insult 3 is
+  // italicised), entities and curly quotes are normalised, punctuation and
+  // case stop mattering; apostrophes stay, because "serve'll" and "I'd've" are
+  // most of what these lines are made of.
+  function flattenInsult(text) {
+    return String(text == null ? '' : text)
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/&quot;/gi, '"')
+      .replace(/&#0?39;|&apos;|&rsquo;/gi, '\'')
+      .replace(/&amp;/gi, '&')
+      .replace(/[‘’]/g, '\'')
+      .replace(/[“”]/g, '"')
+      .toLowerCase()
+      .replace(/[^a-z0-9']+/g, ' ')
+      .trim();
+  }
+
+  function maskPrepositions(flat) {
+    return flat.replace(BEERPONG_PREPOSITIONS, '@');
+  }
+
+  // Rickets' insult, quoted differently in each of the three rounds. These are
+  // KoLmafia's patterns, run against page text rather than raw HTML -- and the
+  // round-1 preposition ("lobs his ball AT your cups") is left open, because
+  // the sword rewrites that sentence too.
+  const BEERPONG_ROUNDS = [
+    /the pirate lobs his ball\s+\S+\s+your cups\.\s*"([^"]+)"\s*he taunts/i,
+    /"however --\s*([^"]+)"/i,
+    /and growls\s*"([^"]+)"/i,
+  ];
+
+  function ricketsInsult(text) {
+    const clean = String(text == null ? '' : text)
+      .replace(/&quot;/gi, '"')
+      .replace(/[“”]/g, '"');
+    for (const re of BEERPONG_ROUNDS) {
+      const m = clean.match(re);
+      if (m) return m[1].trim();
+    }
+    return null;
+  }
+
+  // Which of the eight he threw, or 0. Exact first, preposition-masked second;
+  // never a fuzzy or partial match, because naming the wrong retort here loses
+  // the game just as surely as picking a joke.
+  function matchInsult(text) {
+    const want = flattenInsult(text);
+    if (!want) return 0;
+    let i = BEERPONG_INSULTS.findIndex((p) => flattenInsult(p.rickets) === want);
+    if (i >= 0) return i + 1;
+    const masked = maskPrepositions(want);
+    i = BEERPONG_INSULTS.findIndex((p) => maskPrepositions(flattenInsult(p.rickets)) === masked);
+    return i >= 0 ? i + 1 : 0;
+  }
+
+  // The dropdown IS the record of which retorts you have -- KoL leaves out the
+  // ones you haven't learned. Values above 8 are the failing five and say
+  // nothing about what you know, which is the same rule KoLmafia parses by.
+  function beerpongKnown(values) {
+    const seen = [];
+    (values || []).forEach((v) => {
+      if (!/^\d+$/.test(String(v).trim())) return;
+      const n = parseInt(String(v), 10);
+      if (n >= 1 && n <= BEERPONG_INSULTS.length && seen.indexOf(n) === -1) seen.push(n);
+    });
+    return seen.sort((a, b) => a - b);
+  }
+
+  // Odds of winning a whole match with `n` retorts: three rounds, each a fresh
+  // insult drawn from the eight without replacement. Under three you cannot
+  // win at all -- that's a fact about the game, not a rounding of a small
+  // number, so it's returned as a flat zero.
+  function beerpongOdds(n) {
+    const total = BEERPONG_INSULTS.length;
+    if (n < 3) return 0;
+    return (n / total) * ((n - 1) / (total - 1)) * ((n - 2) / (total - 2));
+  }
+
+  function beerpongPlan(input) {
+    const readable = input.readable !== false;
+    const index = input.index || 0;
+    const pair = index >= 1 && index <= BEERPONG_INSULTS.length
+      ? BEERPONG_INSULTS[index - 1] : null;
+    const known = readable ? beerpongKnown(input.known) : [];
+    const know = !!pair && known.indexOf(index) !== -1;
+    const all = BEERPONG_INSULTS.map((p, i) => i + 1);
+    return {
+      index: index,
+      readable: readable,
+      rickets: pair ? pair.rickets : null,
+      retort: pair ? pair.retort : null,
+      know: know,
+      // The value to post as `response`, and only ever one we've seen offered.
+      value: know ? String(index) : null,
+      known: readable ? known : null,
+      count: readable ? known.length : null,
+      missing: readable ? all.filter((n) => known.indexOf(n) === -1) : null,
+      odds: readable ? beerpongOdds(known.length) : null,
+    };
+  }
+
+  function beerpongPercent(odds) {
+    return (Math.round(odds * 1000) / 10) + '%';
+  }
+
+  function beerpongAdvice(plan) {
+    const lines = [];
+
+    // An unreadable dropdown is not an empty one. Saying "you know 0 retorts"
+    // here would send you off collecting insults you may already have.
+    if (!plan.readable) {
+      lines.push('KoL lists only the retorts you have collected, so that dropdown is the ' +
+        'one record of what you know — and this page did not give one up.');
+      lines.push('Pick your answer by hand; nothing has been filled in for you.');
+      return {
+        tone: 'turn',
+        headline: 'Couldn\'t read the retort dropdown, so this says nothing about what you know.',
+        lines: lines,
+      };
+    }
+
+    lines.push('You know ' + plan.count + ' of the 8 retorts' +
+      (plan.missing.length ? ' (missing #' + plan.missing.join(', #') + ')' : '') + '.');
+    lines.push(plan.count < 3
+      ? 'With fewer than three of them you cannot win a match at all — the three rounds ' +
+        'are drawn from the eight without replacement.'
+      : 'That is about a ' + beerpongPercent(plan.odds) + ' chance of winning a whole match.');
+
+    if (!plan.index) {
+      lines.push('He phrases it differently in each of the three rounds. If this is the ' +
+        'opening screen he has not thrown yet — it will read once he does.');
+      return {
+        tone: 'turn',
+        headline: 'Couldn\'t read Rickets\' insult on this page.',
+        lines: lines,
+      };
+    }
+
+    if (!plan.know) {
+      lines.push('The answer is "' + plan.retort + '" and it is not in your dropdown, so ' +
+        'this match is already lost — every other option ends it.');
+      lines.push('Retorts are learned by being embarrassed by a pirate while you carry ' +
+        'The Big Book of Pirate Insults. That is the only way to fill the gaps.');
+      return {
+        tone: 'stop',
+        headline: 'Rickets used insult #' + plan.index + ' and you haven\'t learned that retort.',
+        lines: lines,
+      };
+    }
+
+    lines.push('The button below only picks it in the dropdown — press Retort yourself.');
+    return {
+      tone: 'go',
+      headline: 'Rickets used insult #' + plan.index + '. Answer: "' + plan.retort + '"',
+      lines: lines,
+    };
+  }
+
+  // --- the page ------------------------------------------------------------
+
+  // A select whose options are all beer pong responses (1-13). Found this way
+  // rather than by `name`, which no fixture pins down.
+  function beerpongSelect(scope) {
+    const sels = Array.from((scope || document).querySelectorAll('select'));
+    return sels.find((s) => {
+      const vals = Array.from(s.options || []).map((o) => o.value);
+      return vals.length >= 3 && vals.every((v) => /^\d+$/.test(v) &&
+        parseInt(v, 10) >= 1 && parseInt(v, 10) <= BEERPONG_INSULTS.length + BEERPONG_JOKES.length);
+    }) || null;
+  }
+
+  function beerpongForm() {
+    const forms = Array.from(document.querySelectorAll('form'));
+    const byAction = forms.find((f) =>
+      /beerpong\.php/i.test(f.getAttribute('action') || '') && beerpongSelect(f));
+    return byAction || forms.find((f) => beerpongSelect(f)) || null;
+  }
+
+  const beerpongHandler = {
+    locate() {
+      const form = beerpongForm();
+      if (!form) return null;
+      // Above the form: the advice is what decides which option you pick, so it
+      // has to be read before the dropdown, not after it. Same reason the
+      // combat cues sit above their buttons.
+      return { form: form, select: beerpongSelect(form), mount: form, before: true, body: null };
+    },
+
+    extras(puzzle, ctx, say) {
+      const body = document.createElement('div');
+      body.style.cssText = 'margin-top:5px';
+      ctx.body = body;
+      ctx.say = say;
+      return body;
+    },
+
+    apply(puzzle, ctx, say) {
+      const text = document.body ? (document.body.textContent || '') : '';
+      const plan = beerpongPlan({
+        index: matchInsult(ricketsInsult(text) || ''),
+        known: ctx.select ? Array.from(ctx.select.options).map((o) => o.value) : [],
+        readable: !!ctx.select,
+      });
+      const advice = beerpongAdvice(plan);
+      say(advice.headline, ROT_TONE[advice.tone]);
+
+      const body = ctx.body;
+      if (!body) return;
+      body.textContent = '';
+      advice.lines.forEach((line) => {
+        body.appendChild(mkEl(document, 'div',
+          'margin-top:3px;text-align:left;color:' + (ROT_TONE[advice.tone] || '#333'), line));
+      });
+
+      if (!plan.know || !ctx.select) return;
+      body.appendChild(rotButton('Select retort #' + plan.index, false, () => {
+        ctx.select.value = plan.value;
+        ctx.select.dispatchEvent(new Event('change', { bubbles: true }));
+        ctx.say('Retort #' + plan.index + ' is selected. Press Retort yourself — this ' +
+          'script never does.', ROT_TONE.go);
+      }));
+    },
+  };
+
   // === the charpane button and its panel ===================================
   //
   // The clue tracker is wanted BETWEEN visits to the scroll -- while deciding
@@ -3089,6 +3418,7 @@
     counter: counterHandler,
     dreadscroll: dreadscrollHandler,
     catalog: catalogHandler,
+    beerpong: beerpongHandler,
   };
 
   // === The 8-Bit Realm score (charpane) ====================================
