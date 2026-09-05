@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/all-in-one/kingdom-of-loathing.js
-// @version      1.42
+// @version      1.44
 // @description  Single-install loader for the Kingdom of Loathing userscripts in this repo. It carries no logic of its own; it @requires each individual script straight from GitHub so installing this one file gives you all of them. NOTE: adventure-choices.js is intentionally NOT bundled here -- it needs GM_* grants, which are incompatible with the @grant none mode the other scripts rely on. Install that one separately.
 //
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
@@ -50,6 +50,8 @@
 // @match        https://kingdomofloathing.com/adventure.php*
 // @match        https://www.kingdomofloathing.com/pandamonium.php*
 // @match        https://kingdomofloathing.com/pandamonium.php*
+// @match        https://www.kingdomofloathing.com/beerpong.php*
+// @match        https://kingdomofloathing.com/beerpong.php*
 // @match        https://www.kingdomofloathing.com/inv_use.php*
 // @match        https://kingdomofloathing.com/inv_use.php*
 // @match        https://www.kingdomofloathing.com/runskillz.php*
@@ -73,6 +75,7 @@
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/quest-helper.js
 // @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/auto-combat.js
+// @require      https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/auto-mine.js
 //
 // @run-at       document-idle
 // @grant        none
