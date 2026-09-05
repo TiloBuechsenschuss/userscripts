@@ -568,8 +568,12 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   Turns are **measured** from `api.php`'s adventure total, never counted from requests, because
   free mining actions (Unaccompanied Miner, Loded) dig without spending one; `turns=0` is oreo's
   "free actions only" and stops the moment a dig costs an adventure.
-  Nothing in this script is **verified in-game**. The strategy is verified against oreo's tests
-  and the page reads against KoLmafia's fixtures, which is not the same thing.
+  **Confirmed working in-game** (2026-09-05): a live run in the Velvet / Gold Mine drove the
+  page, picked squares and reset caverns as intended. What that run did *not* exercise, and so
+  is still unverified, is the dynamite path — `api.php?what=inventory` returning a plain
+  `{itemId: count}` map is taken from convention rather than from a fixture. It fails safe (a
+  count of 0 means no route discount, never a different square), so a wrong read costs turns
+  rather than digging in the wrong place; check it there first if dynamite never seems to apply.
 
 **Twilight Heroes** is plain (non-frame) pages scraped from table layout. State that must
 survive the full-page reload after equip/unequip/use is stashed in `sessionStorage`
