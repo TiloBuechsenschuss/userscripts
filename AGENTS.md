@@ -376,6 +376,26 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   adds a link; it never sets the dial. Note the registry's `run()` also `.catch`es a
   returned promise now, because this feature is async and try/catch alone would let a
   rejection escape.
+  The sixth feature marks the **Daily Dungeon's free-skip options** on `choice.php`. Each
+  obstacle room has one button that gets you past for no adventure, drawn exactly like the
+  ones that don't: the door room (692) takes **Pick-O-Matic lockpicks** or the **Platinum
+  Yendorian Express Card**, the trap room (693) an **eleven-foot pole** or an equipped
+  **candy cane sword cane**, and the two chest rooms (690 room 5, 691 room 10) offer **Go
+  through the boring door** with a **Ring of Detect Boring Doors** equipped, which skips three
+  rooms at the cost of that chest's item. The marked button gets a green outline plus a line
+  saying what it costs — a `title` would do, but this is a page you read on a phone too, and
+  the reason has to be legible *before* the click.
+  Two decisions carry it. **Matching is on the button's label, never on the option number**:
+  the label is what the player is reading, so a marker can't end up on a button that says
+  something else, whereas an option number drifted by a KoL change could put the green outline
+  on **Try the doorknob** (springs the trap, up to 3 adventures) or **Proceed forward
+  cautiously** (half your maximum HP, not reduced by resistance) — the two options this
+  feature exists to steer away from. A drifted *label* simply matches nothing, and matching
+  nothing is already the normal case, since KoL only renders these options when you have the
+  item. And **`Use a skeleton key` is deliberately not in the table**: it also passes for no
+  adventure, but the key breaks most times, so it isn't free in the sense the green says.
+  The labels and choice numbers are the wiki's and are **unverified against a live dungeon**;
+  `ddLabel`/`ddSkipFor` are DOM-free so the table is unit-tested.
 
 - `auto-combat.js` adds an "Auto" button to the **charpane**, under the Last Adventure
   readout, opening a panel that adventures a chosen zone for a chosen number of
@@ -1217,6 +1237,16 @@ Current tests:
   both panes' labels for a device are recognised so the line is never duplicated, that a
   last-adventure link to Hey Deze is *not* mistaken for the Heartbreaker's line (which is
   why the label rather than the href identifies it), and the compact/expanded discriminator.
+- `KingdomOfLoathing/test/ux-daily-dungeon.test.mjs` — asserts `ux-enhancers.js`'s Daily
+  Dungeon skip marker. The half that matters is negative: every *other* label the wiki lists
+  on those four screens is pinned as unmatched, above all **Try the doorknob** and **Proceed
+  forward cautiously**, because a green outline on either of those is worse than no feature
+  at all. It also pins that each free option belongs to its own room only (lockpicks don't
+  match on the trap screen, the boring door doesn't match on the door screen), that the
+  skeleton key is absent from the table rather than merely unmatched, that a non-dungeon
+  `whichchoice` and a page with none are both left alone, and that a second pass — the same
+  page re-scanned — adds no second note. Extend it before adding an option, and take the
+  label verbatim from the wiki rather than retyping it.
 - `KingdomOfLoathing/test/daily-checklist-seeding.test.mjs` — asserts `daily-checklist.js`'s
   `applySeeds`: order on a fresh list, and that a new default reaches a list someone already
   has, in the right place and exactly once. Two traps it pins down — resting, the tea tree

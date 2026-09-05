@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js
-// @version      1.7
-// @description  A grab-bag of small quality-of-life tweaks for Kingdom of Loathing pages. Currently: at the Hermit (hermit.php) it adds a "Buy all clovers" button next to the Trade button that trades worthless items for every 11-leaf clover the Hermit still has in stock today, one at a time, then reloads and reports how many it got; at the Campground (campground.php) it guards a Beer Garden that hasn't grown for two days yet, since the fancy bottles and labels don't appear before then -- the crop is flagged and clicking it asks for confirmation first; in the Mall (mall.php) it adds a "buy all" action to each store row and a "Buy N" row per item that walks the stores cheapest-first, showing the total and the average cost per item before spending anything; in the Inventory (inventory.php) it adds a [mall] action next to [use] on every tradeable item, searching the Mall for that exact item; and in the character pane (charpane.php) it keeps the link to your monster aggravation device on screen even when the dial is at 0, which is exactly when KoL hides it.
+// @version      1.8
+// @description  A grab-bag of small quality-of-life tweaks for Kingdom of Loathing pages. Currently: at the Hermit (hermit.php) it adds a "Buy all clovers" button next to the Trade button that trades worthless items for every 11-leaf clover the Hermit still has in stock today, one at a time, then reloads and reports how many it got; at the Campground (campground.php) it guards a Beer Garden that hasn't grown for two days yet, since the fancy bottles and labels don't appear before then -- the crop is flagged and clicking it asks for confirmation first; in the Mall (mall.php) it adds a "buy all" action to each store row and a "Buy N" row per item that walks the stores cheapest-first, showing the total and the average cost per item before spending anything; in the Inventory (inventory.php) it adds a [mall] action next to [use] on every tradeable item, searching the Mall for that exact item; in the character pane (charpane.php) it keeps the link to your monster aggravation device on screen even when the dial is at 0, which is exactly when KoL hides it; and in the Daily Dungeon (choice.php) it marks the option that gets you past a door, trap or chest room without spending an adventure -- lockpicks, the Platinum Yendorian Express Card, the eleven-foot pole, the candy cane sword cane, or the Ring of Detect Boring Doors -- with a note on what it costs you.
 // @match        https://www.kingdomofloathing.com/hermit.php*
 // @match        https://kingdomofloathing.com/hermit.php*
 // @match        https://www.kingdomofloathing.com/campground.php*
@@ -15,6 +15,8 @@
 // @match        https://kingdomofloathing.com/inventory.php*
 // @match        https://www.kingdomofloathing.com/charpane.php*
 // @match        https://kingdomofloathing.com/charpane.php*
+// @match        https://www.kingdomofloathing.com/choice.php*
+// @match        https://kingdomofloathing.com/choice.php*
 // @grant        none
 // ==/UserScript==
 
@@ -1270,6 +1272,134 @@
     injectMcdLine(dev, pwd);
   }
 
+  // === feature: Daily Dungeon free-skip options =========================
+  //
+  // Every obstacle room in the Daily Dungeon has one option that gets you past
+  // it for **no adventure**, and KoL renders it as just another button in the
+  // stack. Picking the wrong one is expensive in a way that doesn't come back:
+  // "Try the doorknob" triggers the trap (up to 3 adventures gone), and
+  // "Proceed forward cautiously" takes half your maximum HP, unreduced by
+  // resistance. So the free option gets an outline and a line saying what it
+  // costs you, which is nothing.
+  //
+  // Choice numbers and button labels are the wiki's:
+  //   690 The First Chest Isn't the Deepest. (room 5)
+  //   691 Second Chest (room 10)
+  //   692 I Wanna Be a Door
+  //   693 It's Almost Certainly a Trap
+  //
+  // "Use a skeleton key" is deliberately NOT here. It also passes for no
+  // adventure, but it breaks the key most times, so it isn't free the way the
+  // rest are and shouldn't wear the same colour.
+  //
+  // Matching is on the button's LABEL, never on the option number. The label is
+  // the thing the player is reading, so a highlight can't end up on a button
+  // that says something else; an option number drifted by a KoL change could
+  // put the outline on the doorknob. A drifted *label* just matches nothing,
+  // which is the harmless direction -- and an unmatched option is the normal
+  // case here anyway, since KoL only renders these when you have the item.
+
+  const DD_ID_PREFIX = 'tm-dd-skip-';
+
+  const DUNGEON_SKIPS = {
+    690: [
+      { label: 'go through the boring door',
+        why: 'Ring of Detect Boring Doors: skips straight to room 8, so three rooms ' +
+          'cost no adventures. You give up this chest\'s item.' },
+    ],
+    691: [
+      { label: 'go through the boring door',
+        why: 'Ring of Detect Boring Doors: skips straight to room 13, so three rooms ' +
+          'cost no adventures. You give up this chest\'s item.' },
+    ],
+    692: [
+      { label: 'use your lockpicks',
+        why: 'Pick-O-Matic lockpicks: unlocks the door every time. No adventure, no ' +
+          'trap, and the lockpicks are not used up.' },
+      { label: 'use your credit card to open the door',
+        why: 'Platinum Yendorian Express Card: unlocks the door every time. No ' +
+          'adventure, no trap, and the card is not used up.' },
+    ],
+    693: [
+      { label: 'use your eleven-foot pole',
+        why: 'eleven-foot pole: past the trap for no adventure and no damage. You ' +
+          'get no stats from the trap either, and the pole is not used up.' },
+      { label: 'use your candy cane sword',
+        why: 'candy cane sword cane: past the trap for no adventure and no damage, ' +
+          'and it still gives around 40-50 substats.' },
+    ],
+  };
+
+  // Buttons are compared on a flattened label: KoL's own spacing and the
+  // trailing full stop it puts on some options are not identity.
+  function ddLabel(text) {
+    return String(text == null ? '' : text)
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/\.$/, '')
+      .toLowerCase();
+  }
+
+  // The advice for one button on one choice page, or null when this isn't an
+  // option we have anything to say about.
+  function ddSkipFor(choice, text) {
+    const entries = DUNGEON_SKIPS[choice];
+    if (!entries) return null;
+    const want = ddLabel(text);
+    if (!want) return null;
+    for (const entry of entries) {
+      if (entry.label === want) return entry;
+    }
+    return null;
+  }
+
+  // choice.php is shared by every choice adventure, so nothing happens until
+  // the hidden whichchoice says we're in one of the dungeon's rooms.
+  function currentChoiceNumber(doc) {
+    const input = (doc || document).querySelector('input[name="whichchoice"]');
+    if (!input) return null;
+    const n = Number(input.value);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  // Whatever the page is using as a clickable option. Choice pages are
+  // classic <input type=submit class=button>, but a <button> is answered the
+  // same way, so both are read and the label comes from whichever holds it.
+  function ddButtonLabel(el) {
+    return el.tagName === 'BUTTON' ? el.textContent : el.value;
+  }
+
+  function dailyDungeonSkips() {
+    const choice = currentChoiceNumber(document);
+    if (!DUNGEON_SKIPS[choice]) return;
+
+    const buttons = document.querySelectorAll('input[type="submit"], button');
+    let n = 0;
+    for (const btn of buttons) {
+      const skip = ddSkipFor(choice, ddButtonLabel(btn));
+      if (!skip) continue;
+      if (btn.dataset.tmDdSkip) continue; // idempotency guard
+      btn.dataset.tmDdSkip = '1';
+
+      // Inline styles only: KoL's CSP blocks a script-injected stylesheet, but
+      // allows style attributes (same constraint mine-sparkle-highlight.js and
+      // quest-helper.js work under).
+      btn.style.outline = '3px solid #0a0';
+      btn.style.outlineOffset = '2px';
+      btn.style.fontWeight = 'bold';
+
+      // The outline says "this one"; the note says why, because a tooltip is
+      // unreadable on a touch screen and this is exactly the moment you want
+      // the reason before you click.
+      const note = document.createElement('div');
+      note.id = DD_ID_PREFIX + (n++);
+      note.style.cssText = 'margin:3px 0 6px;color:#060;font-size:10px;font-weight:bold';
+      note.textContent = 'Free: ' + skip.why;
+      const host = btn.parentNode;
+      if (host) host.insertBefore(note, btn.nextSibling);
+    }
+  }
+
   // === feature registry =================================================
 
   const FEATURES = [
@@ -1278,6 +1408,7 @@
     { name: 'mall-bulk-buy', path: /\/mall\.php/i, run: mallBulkBuy },
     { name: 'inventory-mall-link', path: /\/inventory\.php/i, run: inventoryMallLinks },
     { name: 'mcd-always-visible', path: /\/charpane\.php/i, run: mcdAlwaysVisible },
+    { name: 'daily-dungeon-skips', path: /\/choice\.php/i, run: dailyDungeonSkips },
   ];
 
   function run() {
