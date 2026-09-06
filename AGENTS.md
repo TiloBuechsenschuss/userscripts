@@ -719,6 +719,21 @@ navigation. Two consequences:
   `launcher` feature mounts a "⚙ UX" button whose menu is built from the `PANELS` registry
   (`{ id, icon, label, hint, render }`, `render()` called fresh on every open so a live panel
   never has to invalidate a cache).
+  Every panel's sticky header carries a **fullscreen** button beside its close button, and the
+  choice is **remembered** in `localStorage` (`fl-ux-panel-fullscreen`), so a long panel opens at
+  full size every time rather than needing the button pressed again (added 2026-09-06). The
+  popover is sized to hang off the launcher button, which is right for a lookup table and wrong
+  for the festival checklist — several screens of it in a 660px box. Two things there are
+  load-bearing. Fullscreen is **`position:fixed`, not a move in the DOM**: the launcher root is
+  itself fixed and carries no transform or filter, so a fixed child is measured against the
+  viewport and steps out of the root's flex column on its own, leaving the docked button, the
+  menu and the placement code untouched. And the two shapes are **one style patch each**
+  (`PANEL_FULLSCREEN_CSS` / `PANEL_WINDOWED_CSS`) rather than a set of ad-hoc assignments, so
+  every property fullscreen sets is given a value again on the way back — the three exceptions
+  are `margin`/`maxWidth`/`maxHeight`, which `applyLauncherStack` owns and re-applies on the next
+  placement, and which it now **skips while fullscreen** or the 660px cap would go straight back
+  on. A test pins that key coverage, since a property added to one patch and not the other leaves
+  the panel stuck half-fullscreen.
 
   **The button is DOCKED into FL's own chrome, not floating over it** (changed 2026-09-03, on a
   report that it kept covering things). It used to be `position:fixed` on `document.body` — and
@@ -1148,11 +1163,25 @@ navigation. Two consequences:
   second table -- the depths are stated there once and must not be stated twice --
   and `fotzSplitUniques` lifts out the entries spanning depths 1-5 (the corals) so they are
   named once above the table instead of five times inside it.
+  **The "coral in hand ends it" rule now lives in `fotzMissingFrom` rather than only in
+  `coralsWanted`** (2026-09-06, reported: a character carrying all six corals was still shown all
+  six as still down there). Holding **one** copy is the whole condition — one coral becomes one
+  item and the three items are mechanically identical, so a second is a duplicate of a duplicate
+  — and the check comes *before* the `pending` case for the same reason `entry.inHand` does: a
+  pending coral's items can never read as held, but the coral itself reads perfectly well, and it
+  is the coral you dive for. Because `fotzMissingFrom` is shared, the card **badge** moved with
+  it: a coral card whose coral you carry now marks `✓` rather than `★`, which is the same answer
+  the dive advice was already giving. The one thing that could no longer be derived from it is the
+  tooltip's distinction between "spare, since you already have the item it becomes" and "one is
+  all it takes" — that now asks the variants directly.
   `fotzLedger` totals what your
   treasures and *spare* equipment would fetch, which needs quantities -- hence
   `readPossessionCounts`, which `readPossessions` is now defined in terms of so the two cannot
   drift. Counts are a **max, never a sum**: an item you are wearing appears both as
-  `div.equipped-item` and as a row in the equip drawer.
+  `div.equipped-item` and as a row in the equip drawer. They are read off the
+  `.js-item-value` span first and only then off the `aria-label` — see the Possessions paragraph
+  above; equipment states its quantity in the span and nowhere else, and reading the label alone
+  made every spare piece of kit invisible to this ledger.
   Two shared pieces moved for this. `refreshFactionState` is now **`refreshBackgroundState`** and
   banks both panels' readings off the same two page loads -- booting the SPA twice more for this
   panel would have been silly. And `fotzHoldings()` is memoised on a `fotzGen` counter bumped
@@ -1176,7 +1205,11 @@ navigation. Two consequences:
   parser strips the alt off the front instead of hunting for where the name ends. FL's faction
   names match `FACTIONS[].name` exactly for all twelve. A text-only fallback exists for a missing
   alt, anchored on the `Renown:`/`Favours:`/`Connected:` prefixes so a quality whose name contains
-  a number can't be mis-split.
+  a number can't be mis-split. An **Accomplishment carries no number at all** — FL renders
+  `Discovered: the Pentamerous Bride` and stops — so a matched alt with nothing after it reads as
+  **level 1** rather than as a parse failure. Demanding a digit dropped every Accomplishment on
+  the floor, which is what kept sending someone who had already met the Bride back to the bottom
+  of the trench (fixed 2026-09-06, off a real `/myself` capture).
   **Three rules here are load-bearing.** (1) FL doesn't render a quality you have none of, so
   absent means 0 — *except* when the tab's search box (`input.input--item-search`) has text in it,
   which filters the list, and then absent must stay unknown. That guard is why the zero is safe at
@@ -1193,7 +1226,18 @@ navigation. Two consequences:
   `[data-quality-id]` rather than a per-section selector is deliberate — inventory
   (`li.item`), the equip drawer (`li.available-item-list__item`) and **the slot you are actually
   wearing** (`div.equipped-item`) are three different shapes, and missing the third would tell
-  anyone wearing their Renown item that they don't have it. The ids would be a better key than
+  anyone wearing their Renown item that they don't have it.
+  **How many you hold is stated in two different places, and never in the same one.** An
+  inventory item carries the count in its `aria-label` (`Witch-Stone × 20; …`) *and* in a
+  `.js-item-value` span beside the label; a piece of **equipment in the drawer** — the only place
+  a spare weapon, hat or pair of boots ever appears — carries no `× N` in its label at all and
+  states the count solely in that span; and the slot you are wearing has neither, which is
+  correctly the one you have on. So the count is read off `.js-item-value` where it exists and
+  falls back to the label. Reading the label alone counted every duplicate piece of equipment as
+  one, and a character sitting on four Scrimshander Carving Knives was told they had no spares to
+  trade in (fixed 2026-09-06, off a real `/possessions` capture). The "**max, never summed**" rule
+  across nodes still stands, and now covers the equipped copy (1, no span) against the drawer's
+  span (the whole holding). The ids would be a better key than
   names, but only the ids of items you *own* are visible, so the full table can't be built from
   them; the names matched the wiki exactly for all nineteen faction/Renown items in the capture.
   `itemStatus()` turns those two readings into one of six states — `claimed` / `ready` /
@@ -1245,7 +1289,7 @@ navigation. Two consequences:
   `ctx.rerender()` that rebuilds only the body, so a refresh landing doesn't flicker the header
   or lose scroll position.
 
-**What in `FallenLondon/ux-enhancers.js` has actually been run in the game** (as of 2026-09-04).
+**What in `FallenLondon/ux-enhancers.js` has actually been run in the game** (as of 2026-09-06).
 Worth keeping current, because "verified against a capture" and "seen working live" are different
 claims and this file makes both.
 
@@ -1322,6 +1366,20 @@ Confirmed live by the author:
   Confirmed readable in the page, which is the half a contrast ratio cannot settle -- the
   question was never white-on-blue, it was whether a light card reads as *ours* against FL's
   dark chrome. It does.
+
+- The **three scrape fixes of 2026-09-06, end to end**. All three started as reported wrong
+  answers, were diagnosed off fresh `/myself` and `/possessions` captures (quoted in the script),
+  and were then **reported working in the game by the author**:
+  the **Accomplishment shape** -- `Discovered: the Pentamerous Bride`, name and nothing else, no
+  level anywhere -- so the Bride now reads and the bottom of the trench drops out of what is
+  still to dive for; the **`.js-item-value` span**, which is the *only* place a piece of
+  equipment states its quantity, so four Scrimshander Carving Knives count as three spares in
+  the ledger instead of none; and **a coral already in hand ending its card**, so a diver
+  carrying all six is no longer shown all six as still down there.
+- The **panel fullscreen toggle** (2026-09-06), reported working -- including that the
+  preference carries to the next panel, which is the whole reason it is remembered. So the
+  `position:fixed`-child-of-a-fixed-root trick really does step out of the launcher's flex
+  column without disturbing the docked button.
 
 **Not** verified in-game (reasoned about only):
 
@@ -1617,6 +1675,13 @@ Current tests:
   be an infinite loop, not just a stray node — that both copies (docked, and above the hand)
   repair themselves, that the banner gets one cycling button instead of a row of six, and that
   surfacing removes both.
+  And the **panel header's fullscreen toggle** (2026-09-06), which needs a launcher that has
+  actually been mounted: it pushes a stub panel onto `PANELS` before the rebuild so what is under
+  test is the header rather than any real panel's render, then presses the button and checks the
+  panel goes fixed and full-bleed, that a placement pass leaves it alone, that the preference
+  survives a close and the next panel opens fullscreen already, and that pressing it again
+  restores the popover's own size. Plus the key-coverage check on the two style patches. Its stub
+  records event listeners for this; it used to drop them.
 - `FallenLondon/test/ux-fruits-of-the-zee.test.mjs` — asserts `ux-enhancers.js`'s Fruits of the
   Zee feature. Its stub DOM builds both the qualities and the possessions markup and is rich
   enough to **actually build the panel**, in both the mid-festival and the nothing-ever-read
@@ -1626,7 +1691,12 @@ Current tests:
   tick), the range-not-a-guess rule and that a proven floor trims the range without collapsing it,
   the Sights → variant mapping and that the bands tile 1..100, the Fruit Market prices (with the
   invariant that buying at the stalls always costs less than trading a spare back pays), that
-  counts are a max rather than a sum, and the collection arithmetic — what counts towards the
+  counts are a max rather than a sum (and that **equipment states its count in a
+  `.js-item-value` span and not in its label**, so four Scrimshander Carving Knives really
+  are three spares in the ledger), that an **Accomplishment with no level at all** still
+  reads — the Bride, off a real `/myself` capture — and drops the bottom of the trench out
+  of what is left to dive for, that a **coral you are already carrying** is likewise not
+  still down there, and the collection arithmetic — what counts towards the
   headline and what deliberately does not. It also holds the cross-feature check that no card name
   appears in two of `SPITE_CARDS`, `ZEE_CARDS` and `FOTZ_CARDS`. It also pins the **dive plan**
   (each stage's items really are claimable at that stage's depth, the four stages cover all six

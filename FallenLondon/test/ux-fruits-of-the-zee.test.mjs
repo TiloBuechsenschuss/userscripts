@@ -145,6 +145,39 @@ function ownedEl(name, count) {
   return root;
 }
 
+// The OTHER shape a possession takes, and it is not the same one: a piece of
+// equipment -- in the equip drawer, which is the only place a spare weapon,
+// hat or pair of boots appears -- carries no "× N" in its aria-label at all,
+// and states the count solely in a `.js-item-value` span beside it. Verbatim
+// from a real Possessions tab (2026-09-06).
+function equipmentEl(name, count) {
+  const root = makeEl('div');
+  root.attrs['data-quality-id'] = '2';
+  const inner = makeEl('div');
+  inner.attrs['aria-label'] = name + '; Watchful +3; a description';
+  root.appendChild(inner);
+  const value = makeEl('span');
+  value.className = 'js-item-value icon__value';
+  value.textContent = String(count);
+  root.appendChild(value);
+  return root;
+}
+
+// An ACCOMPLISHMENT on the Myself tab. It carries no number anywhere: FL
+// renders the name and stops, trailing space and all (captured 2026-09-06).
+function accomplishmentLi(name) {
+  const li = makeEl('li');
+  li.className = 'quality-item';
+  const img = makeEl('img');
+  img.attrs.alt = name;
+  li.appendChild(img);
+  const span = makeEl('span');
+  span.className = 'quality-item__name';
+  span.textContent = name + ' ';
+  li.appendChild(span);
+  return li;
+}
+
 // A storylet branch, in the shape captured from the live game (2026-09-03):
 //
 //   <div class="media branch media--branch" data-branch-id="259494">
@@ -489,11 +522,15 @@ check('a coral card is labelled rather than scored — it pays no Favour',
     bride: false,
     sig: 'corals',
   };
-  check('the coral you are already holding is counted on the badge',
+  // The mark is a TICK for the two you are carrying: one coral becomes one
+  // item, so a coral in hand leaves nothing to dive for on that card even
+  // before week two opens and lets you break it (2026-09-06). Only Old
+  // Wounds, whose Pedestrian Polyp you have never seen, still wants a dive.
+  check('a coral you are already holding is done, and the count still shows',
     [spec('A Graveyard of Derelict Debris', 2, holdingCorals).text,
       spec('A Reef of Wrecks', 2, holdingCorals).text,
       spec('Old Wounds', 2, holdingCorals).text],
-    [api.FOTZ_MARK_NEED + 'coral (1)', api.FOTZ_MARK_NEED + 'coral (2)',
+    [api.FOTZ_MARK_DONE + 'coral (1)', api.FOTZ_MARK_DONE + 'coral (2)',
       api.FOTZ_MARK_NEED + 'coral']);
 
   check('...so two coral cards no longer read identically',
@@ -710,6 +747,37 @@ check('an item listed twice counts once, at its highest count — never summed',
     return held.get('wrecking boots').count;
   })(), 2);
 
+// ...but the label is not where equipment states it. Reported 2026-09-06: a
+// character holding four Scrimshander Carving Knives was told they had no
+// spares to trade in, because the aria-label of a piece of equipment carries
+// no count and the span beside it was not being read.
+check('a piece of equipment is counted off its own span, not off its label',
+  (() => {
+    ownedEls = [equipmentEl('Scrimshander Carving Knife', 4)];
+    const held = api.readPossessionCounts();
+    ownedEls = [];
+    return held.get('scrimshander carving knife').count;
+  })(), 4);
+
+check('...so three of the four are spares, and the total says what they fetch',
+  (() => {
+    ownedEls = [equipmentEl('Scrimshander Carving Knife', 4)];
+    const l = api.fotzLedger(api.readFotzState());
+    ownedEls = [];
+    return [l.spares.map((r) => [r.name, r.count, r.subtotal]), l.total];
+  })(), [[['Scrimshander Carving Knife', 3, 1200]], 1200]);
+
+// The equipped copy has neither a count in its label nor a span, and the
+// drawer's span is the whole holding, so the "max, never summed" rule still
+// has to hold across the two.
+check('the one you are wearing is not added to the drawer\'s count',
+  (() => {
+    ownedEls = [ownedEl('Nuncian Pocket Watch', 1), equipmentEl('Nuncian Pocket Watch', 3)];
+    const held = api.readPossessionCounts();
+    ownedEls = [];
+    return held.get('nuncian pocket watch').count;
+  })(), 3);
+
 check('no Possessions markup at all reads as null, not as "you own nothing"',
   api.readPossessionCounts(), null);
 
@@ -876,6 +944,33 @@ check('a spare piece of equipment is worth its trade-in value',
   [['Wrecking Boots', 1, 100]]);
 
 check('the total is the treasures plus the spares', ledger.total, 600);
+
+// --- the Bride, which is an Accomplishment and not a number ----------------
+//
+// Reported 2026-09-06: someone who had already met the Pentamerous Bride was
+// still being sent to the bottom of the trench for her. FL renders an
+// Accomplishment as its name and nothing else -- no level, no cap -- and the
+// quality reader demanded a number and dropped every one of them, so the
+// festival's own scrape never saw the Bride at all.
+check('an Accomplishment is read even though it states no level',
+  (() => {
+    qualityLis = [accomplishmentLi('Discovered: the Pentamerous Bride'),
+      qualityLi('Thalassic Favour', 260)];
+    ownedEls = [ownedEl('Witch-Stone', 1)];
+    api.captureFotzState();
+    const state = api.readFotzState();
+    const holdings = api.fotzHoldings();
+    return [state.values.get('Discovered: the Pentamerous Bride'), holdings.bride];
+  })(), [1, true]);
+
+check('...and the storylet at the bottom drops out of what is left to dive for',
+  (() => {
+    const rows = api.fotzUniquesByDepth(api.fotzHoldings());
+    qualityLis = [];
+    ownedEls = [];
+    store.clear();
+    return rows.filter((row) => row.entries.some((e) => e.bride)).map((row) => row.depth);
+  })(), []);
 
 check('an unread Possessions list is admitted rather than totalled as zero',
   (() => {
@@ -1223,6 +1318,30 @@ check('the equipment turns up at exactly the depths the card table gives it',
     [5, ['Semi-Automated Mary Lloyd', 'A Faceted Decanter of Drownie Effluvia',
       'Scrimshander Carving Knife']],
   ]);
+
+// Reported 2026-09-06: a character carrying all six corals was still being
+// shown all six under "unique rewards still down there". One coral becomes one
+// item and the three items are mechanically identical, so a coral in your hold
+// has already paid out -- a second is a duplicate of a duplicate. Holding ONE
+// is the whole condition, which is the rule the dive advice already used.
+{
+  const twoCorals = {
+    has: () => false,
+    count: (n) => (n === 'Grasping Coral' || n === 'Rust-Eaten Ration' ? 2 : 0),
+    bride: false,
+    sig: 'corals',
+  };
+  check('a coral you are already carrying is not still down there',
+    api.fotzSplitUniques(api.fotzUniquesByDepth(twoCorals)).everywhere
+      .map((e) => e.coral),
+    ['Gorgonian Reef-Rock', 'Barnacled Headpiece', 'Spinebound Oddity',
+      'Pedestrian Polyp']);
+
+  check('...and holding all six leaves nothing but the equipment and the Bride',
+    api.fotzUniquesByDepth({
+      has: () => false, count: () => 1, bride: false, sig: 'all-corals',
+    }).flatMap((row) => row.entries).filter((e) => e.coral), []);
+}
 
 check('the Bride is at the bottom and nowhere else',
   api.fotzUniquesByDepth(nothingHeld)

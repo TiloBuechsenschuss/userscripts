@@ -145,7 +145,16 @@ function makeEl(tag) {
     },
     setAttribute(k, v) { this.attrs[k] = v; },
     getAttribute(k) { return Object.prototype.hasOwnProperty.call(this.attrs, k) ? this.attrs[k] : null; },
-    addEventListener() {},
+    // Recorded rather than swallowed: the panel header's fullscreen button is
+    // wired with `addEventListener`, and a stub that dropped the listener
+    // could not press it.
+    listeners: {},
+    addEventListener(type, fn) {
+      (this.listeners[type] = this.listeners[type] || []).push(fn);
+    },
+    dispatch(type, ev) {
+      (this.listeners[type] || []).forEach((fn) => fn(ev || { currentTarget: this }));
+    },
     getBoundingClientRect() {
       const r = this.rect;
       return {
@@ -315,6 +324,8 @@ const wrapped = src
   .replace(/\}\)\(\);\s*$/,
     'return { mountLauncher, dockLauncher, positionLauncher, findTravelAnchor,'
     + ' dockPreferred, setDockPreferred, LAUNCHER_ID, LAUNCHER_BUTTON_ID,'
+    + ' fullscreenPreferred, setFullscreenPreferred, applyPanelFullscreen,'
+    + ' PANEL_FULLSCREEN_CSS, PANEL_WINDOWED_CSS, PANELS,'
     + ' fotzDepthControls, fotzSetDepth, DEPTH_ROW_ID, DEPTH_DOCK_ID,'
     + ' DEPTH_BG, DEPTH_EDGE, DEPTH_INK, DEPTH_DIM, DEPTH_ON }; })();');
 const api = new Function(
@@ -654,6 +665,86 @@ check('the card is light, and every colour written on it is readable against it'
 
   api.fotzSetDepth(null);
   setArea(null);
+}
+
+// --- the panel's fullscreen toggle -----------------------------------------
+//
+// The popover is sized to hang off the launcher button, which is right for a
+// lookup table and wrong for the festival checklist -- several screens of it,
+// in a 660px box. The header therefore carries a fullscreen button beside the
+// close one, and the choice is REMEMBERED, so it does not have to be pressed
+// again on the next panel.
+//
+// Fullscreen is `position:fixed` rather than a move in the DOM: the launcher
+// root is fixed and carries no transform, so a fixed child is measured against
+// the viewport and steps out of the root's flex column on its own. That is
+// what keeps the docked button and the placement code out of it.
+{
+  api.setFullscreenPreferred(false);
+
+  // Every property fullscreen sets has to be given a value again on the way
+  // back, or the panel comes out of fullscreen still wearing half of it. The
+  // three exceptions are the ones `applyLauncherStack` owns and re-applies on
+  // the next placement.
+  const onlyInFullscreen = Object.keys(api.PANEL_FULLSCREEN_CSS)
+    .filter((k) => !(k in api.PANEL_WINDOWED_CSS)).sort();
+  check('leaving fullscreen restores everything but the three the stack owns',
+    [onlyInFullscreen,
+      Object.keys(api.PANEL_WINDOWED_CSS).every((k) => k in api.PANEL_FULLSCREEN_CSS)],
+    [['margin', 'maxHeight', 'maxWidth'], true]);
+
+  // A stub panel, so what is under test is the header and not any real panel's
+  // render. It goes in before the launcher is rebuilt, because the menu is
+  // built once from the registry as it stands.
+  api.PANELS.push({
+    id: 'stub', icon: 'S', label: 'Stub', hint: '', render: () => makeEl('div'),
+  });
+  layout = wideLayout();
+  api.mountLauncher();
+
+  const panelHost = () => root().children[0];
+  const menu = () => root().children[1];
+  const openStub = () => menu().querySelectorAll('button')
+    .filter((b) => b.textContent.includes('Stub'))[0].dispatch('click');
+  const headerButtons = () => panelHost().children[0].querySelectorAll('button');
+
+  openStub();
+  check('the panel header carries a fullscreen button next to the close one',
+    headerButtons().map((b) => [b.textContent, b.title]),
+    [['⤢', 'Fullscreen'], ['✕', 'Close']]);
+
+  headerButtons()[0].dispatch('click');
+  check('pressing it lifts the panel out of the popover and onto the viewport',
+    [panelHost().style.position, panelHost().style.maxWidth, panelHost().style.maxHeight,
+      panelHost().style.margin],
+    ['fixed', 'none', 'none', '0']);
+
+  check('...and the glyph flips to the state it would move back to',
+    [headerButtons()[0].textContent, headerButtons()[0].title],
+    ['⤡', 'Leave fullscreen']);
+
+  // The point of remembering it: the next panel opens fullscreen too, rather
+  // than making you press the same button again on every one.
+  headerButtons()[1].dispatch('click'); // close
+  check('a closed panel keeps the preference', api.fullscreenPreferred(), true);
+  openStub();
+  check('...so the next panel opens fullscreen already',
+    [panelHost().style.position, headerButtons()[0].title],
+    ['fixed', 'Leave fullscreen']);
+
+  // And the placement code must not put the 660px cap back on while it is up.
+  api.positionLauncher();
+  check('a placement pass leaves a fullscreen panel alone',
+    [panelHost().style.maxWidth, panelHost().style.position], ['none', 'fixed']);
+
+  headerButtons()[0].dispatch('click');
+  check('pressing it again drops the panel back into the popover, sized again',
+    [panelHost().style.position, panelHost().style.width,
+      panelHost().style.maxWidth !== 'none', headerButtons()[0].title],
+    ['static', 'min(660px,calc(100vw - 32px))', true, 'Fullscreen']);
+
+  api.PANELS.pop();
+  api.setFullscreenPreferred(false);
 }
 
 console.log(failures ? '\n' + failures + ' check(s) FAILED.' : '\nAll checks passed.');

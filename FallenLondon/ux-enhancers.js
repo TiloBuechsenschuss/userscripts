@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      2.3
-// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A "UX" button docked INTO Fallen London's own chrome beside its travel control -- under the big Travel button on the wide layout, as one more icon in the banner on the narrow one -- so it takes up space in the page like any other control and covers nothing. It opens a menu of reference panels; the last line of that menu switches it back to floating over the page if you preferred it that way, and it falls back to floating on its own if Fallen London's chrome cannot be found. The first panel is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, where the safe docks are, the three winds and the dreams they start, and the whole card table, searchable. (4) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: beside Fallen London’s own Travel button, where the UX button docks, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. A third panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. Built as a feature registry so further tweaks can be added as entries.
+// @version      2.4
+// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A "UX" button docked INTO Fallen London's own chrome beside its travel control -- under the big Travel button on the wide layout, as one more icon in the banner on the narrow one -- so it takes up space in the page like any other control and covers nothing. It opens a menu of reference panels; the last line of that menu switches it back to floating over the page if you preferred it that way, and it falls back to floating on its own if Fallen London's chrome cannot be found. Every panel's header carries a fullscreen button beside its close button, which takes the panel off the popover and over the whole screen and back; the choice is remembered, so a long panel opens at full size every time rather than needing the button pressed again. The first panel is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, where the safe docks are, the three winds and the dreams they start, and the whole card table, searchable. (4) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: beside Fallen London’s own Travel button, where the UX button docks, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. A third panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. Built as a feature registry so further tweaks can be added as entries.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 // @run-at       document-idle
@@ -2836,6 +2836,18 @@
     if (opt.coral) {
       const coral = FOTZ_CORAL_BY_NAME.get(opt.coral);
       if (!coral) return [];
+      // **A coral already in your hold finishes the card**, whether or not
+      // week two has opened and let you break it. One coral becomes one item
+      // and the three items are mechanically identical, so a second coral of
+      // the same kind is a duplicate of a duplicate -- there is nothing left
+      // to dive for. This is the rule `coralsWanted` already applied to the
+      // dive advice; applying it here is what stops the "unique rewards still
+      // down there" list from sending you after six corals you are carrying
+      // (reported 2026-09-06). It comes before the `pending` case on purpose:
+      // a pending coral's items can never read as held, but the coral itself
+      // reads perfectly well, and it is the coral you dive for. Confirmed
+      // in-game by the author on 2026-09-06.
+      if (holdings.count && holdings.count(opt.coral) > 0) return [];
       // A coral whose three items have not been published yet: nobody can
       // hold what does not exist, so it is missing.
       if (!coral.variants) return [coral.pendingLabel || coral.slot];
@@ -3105,13 +3117,18 @@
         // becomes one item, so needing three variants and holding one coral
         // means two more dives -- that subtraction is the useful form of the
         // number, and there is room for it here where there is none on a badge.
-        const done = coral && coral.variants
-          && !fotzMissingFrom(opt, holdings).length;
+        // Asked of the ITEM, not of `fotzMissingFrom` -- which now answers
+        // "nothing left to dive for" the moment the coral is in your hold, so
+        // it can no longer tell the two sentences below apart.
+        const done = !!(coral && coral.variants && holdings && holdings.has
+          && coral.variants.some(function (v) { return holdings.has(v); }));
         if (coralHeld) {
           lines.push('  You are holding ' + coralHeld + ' ' + opt.coral
             + (coralHeld === 1 ? '' : 's') + ' already'
             + (done ? ' — spare, since you already have the item it becomes.'
-              : (coral && coral.variants ? ' — one is all it takes.' : '.')));
+              : (coral && coral.variants
+                ? ' — one is all it takes, so there is nothing left to dive for here.'
+                : '.')));
         }
         if (coral && !coral.variants) {
           lines.push('  ' + opt.coral + ' → one of three ' + coral.slot + ' in week two.');
@@ -3428,6 +3445,56 @@
       localStorage.setItem(DOCK_KEY, on ? 'dock' : 'float');
     } catch (e) { /* private mode; it just won't be remembered */ }
   }
+
+  // Fullscreen, and it is REMEMBERED between panels on purpose (added
+  // 2026-09-06). The popover is sized to hang off the launcher button, which
+  // is the right shape for a lookup table and the wrong one for the festival
+  // checklist -- that one runs to several screens and is close to unreadable
+  // in a 660px box on a phone. Someone who wanted the whole screen for one
+  // panel wants it for the next, and having to press the same button on every
+  // open is the annoyance this setting exists to remove. It lives beside the
+  // dock preference for the same reason that one does: it is the answer to
+  // "this box is in the way", which is a thought you have while looking at
+  // the box, not while looking for a settings screen.
+  // **Confirmed in-game by the author on 2026-09-06**, the carry-over to the
+  // next panel included -- so the fixed-child-of-a-fixed-root trick really does
+  // step out of the launcher's flex column without disturbing the dock.
+  const FULLSCREEN_KEY = 'fl-ux-panel-fullscreen';
+
+  function fullscreenPreferred() {
+    try {
+      return localStorage.getItem(FULLSCREEN_KEY) === 'on';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function setFullscreenPreferred(on) {
+    try {
+      localStorage.setItem(FULLSCREEN_KEY, on ? 'on' : 'off');
+    } catch (e) { /* private mode; it just won't be remembered */ }
+  }
+
+  // The two shapes the panel takes, one style patch each, so the toggle is a
+  // single assignment and nothing has to reconstruct the windowed values by
+  // hand. Fullscreen is `position:fixed` rather than a move in the DOM: the
+  // launcher root is itself fixed and carries no transform or filter, so a
+  // fixed CHILD is measured against the viewport and simply steps out of the
+  // root's flex column, which leaves the docked button, the menu and the
+  // placement code untouched. The windowed patch restores only what the
+  // fullscreen one overwrote -- `maxWidth`, `maxHeight` and `margin` belong to
+  // `applyLauncherStack`, which puts them back on the next placement.
+  const PANEL_FULLSCREEN_CSS = {
+    position: 'fixed', left: '0', top: '0', right: '0', bottom: '0',
+    width: 'auto', height: 'auto', maxWidth: 'none', maxHeight: 'none',
+    margin: '0', borderRadius: '0', borderWidth: '0', zIndex: '100000',
+  };
+
+  const PANEL_WINDOWED_CSS = {
+    position: 'static', left: 'auto', top: 'auto', right: 'auto', bottom: 'auto',
+    width: 'min(660px,calc(100vw - 32px))', height: 'auto',
+    borderRadius: '4px', borderWidth: '1px', zIndex: 'auto',
+  };
 
   // No viewport means nothing to position against -- which is also how this
   // file is evaluated outside a browser, by the tests.
@@ -3801,11 +3868,27 @@
   function applyLauncherStack(down, maxWidth, maxHeight) {
     const stackGap = down ? LAUNCHER_GAP + 'px 0 0 0' : '0 0 ' + LAUNCHER_GAP + 'px 0';
     if (launcherMenu) launcherMenu.style.margin = stackGap;
-    if (launcherPanelHost) {
+    // A fullscreen panel is not in the stack any more -- it is a fixed box on
+    // the viewport -- so sizing it to the room beside the button would put the
+    // 660px cap straight back on.
+    if (launcherPanelHost && !fullscreenPreferred()) {
       launcherPanelHost.style.margin = stackGap;
       launcherPanelHost.style.maxWidth = Math.max(240, maxWidth) + 'px';
       launcherPanelHost.style.maxHeight = Math.max(160, maxHeight) + 'px';
     }
+  }
+
+  // Put the panel into whichever shape is preferred. Called on every open, so
+  // a preference set on one panel is already in force when the next one is
+  // drawn, and on the toggle itself.
+  function applyPanelFullscreen() {
+    const host = launcherPanelHost;
+    if (!host || !host.style) return;
+    Object.assign(host.style, fullscreenPreferred()
+      ? PANEL_FULLSCREEN_CSS : PANEL_WINDOWED_CSS);
+    // Leaving fullscreen drops the panel back into the stack with no size on
+    // it at all, which is `applyLauncherStack`'s job to restore.
+    if (!fullscreenPreferred()) positionLauncher();
   }
 
   function positionLauncher() {
@@ -4019,18 +4102,42 @@
     // The header stays put and only the body is rebuilt, so a panel that
     // refreshes itself doesn't make the whole thing flicker or lose its
     // scroll position. `ctx.rerender()` is how a panel asks for that.
+    // The header's icon buttons, styled alike so the pair reads as one control
+    // group. `position:sticky` on the header is what keeps them reachable in a
+    // panel several screens long -- which is the whole argument for the
+    // fullscreen one being here rather than in the menu.
+    const HEADER_BTN = 'border:0;background:transparent;color:' + UI.dim
+      + ';font:16px sans-serif;line-height:1;cursor:pointer;padding:0 2px;';
+
+    // Toggles the panel between the popover it hangs off the button as and
+    // the whole viewport. The glyph is the state you would be MOVING to, and
+    // it is re-synced rather than rebuilt so the panel's scroll position
+    // survives the press.
+    const fullscreenButton = h('button', { type: 'button', css: HEADER_BTN });
+    function syncFullscreenButton() {
+      const on = fullscreenPreferred();
+      fullscreenButton.textContent = on ? '⤡' : '⤢';
+      fullscreenButton.title = on ? 'Leave fullscreen' : 'Fullscreen';
+    }
+    fullscreenButton.addEventListener('click', function () {
+      setFullscreenPreferred(!fullscreenPreferred());
+      syncFullscreenButton();
+      applyPanelFullscreen();
+    });
+
     function openPanel(panel) {
       panelHost.textContent = '';
+      syncFullscreenButton();
       panelHost.appendChild(h('div', {
         css: 'position:sticky;top:0;display:flex;align-items:center;gap:8px;'
           + 'padding:8px 12px;background:' + UI.bg + ';border-bottom:1px solid ' + UI.line + ';',
       }, [
         h('span', { css: 'font:bold 14px ' + UI.font + ';color:' + UI.accent + ';flex:1;' },
           [panel.icon + '  ' + panel.label]),
+        fullscreenButton,
         h('button', {
           type: 'button', title: 'Close',
-          css: 'border:0;background:transparent;color:' + UI.dim
-            + ';font:16px sans-serif;line-height:1;cursor:pointer;padding:0 2px;',
+          css: HEADER_BTN,
           on: { click: closePanel },
         }, ['✕']),
       ]));
@@ -4052,6 +4159,10 @@
       panelHost.style.display = 'block';
       panelHost.scrollTop = 0;
       positionLauncher();
+      // After the placement, not before: `applyPanelFullscreen` is what has
+      // the last word on the panel's box, and this is where the remembered
+      // preference reaches a panel that was opened fresh.
+      applyPanelFullscreen();
     }
 
     // Escape closes the menu first, then the panel. Clicking anywhere outside
@@ -4288,7 +4399,14 @@
     const alt = img ? (img.getAttribute('alt') || '').trim() : '';
     if (alt && text.slice(0, alt.length).toLowerCase() === alt.toLowerCase()) {
       const m = /^\s*(\d+)(?:\s*\/\s*(\d+))?/.exec(text.slice(alt.length));
-      if (!m) return null;
+      // An ACCOMPLISHMENT has no number anywhere -- FL renders it as the name
+      // and nothing else ("Discovered: the Pentamerous Bride", captured from
+      // /myself on 2026-09-06). Returning null for those dropped every one of
+      // them on the floor, which is why the festival panel kept sending
+      // someone who had already met the Bride back down to the bottom of the
+      // trench. You either have an Accomplishment or you do not, so the level
+      // it is missing is 1.
+      if (!m) return { quality: alt, level: 1, cap: null };
       return { quality: alt, level: Number(m[1]), cap: m[2] ? Number(m[2]) : null };
     }
 
@@ -4354,6 +4472,31 @@
     return m ? Number(m[1]) : 1;
   }
 
+  // ...and the label is not where EQUIPMENT states it. FL writes the count in
+  // two places and never in the same one: an inventory item carries it in the
+  // aria-label ("Witch-Stone × 20; A pebble…") and again in a
+  // `.js-item-value` span beside the label, but a piece of equipment in the
+  // equip drawer -- which is the only place a spare weapon, hat or pair of
+  // boots ever appears -- carries no "× N" at all and only the span:
+  //
+  //   <div class="icon icon--available-item" data-quality-id="127763">
+  //     <div aria-label="Scrimshander Carving Knife; Watchful +3; …">…</div>
+  //     <span class="js-item-value icon__value">4</span>
+  //
+  // Reading the label alone therefore counted every duplicate piece of
+  // equipment as one, and a character sitting on four Scrimshander Carving
+  // Knives was told they had no spares to trade in (reported 2026-09-06, and
+  // the markup above is that character's; the fix is confirmed in-game the
+  // same day). The span wins wherever it is
+  // there; the label stays as the fallback, and an equipped item (`.equipped-
+  // item`, which has neither) still reads as the one you are wearing.
+  function itemCountFromNode(el, label) {
+    const value = el && el.querySelector ? el.querySelector('.js-item-value') : null;
+    const n = value ? Number(String(value.textContent).replace(/[^0-9]/g, '')) : NaN;
+    if (n > 0) return n;
+    return itemCountFromLabel(label);
+  }
+
   // Every item on the Possessions tab as a Map of normalised name ->
   // { name, count }, or null when this isn't that tab. The null matters: the
   // Myself tab has no `[data-quality-id]` at all, so an empty result there
@@ -4373,7 +4516,7 @@
       const name = label && itemNameFromLabel(label);
       if (!name) return;
       const key = normalizeName(name);
-      const count = itemCountFromLabel(label);
+      const count = itemCountFromNode(el, label);
       const seen = held.get(key);
       if (!seen) held.set(key, { name: name, count: count });
       else if (count > seen.count) seen.count = count;
@@ -5700,7 +5843,9 @@
     // The Bride is an Accomplishment, so it comes off the quality scrape, not
     // possessions -- and an unreadable one has to stay false rather than
     // become an unknown, or the storylet at the bottom of the trench would
-    // never get a mark at all. It errs towards "go and do it".
+    // never get a mark at all. It errs towards "go and do it". Confirmed
+    // in-game by the author on 2026-09-06, once `parseQualityItem` learned to
+    // read a quality that states no level.
     let bride = false;
     const scan = readQualities();
     if (scan) {
