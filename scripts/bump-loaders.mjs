@@ -26,7 +26,7 @@
 // in THIS repo. No config list to maintain -- add a loader and it's covered.
 
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const argv = process.argv.slice(2);
@@ -106,6 +106,11 @@ const summary = [];
 
 for (const file of tracked) {
   const abs = join(repoRoot, file);
+  // A file can be tracked but gone from the working tree -- deleted, but the
+  // deletion not staged yet. That's a normal state mid-change, and it is not
+  // this script's business to have an opinion about it, so skip rather than
+  // crash on the read.
+  if (!existsSync(abs)) continue;
   const text = readFileSync(abs, 'utf8');
 
   // Only consider the metadata block.

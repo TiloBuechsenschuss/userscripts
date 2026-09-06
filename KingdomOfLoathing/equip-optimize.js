@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name         KoL Equip Optimize
+// @name         KoL Inventory Tools
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/equip-optimize.js
-// @version      1.3
-// @description  On the equipment inventory (inventory.php?which=2), adds an "Optimize for this" button next to KoL's enchantment sort dropdown. It equips, in every slot, the highest-value item you own for whatever attribute that dropdown is sorting by (the blue value next to each item). To get a clean comparison it records your current equipment, then unequips everything (so currently-worn items rejoin the list), expands every category, and equips the best per slot. Any slot whose attribute has no owned/valued item keeps whatever you had on before, so slots only ever change to something better and are never left empty. Then it reloads. The run spans the page reload that "unequip all" causes, so its working state is kept in sessionStorage. For the Elemental Damage / Resistance sorts it adds an element picker (All + the five elements), for Monster Level a Higher/Lower picker, and for Monster Encounters a More/Fewer picker. For sorts with nothing to optimize (Outfit / Name / Item Quantity) the button is hidden.
+// @version      1.4
+// @description  On the equipment inventory (inventory.php?which=2), adds an "Optimize for this" button next to KoL's enchantment sort dropdown. It equips, in every slot, the highest-value item you own for whatever attribute that dropdown is sorting by (the blue value next to each item). To get a clean comparison it records your current equipment, then unequips everything (so currently-worn items rejoin the list), expands every category, and equips the best per slot. Any slot whose attribute has no owned/valued item keeps whatever you had on before, so slots only ever change to something better and are never left empty. Then it reloads. The run spans the page reload that "unequip all" causes, so its working state is kept in sessionStorage. For the Elemental Damage / Resistance sorts it adds an element picker (All + the five elements), for Monster Level a Higher/Lower picker, and for Monster Encounters a More/Fewer picker. For sorts with nothing to optimize (Outfit / Name / Item Quantity) the button is hidden. Also adds a single Collapse all / Expand all button at the top of the categorized inventory that flips every category header open or closed at once; the label reflects the next action, and it reuses KoL's own toggle() so the "inventory" cookie stays in sync and lazily-loaded sections still fetch their items on expand.
 // @match        https://www.kingdomofloathing.com/inventory.php*
 // @match        https://kingdomofloathing.com/inventory.php*
 // @run-at       document-idle
@@ -20,10 +20,8 @@
   // to inventory.php, but guard explicitly for the bundle.
   if (!/\/inventory\.php/i.test(location.pathname)) return;
 
-  // Idempotency guard: the page/loader may run us more than once.
-  if (document.getElementById('tm-equip-optimize-btn')) return;
-
   const BUTTON_ID = 'tm-equip-optimize-btn';
+  const COLLAPSE_BAR_ID = 'kol-inv-collapse-bar';
   const STATUS_ID = 'tm-equip-optimize-status';
   // Survives the "unequip all" reload: { attr, attrLabel, sortTried }.
   const STATE_KEY = 'tm-equip-optimize';
@@ -234,28 +232,61 @@
     return parseValue;
   }
 
+  // --- Collapsible categories -------------------------------------------
+  // Shared by both features on this page: the optimizer expands everything so
+  // worn items rejoin the list, and the Collapse all / Expand all bar flips the
+  // lot either way. One copy, so the two can't drift apart.
+  //
+  // Each collapsible category is a <b class="tit"><a class="nounder"
+  // href="javascript:toggle('Food and Drink');">. Its open/closed state is read
+  // from the sibling <div class="collapse" id="sectionN"> inside the same
+  // table.stuffbox (display:none = collapsed, display:inline = open).
+  function getEntries() {
+    const entries = [];
+    document.querySelectorAll('b.tit a.nounder').forEach(function (a) {
+      const m = /toggle\('(.+?)'\)/.exec(a.getAttribute('href') || '');
+      if (!m) return;
+      const box = a.closest('table.stuffbox');
+      const div = box && box.querySelector('div.collapse[id^="section"]');
+      if (!div) return;
+      entries.push({ name: m[1], div: div });
+    });
+    return entries;
+  }
+
   function isCollapsed(div) {
+    // Inline style is what KoL's toggle() sets; trust it, but fall back to
+    // computed style if some other path cleared the inline value.
     const d = div.style.display;
     if (d === 'none') return true;
     if (d === 'inline' || d === 'block' || d === 'inline-block') return false;
     return getComputedStyle(div).display === 'none';
   }
 
-  // Expand every collapsed category. Prefer KoL's own toggle() (keeps the
-  // "inventory" cookie in sync and AJAX-loads a section's items the first time
-  // it opens); only flip sections that are actually collapsed so we never close
-  // an open one. Returns true if anything was expanded.
+  // Flip one category to a target state. Prefer the page's own toggle(): it
+  // keeps the "inventory" cookie in sync, updates the "(click to open)" label,
+  // and AJAX-loads a section's items the first time it is opened. Only call it
+  // when a flip is actually needed, so we never toggle a section that is
+  // already in the wanted state. Returns true if it flipped.
+  function flipTo(entry, collapse) {
+    if (isCollapsed(entry.div) === collapse) return false; // already correct
+    if (typeof window.toggle === 'function') {
+      window.toggle(entry.name);
+      return true;
+    }
+    // Fallback: plain DOM flip (no cookie / no lazy-load) if toggle() is gone.
+    entry.div.style.display = collapse ? 'none' : 'inline';
+    const box = entry.div.closest('table.stuffbox');
+    const label = box && box.querySelector('.collapsed');
+    if (label) label.textContent = collapse ? '(click to open)' : '';
+    return true;
+  }
+
+  // Expand every collapsed category. Returns true if anything was expanded.
   function expandAllCategories() {
     let expanded = false;
-    document.querySelectorAll('b.tit a.nounder').forEach(function (a) {
-      const m = /toggle\('(.+?)'\)/.exec(a.getAttribute('href') || '');
-      if (!m) return;
-      const box = a.closest('table.stuffbox');
-      const div = box && box.querySelector('div.collapse[id^="section"]');
-      if (!div || !isCollapsed(div)) return;
-      if (typeof window.toggle === 'function') window.toggle(m[1]);
-      else div.style.display = 'inline';
-      expanded = true;
+    getEntries().forEach(function (e) {
+      if (flipTo(e, false)) expanded = true;
     });
     return expanded;
   }
@@ -711,6 +742,9 @@
 
   // --- UI ---------------------------------------------------------------
   function build() {
+    // Idempotency guard: the page/loader may run us more than once.
+    if (document.getElementById(BUTTON_ID)) return;
+
     const dropdown = findSortDropdown();
     if (!dropdown) return; // not the equipment view
 
@@ -785,5 +819,48 @@
     return sel;
   }
 
+  // --- Collapse all / Expand all ----------------------------------------
+  // Sits above the first category on any categorized inventory view (not just
+  // the equipment one), so it is built independently of the optimizer.
+  function buildCollapseBar() {
+    if (document.getElementById(COLLAPSE_BAR_ID)) return;
+
+    const firstBox = document.querySelector('table.stuffbox');
+    if (!firstBox) return; // not the categorized list view
+
+    const bar = document.createElement('div');
+    bar.id = COLLAPSE_BAR_ID;
+    bar.style.cssText = 'text-align:center;margin:4px auto;padding:4px;width:95%;';
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.style.cssText = 'cursor:pointer;padding:2px 10px;font-weight:bold;';
+    bar.appendChild(btn);
+
+    // Decide the button's next action and label from the live page state: if
+    // every category is currently open, the next click collapses them all;
+    // otherwise (all closed or a mix) the next click expands them all.
+    function refreshLabel() {
+      const entries = getEntries();
+      const allOpen = entries.length > 0 && entries.every(function (e) {
+        return !isCollapsed(e.div);
+      });
+      btn.dataset.action = allOpen ? 'collapse' : 'expand';
+      btn.textContent = allOpen ? 'Collapse all' : 'Expand all';
+    }
+
+    btn.addEventListener('click', function () {
+      const collapse = btn.dataset.action === 'collapse';
+      getEntries().forEach(function (e) { flipTo(e, collapse); });
+      refreshLabel();
+    });
+
+    const anchor = firstBox.closest('a[name]') || firstBox;
+    anchor.parentNode.insertBefore(bar, anchor);
+    refreshLabel();
+  }
+
+  // TEST-SEAM
+  buildCollapseBar();
   build();
 })();

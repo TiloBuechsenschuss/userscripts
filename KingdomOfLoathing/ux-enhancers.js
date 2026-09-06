@@ -1382,8 +1382,8 @@
       btn.dataset.tmDdSkip = '1';
 
       // Inline styles only: KoL's CSP blocks a script-injected stylesheet, but
-      // allows style attributes (same constraint mine-sparkle-highlight.js and
-      // quest-helper.js work under).
+      // allows style attributes (the same constraint auto-mine.js's tile
+      // highlight and quest-helper.js work under).
       btn.style.outline = '3px solid #0a0';
       btn.style.outlineOffset = '2px';
       btn.style.fontWeight = 'bold';

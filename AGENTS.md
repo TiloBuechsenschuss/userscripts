@@ -37,6 +37,16 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   not reach installed users.
 - Keep the `@match` / `@include` lines in sync with the actual page(s) the script touches.
   Both bare and `www.` hosts are matched deliberately; preserve both.
+- **Deleting a script leaves it installed.** A dead `@downloadURL` stops delivering updates but
+  does not uninstall anything, so anyone who installed that file keeps running the last copy
+  they fetched, forever, against a page that moves on without it. So when a script is removed or
+  folded into another one, three things have to happen together: drop its `@require` from the
+  matching `all-in-one/` loader and bump the loader's `@version` by hand (`bump-loaders.mjs`
+  leaves a loader alone once you have edited it yourself); bump the absorbing script's
+  `@version`; and **add a row to README's "Merged / removed scripts" table** saying where the
+  feature went and which version of the new host first carried it. That table is the only place
+  a user can find out why their script went quiet — keep it current, and don't drop rows from it
+  later, since the stale installs it addresses never expire.
 
 ## Conventions that recur across scripts
 
@@ -110,7 +120,8 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   a choice page carries the same `whichchoice` on several forms (the action form *and* "Leave"),
   `findSelectsForm` matches on the puzzle's fields too rather than taking the first hit.
   A second type, `tiles` ("step on these, in this order"), only *highlights* — reusing
-  `mine-sparkle-highlight.js`'s gold JS-timer pulse, and for the same CSP reason (KoL allows
+  the mine highlight's gold JS-timer pulse (which lives in `auto-mine.js` now, and was its own
+  `mine-sparkle-highlight.js` when this was written), and for the same CSP reason (KoL allows
   inline style attributes but blocks script-injected stylesheets, so CSS classes/`@keyframes`
   do nothing). Its entry is **Beginning at the Beginning of Beginning**, the Hidden Temple tile
   floor, and it shows why the registry has a `page` regex: that puzzle is *not* on `choice.php`
@@ -324,6 +335,40 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   score too) with the `<font color>` beside a "Score:" cell as fallback, and an unrecognised
   colour yields **no box at all** rather than a guess about where to spend turns. The link
   carries `target="mainpane"` because the script runs inside the sidebar frame.
+- **Three KoL files each hold two features, on purpose.** There is no module system here — a
+  `.js` file is a self-contained IIFE — so the only way two features can share a helper is to
+  live in the same file. Three pairs had drifted into keeping duplicate copies instead, and were
+  merged. Do not split them back apart, and when you touch one half, check whether the shared
+  piece is what you are actually changing:
+  - `charpane-heal.js` — the `heal` button **and** the per-buff `max` buttons (was
+    `skills-cast-max.js`). Shares one `fetchSkillsDoc()` and one `sessionStorage` cache of the
+    skills page, and one `buildSkillMap()` scrape that the heal half reads ids out of and the
+    max half reads names out of (`skillNameSet`). This matters at runtime: the charpane is
+    rebuilt on most turns, and two scripts meant two caches of the same page. Note the KoL
+    counterpart to `TwilightHeroes/skills-cast-max.js` lives here now, not under that name.
+    **`#tm-charpane-heal` is a cross-frame API** — `auto-mine.js` clicks it — so keep the id.
+  - `auto-mine.js` — the engine/advisor **and** the mine tile highlight (was
+    `mine-sparkle-highlight.js`). The two are gated *separately* and that is the point: the
+    advisor and its Start button need mine 6 and a readable grid, the highlight commits nothing
+    and runs on `mining.php` and `mine.php` alike. So the highlight keeps its own detection (a
+    sparkle is an `<img>` whose `src` or `alt` says so, inside an `<a href="mining.php...">`)
+    rather than borrowing `readTilesFromDoc`, which needs KoL's `alt='<Name> (col,row)'` grid
+    labels. The highlight paints the `<img>`; `paintAdvice` paints the `<td>` — different
+    elements, so the route and target stay legible on top of the highlight.
+  - `equip-optimize.js` — "Optimize for this" **and** the Collapse all / Expand all bar (was
+    `inventory-collapse.js`). Shares `getEntries`/`isCollapsed`/`flipTo`; `expandAllCategories`
+    is now a loop over `flipTo(entry, false)`. Each feature owns its own idempotency guard, so
+    the bar is still built on a non-equipment inventory view where the optimizer bails.
+
+  `daily-checklist.js` and `iotm.js` were considered for the same treatment and deliberately
+  left as two files, so the co-owned `#tm-kol-menu-btns` row above stays exactly as documented:
+  two `getButtonRow()` copies that must not drift, and CSS `order` rather than DOM order.
+
+  Absorbed files were **deleted**, not stubbed, and dropped from
+  `all-in-one/kingdom-of-loathing.js`'s `@require` list. Anyone who installed one standalone
+  keeps their last-fetched copy running until they remove it, so the merged halves each guard on
+  their own element ids and are harmless if a stale copy is also present.
+
 - `ux-enhancers.js` is the catch-all for unrelated small tweaks. It's a `FEATURES` registry of
   `{ name, path, run }`, each entry scoped to its own pathname and each `run` wrapped in a
   try/catch so one broken feature can't take the others down — add a tweak as an entry, not as
