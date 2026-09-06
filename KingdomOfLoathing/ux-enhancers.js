@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js
-// @version      1.14
-// @description  A grab-bag of quality-of-life tweaks for Kingdom of Loathing pages. Currently: in the character pane a "heal" button that casts your heal skills until HP is full or none can raise it further, and a "max" button next to every prolongable buff you can actually cast that re-casts it as many times as your MP allows (measuring the per-cast cost live, so gear and effect discounts are accounted for) with a "refresh skills" button below the list; on the equipment inventory an "Optimize for this" button that equips the highest-value item in every slot for whatever the enchantment-sort dropdown is sorting by (with element / Monster Level / encounter pickers for the sorts that need one), and a Collapse all / Expand all button that flips every inventory category at once; a small "W" badge linking to the KoL wiki next to the last adventure in the charpane, the location name atop place.php and crypt.php, the choice-adventure name atop choice.php, each quest title in questlog.php, the monster name and the items you acquire in combat, and item names in your inventory; a banner before you enter the lair of a special-reward boss (Boss Bat, Bonerdagon, Knob Goblin King, Baron von Ratsworth) when your Monster Aggravation Device is not set to a level that forces the unique reward to drop, shown on the page you see just before committing the adventure because fight.php is already too late; on the autosell page (sellstuff_ugly.php) a toolbar with Quantity / Sell price / Name sort buttons that reorder every category at once (click again to flip the direction, or Name to restore the original order), a Single list toggle that collapses every category into one globally-sorted list, and an Expand all / Collapse all button that keeps KoL's "sellstuff" cookie in sync; at the Hermit (hermit.php) it adds a "Buy all clovers" button next to the Trade button that trades worthless items for every 11-leaf clover the Hermit still has in stock today, one at a time, then reloads and reports how many it got; at the Campground (campground.php) it guards a Beer Garden that hasn't grown for two days yet, since the fancy bottles and labels don't appear before then -- the crop is flagged and clicking it asks for confirmation first; in the Mall (mall.php) it adds a "buy all" action to each store row and a "Buy N" row per item that walks the stores cheapest-first, showing the total and the average cost per item before spending anything; in the Inventory (inventory.php) it adds a [mall] action next to [use] on every tradeable item, searching the Mall for that exact item; in the character pane (charpane.php) it keeps the link to your monster aggravation device on screen even when the dial is at 0, which is exactly when KoL hides it; and in the Daily Dungeon (choice.php) it marks the option that gets you past a door, trap or chest room without spending an adventure -- lockpicks, the Platinum Yendorian Express Card, the eleven-foot pole, the candy cane sword cane, or the Ring of Detect Boring Doors -- with a note on what it costs you.
+// @version      1.22
+// @description  A grab-bag of quality-of-life tweaks for Kingdom of Loathing pages. Currently: in the character pane a "heal" button that casts your heal skills until HP is full or none can raise it further, and a "max" button next to every prolongable buff you can actually cast that re-casts it as many times as your MP allows (measuring the per-cast cost live, so gear and effect discounts are accounted for) with a "refresh skills" button below the list; on the equipment inventory an "Optimize for this" button that equips the highest-value item in every slot for whatever the enchantment-sort dropdown is sorting by (with element / Monster Level / encounter pickers for the sorts that need one), and a Collapse all / Expand all button that flips every inventory category at once; a small "W" badge linking to the KoL wiki next to the last adventure in the charpane, the location name atop place.php and crypt.php, the choice-adventure name atop choice.php, each quest title in questlog.php, the monster name and the items you acquire in combat, and item names in your inventory; a banner before you enter the lair of a special-reward boss (Boss Bat, Bonerdagon, Knob Goblin King, Baron von Ratsworth) when your Monster Aggravation Device is not set to a level that forces the unique reward to drop, shown on the page you see just before committing the adventure because fight.php is already too late; on the autosell page (sellstuff_ugly.php) a toolbar with Quantity / Sell price / Name sort buttons that reorder every category at once (click again to flip the direction, or Name to restore the original order), a Single list toggle that collapses every category into one globally-sorted list, and an Expand all / Collapse all button that keeps KoL's "sellstuff" cookie in sync; at the Hermit (hermit.php) it adds a "Buy all clovers" button next to the Trade button that trades worthless items for every 11-leaf clover the Hermit still has in stock today, one at a time, then reloads and reports how many it got; at the Campground (campground.php) it guards a Beer Garden that hasn't grown for two days yet, since the fancy bottles and labels don't appear before then -- the crop is flagged and clicking it asks for confirmation first; in the Mall (mall.php) it adds a "buy all" action to each store row and a "Buy N" row per item that walks the stores cheapest-first, showing the total and the average cost per item before spending anything; in the Inventory (inventory.php) it adds a [mall] action next to [use] on every tradeable item, searching the Mall for that exact item; in the character pane (charpane.php) it keeps the link to your monster aggravation device on screen even when the dial is at 0, which is exactly when KoL hides it; and in the Daily Dungeon (choice.php) it marks the option that gets you past a door, trap or chest room without spending an adventure -- lockpicks, the Platinum Yendorian Express Card, the eleven-foot pole, the candy cane sword cane, or the Ring of Detect Boring Doors -- with a note on what it costs you; and in the Inventory a "pays out" checkbox beside KoL's own Filter box that hides every item except the ones that hand you other items or Meat when used (gift boxes, buckets, scrolls, wallets), closing the gaps by layout alone -- it writes inline styles and never moves, adds or removes a node, so KoL's own list keeps its order -- matched by item id against a list derived from the wiki and leaving out items that merely turn into a used copy of themselves; with a "group by type" box under it that sorts the survivors into multi-use recipes (a smoked potsherd makes five different things depending on how many you use at once), Meat, random yields and plain items, under a heading each -- also without moving anything, since flex order decides what is drawn where.
 // @match        https://www.kingdomofloathing.com/hermit.php*
 // @match        https://kingdomofloathing.com/hermit.php*
 // @match        https://www.kingdomofloathing.com/campground.php*
@@ -1000,6 +1000,505 @@
     };
     pass();
     watchInventory(pass);
+  }
+
+  // === feature: filter the inventory to items that pay out ===============
+  //
+  // Plenty of KoL items are really containers: use a Mer-kin foodbucket and it
+  // hands you sea broccoli, a gift box hands you what's inside, a scroll hands
+  // you clovers, an old leather wallet hands you 400-600 Meat. There is no way
+  // to see those at a glance -- KoL's own Filter box searches names, and
+  // "bucket" is not a category. So: a checkbox next to that filter that hides
+  // everything except the items which pay out.
+  //
+  // What counts as paying out is data, not a heuristic. data/kol-use-yields-items.tsv
+  // is derived from the {{acquire}} and {{meat}} templates in the "When Used"
+  // section of every article in the wiki's Category:Usable Items; the id list
+  // below is that file minus its self_transform=all rows, because a book that
+  // turns into "<book> (used)" is not a way to get anything -- but a row that
+  // pays Meat is kept whatever its items do. Meat an item COSTS you
+  // ({{meat|type=lose}}) is not a payout and is not counted. Regenerate both with:
+  //
+  //   node scripts/fetch-kol-item-yields.mjs              # refresh the data file
+  //   node scripts/fetch-kol-item-yields.mjs --print-ids  # re-emit the list below
+  //
+  // Matching is by ITEM ID, read from the item table's own `rel` (the same
+  // attribute the [mall] link above reads), never by name: the wiki writes
+  // "jaba&ntilde;ero-flavored chewing gum" where the page renders the ñ, and
+  // trademark signs, quotes and parenthetical suffixes all differ in their own
+  // ways. Ids don't.
+  //
+  // The filter only sees items that are ON THE PAGE. A collapsed category has
+  // not fetched its items yet, which is the same limitation KoL's own in-page
+  // filter carries ("Searching page, hit Enter to seach all sections") -- hence
+  // the note beside the checkbox rather than an attempt to expand everything,
+  // which would fire a request per category.
+  //
+  // Nothing here moves, adds or removes a node. The filter writes inline styles
+  // and nothing else, so KoL's markup and its ORDER stay exactly as the game
+  // rendered them -- see the note above setPacking for what happened when this
+  // did rearrange the grid.
+
+  const YIELD_ONLY_ID = 'tm-inv-yield-only';
+  const YIELD_STATE_KEY = 'tm-inv-yield-only';
+  const YIELD_GROUP_ID = 'tm-inv-yield-group';
+  const YIELD_GROUP_KEY = 'tm-inv-yield-group';
+
+  // The groups the filter sorts by, in the order they are shown, with the heading
+  // each one gets. "multiuse" comes first because how many to use at once is the
+  // question you open the inventory with; an item that is both multi-use and a Meat
+  // payout is filed there.
+  const YIELD_GROUPS = [
+    { key: 'multiuse', label: 'Multi-use recipes' },
+    { key: 'meat', label: 'Meat' },
+    { key: 'random', label: 'Random yield' },
+    { key: 'items', label: 'Items' },
+  ];
+
+  // Item ids whose "When Used" hands you a different item or Meat, by group.
+  // Generated by scripts/fetch-kol-item-yields.mjs --print-classes -- don't hand-edit.
+  const YIELD_CLASSES = {
+    multiuse: [
+      433, 2110, 2581, 2582, 2605, 2634, 2697, 2988, 3367, 3403, 3473, 3919, 4044, 4151,
+      4254, 4457, 4469, 4489, 4680, 4856, 5048, 5144, 5395, 5703, 5725, 5789, 5864, 5881,
+      6306, 6766, 6914, 6927, 6937, 6947, 7120, 7359, 7478, 7523, 7707, 8423, 8524, 8900,
+      9190, 9333, 9992, 10259, 10475, 11654,
+    ],
+    meat: [
+      26, 84, 85, 184, 546, 548, 552, 604, 621, 636, 678, 1917, 1918, 2057, 2599, 2612,
+      2698, 2864, 3034, 3571, 3735, 4585, 4593, 4731, 5052, 5294, 5297, 5644, 5745, 5788,
+      6141, 7060, 7188, 8084, 8088, 8211, 8299, 8446, 8691, 8767, 9484, 9563, 9926, 10368,
+      11003, 11281, 11951, 12183,
+    ],
+    random: [
+      400, 401, 504, 533, 553, 643, 707, 818, 831, 832, 873, 874, 1134, 1161, 1183, 1267,
+      1398, 1429, 1433, 1434, 1789, 1798, 2058, 2372, 2511, 2512, 2592, 3016, 3017, 3018,
+      3067, 3290, 3427, 3574, 3593, 3596, 3671, 3676, 3811, 3949, 4189, 4211, 4217, 4348,
+      4431, 4488, 4604, 4756, 4891, 5077, 5285, 5286, 5287, 5502, 5504, 6151, 6266, 6312,
+      6726, 6727, 6728, 7579, 11418, 11433, 11537, 11647,
+    ],
+    items: [
+      23, 24, 138, 146, 159, 188, 196, 301, 407, 411, 413, 485, 500, 516, 527, 598, 601,
+      637, 644, 647, 667, 780, 939, 941, 951, 1155, 1332, 1333, 1338, 1339, 1347, 1359,
+      1423, 1529, 1605, 1631, 1767, 1768, 1786, 1799, 1957, 1995, 1998, 2213, 2220, 2224,
+      2225, 2226, 2310, 2311, 2312, 2313, 2314, 2315, 2449, 2536, 2957, 2959, 2972, 2974,
+      2975, 2980, 2982, 2983, 2984, 2985, 2986, 2987, 3021, 3022, 3023, 3075, 3113, 3114,
+      3115, 3124, 3157, 3167, 3264, 3321, 3336, 3445, 3602, 3612, 3641, 3665, 3739, 3781,
+      3883, 3914, 3916, 3917, 3932, 3946, 3988, 4091, 4092, 4093, 4094, 4114, 4122, 4153,
+      4155, 4184, 4250, 4275, 4410, 4411, 4449, 4559, 4597, 4599, 4612, 4657, 4712, 4759,
+      4761, 4810, 4855, 4857, 4864, 4865, 4874, 4875, 4882, 4883, 4885, 4887, 4890, 4892,
+      4930, 4966, 4987, 5008, 5022, 5045, 5046, 5113, 5183, 5184, 5185, 5186, 5187, 5288,
+      5301, 5403, 5454, 5455, 5456, 5473, 5474, 5475, 5491, 5492, 5493, 5505, 5553, 5646,
+      5663, 5664, 5699, 5732, 5733, 5790, 5876, 5879, 5930, 5972, 5974, 5976, 6051, 6056,
+      6078, 6082, 6109, 6110, 6156, 6237, 6249, 6296, 6313, 6329, 6330, 6331, 6363, 6548,
+      6549, 6550, 6596, 6597, 6677, 6694, 6723, 6750, 6756, 6845, 6851, 6876, 6877, 6878,
+      6879, 6880, 6886, 6887, 6888, 6889, 6971, 6972, 7034, 7056, 7059, 7069, 7228, 7251,
+      7259, 7271, 7278, 7382, 7515, 7544, 7723, 7729, 7731, 7737, 7738, 7790, 7806, 7936,
+      7959, 8077, 8184, 8279, 8381, 8394, 8443, 8444, 8445, 8457, 8568, 8569, 8570, 8571,
+      8572, 8573, 8574, 8575, 8576, 8577, 8693, 8764, 9025, 9026, 9073, 9081, 9103, 9183,
+      9189, 9215, 9264, 9313, 9492, 9503, 9507, 9572, 9591, 9689, 9739, 9740, 9741, 9742,
+      9759, 9827, 9912, 9914, 9920, 9927, 9945, 9946, 9988, 10057, 10062, 10165, 10217,
+      10241, 10245, 10250, 10256, 10257, 10260, 10261, 10271, 10281, 10312, 10314, 10332,
+      10334, 10382, 10392, 10431, 10433, 10437, 10476, 10481, 10483, 10484, 10485, 10486,
+      10487, 10488, 10490, 10493, 10495, 10496, 10532, 10573, 10581, 10582, 10623, 10624,
+      10625, 10626, 10627, 10628, 10629, 10630, 10631, 10632, 10633, 10634, 10635, 10646,
+      10648, 10652, 10729, 10731, 10733, 10737, 10748, 10760, 10796, 10803, 10814, 10870,
+      10878, 10879, 10882, 10884, 10890, 10892, 10898, 10901, 10919, 10928, 10931, 10951,
+      10953, 11044, 11049, 11061, 11082, 11083, 11099, 11110, 11115, 11168, 11187, 11197,
+      11213, 11219, 11222, 11253, 11256, 11259, 11264, 11305, 11346, 11364, 11376, 11386,
+      11390, 11394, 11412, 11413, 11482, 11485, 11489, 11545, 11560, 11564, 11571, 11608,
+      11629, 11636, 11639, 11641, 11657, 11686, 11695, 11741, 11767, 11771, 11782, 11807,
+      11836, 11860, 11861, 11868, 11883, 11904, 11918, 11932, 11941, 11974, 11986, 12047,
+      12066, 12125, 12133, 12164, 12176, 12180, 12185, 12191, 12192, 12196, 12215, 12222,
+      12258, 12269, 12276, 12308,
+    ],
+  };
+
+  // id -> index into YIELD_GROUPS, built once.
+  const YIELD_GROUP_OF = new Map();
+  YIELD_GROUPS.forEach(function (group, index) {
+    (YIELD_CLASSES[group.key] || []).forEach(function (id) { YIELD_GROUP_OF.set(id, index); });
+  });
+
+  const ITEM_SELECTOR = 'table.item[id^="ic"]';
+
+  // Which group an item belongs to, or -1 for one that pays nothing (and for one
+  // we cannot identify -- showsWhenFiltered decides what happens to those, and
+  // an unplaceable item is simply not grouped).
+  function groupOfItem(rel) {
+    const id = Number(parseItemRel(rel).id);
+    if (!Number.isInteger(id)) return -1;
+    const index = YIELD_GROUP_OF.get(id);
+    return index === undefined ? -1 : index;
+  }
+
+  function isYieldItem(rel) {
+    return groupOfItem(rel) !== -1;
+  }
+
+  // Whether an item survives the filter. Note this is NOT isYieldItem: an item
+  // whose `rel` carries no readable id is SHOWN, not hidden. Hiding is a claim
+  // ("this one pays nothing") and an unreadable id supports no claim at all --
+  // the same way the [mall] link above only suppresses itself on a positive
+  // `t=0`. It matters because KoL splices its own markup into the page when you
+  // use something, and markup we can't read must never cost you sight of your
+  // inventory: the worst a wrongly-shown item does is take up a slot.
+  function showsWhenFiltered(rel) {
+    const id = parseItemRel(rel).id;
+    if (!id || !Number.isInteger(Number(id))) return true;
+    return isYieldItem(rel);
+  }
+
+  // Does this mutation record add or remove an inventory item? Only those can
+  // change what the filter should be showing; every other change to the page --
+  // above all the description popup KoL adds and removes as the pointer crosses
+  // an item -- is noise as far as this feature is concerned.
+  function touchesAnItem(record) {
+    const lists = [record.addedNodes, record.removedNodes];
+    for (let l = 0; l < lists.length; l++) {
+      const list = lists[l] || [];
+      for (let i = 0; i < list.length; i++) {
+        const node = list[i];
+        if (!node || node.nodeType !== 1) continue; // text nodes and the like
+        if (node.matches && node.matches(ITEM_SELECTOR)) return true;
+        // The item may be wrapped -- a whole category's worth of markup arrives
+        // in one node when a collapsed section is opened.
+        if (node.querySelector && node.querySelector(ITEM_SELECTOR)) return true;
+      }
+    }
+    return false;
+  }
+
+  // Where an item sits in the page's layout. KoL floats the item tables inside
+  // a category's <div class="collapse">, in which case hiding the table is
+  // enough. The other rendering puts each item alone in a <td> of a grid, and
+  // there the CELL is the thing to hide -- hiding only the table inside it would
+  // leave an empty cell holding its column open.
+  function placementNode(item) {
+    const parent = item.parentElement;
+    const cell = parent && parent.closest ? parent.closest('td') : null;
+    if (cell && cell.querySelectorAll(ITEM_SELECTOR).length === 1) return cell;
+    return item;
+  }
+
+  // Packing the survivors together is done with LAYOUT, never by moving nodes.
+  //
+  // The first version of this repacked the grid by moving cells between rows,
+  // and every bug this feature has had came out of that: moving a node is a DOM
+  // mutation, so the observer woke and repacked again, and the grid twitched
+  // under the mouse; a row KoL had meanwhile rebuilt was no longer in the page,
+  // so the survivors went into it and the category vanished; and, worst, the
+  // moves left the DOM holding the payers first and the hidden items behind
+  // them, so KoL's own re-render after using something replayed OUR order and
+  // the inventory stopped being alphabetical for good.
+  //
+  // The page's markup is KoL's, and it stays KoL's. All this does is hide cells
+  // and turn each category's grid into a wrapping flex line for as long as the
+  // filter is on: `display: contents` makes every <tr> hand its cells straight
+  // to that line, the hidden ones take no space, and the rest close up in their
+  // original order. Unticking the box clears the inline styles and the page is
+  // bit-for-bit what KoL rendered.
+  //
+  // Confirmed against the live inventory.php: the packing renders correctly,
+  // using an item while the filter is on no longer disturbs the list, and the
+  // grouping below draws its headings where it should.
+  // The gap is row then column. KoL's grid puts the item tables flush against
+  // each other, which reads as one dense block once a filter has thinned it out
+  // and the remaining items no longer line up in columns -- so the flex line
+  // spaces them itself. `gap` needs no capability check: a browser that doesn't
+  // know it ignores the declaration and the layout is merely tight, which is
+  // where it started.
+  const GRID_STYLE = { table: 'block', tbody: 'flex', row: 'contents', gap: '10px 14px' };
+
+  // display:contents shipped everywhere current, but a browser without it would
+  // silently drop the cells out of the layout -- much worse than not packing.
+  function canPack() {
+    return typeof CSS === 'object' && CSS && typeof CSS.supports === 'function' &&
+      CSS.supports('display', 'contents');
+  }
+
+  // The <tr> containers, and the <tbody>/<table> above them. Only rows that
+  // actually hold item cells count, so the category header's own rows are left
+  // out of it.
+  function gridPartsFor(cells) {
+    const rows = [];
+    cells.forEach(function (c) {
+      const row = c.grid ? c.node.parentNode : null;
+      if (row && rows.indexOf(row) === -1) rows.push(row);
+    });
+    const bodies = [];
+    rows.forEach(function (row) {
+      const body = row.parentNode;
+      if (body && bodies.indexOf(body) === -1) bodies.push(body);
+    });
+    return { rows: rows, bodies: bodies };
+  }
+
+  function setPacking(cells, on) {
+    const parts = gridPartsFor(cells);
+    if (!parts.rows.length) return; // floated layout: hiding alone packs it
+    const pack = on && canPack();
+    parts.rows.forEach(function (row) {
+      row.style.display = pack ? GRID_STYLE.row : '';
+    });
+    parts.bodies.forEach(function (body) {
+      body.style.display = pack ? GRID_STYLE.tbody : '';
+      body.style.flexWrap = pack ? 'wrap' : '';
+      body.style.gap = pack ? GRID_STYLE.gap : '';
+      const table = body.parentNode;
+      // A <tbody> that is a flex container inside a table box would be wrapped
+      // in an anonymous table box and the flex would never take, so the table
+      // has to stop being one too.
+      if (table && table.style) table.style.display = pack ? GRID_STYLE.table : '';
+    });
+  }
+
+  // Grouping rides on the same flex line the packing creates, so it too moves
+  // nothing: a cell's group is a `order` away, and flex draws items in order
+  // order regardless of where they sit in the markup. Each group's heading is a
+  // row of OUR OWN (never one of KoL's, and never anywhere but the end of the
+  // body) whose flex-basis of 100% makes it take a whole line to itself, so the
+  // groups end up stacked with a title over each.
+  //
+  //   order 0  Multi-use recipes   <- heading, full width
+  //   order 1  potsherd, balloon, frond
+  //   order 2  Meat
+  //   order 3  wallet, briefcase
+  //
+  // Without display:contents there is no flex line to order things in, so
+  // grouping is skipped along with the packing rather than half-applied.
+  const HEAD_CLASS = 'tm-yield-head';
+  const HEAD_STYLE =
+    'display: block; flex-basis: 100%; width: 100%; order: %ORDER%; ' +
+    'font-weight: bold; font-size: 9pt; padding: 4px 0 0; color: #404040;';
+
+  function headingFor(body, index, label, count) {
+    const id = HEAD_CLASS + '-' + index;
+    let row = null;
+    for (const child of body.children) {
+      if (child.className === HEAD_CLASS && child.getAttribute('data-group') === String(index)) {
+        row = child;
+        break;
+      }
+    }
+    if (!row) {
+      row = document.createElement('tr');
+      row.className = HEAD_CLASS;
+      row.id = id;
+      row.setAttribute('data-group', String(index));
+      row.appendChild(document.createElement('td'));
+      body.appendChild(row);
+    }
+    row.style.cssText = HEAD_STYLE.replace('%ORDER%', String(index * 2));
+    const text = label + ' (' + count + ')';
+    // Only write when it differs: an identical assignment still replaces the
+    // text node, and this feature has learnt to leave settled things alone.
+    if (row.firstChild.textContent !== text) row.firstChild.textContent = text;
+    return row;
+  }
+
+  function clearHeadings(body) {
+    Array.prototype.slice.call(body.children).forEach(function (child) {
+      if (child.className === HEAD_CLASS && child.parentNode) child.parentNode.removeChild(child);
+    });
+  }
+
+  function setGrouping(cells, on) {
+    const parts = gridPartsFor(cells);
+    const group = on && canPack() && parts.rows.length > 0;
+
+    cells.forEach(function (c) {
+      const want = group && c.keep && c.group !== -1 ? String(c.group * 2 + 1) : '';
+      if (c.node.style.order !== want) c.node.style.order = want;
+    });
+
+    parts.bodies.forEach(function (body) {
+      if (!group) {
+        clearHeadings(body);
+        return;
+      }
+      YIELD_GROUPS.forEach(function (def, index) {
+        const count = cells.filter(function (c) {
+          return c.keep && c.group === index && c.node.parentNode &&
+            c.node.parentNode.parentNode === body;
+        }).length;
+        if (count) headingFor(body, index, def.label, count);
+        else removeHeading(body, index);
+      });
+    });
+  }
+
+  function removeHeading(body, index) {
+    for (const child of Array.prototype.slice.call(body.children)) {
+      if (child.className === HEAD_CLASS && child.getAttribute('data-group') === String(index) &&
+          child.parentNode) {
+        child.parentNode.removeChild(child);
+      }
+    }
+  }
+
+  // One category. Returns { loaded, kept }: `loaded` false means the category
+  // has no items on the page at all (a collapsed section hasn't fetched them),
+  // which is NOT the same as a category filtered down to nothing.
+  function filterCategory(box, on, group) {
+    const items = Array.prototype.slice.call(
+      box.querySelectorAll(ITEM_SELECTOR)
+    );
+    if (!items.length) return { loaded: false, kept: 0 };
+
+    const cells = items.map(function (item) {
+      const node = placementNode(item);
+      const rel = item.getAttribute('rel');
+      return {
+        node: node,
+        grid: node !== item,
+        keep: showsWhenFiltered(rel),
+        group: groupOfItem(rel),
+      };
+    });
+
+    cells.forEach(function (c) {
+      const want = on && !c.keep ? 'none' : '';
+      // Assigning a style that is already set is free, but say it once anyway:
+      // nothing here should ever look like a change to anything watching.
+      if (c.node.style.display !== want) c.node.style.display = want;
+    });
+    setPacking(cells, on);
+    setGrouping(cells, on && group);
+
+    return { loaded: true, kept: cells.filter(function (c) { return c.keep; }).length };
+  }
+
+  function applyYieldFilter(on, group) {
+    let kept = 0;
+    document.querySelectorAll('table.stuffbox').forEach(function (box) {
+      const res = filterCategory(box, on, group);
+      kept += res.kept;
+      // A loaded category filtered down to nothing is hidden whole, header
+      // included: an open category showing zero items reads as a loading bug.
+      // A category with no items loaded is left alone -- hiding it would take
+      // away the header you click to load it. Clearing is deliberately narrow:
+      // if this box is itself the grid table, setPacking has just given it a
+      // display of its own, and only a "none" we put there is ours to remove.
+      if (on && res.loaded && !res.kept) box.style.display = 'none';
+      else if (box.style.display === 'none') box.style.display = '';
+    });
+    return kept;
+  }
+
+  function readYieldState(key, fallback) {
+    try {
+      const stored = localStorage.getItem(key);
+      return stored === null ? fallback : stored === '1';
+    } catch (e) {
+      return fallback; // private mode / storage disabled
+    }
+  }
+
+  function writeYieldState(key, on) {
+    try {
+      localStorage.setItem(key, on ? '1' : '0');
+    } catch (e) { /* not worth failing the filter over */ }
+  }
+
+  function inventoryYieldFilter() {
+    if (document.getElementById(YIELD_ONLY_ID)) return; // idempotency guard
+
+    // Sit next to KoL's own Filter box. Outside the form, so Enter in the text
+    // field still submits the page's filter and not ours.
+    const form = document.querySelector('form#filter');
+    const host = form && form.parentNode;
+    if (!host) return;
+
+    const label = document.createElement('label');
+    label.style.cssText = 'font-size: 9pt; display: inline-block; margin-top: 2px;';
+    label.title = 'Show only items that hand you other items or Meat when used ' +
+      '(gift boxes, buckets, scrolls, wallets). Items that merely turn into a ' +
+      'used copy of themselves are not included.';
+
+    const box = document.createElement('input');
+    box.type = 'checkbox';
+    box.id = YIELD_ONLY_ID;
+    label.appendChild(box);
+    label.appendChild(document.createTextNode(' pays out'));
+
+    // The grouping only has anything to say about items that pay out, so it
+    // rides along with the filter rather than standing on its own.
+    const groupLabel = document.createElement('label');
+    groupLabel.style.cssText = 'font-size: 9pt; display: block; margin-left: 12px;';
+    groupLabel.title = 'Sort the surviving items into multi-use recipes, Meat, ' +
+      'random yields and plain items, with a heading over each.';
+    const groupBox = document.createElement('input');
+    groupBox.type = 'checkbox';
+    groupBox.id = YIELD_GROUP_ID;
+    groupLabel.appendChild(groupBox);
+    groupLabel.appendChild(document.createTextNode(' group by type'));
+    label.appendChild(groupLabel);
+
+    const note = document.createElement('span');
+    note.className = 'small';
+    note.style.cssText = 'display: block; color: #707070;';
+    note.textContent = '(open sections only)';
+    label.appendChild(note);
+    host.appendChild(label);
+
+    // A pass only writes inline styles now, which no childList observer sees,
+    // so it cannot feed itself. The disconnect stays anyway: it costs nothing,
+    // and it is the only thing that would hold if a pass ever touched the tree
+    // again. A boolean "busy" flag would NOT hold -- MutationObserver delivers
+    // its records in a microtask, long after a synchronous pass has cleared the
+    // flag, so they arrive looking exactly like somebody else's edit.
+    let observer = null;
+    const pass = function () {
+      if (observer) observer.disconnect();
+      try {
+        applyYieldFilter(box.checked, groupBox.checked);
+      } finally {
+        if (observer) {
+          // Discard the records our own pass just made. A foreign change that
+          // landed in the same window is dropped with them, which is harmless:
+          // the next mutation on the page schedules another pass anyway.
+          observer.takeRecords();
+          observer.observe(document.body, { childList: true, subtree: true });
+        }
+      }
+    };
+
+    box.checked = readYieldState(YIELD_STATE_KEY, false);
+    groupBox.checked = readYieldState(YIELD_GROUP_KEY, true);
+    groupBox.disabled = !box.checked;
+
+    box.addEventListener('change', function () {
+      writeYieldState(YIELD_STATE_KEY, box.checked);
+      groupBox.disabled = !box.checked;
+      pass();
+    });
+    groupBox.addEventListener('change', function () {
+      writeYieldState(YIELD_GROUP_KEY, groupBox.checked);
+      pass();
+    });
+    if (box.checked) pass();
+
+    // Opening a category AJAX-loads its items, and using something splices the
+    // changed item back in, so a single pass would go stale. Debounced, and a
+    // no-op while unchecked.
+    if (typeof MutationObserver === 'function' && document.body &&
+        !window.__tmInvYieldWatch) {
+      window.__tmInvYieldWatch = true;
+      let pending = null;
+      observer = new MutationObserver(function (records) {
+        if (!box.checked || pending) return;
+        // Only an item ARRIVING or LEAVING can change what the filter should
+        // show. The page mutates constantly for other reasons -- KoL puts a
+        // description popup in the DOM on hover and takes it out again, so
+        // simply moving the mouse across the inventory fires this observer over
+        // and over -- and answering those with a pass is what made the grid
+        // twitch under the pointer. Everything else is ignored here.
+        if (!records.some(touchesAnItem)) return;
+        pending = setTimeout(function () { pending = null; pass(); }, 150);
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
   }
 
   // === feature: always show the monster aggravation device ===============
@@ -3622,6 +4121,7 @@
     { name: 'beer-garden-guard', path: /\/campground\.php/i, run: beerGardenGuard },
     { name: 'mall-bulk-buy', path: /\/mall\.php/i, run: mallBulkBuy },
     { name: 'inventory-mall-link', path: /\/inventory\.php/i, run: inventoryMallLinks },
+    { name: 'inventory-yield-filter', path: /\/inventory\.php/i, run: inventoryYieldFilter },
     { name: 'mcd-always-visible', path: /\/charpane\.php/i, run: mcdAlwaysVisible },
     { name: 'daily-dungeon-skips', path: /\/choice\.php/i, run: dailyDungeonSkips },
     { name: 'sell-sort', path: /\/sellstuff_ugly\.php/i, run: sellSort },

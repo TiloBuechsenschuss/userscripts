@@ -1,0 +1,684 @@
+# Kingdom of Loathing items that yield other items when used.
+# Derived from {{acquire}} templates in the "When Used" section of every article in
+# Category:Usable Items (and subcategories) on wiki.kingdomofloathing.com.
+# Generated 2026-09-06 by scripts/fetch-kol-item-yields.mjs from 3402 pages.
+#
+# itemid: KoL's own item number, from the wiki's Cargo "Items" table. Empty when the
+#         article has no Data: subpage to read one from.
+# self_transform: all  = every yield is the same item in another state (e.g. a book
+#                        becoming "<book> (used)") — no new items come out of it
+#                 part = mixed; the self-transforming yields are prefixed with "*"
+#                 no   = every yield is a different item, or the item pays only Meat
+# meat: Meat the item pays out when used, as the wiki writes it ("400-600", "3,000",
+#       "some"); " / " separates alternative outcomes. Empty = pays no Meat. Meat the
+#       item COSTS you ({{meat|type=lose|...}}) is not counted here.
+# class: what the userscript groups by; first match of multiuse, meat, random, items.
+#        multiuse = using N at once decides what you get (from KoLMafia's MUSE recipes)
+#        meat     = pays Meat; random = the wiki can only give a range or "some"
+#        items    = a fixed set of items
+# multiuse: the recipes, "N=what you get", "; "-separated. Empty unless class=multiuse.
+# yields: "; "-separated; "xN" suffix is the quantity or range the wiki lists.
+item	itemid	class	self_transform	meat	multiuse	yields
+31337 scroll	553	random	no			stat script; worthless knick-knack xsome; worthless gewgaw xsome; worthless trinket xsome; ten-leaf clover xsome
+64735 scroll	552	meat	no	21337		facsimile dictionary; drywall axe; drywall axe
+668 scroll	548	meat	no	some		papaya x10-15; 64735 scroll; 31337 scroll
+A Beginner's Guide to Charming Snakes	4408	items	all			*A Beginner's Guide to Charming Snakes (used)
+A Crimbo Carol, Ch. 1	4354	items	all			*A Crimbo Carol, Ch. 1 (used)
+A Crimbo Carol, Ch. 2	4355	items	all			*A Crimbo Carol, Ch. 2 (used)
+A Crimbo Carol, Ch. 3	4356	items	all			*A Crimbo Carol, Ch. 3 (used)
+A Crimbo Carol, Ch. 4	4357	items	all			*A Crimbo Carol, Ch. 4 (used)
+A Crimbo Carol, Ch. 5	4358	items	all			*A Crimbo Carol, Ch. 5 (used)
+A Crimbo Carol, Ch. 6	4359	items	all			*A Crimbo Carol, Ch. 6 (used)
+A-Boo glue	9912	items	no			glued A-Boo clue
+Abandoned candy	3290	random	no			Mr. Mediocrebar xsome; Yummy Tummy bean xsome; Rock Pops xsome; Daffy Taffy xsome; Spooky Surprise Egg xsome
+Alabaster bishop	10632	items	no			Fancy chess set
+Alabaster king	10629	items	no			Fancy chess set
+Alabaster knight	10633	items	no			Fancy chess set
+Alabaster pawn	10634	items	no			Fancy chess set
+Alabaster queen	10630	items	no			fancy chess set
+Alabaster rook	10631	items	no			Fancy chess set
+Alice's Army booster box	5022	items	no			Pack of Alice's Army Cards x30
+Alien source code printout	7533	items	all			*alien source code printout (used)
+All-purpose flower	1183	random	no			wad of dough x35-45
+Allied Radio Backpack Pack	11932	items	no			Allied Radio Backpack
+Ammonite candy mold	5492	items	no			gummi ammonite
+Ancient calendar fragment	5646	items	no			ancient calendar
+Ancient cursed foot locker	3016	random	no			cursed piece of thirteen xsome; cursed black pearl onion xsome; cursed sea biscuit xsome; cursed bottle of rum xsome; cursed bottle of black-label rum xsome; cursed cannonball xsome; cursed voodoo skull xsome; cursed dirty joke scroll xsome
+Ancient turtle shell	3988	items	no			ancient turtle shell powder
+Ancient vinyl coin purse	2612	meat	no	650-750		
+Antique 8-Bit Power magazine	4597	items	no			map to Vanya's Castle
+Antique bottle opener	4599	items	no			map to the Kegger in the Woods
+Antique painting of a landscape	4449	items	no			map to The Landscaper's Lair
+Antique pair of blue jeans	4657	items	no			map to Ellsbury's Claim
+Antique record album	4559	items	no			map to Professor Jacking's laboratory
+Antique souvenir drawing	4612	items	no			map to the Magic Commune
+Arcanoferric housing	10245	items	no			signal receiver
+Artisanal homebrew sampler	6756	items	no			bottle of Old Pugilist; bottle of Race Car Red; bottle of Professor Beer; bottle of Greedy Dog; bottle of Rapier Witbier; bottle of Lambada Lambic
+Assemble-it-yourself Leprecondo	11860	items	no			Leprecondo
+Astral hot dog dinner	5045	items	no			astral hot dog x3
+Astral six-pack	5046	items	no			astral pilsner x6
+Augmented El Vibrato drone	3167	items	no			El Vibrato Megadrone (hatchling)
+BGE merchandise order form	4875	items	no			BGE 'ferocious fruit' shirt‎; BGE 'cuddly critter' shirt; BGE pocket calendar‎; BGE shotglass‎ x6; BGE temporary tattoo; BGE tiny plastic toy
+BRICKO brick	4469	multiuse	no		2=BRICKO ooze; 3=BRICKO hat; 5=BRICKO bat; 6=BRICKO sword; 8=BRICKO oyster; 9=BRICKO pants; 11=BRICKO turtle; 23=BRICKO elephant; 37=BRICKO octopus; 69=BRICKO python; 420=BRICKO pyramid; 1100=BRICKO vacuum cleaner; 2300=BRICKO airship; 3700=BRICKO cathedral; 6900=BRICKO gargantuchicken	BRICKO ooze (item); BRICKO hat; BRICKO bat (item); BRICKO sword; BRICKO oyster (item); BRICKO pants; BRICKO turtle (item); BRICKO elephant (item); BRICKO octopus (item); BRICKO python (item); BRICKO pyramid; BRICKO vacuum cleaner (item); BRICKO airship (item); BRICKO cathedral (item); BRICKO gargantuchicken (item)
+BRICKO trunk	4488	random	no			BRICKO brick x4-6; BRICKO eye brick x0-1
+Bag of Iunion stones	10573	items	no			Iunion Crown
+Bag of bones	4756	random	no			bone chips x7-10
+Bag of foreign bribes	8691	meat	no	1-500		Beach Buck x6-8; Coinspiracy x4-6; FunFunds™ x1-3; Volcoino; Wal-Mart gift certificate x2-4
+Bag of park garbage	8211	meat	no	150-250		
+Bag of sausage links	10062	items	no			sausage golem
+Bagged Cargo Cultist Shorts	10635	items	no			Cargo Cultist Shorts
+Barnacled barrel	8577	items	no			Alewife™ Ale; bazookafish bubble gum; beefy fish meat; eel battery; glistening fish meat; ink bladder; pufferfish spine; shark cartilage; slick fish meat; slug of rum; slug of shochu; slug of vodka; temporary teardrop tattoo; water log
+Bash-Ōs boxtop	3473	multiuse	no		20=propeller beanie	propeller beanie
+Bastille Battalion control rig crate	9927	items	no			Bastille Battalion control rig
+Bat guano	188	items	no			guano coffee cup
+Bath ball gift set	4891	random	no			chocolate bath ball xsome; bacon bath ball xsome; myrrh-soaked, chocolate-covered bacon bath ball xsome; incense bath ball xsome
+Bazooka cozy	6331	items	no			cozy bazooka
+Beach Comb Box	10257	items	no			Beach Comb
+Beer cartilage	1631	items	no			ice-cold six-pack
+Belemnite candy mold	5493	items	no			gummi belemnite
+Better Shrooms and Gardens catalog	10481	items	no			packet of mushroom spores
+Big slimy cyst	4094	items	no			crusty hula hoop; red wagon; rickety old unicycle
+Big tun	8570	items	no			barrel gun; barrel-aged martini; bottle of Amontillado; gibson; gin and tonic; mimosette; tequila sunset; vodka and tonic; zmobie (drink)
+Bit of clingfilm	2988	multiuse	no		3=clingfilm tangle; 7=clingfilm slippers; 9=clingfilm cap; 11=clingfilm trousers	clingfilm tangle; clingfilm slippers; clingfilm cap; clingfilm trousers
+Black candygram	3264	items	no			black candy heart
+Black pension check	2057	meat	no	400-450		
+Black picnic basket	2058	random	no			black pudding (food) xsome; Blackfly Chardonnay xsome; black & tan xsome; black pepper xsome; black forest cake xsome; black forest ham xsome
+Blank note	5732	items	no			eerily silent box
+Blank prescription sheet	3781	items	no			bottle of melodramamine; bottle of extra-strength melodramamine
+Blessed large box	5504	random	no			milky potion; swirly potion; bubbly potion; smoky potion; cloudy potion; effervescent potion; fizzy potion; dark potion; murky potion; milky potion xsome; swirly potion xsome; bubbly potion xsome; smoky potion xsome; cloudy potion xsome; effervescent potion xsome; fizzy potion xsome; dark potion xsome; murky potion xsome
+Blind-packed capsule toy	5930	items	no			tiny plastic series 3
+Blind-packed die-cast metal toy	6972	items	no			Die-Cast series 1
+Blue lava globs	8444	items	no			uncapped blue lava bottle
+Bolt of striped fabric	12196	items	no			blue and black dress; white and gold dress
+Book of facts	11333	items	all			*book of facts (dog-eared)
+Booty chest charrrm	2980	items	no			booty chest charrrm bracelet
+Boozehounds Anonymous token	3739	items	no			margarita; martini; monkey wrench; salty dog; screwdriver; strawberry daiquiri; strawberry wine; tequila sunrise; vodka martini; whiskey and soda; whiskey sour; wine spritzer
+Boring binder clip	6694	items	no			McClusky file (complete)
+Bottle of Blank-Out	4857	items	no			glob of Blank-Out
+Box o' ghosts	10648	items	no			gregarious ghostling; grinning ghostling; greedy ghostling
+Box of Gratitude chocolates	8764	items	no			Gratitude chocolate (thyme-filled) x3; Gratitude chocolate (bourbon-filled) x3; Gratitude chocolate (Meat-filled) x3; Gratitude chocolate (octopus-filled)
+Box of Pokëmann band-aids	5077	random	no			Pokëmann band-aid x?4-6?
+Box of bear arms	5790	items	no			right bear arm; left bear arm
+Boxed Apriling band helmet	11564	items	no			Apriling band helmet
+Boxed Archaeologist's Spade	12185	items	no			Archaeologist's Spade
+Boxed Heartstone	12180	items	no			Heartstone
+Boxed Mayam Calendar	11571	items	no			Mayam Calendar
+Boxed Sept-Ember Censer	11641	items	no			Sept-Ember Censer
+Boxed august scepter	11305	items	no			august scepter
+Boxed autumn-aton	10953	items	no			autumn-aton
+Boxed bat wings	11657	items	no			bat wings
+Boxed gumball machine	10870	items	no			meatball machine
+Brick of sand	2582	multiuse	no		20=sandcastle	sandcastle
+Briefcase	184	meat	no	300		fat stacks of cash
+Briefcase full of sprinkles	9264	items	no			sprinkles x4,000-6,000
+Broken chocolate pocketwatch	9215	items	no			chocolate pocketwatch
+Broken high-temperature mining drill	8457	items	no			high-temperature mining drill
+Bubble-wrap simulator	5929	items	all			*bubble-wrap simulator (one broken button)
+Bubble-wrap simulator (half broken)	6110	items	no			bubble-wrap simulator (one button left)
+Bubble-wrap simulator (one broken button)	6109	items	no			bubble-wrap simulator (half broken)
+Bubblin' crude	5789	multiuse	no		3=oily boid; 8=oil cap; 9=oil lamp; 10=oil slacks; 11=oil pan; 12=jar of oil	oily boid; oil cap; oil lamp; oil slacks; oil pan; jar of oil
+Bulky free-range mushroom	10485	items	no			mushroom filet x3; plump free-range mushroom
+Bunch of bananas	2372	random	no			banana x4-6
+Bunch of sea grapes	10271	items	no			bottle of sea wine
+Bundle of firewood	10312	items	no			stick of firewood x10
+CRIMBCO Employee Handbook (chapter 1)	4859	items	all			*CRIMBCO Employee Handbook (chapter 1) (used)
+CRIMBCO Employee Handbook (chapter 2)	4860	items	all			*CRIMBCO Employee Handbook (chapter 2) (used)
+CRIMBCO Employee Handbook (chapter 3)	4861	items	all			*CRIMBCO Employee Handbook (chapter 3) (used)
+CRIMBCO Employee Handbook (chapter 4)	4862	items	all			*CRIMBCO Employee Handbook (chapter 4) (used)
+CRIMBCO Employee Handbook (chapter 5)	4863	items	all			*CRIMBCO Employee Handbook (chapter 5) (used)
+CSA discount card	5745	meat	no	300		
+Can of Rain-Doh	5553	items	no			empty Rain-Doh can; Rain-Doh red wings; Rain-Doh orange agent; Rain-Doh yellow laser gun; Rain-Doh green lantern; Rain-Doh blue balls; Rain-Doh indigo cup; Rain-Doh violet bo; Rain-Doh black box
+Cannonball charrrm	2982	items	no			cannonball charrrm bracelet
+Cannonball charrrm bracelet	2983	items	no			charrrm bracelet; cannonball charrrm
+Canopic jar	2536	items	no			ancient spice; powdered organs; Ankh of Badahnkadh
+Carrot nose	6151	random	no			carrot juice; carrot juice xsome
+Carton of astral energy drinks	10882	items	no			astral energy drink x6
+Celsius 233	9504	items	all			*Celsius 233 (singed)
+Charter: Nellyville	11264	items	no			hot nuggets x3
+Cheap toaster	637	items	no			toast x3
+Chest of "pirate gold"	11482	items	no			Crimbuccaneer piece of 12 x20
+Chest of the Bonerdagon	678	meat	no	3,000		
+Chewing gum on a string	23	items	no			seal-skull helmet; seal-clubbing club; helmet turtle; turtle totem; ravioli hat; pasta spoon; Hollandaise helmet; saucepan; disco mask; disco ball; mariachi hat; stolen accordion; old sweatpants; worthless trinket; worthless gewgaw; worthless knick-knack
+Chocolate covered ping-pong ball	11110	items	no			ping-pong ball
+Chroner cross	7723	items	no			Chroner x3; Chroner x2
+Chroner trigger	7729	items	no			Chroner
+Clan VIP Lounge invitation	3946	items	no			Clan VIP Lounge key
+Cloaca-Cola c-rations	1339	items	no			Cloaca-Cola x6
+Cloaca-Cola knapsack	1332	items	no			Cloaca grenade x3; Cloaca-Cola c-rations; Cloaca-Cola-issue combat knife; picture of a dead guy's girlfriend
+Closed-circuit phone system	11168	items	no			closed-circuit pay phone
+Cocktails of the Age of Sail	11432	items	all			*Cocktails of the Age of Sail (used)
+Collection of tiny spooky objects	4585	meat	no	100-1000		
+Colossal free-range mushroom	10488	items	no			house-sized mushroom; immense free-range mushroom
+Combat lover's locket lockbox	10892	items	no			combat lover's locket
+Comprehensive Cartographic Compendium	10644	items	all			*Comprehensive Cartographic Compendium (well-read)
+Cooling iron breastplate	6549	items	no			cool iron breastplate
+Cooling iron greaves	6550	items	no			cool iron greaves
+Cooling iron helmet	6548	items	no			cool iron helmet
+Copper ha'penny charrrm	2984	items	no			copper ha'penny charrrm bracelet
+Copper ha'penny charrrm bracelet	2985	items	no			charrrm bracelet; copper ha'penny charrrm
+Cornucopia	9183	items	no			raw gravy; raw cranberry sauce; raw stuffing; raw turkey; raw green beans; raw bread; raw mincemeat; raw potato; raw sweet potato; cashew x2 - 5
+Cosmic Calorie	6306	multiuse	no		20=celestial olive oil; 30=celestial carrot juice; 50=celestial au jus; 60=celestial squid ink	celestial olive oil; celestial carrot juice; celestial au jus; celestial squid ink
+Cosmic bucket	6296	items	no			fragment of Jarlsberg's soul x15
+Cosmic six-pack	6237	items	no			mediocre lager x6
+Covert Ops for Kids	11765	items	all			*Covert Ops for Kids (used)
+Crate of firebombs	7259	items	no			firebomb x10
+Crate of fish meat	6312	random	no			beefy fish meat x3-6; glistening fish meat x3-6; slick fish meat x3-6
+Crate of prize-winning cheese	12176	items	no			wedge of prize-winning cheese x24
+Crate of prize-winning rum	12125	items	no			bottle of prize-winning rum x24
+Crated wardrobe-o-matic	11394	items	no			wardrobe-o-matic
+Crayon shavings	5703	multiuse	no		7=wax hat; 11=wax pants	wax hat; wax pants; wax bugbear
+Crimbo Factory surprise box	10382	items	no			ball; borg sock monkey; Bulky Buddy Box (hatchling); evil teddy bear; fancy dress ball; killer rag doll; kite; marionette; monomolecular yo-yo; mylar scout drone; pet rock; possessed top; razor-tipped yo-yo; roboduck-on-a-string; stuffed doppelshifter; stuffed gray blob; teddy borg; top; toy crazy train; tree-eating kite; yo-yo
+Crimbo pressie	644	items	no			box; fruitcake; wrapping paper
+Crimbo stocking	941	items	no			candy cane; eggnog; gingerbread bugbear; small Crimbo Pressie
+Crimbot ROM: Mathematical Precision	8008	items	all			*Crimbot ROM: Mathematical Precision (dirty)
+Crimbot ROM: Rapid Prototyping	8007	items	all			*Crimbot ROM: Rapid Prototyping (dirty)
+Crimbot ROM: Ruthless Efficiency	8009	items	all			*Crimbot ROM: Ruthless Efficiency (dirty)
+Crimbuccaneer captain's purse	11418	random	no			Crimbuccaneer piece of 12 x10-40
+Crimbuccaneer premium booty sack	11412	items	no			gunwale; free boots; Crimbuccaneer runebone; Crimbuccaneer invasion map; brown pirate pants; The Encyclopedia of Fruit; Crimbuccaneer fledges (disintegrating); whalegun; Crimbuccaneer tavern swab; Cocktails of the Age of Sail; punching mirror; baby rigging snake; Crimbuccaneer lantern; Crimbuccaneer bombjacket
+Crude monster sculpture	6677	items	no			sticky clay homunculus
+Crude oil congealer	9914	items	no			jar of oil
+Crystal Crimbo goblet	11082	items	no			Crimbosmopolitan
+Crystal Crimbo platter	11083	items	no			Crimbo dinner
+Cult memo	3883	items	no			decoded cult documents
+Cursed microwave	5663	items	no			gunpowder burrito x5
+Cursed monkey glove	11187	items	no			cursed monkey's paw
+Cursed piece of thirteen	3034	meat	no	500-1000		
+Cursed pony keg	5664	items	no			beery blood x5
+CyberRealm keycode	11807	items	no			server room key
+D10	5288	items	no			dungeon dragon chest
+D4	5285	random	no			generic restorative potion xY
+D6	5286	random	no			generic mana potion xY
+D8	5287	random	no			generic healing potion xY
+DIY protonic accelerator kit	9081	items	no			protonic accelerator pack
+Daily Affirmation: Work For Hours a Week	9484	meat	no	some		
+Damp old wallet	6313	items	no			sand dollar x?-58-70-?
+Day shortener	11346	items	no			extra time
+Dead guy's piece of double-sided tape	3336	items	no			dead guy's memento
+Dead mimic	1267	random	no			aluminum wand; ebony wand; hexagonal wand; marble wand; pine wand; Dungeons of Doom potion x10-15; ring of adornment; ring of aggravate monster; ring of cold resistance; ring of conflict; ring of fire resistance; ring of gain strength; ring of increase damage
+Dear Past Self Package	9103	items	no			Time-Spinner
+Delectable catalyst	1605	items	no			scrumdiddlyumptious solution
+Deluxe Neverending Party favor	9946	items	no			TRIO cup of beer x3; party platter for one x3; Party-in-a-Can™ x3; party pup; party whip; Living to Drink, Drinking to Live; Party Tattoo™ gift certificate; TRIO cup of beer; party platter for one; Party-in-a-Can™
+Deluxe fax machine	4865	items	no			portable photocopier x10
+Designer sweatpants (new old stock)	10928	items	no			designer sweatpants
+Detective school application	9073	items	no			plastic detective badge
+Dickory Farms Gift Basket	4882	items	no			festive sausage x2; holiday cheese log x2; fake plastic grass
+Dinghy plans	146	items	no			dingy dinghy
+Disassembled clover	196	items	no			ten-leaf clover
+Discontent™ Winter Garden Catalog	7069	items	no			packet of winter seeds
+Discount Telescope Warehouse gift certificate	2599	meat	no	100000		
+Discreetly-wrapped Eternity Codpiece	12066	items	no			The Eternity Codpiece
+Disintegrating barrel	8573	items	no			insanely spicy bean burrito; insanely spicy enchanted bean burrito; insanely spicy jumping bean burrito; banana; barrel pickle; barrel cracker; tiny barrel
+Disintegrating quill pen	1957	items	no			scroll of ancient forbidden unspeakable evil; scroll of ancient forbidden unspeakable evil
+Doll house	1398	random	no			tiny plastic series 1 xsome; tiny plastic series 1C xsome
+Dollhive	3067	random	no			tiny plastic series 2 xsome
+Dolphin King's map	26	meat	no	150		Dolphin King's crown
+Dr. Hobo's map	601	items	no			Dr. Hobo's scalpel
+Dry cleaning receipt	6876	items	no			power sock; wool sock; moustache sock
+Dubious peppermint	4151	multiuse	no		169=numberwang	numberwang
+Duct tape	2697	multiuse	no		4=duct tape wallet; 10=duct tape buckler; 12=duct tape dockers; 14=duct tape fedora; 17=duct tape sword; 23=duct tape shirt	duct tape wallet; duct tape buckler; duct tape dockers; duct tape fedora; duct tape sword; duct tape shirt
+Duct tape wallet	2698	meat	no	2500-3600		
+Dude ranch souvenir crate	6726	random	no			Bottle of whiskey xsome; Coconut shell xsome; Stick of dynamite xsome; gingham blouse; rhinestone cowboy shirt
+Dungeon dragon chest	5297	meat	no	450-550		
+Dungeoneering kit	6249	items	no			scroll of Protection from Bad Stuff; scroll of Puddingskin; soft green echo eyedrop antidote
+Dusty animal skull	1799	items	no			misshapen animal skeleton
+Dusty barrel	8572	items	no			banana; barrel cracker; barrel pickle; spicy bean burrito; spicy enchanted bean burrito; spicy jumping bean burrito; tiny barrel
+Dyspepsi-Cola d-rations	1338	items	no			Dyspepsi-Cola x6
+Dyspepsi-Cola knapsack	1333	items	no			Dyspepsi grenade x3; Dyspepsi-Cola d-rations; Dyspepsi-Cola-issue canteen; picture of a dead guy's girlfriend
+Ed the Undying exhibit crate	8184	items	no			The Crown of Ed the Undying
+Eerily silent box	5733	items	no			soul monocle
+El Vibrato drone	3157	items	no			sparking El Vibrato drone; humming El Vibrato drone; glowing El Vibrato drone; El Vibrato translator; warm El Vibrato drone
+Eldritch effluvium	9190	multiuse	no		37=eldritch extract	eldritch extract; eldritch concentrate
+Eldritch ichor	9333	multiuse	no		111=eldritch rub; 666=eldritch tincture	eldritch rub; eldritch tincture
+Eldritch tincture	9335	items	all			*eldritch tincture (depleted)
+Elf Farm Raffle ticket	500	items	no			Elfin shortbread; pagoda plans; pagoda plans; Elfin shortbread
+Elf Guard Field Manual: Culinary Arts	11429	items	all			*Elf Guard Field Manual: Culinary Arts (used)
+Elf Guard Field Manual: Extortion	11449	items	all			*Elf Guard Field Manual: Extortion (used)
+Elf Guard Field Manual: Wilderness Sleeping	11454	items	all			*Elf Guard Field Manual: Wilderness Sleeping (used)
+Elf Guard honor present	11413	items	no			Elf Guard SCUBA tank; Elvish underarmor; Elf Guard red and white beret; Elf Guard Field Manual: Extortion; Elf Guard strategic map; Elf Guard insignia (general); ancient Elf dessert spoon; Elf Guard Field Manual: Culinary Arts; Elf Guard clipboard; Elf Guard Field Manual: Wilderness Sleeping; Elf Guard hangover cure; Elf Guard broom; Elf Guard fuel tank; massive wrench
+Elf Guard payroll bag	11433	random	no			Elf Guard MPC x10-40
+Ellsbury's journal	4663	items	all			*Ellsbury's journal (used)
+Embering hunk	11654	multiuse	no		21=ember egg	ember egg
+Emotion chip	10733	items	no			spinal-fluid-covered emotion chip
+Envelope full of Meat	10368	meat	no	500		
+Evil flaming eyeball pendant	2226	items	no			liar's pants
+Evil golden arches	504	random	no			Brimstone Chicken Sandwich xsome; Double Bacon Beelzeburger xsome; Lord of the Flies-sized fries xsome; Jumbo Dr. Lucifer xsome
+Extra special Crimbo stocking	951	items	no			eggnog; candy cane; gingerbread bugbear; small Crimbo Pressie; Mr. Accessory
+Fancy tin beer can	6766	multiuse	no		1=tin cup; 2=tin snips; 4=tin lizzie; 8=tin tam; 11=tin foil; 16=tin drum; 32=tin roof (rusted)	tin cup; tin snips; tin lizzie; tin tam; tin foil; tin drum; tin roof (rusted)
+Fat wallet	3735	meat	no	350-450		
+Festive warbear bank	7060	meat	no	X / 100		
+Field Guide to Skeletal Anatomy	5124	items	all			*Field Guide to Skeletal Anatomy (shredded)
+First Post shirt package	9026	items	no			First Post shirt - Cir Senam
+Fish stick cozy	6330	items	no			Staff of the Cozy Fish
+Fisherman's sack	4250	items	no			fish-oil smoke bomb x3; vial of squid ink; potion of fishy speed
+Flaming familiar doppelgänger	2225	items	no			evil flaming eyeball pendant
+Flaming pink shirt	2224	items	no			flaming familiar doppelgänger
+Flat dough	301	items	no			wad of dough
+Flickering pixel	6156	items	no			Byte
+Floaty inverse geode	4189	random	no			floaty sand x7-10; floaty pebbles x2-6; floaty gravel x0-2; floaty rock x0-1
+Flytrap pellet	3571	meat	no	300-400		dull fish scale; flytrap bezoar; baby cuddlefish; dull fish scale xsome; baby cuddlefish xsome; flytrap bezoar xsome
+Folder Holder	4930	items	no			over-the-shoulder Folder Holder
+Fourth of May Cosplay Saber kit	10250	items	no			Fourth of May Cosplay Saber
+Frat Army FGF	2511	random	no			brain-meltingly-hot chicken wings xsome; knob ka-bobs xsome; can of Swiller xsome; melted Jell-o shot xsome; frat brats xsome; McMillicancuddy's Special Lager
+Free-range mushroom	10483	items	no			mushroom filet x3
+Fresh can of paint	10731	items	no			fresh coat of paint
+Frozen Mob Penguin	1789	random	no			penguin skin; kneecapping stick x0-1; Mob Penguin cellular phone x0-2; penguin skin; support cummerbund x0-1; mafia aria x0-2; penguin skin; iron pasta spoon x0-1; scroll of pasta summoning x0-2
+Fruit basket	1434	random	no			orange xsome; grapefruit xsome; olive xsome; lemon xsome; strawberry xsome; grapes xsome; tomato xsome; papaya xsome; cranberries xsome; lime xsome; jumbo olive xsome; cherry xsome
+Fruit bowl	1433	random	no			cranberries xsome; grapefruit xsome; lemon xsome; strawberry xsome; tomato xsome; olive xsome; orange xsome; papaya xsome; grapes xsome
+Fruitfilm	3124	items	no			strawberry; lemon; grapes; orange
+GameInformPowerDailyPro subscription card	4712	items	no			GameInformPowerDailyPro magazine; fistful of ashes
+Gathered Meat-Clip	9926	meat	no	420-620		
+Gaudy key	4874	items	no			snakehead charrrm
+General Assembly Module	3075	items	no			C.B.F.G.; biomechanical crimborg leg armor; biomechanical crimborg helmet
+Giant castle map	667	items	no			quantum egg
+Giant free-range mushroom	10486	items	no			mushroom slab; bulky free-range mushroom
+Giant green gummi ingot	5474	items	no			giant green gummi bear
+Giant jar of protein powder	6266	random	no			giant grain of protein powder x3-4
+Giant red gummi ingot	5473	items	no			giant red gummi bear
+Giant yellow gummi ingot	5475	items	no			giant yellow gummi bear
+Gilded BRICKO brick	4489	multiuse	no		11=gilded BRICKO chalice	gilded BRICKO chalice
+Gilded ancient cursed chest	3018	random	no			cursed piece of thirteen xsome; cursed black pearl onion xsome; cursed sea biscuit xsome; cursed bottle of rum xsome; cursed bottle of black-label rum xsome; cursed cannonball xsome; cursed voodoo skull xsome; cursed dirty joke scroll xsome
+Gnollish toolbox	533	random	no			cog xsome; empty meat tank xsome; spring xsome; sprocket xsome
+Gnomish toolbox	1768	items	no			cog; spring; sprocket; flange (item); clockwork key
+Gold Boozehounds Anonymous token	6723	items	no			a little sump'm sump'm; ducha de oro; horizontal tango; ocean motion; perpendicular hula; pink pony; rockin' wagon; roll in the hay; slap and tickle; slip 'n' slide
+Gordon Beer's Beer Garden Catalog	6750	items	no			packet of beer seeds
+Government per-diem	11003	meat	no	100		
+Grain of sand	10259	multiuse	no		100=small pile of sand; 1000=pile of sand; 10000=large pile of sand	small pile of sand; pile of sand; large pile of sand
+Granny Tood's Thanksgarden Catalog	9189	items	no			packet of thanksgarden seeds
+Gratitude chocolate (Meat-filled)	8767	meat	no	10000		
+Green candygram	2315	items	no			green candy heart
+Green gummi ingot	5455	items	no			gummi snake
+Green lava globs	8445	items	no			uncapped green lava bottle
+Green rocket	9827	items	no			ten-leaf clover x3
+Groupie bra	4217	random	no			sand dollar x1-3; Barrrnacle (hatchling); bazookafish bubble gum; bottle of melodramamine; dull fish scale; eel battery; sea grease; sea salt crystal; shark cartilage; soggy seed packet; temporary teardrop tattoo
+Grumpy Bumpkin's Pumpkin Seed Catalog	4759	items	no			packet of pumpkin seeds
+Grumpy old man charrrm	2972	items	no			grumpy old man charrrm bracelet
+Gun parts	8900	multiuse	no		4=rinky-dink sixgun; 7=makeshift sixgun; 11=custom sixgun	rinky-dink sixgun; makeshift sixgun; custom sixgun
+Guzzlr application	10532	items	no			Guzzlr tablet
+Handful of drink tickets	400	random	no			bottle of whiskey xsome; bottle of gin xsome; bottle of tequila xsome; bottle of rum xsome; bottle of vodka xsome; boxed wine xsome; ice-cold Sir Schlitz xsome; ice-cold Willer xsome; ice-cold fotie xsome; bottle of whiskey xsome; bottle of gin xsome; bottle of tequila xsome; bottle of rum xsome; bottle of vodka xsome; boxed wine xsome; ice-cold Sir Schlitz xsome; ice-cold Willer xsome; ice-cold fotie xsome
+Handful of honey	5144	multiuse	no		3=honeypot; 4=honey mead; 5=wild honey pie; 37=honeycap; 42=honeybritches; 69=honey dipper	honeypot; honey mead; wild honey pie; honeycap; honeybritches; honey dipper
+Handful of numbers	5052	meat	no	or lose K		
+Handful of sand	2581	multiuse	part		5=brick of sand	brick of sand xX; *handful of sand xY
+Handful of tips	7188	meat	no	300-400		
+Heart necklace	1995	items	no			left half of a heart necklace
+Hey Deze map	516	items	no			Hey Deze nuts
+Hippy Army MPE	2512	random	no			handful of walnuts xsome; mixed wildflower greens xsome; cruelty-free wine xsome; Genalen™ Bottle xsome; thistle wine xsome; Megatofu
+Hjodor's Guide to Arctic Dalmatians	5715	items	all			*Hjodor's Guide to Arctic Dalmatians (used)
+Holiday Hal's Happy-Time Fun Book!	4810	items	no			Holiday Fun! x2
+Holiday Multitasking (item)	11767	items	no			Holiday Multitasking (used)
+Home robotics kit	6078	items	no			pile of useless robot parts; homemade robot
+Hot daub	5725	multiuse	no		1=ballpark hot daub; 15=hot daub bun; 17=foot-long hot daub; 19=hot daub stand	ballpark hot daub; hot daub bun; foot-long hot daub; hot daub stand
+Hotel minibar key	8693	items	no			bottle of gin; bottle of rum; bottle of tequila; bottle of vodka; bottle of whiskey; boxed wine; fancy chocolate x2
+Housekeeping automa-core	11376	items	no			portable housekeeping robot
+How to Lose Friends and Attract Snakes	11763	items	all			*How to Lose Friends and Attract Snakes (used)
+Hoyle's Guide to Reindeer Games	11769	items	all			*Hoyle's Guide to Reindeer Games (used)
+Huge bowl of candy	6851	items	no			Angry Farmer candy; bag of W&Ws; box of Dweebs; Cold Hots candy; Daffy Taffy; Milk Studs; Mr. Mediocrebar; PEEZ dispenser; Rock Pops; Swizzler; Tasty Fun Good rice candy; Yummy Tummy bean; Ultra Mega Sour Ball
+ICEbox	11537	random	no			1 xX; 0 xY
+Ice-cold six-pack	138	items	no			ice-cold Sir Schlitz x6
+Iceberglet	1423	items	no			ice baby; ice pick; ice skates; ice sickle
+Imitation crab crate	3596	random	no			imitation crab meat x2-3; imitation crab zoea
+Immense free-range mushroom	10487	items	no			mushroom slab; giant free-range mushroom
+In-the-box spring shoes	11545	items	no			spring shoes
+Infinite BACON machine	9025	items	no			BACON x100
+Ingot of seal-iron	3932	items	no			bad-ass club
+Inigo's Incantation of Inspiration (item)	4411	items	no			Inigo's Incantation of Inspiration (crumpled)
+Interesting Coin Inheritance Letter	12276	items	no			Interesting Coin; Interesting Coin x3
+Interesting-looking twig	3367	multiuse	no		100=house of twigs and spit	house of twigs and spit
+Intricate clockwork birdhouse	6597	items	no			cuckoo clock
+Intricate clockwork egg	6596	items	no			intricate clockwork birdhouse; intricate clockwork disc; intricate clockwork big hand; intricate clockwork little hand; intricate clockwork numeral I; intricate clockwork numeral II; intricate clockwork numeral III; intricate clockwork numeral IV; intricate clockwork numeral V; intricate clockwork numeral VI; intricate clockwork numeral VII; intricate clockwork numeral VIII; intricate clockwork numeral IX; intricate clockwork numeral X; intricate clockwork numeral XI; intricate clockwork numeral XII; intricate clockwork cuckoo
+Jamfish jam	3641	items	no			toast with jam
+January's Garbage Tote (unopened)	9689	items	no			January's Garbage Tote
+Jolly Roger charrrm	411	items	no			Jolly Roger charrrm bracelet
+Jolly Roger charrrm bracelet	413	items	no			charrrm bracelet; Jolly Roger charrrm
+Jug of Sneaky Pete's Mojo	7251	items	no			shot of Sneaky Pete's Mojo x15
+Junior Adventurer's kit	3445	items	no			Junior Adventurer's merit badge; STYX deodorant body spray; tin rations x3; trusty torch; white-label gin x3
+Khaki duffel bag	7790	items	no			Cloaca-Cola helmet; Cloaca-Cola shield; Cloaca-Cola fatigues; Cloaca-Cola-issue combat knife; Cloaca grenade; New Cloaca-Cola; Cloaca-Cola; Cloaca-Cola knapsack; trench lighter
+Knob Goblin lunchbox	2592	random	no			Knob pasty x1-2; thermos full of Knob coffee x1-2
+Knob Kitchen grab-bag	401	random	no			Knob mushroom xsome; Knob sausage xsome; spices xsome; wad of dough xsome
+Kobold treasure hoard	5294	meat	no	10		newborn kobold
+Kokomo Resort Chip	8279	items	no			Golden Kokomo Resort Chip
+Kramco Industries packing carton	10057	items	no			Kramco Sausage-o-Matic™
+LI-11 Motor Pool voucher	9507	items	no			Asdon Martin keyfob
+LOLmec statuette	8084	meat	no	1000000		
+Lab-grown blood cubic zirconia	11986	items	no			blood cubic zirconia
+Large box	832	random	no			Dungeons of Doom potion x4-6
+Large stone triangle	3021	items	no			strange stone pyramid
+Latte lovers club card	9988	items	no			Latte lovers member's mug
+Lavender candygram	2313	items	no			lavender candy heart
+Leftover Crimbo rations	4348	random	no			expired can of franks 'n' beans x1-2; expired bottle of peppermint schnapps x1-2
+Lemony scales	7120	multiuse	no		4=lemon party hat; 5=lemon shirt; 6=lemon drop trousers	lemon party hat; lemon shirt; lemon drop trousers
+Leprecondo	11861	items	no			11-leaf clover
+Letter from Carrie Bradshaw	11259	items	no			Mr. Big's Wallet; Sexy Cosmo; red-soled high heels; Souvenir Chopsticks
+Letter from King Ralph XI	1155	items	no			big rock; pork elf goodies sack; note from Clancy
+Letter to Ed the Undying	7959	items	no			pork elf goodies sack; disassembled clover
+Lewd playing card	3403	multiuse	no		52=deck of lewd playing cards	deck of lewd playing cards
+License to Chill	9503	items	no			Afternoon Delight
+Lil' Snowball Factory	11485	items	no			precision snowball x3
+Little Geneticist DNA-Splicing Lab	7382	items	no			DNA extraction syringe
+Little firkin	8568	items	no			martini; screwdriver; strawberry daiquiri; margarita; vodka martini; tequila sunrise; bottle of Amontillado; barrel-aged martini; barrel gun
+Loaded serum blowgun	1347	items	no			empty blowgun; empty blowgun
+Locked mumming trunk	9591	items	no			mumming trunk
+Long skinny balloon	433	multiuse	no		2=balloon helmet; 3=balloon sword; 4=balloon shield; 7=balloon monkey	balloon helmet; balloon sword; balloon shield; balloon monkey
+Longbox of Batfellow comics	11636	items	no			Batfellow comic x10
+Loose Meats	12183	meat	no	X		
+Lucky moai statuette	11771	items	no			11-leaf clover x3
+Make-Your-Own-Vampire-Fangs kit	5301	items	no			plastic vampire fangs
+MayDay™ supply package	10901	items	no			survival knife; crank-powered radio on a lanyard; headlamp; thermal blanket; atlas of local maps; emergency glowstick; spare battery; space blanket; single-use dust mask; gaffer's tape; 20-lb can of rice and beans; bar of freeze-dried water; expired MRE; cool mint precipice bar; carrot cake precipice bar
+McHugeLarge deluxe ski set	11782	items	no			McHugeLarge duffel bag
+Meat globe	636	meat	no	600-800		
+Meat vortex	546	meat	no	some		
+Meatball machine	10878	items	no			meatball
+Medium slimy cyst	4093	items	no			Coily™; lawn dart; old school flying disc; Coily™; lawn dart; old school flying disc
+Medium stone triangle	3022	items	no			strange stone pyramid
+Mer-kin cookiestove	10392	items	no			personalizable gingerbread cookie
+Mer-kin foodbucket	3676	random	no			sea broccoli x0-3; sea cauliflower x0-3; sea persimmon x0-3; sea blueberry x0-3
+Mer-kin stashbox	3811	random	no			Mer-kin trailmap; sand dollar x30-50
+Mer-kin thingpouch	3593	random	no			sand dollar x2-4; Mer-kin fastjuice; Mer-kin killscroll
+Merc Core deployment orders	7806	items	no			one-day ticket to Conspiracy Island
+Mermaid's purse	4211	random	no			sand dollar x1-3; barrrnacle (hatchling); bazookafish bubble gum; bottle of melodramamine; dull fish scale; eel battery; sea grease; sea salt crystal; shark cartilage; soggy seed packet; temporary teardrop tattoo
+Miniborg Destroy-O-Bot	3114	items	no			Miniborg stomper; Miniborg strangler; Miniborg laser; Miniborg beeper; Miniborg hiveminder
+Miniborg hiveminder	3113	items	no			Miniborg Destroy-O-Bot
+Mint Salton Pepper's Peppermint Seed Catalog	5403	items	no			Peppermint Pip Packet
+Mint condition Lil' Doctor™ bag	10165	items	no			Lil' Doctor™ bag
+Mint condition magnifying glass	10884	items	no			cursed magnifying glass
+Mint-in-box Moonthril Circlet	5183	items	no			Moonthril Circlet
+Mint-in-box Moonthril Cuirass	5185	items	no			Moonthril Cuirass
+Mint-in-box Moonthril Flamberge	5186	items	no			Moonthril Flamberge
+Mint-in-box Moonthril Greaves	5184	items	no			Moonthril Greaves
+Mint-in-box Moonthril Longbow	5187	items	no			Moonthril Longbow
+Mint-in-box Powerful Glove	10437	items	no			Powerful Glove
+Moist barrel	8574	items	no			barrel beryl; cast; concentrated magicalness pill; cute mushroom; enchanted barbell; giant moxie weed; Mountain Stream soda; vibrating mushroom
+Mouldering barrel	8576	items	no			barrel beryl; creepy ginger ale; cute mushroom; haunted battery; scroll of drastic healing; synthetic marrow; the funk; vibrating mushroom
+Mr. Big's Wallet	11281	meat	no	690		
+Mummy wrapping	2634	multiuse	no		2=really thick bandage; 4=mummy mask; 6=gauze shorts; 10=gauze hammock	really thick bandage; mummy mask; gauze shorts; gauze hammock
+Murgatroyd diode	10314	items	no			enhanced signal receiver
+Mushroom badge	10496	items	no			mushroom cap
+Mushroom cap	10493	items	no			mushroom shield
+Mushroom pants	10495	items	no			mushroom badge
+Mushroom slab	10490	items	no			mushroom cap
+My First Paycheck envelope	11489	items	no			Elf Guard MPC x20
+Mysterious Black Box	9742	items	no			rubber doll head
+Mysterious Blue Box	9741	items	no			rubber doll body
+Mysterious Green Box	9740	items	no			plastic doll arms
+Mysterious Red Box	9739	items	no			plastic doll legs
+Möbius ring box	11941	items	no			Möbius ring
+NPZR chemistry set	4431	random	no			invisibility potion xsome; irresistibility potion xsome; irritability potion xsome
+Nest egg	4731	meat	no	150		
+Neverending Party favor	9945	items	no			party beer bomb x3; sweet party mix x3; party balloon x3; fancy party pants; party crasher (off-hand); Party Planning on a Budget; PARTY HARD T-shirt; party beer bomb; sweet party mix; party balloon; Neverending Party guest pass; party beer bomb; sweet party mix; party balloon
+New-in-box toy Cupid bow	11836	items	no			toy Cupid bow
+Ninja pirate zombie robot head	1359	items	no			ninja pirate zombie robot
+Normal barrel	8569	items	no			a little sump'm sump'm; barrel gun; barrel-aged martini; bottle of Amontillado; pink pony; rockin' wagon; roll in the hay; slip 'n' slide; slap and tickle
+Old coin purse	1918	meat	no	450-550		
+Old leather wallet	1917	meat	no	400-600		
+Old-fashioned Crimbo Pressie	3115	items	no			handmade hobby horse; ball-in-a-cup; set of jacks
+Onyx bishop	10626	items	no			Fancy chess set
+Onyx king	10623	items	no			Fancy chess set
+Onyx knight	10627	items	no			Fancy chess set
+Onyx pawn	10628	items	no			Fancy chess set
+Onyx queen	10624	items	no			Fancy chess set
+Onyx rook	10625	items	no			Fancy chess set
+Orange and black Crimboween candy	2220	items	no			loose teeth
+Orange candygram	2312	items	no			orange candy heart
+Orcish meat locker	84	meat	no	90-110		
+Ornate ancient cursed chest	3017	random	no			cursed piece of thirteen xsome; cursed black pearl onion xsome; cursed sea biscuit xsome; cursed bottle of rum xsome; cursed bottle of black-label rum xsome; cursed cannonball xsome; cursed voodoo skull xsome; cursed dirty joke scroll xsome
+Pack of Alice's Army Cards	4966	items	no			Alice's Army Cards; Alice's Army Cards; Alice's Army Cards; Alice's Army Cards; Alice's Army Cards
+Pack of Alice's Army Foil Cards	4987	items	no			Alice's army foil cards; Alice's army foil cards; Alice's army foil cards; Alice's army foil cards; Alice's army foil cards; Alice's army foil cards
+Pack of Every Card	8381	items	no			Deck of Every Card
+Pack of KWE trading card	1998	items	no			KWE Trading Cards; stick of "gum"
+Pack of chewing gum	1767	items	no			jabañero-flavored chewing gum; lime-and-chile-flavored chewing gum; pickle-flavored chewing gum; tamarind-flavored chewing gum
+Pack of pogs	5505	items	no			pog 01 (spider); pog 02 (Knob goblin); pog 03 (warwelf); pog 04 (skleleton); pog 05 (ninja snowman); pog 06 (filthy hippy); pog 07 (orcish frat boy); pog 08 (hellion); pog 09 (pirate); pog 10 (hobo); pog 11 (Naughty Sorceress)
+Packaged April Shower Thoughts Calendar	11883	items	no			April Shower Thoughts shield
+Packaged Daylight Shavings Helmet	10803	items	no			Daylight Shavings Helmet
+Packaged Everfull Dart Holster	11560	items	no			Everfull Dart Holster
+Packaged June cleaver	10919	items	no			June cleaver
+Packaged Jurassic Parka	10951	items	no			Jurassic Parka
+Packaged Monodent of the Sea	11974	items	no			Monodent of the Sea
+Packaged Portable Laughing Stock	12269	items	no			Portable Laughing Stock
+Packaged Roman Candelabra	11608	items	no			Roman Candelabra
+Packaged SpinMaster™ lathe	10581	items	no			SpinMaster™ lathe
+Packaged backup camera	10748	items	no			backup camera
+Packaged cold medicine cabinet	10814	items	no			cold medicine cabinet
+Packaged familiar scrapbook	10760	items	no			familiar scrapbook
+Packaged industrial fire extinguisher	10796	items	no			industrial fire extinguisher
+Packaged knock-off retro superhero cape	10646	items	no			unwrapped knock-off retro superhero cape
+Packaged luxury garment	11695	items	no			governor's daughter's pearl hairpin; governor's daughter's petticoats; governor's daughter's lace collar
+Packaged miniature crystal ball	10729	items	no			miniature crystal ball
+Packaged model train set	11044	items	no			Model train set
+Packaged prismatic beret	11918	items	no			prismatic beret
+Packet of mayfly bait	3321	items	no			mayfly bait necklace
+Packet of orchid seeds	5113	items	no			tropical orchid x6
+Palm frond	2605	multiuse	no		2=palm-frond fan; 3=palm-frond net; 4=palm-frond whip; 5=palm-frond capris; 6=extra-large palm-frond toupee; 7=palm-frond cloak	palm-frond fan; palm-frond net; palm-frond whip; palm-frond capris; extra-large palm-frond toupee; palm-frond cloak
+Pantogram	9572	items	no			portable pantogram
+Paperclip	4856	multiuse	no		1=paperclip sproinger; 10=paperclip-on tie; 15=paperclip turban; 20=paperclip cape; 25=paperclip pants	paperclip sproinger; paperclip-on tie; paperclip turban; paperclip cape; paperclip pants
+Papier-mâché bowl	5876	items	no			papier-mâché trophy piñata
+Papier-mâché glob	5864	multiuse	no		2=papier-mochi; 3=papier-m&acirc;chaeranthera; 4=papier-m&acirc;ch&eacute; toothpicks; 5=papier-m&acirc;ch&eacute;te; 6=papier-m&acirc;chine gun; 7=papier-masque; 9=papier-mitre; 11=papier-m&acirc;churidars; 23=papier-m&acirc;ch&eacute; plaque; 37=papier-m&acirc;ch&eacute; handle; 69=papier-m&acirc;ch&eacute; base; 111=papier-m&acirc;ch&eacute; bowl	papier-mochi; papier-mâchaeranthera; papier-mâché toothpicks; papier-mâchéte; papier-mâchine gun; papier-masque; papier-mitre; papier-mâchuridars; papier-mâché plaque; papier-mâché handle; papier-mâché base; papier-mâché bowl
+Pasta wand loot box	12222	items	no			legendary pasta wand
+Penultimate Fantasy chest	604	meat	no	100-200		cocoa eggshell fragment xsome; phonics down xsome; scroll of drastic healing xsome; soft green echo eyedrop antidote xsome; super-spiky hair gel xsome; tiny house xsome
+Peppermint sprout	5395	multiuse	no		1=peppermint twist; 2=peppermint patty; 3=peppermint crook; 10=cane-mail pants; 11=peppermint rhino baby; 15=cane-mail shirt	peppermint twist; peppermint patty; peppermint crook; cane-mail pants; peppermint rhino baby; cane-mail shirt
+Pete & Jackie's Dragon Tooth Emporium Catalog	5879	items	no			packet of dragon's teeth
+Picky tweezers	7936	items	no			single atom
+Piece of driftwood	10281	items	no			driftwood beach comb
+Pile of Trainbot parts	11049	items	no			Trainbot circuitry; Trainbot linkages; Trainbot optics; Trainbot plating; Trainbot servomotors; Trainbot tubing
+Pile of candy	1161	random	no			Angry Farmer candy xsome; marzipan skull xsome; Tasty Fun Good rice candy xsome; Yummy Tummy bean xsome
+Pile of dusty animal bones	1798	random	no			dusty animal bones x1-2
+Pile of sand	10261	items	no			large pile of sand
+Pink candygram	2311	items	no			pink candy heart
+Pirate encryption key alpha	11386	items	part			*pirate encryption key alpha; pirate encryption key bravo; pirate encryption key charlie; pirate encryption key delta; pirate encryption key (complete)
+Pirate skull	407	items	no			spooky pirate skeleton
+Pixel coin	8299	meat	no	2000		
+Pixellated moneybag	4593	meat	no	450-550		
+Plaid swatch	7359	multiuse	no		2=plaid bandage; 4=plaid pocket square; 6=plaid skirt	plaid bandage; plaid pocket square; plaid skirt
+Plastic rock	7515	items	no			witch's spare house key
+Plump free-range mushroom	10484	items	no			mushroom filet x3; free-range mushroom
+Plus sign	818	random	no			small box xsome; large box xsome; magic whistle xsome; baby killer bee xsome; royal jelly xsome; mind flayer corpse xsome; cornuthaum xsome; vorpal blade xsome; pile of gold coins xsome; ring of aggravate monster xsome
+Pocket Guide to Mild Evil	11322	items	all			*Pocket Guide to Mild Evil (used)
+Pocket Meteor Guide	9511	items	all			*Pocket Meteor Guide (well-thumbed)
+Pocket lint (blue)	6877	items	no			bowl of petunias
+Pocket lint (green)	6878	items	no			bowl of petunias
+Pocket lint (orange)	6880	items	no			bowl of petunias
+Pocket lint (white)	6879	items	no			bowl of petunias
+Pokéfam Guide to Capturing All of Them	9759	items	no			packet of tall grass seeds
+Pork Elf toiletries kit	12192	items	no			Pork Elf mouthwash; Pork Elf deodorant; Pork Elf toothpaste
+Pork elf goodies sack	707	random	no			hamethyst xsome; baconstone xsome; porquoise xsome
+Portable Spacegate	9465	items	all			*portable Spacegate (open)
+Portable photocopier	4864	items	no			photocopied monster; photocopied monster
+Possessed sugar cube	7478	multiuse	no		1=sugar fairy; 3=sugar bunny; 11=sweet tooth	sugar fairy; sugar bunny; sweet tooth
+Power seed	10737	items	no			potted power plant
+Present	647	items	no			box; wrapping paper
+Pulled green taffy	6363	items	no			envyfish egg
+Pumpkin	4761	items	no			pumpkin juice x3
+Ragged wool yarn	11741	items	no			perfect Christmas scarf
+Record of infuriating silence	5971	items	all			*record of infuriating silence (used)
+Record of infuriating silence (used)	5972	items	no			record of infuriating silence (used)
+Record of menacing silence	5975	items	all			*record of menacing silence (used)
+Record of menacing silence (used)	5976	items	no			record of menacing silence (used)
+Record of tranquil silence	5973	items	all			*record of tranquil silence (used)
+Record of tranquil silence (used)	5974	items	no			record of tranquil silence (used)
+Red Roger's reliquary	10217	items	no			Red Roger's red right foot; Red Roger's red left foot; Red Roger's red right hand; Red Roger's red left hand
+Red box	7228	items	no			red letter; red red wine; red rum; red velvet cake; red badge; red book; red coat; red-hot poker; red masque; red shirt; red shoe; Red X Shield
+Red coin	10475	multiuse	no		11=red plumber's boots	red plumber's boots
+Red gummi ingot	5454	items	no			gummi salamander
+Red lava globs	8443	items	no			uncapped red lava bottle
+Refurbished air fryer	10879	items	no			fried air
+Replica Libram of Resolutions	11213	items	no			resolution: be kinder; resolution: be more adventurous; resolution: be luckier; resolution: be wealthier; resolution: be happier; resolution: be stronger; resolution: be smarter; resolution: be sexier; resolution: be feistier; resolution: be kinder
+Replica Smith's Tome	11219	items	no			Flaskfull of Hollow x3; lump of Brituminous coal x3; handful of Smithereens x3
+Replica Ten Dollars	11253	items	no			replica Mr. Accessory
+Replica Tome of Snowcone Summoning	11197	items	no			blue snowcone; green snowcone; orange snowcone; purple snowcone; red snowcone; black snowcone
+Retrospecs try-at-home kit	10431	items	no			Retrospecs
+Returned Thinknerd package	7278	items	no			crying statue earrings; Gary Claybender's Time Screwer; plastic Duskwalker necklace; plastic replica blaster pistol; Space Tourist palmdoctor; wind-up ensign; wind-up navigation droid; wind-up owl; wind-up vampire teeth; wind-up Whatsian robot
+Rock Garden Guide	11099	items	no			packet of rock seeds
+Rockfish stomach	4153	items	no			live lobster; glistening fish meat; beefy fish meat; slick fish meat; shark cartilage; seaweed; sand dollar; dull fish scale; rough fish scale; Midget clownfish; halibut
+Roll of Hob-Os	3427	random	no			sterno-flavored Hob-O xsome; frostbite-flavored Hob-O xsome; fry-oil-flavored Hob-O xsome; strawberry-flavored Hob-O xsome; garbage-juice-flavored Hob-O xsome
+Roll of drink tickets	1429	random	no			bottle of gin xsome; bottle of rum xsome; bottle of tequila xsome; bottle of vodka xsome; bottle of whiskey xsome; boxed wine xsome; ice-cold Willer xsome
+Roll of meat	9563	meat	no	50		dense meat stack; meat stack x5
+Roll of toilet paper	1923	random	all			*roll of toilet paper xsome
+Rolling pin	873	random	no			flat dough xsome
+Rotting barrel	8575	items	no			barrel beryl; cute mushroom; Doc Galaktik's Ailment Ointment; extra-strength strongness elixir; jug-o-magicalness; Marquis de Poivre soda; suntan lotion of moxiousness; vibrating mushroom
+Rubber doll head	10476	items	no			rubber baby doll
+Rubber nubbin	7707	multiuse	no		11=rubber cape	rubber cape
+Rum barrel charrrm	2957	items	no			rum barrel charrrm bracelet
+Rum barrel charrrm bracelet	2959	items	no			charrrm bracelet; rum barrel charrrm
+Rune-strewn spoon cocoon	10256	items	no			hewn moon-rune spoon
+Rusty broken diving helmet	3602	items	no			rusty diving helmet
+S.I.T. Course Voucher	11115	items	no			S.I.T. Course Completion Certificate
+SMOOCH bottlecap	8446	meat	no	1000		
+Sack lunch	4890	items	no			ghuol guolash; Spam Witch sammich; t8r tots; trollhouse cookies; brains casserole; chorizo taco; stuffed spooky mushroom; carob chunk noodles; boring spaghetti; delicious noodles; painful penne pasta; ravioli della hippy; cherry pie; fishy fish casserole; gnatloaf casserole; long pork casserole
+Savings bondo	12308	items	no			meat paste x5
+Scimitar cozy	6329	items	no			cozy scimitar
+Scroll of pasta summoning	780	items	no			boring spaghetti; delicious noodles; delicious spicy noodles; painful penne pasta; ravioli della hippy; spicy noodles; fettucini Inconnu; gnocchetti di Nietzsche; spaghetti with Skullheads
+Seal-clubbing club loot box	12133	items	no			legendary seal-clubbing club
+Sealed TakerSpace letter of Marque	11686	items	no			TakerSpace letter of Marque
+Secret from the future	4114	items	no			monstrous monocle; brazen bracelet; molten medallion; bewitching boots; bitter bowtie; musty moccasins
+Secrets of the Master Egg Hunters	11761	items	all			*Secrets of the Master Egg Hunters (used)
+Shanty: I'm Smarter Than a Drunken Sailor	12158	items	all			*Shanty: I'm Smarter Than a Drunken Sailor (used)
+Shanty: Let's Beat Up This Drunken Sailor	12156	items	all			*Shanty: Let's Beat Up This Drunken Sailor (used)
+Shanty: Look At That Drunken Sailor Dance	12160	items	all			*Shanty: Look At That Drunken Sailor Dance (used)
+Shanty: Only Dogs Love a Drunken Sailor	12164	items	no			Shanty: Only Dogs Love Drunken Sailors (used)
+Shanty: Who's Going to Pay This Drunken Sailor?	12162	items	all			*Shanty: Who's Going to Pay This Drunken Sailor? (used)
+Shard of double-ice	5048	multiuse	no		5=double-ice cap; 7=double-ice box; 9=double-ice britches	double-ice cap; double-ice box; double-ice britches
+Shiny stones	5644	meat	no	140-160		
+Shrink-wrapped 2002 Mr. Store Catalog	11256	items	no			2002 Mr. Store Catalog
+Shrink-wrapped Cincho de Mayo	11222	items	no			Cincho de Mayo
+Shrink-wrapped Cup of 13s	12258	items	no			Cup of 13s
+Shrunken head in a duffel bag	12047	items	no			shrunken head
+Silver keg	4604	random	no			plastic cup of flat beer x15-20
+Silver tongue charrrm	2986	items	no			silver tongue charrrm bracelet
+Silver tongue charrrm bracelet	2987	items	no			charrrm bracelet; silver tongue charrrm
+Single Alice's Army Foil	5008	items	no			Alice's army foil cards; Alice's army foil cards; Alice's army foil cards
+Six pack of Mountain Stream	1786	items	no			Mountain Stream soda x6
+Six-pack of New Cloaca-Cola	2449	items	no			New Cloaca-Cola x6
+Skeleton	5881	multiuse	no		2=skeleton skis; 3=skeleton quiche; 4=skeletal scabbard; 5=crystal skeleton vodka; 7=skeletal skiff; 9=auxiliary backbone; 11=Bonestabber; 13=Lazybones&trade; recliner; 100=shaking skull	skeleton skis; skeleton quiche; skeletal scabbard; crystal skeleton vodka; skeletal skiff; auxiliary backbone; bonestabber; Lazybones™ recliner; shaking skull
+Skeleton key ring	643	random	no			skeleton key x3-5
+Ski resort souvenir crate	6728	random	no			Bottle of vodka xsome; Magical ice cubes xsome; Barbed-wire fence xsome; souvenir ski t-shirt
+Slime convention swag bag	4184	items	no			slime convention flyers; slime convention coupons; slime convention pin; slime convention t-shirt
+Slimy chest	3574	random	no			sand dollar x3-5; figurine of a sleek seal; sand dollar xsome; figurine of a sleek seal; figurine of a sleek seal xsome
+Slow jam collection	4892	items	no			toe jam; traffic jam; space jam
+Small Crimbo Pressie	939	items	no			Hanukkimbo dreidl; imitation nice watch; tiny plastic sword; bow
+Small box	831	random	no			Dungeons of Doom potion x2-4
+Small pile of sand	10260	items	no			pile of sand; large pile of sand
+Small slimy cyst	4092	items	no			green peawee marble; brown crock marble; red China marble; lemonade marble; bumblebee marble; jet bennie marble; beige clambroth marble; steely marble; beach ball marble; black catseye marble; big bumboozer marble
+Small stone triangle	3023	items	no			strange stone pyramid
+Smoked potsherd	4680	multiuse	no		5=pottery yo-yo; 7=pottery hat; 8=pottery club; 9=pottery shield; 11=pottery training pants	pottery yo-yo; pottery hat; pottery club; pottery shield; pottery training pants
+Smut orc keepsake box	5788	meat	no	1,400-1,500		morningwood plank xsome; raging hardwood plank xsome; weirdwood plank xsome; thick caulk xsome; long hard screw xsome; messy butt joint xsome
+Snailmail bits	4457	multiuse	no		3=snailmail coif; 5=snailmail breeches; 8=snailmail hauberk	snailmail coif; snailmail breeches; snailmail hauberk
+Snake skin	9992	multiuse	no		11=snakeskin cowboy hat; 23=snakeskin thighboots; 37=snakeskin jacket	snakeskin cowboy hat; snakeskin thighboots; snakeskin jacket
+Snakehead charrrm	485	items	no			Talisman o' Namsilat
+Solid gold jewel	8088	meat	no	100000		
+SongBoom™ BoomBox Box	9920	items	no			SongBoom™ BoomBox
+Space bar	7544	items	no			space port x3
+Space jam	4887	items	no			space jam toast
+Space junk	7523	multiuse	no		5=space invader; 10=space bar; 15=space needle; 20=space heater	space invader; space bar; space needle; space heater
+Spelunker of Fortune	8073	items	all			*Spelunker of Fortune (used)
+Spelunker's Guild prize sack	8077	items	no			Spelunker's fedora; Spelunker's khakis; Spelunker's whip; solid gold jewel
+SpinMaster™ lathe	10582	items	no			flimsy hardwood scraps
+Spirit blanket	6889	items	no			spirit bed
+Spirit mattress	6888	items	no			spirit bed
+Spirit pillow	6886	items	no			spirit bed
+Spirit sheet	6887	items	no			spirit bed
+Spooky Putty sheet	3665	items	no			Spooky Putty snake; Spooky Putty mitre; Spooky Putty monster
+Spooky bark	4254	multiuse	no		5=bark bracelet; 7=bark beret; 9=bark boxers	bark bracelet; bark beret; bark boxers
+Spooky cosmetics bag	1134	random	no			spooky eyeliner x4-6; spooky lipstick x4-6
+Spoon	11868	items	no			unironic knife
+St. Sneaky Pete's Day goodies basket	1529	items	no			fake plastic grass
+Stick	2110	multiuse	no		2=fire	fire
+Stock Certificate	11951	meat	no	X		
+Stolen meatpouch	2864	meat	no	30-50		
+Structural ember	11647	random	no			morningwood plank xsome; raging hardwood plank xsome; weirdwood plank xsome; thick caulk xsome; long hard screw xsome; messy butt joint xsome
+Stuffed treasure chest	3949	random	no			stuffed Baron von Ratsworth xsome; stuffed crazy bastard sword xsome; stuffed martini xsome; stuffed Meat xsome; stuffed mink xsome; stuffed monocle xsome; stuffed teddy butler xsome; stuffed tin of caviar xsome
+Sturdy Crimbo crate	3612	items	no			Bulky Buddy Box (hatchling); doll house; dollhive; evil teddy bear; pet rock; teddy borg; toothsome rock; teddy bear
+Subscription cocoa dispenser	10652	items	no			fortifying hot cocoa; boiling hot cocoa; cool hot cocoa; hot cocoa au beurre; hot cocoa with rainbow marshmallows; overly-fancy hot cocoa
+Superheated metal	8524	multiuse	no		5=SMOOCH bracers; 7=SMOOCH kneepads; 9=SMOOCH spaulders; 11=SMOOCH codpiece; 13=SMOOCH breastplate	SMOOCH bracers; SMOOCH kneepads; SMOOCH spaulders; SMOOCH codpiece; SMOOCH breastplate
+Suspicious package	9492	items	no			Kremlin's Greatest Briefcase
+Taco Dan's Taco Stand Flier	6051	items	no			Taco Dan's Taco Stand Taco; Taco Dan's Taco Stand Chillacious Churro; Taco Dan's Taco Stand Chimichangarita
+Tales of a Kansas Toymaker	4843	items	all			*Tales of a Kansas Toymaker (used)
+Tarnished luggage key	9313	items	no			recovered cufflinks
+Tarrrnish charrrm	2974	items	no			tarrrnished charrrm bracelet
+Tarrrnished charrrm bracelet	2975	items	no			charrrm bracelet; tarrrnish charrrm
+Ten-leaf clover	24	items	no			disassembled clover
+The Art of Slapfighting	4406	items	all			*The Art of Slapfighting (used)
+The Autobiography Of Dynamite Superman Jones	4410	items	no			Autobiography Of Dynamite Superman Jones (used)
+The Big Book of Communism	8785	items	all			*The Big Book of Communism (used)
+The Crymbich Manuscript	10858	items	all			*the Crymbich Manuscript (used)
+The Emperor's dry cleaning	8394	items	no			The Emperor's new hat; The Emperor's new shirt; The Emperor's new pants
+The Encyclopedia of Fruit	11450	items	all			*The Encyclopedia of Fruit (used)
+The Encyclopedia of Holiday Funerary Rites	12123	items	all			*The Encyclopedia of Holiday Funerary Rites (used)
+The Journal of Mime Science Vol. 1	9635	items	all			*The Journal of Mime Science Vol. 1 (used)
+The Journal of Mime Science Vol. 2	9637	items	all			*The Journal of Mime Science Vol. 2 (used)
+The Journal of Mime Science Vol. 3	9639	items	all			*The Journal of Mime Science Vol. 3 (used)
+The Journal of Mime Science Vol. 4	9641	items	all			*The Journal of Mime Science Vol. 4 (used)
+The Journal of Mime Science Vol. 5	9643	items	all			*The Journal of Mime Science Vol. 5 (used)
+The Journal of Mime Science Vol. 6	9645	items	all			*The Journal of Mime Science Vol. 6 (used)
+The Joy of Wassailing	4844	items	all			*The Joy of Wassailing (used)
+The Lost Pill Bottle	5699	items	no			bugbear purification pill; concentrated magicalness pill; Dogsgotnonoz pills; Knob Goblin learning pill; Marvin's marvelous pill; munchies pill; neurostim pill; physiostim pill; bitter pill; distention pill; Red Pill; synthetic dog hair pill; vitachoconutriment capsule
+The Necbronomicon	5341	items	all			*The Necbronomicon (used)
+The Night Before Crimbo, Ch. 1	10703	items	all			*The Night Before Crimbo, Ch. 1 (used)
+The Night Before Crimbo, Ch. 2	10705	items	all			*The Night Before Crimbo, Ch. 2 (used)
+The Night Before Crimbo, Ch. 3	10707	items	all			*The Night Before Crimbo, Ch. 3 (used)
+The Night Before Crimbo, Ch. 4	10709	items	all			*The Night Before Crimbo, Ch. 4 (used)
+The Night Before Crimbo, Ch. 5	10711	items	all			*The Night Before Crimbo, Ch. 5 (used)
+The Night Before Crimbo, Ch. 6	10713	items	all			*The Night Before Crimbo, Ch. 6 (used)
+The Nose Knows, A Guide to Smells	10798	items	all			*The Nose Knows, A Guide to Smells (read)
+The Slug Lord's map	598	items	no			pants of the Slug Lord
+The Spirit of Giving	10380	items	all			*The Spirit of Giving (used)
+The Sword in the Steak (item)	6056	items	no			Meatcleaver
+Thinknerd Blind-Packed Toy	7271	items	no			tiny plastic series 1(FF)
+Thinknerd T-shirt grab bag	6082	items	no			Thinknerd T-Shirt
+Tiny slimy cyst	4091	items	no			green peawee marble; brown crock marble; red China marble; lemonade marble; bumblebee marble; jet bennie marble; beige clambroth marble; steely marble; beach ball marble; black catseye marble; big bumboozer marble
+Toe jam	4883	items	no			toe jam toast
+Too Cold to Hold: How to Be Cool - A Memoir	11639	items	no			Too Cold to Hold: How to Be Cool - A Memo (read)
+Toot Oriole care package	4855	items	no			bowl of oriole's nest soup x3; Mt. Noob Pale Ale x3
+Traffic jam	4885	items	no			traffic jam toast
+Trainbot autoassembly module	11061	items	no			leg-mounted Trainbots; shoulder-mounted Trainbot; head-mounted Trainbot
+Transmission from planet Xi	7731	items	no			Xiblaxian holo-wrist-puter simcode
+Triad summoning scroll	6141	meat	no	300-500		cheap Chinese beer x6
+Trilobite candy mold	5491	items	no			gummi trilobite
+Trivial Avocations board game	5502	random	no			Trivial Avocations Card: What? xsome; Trivial Avocations Card: When? xsome; Trivial Avocations Card: Where? xsome; Trivial Avocations Card: Who? xsome
+Tropical Crimbo pressie	2213	items	no			tropical wrapping paper; tropical paperweight; Tiki lighter; deck of tropical cards; Crimbo ukulele; lucky Crimbo tiki necklace; bobble-hip hula elf doll
+Tropical island souvenir crate	6727	random	no			Bottle of rum xsome; Little paper umbrella xsome; Tropical orchid xsome; packet of orchid seeds; gingham blouse; rhinestone cowboy shirt
+Turtle wax	3914	items	no			turtle wax shield
+Turtle wax greaves	3917	items	no			turtle wax shield
+Turtle wax helmet	3916	items	no			turtle wax greaves
+Turtlemail bits	3919	multiuse	no		3=turtlemail coif; 5=turtlemail breeches; 8=turtlemail hauberk	turtlemail coif; turtlemail breeches; turtlemail hauberk
+Twitching time capsule	7579	random	no			chroner x4-5; liquid shifting time weirdness; chroner x4-5; solid shifting time weirdness; chroner x4-5
+Uncle Crimbo's Rations	3671	random	no			can of franks 'n' beans xsome; bottle of peppermint schnapps xsome
+Uncle Romulus	4407	items	all			*Uncle Romulus (used)
+Undamaged Unbreakable Umbrella	10898	items	no			unbreakable umbrella (broken)
+Underworld trunk	4275	items	no			Underworld truncheon; Staff of the Woodfire; Underworld flail
+Undrilled cosmic bowling ball	10890	items	no			cosmic bowling ball
+Unlocked meat locker	85	meat	no	93-106		
+Unopened Bird-a-Day calendar	10433	items	no			Bird-a-Day calendar
+Unopened Eight Days a Week Pill Keeper	10332	items	no			Eight Days a Week Pill Keeper
+Unopened Pork Elf toiletries kit	12191	items	no			Pork Elf toiletries kit
+Unopened diabolic pizza cube box	10334	items	no			diabolic pizza cube
+Unopened tiny stillsuit	10931	items	no			tiny stillsuit
+Unpeeled Peridot of Peril	11904	items	no			Peridot of Peril
+Unrolling pin	874	random	no			wad of dough xsome
+Unsmoothed velvet	8423	multiuse	no		3=smooth velvet bra; 5=smooth velvet pocket square; 6=smooth velvet socks; 7=smooth velvet hat; 8=smooth velvet shirt; 9=smooth velvet hanky; 10=smooth velvet pants	smooth velvet bra; smooth velvet pocket square; smooth velvet socks; smooth velvet hat; smooth velvet shirt; smooth velvet hanky; smooth velvet pants
+Untorn tearaway pants package	11629	items	no			tearaway pants
+Unused walkie-talkie	6845	items	no			walkie-talkie
+Vampyric cloake pattern	10241	items	no			vampyric cloake
+Volleyball	527	items	no			blood-faced volleyball
+Wad of dough	159	items	no			flat dough
+Wad of slimy rags	4122	items	no			crown-shaped beanie; hopping socks; letterman's jacket; poodle skirt
+Warbear accoutrements chunk	6947	multiuse	no		9=warbear warscarf; 10=warbear laser bowtie; 11=warbear goggles; 21=warbear fleece-lined warscarf; 22=warbear plasma bowtie; 23=warbear snowblindness goggles; 35=warbear electric warscarf; 36=warbear nuclear bowtie; 37=warbear polarized goggles	warbear warscarf; warbear laser bowtie; warbear goggles; warbear fleece-lined warscarf; warbear plasma bowtie; warbear snowblindness goggles; warbear electric warscarf; warbear nuclear bowtie; warbear polarized goggles
+Warbear breakfast machine	7056	items	no			breakfast mess; breakfast miracle
+Warbear breakfast machine assembler	6971	items	no			warbear breakfast machine
+Warbear empathy chip	6969	items	all			*warbear empathy chip (used)
+Warbear helm fragment	6927	multiuse	no		9=warbear plain ushanka; 10=warbear plain helm; 11=warbear plain fedora; 21=warbear lined ushanka; 22=warbear spiked helm; 23=warbear feathered fedora; 35=warbear heated ushanka; 36=warbear electro-spiked helm; 37=warbear fancy fedora	warbear plain ushanka; warbear plain helm; warbear plain fedora; warbear lined ushanka; warbear spiked helm; warbear feathered fedora; warbear heated ushanka; warbear electro-spiked helm; warbear fancy fedora
+Warbear hoverbelt piecepart	6914	multiuse	no		8=warbear hoverbelt	warbear hoverbelt
+Warbear metalworking primer	7042	items	all			*warbear metalworking primer (used)
+Warbear soda machine	7059	items	no			Cloaca Cola Polar
+Warbear soda machine assembler	7034	items	no			warbear soda machine
+Warbear trouser fragment	6937	multiuse	no		9=warbear long johns; 10=warbear battle greaves; 11=warbear party pants; 21=warbear fleece-lined long johns; 22=warbear officer greaves; 23=warbear ceremonial party pants; 35=warbear electric long johns; 36=warbear bearserker greaves; 37=warbear high festival pants	warbear long johns; warbear battle greaves; warbear party pants; warbear fleece-lined long johns; warbear officer greaves; warbear ceremonial party pants; warbear electric long johns; warbear bearserker greaves; warbear high festival pants
+Wardrobe-o-matic	11390	items	no			futuristic shirt; futuristic hat; futuristic collar
+Warm Subject gift certificate	621	meat	no	400-500		goth kid t-shirt
+Weathered barrel	8571	items	no			banana; barrel cracker; barrel pickle; bean burrito; enchanted bean burrito; jumping bean burrito; tiny barrel
+White candygram	2310	items	no			white candy heart
+Wok lobster	4155	items	no			rock lobster
+Wrapped Baseball Diamond	12215	items	no			Baseball Diamond
+Wrapped candy cane sword cane	11364	items	no			candy cane sword cane
+Wumpus hair	4044	multiuse	no		2=wumpus-hair bolo; 5=wumpus-hair net; 11=wumpus-hair whip; 16=wumpus-hair wig; 23=wumpus-hair loincloth; 30=wumpus-hair sweater	wumpus-hair bolo; wumpus-hair net; wumpus-hair whip; wumpus-hair wig; wumpus-hair loincloth; wumpus-hair sweater
+Xiblaxian cache locator simcode	7738	items	no			Xiblaxian 5D printer
+Xiblaxian holo-wrist-puter simcode	7737	items	no			Xiblaxian holo-wrist-puter
+Yellow candygram	2314	items	no			yellow candy heart
+Yellow gummi ingot	5456	items	no			gummi canary
+Zu Mannkäse Dienen	4409	items	all			*Zu Mannkäse Dienen (used)
