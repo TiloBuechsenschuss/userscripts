@@ -59,7 +59,7 @@
   // (the game uses them everywhere) but blocks script-injected stylesheets, so CSS
   // classes and @keyframes silently do nothing. Everything here is inline styles,
   // and the tile glow is pulsed by a JS timer -- same approach and same reason as
-  // mine-sparkle-highlight.js.
+  // auto-mine.js's tile highlight.
 
   // === Puzzle database =====================================================
   // `page`   - pathname regex; the puzzle is only considered on those pages.
@@ -486,7 +486,7 @@
 
   const pulsing = []; // tiles currently glowing; driven by one shared timer
 
-  // Gold pulsing glow, matching mine-sparkle-highlight.js so the two feel the
+  // Gold pulsing glow, matching auto-mine.js's tile highlight so the two feel the
   // same. Inline styles + JS timer because of the CSP note at the top.
   function glow(el, step, letter, ambiguous) {
     if (el.dataset.tmQhHighlighted) return;
@@ -1219,7 +1219,7 @@
     return null;
   }
 
-  // Same gold pulse as the tile floor (and mine-sparkle-highlight.js), on the
+  // Same gold pulse as the tile floor (and auto-mine.js's tile highlight), on the
   // shared timer. No step numbers here -- there's only ever one message.
   function markCue(el) {
     if (!el || (el.dataset && el.dataset.tmQhCue)) return;
@@ -3730,7 +3730,7 @@
   }
 
   // Highlighting and advising commit nothing, so 'tiles' and 'rotation' run on
-  // sight (like mine-sparkle-highlight.js). 'selects' WRITES into the form, so
+  // sight (like auto-mine.js's tile highlight). 'selects' WRITES into the form, so
   // it stays strictly opt-in behind its button.
   if (puzzle.auto) handler.apply(puzzle, ctx, say);
 })();

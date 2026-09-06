@@ -191,7 +191,7 @@ check('...and says why', /maximum HP/.test(noRoom.reason), true);
 
 const noButton = await api.healAboveFloor(60, { hp: 40, maxhp: 200 });
 check('a missing heal button is refused', noButton.status, null);
-check('...and names the script that provides it', /charpane-heal\.js/.test(noButton.reason), true);
+check('...and names the script that provides it', /ux-enhancers\.js/.test(noButton.reason), true);
 
 console.log(failures ? '\n' + failures + ' failure(s)' : '\nAll passed');
 process.exit(failures ? 1 : 0);

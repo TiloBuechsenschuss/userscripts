@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js
-// @version      1.8
-// @description  A grab-bag of small quality-of-life tweaks for Kingdom of Loathing pages. Currently: at the Hermit (hermit.php) it adds a "Buy all clovers" button next to the Trade button that trades worthless items for every 11-leaf clover the Hermit still has in stock today, one at a time, then reloads and reports how many it got; at the Campground (campground.php) it guards a Beer Garden that hasn't grown for two days yet, since the fancy bottles and labels don't appear before then -- the crop is flagged and clicking it asks for confirmation first; in the Mall (mall.php) it adds a "buy all" action to each store row and a "Buy N" row per item that walks the stores cheapest-first, showing the total and the average cost per item before spending anything; in the Inventory (inventory.php) it adds a [mall] action next to [use] on every tradeable item, searching the Mall for that exact item; in the character pane (charpane.php) it keeps the link to your monster aggravation device on screen even when the dial is at 0, which is exactly when KoL hides it; and in the Daily Dungeon (choice.php) it marks the option that gets you past a door, trap or chest room without spending an adventure -- lockpicks, the Platinum Yendorian Express Card, the eleven-foot pole, the candy cane sword cane, or the Ring of Detect Boring Doors -- with a note on what it costs you.
+// @version      1.14
+// @description  A grab-bag of quality-of-life tweaks for Kingdom of Loathing pages. Currently: in the character pane a "heal" button that casts your heal skills until HP is full or none can raise it further, and a "max" button next to every prolongable buff you can actually cast that re-casts it as many times as your MP allows (measuring the per-cast cost live, so gear and effect discounts are accounted for) with a "refresh skills" button below the list; on the equipment inventory an "Optimize for this" button that equips the highest-value item in every slot for whatever the enchantment-sort dropdown is sorting by (with element / Monster Level / encounter pickers for the sorts that need one), and a Collapse all / Expand all button that flips every inventory category at once; a small "W" badge linking to the KoL wiki next to the last adventure in the charpane, the location name atop place.php and crypt.php, the choice-adventure name atop choice.php, each quest title in questlog.php, the monster name and the items you acquire in combat, and item names in your inventory; a banner before you enter the lair of a special-reward boss (Boss Bat, Bonerdagon, Knob Goblin King, Baron von Ratsworth) when your Monster Aggravation Device is not set to a level that forces the unique reward to drop, shown on the page you see just before committing the adventure because fight.php is already too late; on the autosell page (sellstuff_ugly.php) a toolbar with Quantity / Sell price / Name sort buttons that reorder every category at once (click again to flip the direction, or Name to restore the original order), a Single list toggle that collapses every category into one globally-sorted list, and an Expand all / Collapse all button that keeps KoL's "sellstuff" cookie in sync; at the Hermit (hermit.php) it adds a "Buy all clovers" button next to the Trade button that trades worthless items for every 11-leaf clover the Hermit still has in stock today, one at a time, then reloads and reports how many it got; at the Campground (campground.php) it guards a Beer Garden that hasn't grown for two days yet, since the fancy bottles and labels don't appear before then -- the crop is flagged and clicking it asks for confirmation first; in the Mall (mall.php) it adds a "buy all" action to each store row and a "Buy N" row per item that walks the stores cheapest-first, showing the total and the average cost per item before spending anything; in the Inventory (inventory.php) it adds a [mall] action next to [use] on every tradeable item, searching the Mall for that exact item; in the character pane (charpane.php) it keeps the link to your monster aggravation device on screen even when the dial is at 0, which is exactly when KoL hides it; and in the Daily Dungeon (choice.php) it marks the option that gets you past a door, trap or chest room without spending an adventure -- lockpicks, the Platinum Yendorian Express Card, the eleven-foot pole, the candy cane sword cane, or the Ring of Detect Boring Doors -- with a note on what it costs you.
 // @match        https://www.kingdomofloathing.com/hermit.php*
 // @match        https://kingdomofloathing.com/hermit.php*
 // @match        https://www.kingdomofloathing.com/campground.php*
@@ -17,6 +17,20 @@
 // @match        https://kingdomofloathing.com/charpane.php*
 // @match        https://www.kingdomofloathing.com/choice.php*
 // @match        https://kingdomofloathing.com/choice.php*
+// @match        https://www.kingdomofloathing.com/questlog.php*
+// @match        https://kingdomofloathing.com/questlog.php*
+// @match        https://www.kingdomofloathing.com/fight.php*
+// @match        https://kingdomofloathing.com/fight.php*
+// @match        https://www.kingdomofloathing.com/place.php*
+// @match        https://kingdomofloathing.com/place.php*
+// @match        https://www.kingdomofloathing.com/cobbsknob.php*
+// @match        https://kingdomofloathing.com/cobbsknob.php*
+// @match        https://www.kingdomofloathing.com/crypt.php*
+// @match        https://kingdomofloathing.com/crypt.php*
+// @match        https://www.kingdomofloathing.com/cellar.php*
+// @match        https://kingdomofloathing.com/cellar.php*
+// @match        https://www.kingdomofloathing.com/sellstuff_ugly.php*
+// @match        https://kingdomofloathing.com/sellstuff_ugly.php*
 // @grant        none
 // ==/UserScript==
 
@@ -1303,28 +1317,28 @@
 
   const DUNGEON_SKIPS = {
     690: [
-      { label: 'go through the boring door',
+      { labels: ['go through the boring door'],
         why: 'Ring of Detect Boring Doors: skips straight to room 8, so three rooms ' +
           'cost no adventures. You give up this chest\'s item.' },
     ],
     691: [
-      { label: 'go through the boring door',
+      { labels: ['go through the boring door'],
         why: 'Ring of Detect Boring Doors: skips straight to room 13, so three rooms ' +
           'cost no adventures. You give up this chest\'s item.' },
     ],
     692: [
-      { label: 'use your lockpicks',
+      { labels: ['use your lockpicks'],
         why: 'Pick-O-Matic lockpicks: unlocks the door every time. No adventure, no ' +
           'trap, and the lockpicks are not used up.' },
-      { label: 'use your credit card to open the door',
+      { labels: ['use your credit card to open the door'],
         why: 'Platinum Yendorian Express Card: unlocks the door every time. No ' +
           'adventure, no trap, and the card is not used up.' },
     ],
     693: [
-      { label: 'use your eleven-foot pole',
+      { labels: ['use your eleven-foot pole'],
         why: 'eleven-foot pole: past the trap for no adventure and no damage. You ' +
           'get no stats from the trap either, and the pole is not used up.' },
-      { label: 'use your candy cane sword',
+      { labels: ['use your candy cane sword', 'use your candy cane sword cane'],
         why: 'candy cane sword cane: past the trap for no adventure and no damage, ' +
           'and it still gives around 40-50 substats.' },
     ],
@@ -1332,23 +1346,41 @@
 
   // Buttons are compared on a flattened label: KoL's own spacing and the
   // trailing full stop it puts on some options are not identity.
+  //
+  // Neither is anything ANOTHER script appended. adventure-choices.js annotates
+  // these exact four rooms -- `DisplaySpoilers()` does
+  // `inputs[n].value += " -- " + spoiler` on every submit button -- and neither
+  // script declares @run-at, so which one reads the label first is not
+  // decidable. Cutting the annotation off makes the marker survive both orders.
+  // Two separators are cut: " -- ", which is adventure-choices' (and its debug
+  // " -- buttonID = N." too), and " [", which is KoL's own bracketed suffix --
+  // adventure-choices cuts that one before its own lookup for the same reason.
   function ddLabel(text) {
-    return String(text == null ? '' : text)
-      .replace(/\s+/g, ' ')
-      .trim()
-      .replace(/\.$/, '')
-      .toLowerCase();
+    let out = String(text == null ? '' : text).replace(/\s+/g, ' ').trim();
+    for (const sep of [' -- ', ' [']) {
+      const at = out.indexOf(sep);
+      if (at !== -1) out = out.slice(0, at);
+    }
+    return out.trim().replace(/\.$/, '').toLowerCase();
   }
 
   // The advice for one button on one choice page, or null when this isn't an
   // option we have anything to say about.
+  //
+  // Matching stays EXACT, against a list of known wordings, and is deliberately
+  // not a substring sweep. The chest rooms carry "Pry off a loose panel with
+  // your candy cane sword", which any `includes('candy cane sword')` would mark
+  // green -- and that option costs an adventure. An unknown wording matching
+  // nothing is the safe failure here; a wrong button wearing the green is not.
+  // A wording KoL renders differently gets added to `labels`, not loosened into
+  // a prefix rule.
   function ddSkipFor(choice, text) {
     const entries = DUNGEON_SKIPS[choice];
     if (!entries) return null;
     const want = ddLabel(text);
     if (!want) return null;
     for (const entry of entries) {
-      if (entry.label === want) return entry;
+      if (entry.labels.indexOf(want) !== -1) return entry;
     }
     return null;
   }
@@ -1382,8 +1414,8 @@
       btn.dataset.tmDdSkip = '1';
 
       // Inline styles only: KoL's CSP blocks a script-injected stylesheet, but
-      // allows style attributes (same constraint mine-sparkle-highlight.js and
-      // quest-helper.js work under).
+      // allows style attributes (the same constraint auto-mine.js's tile
+      // highlight and quest-helper.js work under).
       btn.style.outline = '3px solid #0a0';
       btn.style.outlineOffset = '2px';
       btn.style.fontWeight = 'bold';
@@ -1400,6 +1432,2189 @@
     }
   }
 
+
+  // === feature: sort and collapse the autosell list =====================
+  //
+  // Was its own sell-sort.js. Straight-line code in the original -- it ran on
+  // eval -- so it is wrapped here to become a registry entry, which is what
+  // puts it behind the same per-feature try/catch as everything else.
+  //
+  // Note this owns a SECOND collapse-all implementation: it mirrors KoL's
+  // `sellstuff` cookie, where the inventory one (below) mirrors `inventory`.
+  // Different cookies, different section markup; they are not interchangeable.
+
+  function sellSort() {
+
+    // Idempotency guard: the page/loader may run us more than once.
+    if (document.getElementById('kol-sell-sort-bar')) return;
+
+    // The category sections are <div id='sectionN'> where N is the bit value
+    // from the page's `sections` map. Find them directly.
+    const divs = Array.prototype.slice.call(
+      document.querySelectorAll("div[id^='section']")
+    ).filter(function (d) { return /^section\d+$/.test(d.id); });
+    if (!divs.length) return;
+
+    // --- KoL "sellstuff" cookie (bit set = section hidden) ----------------
+    // Mirror the page's own toggle()/cookie logic so collapse/expand persists.
+    // We maintain our own copy, re-reading the live cookie on each flip in case
+    // the user also clicked KoL's native header toggles in between.
+    function readCookie() {
+      if (typeof window.getCookie === 'function') {
+        var c = parseInt(window.getCookie('sellstuff'), 10);
+        return Number.isFinite(c) ? c : 0;
+      }
+      return 0;
+    }
+
+    function isOpen(div) {
+      return div.style.display !== 'none';
+    }
+
+    // Set a section to open/closed and keep the cookie in sync.
+    function setOpen(div, open) {
+      if (isOpen(div) === open) return;
+      var bit = parseInt(div.id.replace('section', ''), 10);
+      var cookie = readCookie();
+      if (open) {
+        div.style.display = 'inline';
+        cookie = cookie & ~bit;
+      } else {
+        div.style.display = 'none';
+        cookie = cookie | bit;
+      }
+      if (typeof window.setCookie === 'function') {
+        window.setCookie('sellstuff', cookie);
+      }
+    }
+
+    // --- Item scraping ----------------------------------------------------
+    // Each item is a pair of <td>s: a checkbox cell followed by an info cell
+    // (<a><b>name</b></a> (qty)<br><font size=1>NN Meat</font>). Items are laid
+    // out two-per-row; the last row may carry a "&nbsp;" filler cell.
+    function scrapeItems(div) {
+      var boxes = Array.prototype.slice.call(
+        div.querySelectorAll("input[type=checkbox]")
+      );
+      return boxes.map(function (cb, i) {
+        var cbTd = cb.parentNode;
+        var infoTd = cbTd.nextElementSibling;
+        // Read qty/price from the text that follows the item link, so item
+        // names that themselves contain "(...)" can't be misread as a quantity.
+        var clone = infoTd.cloneNode(true);
+        var a = clone.querySelector('a');
+        if (a) a.parentNode.removeChild(a);
+        var rest = clone.textContent;
+        var qm = rest.match(/\((\d+)\)/);
+        var pm = rest.match(/([\d,]+)\s*Meat/i);
+        return {
+          cbTd: cbTd,
+          infoTd: infoTd,
+          qty: qm ? parseInt(qm[1], 10) : 1,
+          price: pm ? parseInt(pm[1].replace(/,/g, ''), 10) : 0,
+          index: i
+        };
+      });
+    }
+
+    // Rebuild the two-column grid in the given order.
+    function relayout(tbody, items) {
+      while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+      for (var i = 0; i < items.length; i += 2) {
+        var tr = document.createElement('tr');
+        tr.appendChild(items[i].cbTd);
+        tr.appendChild(items[i].infoTd);
+        if (items[i + 1]) {
+          tr.appendChild(items[i + 1].cbTd);
+          tr.appendChild(items[i + 1].infoTd);
+        } else {
+          var filler = document.createElement('td');
+          filler.innerHTML = '&nbsp;';
+          tr.appendChild(filler);
+        }
+        tbody.appendChild(tr);
+      }
+    }
+
+    // --- Locate the sell form (checkboxes must stay inside it) -----------
+    var form = document.forms.f || document.querySelector('form[name=f]');
+
+    // Walk up to the top-level category <table> that is a direct child of form.
+    function topTable(node) {
+      while (node && node.parentNode && node.parentNode !== form) {
+        node = node.parentNode;
+      }
+      return (node && node.parentNode === form) ? node : null;
+    }
+
+    // --- Prepare every section for sorting -------------------------------
+    // Each section keeps its own item list, tbody and original order. We also
+    // build one combined list (globalOriginal) for the flattened single-list
+    // view, and collect the outer category tables so they can be hidden when
+    // flattened. A single set of buttons drives both views.
+    var sections = [];
+    var globalOriginal = [];
+    var catTables = [];
+    var gIndex = 0;
+    divs.forEach(function (div) {
+      if (!div.querySelector('table')) return;
+      var items = scrapeItems(div);
+      if (!items.length) return;
+      items.forEach(function (it) { it.globalIndex = gIndex++; });
+      sections.push({
+        tbody: items[0].cbTd.parentNode.parentNode, // td -> tr -> tbody
+        original: items.slice()                     // original (alphabetical)
+      });
+      items.forEach(function (it) { globalOriginal.push(it); });
+      var ct = topTable(div);
+      if (ct && catTables.indexOf(ct) === -1) catTables.push(ct);
+    });
+    if (!sections.length) return;
+
+    var activeKey = null;   // 'qty' | 'price' | null (name/original order)
+    var descending = true;  // first click on a key shows biggest first
+    var flattened = false;  // single global list vs per-category
+
+    // Sort comparator; idxProp picks the stable tiebreak field (per-section
+    // 'index' for category sorts, 'globalIndex' for the flattened list).
+    function comparator(idxProp) {
+      return function (a, b) {
+        var diff = a[activeKey] - b[activeKey];
+        if (diff !== 0) return descending ? -diff : diff;
+        return a[idxProp] - b[idxProp];
+      };
+    }
+
+    // Re-lay items according to the current key/direction and view mode.
+    function render() {
+      if (flattened) {
+        var ordered = activeKey === null
+          ? globalOriginal.slice()
+          : globalOriginal.slice().sort(comparator('globalIndex'));
+        relayout(flatTbody, ordered);
+      } else {
+        sections.forEach(function (s) {
+          var ordered = activeKey === null
+            ? s.original.slice()
+            : s.original.slice().sort(comparator('index'));
+          relayout(s.tbody, ordered);
+        });
+      }
+    }
+
+    function applySort(key) {
+      if (key === 'name') {
+        activeKey = null;
+      } else if (key === activeKey) {
+        descending = !descending;
+      } else {
+        activeKey = key;
+        descending = true;
+      }
+      render();
+      updateLabels();
+    }
+
+    // --- Flattened single-list container (hidden until toggled) ----------
+    // Mimics a category table so it blends in; render() moves the real item
+    // cells into its inner tbody, and back into their sections on restore.
+    var flatTable = document.createElement('table');
+    flatTable.id = 'kol-sell-sort-flat';
+    flatTable.width = '95%';
+    flatTable.cellSpacing = '0';
+    flatTable.cellPadding = '0';
+    flatTable.style.display = 'none';
+    flatTable.innerHTML =
+      '<tr><td style="background-color: blue" align=center>' +
+        '<b style="color: white">All Items</b></td></tr>' +
+      '<tr><td style="padding: 5px; border: 1px solid blue;"><center>' +
+        '<table width=100%><tbody></tbody></table>' +
+      '</center></td></tr>';
+    var flatTbody = flatTable.getElementsByTagName('table')[0].tBodies[0];
+    if (catTables.length) {
+      catTables[0].parentNode.insertBefore(flatTable, catTables[0]);
+    } else {
+      form.appendChild(flatTable);
+    }
+
+    function setFlattened(on) {
+      flattened = on;
+      catTables.forEach(function (t) { t.style.display = on ? 'none' : ''; });
+      flatTable.style.display = on ? '' : 'none';
+      toggleBtn.style.display = on ? 'none' : ''; // expand/collapse is moot flat
+      render();
+      updateFlattenLabel();
+    }
+
+    // --- Toolbar ---------------------------------------------------------
+    // Expand all / Collapse all (per-category view only).
+    function toggleAll() {
+      var anyOpen = divs.some(isOpen);
+      divs.forEach(function (d) { setOpen(d, !anyOpen); });
+      updateToggleAllLabel();
+    }
+
+    var toggleBtn = document.createElement('button');
+    toggleBtn.type = 'button';
+    toggleBtn.style.cssText = 'cursor:pointer;';
+    toggleBtn.addEventListener('click', toggleAll);
+
+    function updateToggleAllLabel() {
+      toggleBtn.textContent = divs.some(isOpen) ? 'Collapse all' : 'Expand all';
+    }
+    updateToggleAllLabel();
+
+    // Single list / Show categories toggle.
+    var flattenBtn = document.createElement('button');
+    flattenBtn.type = 'button';
+    flattenBtn.style.cssText = 'margin-left:8px;cursor:pointer;';
+    flattenBtn.addEventListener('click', function () { setFlattened(!flattened); });
+
+    function updateFlattenLabel() {
+      flattenBtn.textContent = flattened ? 'Show categories' : 'Single list';
+    }
+    updateFlattenLabel();
+
+    var topBar = document.createElement('div');
+    topBar.id = 'kol-sell-sort-bar';
+    topBar.style.cssText =
+      'text-align:center;margin:4px 0;font-family:arial;font-size:9pt;';
+    topBar.appendChild(toggleBtn);
+    topBar.appendChild(flattenBtn);
+
+    // One shared set of sort buttons, applied to every category (or the list).
+    var sortButtons = [];
+    var sortLabel = document.createElement('span');
+    sortLabel.textContent = ' Sort: ';
+    topBar.appendChild(sortLabel);
+    [['qty', 'Quantity'], ['price', 'Sell price'], ['name', 'Name']]
+      .forEach(function (spec) {
+        var key = spec[0];
+        var btn = document.createElement('button');
+        btn.type = 'button'; // must not submit the sell form
+        btn.textContent = spec[1];
+        btn.style.cssText = 'margin-left:4px;cursor:pointer;';
+        btn.addEventListener('click', function () { applySort(key); });
+        sortButtons.push({ el: btn, key: key, base: spec[1] });
+        topBar.appendChild(btn);
+      });
+
+    function updateLabels() {
+      sortButtons.forEach(function (b) {
+        if (b.key !== 'name' && b.key === activeKey) {
+          b.el.textContent = b.base + (descending ? ' ▼' : ' ▲');
+        } else {
+          b.el.textContent = b.base;
+        }
+      });
+    }
+
+    // Drop the toolbar at the very top of the sell form so it's always visible.
+    if (form && form.firstChild) {
+      form.insertBefore(topBar, form.firstChild);
+    } else {
+      document.body.insertBefore(topBar, document.body.firstChild);
+    }
+  }
+
+
+  // === feature: warn before a special-reward boss ========================
+  //
+  // Was its own boss-aggro-warn.js, and it belongs here: the file already
+  // knows the monster aggravation device (MCD_DEVICES / MOON_SIGN_DEVICE, in
+  // the charpane feature below). This half reads the dial off api.php rather
+  // than the sidebar, because it runs in the mainpane.
+  //
+  // getStatus() was renamed bossStatus(): charpane-heal's getStatus returns
+  // {hp, mp, pwd} and throws, this one returns {level, equippedIds} and never
+  // throws. Same name, opposite error contract -- do not re-merge them.
+
+
+  // ---------------------------------------------------------------------------
+  // Data: the four bosses that drop a special item when defeated with the
+  // aggravation device set to a specific level, and how to warn BEFORE entering
+  // each one's area.
+  //
+  // Source: https://wiki.kingdomofloathing.com/Monster_Aggravation_Devices
+  // The "level" is the aggravation-device setting itself (0-11), NOT the
+  // effective Monster Level -- equipment ML penalties/bonuses don't change which
+  // reward drops; only the dial setting matters.
+  //
+  // KoL zone maps are HTML image maps: the link into a zone is an <area> (not an
+  // <a>) inside <map>, e.g. on cobbsknob.php the throne room is
+  //   <area href="cobbsknob.php?action=throneroom" alt="Throne Room" ...>
+  // <area> has no layout, so we can't badge it inline -- instead we show one
+  // top-of-page banner, but ONLY when the entry link/area is present (= the zone
+  // is actually enterable), preserving the "before entering" intent.
+  //
+  //   name    - boss, for the warning text.
+  //   rewards - map of required device setting -> reward item name.
+  //   present - predicate (receives the status context: { equippedIds }): is
+  //             this boss's area enterable from the current page right now?
+  //             Returns true to trigger the banner. Match the entry <area>/<a>
+  //             by href or by alt/title/text (zone name lives in the image map's
+  //             alt/title), and gate on equipment where entering requires it.
+  // ---------------------------------------------------------------------------
+
+  // Find an entry link/area on the page, matching href OR alt/title/text. Covers
+  // both <a> and <area> (image-map zones). Used by the `present` predicates.
+  //
+  // Image maps need care: a page can emit several <map>s and switch the live one
+  // via the <img usemap="#name">. The Cyrpt (crypt.php) emits BOTH a
+  // <map name="heart"> (with the Haert area) and a <map name="empty">, so the
+  // Haert <area> exists in the DOM even when it isn't enterable -- only the map
+  // the <img> points at is active. So an <area> only counts if its parent <map>'s
+  // name is referenced by some <img usemap>. Plain <a> links always count.
+  function hasEntry({ href, label } = {}) {
+    const activeMaps = new Set(
+      Array.from(document.querySelectorAll('img[usemap]')).map((img) =>
+        (img.getAttribute('usemap') || '').replace(/^#/, '')
+      )
+    );
+    const els = document.querySelectorAll('a[href], area[href]');
+    for (const el of els) {
+      if (el.tagName === 'AREA') {
+        const map = el.closest('map');
+        if (!map || !activeMaps.has(map.getAttribute('name'))) continue;
+      }
+      if (href && href.test(el.getAttribute('href') || '')) return true;
+      if (label) {
+        const text = `${el.textContent || ''} ${el.title || ''} ${el.alt || ''}`;
+        if (label.test(text)) return true;
+      }
+    }
+    return false;
+  }
+
+  // The Knob Goblin King only fights you when you approach the throne room in a
+  // complete disguise; without it you just get a beating (no boss, no reward).
+  // Item ids verified from the wiki Collection numbers:
+  //   Harem Girl Disguise = harem veil (306, hat) + harem pants (305).
+  //   Elite Guard Uniform = elite helm (308, hat) + elite polearm (310, weapon)
+  //                         + elite pants (309).
+  // We check against ALL equipped slots so a slot reassignment can't break it.
+  const KNOB_DISGUISES = [
+    [306, 305],
+    [308, 310, 309],
+  ];
+  const wearingKnobDisguise = (equippedIds) =>
+    KNOB_DISGUISES.some((pieces) => pieces.every((id) => equippedIds.has(id)));
+
+  const BOSSES = [
+    {
+      name: 'Boss Bat',
+      rewards: { 4: 'Boss Bat britches', 8: 'Boss Bat bling' },
+      // The Bat Hole map (place.php?whichplace=bathole) only shows the lair once
+      // the three walls are down. TODO(verify) snarfblat against real HTML; the
+      // alt/title label is the reliable matcher.
+      present: () =>
+        hasEntry({ href: /snarfblat=34\b/i, label: /Boss Bat'?s Lair/i }),
+    },
+    {
+      name: 'The Bonerdagon',
+      rewards: { 5: 'rib of the Bonerdagon', 10: 'vertebra of the Bonerdagon' },
+      // VERIFIED from crypt.php HTML: the Defiled Cyrpt map's Haert is an
+      // image-map <area href="crypt.php?action=heart" title="The Haert of the
+      // Cyrpt"> inside <map name="heart">. It's only live once the four niches
+      // are undefiled (the <img> switches usemap from #empty to #heart), which
+      // hasEntry()'s active-map check handles.
+      present: () =>
+        hasEntry({ href: /crypt\.php\?action=heart/i, label: /Haert of the Cyrpt/i }),
+    },
+    {
+      name: 'Knob Goblin King',
+      rewards: { 3: 'Glass Balls of the Goblin King', 7: 'Codpiece of the Goblin King' },
+      // VERIFIED from cobbsknob.php HTML: the throne room is an image-map <area>
+      // href="cobbsknob.php?action=throneroom" alt/title="Throne Room". The area
+      // is always present inside the Knob, but the King only fights you in a
+      // complete disguise -- so gate on that to avoid a standing reminder.
+      present: (ctx) =>
+        hasEntry({ href: /action=throneroom/i, label: /Throne ?Room/i }) &&
+        wearingKnobDisguise(ctx.equippedIds),
+    },
+    {
+      name: 'Baron von Ratsworth',
+      rewards: { 2: "Baron von Ratsworth's money clip", 9: "Baron von Ratsworth's tophat" },
+      // The Baron is a wandering encounter while mapping the Tavern Cellar maze
+      // (cellar.php is not an adv.php zone), so there's no entry link -- just
+      // being on cellar.php means he could turn up.
+      present: () => /\/cellar\.php/i.test(location.pathname),
+    },
+  ];
+
+  // For reference / future messaging. All four devices drive the same single
+  // setting; which one a player has depends on their moon sign / unlocks.
+  //   Detuned radio ............... 0-10  (Degrassi Knoll)
+  //   Mind-Control Device (MCD) ... 0-11  (Little Canadia)
+  //   Annoy-o-Tron 5000 ........... 0-10  (Gnomish Gnomad Camp)
+  //   Heartbreaker's Hotel ........ 0-11  (Hey Deze, Bad Moon)
+
+  const BANNER_ID = 'tm-boss-aggro-warn';
+
+  // ---------------------------------------------------------------------------
+  // Read the player status: the aggravation-device setting and equipped items,
+  // in one api.php call.
+  //
+  // VERIFIED against a live api.php?what=status dump:
+  //   - the setting is the `mcd` field (a string, e.g. "5"), and it's the same
+  //     field for every device (the sample was an Annoy-o-Tron 5000).
+  //   - `equipment` maps slot -> item id string, e.g. {"hat":"12202",...}; we
+  //     collapse the values into a Set of numeric ids for disguise checks.
+  // Returns { level, equippedIds }; level is null on fetch/parse failure or a
+  // non-numeric mcd (treated as "unknown" by the caller).
+  // ---------------------------------------------------------------------------
+  async function bossStatus() {
+    try {
+      const res = await fetch('/api.php?what=status&for=tm-boss-aggro-warn', {
+        credentials: 'same-origin',
+      });
+      const data = await res.json();
+      const lvl = parseInt(data.mcd, 10);
+      const equippedIds = new Set(
+        Object.values(data.equipment || {})
+          .map((v) => parseInt(v, 10))
+          .filter((n) => !Number.isNaN(n))
+      );
+      return { level: Number.isNaN(lvl) ? null : lvl, equippedIds };
+    } catch (e) {
+      return { level: null, equippedIds: new Set() };
+    }
+  }
+
+  // Human-readable list of the reward settings, e.g.
+  // "4 (Boss Bat britches) or 8 (Boss Bat bling)".
+  function rewardSummary(boss) {
+    return Object.keys(boss.rewards)
+      .map(Number)
+      .sort((a, b) => a - b)
+      .map((s) => `${s} (${boss.rewards[s]})`)
+      .join(' or ');
+  }
+
+  // ---------------------------------------------------------------------------
+  // UI: one warning banner at the top of the page. Idempotent via id.
+  // ---------------------------------------------------------------------------
+  function showBanner(boss, level) {
+    if (document.getElementById(BANNER_ID)) return;
+    const banner = document.createElement('div');
+    banner.id = BANNER_ID;
+    banner.style.cssText =
+      'margin:6px;padding:8px 12px;border:2px solid #b00;border-radius:6px;' +
+      'background:#ffe5e5;color:#600;font-weight:bold;text-align:center;';
+    banner.textContent =
+      `⚠ ${boss.name}: aggravator is set to ${level == null ? '?' : level}, ` +
+      `which won't drop a special item. Set it to ${rewardSummary(boss)} first.`;
+    document.body.insertBefore(banner, document.body.firstChild);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Orchestrate: pull status once (some `present` checks need equipment), find
+  // the boss whose area is enterable here, and banner it unless the setting
+  // already yields a reward.
+  // ---------------------------------------------------------------------------
+  async function bossAggroWarn() {
+    const { level, equippedIds } = await bossStatus();
+    const boss = BOSSES.find((b) => b.present({ equippedIds }));
+    if (!boss) return;
+
+    const rewardSettings = Object.keys(boss.rewards).map(Number);
+
+    // Stay silent if the setting already yields a reward. (Later we could flip
+    // this to a green "you'll get X" confirmation instead of nothing.)
+    if (level != null && rewardSettings.includes(level)) return;
+
+    showBanner(boss, level);
+  }
+
+
+  // === feature: wiki links ==============================================
+  //
+  // Was its own wiki-links.js. Unlike every other feature here it spans
+  // several pages, so it becomes several registry entries over one shared set
+  // of helpers rather than one entry -- the registry's unit is a page, and
+  // fanning it out keeps each page paying only for the badges it can draw.
+  // fight.php draws two (monster and drops), so it gets two entries.
+  //
+  // All targets are verified against real page HTML; see AGENTS.md before
+  // changing a selector.
+
+  const WIKI_BASE = 'https://wiki.kingdomofloathing.com/';
+
+  // --- Wiki URL ---------------------------------------------------------
+  // Link via MediaWiki's "Go" search (index.php?search=...&go=Go) rather than
+  // a direct /Title path. When the name is an exact page title, Go redirects
+  // straight to the article (and is already first-letter-case-insensitive);
+  // when it is not (a slightly-off quest title, a redirect we don't know, a
+  // name with adjectives), it lands on the search-results page for the text,
+  // which is still useful instead of a dead redlink. URLSearchParams encodes
+  // spaces as '+' and ':' as '%3A', matching the wiki's own search URLs.
+  function wikiHref(name) {
+    const t = name.trim().replace(/\s+/g, ' ');
+    if (!t) return null;
+    const qs = new URLSearchParams({ search: t, title: 'Special:Search', go: 'Go' });
+    return WIKI_BASE + 'index.php?' + qs.toString();
+  }
+
+  // KoL prints monster names with a leading article ("a baguette lady",
+  // "an ocelot", "the spooky ghost"), but the wiki article drops it
+  // ("Baguette lady"). Strip one leading a/an/the before building the title.
+  // NOTE: a few foes carry "The" as part of the real page name (e.g. bosses);
+  // those are the rare exception and can be special-cased later if needed.
+  function stripArticle(name) {
+    return name.replace(/^\s*(an?|the)\s+/i, '');
+  }
+
+  // The "W" badge. Small, opens in a new tab so a misclick mid-fight does
+  // not navigate the game page away. Marked with a class for the per-target
+  // idempotency check below. Inline styles only (repo convention).
+  function makeBadge(name) {
+    const href = wikiHref(name);
+    if (!href) return null;
+    const a = document.createElement('a');
+    a.className = 'kol-wiki-link';
+    a.href = href;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = 'W';
+    a.title = 'KoL wiki: ' + name.trim();
+    a.style.cssText =
+      'display:inline-block;margin-left:4px;padding:0 3px;' +
+      'font-family:arial,sans-serif;font-size:9px;font-weight:bold;' +
+      'line-height:13px;color:#fff;background:#3366cc;border-radius:2px;' +
+      'text-decoration:none;vertical-align:middle;cursor:pointer;';
+    return a;
+  }
+
+  // Badge `el`, once, deriving the wiki title from `name` (defaults to the
+  // element's own text). `place` is 'after' (badge becomes the next sibling —
+  // good for inline names) or 'append' (badge becomes the last child — good
+  // for headings, so the W sits on the heading line). The data-kol-wiki flag
+  // makes this idempotent: scripts may run more than once per page, and the
+  // name is read before the badge is added either way.
+  function addBadge(el, place, name) {
+    if (!el || el.dataset.kolWiki) return;
+    name = (name != null ? name : el.textContent).trim();
+    if (!name) return;
+    const badge = makeBadge(name);
+    if (!badge) return;
+    el.dataset.kolWiki = '1';
+    if (place === 'append') el.appendChild(badge);
+    else el.after(badge);
+  }
+
+  // --- Last adventure (charpane.php) -----------------------------------
+  // The charpane shows a "Last Adventure:" label anchor, then (in a sibling
+  // <table>) the adventure-name link itself, e.g.
+  //   <a href="place.php?whichplace=town_right">Last Adventure:</a><br>
+  //   <table>...<a href="adventure.php?snarfblat=440">Madness Bakery</a>...
+  // Anchor on the label by its text and badge the very next anchor in
+  // document order — that is the adventure name. Reading by position (rather
+  // than by href) keeps it working for adventures linked via place.php as
+  // well as the usual adventure.php?snarfblat= form; the wiki title comes
+  // from the link text either way.
+  function linkLastAdventure() {
+    const anchors = Array.from(document.querySelectorAll('a'));
+    const i = anchors.findIndex(function (a) {
+      return /last adventure/i.test(a.textContent);
+    });
+    if (i === -1) return;
+    addBadge(anchors[i + 1], 'after');
+  }
+
+  // --- Page title bar (place.php, choice.php, crypt.php) ---------------
+  // These pages head with a blue title bar whose cell holds the name in
+  // white bold:
+  //   <td style="background-color: blue"><b style="color: white">Name</b></td>
+  // On place.php this is the location ("The Right Side of the Tracks"); on
+  // crypt.php the Defiled Cyrpt map carries the same bar ("The Defiled
+  // Cyrpt"); on choice.php it is the choice adventure ("The Popular
+  // Machine"). Badge that
+  // <b>. Unlike monsters, the leading article is NOT stripped: the wiki page
+  // keeps it. NOTE: other pages share this exact bar but with non-article
+  // titles — fight.php ("Combat!"), questlog.php ("Your Quest Log") — so this
+  // is wired only into the place/choice dispatch branches, never called there.
+  //
+  // SPECIAL CASE: a choice adventure can flow straight into the next one. The
+  // page then shows a "Results:" recap bar first — inside <div id="results">,
+  // holding the items/text from the previous choice — and the real next-choice
+  // title bar as a sibling after it. The recap is not an adventure name and
+  // must not be badged, so skip any title cell inside #results and badge the
+  // first real one. (place.php and ordinary single choices have no #results,
+  // so their sole title bar is taken as before.)
+  function linkTitleBar() {
+    const tds = document.querySelectorAll('td[style*="background-color: blue"]');
+    for (const td of tds) {
+      if (td.closest('#results')) continue;
+      addBadge(td.querySelector('b'), 'after');
+      return;
+    }
+  }
+
+  // --- Quest titles (questlog.php) -------------------------------------
+  // Each current quest is introduced by its title as a <b> immediately
+  // followed by the <br> that precedes the quest's description, e.g.
+  //   <b>Lady Spookyraven's Babies</b><br> Gather up ...
+  // Only the FIRST quest in a section is a direct child of the <blockquote>;
+  // the rest are each wrapped in a <p> (<blockquote><p><b>title</b><br>...),
+  // so `blockquote > b` would catch only one per section. We scope to all
+  // <b>s inside the blockquote instead and pick out the titles by structure:
+  //  - place links in descriptions ("The Old Man", "The Sea") are <b>s nested
+  //    inside <a>, so skip any <b> with an <a> ancestor;
+  //  - bold words mid-description ("...make it a <b>big</b> war.") are NOT
+  //    followed by a <br>, so require the trailing <br>.
+  // The "Current/Council/Other Quests:" headers sit OUTSIDE the blockquote,
+  // so the blockquote scope already excludes them. No article stripping: the
+  // wiki quest page keeps the title verbatim — except for the per-player names
+  // scrubbed by normalizeQuestTitle below.
+  //
+  // SPECIAL CASE: KoL splices the logged-in player's name (and sometimes the
+  // current familiar's name) into several quest-log titles — e.g. the White
+  // Citadel quest reads "<Player> and <Familiar> Go To White Citadel" (and
+  // "<Player> and Kumar Go To White Citadel" with no familiar along). Those
+  // names vary per player, so the verbatim title is not a wiki page and even a
+  // Go-search on it gets swamped by the names. We scrub them to the generic
+  // placeholders the wiki documents these titles with ("Player Name" /
+  // "Familiar Name"), so the search keys off the fixed words: e.g. "Player
+  // Name and Familiar Name Go To White Citadel" lands the White Citadel Quest
+  // article as its top hit. (The bracket form "<playername>" does NOT — the
+  // wiki tokenises it differently and the right article drops off the results.)
+
+  // Best-effort lookup of the logged-in player's name. questlog.php is the
+  // mainpane frame and carries no name of its own, so read it from a sibling
+  // frame: the charpane (and the top menu) link the player's name to
+  // charsheet.php. Probe the charpane first, then any other reachable frame.
+  // Returns null when no accessible frame exposes it (e.g. questlog.php opened
+  // standalone, outside the frameset) — titles are then left untouched rather
+  // than mangled.
+  function getPlayerName() {
+    const docs = [];
+    try {
+      const frames = window.top && window.top.frames;
+      if (frames) {
+        const cp = frames['charpane'];
+        if (cp) { try { docs.push(cp.document); } catch (e) {} }
+        for (let i = 0; i < frames.length; i++) {
+          try { docs.push(frames[i].document); } catch (e) {}
+        }
+      }
+    } catch (e) {}
+    try { docs.push(document); } catch (e) {}
+    for (const doc of docs) {
+      if (!doc || !doc.querySelector) continue;
+      const a = doc.querySelector('a[href*="charsheet.php"]');
+      if (a) {
+        // Player names are alphanumerics/spaces/underscores — no parens — so a
+        // trailing "(#id)" or "(Level N)" some menus append is safe to drop.
+        const name = a.textContent.replace(/\s*\([^)]*\)\s*$/, '').replace(/\s+/g, ' ').trim();
+        if (name) return name;
+      }
+    }
+    return null;
+  }
+
+  function escapeRegExp(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function normalizeQuestTitle(name) {
+    let out = name;
+    // The Azazel quest logs as "Angry <playername>, this is Azazel in Hell." —
+    // a pun on the song, not the wiki's name for it, and the player name inside
+    // makes even a Go-search useless. The article is "Azazel, Ma Belle"; that
+    // title shares no wording with the log line, so no amount of scrubbing gets
+    // there. Match the one fixed word and hard-map it.
+    if (/\bazazel\b/i.test(out)) return 'Azazel, Ma Belle';
+    const player = getPlayerName();
+    if (player) {
+      out = out.replace(new RegExp(escapeRegExp(player), 'gi'), 'Player Name');
+    }
+    // White Citadel also embeds the familiar's name, which isn't exposed as
+    // reliably as the player's — but that title is otherwise fixed, so collapse
+    // the whole dynamic prefix. This also covers the case where the player-name
+    // lookup above failed (no reachable charpane).
+    if (/ Go to White Citadel$/i.test(out)) {
+      return 'Player Name and Familiar Name Go To White Citadel';
+    }
+    return out;
+  }
+
+  function linkQuests() {
+    document.querySelectorAll('blockquote b').forEach(function (b) {
+      if (b.closest('a')) return;
+      const next = b.nextElementSibling;
+      if (!next || next.tagName !== 'BR') return;
+      addBadge(b, 'after', normalizeQuestTitle(b.textContent.trim()));
+    });
+  }
+
+  // --- Combat monster (fight.php) --------------------------------------
+  // Verified: the current foe's name sits in <span id="monname">, including
+  // the leading article ("a gingerbread murderer"; the page also carries a
+  // <!-- MONSTERID --> comment, but the wiki has no id lookup, so we go by
+  // name). Strip the article so the Go-search lands on the page; badge after
+  // the span, searching on the stripped name via addBadge's name argument.
+  function linkMonster() {
+    const el = document.getElementById('monname');
+    if (!el) return;
+    addBadge(el, 'after', stripArticle(el.textContent));
+  }
+
+  // --- Items acquired (fight.php) --------------------------------------
+  // Verified: acquire lines read "You acquire an item: <b>name</b>" and, for
+  // bounty drops, "You acquire a bounty item: <b>name</b>" — both wanted, and
+  // both caught by the "acquire ... item" test on the line's text. Effect
+  // gains ("You acquire an effect: ...") lack "item" and are skipped, as is
+  // other bold text on the page (familiar shouts, stat numbers) whose line
+  // has no "acquire item". The name is a direct-child <b> of the line cell.
+  // CAVEAT (still untested): a multi-quantity drop bolds a number-prefixed,
+  // pluralised name ("You acquire <b>5 ginger snapses</b>"), which won't
+  // match the singular wiki page; needs a quantity/plural strip once seen.
+  function linkDrops() {
+    document.querySelectorAll('b').forEach(function (b) {
+      const parent = b.parentElement;
+      if (parent && /you acquire\b.*\bitems?\b/i.test(parent.textContent)) {
+        addBadge(b, 'after');
+      }
+    });
+  }
+
+  // --- Inventory item names (inventory.php) ----------------------------
+  // Each item's name is a <b class="ircm"> in its name cell, e.g.
+  //   <td id="i1593"><b rel="..." class="ircm">cold hi mein</b>&nbsp;<span>(118)</span>...
+  // The clickable description icon beside it is an <img class="hand ircm">
+  // (an image, not a <b>), so b.ircm uniquely selects names. Category headers
+  // are <b class="tit"> and the page title is a plain white <b>, so neither is
+  // matched. No article stripping: item names can legitimately start with "a"
+  // (e.g. "a little sump'm sump'm").
+  function linkInventory() {
+    document.querySelectorAll('b.ircm')
+      .forEach(function (b) { addBadge(b, 'after'); });
+  }
+
+
+  // === feature: inventory tools =========================================
+  //
+  // Was its own equip-optimize.js (which had already absorbed
+  // inventory-collapse.js). Two entries, because they are two independently
+  // useful things on one page: "Optimize for this" only appears on the
+  // equipment view, the Collapse all / Expand all bar on any categorised
+  // inventory. Each keeps its own idempotency guard so one bailing never
+  // suppresses the other.
+  //
+  // They share getEntries/isCollapsed/flipTo -- the optimizer expands every
+  // category so worn items rejoin the list, the bar flips them either way.
+  // Note this is the `inventory` cookie; sell-sort above mirrors `sellstuff`.
+  //
+  // build() was renamed buildEquipOptimizer(): too generic for a scope this
+  // crowded.
+
+  const BUTTON_ID = 'tm-equip-optimize-btn';
+  const COLLAPSE_BAR_ID = 'kol-inv-collapse-bar';
+  const STATUS_ID = 'tm-equip-optimize-status';
+  // Survives the "unequip all" reload: { attr, attrLabel, sortTried }.
+  const STATE_KEY = 'tm-equip-optimize';
+
+  // KoL's collapsible category headers (the toggle('Name') links) map to the
+  // equip-slot type. Melee + Ranged both feed the single weapon slot; "Back
+  // Items" is the container slot. Accessories are handled specially (one pool,
+  // three physical slots). Anything not listed here is ignored.
+  const SLOT_BY_CATEGORY = {
+    'Hats': 'hat',
+    'Shirts': 'shirt',
+    'Pants': 'pants',
+    'Melee Weapons': 'weapon',
+    'Ranged Weapons': 'weapon',
+    'Off-Hand Items': 'offhand',
+    'Back Items': 'container',
+    'Familiar Equipment': 'familiarequip',
+    'Accessories': 'accessory'
+  };
+
+  // Single-item slots in apply order, each with a human label for the summary.
+  // Weapon is applied before off-hand: a 2h+ weapon occupies the off-hand slot,
+  // and planEquipment() drops the off-hand from the plan in that case (read from
+  // the weapon's "[equip (Nh)]" handedness), so they never fight over the slot.
+  const SINGLE_SLOTS = [
+    { key: 'hat', label: 'Hat' },
+    { key: 'shirt', label: 'Shirt' },
+    { key: 'pants', label: 'Pants' },
+    { key: 'container', label: 'Back' },
+    { key: 'familiarequip', label: 'Familiar' },
+    { key: 'weapon', label: 'Weapon' },
+    { key: 'offhand', label: 'Off-hand' }
+  ];
+  const ACCESSORY_SLOTS = [
+    { slot: 1, label: 'Accessory 1' },
+    { slot: 2, label: 'Accessory 2' },
+    { slot: 3, label: 'Accessory 3' }
+  ];
+
+  // KoL's "[unequip]" links carry the slot they clear as ?type=… . We snapshot
+  // what's worn (by that type) before the unequip-all, keyed here to the plan's
+  // slot label so a slot the optimizer leaves empty can be refilled with what it
+  // held. `accSlot` marks the three accessory slots (which need a slot-specific
+  // equip link on restore); the rest map one-to-one to SINGLE_SLOTS labels.
+  const WORN_TYPES = {
+    hat: { label: 'Hat' },
+    shirt: { label: 'Shirt' },
+    pants: { label: 'Pants' },
+    container: { label: 'Back' },
+    familiarequip: { label: 'Familiar' },
+    weapon: { label: 'Weapon' },
+    offhand: { label: 'Off-hand' },
+    acc1: { label: 'Accessory 1', accSlot: 1 },
+    acc2: { label: 'Accessory 2', accSlot: 2 },
+    acc3: { label: 'Accessory 3', accSlot: 3 }
+  };
+
+  // The five KoL elements. "Elemental Damage" / "Elemental Resistance" sorts
+  // (sortby ed / er) lump all five together — KoL can't sort by just one — so
+  // for those we show an element picker and rank by the chosen element ourselves
+  // (see elementValue / scrapeCandidates), instead of trusting KoL's DOM order.
+  const ELEMENTS = ['hot', 'cold', 'spooky', 'stench', 'sleaze'];
+  const ELEMENTAL_SORTS = { ed: 'Elemental Damage', er: 'Elemental Resistance' };
+
+  // Sorts optimizable in either direction: each gets a two-option picker
+  // [maximize, minimize] and value-based ranking that can run ascending.
+  // Monster Encounters (adr) is qualitative ("more"/"less Monsters") — see
+  // encountersValue — so its picker is More/Fewer.
+  const DIRECTIONAL_SORTS = { ml: ['Higher', 'Lower'], adr: ['More', 'Fewer'] };
+
+  // Sort options with no enchantment magnitude to optimize — hide the button.
+  const NON_OPTIMIZABLE = { set: true, name: true, qty: true };
+
+  // Seasonal items: their enchantment only applies at certain times, yet KoL
+  // still shows the value year-round — so without this they'd be "optimized"
+  // into a slot where they currently do nothing. Keyed by lowercased item name;
+  // each predicate says whether the bonus is live for the given Date. When it
+  // isn't, the item is skipped as a candidate. Add more entries as needed.
+  const SEASONAL_ITEMS = {
+    'perfect christmas scarf': function (d) { return d.getMonth() === 11; }, // Dec
+    'mr. accessaturday': function (d) { return d.getDay() === 6; }           // Sat
+  };
+
+  // Items whose value for a given sort isn't what the static annotation shows
+  // (e.g. date-dependent bonuses). Keyed by lowercased name -> { sortKey:
+  // function(Date) -> value }; when the current sort matches, this replaces the
+  // parsed value. Add more entries as needed.
+  const VALUE_OVERRIDES = {
+    'gingerbeard': {
+      adv: function (d) { return d.getMonth() === 11 ? 9 : 6; } // +9 Dec, else +6
+    }
+  };
+
+  // --- Persisted run state ----------------------------------------------
+  function loadState() {
+    try {
+      const o = JSON.parse(sessionStorage.getItem(STATE_KEY));
+      return (o && typeof o === 'object') ? o : null;
+    } catch (e) {
+      return null;
+    }
+  }
+  function saveState(o) { sessionStorage.setItem(STATE_KEY, JSON.stringify(o)); }
+  function clearState() { sessionStorage.removeItem(STATE_KEY); }
+
+  // --- Page scraping ----------------------------------------------------
+
+  // The enchantment sort dropdown (changing it re-sorts and shows a blue value
+  // next to each item). Only present on the equipment view, so its presence is
+  // also our "are we on the right tab?" gate.
+  function findSortDropdown() {
+    return document.querySelector('select[name="sortby"]');
+  }
+
+  // Label of the attribute currently sorted by, e.g. "HP Regen".
+  function selectedAttributeLabel(dropdown) {
+    const opt = dropdown && dropdown.options[dropdown.selectedIndex];
+    return opt ? opt.textContent.trim() : '';
+  }
+
+  function getUnequipAllHref() {
+    const a = document.querySelector('a[href*="action=unequipall"]');
+    return a ? a.href : null;
+  }
+
+  // Snapshot what's currently equipped, before the unequip-all wipes it. Each
+  // worn item is displayed next to an "[unequip]" link whose ?type=… names its
+  // slot (hat, weapon, offhand, acc1…acc3, familiarequip, container, …); the
+  // item name sits in the same cell (a descitem link, or failing that a <b>).
+  // Returns { type: itemName } for the types we know how to restore (WORN_TYPES);
+  // restore() re-matches those names to equip links after the reload.
+  function scrapeWornItems() {
+    const worn = {};
+    document.querySelectorAll('a[href*="action=unequip"]').forEach(function (a) {
+      const m = /[?&]type=([a-z0-9]+)/i.exec(a.getAttribute('href') || '');
+      if (!m) return; // e.g. action=unequipall carries no type
+      const type = m[1].toLowerCase();
+      if (!WORN_TYPES[type]) return;
+      const cell = a.closest('td') || a.parentElement;
+      if (!cell) return;
+      const nameEl = cell.querySelector('a[onclick*="descitem"]') ||
+        cell.querySelector('b');
+      const name = nameEl ? nameEl.textContent.trim() : '';
+      if (name) worn[type] = name;
+    });
+    return worn;
+  }
+
+  // Pull a comparable number out of a blue annotation like "(30-60 HP Regen)",
+  // "(+5 Moxie)" or "(+10% Item Drops)". We use the low end of a range, matching
+  // how KoL itself orders these lists (descending by the low end). Ranking
+  // *within* a category comes from KoL's DOM order, not this number — value is
+  // only used where KoL gives no order: merging the two weapon categories and
+  // the 1h+offhand vs 2h total. Returns null if there's no number.
+  function parseValue(text) {
+    const nums = (text.match(/-?\d+(?:\.\d+)?/g) || []).map(Number);
+    return nums.length ? Math.min.apply(null, nums) : null;
+  }
+
+  // Per-element value for the elemental sorts. Verified against live er and ed
+  // pages. Each annotation is one line:
+  //   er, single:    "Serious Hot Resistance [+3]"
+  //   er, all:       "Serious Resistance to All Elements [+3]"  (+3 to each)
+  //   ed, single:    "Hot Damage +5"
+  //   ed, all:       "Prismatic Damage +5"                      (+5 to each)
+  // (In ed the element word / "Prismatic" is split across colored <font> tags,
+  // but textContent flattens it back to plain text.) The magnitude is the first
+  // signed number (covers both the [+N] and +N shapes). The all-elements case is
+  // flagged by "All Elements" (er) or "Prismatic" (ed).
+  //
+  // For a specific element: the item counts if it names that element or is an
+  // all-elements line; value is that number. For 'all': sum over the five
+  // elements — an all-elements line covers all five (N×5), a single line one (N)
+  // — so 'all' rewards breadth. For 'any': the strongest single value regardless
+  // of element (a single-element line's number, or an all-elements line's per-
+  // element number), so it rewards magnitude rather than coverage.
+  function elementValue(text, element) {
+    const nums = (text.match(/[+-]?\d+/g) || []).map(Number);
+    if (!nums.length) return null;
+    if (element === 'any') return Math.max.apply(null, nums);
+    const n = nums[0];
+    const isAll = /all elements|prismatic/i.test(text);
+    const has = function (el) { return new RegExp('\\b' + el + '\\b', 'i').test(text); };
+
+    if (element === 'all') {
+      if (isAll) return n * ELEMENTS.length;
+      return ELEMENTS.some(has) ? n : null;
+    }
+    if (isAll) return n;
+    return has(element) ? n : null;
+  }
+
+  // Monster Encounters (adr) annotations are qualitative, with no magnitude:
+  // "(more Monsters)" / "(less Monsters)". Map them to +1 / -1 so the directional
+  // ranking and sign-filter work; combat modifiers stack, so each slot taking
+  // one matching item pushes encounters further in the chosen direction.
+  function encountersValue(text) {
+    if (/more monster/i.test(text)) return 1;
+    if (/less monster/i.test(text)) return -1;
+    return null;
+  }
+
+  // Pick the value parser for the current sort: per-element (ed/er), qualitative
+  // encounters (adr), or the generic signed number (everything else).
+  function makeValueFn(attr, element) {
+    if (element) return function (t) { return elementValue(t, element); };
+    if (attr === 'adr') return encountersValue;
+    return parseValue;
+  }
+
+  // --- Collapsible categories -------------------------------------------
+  // Shared by both features on this page: the optimizer expands everything so
+  // worn items rejoin the list, and the Collapse all / Expand all bar flips the
+  // lot either way. One copy, so the two can't drift apart.
+  //
+  // Each collapsible category is a <b class="tit"><a class="nounder"
+  // href="javascript:toggle('Food and Drink');">. Its open/closed state is read
+  // from the sibling <div class="collapse" id="sectionN"> inside the same
+  // table.stuffbox (display:none = collapsed, display:inline = open).
+  function getEntries() {
+    const entries = [];
+    document.querySelectorAll('b.tit a.nounder').forEach(function (a) {
+      const m = /toggle\('(.+?)'\)/.exec(a.getAttribute('href') || '');
+      if (!m) return;
+      const box = a.closest('table.stuffbox');
+      const div = box && box.querySelector('div.collapse[id^="section"]');
+      if (!div) return;
+      entries.push({ name: m[1], div: div });
+    });
+    return entries;
+  }
+
+  function isCollapsed(div) {
+    // Inline style is what KoL's toggle() sets; trust it, but fall back to
+    // computed style if some other path cleared the inline value.
+    const d = div.style.display;
+    if (d === 'none') return true;
+    if (d === 'inline' || d === 'block' || d === 'inline-block') return false;
+    return getComputedStyle(div).display === 'none';
+  }
+
+  // Flip one category to a target state. Prefer the page's own toggle(): it
+  // keeps the "inventory" cookie in sync, updates the "(click to open)" label,
+  // and AJAX-loads a section's items the first time it is opened. Only call it
+  // when a flip is actually needed, so we never toggle a section that is
+  // already in the wanted state. Returns true if it flipped.
+  function flipTo(entry, collapse) {
+    if (isCollapsed(entry.div) === collapse) return false; // already correct
+    if (typeof window.toggle === 'function') {
+      window.toggle(entry.name);
+      return true;
+    }
+    // Fallback: plain DOM flip (no cookie / no lazy-load) if toggle() is gone.
+    entry.div.style.display = collapse ? 'none' : 'inline';
+    const box = entry.div.closest('table.stuffbox');
+    const label = box && box.querySelector('.collapsed');
+    if (label) label.textContent = collapse ? '(click to open)' : '';
+    return true;
+  }
+
+  // Expand every collapsed category. Returns true if anything was expanded.
+  function expandAllCategories() {
+    let expanded = false;
+    getEntries().forEach(function (e) {
+      if (flipTo(e, false)) expanded = true;
+    });
+    return expanded;
+  }
+
+  // After expanding we may have triggered AJAX section loads; wait until the
+  // item count stops growing (or a cap) before scraping.
+  function waitForStableItems(cb) {
+    let last = -1, stable = 0, tries = 0;
+    (function tick() {
+      const n = document.querySelectorAll('table.item[id^="ic"]').length;
+      if (n === last) {
+        if (++stable >= 2) return cb();
+      } else {
+        stable = 0;
+        last = n;
+      }
+      if (++tries > 100) return cb(); // ~5s cap; proceed with what we have
+      setTimeout(tick, 50);
+    })();
+  }
+
+  // NOTE: KoL sorts each category smartly for the chosen attribute, with the
+  // better equipment higher up the list (and it handles flat vs % the way the
+  // game considers correct). So an item's position *within its category* is the
+  // authoritative ranking — we trust that DOM order rather than re-deriving a
+  // "best" from the displayed number. The parsed value is only a fallback for
+  // the two comparisons KoL leaves to us: merging the two weapon categories
+  // (Melee / Ranged) and weighing 1h+offhand against a 2h weapon.
+  //
+  // Collect candidate items per slot type. A candidate is an item that (a) has
+  // an [equip] link (owned, equippable, requirements met) and (b) carries a
+  // blue value annotation for the current sort (so it contributes to the
+  // attribute). Each item lives inside a collapsible category whose
+  // toggle('Name') tells us the slot.
+  //
+  // Returns { slotKey: [ { id, name, cat, index, value, isPercent, valueText,
+  // hands, links } ] }. `cat` is the KoL category name and `index` the item's
+  // rank within that category (0 = top = KoL's best), which is how we honour
+  // "match KoL's sort order". `links` is [ { slot, href } ] — slot is null for
+  // normal items, or 1/2/3 for the per-slot accessory equip links KoL renders.
+  // `valueFn(text)` parses an item's value for the current sort (see
+  // makeValueFn); items it returns null for aren't candidates. `attr` is the
+  // current sort key, used for per-item value overrides.
+  function scrapeCandidates(valueFn, attr) {
+    const bySlot = {};
+    const now = new Date(); // for seasonal items / date-dependent overrides
+
+    document.querySelectorAll('b.tit a.nounder').forEach(function (a) {
+      const m = /toggle\('(.+?)'\)/.exec(a.getAttribute('href') || '');
+      if (!m) return;
+      const slotKey = SLOT_BY_CATEGORY[m[1]];
+      if (!slotKey) return;
+
+      const box = a.closest('table.stuffbox');
+      if (!box) return;
+
+      // Rank candidates by their order within this (already KoL-sorted)
+      // category; only count items we actually keep, preserving relative order.
+      let index = 0;
+      box.querySelectorAll('table.item[id^="ic"]').forEach(function (item) {
+        const equipLinks = Array.prototype.slice.call(
+          item.querySelectorAll('a[href*="action=equip"]')
+        );
+        if (!equipLinks.length) return; // worn / unowned / requirements unmet
+
+        const valueEl = item.querySelector('font[color="blue"]');
+        if (!valueEl) return; // no value for this attribute
+
+        const nameEl = item.querySelector('b');
+        const name = nameEl ? nameEl.textContent.trim() : '(item ' + item.id + ')';
+        const key = name.toLowerCase();
+
+        // Skip seasonal items whose bonus isn't active today (KoL still shows
+        // their value, so they'd otherwise be equipped where they do nothing).
+        const season = SEASONAL_ITEMS[key];
+        if (season && !season(now)) return;
+
+        // Per-item value override (e.g. date-dependent bonuses the static
+        // annotation doesn't reflect); else parse the annotation.
+        const ov = VALUE_OVERRIDES[key];
+        const value = (ov && ov[attr]) ? ov[attr](now)
+          : valueFn(valueEl.textContent);
+        if (value === null) return; // no value for this sort/element/direction
+
+        const links = equipLinks.map(function (l) {
+          const sm = /[?&]slot=(\d+)/.exec(l.href);
+          return { slot: sm ? Number(sm[1]) : null, href: l.href };
+        });
+
+        // Weapons render their handedness in the link text: "[equip (1h)]",
+        // "[equip (2h)]", "[equip (3h)]" (3h is a joke type that still takes
+        // two hands). Anything 2h+ occupies the off-hand slot too. Plain
+        // "[equip]" (non-weapons) leaves hands null.
+        let hands = null;
+        equipLinks.forEach(function (l) {
+          const hm = /\((\d+)h\)/i.exec(l.textContent);
+          if (hm) hands = Number(hm[1]);
+        });
+
+        (bySlot[slotKey] = bySlot[slotKey] || []).push({
+          id: item.id.slice(2), // "ic7468" -> "7468"
+          name: name,
+          cat: m[1],
+          index: index++,
+          value: value,
+          isPercent: /%/.test(valueEl.textContent),
+          valueText: valueEl.textContent.trim().replace(/^\(|\)$/g, ''),
+          hands: hands,
+          links: links
+        });
+      });
+    });
+
+    return bySlot;
+  }
+
+  // For restore: map every owned, equippable item (lowercased name) to its equip
+  // links, regardless of whether it carries a value for the current sort — a slot
+  // we're refilling with its original item may hold something the current sort
+  // doesn't score. Mirrors scrapeCandidates' link/handedness parsing but over the
+  // full list. Returns { name: { links: [ { slot, href } ], hands } }; first item
+  // of a given name wins (duplicates are interchangeable for restore). `hands`
+  // lets restore() honour the 2h-weapon-eats-the-off-hand rule.
+  function scrapeEquipLinksByName() {
+    const byName = {};
+    document.querySelectorAll('table.item[id^="ic"]').forEach(function (item) {
+      const equipLinks = Array.prototype.slice.call(
+        item.querySelectorAll('a[href*="action=equip"]')
+      );
+      if (!equipLinks.length) return; // worn / unowned / requirements unmet
+      const nameEl = item.querySelector('b');
+      if (!nameEl) return;
+      const key = nameEl.textContent.trim().toLowerCase();
+      if (byName[key]) return;
+      const links = equipLinks.map(function (l) {
+        const sm = /[?&]slot=(\d+)/.exec(l.href);
+        return { slot: sm ? Number(sm[1]) : null, href: l.href };
+      });
+      let hands = null;
+      equipLinks.forEach(function (l) {
+        const hm = /\((\d+)h\)/i.exec(l.textContent);
+        if (hm) hands = Number(hm[1]);
+      });
+      byName[key] = { links: links, hands: hands };
+    });
+    return byName;
+  }
+
+  // --- Optimization -----------------------------------------------------
+
+  // Build the list of equips to perform. Each slot's pick follows KoL's own
+  // sort order (see bestOf), except in value mode (byValue=true: the elemental
+  // sorts and the directional sorts ml/adr) where KoL's order isn't what we want
+  // — we rank by the parsed value, descending, or ascending when lowerBetter.
+  // In value mode we also drop items on the wrong side of zero (see beneficial),
+  // since after unequip-all an empty slot contributes 0 and a wrong-sign item
+  // would be worse than nothing. Weapon + off-hand are decided together (a 2h
+  // weapon takes the off-hand slot — see preferTwoHand); accessories take the
+  // top three into slots 1/2/3. Returns [ { label, name, valueText, href } ].
+  function planEquipment(bySlot, byValue, lowerBetter) {
+    const plan = [];
+
+    const weapons = beneficial(bySlot.weapon, byValue, lowerBetter);
+    const oneHand = bestOf(weapons.filter(function (w) {
+      return (w.hands || 1) === 1;
+    }), byValue, lowerBetter);
+    const twoHand = bestOf(weapons.filter(function (w) {
+      return (w.hands || 1) >= 2;
+    }), byValue, lowerBetter);
+    const offhand = bestOf(beneficial(bySlot.offhand, byValue, lowerBetter),
+      byValue, lowerBetter);
+    const useTwoHand = preferTwoHand(oneHand, twoHand, offhand, lowerBetter);
+    const weaponChoice = useTwoHand ? twoHand : oneHand;
+    const offhandChoice = useTwoHand ? null : offhand;
+
+    SINGLE_SLOTS.forEach(function (slot) {
+      let best;
+      if (slot.key === 'weapon') best = weaponChoice;
+      else if (slot.key === 'offhand') best = offhandChoice;
+      else best = bestOf(beneficial(bySlot[slot.key], byValue, lowerBetter),
+        byValue, lowerBetter);
+      if (!best) return;
+      plan.push({
+        label: slot.label, name: best.name,
+        valueText: best.valueText, href: best.links[0].href,
+        hands: best.hands
+      });
+    });
+
+    // Accessories are one category — by KoL's DOM order normally, or by value in
+    // value mode — take the top three distinct items into slots 1/2/3.
+    const accs = beneficial(bySlot.accessory, byValue, lowerBetter)
+      .sort(function (a, b) {
+        if (!byValue) return a.index - b.index;
+        return lowerBetter ? a.value - b.value : b.value - a.value;
+      });
+    ACCESSORY_SLOTS.forEach(function (s, i) {
+      const item = accs[i];
+      if (!item) return;
+      // Prefer the link that targets this physical slot; fall back to the first.
+      const link = item.links.find(function (l) { return l.slot === s.slot; }) ||
+        item.links[0];
+      plan.push({
+        label: s.label, name: item.name,
+        valueText: item.valueText, href: link.href
+      });
+    });
+
+    return plan;
+  }
+
+  // Build the "put back what you had" steps for slots the optimizer left empty.
+  // `worn` is the pre-unequip snapshot (type -> name); `byName` maps names to
+  // equip links (post-unequip, so the originals are equippable again). The
+  // optimizer's picks are authoritative — a restore never displaces one — so we
+  // only touch labels absent from `optimize`. Weapon and off-hand are decided
+  // together because a 2h+ weapon claims the off-hand slot: we won't restore a 2h
+  // weapon over an off-hand the optimizer kept, and won't restore an off-hand
+  // under a 2h weapon (optimizer's or restored). Returns [ { label, name,
+  // valueText, href } ] to append after the optimize plan.
+  function planRestore(optimize, worn, byName) {
+    if (!worn) return [];
+    const filled = {};
+    let optimizerWeaponHands = null;
+    optimize.forEach(function (p) {
+      filled[p.label] = true;
+      if (p.label === 'Weapon') optimizerWeaponHands = p.hands || 1;
+    });
+
+    // Resolve a worn item to a restore step, choosing an accessory-slot-specific
+    // equip link when one applies. Returns null if the item can't be re-equipped.
+    function stepFor(type) {
+      const spec = WORN_TYPES[type];
+      const name = worn[type];
+      if (!spec || !name) return null;
+      const entry = byName[name.toLowerCase()];
+      if (!entry) return null;
+      const link = spec.accSlot
+        ? (entry.links.find(function (l) { return l.slot === spec.accSlot; }) ||
+           entry.links[0])
+        : entry.links[0];
+      return {
+        label: spec.label, name: name, valueText: 'kept',
+        href: link.href, hands: entry.hands
+      };
+    }
+
+    const restore = [];
+
+    // Slots with no cross-slot interaction.
+    ['hat', 'shirt', 'pants', 'container', 'familiarequip',
+     'acc1', 'acc2', 'acc3'].forEach(function (type) {
+      if (filled[WORN_TYPES[type].label]) return;
+      const step = stepFor(type);
+      if (step) restore.push(step);
+    });
+
+    // Weapon: only if the optimizer left it empty, and never a 2h weapon over an
+    // off-hand the optimizer equipped. Track the handedness of whatever ends up
+    // in the weapon slot to gate the off-hand below.
+    let weaponHands = filled['Weapon'] ? optimizerWeaponHands : null;
+    if (!filled['Weapon']) {
+      const w = stepFor('weapon');
+      if (w && !((w.hands || 1) >= 2 && filled['Off-hand'])) {
+        restore.push(w);
+        weaponHands = w.hands || 1;
+      }
+    }
+
+    // Off-hand: only if empty and the weapon in effect leaves the slot free.
+    if (!filled['Off-hand'] && !(weaponHands >= 2)) {
+      const o = stepFor('offhand');
+      if (o) restore.push(o);
+    }
+
+    return restore;
+  }
+
+  // KoL's best of a list. Within one category, "best" is simply the earliest
+  // (KoL already sorted it best-first, handling flat vs % its own way). Across
+  // different categories — only weapons span two (Melee / Ranged), where KoL
+  // gives no relative order — fall back to value. In value mode (byValue) rank
+  // purely by value: highest, or lowest when lowerBetter (minimize ML).
+  function bestOf(list, byValue, lowerBetter) {
+    if (!list || !list.length) return null;
+    return list.reduce(function (best, it) {
+      return koLBetter(it, best, byValue, lowerBetter) ? it : best;
+    });
+  }
+  function koLBetter(a, b, byValue, lowerBetter) {
+    if (byValue) return lowerBetter ? a.value < b.value : a.value > b.value;
+    if (a.cat === b.cat) return a.index < b.index;
+    return a.value > b.value;
+  }
+
+  // In value mode, keep only items on the beneficial side of zero: positive when
+  // maximizing, negative when minimizing (ML lower). An empty slot is 0, so a
+  // wrong-sign item would be worse than equipping nothing. Outside value mode we
+  // trust KoL's order and don't filter.
+  function beneficial(list, byValue, lowerBetter) {
+    if (!byValue) return (list || []).slice();
+    return (list || []).filter(function (it) {
+      return lowerBetter ? it.value < 0 : it.value > 0;
+    });
+  }
+
+  // Unit shared by a set of candidates: 'flat', 'pct', or 'mixed' (some of each).
+  function unitOf(items) {
+    let flat = false, pct = false;
+    items.forEach(function (it) {
+      if (it) { if (it.isPercent) pct = true; else flat = true; }
+    });
+    return (flat && pct) ? 'mixed' : (pct ? 'pct' : 'flat');
+  }
+
+  // Choose between the two weapon configurations:
+  //   A) best 1h weapon + best off-hand   B) best 2h+ weapon alone
+  // We can only add the off-hand to the 1h weapon when their values share a unit
+  // (you can't add "+X" to "+Y%"). When A and B are comparable in the same unit,
+  // take the better total (higher, or lower when lowerBetter). Otherwise — a 2h
+  // is the only option, or the units are mixed so a total is meaningless —
+  // default to filling both slots (config A), except when there's no 1h weapon
+  // and no off-hand at all.
+  function preferTwoHand(oneHand, twoHand, offhand, lowerBetter) {
+    if (!twoHand) return false;
+    if (!oneHand && !offhand) return true; // a 2h weapon is the only option
+    const unitA = unitOf([oneHand, offhand]);
+    if (unitA !== 'mixed' && unitA === unitOf([twoHand])) {
+      const totalA = (oneHand ? oneHand.value : 0) +
+        (offhand ? offhand.value : 0);
+      return lowerBetter ? twoHand.value < totalA : twoHand.value > totalA;
+    }
+    return false; // units not comparable: keep both slots filled
+  }
+
+  // --- Applying equipment ----------------------------------------------
+  // Fire each equip via its own [equip] href (GET, same as clicking the link),
+  // sequentially, then reload once. The server is authoritative about what can
+  // actually be worn, so we let each equip settle before the next and re-read
+  // the truth on reload (mirrors iotm.js's multi-slot apply).
+  async function applyPlan(plan, status) {
+    for (let i = 0; i < plan.length; i++) {
+      const step = plan[i];
+      status.textContent = 'Equipping ' + step.label + ' (' + (i + 1) + '/' +
+        plan.length + ')…';
+      try {
+        await fetch(step.href, { credentials: 'same-origin' });
+      } catch (e) {
+        status.textContent = 'Equip failed on ' + step.label + ': ' + e;
+        console.error('Equip Optimize: equip failed', step, e);
+        return;
+      }
+    }
+    status.textContent = 'Done, reloading…';
+    location.reload();
+  }
+
+  // --- Flow -------------------------------------------------------------
+
+  // Step 1 (user click): confirm, stash the chosen attribute, then unequip all.
+  // That reload lands us back here with state set, where resume() takes over —
+  // with nothing equipped, every owned item rejoins the lists, so the per-slot
+  // "best" is a true comparison rather than "best among items not already worn".
+  function start(dropdown, status, opts) {
+    const attr = dropdown.value;
+    const element = opts.element || null;
+    const lowerBetter = !!opts.lower;
+    // Elemental sorts and the directional sorts rank by parsed value, not by
+    // KoL's DOM order.
+    const byValue = !!element || !!DIRECTIONAL_SORTS[attr];
+    let suffix = '';
+    if (element && element !== 'all') {
+      suffix = ' (' + element + ')';
+    } else if (DIRECTIONAL_SORTS[attr]) {
+      const labels = DIRECTIONAL_SORTS[attr];
+      suffix = ' (' + (lowerBetter ? labels[1] : labels[0]).toLowerCase() + ')';
+    }
+    const attrLabel = selectedAttributeLabel(dropdown) + suffix;
+
+    const href = getUnequipAllHref();
+    if (!confirm('Optimize equipment for "' + attrLabel + '"?\n\n' +
+        (href ? 'This unequips everything, then equips ' : 'This equips ') +
+        'the best item for "' + attrLabel + '" in each slot, keeping your ' +
+        'current gear in any slot with no better option.')) {
+      status.textContent = 'Cancelled.';
+      return;
+    }
+    // Snapshot what's worn now (before the unequip-all wipes it) so resume() can
+    // put the original item back in any slot the optimizer leaves empty.
+    const state = {
+      attr: attr, attrLabel: attrLabel, sortTried: false,
+      element: element, byValue: byValue, lowerBetter: lowerBetter,
+      worn: scrapeWornItems()
+    };
+    if (!href) {
+      // No "unequip all" link means nothing is equipped, so there's nothing to
+      // unequip and no reload to wait for — optimize this page directly. (The
+      // sort already matches what the user just clicked, so resume() won't need
+      // to re-sort; it expands, scrapes, equips, then reloads.)
+      status.textContent = 'Nothing equipped; optimizing…';
+      resume(dropdown, status, state);
+      return;
+    }
+    saveState(state);
+    status.textContent = 'Unequipping all…';
+    location.href = href; // GET → reload back into resume()
+  }
+
+  // Step 2 (after the unequip-all reload): make sure we're still sorted by the
+  // saved attribute, expand everything, equip the best per slot, then put the
+  // originally-worn item back in any slot that got nothing.
+  function resume(dropdown, status, state) {
+    // The sort is a sticky KoL preference, so it normally survives the reload;
+    // if it didn't, re-apply it (one shot) and let the resubmit reload us.
+    if (dropdown.value !== state.attr) {
+      if (state.sortTried) {
+        clearState();
+        status.textContent = 'Could not apply the "' + state.attrLabel +
+          '" sort; aborting.';
+        return;
+      }
+      state.sortTried = true;
+      saveState(state);
+      status.textContent = 'Re-applying sort…';
+      dropdown.value = state.attr;
+      (dropdown.form || dropdown.closest('form')).submit();
+      return;
+    }
+
+    status.textContent = 'Expanding categories…';
+    expandAllCategories();
+    waitForStableItems(function () {
+      const optimize = planEquipment(
+        scrapeCandidates(makeValueFn(state.attr, state.element), state.attr),
+        state.byValue, state.lowerBetter);
+      // Refill every slot the optimizer left empty with what it held before, so
+      // slots only ever change to something better (and nothing is left bare —
+      // including the case where the optimizer found nothing at all).
+      const plan = optimize.concat(
+        planRestore(optimize, state.worn, scrapeEquipLinksByName()));
+      if (!plan.length) {
+        clearState();
+        status.textContent = 'No equippable items have a value for "' +
+          state.attrLabel + '".';
+        return;
+      }
+      // Clear before equipping so a mid-run failure (or the final reload)
+      // doesn't loop us back into resume().
+      clearState();
+      applyPlan(plan, status);
+    });
+  }
+
+  // --- UI ---------------------------------------------------------------
+  function buildEquipOptimizer() {
+    // Idempotency guard: the page/loader may run us more than once.
+    if (document.getElementById(BUTTON_ID)) return;
+
+    const dropdown = findSortDropdown();
+    if (!dropdown) return; // not the equipment view
+
+    // Nothing to optimize for these sorts (Outfit / Name / Item Quantity) —
+    // don't show the button at all.
+    if (NON_OPTIMIZABLE[dropdown.value]) return;
+
+    const btn = document.createElement('button');
+    btn.id = BUTTON_ID;
+    btn.type = 'button'; // must not submit the sort form
+    btn.textContent = 'Optimize for this';
+    btn.style.cssText = 'margin-left:6px;cursor:pointer;';
+
+    const status = document.createElement('span');
+    status.id = STATUS_ID;
+    status.style.cssText =
+      'margin-left:8px;font-family:arial;font-size:9pt;color:#006;';
+
+    // Secondary picker for sorts that need a sub-choice:
+    //  - elemental (ed/er): which element to optimize. "All" sums coverage
+    //    across the five; "Any" takes the strongest single value regardless of
+    //    element; or pick one specific element.
+    //  - directional (ml / adr): which way to optimize (maximize/minimize).
+    let elemSel = null, dirSel = null;
+    if (ELEMENTAL_SORTS[dropdown.value]) {
+      elemSel = makeSelect('tm-equip-optimize-elem',
+        [['all', 'All elements'], ['any', 'Any element']].concat(
+          ELEMENTS.map(function (e) {
+            return [e, e.charAt(0).toUpperCase() + e.slice(1)];
+          })));
+    } else if (DIRECTIONAL_SORTS[dropdown.value]) {
+      const labels = DIRECTIONAL_SORTS[dropdown.value];
+      dirSel = makeSelect('tm-equip-optimize-dir',
+        [['higher', labels[0]], ['lower', labels[1]]]);
+    }
+
+    btn.addEventListener('click', function () {
+      start(dropdown, status, {
+        element: elemSel ? elemSel.value : null,
+        lower: dirSel ? dirSel.value === 'lower' : false
+      });
+    });
+
+    let anchor = dropdown;
+    [elemSel, dirSel].forEach(function (sel) {
+      if (sel) { anchor.insertAdjacentElement('afterend', sel); anchor = sel; }
+    });
+    anchor.insertAdjacentElement('afterend', btn);
+    btn.insertAdjacentElement('afterend', status);
+
+    // Mid-run? Pick up where the unequip-all reload left off, restoring the
+    // sub-choice in its picker so it reflects what's being applied.
+    const state = loadState();
+    if (state) {
+      if (elemSel && state.element) elemSel.value = state.element;
+      if (dirSel && state.lowerBetter) dirSel.value = 'lower';
+      resume(dropdown, status, state);
+    }
+  }
+
+  // Build a <select> from [value, label] pairs.
+  function makeSelect(id, pairs) {
+    const sel = document.createElement('select');
+    sel.id = id;
+    sel.style.cssText = 'margin-left:6px;';
+    pairs.forEach(function (pair) {
+      const o = document.createElement('option');
+      o.value = pair[0];
+      o.textContent = pair[1];
+      sel.appendChild(o);
+    });
+    return sel;
+  }
+
+  // --- Collapse all / Expand all ----------------------------------------
+  // Sits above the first category on any categorized inventory view (not just
+  // the equipment one), so it is built independently of the optimizer.
+  function buildCollapseBar() {
+    if (document.getElementById(COLLAPSE_BAR_ID)) return;
+
+    const firstBox = document.querySelector('table.stuffbox');
+    if (!firstBox) return; // not the categorized list view
+
+    const bar = document.createElement('div');
+    bar.id = COLLAPSE_BAR_ID;
+    bar.style.cssText = 'text-align:center;margin:4px auto;padding:4px;width:95%;';
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.style.cssText = 'cursor:pointer;padding:2px 10px;font-weight:bold;';
+    bar.appendChild(btn);
+
+    // Decide the button's next action and label from the live page state: if
+    // every category is currently open, the next click collapses them all;
+    // otherwise (all closed or a mix) the next click expands them all.
+    function refreshLabel() {
+      const entries = getEntries();
+      const allOpen = entries.length > 0 && entries.every(function (e) {
+        return !isCollapsed(e.div);
+      });
+      btn.dataset.action = allOpen ? 'collapse' : 'expand';
+      btn.textContent = allOpen ? 'Collapse all' : 'Expand all';
+    }
+
+    btn.addEventListener('click', function () {
+      const collapse = btn.dataset.action === 'collapse';
+      getEntries().forEach(function (e) { flipTo(e, collapse); });
+      refreshLabel();
+    });
+
+    const anchor = firstBox.closest('a[name]') || firstBox;
+    anchor.parentNode.insertBefore(bar, anchor);
+    refreshLabel();
+  }
+
+
+  // === feature: charpane heal and buff buttons ==========================
+  //
+  // Was its own charpane-heal.js (which had already absorbed
+  // skills-cast-max.js). Two entries: the "heal" button by the HP line, and
+  // the "max" button on each prolongable buff. They share one fetch of the
+  // skills page and one sessionStorage cache of it, which matters because the
+  // charpane is rebuilt on most turns.
+  //
+  // #tm-charpane-heal IS A CROSS-FRAME API: auto-mine.js reaches into the
+  // charpane and clicks that button when a run hits its HP floor. Renaming
+  // the id silently breaks mining runs -- see AGENTS.md.
+  //
+  // Renamed on the way in: makeButton -> makeHealButton (the host's makeButton
+  // builds a different kind of button), getStatus -> healStatus (it throws;
+  // bossStatus does not), addButton -> addHealButton. ORIGIN was dropped as a
+  // duplicate of the host's.
+
+  // This script runs INSIDE the charpane frame, so `document` is the sidebar
+  // and same-origin fetches to api.php / the skills form work directly.
+  //
+  // Design mirrors TwilightHeroes/header-heal.js: a configurable, priority-
+  // ordered list of heal skills matched against the skills page *by name*, so
+  // there are no hardcoded skill ids -- each id is scraped from the page's
+  // `whichskill=<id>` icon links, and the pwd hash comes from api.php. Casts go
+  // to runskillz.php (ajax=1). Unlike the TH version we don't track MP
+  // cost at all -- after each cast we re-read HP and judge the cast purely by
+  // whether HP went up. That naturally handles heal-to-full skills, per-cast
+  // heals, out-of-MP, and once-per-day cooldowns without special cases.
+  //
+  // This file holds TWO charpane features, because they read the same page:
+  //
+  //   1. the "heal" button by the HP line (below), and
+  //   2. the "max" button next to each prolongable buff (further down).
+  //
+  // Both need to know what the skills page lists, so there is exactly one
+  // fetchSkillsDoc() and one sessionStorage cache of it, and one scrape of it
+  // (buildSkillMap) that the heal half reads ids out of and the max half reads
+  // names out of. These were two scripts and had drifted into two copies of
+  // that; keep it one. Each half owns its own idempotency guard, so one being
+  // absent from a given charpane (no HP icon, no prolongable buffs) never
+  // suppresses the other. Note the KoL counterpart to
+  // TwilightHeroes/skills-cast-max.js lives here now, not under that name.
+
+  // ---------------------------------------------------------------------------
+  // Configuration: the heal skills to consider, highest priority first.
+  //
+  //   name     - matched against the START of a skill's <option> text in the
+  //              skills form (case-insensitive), e.g. "Cannelloni Cocoon".
+  //   priority - lower numbers are tried first. Each pass, skills are tried in
+  //              priority order until one actually raises HP; then we start over
+  //              from the top. When no skill raises HP, we stop.
+  //
+  // Listing a skill you don't own is harmless -- it just won't be found in the
+  // form. Adjust this list to whatever heals your class/path actually has.
+  // ---------------------------------------------------------------------------
+  const HEAL_SKILLS = [
+    { name: 'Cannelloni Cocoon', priority: 1 }, // Sauceror: heals to full
+    { name: 'Lasagna Bandages', priority: 2 },
+    { name: 'Tongue of the Walrus', priority: 3 }, // Seal Clubber: large heal
+    { name: 'Disco Power Nap', priority: 4 },
+    { name: 'Disco Nap', priority: 5 },
+    { name: 'Saucy Salve', priority: 6 }, // cheap top-up
+  ];
+
+  // Hard cap on total heal casts so a misread (HP that never reaches max) can't
+  // loop forever firing requests.
+  const MAX_CASTS = 60;
+
+  // How many single casts the "max" loop fallback will attempt before giving
+  // up, in case MP can't be read (so it can't run away firing requests forever).
+  const LOOP_CAST_CAP = 60;
+
+  // Pages that may host the skill list. KoL renders each usable skill as an
+  // icon whose link/onclick references the skill id via `whichskill=<id>`
+  // (e.g. desc_skill.php?whichskill=3012). The skill name comes from the icon's
+  // title/alt. We probe these pages in order and use the first that contains
+  // such references -- so the ids come straight from the page, never hardcoded.
+  const SKILL_PAGE_CANDIDATES = ['skillz.php', 'skills.php'];
+
+  // The fetched skills page is cached for the session so the frequent charpane
+  // reloads (every adventure) don't re-hit the server -- what it lists only
+  // changes when you learn/forget a skill, which the refresh button forces.
+  const CACHE_KEY = 'tm-skills-cast-max-html';
+
+  // --- stat reading -----------------------------------------------------------
+
+  // api.php is KoL's canonical status endpoint and returns JSON with hp/maxhp/
+  // mp/maxmp (and pwd). We use it instead of scraping the charpane DOM because
+  // the live DOM is stale right after a background cast, and the JSON is exact.
+  async function healStatus() {
+    const res = await fetch(ORIGIN + '/api.php?what=status&for=charpane-heal', {
+      credentials: 'same-origin', cache: 'no-store',
+    });
+    if (!res.ok) throw new Error('api.php returned HTTP ' + res.status);
+    const j = await res.json();
+    const num = v => parseInt(String(v).replace(/,/g, ''), 10);
+    return {
+      hp: { cur: num(j.hp), max: num(j.maxhp) },
+      mp: { cur: num(j.mp), max: num(j.maxmp) },
+      pwd: j.pwd, // password hash, needed to POST/GET the skill cast
+    };
+  }
+
+  // --- skills page scraping & casting ----------------------------------------
+
+  // Fetch + parse the first candidate page that actually lists skills (contains
+  // any `whichskill=<id>` reference). Returns a Document or null. Caches the raw
+  // HTML in sessionStorage so repeated charpane reloads don't re-fetch, and so
+  // the heal half and the max half share one round trip.
+  async function fetchSkillsDoc() {
+    try {
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      if (cached) return new DOMParser().parseFromString(cached, 'text/html');
+    } catch (e) { /* sessionStorage may be unavailable; fetch fresh */ }
+    for (const path of SKILL_PAGE_CANDIDATES) {
+      try {
+        const res = await fetch(ORIGIN + '/' + path, { credentials: 'same-origin', cache: 'no-store' });
+        if (!res.ok) continue;
+        const html = await res.text();
+        if (!/whichskill=\d+/.test(html)) continue;
+        try { sessionStorage.setItem(CACHE_KEY, html); } catch (e) { /* ignore */ }
+        return new DOMParser().parseFromString(html, 'text/html');
+      } catch (e) { /* try the next candidate */ }
+    }
+    return null;
+  }
+
+  // Build a list of { name (lowercased), id } from the skills page. Each usable
+  // skill icon links/onclicks to `...whichskill=<id>...` and carries the skill
+  // name in the icon's title/alt (or link text). The id is read from the page,
+  // so we never hardcode skill ids. A legacy <select name="whichskill"> is also
+  // honoured if present, for resilience across KoL skin changes.
+  function buildSkillMap(doc) {
+    const map = [];
+    const seen = new Set();
+    const add = (name, id) => {
+      name = (name || '').trim().toLowerCase();
+      if (!name) return;
+      const key = name + '|' + id;
+      if (seen.has(key)) return;
+      seen.add(key);
+      map.push({ name, id: String(id) });
+    };
+
+    for (const el of doc.querySelectorAll('[href*="whichskill="], [onclick*="whichskill="]')) {
+      const ref = (el.getAttribute('href') || '') + ' ' + (el.getAttribute('onclick') || '');
+      const m = ref.match(/whichskill=(\d+)/);
+      const img = el.tagName === 'IMG' ? el : el.querySelector('img');
+      const name = (img && (img.getAttribute('title') || img.getAttribute('alt'))) || el.textContent;
+      add(name, m ? m[1] : null);
+    }
+
+    for (const select of doc.querySelectorAll('select[name="whichskill"]')) {
+      for (const opt of select.options) add(opt.textContent, opt.value);
+    }
+
+    return map;
+  }
+
+  // Resolve a configured skill name to its id by prefix-matching the page's
+  // skill names (case-insensitive), mirroring the original by-name behaviour.
+  // An entry with no readable id can't be cast by id, so it's skipped here --
+  // it still counts as castable for the max buttons, which cast by href.
+  function findSkillId(skillMap, name) {
+    const target = name.trim().toLowerCase();
+    const hit = skillMap.find(s => s.id && s.name.startsWith(target));
+    return hit ? hit.id : null;
+  }
+
+  // The max half's view of the same scrape: just the castable names.
+  function skillNameSet(skillMap) {
+    return new Set(skillMap.map(s => s.name));
+  }
+
+  // Cast a skill once via runskillz.php with ajax=1 so it fires without
+  // rendering a full page. The pwd hash comes from api.php (see healStatus).
+  async function castOnce(id, pwd) {
+    const params = new URLSearchParams({
+      action: 'Skillz', whichskill: id, quantity: '1', ajax: '1',
+    });
+    if (pwd) params.set('pwd', pwd);
+    await fetch(ORIGIN + '/runskillz.php?' + params.toString(), {
+      credentials: 'same-origin', cache: 'no-store',
+    });
+  }
+
+  // --- main loop --------------------------------------------------------------
+
+  let running = false;
+
+  async function runHeal(btn) {
+    if (running) return;
+    running = true;
+    setBusy(btn, true, '…');
+
+    try {
+      let status = await healStatus();
+      if (!status.hp.max) { alert('Heal: could not read your HP.'); return; }
+      if (status.hp.cur >= status.hp.max) { return; } // already full
+
+      // Discover each configured skill's id once; ids don't change between casts.
+      const doc = await fetchSkillsDoc();
+      if (!doc) { alert('Heal: could not find the skills page.'); return; }
+      const skillMap = buildSkillMap(doc);
+      const skills = HEAL_SKILLS
+        .slice()
+        .sort((a, b) => a.priority - b.priority)
+        .map(s => {
+          const id = findSkillId(skillMap, s.name);
+          return id ? Object.assign({}, s, { id }) : null;
+        })
+        .filter(Boolean);
+
+      if (!skills.length) {
+        alert('Heal: none of the configured heal skills were found.');
+        return;
+      }
+
+      let casts = 0;
+      // Each outer pass: try skills in priority order until one raises HP, then
+      // restart from the top. Stop when HP is full, nothing helped, or we hit
+      // the cast cap.
+      while (status.hp.cur < status.hp.max && casts < MAX_CASTS) {
+        let progressed = false;
+        for (const skill of skills) {
+          if (status.hp.cur >= status.hp.max || casts >= MAX_CASTS) break;
+          casts++;
+          setBusy(btn, true, 'heal ' + casts);
+          await castOnce(skill.id, status.pwd);
+          const after = await healStatus();
+          if (after.hp.cur > status.hp.cur) {
+            status = after;
+            progressed = true;
+            break; // restart from highest priority
+          }
+          status = after; // cast didn't help; try the next, cheaper skill
+        }
+        if (!progressed) break; // no skill could raise HP -> done
+      }
+    } catch (e) {
+      alert('Heal failed: ' + (e && e.message ? e.message : e));
+    } finally {
+      running = false;
+      // Refresh the visible charpane so HP/MP reflect what we cast.
+      reload();
+    }
+  }
+
+  // --- button -----------------------------------------------------------------
+
+  function setBusy(btn, busy, label) {
+    btn.disabled = busy;
+    btn.style.opacity = busy ? '0.5' : '1';
+    btn.style.cursor = busy ? 'default' : 'pointer';
+    btn.textContent = label;
+  }
+
+  // Shared by both halves: after casting anything, the visible charpane is
+  // stale, so refresh it.
+  function reload() {
+    window.location.reload();
+  }
+
+  function makeHealButton() {
+    const btn = document.createElement('button');
+    btn.id = 'tm-charpane-heal';
+    btn.type = 'button';
+    btn.textContent = 'heal';
+    btn.title = 'Cast heal skills until HP is full or none can raise it';
+    btn.style.cssText = [
+      'margin-left:3px',
+      'padding:0 3px',
+      'font-size:8px',
+      'font-family:arial,helvetica,sans-serif',
+      'line-height:11px',
+      'height:13px',
+      'vertical-align:middle',
+      'cursor:pointer',
+      'border:1px solid #888',
+      'border-radius:2px',
+      'background:#eee',
+      'white-space:nowrap',
+    ].join(';');
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      runHeal(btn);
+    });
+    return btn;
+  }
+
+  // Place the button in the HP cell -- the <td> holding the hp.gif icon, whose
+  // text reads "<cur> / <max>". Fall back to the body top if not found.
+  function addHealButton() {
+    // Idempotency: a previous run may already have inserted the button.
+    if (document.getElementById('tm-charpane-heal')) return;
+
+    const btn = makeHealButton();
+    const imgs = document.getElementsByTagName('img');
+    for (let i = 0; i < imgs.length; i++) {
+      if (!/hp\.gif/i.test(imgs[i].getAttribute('src') || '')) continue;
+      const td = imgs[i].closest ? imgs[i].closest('td') : imgs[i].parentNode;
+      if (td) { td.appendChild(btn); return; }
+    }
+    document.body.insertBefore(btn, document.body.firstChild);
+  }
+
+  // ===========================================================================
+  // The "max" button on each prolongable buff
+  // ===========================================================================
+  //
+  // Each prolongable buff is an `<a class="upeffect" href="upeffect.php?efid=
+  // ...&qty=1&pwd=HASH">` carrying its own pwd hash. We reuse that href rather
+  // than rebuilding it, so we never have to hunt for the pwd ourselves. The
+  // existing charpane code already multi-casts by swapping `qty=1` -> `qty=N`
+  // and appending `&ajax=1`; we do the same.
+
+  // ---------------------------------------------------------------------------
+  // MP reading
+  // ---------------------------------------------------------------------------
+
+  // Read current MP as a number (or null) by finding the cell with the mp.gif
+  // icon, whose text reads "<cur> / <max>". `root` is any document/element to
+  // scan: the live charpane, or a parsed re-fetch of it.
+  function readMpFrom(root) {
+    const imgs = root.getElementsByTagName('img');
+    for (let i = 0; i < imgs.length; i++) {
+      const src = imgs[i].getAttribute('src') || '';
+      if (!/mp\.gif/i.test(src)) continue;
+      const td = imgs[i].closest ? imgs[i].closest('td') : imgs[i].parentNode;
+      const host = td || imgs[i].parentNode;
+      if (!host) continue;
+      // \s matches the &nbsp; KoL puts around the "/"; textContent (live DOM or
+      // a parsed document) exposes it as a real char, so this parses cleanly.
+      const m = (host.textContent || '').match(/([\d,]+)\s*\/\s*([\d,]+)/);
+      if (m) return parseInt(m[1].replace(/,/g, ''), 10);
+    }
+    return null;
+  }
+
+  // Fresh MP read by re-fetching the charpane and parsing it with the same
+  // logic that works on the live DOM. We use this (not api.php) because the
+  // live DOM is stale right after a background ajax cast, and charpane.php is
+  // the canonical source we already know how to read. Returns a number/null.
+  function readMpFresh() {
+    return fetch('charpane.php', { credentials: 'same-origin', cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.text() : null; })
+      .then(function (html) {
+        if (!html) return null;
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        return readMpFrom(doc);
+      })
+      .catch(function () { return null; });
+  }
+
+  // Is `skill` (the name read off the charpane up-arrow) castable per the set
+  // scraped from skillz.php? Exact match first, then a tolerant prefix match in
+  // either direction, since a skill's name and its effect-arrow label can differ
+  // slightly in punctuation/length.
+  function isCastable(set, skill) {
+    const s = (skill || '').trim().toLowerCase();
+    if (!s) return false;
+    if (set.has(s)) return true;
+    for (const n of set) {
+      if (n.startsWith(s) || s.startsWith(n)) return true;
+    }
+    return false;
+  }
+  // ---------------------------------------------------------------------------
+  // casting
+  // ---------------------------------------------------------------------------
+
+  // Cast a buff `n` times via its up-arrow href. Resolves with the response
+  // text so the caller can detect KoL's "no|<reason>" failure format.
+  function cast(href, n) {
+    const url = href.replace('qty=1', 'qty=' + n) +
+      (href.indexOf('ajax=') === -1 ? '&ajax=1' : '');
+    return fetch(url, { credentials: 'same-origin', cache: 'no-store' })
+      .then(function (r) { return r.text(); });
+  }
+
+  // KoL signals a failed cast with a response beginning "no|<reason>".
+  function failureReason(text) {
+    const m = (text || '').match(/^\s*no\|([^|]*)/i);
+    return m ? m[1].trim() : null;
+  }
+  // Fallback used when the MP delta can't be measured: just keep casting once
+  // at a time until KoL refuses (out of MP / at the cap), then refresh. Capped
+  // so a parsing problem can't fire requests endlessly.
+  function loopCast(href, name, left) {
+    if (left <= 0) { reload(); return; }
+    cast(href, 1).then(function (out) {
+      if (failureReason(out)) { reload(); return; }
+      loopCast(href, name, left - 1);
+    }).catch(function () { reload(); });
+  }
+
+  // Cast `name` (via `href`) as many times as current MP allows. We don't know
+  // the player's *effective* per-cast cost up front (gear/effects discount it),
+  // so we cast once, measure the MP drop, then cast floor(remaining / cost)
+  // more in a single request. Total casts == floor(startMp / cost) = the max
+  // affordable. Refreshes the charpane when done.
+  function castMax(btn, href, name) {
+    const original = btn.textContent;
+    setBusy(btn, true, '…');
+
+    const startMp = readMpFrom(document);
+
+    // Probe cast: one cast tells us the real per-cast MP cost.
+    cast(href, 1).then(function (out) {
+      const reason = failureReason(out);
+      if (reason) {
+        // Already maxed, out of MP for even one, etc. Reflect new state.
+        alert('Cast max (' + name + '): ' + reason + '.');
+        reload();
+        return;
+      }
+
+      readMpFresh().then(function (mpAfter) {
+        // If we couldn't read MP before and/or after, we can't compute the
+        // cost -- fall back to casting one at a time until KoL refuses.
+        if (startMp == null || mpAfter == null) {
+          loopCast(href, name, LOOP_CAST_CAP);
+          return;
+        }
+        const cost = startMp - mpAfter;
+        if (cost <= 0) {
+          // Free cast, or MP moved unexpectedly; cast-till-refused instead.
+          loopCast(href, name, LOOP_CAST_CAP);
+          return;
+        }
+        const more = Math.floor(mpAfter / cost);
+        if (more <= 0) { reload(); return; }
+        cast(href, more).then(reload).catch(reload);
+      });
+    }).catch(function (err) {
+      console.error('Cast max: cast failed.', err);
+      alert('Cast max: the cast request failed (see console).');
+      setBusy(btn, false, original);
+    });
+  }
+  // ---------------------------------------------------------------------------
+  // buttons
+  // ---------------------------------------------------------------------------
+
+  function makeMaxButton(href, name) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'tm-cast-max';
+    btn.textContent = 'max';
+    btn.title = 'Cast ' + name + ' as many times as your MP allows';
+    btn.style.cssText = [
+      'margin-left:2px',
+      'padding:0 3px',
+      'font-size:8px',
+      'font-family:arial,helvetica,sans-serif',
+      'line-height:11px',
+      'height:13px',
+      'vertical-align:middle',
+      'cursor:pointer',
+      'border:1px solid #888',
+      'border-radius:2px',
+      'background:#eee',
+      'white-space:nowrap'
+    ].join(';');
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      castMax(btn, href, name);
+    });
+    return btn;
+  }
+
+  // A "refresh skills" button placed below the buff list. Clears the cached
+  // skillz.php, drops every max button, and re-enhances -- so a skill learned or
+  // lost mid-session is reflected without opening a new tab. Anchored to the
+  // table holding the buffs; no-op if there are no prolongable buffs to anchor.
+  function addRefreshButton() {
+    if (document.getElementById('tm-cast-max-refresh')) return;
+    const anchor = document.querySelector('a.upeffect');
+    const table = anchor && anchor.closest('table');
+    if (!table || !table.parentNode) return;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.id = 'tm-cast-max-refresh';
+    btn.textContent = '↻ refresh skills';
+    btn.title = 'Re-check skillz.php for castable skills and rebuild the max buttons';
+    btn.style.cssText = [
+      'padding:0 4px',
+      'font-size:8px',
+      'font-family:arial,helvetica,sans-serif',
+      'line-height:13px',
+      'height:15px',
+      'cursor:pointer',
+      'border:1px solid #888',
+      'border-radius:2px',
+      'background:#eee',
+      'white-space:nowrap'
+    ].join(';');
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (btn.disabled) return;
+      const original = btn.textContent;
+      setBusy(btn, true, '…');
+      try { sessionStorage.removeItem(CACHE_KEY); } catch (err) { /* ignore */ }
+      for (const b of document.querySelectorAll('.tm-cast-max')) b.remove();
+      for (const l of document.querySelectorAll('a.upeffect[data-tm-cast-max]')) {
+        l.removeAttribute('data-tm-cast-max');
+      }
+      enhance().then(function () { setBusy(btn, false, original); });
+    });
+
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'text-align:center;margin:3px 0;';
+    wrap.appendChild(btn);
+    table.insertAdjacentElement('afterend', wrap);
+  }
+  // ---------------------------------------------------------------------------
+  // enhance
+  // ---------------------------------------------------------------------------
+
+  // Item-granted buffs share the .upeffect / upeffect.php link with cast skills,
+  // but their up-arrow tooltip reads "Click to use ..." instead of "Click to
+  // cast ...". "Cast as many as MP allows" is meaningless for an item, so only
+  // act on arrows whose tooltip says cast -- and the skill name itself is the
+  // text after "cast", which we match against skillz.php. Returns the skill name
+  // or null (item-use buff / no tooltip).
+  function castSkillName(link) {
+    const img = link.querySelector('img');
+    const tip = (img && (img.getAttribute('title') || img.getAttribute('alt'))) || '';
+    const m = tip.match(/click to cast\s+(.+)/i);
+    return m ? m[1].trim() : null;
+  }
+
+  async function enhance() {
+    const links = document.querySelectorAll('a.upeffect');
+    const pending = [];
+    for (let i = 0; i < links.length; i++) {
+      const link = links[i];
+      // Idempotency: skip a link we've already processed this page load.
+      if (link.getAttribute('data-tm-cast-max')) continue;
+      const href = link.getAttribute('href');
+      if (!href || href.indexOf('upeffect.php') === -1) continue;
+      const skill = castSkillName(link);
+      if (!skill) continue; // item-use buff, not a cast skill
+      pending.push({ link: link, href: href, skill: skill });
+    }
+    if (!pending.length) { addRefreshButton(); return; }
+
+    // Resolve castability against skillz.php. If it can't be fetched we don't
+    // know what's castable, so fall back to the old behaviour (button on every
+    // cast arrow) rather than silently dropping the feature on a transient error.
+    const doc = await fetchSkillsDoc();
+    const castable = doc ? skillNameSet(buildSkillMap(doc)) : null;
+
+    for (const p of pending) {
+      p.link.setAttribute('data-tm-cast-max', '1');
+      if (castable && !isCastable(castable, p.skill)) continue;
+      const name = p.link.getAttribute('rel') || p.skill || 'this buff';
+      p.link.insertAdjacentElement('afterend', makeMaxButton(p.href, name));
+    }
+    addRefreshButton();
+  }
+
   // === feature registry =================================================
 
   const FEATURES = [
@@ -1409,6 +3624,19 @@
     { name: 'inventory-mall-link', path: /\/inventory\.php/i, run: inventoryMallLinks },
     { name: 'mcd-always-visible', path: /\/charpane\.php/i, run: mcdAlwaysVisible },
     { name: 'daily-dungeon-skips', path: /\/choice\.php/i, run: dailyDungeonSkips },
+    { name: 'sell-sort', path: /\/sellstuff_ugly\.php/i, run: sellSort },
+    { name: 'boss-aggro-warn', path: /\/(place|cobbsknob|crypt|cellar)\.php/i,
+      run: bossAggroWarn },
+    { name: 'wiki-last-adventure', path: /\/charpane\.php/i, run: linkLastAdventure },
+    { name: 'wiki-title-bar', path: /\/(place|choice|crypt)\.php/i, run: linkTitleBar },
+    { name: 'wiki-quests', path: /\/questlog\.php/i, run: linkQuests },
+    { name: 'wiki-monster', path: /\/fight\.php/i, run: linkMonster },
+    { name: 'wiki-drops', path: /\/fight\.php/i, run: linkDrops },
+    { name: 'wiki-inventory', path: /\/inventory\.php/i, run: linkInventory },
+    { name: 'inventory-collapse', path: /\/inventory\.php/i, run: buildCollapseBar },
+    { name: 'equip-optimize', path: /\/inventory\.php/i, run: buildEquipOptimizer },
+    { name: 'charpane-heal', path: /\/charpane\.php/i, run: addHealButton },
+    { name: 'charpane-cast-max', path: /\/charpane\.php/i, run: enhance },
   ];
 
   function run() {

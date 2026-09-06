@@ -3,14 +3,16 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/auto-mine.js
-// @version      0.5
-// @description  A port of the loathers/oreo KoLmafia script to the browser: farms 1,970 carat gold in the Velvet / Gold Mine. Whenever you are looking at mining.php it paints its advice onto the mine -- the recommended square, the route to it, and why -- and puts a "Mine" button in that same advice box, which opens a panel where you pick a strategy (pjb, oreo, ev, ev-cluster), a visibility mode and a turn budget and press Start; the run then drives mining.php from the menu frame, choosing each square by oreo's expected-value model and finding a new cavern when nothing left is worth a turn. The panel also keeps a running total of the turns you have spent mining today, which starts over at each KoL rollover. Unlike oreo it never buys or equips anything -- it reads what you already have and refuses to start when something is missing. The one exception is healing: when HP reaches the floor it can press charpane-heal.js's own "heal" button and carry on, which you can switch off in the panel.
+// @version      0.6
+// @description  A port of the loathers/oreo KoLmafia script to the browser: farms 1,970 carat gold in the Velvet / Gold Mine. Whenever you are looking at mining.php it paints its advice onto the mine -- the recommended square, the route to it, and why -- and puts a "Mine" button in that same advice box, which opens a panel where you pick a strategy (pjb, oreo, ev, ev-cluster), a visibility mode and a turn budget and press Start; the run then drives mining.php from the menu frame, choosing each square by oreo's expected-value model and finding a new cavern when nothing left is worth a turn. The panel also keeps a running total of the turns you have spent mining today, which starts over at each KoL rollover. Unlike oreo it never buys or equips anything -- it reads what you already have and refuses to start when something is missing. The one exception is healing: when HP reaches the floor it can press ux-enhancers.js's own "heal" button and carry on, which you can switch off in the panel. On any mine page -- including Itznotyerzitz, where the advisor stays quiet -- it also makes the twinkling "Promising Chunk of Wall" tiles stand out with a constant pulsing gold glow and subtly marks the other mineable tiles.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
 // @match        https://www.kingdomofloathing.com/topmenu.php*
 // @match        https://kingdomofloathing.com/topmenu.php*
 // @match        https://www.kingdomofloathing.com/mining.php*
 // @match        https://kingdomofloathing.com/mining.php*
+// @match        https://www.kingdomofloathing.com/mine.php*
+// @match        https://kingdomofloathing.com/mine.php*
 // @grant        none
 
 // ==/UserScript==
@@ -29,13 +31,24 @@
   //                  FRAME" below; same reasoning as auto-combat.js.
   //   mining.php  -- the advisor overlay, and the button that starts a run,
   //                  which sits in the advisor's own box.
+  //   any mine    -- the tile highlight (gold glow on the sparkles, a dashed
+  //                  mark on the other diggable squares).
+  //
+  // The last two are gated SEPARATELY and that split is the point. oreo's model
+  // only describes mine 6, so the advisor and the Start button appear only
+  // there, on a readable grid. The highlight commits nothing and is useful in
+  // any mine, so it runs on mining.php and mine.php alike -- which is why it
+  // keeps its own tile detection (a sparkle is an <img> whose src or alt says
+  // so, inside an <a href="mining.php...">) instead of borrowing
+  // readTilesFromDoc. That reader needs KoL's `alt='<Name> (col,row)'` grid
+  // labels; the highlight must survive a mine that doesn't carry them.
   //
   // The button used to live in the charpane, beside Auto Combat's, and it
   // moved here on purpose: the mine is the only place a mining run makes sense
   // to start, the advice already tells you what the run is about to do, and a
   // button next to that advice reads as "do this" rather than as a control
   // stranded three frames away from the thing it drives. The charpane is still
-  // READ across the frames -- for the character name and for charpane-heal.js's
+  // READ across the frames -- for the character name and for ux-enhancers.js's
   // heal button -- but the script no longer runs there.
   //
   // Everything above the page dispatch is defined on both and used by
@@ -43,7 +56,9 @@
   // advisor and the engine must not be able to disagree about the best square.
   const ON_MENU = /\/(awesomemenu|topmenu)\.php/i.test(location.pathname);
   const ON_MINE = /\/mining\.php/i.test(location.pathname);
-  if (!ON_MENU && !ON_MINE) return;
+  // Itznotyerzitz is mine.php; the advisor never runs there, the highlight does.
+  const ON_ANY_MINE = /\/(mining|mine)\.php/i.test(location.pathname);
+  if (!ON_MENU && !ON_ANY_MINE) return;
 
   // ===================================================================
   // WHY THIS RUNS IN THE MENU FRAME
@@ -93,7 +108,7 @@
   // is momentarily unreadable.
   const CHARACTER_KEY = 'tm-automine-character';
 
-  // charpane-heal.js's button. We press that script's button rather than
+  // ux-enhancers.js's button. We press that script's button rather than
   // casting anything ourselves: it already knows which heal skills you own and
   // in what order to try them, and a second copy of that list here would be a
   // second copy to keep in step.
@@ -110,7 +125,7 @@
   const CYCLE_BUDGET_FACTOR = 3;
   const CYCLE_BUDGET_CONSTANT = 40;
 
-  // Pressing the heal button is a click, not a promise -- charpane-heal.js
+  // Pressing the heal button is a click, not a promise -- ux-enhancers.js
   // casts in its own frame and tells us nothing -- so progress is read back
   // from api.php. Poll this often, give up after this many polls, and give up
   // early after this many polls in a row that did not move HP at all.
@@ -871,7 +886,7 @@
   // ===================================================================
 
   // The name is READ from a frame that can be busy, and that is the whole
-  // difficulty. charpane-heal.js finishes by reloading the charpane, and while
+  // difficulty. ux-enhancers.js finishes by reloading the charpane, and while
   // that reload is in flight the charpane has no charsheet.php link -- so a
   // probe run at that moment used to answer 'unknown', the keys became
   // `...:unknown`, and both stores silently switched to an empty bucket. The
@@ -1201,18 +1216,18 @@
   //
   // The script still buys and equips nothing. Healing is the one thing it can
   // now do for itself, and it does it by pressing the "heal" button
-  // charpane-heal.js puts next to the HP line -- that script owns the list of
+  // ux-enhancers.js puts next to the HP line -- that script owns the list of
   // heal skills and the order to try them in, and this one owns none of it.
   //
   // Two consequences worth knowing:
   //
-  //   - No button means no healing. charpane-heal.js may not be installed, and
+  //   - No button means no healing. ux-enhancers.js may not be installed, and
   //     the charpane is rebuilt on most turns, so the button is looked up
   //     fresh every time rather than held.
   //   - The click returns immediately; the casting happens in the other frame
   //     and reports nothing back, and it ends by reloading the charpane, which
   //     destroys the very button we pressed. So progress is read from api.php
-  //     instead. If charpane-heal.js puts up an alert() (no skills found, say),
+  //     instead. If ux-enhancers.js puts up an alert() (no skills found, say),
   //     the tab's modal blocks everything until you dismiss it, and the poll
   //     below simply waits it out.
   // ===================================================================
@@ -1234,10 +1249,10 @@
     }
     const btn = charpaneHealButton();
     if (!btn) {
-      return { status: null, reason: 'no heal button in the charpane (is charpane-heal.js installed?)' };
+      return { status: null, reason: 'no heal button in the charpane (is ux-enhancers.js installed?)' };
     }
     log('HP is ' + status.hp + '; pressing the charpane heal button.');
-    // A disabled button is charpane-heal.js already healing. Don't press it
+    // A disabled button is ux-enhancers.js already healing. Don't press it
     // again -- just wait on the same poll.
     if (!btn.disabled) btn.click();
 
@@ -1644,7 +1659,7 @@
         'Nothing is ever bought or equipped. Dynamite is the price of a stick you ' +
           'already hold, used to discount a route through dull rock; 0 ignores it. ' +
           '"heal at floor" presses the charpane\'s own heal button when HP reaches ' +
-          'the floor instead of stopping; without it, or without charpane-heal.js, ' +
+          'the floor instead of stopping; without it, or without ux-enhancers.js, ' +
           'the run stops there.'
       )
     );
@@ -1883,13 +1898,14 @@
   // beyond one api.php read for the Object Detection check -- which is why it
   // needs no button of its own and simply runs.
   //
-  // Styling note, inherited from mine-sparkle-highlight.js: KoL's CSP allows
-  // inline style ATTRIBUTES but blocks script-injected stylesheets, so CSS
-  // classes and @keyframes silently do nothing and the pulse has to be a JS
-  // timer toggling an inline box-shadow. This one styles the <td> rather than
-  // the <img> on purpose: mine-sparkle-highlight.js owns the img's outline and
-  // box-shadow, and two scripts writing the same property is a fight neither
-  // wins.
+  // Styling note: KoL's CSP allows inline style ATTRIBUTES but blocks
+  // script-injected stylesheets, so CSS classes and @keyframes silently do
+  // nothing and the pulse has to be a JS timer toggling an inline box-shadow.
+  // This one styles the <td> rather than the <img> on purpose: the TILE
+  // HIGHLIGHT section below owns the img's outline and box-shadow, and two
+  // writers on the same property is a fight neither wins. (That section was
+  // its own mine-sparkle-highlight.js before the two were merged, which is
+  // where the split between the elements comes from.)
   // ===================================================================
 
   let advisorTimer = null;
@@ -2051,8 +2067,89 @@
     }
   }
 
+  // ===================================================================
+  // TILE HIGHLIGHT
+  //
+  // Styling is applied via inline element styles (not an injected <style>
+  // element). KoL's Content-Security-Policy allows inline style ATTRIBUTES (the
+  // page uses them everywhere) but blocks script-injected stylesheets, so
+  // @keyframes/CSS classes silently do nothing. The pulse is therefore driven
+  // by a JS timer toggling an inline box-shadow -- the same reason
+  // quest-helper.js's tile-floor puzzle pulses the way it does.
+  //
+  // This paints the <img>; paintAdvice() paints the <td>. They are deliberately
+  // on different elements so the advisor's route and target stay legible on top
+  // of the highlight.
+  // ===================================================================
+
+  const sparkleImgs = [];
+
+  // A tile is mineable when its <img> sits inside an <a href="mining.php...">.
+  // Among those, the "Promising Chunk of Wall" tiles use the twinkling
+  // wallsparkle*.gif images (also flagged in their alt/title text).
+  function styleTiles() {
+    const anchors = document.querySelectorAll('a[href*="mining.php"]');
+    anchors.forEach((a) => {
+      const img = a.querySelector('img');
+      if (!img || img.dataset.mineHighlighted) return;
+
+      const src = (img.getAttribute('src') || '').toLowerCase();
+      const label = ((img.getAttribute('alt') || '') + ' ' +
+                     (img.getAttribute('title') || '')).toLowerCase();
+      const isSparkle = src.indexOf('sparkle') !== -1 ||
+                        label.indexOf('promising') !== -1;
+
+      if (isSparkle) {
+        img.style.outline = '3px solid gold';
+        img.style.outlineOffset = '-3px';
+        img.style.borderRadius = '3px';
+        img.style.position = 'relative';
+        img.style.zIndex = '2';
+        img.style.transition = 'box-shadow 0.45s ease-in-out';
+        sparkleImgs.push(img);
+      } else {
+        img.style.outline = '2px dashed rgba(0,200,255,0.85)';
+        img.style.outlineOffset = '-2px';
+      }
+      img.dataset.mineHighlighted = '1';
+    });
+  }
+
+  function startSparklePulse() {
+    if (window.__mineSparklePulse) return; // one timer only
+    let bright = false;
+    window.__mineSparklePulse = setInterval(() => {
+      if (sparkleImgs.length === 0) return;
+      bright = !bright;
+      const shadow = bright
+        ? '0 0 16px 7px rgba(255,215,0,1)'
+        : '0 0 4px 2px rgba(255,215,0,0.55)';
+      sparkleImgs.forEach((img) => { img.style.boxShadow = shadow; });
+    }, 550);
+  }
+
+  function runHighlight() {
+    styleTiles();
+    startSparklePulse();
+  }
+
+  // The grid is hidden inside #preload until KoL's own window.onload swaps in
+  // #postload, so run after that handler -- later than the advisor, which only
+  // reads alt text and does not care whether the grid is visible. The dataset
+  // guard makes re-runs safe.
+  function bootHighlight() {
+    if (document.readyState === 'complete') {
+      runHighlight();
+    } else {
+      window.addEventListener('load', () => setTimeout(runHighlight, 0));
+    }
+    // Backstop in case the postload swap lands after our first pass.
+    setTimeout(runHighlight, 400);
+  }
+
   function boot() {
     if (ON_MENU) { publishEngine(); return; }
+    if (ON_ANY_MINE) bootHighlight();
     if (ON_MINE) {
       // The grid is inside a div the page reveals in window.onload, so the
       // markup is there from the start even though it is display:none -- alt
