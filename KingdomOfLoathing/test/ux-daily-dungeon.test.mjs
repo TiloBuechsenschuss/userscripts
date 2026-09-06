@@ -167,6 +167,64 @@ check('the skeleton key is not in the table at all',
   JSON.stringify(api.DUNGEON_SKIPS).toLowerCase().includes('skeleton key'),
   false);
 
+// --- coexisting with adventure-choices.js ---------------------------------
+//
+// adventure-choices.js annotates the SAME four rooms: DisplaySpoilers() does
+// `inputs[n].value += " -- " + spoiler` on every submit button, so by the time
+// this feature reads a label it may already carry a spoiler. Neither script
+// declares @run-at, so which one gets there first is not decidable -- the
+// marker has to survive both orders.
+//
+// The spoilers below are the real strings from adventure-choices.js's own
+// table for 690-693.
+
+const annotated = [
+  ['Go through the boring door -- skip to room 8 (no adv loss)', 690],
+  ['Go through the boring door -- skip to room 13 (no adv loss)', 691],
+  ['Use your lockpicks -- pass (no adv loss, 50% chance for key to break)', 692],
+  ['Use your credit card to open the door -- pass if Mus is high enough', 692],
+  ['Use your eleven-foot pole -- pass (no adv loss)', 693],
+];
+check('a free option is still found under an appended spoiler',
+  annotated.map(([l, c]) => hit(c, l)),
+  annotated.map(() => true));
+
+// debug mode appends a different shape; ShowButtonIDs uses " -- buttonID = N."
+check('...and under the debug button-id annotation',
+  hit(692, 'Use your lockpicks -- buttonID = 3.'), true);
+
+// KoL puts its own bracketed suffix on some options; adventure-choices already
+// cuts at "[" before its lookup, so this feature has to as well.
+check('...and under a bracketed suffix',
+  hit(693, 'Use your eleven-foot pole [eleven-foot pole]'), true);
+
+// The whole point of the label table is the negative half, and an annotation
+// must not open a door to it. "Use a skeleton key" is the sharpest case: its
+// spoiler literally contains "no adv loss".
+const annotatedOthers = [
+  ['Try the doorknob -- trigger trap', 692],
+  ['Use a skeleton key -- pass (no adv loss, 50% chance for key to break)', 692],
+  ['Proceed forward cautiously -- Ow.', 693],
+  ['Proceed backwards cautiously -- leave (no adv loss)', 693],
+  ['Pry off a loose panel with your candy cane sword -- item: ???', 690],
+  ['Open the chest -- item: ???', 690],
+];
+check('an annotated dangerous option is still never marked',
+  annotatedOthers.map(([l, c]) => hit(c, l)),
+  annotatedOthers.map(() => false));
+
+// A room still owns its own options, annotation or not.
+check('an annotated free option stays in its own room',
+  [hit(693, 'Use your lockpicks -- pass'), hit(692, 'Use your eleven-foot pole -- pass')],
+  [false, false]);
+
+// KoL's real label for the sword cane carries a trailing word the table has to
+// know about; matching is a list of known labels, never a substring sweep.
+check('the candy cane sword cane is matched under either wording',
+  [hit(693, 'Use your candy cane sword'), hit(693, 'Use your candy cane sword cane')],
+  [true, true]);
+
+
 // --- gating on whichchoice ------------------------------------------------
 
 check('the choice number is read off the hidden input', (() => {

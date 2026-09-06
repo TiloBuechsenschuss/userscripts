@@ -4,7 +4,7 @@
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/auto-mine.js
 // @version      0.6
-// @description  A port of the loathers/oreo KoLmafia script to the browser: farms 1,970 carat gold in the Velvet / Gold Mine. Whenever you are looking at mining.php it paints its advice onto the mine -- the recommended square, the route to it, and why -- and puts a "Mine" button in that same advice box, which opens a panel where you pick a strategy (pjb, oreo, ev, ev-cluster), a visibility mode and a turn budget and press Start; the run then drives mining.php from the menu frame, choosing each square by oreo's expected-value model and finding a new cavern when nothing left is worth a turn. The panel also keeps a running total of the turns you have spent mining today, which starts over at each KoL rollover. Unlike oreo it never buys or equips anything -- it reads what you already have and refuses to start when something is missing. The one exception is healing: when HP reaches the floor it can press charpane-heal.js's own "heal" button and carry on, which you can switch off in the panel. On any mine page -- including Itznotyerzitz, where the advisor stays quiet -- it also makes the twinkling "Promising Chunk of Wall" tiles stand out with a constant pulsing gold glow and subtly marks the other mineable tiles.
+// @description  A port of the loathers/oreo KoLmafia script to the browser: farms 1,970 carat gold in the Velvet / Gold Mine. Whenever you are looking at mining.php it paints its advice onto the mine -- the recommended square, the route to it, and why -- and puts a "Mine" button in that same advice box, which opens a panel where you pick a strategy (pjb, oreo, ev, ev-cluster), a visibility mode and a turn budget and press Start; the run then drives mining.php from the menu frame, choosing each square by oreo's expected-value model and finding a new cavern when nothing left is worth a turn. The panel also keeps a running total of the turns you have spent mining today, which starts over at each KoL rollover. Unlike oreo it never buys or equips anything -- it reads what you already have and refuses to start when something is missing. The one exception is healing: when HP reaches the floor it can press ux-enhancers.js's own "heal" button and carry on, which you can switch off in the panel. On any mine page -- including Itznotyerzitz, where the advisor stays quiet -- it also makes the twinkling "Promising Chunk of Wall" tiles stand out with a constant pulsing gold glow and subtly marks the other mineable tiles.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
 // @match        https://www.kingdomofloathing.com/topmenu.php*
@@ -48,7 +48,7 @@
   // to start, the advice already tells you what the run is about to do, and a
   // button next to that advice reads as "do this" rather than as a control
   // stranded three frames away from the thing it drives. The charpane is still
-  // READ across the frames -- for the character name and for charpane-heal.js's
+  // READ across the frames -- for the character name and for ux-enhancers.js's
   // heal button -- but the script no longer runs there.
   //
   // Everything above the page dispatch is defined on both and used by
@@ -108,7 +108,7 @@
   // is momentarily unreadable.
   const CHARACTER_KEY = 'tm-automine-character';
 
-  // charpane-heal.js's button. We press that script's button rather than
+  // ux-enhancers.js's button. We press that script's button rather than
   // casting anything ourselves: it already knows which heal skills you own and
   // in what order to try them, and a second copy of that list here would be a
   // second copy to keep in step.
@@ -125,7 +125,7 @@
   const CYCLE_BUDGET_FACTOR = 3;
   const CYCLE_BUDGET_CONSTANT = 40;
 
-  // Pressing the heal button is a click, not a promise -- charpane-heal.js
+  // Pressing the heal button is a click, not a promise -- ux-enhancers.js
   // casts in its own frame and tells us nothing -- so progress is read back
   // from api.php. Poll this often, give up after this many polls, and give up
   // early after this many polls in a row that did not move HP at all.
@@ -886,7 +886,7 @@
   // ===================================================================
 
   // The name is READ from a frame that can be busy, and that is the whole
-  // difficulty. charpane-heal.js finishes by reloading the charpane, and while
+  // difficulty. ux-enhancers.js finishes by reloading the charpane, and while
   // that reload is in flight the charpane has no charsheet.php link -- so a
   // probe run at that moment used to answer 'unknown', the keys became
   // `...:unknown`, and both stores silently switched to an empty bucket. The
@@ -1216,18 +1216,18 @@
   //
   // The script still buys and equips nothing. Healing is the one thing it can
   // now do for itself, and it does it by pressing the "heal" button
-  // charpane-heal.js puts next to the HP line -- that script owns the list of
+  // ux-enhancers.js puts next to the HP line -- that script owns the list of
   // heal skills and the order to try them in, and this one owns none of it.
   //
   // Two consequences worth knowing:
   //
-  //   - No button means no healing. charpane-heal.js may not be installed, and
+  //   - No button means no healing. ux-enhancers.js may not be installed, and
   //     the charpane is rebuilt on most turns, so the button is looked up
   //     fresh every time rather than held.
   //   - The click returns immediately; the casting happens in the other frame
   //     and reports nothing back, and it ends by reloading the charpane, which
   //     destroys the very button we pressed. So progress is read from api.php
-  //     instead. If charpane-heal.js puts up an alert() (no skills found, say),
+  //     instead. If ux-enhancers.js puts up an alert() (no skills found, say),
   //     the tab's modal blocks everything until you dismiss it, and the poll
   //     below simply waits it out.
   // ===================================================================
@@ -1249,10 +1249,10 @@
     }
     const btn = charpaneHealButton();
     if (!btn) {
-      return { status: null, reason: 'no heal button in the charpane (is charpane-heal.js installed?)' };
+      return { status: null, reason: 'no heal button in the charpane (is ux-enhancers.js installed?)' };
     }
     log('HP is ' + status.hp + '; pressing the charpane heal button.');
-    // A disabled button is charpane-heal.js already healing. Don't press it
+    // A disabled button is ux-enhancers.js already healing. Don't press it
     // again -- just wait on the same poll.
     if (!btn.disabled) btn.click();
 
@@ -1659,7 +1659,7 @@
         'Nothing is ever bought or equipped. Dynamite is the price of a stick you ' +
           'already hold, used to discount a route through dull rock; 0 ignores it. ' +
           '"heal at floor" presses the charpane\'s own heal button when HP reaches ' +
-          'the floor instead of stopping; without it, or without charpane-heal.js, ' +
+          'the floor instead of stopping; without it, or without ux-enhancers.js, ' +
           'the run stops there.'
       )
     );

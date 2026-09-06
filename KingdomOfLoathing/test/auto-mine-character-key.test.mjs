@@ -7,7 +7,7 @@
 // counter that depends on it.
 //
 // The bug this pins, reported as "turns today resets after pressing charpane
-// heal": charpane-heal.js finishes by reloading the charpane, and during that
+// heal": ux-enhancers.js finishes by reloading the charpane, and during that
 // reload the charpane has no charsheet.php link. The old characterName()
 // probed the frame and answered 'unknown' when the probe came up empty, so
 // every key became `...:unknown` -- an empty bucket. The day's turn count read
@@ -104,7 +104,7 @@ check('so is the cavern layout', api.loadLayout()['28'], 'gold');
 
 // --- the charpane reload, which is what pressing heal causes ----------------
 
-drawn.document.querySelector = () => null; // charpane-heal.js reloaded it
+drawn.document.querySelector = () => null; // ux-enhancers.js reloaded it
 check('a blank charpane does not change who we are', api.characterName(), 'Tilo');
 check('the day total survives the reload', api.dailyTurns(DAY), 7);
 check('so does the layout', api.loadLayout()['28'], 'gold');

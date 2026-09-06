@@ -691,7 +691,7 @@
   //   <td style="background-color: blue"><b style="color: white">Name</b></td>
   // A chained choice shows a "Results:" recap in that same bar inside
   // #results first, which is not an adventure name -- skip it and take the
-  // first real one. (Same locator as wiki-links.js's title-bar branch.)
+  // first real one. (Same locator as the wiki-links title-bar feature in ux-enhancers.js.)
   function readChoiceName(doc) {
     const tds = doc.querySelectorAll('td[style*="background-color: blue"]');
     for (const td of tds) {

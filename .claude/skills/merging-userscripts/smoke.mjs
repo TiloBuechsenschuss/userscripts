@@ -57,6 +57,8 @@ const document = {
   createElement: el,
   createTextNode: el,
   documentElement: { innerHTML: '' },
+  images: [],
+  forms: [],
   body: el(),
   cookie: '',
 };
@@ -81,6 +83,16 @@ window.top = window;
 let failed = null;
 process.on('unhandledRejection', (e) => { failed = e; });
 
+// A host with a feature registry (ux-enhancers.js) wraps each feature in
+// try/catch and reports a failure through console.error. Without this, such a
+// host "passes" while a feature is broken -- the exact thing we are looking for.
+const realError = console.error.bind(console);
+const shim = Object.create(console);
+shim.error = (...a) => {
+  if (!failed) failed = new Error('console.error: ' + a.map(String).join(' '));
+  realError(...a);
+};
+
 try {
   const fn = new Function(
     'document', 'location', 'window', 'top', 'sessionStorage', 'localStorage',
@@ -94,7 +106,7 @@ try {
       json: () => Promise.resolve({}),
     }),
     function DOMParser() { this.parseFromString = () => document; },
-    () => {}, () => false, () => ({ display: 'none' }), console);
+    () => {}, () => false, () => ({ display: 'none' }), shim);
 } catch (e) {
   failed = e;
 }

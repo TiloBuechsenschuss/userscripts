@@ -335,18 +335,17 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   score too) with the `<font color>` beside a "Score:" cell as fallback, and an unrecognised
   colour yields **no box at all** rather than a guess about where to spend turns. The link
   carries `target="mainpane"` because the script runs inside the sidebar frame.
-- **Three KoL files each hold two features, on purpose.** There is no module system here — a
+- **KoL has been consolidated down to nine scripts.** There is no module system here — a
   `.js` file is a self-contained IIFE — so the only way two features can share a helper is to
-  live in the same file. Three pairs had drifted into keeping duplicate copies instead, and were
-  merged. Do not split them back apart, and when you touch one half, check whether the shared
-  piece is what you are actually changing:
-  - `charpane-heal.js` — the `heal` button **and** the per-buff `max` buttons (was
-    `skills-cast-max.js`). Shares one `fetchSkillsDoc()` and one `sessionStorage` cache of the
-    skills page, and one `buildSkillMap()` scrape that the heal half reads ids out of and the
-    max half reads names out of (`skillNameSet`). This matters at runtime: the charpane is
-    rebuilt on most turns, and two scripts meant two caches of the same page. Note the KoL
-    counterpart to `TwilightHeroes/skills-cast-max.js` lives here now, not under that name.
-    **`#tm-charpane-heal` is a cross-frame API** — `auto-mine.js` clicks it — so keep the id.
+  live in the same file. Eight standalone scripts were folded into three hosts. Do not split
+  them back apart, and when you touch one, check whether the shared piece is what you are
+  actually changing. The procedure for doing either direction is a skill:
+  `.claude/skills/merging-userscripts/SKILL.md`.
+  - `ux-enhancers.js` — the big one, and now **most of KoL by page count**: eleven features
+    over thirteen pages. It absorbed `sell-sort.js`, `boss-aggro-warn.js`, `wiki-links.js`,
+    `equip-optimize.js` (which had already taken `inventory-collapse.js`) and
+    `charpane-heal.js` (which had already taken `skills-cast-max.js`). See its own entry below
+    for what that means for the registry.
   - `auto-mine.js` — the engine/advisor **and** the mine tile highlight (was
     `mine-sparkle-highlight.js`). The two are gated *separately* and that is the point: the
     advisor and its Start button need mine 6 and a readable grid, the highlight commits nothing
@@ -355,21 +354,40 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
     rather than borrowing `readTilesFromDoc`, which needs KoL's `alt='<Name> (col,row)'` grid
     labels. The highlight paints the `<img>`; `paintAdvice` paints the `<td>` — different
     elements, so the route and target stay legible on top of the highlight.
-  - `equip-optimize.js` — "Optimize for this" **and** the Collapse all / Expand all bar (was
-    `inventory-collapse.js`). Shares `getEntries`/`isCollapsed`/`flipTo`; `expandAllCategories`
-    is now a loop over `flipTo(entry, false)`. Each feature owns its own idempotency guard, so
-    the bar is still built on a non-equipment inventory view where the optimizer bails.
-
-  `daily-checklist.js` and `iotm.js` were considered for the same treatment and deliberately
-  left as two files, so the co-owned `#tm-kol-menu-btns` row above stays exactly as documented:
-  two `getButtonRow()` copies that must not drift, and CSS `order` rather than DOM order.
+  - `iotm.js` and `daily-checklist.js` were considered and deliberately **left as two files**,
+    so the co-owned `#tm-kol-menu-btns` row above stays exactly as documented: two
+    `getButtonRow()` copies that must not drift, and CSS `order` rather than DOM order.
 
   Absorbed files were **deleted**, not stubbed, and dropped from
   `all-in-one/kingdom-of-loathing.js`'s `@require` list. Anyone who installed one standalone
-  keeps their last-fetched copy running until they remove it, so the merged halves each guard on
-  their own element ids and are harmless if a stale copy is also present.
+  keeps their last-fetched copy running until they remove it, so every absorbed feature keeps
+  the element id it guarded on and is harmless if a stale copy is also present. README's
+  **"Merged / removed scripts"** table is where a user finds out where their script went; every
+  removal adds a row.
 
-- `ux-enhancers.js` is the catch-all for unrelated small tweaks. It's a `FEATURES` registry of
+- `ux-enhancers.js` **is no longer just small tweaks** — it is the KoL catch-all, eleven
+  features over thirteen pages, and five former standalone scripts live in it. The registry is
+  what makes that survivable, so keep using it: a feature is a `{ name, path, run }` entry and
+  nothing runs outside one. Two rules follow from the merges.
+  **Everything absorbed became a registry entry, never a top-level statement.** `sell-sort.js`
+  was straight-line code that ran on eval; it is wrapped in `sellSort()` now, because code
+  spliced in at the top level would sit outside the per-feature try/catch and one throw would
+  take the other ten features down with it.
+  **One feature is one page.** A script that spanned several became several entries over one
+  set of shared helpers — the six `wiki-*` entries, and two each for the inventory and charpane
+  pairs — so each page pays only for what it can actually draw, and each half keeps its own
+  idempotency guard rather than one bailing and silencing the other.
+  Names collided once the scopes merged, and the renames are load-bearing: `bossStatus()`
+  returns `{level, equippedIds}` and never throws, `healStatus()` returns `{hp, mp, pwd}` and
+  does — same original name, opposite error contract, **do not re-merge them**. Also
+  `makeHealButton` (the plain `makeButton` builds a KoL `<input class=button>`),
+  `buildEquipOptimizer` (`build` is far too generic here), and `addHealButton`.
+  **`#tm-charpane-heal` is a cross-frame API**: `auto-mine.js` reaches into the charpane and
+  clicks it when a mining run hits its HP floor. Renaming it silently breaks mining runs.
+  Two separate collapse-all implementations live here on purpose — the autosell one mirrors
+  KoL's `sellstuff` cookie, the inventory one `inventory`; different cookies and different
+  section markup, so they are not interchangeable.
+  Historically it was the catch-all for unrelated small tweaks. It's a `FEATURES` registry of
   `{ name, path, run }`, each entry scoped to its own pathname and each `run` wrapped in a
   try/catch so one broken feature can't take the others down — add a tweak as an entry, not as
   a new file, and add its page to `@match`. Two features so far. The Hermit one buys clovers
@@ -478,8 +496,23 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   nothing is already the normal case, since KoL only renders these options when you have the
   item. And **`Use a skeleton key` is deliberately not in the table**: it also passes for no
   adventure, but the key breaks most times, so it isn't free in the sense the green says.
+  Because the label is the key, **another script rewriting it breaks the match** — and one
+  does. `adventure-choices.js` annotates these same four rooms (`DisplaySpoilers()` does
+  `inputs[n].value += " -- " + spoiler` on every submit button), and neither script declares
+  `@run-at`, so which reads the label first is undecidable and the marker simply vanished
+  whenever adventure-choices won the race. `ddLabel` therefore cuts the annotation off before
+  comparing: at `" -- "` (adventure-choices', including its debug `" -- buttonID = N."`) and at
+  `" ["` (KoL's own bracketed suffix — adventure-choices cuts that one too, for the same
+  reason). The clash is one-directional: this feature only sets `style` and inserts a `<div>`,
+  and adventure-choices reads `getElementsByTagName('input')`, so it cannot be broken in return.
+  The match itself stays **exact, against a list of wordings** (`labels`), and must not be
+  loosened into a substring sweep: the chest rooms carry **Pry off a loose panel with your candy
+  cane sword**, which any `includes('candy cane sword')` would paint green — and that option
+  costs an adventure. A wording KoL renders differently gets appended to `labels`; that is why
+  the sword cane is listed under both `use your candy cane sword` and `...sword cane`.
   The labels and choice numbers are the wiki's and are **unverified against a live dungeon**;
-  `ddLabel`/`ddSkipFor` are DOM-free so the table is unit-tested.
+  `ddLabel`/`ddSkipFor` are DOM-free so the table is unit-tested — including every dangerous
+  option under an adventure-choices annotation.
 
 - `auto-combat.js` adds an "Auto" button to the **charpane**, under the Last Adventure
   readout, opening a panel that adventures a chosen zone for a chosen number of
@@ -576,10 +609,10 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   what you already hold — dynamite from `api.php?what=inventory`, Object Detection from the
   status effects — and each missing prerequisite is a named refusal instead. Healing is the
   single exception, and it still casts nothing of its own: when HP reaches the panel's floor it
-  clicks **`charpane-heal.js`'s own `#tm-charpane-heal` button** in the charpane frame, because
+  clicks **`ux-enhancers.js`'s own `#tm-charpane-heal` button** in the charpane frame, because
   that script already owns the list of heal skills and the order to try them in and a second
   copy here would be a second copy to keep in step. The `heal at floor` checkbox turns it off,
-  and with it off — or with `charpane-heal.js` not installed, or a max HP below the floor — the
+  and with it off — or with `ux-enhancers.js` not installed, or a max HP below the floor — the
   run stops at the floor exactly as it did before. The click is fire-and-forget (the other frame
   reports nothing back and ends by reloading itself, destroying the button), so progress is
   polled off `api.php` until HP clears the floor, stalls for four reads, or 40 reads pass. The drill and the
@@ -595,7 +628,7 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   makes sense to start, and the advice beside the button is the run's first move spelled out.
   The script therefore **no longer runs on `charpane.php` at all** and its two `@match` lines are
   gone; the charpane is still *read* across the frames, for the character name and for
-  `charpane-heal.js`'s button, which needs no `@match`. Consequences worth knowing: the button
+  `ux-enhancers.js`'s button, which needs no `@match`. Consequences worth knowing: the button
   appears only where `runAdvisor` gets as far as painting (mine 6, readable grid), which is
   exactly where a run could start; and since the box is repainted on every load, the box is a
   **row of two nodes** — a text span (`#tm-automine-advice-text`) and the button — because the
@@ -631,7 +664,7 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   `<div id='postload'>`), not at the end of the document.
   Both stores are **suffixed with the character name**, and `characterName()` is more careful
   than it looks, for a reason that cost a real bug: the name is read from the charpane's
-  `charsheet.php` link, and `charpane-heal.js` finishes by **reloading the charpane**. During
+  `charsheet.php` link, and `ux-enhancers.js` finishes by **reloading the charpane**. During
   that reload the link isn't there, the probe came up empty, and the old code answered
   `'unknown'` — so every key became `...:unknown`, an empty bucket. The day's turn count read
   back as 0 just after a heal and returned a moment later, and anything written in between went
@@ -666,7 +699,7 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   page, picked squares and reset caverns as intended. Confirmed again at 0.5, after the button
   moved into the advice box: the button appears on `mining.php` and Start drives a run from
   there. The **heal path is confirmed too**: a run that reached the HP floor pressed
-  `charpane-heal.js`'s button, cleared the floor and carried on, so the click-and-poll across
+  `ux-enhancers.js`'s button, cleared the floor and carried on, so the click-and-poll across
   frames works against the real charpane.
   Still **unverified in-game**, and worth saying plainly because each was written against a
   fixture rather than a watched run: the daily counter actually rolling over (it has only been
@@ -1494,7 +1527,7 @@ Current tests:
   refused. Verified to fail against the pre-fix `setDynamitePrice` before being kept.
 - `KingdomOfLoathing/test/auto-mine-character-key.test.mjs` — asserts `auto-mine.js`'s
   `characterName()`, which suffixes both of its `localStorage` keys. It pins the reported bug:
-  a charpane mid-reload (what pressing `charpane-heal.js`'s button causes) has no
+  a charpane mid-reload (what pressing `ux-enhancers.js`'s button causes) has no
   `charsheet.php` link, and answering `'unknown'` there switches both stores to an empty
   bucket — the day's turns read 0 and come back a moment later. A failed probe must fall
   through to the last known name; a probe that *succeeds with a different name* must still
@@ -1509,7 +1542,7 @@ Current tests:
   eating adventures credits no turns, and that a run spanning rollover restarts the day's total
   without restarting its own. On the heal side it pins the two refusals that must not turn into
   a poll for something that cannot happen: a max HP at or below the floor, and no
-  `charpane-heal.js` button in the charpane.
+  `ux-enhancers.js` button in the charpane.
 - `TwilightHeroes/test/quest-helper.test.mjs` — asserts `quest-helper.js`'s per-stage hint
   lookup resolves correctly. If you add quests/stages to that hint map (especially
   overlapping-text stages), add a case here too.
