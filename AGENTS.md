@@ -710,21 +710,49 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   wrong place; check it there first if dynamite never seems to apply.
 
 **Twilight Heroes** is plain (non-frame) pages scraped from table layout. State that must
-survive the full-page reload after equip/unequip/use is stashed in `sessionStorage`
-(see `inventory-filter.js`, keyed per page via `TEXT_KEY`/`TYPE_KEY`). That one script
-serves several pages with the same `<td width=50%><b>name</b></td>` item layout
-(wear.php, inventory.php, use.php) by matching all of them and locating the table from a
-known `<h1>`/`<h2>` heading; extend `HEADINGS` rather than forking the file when another
-such page turns up.
+survive the full-page reload after equip/unequip/use is stashed in `sessionStorage`.
 
-`autobox.js` is a *multi-page* TH script: its `main.php` branch injects the trigger button,
-and its `criminology.php` branch drives the Black Box quest across the page reloads that each
-form submission causes. The "run in progress" flag lives in `sessionStorage` (`th-autobox-active`)
-— the same survive-the-reload pattern, but it spans navigation between two different pages, so
-each branch is gated on `location.pathname` up front (also what makes it safe to bundle). The
-quest-advancing logic it inherits from the legacy original is index-based (`forms.length > 3` →
-submit `forms[2]`, else follow the first `<a>`) and is **unverified against the live page**;
-preserve it faithfully rather than "improving" form heuristics you can't test in-game.
+**TH is three scripts.** Nine were folded into `TwilightHeroes/ux-enhancers.js`, which is the
+counterpart of `KingdomOfLoathing/ux-enhancers.js` and works the same way: a `FEATURES`
+registry of `{ name, path, run }`, each entry scoped to its own pathname and each `run` wrapped
+in a try/catch so one broken feature can't take the others down. Only `auto-combat.js` and
+`puzzle-solver.js` are still separate. Adding a tweak means a function plus a registry row —
+not a new file. Four things about that file are load-bearing:
+
+- **Every absorbed body is inside a function.** Most of these were straight-line code that ran
+  on eval; spliced in at the top level it would sit *outside* the per-feature try/catch, and one
+  throw would take the other features down. Wrapping is also what scoped away the collisions —
+  `path` was a top-level `const` in three of them and `span` in two, and neither is a collision
+  once each body has its own scope.
+- **The shared helpers are the reason the file exists.** `header-heal.js` and
+  `skills-cast-max.js` each carried a byte-identical `SKILLS_URL`, `findSkillOption` and
+  `serializeForm`, and `quest-helper.js` and `wiki-links.js` each their own `WIKI_BASE` /
+  `wikiHref`. There is one of each now, at the top of the file. `fetchSkillsDoc` is
+  skills-cast-max's *cached* version (sessionStorage `th-skills-html`), which the heal path
+  gains for free — casting changes HP and PP, never which skills you own, so the cache can't go
+  stale under it. `wikiHref` is quest-helper's, whose optional `slug` argument makes it a strict
+  superset of wiki-links'. Don't let a feature grow a private copy back.
+- **The journal quest logic stays at file scope**, not inside its feature function: `QUESTS`,
+  `hintFor`, `key`, `normForMatch` and `headingName` are DOM-free and are what
+  `test/quest-helper.test.mjs` reaches through the end-of-IIFE seam, which cannot see inside a
+  wrapper. Only the injection pass is the registry entry.
+- **The nav sidebar's `+max` button is an API.** `auto-combat.js` — which is *not* in this file
+  — finds it and reads its `data-pp-cost` to refresh a buff between fights. The class
+  (`th-cast-max`) and that dataset key must not be renamed.
+
+`inventory-filter` is one feature over three pages that share the same
+`<td width=50%><b>name</b></td>` item layout (wear.php, inventory.php, use.php): it locates the
+table from a known `<h1>`/`<h2>` heading, so extend `HEADINGS` rather than forking it when
+another such page turns up. Its filter state is keyed per page via `TEXT_KEY`/`TYPE_KEY`.
+
+The `autobox` feature is the one that spans a *navigation*: its `main.php` branch injects the
+trigger button, and its `criminology.php` branch drives the Black Box quest across the page
+reloads that each form submission causes, the two halves talking through `sessionStorage`
+(`th-autobox-active`). Both branches stay in **one** registry entry with the original's own
+`location.pathname` test intact, because that pairing *is* the feature. The quest-advancing
+logic it inherits from the legacy original is index-based (`forms.length > 3` → submit
+`forms[2]`, else follow the first `<a>`) and is **unverified against the live page**; preserve
+it faithfully rather than "improving" form heuristics you can't test in-game.
 
 **Fallen London** is a different animal from the other two: a **single-page React app**.
 There are no per-page URLs to `@match` — everything happens under `fallenlondon.com/*`, and

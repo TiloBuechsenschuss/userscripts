@@ -1,4 +1,7 @@
-// Ad-hoc test for TwilightHeroes/quest-helper.js stage matching.
+// Ad-hoc test for the Twilight Heroes journal quest hints.
+//
+// The feature used to be its own quest-helper.js; it now lives in
+// ux-enhancers.js, which absorbed nine TH scripts, so that is what this reads.
 //
 // There's no test runner in this repo (see AGENTS.md). This is a standalone
 // Node script: it reads the userscript, evaluates its IIFE against a stub DOM
@@ -14,13 +17,16 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const scriptPath = join(here, '..', 'quest-helper.js');
+const scriptPath = join(here, '..', 'ux-enhancers.js');
 const src = readFileSync(scriptPath, 'utf8');
 
 // Stub DOM: querySelectorAll returns nothing, so the script's injection pass is
 // a no-op. We only want the internal helpers.
-const fakeDoc = { querySelectorAll: () => [] };
-const fakeLocation = { pathname: '/journal.php' };
+const fakeDoc = { querySelectorAll: () => [], addEventListener: () => {},
+  readyState: 'complete' };
+// A pathname no registry entry matches, so run() dispatches nothing and the
+// stub DOM never has to satisfy nine features -- only the helpers are wanted.
+const fakeLocation = { pathname: '/nowhere.php' };
 
 // Re-expose the IIFE's internals: name the IIFE and have it return the helpers.
 const wrapped = src

@@ -68,17 +68,9 @@ Looking for a script that used to be here? See
 
 | Script | Pages | What it does |
 | --- | --- | --- |
-| `header-heal.js` | header | "Heal" button in the header |
-| `header-hideout-links.js` | header | Extra hideout links in the header |
-| `inventory-filter.js` | wear / inventory / use | Text/type filtering for item lists |
-| `wearables-ui.js` | wear | Improved wearables UI |
-| `sell-sort.js` | sell | Sortable sell list |
-| `skills-cast-max.js` | skills | Cast a skill the maximum number of times |
-| `wiki-links.js` | fight / nav / journal / maps / wear / inventory / use | "W" badge linking the combat monster, non-combat encounter, received items, map areas, the last patrolled area, journal quests, and item names to the TH wiki |
-| `quest-helper.js` | journal | "Next steps" box under each Hero's Journal quest, from a built-in hint map with a TH wiki walkthrough link as fallback |
+| `ux-enhancers.js` | header / skills / nav / inventory / wear / use / sell / journal / fight / maps / main / criminology | The Twilight Heroes catch-all — nine features, each scoped to its own page. **Header:** a "Heal" link that casts your heal skills until HP is full, plus Garage / Rest links next to Hideout. **Skills / nav:** a "max" button per buff that casts it as many times as your PP allows, with a compact version in the sidebar. **Items (inventory / wear / use):** a filter box that narrows the list as you type, with a type dropdown, remembered across the reload equipping or using something causes. **Wear:** sortable columns for your wearables. **Sell:** sort buttons for the item list. **Journal:** the next step for each open quest. **Wiki "W" badges** on combat monsters and drops, your last area, quest titles, map areas and item names. **Main:** a "Get & Equip Black Box" button that drives the Black Box quest through criminology.php for you |
 | `puzzle-solver.js` | goldberg / fight | Goldbergium Door (goldberg.php): solves the contraption for the current goal, shows a component matrix with inventory counts and drop zones, and replays the plan with progress as you build. Bit Player (fight.php): _not yet implemented_ |
 | `auto-combat.js` | fight / nav | Buttons to repeat attack/skill until a fight ends, and to re-adventure the same location and auto-attack fight after fight until a non-combat, low HP, or out of turns |
-| `autobox.js` | main / criminology | "Get & Equip Black Box" button that walks the criminology.php quest steps and equips the box |
 
 **Fallen London** (`FallenLondon/`)
 
@@ -111,6 +103,15 @@ instead, there is nothing to do.
 | `KingdomOfLoathing/wiki-links.js` | [`KingdomOfLoathing/ux-enhancers.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js) | ux-enhancers 1.11 | All seven wiki "W" badges. Now six registry entries over one set of shared helpers, one per page |
 | `KingdomOfLoathing/equip-optimize.js` | [`KingdomOfLoathing/ux-enhancers.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js) | ux-enhancers 1.12 | "Optimize for this" and the Collapse all / Expand all bar (this file had already absorbed `inventory-collapse.js`) |
 | `KingdomOfLoathing/charpane-heal.js` | [`KingdomOfLoathing/ux-enhancers.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js) | ux-enhancers 1.13 | The `heal` button and the per-buff `max` buttons (this file had already absorbed `skills-cast-max.js`). `#tm-charpane-heal` is unchanged, so `auto-mine.js` still finds it across frames |
+| `TwilightHeroes/header-heal.js` | [`TwilightHeroes/ux-enhancers.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/ux-enhancers.js) | ux-enhancers 1.0 | The header "Heal" link. Its skills-page scrape is now shared with the "max" buttons instead of being a second copy |
+| `TwilightHeroes/header-hideout-links.js` | [`TwilightHeroes/ux-enhancers.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/ux-enhancers.js) | ux-enhancers 1.0 | The Garage / Rest links beside Hideout |
+| `TwilightHeroes/inventory-filter.js` | [`TwilightHeroes/ux-enhancers.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/ux-enhancers.js) | ux-enhancers 1.0 | The item filter on inventory / wear / use, including the per-page sessionStorage that survives an equip or use reload |
+| `TwilightHeroes/wearables-ui.js` | [`TwilightHeroes/ux-enhancers.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/ux-enhancers.js) | ux-enhancers 1.0 | Sortable columns on the wear page |
+| `TwilightHeroes/sell-sort.js` | [`TwilightHeroes/ux-enhancers.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/ux-enhancers.js) | ux-enhancers 1.0 | The sort buttons on the sell page |
+| `TwilightHeroes/skills-cast-max.js` | [`TwilightHeroes/ux-enhancers.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/ux-enhancers.js) | ux-enhancers 1.0 | The "max" buttons on skills.php and in the nav sidebar. The sidebar button still carries `data-pp-cost`, which `auto-combat.js` reads |
+| `TwilightHeroes/wiki-links.js` | [`TwilightHeroes/ux-enhancers.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/ux-enhancers.js) | ux-enhancers 1.0 | All the wiki "W" badges — combat monsters and drops, last area, quest titles, map areas, item names |
+| `TwilightHeroes/quest-helper.js` | [`TwilightHeroes/ux-enhancers.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/ux-enhancers.js) | ux-enhancers 1.0 | The journal quest hints. Its `wikiHref` was the more capable of the two and is the one the whole file now uses |
+| `TwilightHeroes/autobox.js` | [`TwilightHeroes/ux-enhancers.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/ux-enhancers.js) | ux-enhancers 1.0 | The "Get & Equip Black Box" button and the criminology.php run it drives |
 
 ## Editing / contributing
 
