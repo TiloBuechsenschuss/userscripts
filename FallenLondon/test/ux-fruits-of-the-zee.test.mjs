@@ -1664,11 +1664,11 @@ check('the feature list, in order',
   api.FEATURES.map((f) => f.name),
   ['launcher', 'faction-capture', 'fotz-capture', 'pending-item',
     'spite-card-ratings', 'zee-card-ratings', 'fotz-card-ratings', 'fotz-depth-control',
-    'fotz-supplication']);
+    'fotz-supplication', 'port-carnelian', 'scientific-voyages']);
 
 check('the panel list, in order',
   api.PANELS.map((p) => p.id),
-  ['factions', 'zailing', 'fruits-of-the-zee']);
+  ['factions', 'zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee']);
 
 check('every panel has an icon, a label and a render function',
   api.PANELS.every((p) => !!p.icon && !!p.label && typeof p.render === 'function'), true);

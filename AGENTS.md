@@ -785,6 +785,11 @@ navigation. Two consequences:
   observer. Adding one: write an idempotent `run()` that bails when its markup is absent, add a
   `{ name, run }` entry to `FEATURES`, and give it **its own badge class and dataset flag** so
   two features can decorate the same element without fighting over one flag.
+  The whole procedure for adding one — where a badge may go, how to source and shape the
+  table, which of the three gate strengths the evidence entitles you to, the tests, and the
+  four other suites that break the moment you touch the registry — is a skill:
+  `.claude/skills/adding-fallen-london-features/SKILL.md`, with a `check.mjs` beside it that
+  audits the wiring.
   Shared plumbing worth reusing rather than re-deriving: `makeBadge`/`attachBadge` (badge
   described as a pure `{text, color, title}` spec, drawn by shared code), `headingName`, and
   `eachCardName`, which walks all three shapes an opportunity card's name takes. Those three
@@ -800,6 +805,15 @@ navigation. Two consequences:
   top-left. **`attachBadge`'s flag stores the value it drew for, not a boolean**: React reuses a
   `.hand__card-container` node for the next card when you play one, so a boolean would leave the
   old card's badge on the new card — a changed value redraws, and a `null` spec clears it.
+  **An `'after'` badge is cleared by walking the whole run of badges following the host**, not
+  just `nextElementSibling` (2026-09-09, with `port-carnelian`). Two features can now badge one
+  heading — `fotz-supplication` and `port-carnelian` both walk `.branch__title` — and since
+  `host.after()` inserts *immediately* after the host, the badge drawn second ends up nearer the
+  heading than the one drawn first. Checking only the immediate sibling then fails to find the
+  feature's own stale badge and leaves two of them behind on a reused node. The walk stops at the
+  first non-badge sibling and removes only the one carrying that feature's class, so clearing one
+  feature's badge still never touches the other's. `ux-port-carnelian.test.mjs` pins all three of
+  those, and the stale-badge one fails against the old single-sibling check.
   **The `title` also opens on tap** (added 2026-09-04, on a report that it was unreachable on a
   phone). A badge's whole argument lives in its `title`, and on a touch screen a `title` is
   invisible: there is no hover, and a long press raises the text-selection menu instead — so on
@@ -1296,6 +1310,111 @@ navigation. Two consequences:
   badge's `attachBadge` value carries the depth and that generation, not just the card name, so
   setting your depth redraws a hand that is already on screen.
 
+  `port-carnelian` is the fourth badge feature, and the first that badges **no cards at all**:
+  *Port Carnelian (Guide)* states outright that the governorship deals none. So it walks
+  `.storylet__heading, .storylet-root__heading` (the storylet in the list and the one you have
+  opened, the same two selectors `wiki-links.js` uses) and `.branch__title` (the options inside
+  it, the selector `fotz-supplication` already walks). It owns a **second** class/flag pair,
+  `PC_BRANCH_CLASS` / `PC_BRANCH_FLAG`, precisely so the two branch features can decorate one
+  heading without either clearing the other's badge — `attachBadge`'s flag is per-feature, and
+  this is the first time two features have actually shared a selector.
+  `PC_OPTIONS` is one entry per **row of the guide's option table**, 29 of them, and it is the
+  only place corrections go. Each carries the guide's `net` **and** the three currency changes it
+  is made of (`sd`/`sh`/`il`), which looks like duplication and is not: a test checks the two
+  against each other, and a transcription typo in either is invisible in game until a whole
+  26-action term has been spent on it.
+  **`either` is the field that matters most.** Two rows — A stroll through the Blue Bazaar and
+  Inconvenienced — pay 10 or 15 of *one* of the two currencies, the game's choice rather than
+  yours. Folded into `sd` and `sh` they would read as that much of *each*, which would make them
+  the two best rows in the table by a distance. So they are held apart, `pcNet` counts them once,
+  and `pcChangeWords` says "Striped Delights OR Silver Horseheads" in words.
+  **Imperial Legitimacy is this activity's Troubled Waters**, and the badge is built around that.
+  Nine of the rows are worth exactly +5, so the net alone separates almost nothing; what does
+  separate them is whether that +5 was paid for out of the number that, at 0, ends the term at
+  once with no rewards and a trip back to the Foreign Office. Hence `PC_LEGIT_MARK` on any row
+  with `il < 0`. The four Time 12 endings gain nothing and *spend* a currency, so they carry
+  `reset` and a `net` of **null** rather than 0 — collapsing them onto 0 would rank them
+  alongside A summons from the Smouldering Herald, which genuinely nets nothing — and they are
+  labelled `cash out` instead of scored, the way the trophyless Spite cards are.
+  `pcColor` is a **ladder, not a cost scale** (the opposite of `zeeColor`): here a bigger number
+  is plainly better, so it runs up the tail of the Spite ramp to the same gold, with a red for a
+  loss, a grey for break-even and a blue for the endings. The test is the lesson the Fruits of
+  the Zee palette taught — it checks that no two of the nets *this table actually pays* share a
+  colour, not that adjacent steps of an invented ramp differ, because the latter passes happily
+  while two real values collide.
+  A storylet the guide splits in two (Within their rights, A plea for pardon) is badged with the
+  **better** net by `bestPcOption` and keeps **both** branches in its tooltip, because the losing
+  branch is not a trap — it is how Imperial Legitimacy is bought back, and it is the right move
+  when Legitimacy is low. Open the storylet and each branch is badged in its own right.
+  The gate, `PC_AREAS`, is the **weak** kind, like `ZEE_AREAS` and unlike `SPITE_AREAS`: nobody
+  has captured a greeting in Port Carnelian, so `inPortCarnelian()` only ever confirms and the
+  option table stays the real scope. Exactly two rows are `strict` and wait for that confirmation
+  — **His Amused Lordship**, which the wiki files as `His Amused Lordship - 2` and so is proof
+  something else owns the plain name, and **Inconvenienced**, one ordinary English word. Capture
+  a real greeting there and this can be tightened the way `SPITE_AREAS` was.
+  `pcKeys` tolerates a leading `"…: "` on a heading, because FL prefixes a storylet inside a
+  named activity ("Fruits of the Zee: Supplication on the Shore") and nothing has confirmed
+  whether it does the same here. It can only ever *tolerate* a prefix — the remainder still has
+  to match exactly — so it cannot widen what matches.
+  The `port-carnelian` panel is the reference half: how to unlock and reach the posting, the
+  rules a term is played by, every option grouped by the Time Passing window with the same live
+  text filter the Zailing panel has (on `row.dataset.pcSearch`, so a term can hit a requirement
+  the collapsed row does not show), what each currency cashes in for, `PC_TIERS` with the two
+  rounding steps worth aiming at (105 and 176) picked out in the accent, and the strategy. It has
+  **no "your hand, ranked" block** — there is no hand here; the storylet list is the hand, and it
+  is already badged.
+
+  `scientific-voyages` is the fifth, for the Dilmun Club's **Voyages of Scientific
+  Discovery**, and it is the first that has to work out **which of three places** a heading
+  belongs to before it can say anything. `VSD_OPTIONS` is one entry per row of three
+  different sources: the guide's Preparatory Research and Organise your Research tables, and
+  the *Expedition Progress* table on each of **Bullbone Island**, **Corpsecage Island** and
+  **Grunting Fen** — the guide transcludes those three rather than restating them, so the
+  island page is the source either way.
+  **The badge is pages, coloured by kind** (AN / CN / TN), because that is the only question
+  these screens ask: you sail to one island for one kind, and at every Orthos band you are
+  choosing between the action that pays it and one that pays goods. Those two **cannot be
+  ranked against each other** — it would need an exchange rate between pages and Echoes that
+  nothing supports — so a goods action is **labelled** with its `headline` rather than
+  scored. `vsdPages` returns **null**, not zero, for such a row: "pays no pages" and "pays
+  zero pages" are different claims, and a `+0` on the action that hands you 860 Shards of
+  Glim reads as the second. On the Organise screen the problem does not arise, since
+  everything there is priced, so those rows carry the guide's pence per page and
+  `VSD_BEST_PER_NOTE` is **derived** from the table rather than asserted.
+  **The Luck rule is `zeeTwScore`'s, and it matters more here.** The three end-of-visit
+  gambles state both outcomes and the odds, so they are ranked on expected value: *Cut it
+  fine* advertises twice the pages of *Tarry a little* and is worth `1.5` against `9.5` once
+  the 70% chance of losing five of every type is counted. Ranked on the advertised half the
+  badge would talk you into the worse action at the one moment a voyage is over. The `≈` and
+  the `?` on the badge are what say the number is arithmetic rather than a promise.
+  **The disambiguation is this feature's real work.** *Time to go*, *Tarry a little* and *Cut
+  it fine* are on all three islands and pay a different page on each; so are the storylets
+  named after their islands, which are also **area** names. `vsdDisambiguate` therefore
+  returns **null rather than a guess** — a badge naming the wrong island's currency a third
+  of the time is worse than no badge — and `vsdIslandHere` has two ways to answer: the
+  greeting, and failing that the `.storylet-root__heading` on screen, which is on the very
+  page the branches are and names its island. The badge's `attachBadge` value carries the
+  island as well as the name, so the same heading on two islands is two different badges.
+  `VSD_AREAS` is the usual confirm-only guess. **`strict` is kept narrow here on purpose**,
+  and the first cut had it wrong: it was on 22 of the 47 island rows, including the
+  distinctive ones, which would have blacked the feature out on the storylet **list** — where
+  nothing is open to resolve the island and the greeting is an unverified guess, and where
+  the badges are most use. It is now the ten ordinary English phrases only (`Time to go`,
+  `Tarry a little`, `Cut it fine`, `Looking up`, `Making money`, `Search the island`, `Do a
+  survey`, `Catch some`, `Go searching`, `See what you can dig up`), pinned **by name** in
+  the test. Storylet headings get a list of their own, `VSD_STRICT_STORYLETS` — the three
+  named after their island plus `Up the Hill` — rather than "any branch of mine is strict",
+  which would have gated `Sparkling around the Copse` on the one ordinary option inside it.
+  This is now the **third** feature on `.branch__title`, which is what the sibling-run
+  clearing in `attachBadge` was written for; `ux-scientific-voyages.test.mjs` drives all
+  three at once.
+  The `scientific-voyages` panel is the reference half: what the Dilmun Club wants before it
+  will sponsor you, a per-island table of pages/region/EPA with each island's own kind picked
+  out in its colour, every action grouped by phase and island with the usual
+  `dataset.vsdSearch` filter, and the guide's three "most preparatory research" plans. **The
+  Fleet of Truth deliberately is not in `VSD_OPTIONS`** — the voyage adds it to your zee deck,
+  it is already in `ZEE_CARDS`, and no name may be in two tables.
+
   The `factions` panel's static half is `FACTIONS`, transcribing the *Factions (Guide)*
   Faction-Item table (the item that converts Favours to Renown, its shop, its price) and the
   Renown-item ladder (10/25/40, for 3/5/7 Favours), including the wiki's best-in-slot marks and
@@ -1496,6 +1615,25 @@ Confirmed live by the author:
   ("Welcome to The Sea of Voices"), the ocean, or something else entirely; `inZee()` is written
   to fail closed on the one card that leans on it and open on everything else. Move this up on a
   report, and say what the greeting actually said.
+
+- The **Port Carnelian badges and panel** (added 2026-09-09), for the same two reasons and one
+  more. The transcription and `PC_AREAS` are unverified exactly as the zee ones are — nobody has
+  read the greeting in Port Carnelian either. The third is that this is the first feature to
+  badge the **storylet list** rather than a hand: `.storylet__heading` is `wiki-links.js`'s own,
+  well-used selector, so the markup is not the risk, but nothing has confirmed whether Fallen
+  London **prefixes** a Port Carnelian storylet's heading the way it prefixes "Fruits of the Zee:
+  Supplication on the Shore". `pcKeys` tolerates a prefix in case it does. Report what a heading
+  there actually reads, and whether the branch badges land where the supplication ones do.
+
+- The **Voyages of Scientific Discovery badges and panel** (added 2026-09-09). Same two
+  reasons again — the transcription, and `VSD_AREAS` being a guess at three greetings nobody
+  has read. The thing worth reporting first is narrower than that: whether the three islands'
+  storylet headings read as the wiki titles them, since three of them are also the area name,
+  and whether `vsdIslandHere` in fact resolves the island from the open storylet when the
+  greeting does not. If a badge ever quotes the wrong page type at the end of a visit, that is
+  the code path that failed. Also worth a look: the island page records **no Orthos gain** on
+  a success for Grunting Fen's *Follow the trail of history*, alone in all three carousels,
+  and that is transcribed as the page has it rather than as confirmed.
 
 - The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
   table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
@@ -1722,6 +1860,33 @@ Current tests:
   It also builds the whole panel, the way `ux-factions.test.mjs` does, since that is the only way
   to catch a typo in a few hundred hand-built nodes -- including that a multi-region card is
   listed under each of its regions while an everywhere card is listed once.
+- `FallenLondon/test/ux-port-carnelian.test.mjs` — asserts `ux-enhancers.js`'s Port Carnelian
+  feature. The transcription first, and the cross-check that makes it worth carrying twice: the
+  guide's Net column against the currency changes it is the sum of, row by row. Then the rules a
+  plausible tidy-up would quietly invert — that `either` is worth its figure **once** and only
+  the two rows the guide marks use it; that the four Time 12 endings have a `net` of null rather
+  than 0, so they cannot be ranked alongside the row that really does net nothing; that the
+  Legitimacy mark is on the rows paid for out of Legitimacy and off the ones that are not; and
+  that no two of the nets this table actually pays share a colour (the "adjacent steps differ"
+  check would pass through a real collision — see the Fruits of the Zee palette). Then the
+  two-branch storylets: the badge takes the better net, the tooltip keeps both, and each branch
+  badges in its own right. Then name lookup, including the `"…: "` prefix tolerance, and the
+  gate in all three greeting states with the two `strict` rows pinned by name. It also pins that
+  no Port Carnelian name is in `ZEE_CARDS`, `SPITE_CARDS` or `FOTZ_CARDS`, and builds the whole
+  panel, which is the only way to catch a typo in a few hundred hand-built nodes. Extend it
+  whenever you touch `PC_OPTIONS`.
+- `FallenLondon/test/ux-scientific-voyages.test.mjs` — asserts `ux-enhancers.js`'s Voyages of
+  Scientific Discovery feature. The centre of it is the **ambiguity**: that a branch name
+  shared by the three islands resolves to `null` without an island and to the right row with
+  one, that each island's gambles pay that island's own page type, and that an opened
+  storylet named after an island answers when the greeting cannot. Then the Luck arithmetic
+  pinned outright (`9.5` against `1.5`), and that the storylet badge follows it rather than
+  the advertised figure. Then that a row paying no pages is **labelled** rather than scored
+  and that every such row has a `headline` to show; that `orElse` never merges into the page
+  counts; that each island's advertised page type is the one it pays the most of — the one
+  stated-versus-derived cross-check this table supports; and that no name of its is in any of
+  the four other tables. It also drives **all three** `.branch__title` features at once, which
+  is the only place the sibling-run clearing is exercised three deep, and builds the panel.
 - `FallenLondon/test/ux-launcher-placement.test.mjs` — asserts `ux-enhancers.js`'s
   `launcherPlacement`, the pure half of where the "⚙ UX" button sits. It is organised around
   the three real travel controls: wide desktop (beside the sidebar button, bottoms level),

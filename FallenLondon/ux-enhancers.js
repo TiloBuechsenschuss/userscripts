@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      2.4
-// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A "UX" button docked INTO Fallen London's own chrome beside its travel control -- under the big Travel button on the wide layout, as one more icon in the banner on the narrow one -- so it takes up space in the page like any other control and covers nothing. It opens a menu of reference panels; the last line of that menu switches it back to floating over the page if you preferred it that way, and it falls back to floating on its own if Fallen London's chrome cannot be found. Every panel's header carries a fullscreen button beside its close button, which takes the panel off the popover and over the whole screen and back; the choice is remembered, so a long panel opens at full size every time rather than needing the button pressed again. The first panel is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, where the safe docks are, the three winds and the dreams they start, and the whole card table, searchable. (4) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: beside Fallen London’s own Travel button, where the UX button docks, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. A third panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. Built as a feature registry so further tweaks can be added as entries.
+// @version      2.6
+// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A "UX" button docked INTO Fallen London's own chrome beside its travel control -- under the big Travel button on the wide layout, as one more icon in the banner on the narrow one -- so it takes up space in the page like any other control and covers nothing. It opens a menu of reference panels; the last line of that menu switches it back to floating over the page if you preferred it that way, and it falls back to floating on its own if Fallen London's chrome cannot be found. Every panel's header carries a fullscreen button beside its close button, which takes the panel off the popover and over the whole screen and back; the choice is remembered, so a long panel opens at full size every time rather than needing the button pressed again. The first panel is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, where the safe docks are, the three winds and the dreams they start, and the whole card table, searchable. (4) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: beside Fallen London’s own Travel button, where the UX button docks, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. A third panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. (5) In Port Carnelian, where a governor's term runs 26 actions and Fallen London deals no opportunity cards at all, the badges go on the storylets in the list and on the branches inside an opened one instead. Each shows the net change in resources that option makes, with a mark when the net is paid for out of Imperial Legitimacy -- the number that ends a term at once when it reaches 0, sending you back to zee with nothing -- a Fate label on the one Fate-locked option, and "cash out" on the four endings, which spend a currency rather than gaining any. Half the table is worth the same +5, so whether it costs Legitimacy is the only thing separating those rows. The tooltip carries the Time Passing in Office and Airs windows the option is offered in, every currency change with its currency named, the requirement and the note; the two options that pay ten or fifteen of ONE of the two currencies, the game's choice rather than yours, say so in words, since reading them as that much of each would make them the best options in the table by a distance. A storylet the guide splits in two is badged with the better net and keeps both branches in its tooltip, because the losing branch is how Imperial Legitimacy is bought back. A fourth panel, Port Carnelian, is the rest of the guide: how to unlock and reach the posting, the rules a term is played by, every option grouped by the clock and searchable, what the two currencies cash in for, the reward tiers with the two worth aiming at picked out, and the strategy. (6) On a Voyage of Scientific Discovery -- the Dilmun Club's expeditions to Bullbone Island, Corpsecage Island and Grunting Fen, which deal no opportunity cards either -- every action gets a badge for what it pays in research pages, coloured by which of the three kinds it is: Archaeological, Cryptopalaeontological or Theosophistical. You sail to one island for one kind, and at every step of the visit you are choosing between the action that pays it and one that pays goods instead, so an action paying no pages is labelled with what it does pay rather than scored: there is no exchange rate between pages and Echoes, and inventing one would be the badge choosing your voyage for you. The three gambles at the end of a visit carry their EXPECTED value rather than the figure they advertise, since the wiki gives both outcomes and the odds -- taking the safer of the two is worth about six times the greedier one once the failure is priced in. The tooltip carries the step of the visit the action belongs to, its challenge, everything it gives, what it costs, and what a failure costs; where the game picks between two payouts rather than you, that is said in words. The same badges cover the two screens at your Lodgings, where the pages are generated before you sail and spent afterwards, and there the figure is the guide's pence per page, because everything on that screen is priced. Three actions and three storylets have the same names on all three islands and pay a different kind of page on each, so the feature works out which island it is looking at from the greeting or from the storylet you have open, and says nothing at all rather than guess. A fifth panel, Scientific Voyages, holds the rest: how the voyage is unlocked, what each island pays and costs to reach, every action grouped by island and searchable, and how to squeeze the most preparatory research out of London first. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. Built as a feature registry so further tweaks can be added as entries.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 // @run-at       document-idle
@@ -319,8 +319,18 @@
 
     const inside = host.querySelector('.' + cls);
     if (inside && inside.parentNode === host) inside.remove();
-    const next = host.nextElementSibling;
-    if (next && next.classList && next.classList.contains(cls)) next.remove();
+    // For an 'after' badge, walk the whole RUN of badges following the host
+    // rather than only the first. Two features can badge one heading -- the
+    // Fruits of the Zee supplication branches and the Port Carnelian ones share
+    // `.branch__title` -- and each `host.after()` inserts immediately after the
+    // host, so ours is not necessarily the nearest. Checking only
+    // `nextElementSibling` would then fail to clear our own stale badge and
+    // leave two of them behind on a node React has reused.
+    for (let next = host.nextElementSibling;
+      next && next.classList && next.classList.contains(BADGE_CLASS);
+      next = next.nextElementSibling) {
+      if (next.classList.contains(cls)) { next.remove(); break; }
+    }
 
     host.dataset[opts.flag] = key;
     if (!opts.spec) return;
@@ -3293,6 +3303,1179 @@
     });
   }
 
+  // === feature: Port Carnelian ===========================================
+  //
+  // A term as Governor of Port Carnelian is a fixed-length activity, 26 actions
+  // long, and it is the one supported area in this script with NO OPPORTUNITY
+  // CARDS at all -- the guide says so outright. So this is the first feature
+  // whose badges live on STORYLETS and on their BRANCHES rather than on a hand.
+  //
+  // A term is a race between three numbers:
+  //
+  //   Striped Delights and Silver Horseheads -- the two currencies. At the end
+  //     of the term you cash ONE of them in; the more of it you have, the more
+  //     Presbyterate Passphrases / Antique Mysteries (Delights) or Partial
+  //     Maps / Puzzling Maps (Horseheads) you get.
+  //   Imperial Legitimacy -- the thing that ends a term badly. At 0 the only
+  //     option left is "The sword falls": you are thrown back to zee with
+  //     nothing, and getting Legitimacy back means a trip to the Foreign
+  //     Office. It does NOT reset between terms.
+  //
+  // Which options are in front of you is decided by two more:
+  //
+  //   Time Passing in Office -- 1 to 12, the clock on the term.
+  //   The Airs of Port Carnelian -- 1 to 100, RE-ROLLED EVERY TIME YOU ACT. So
+  //     which of the airs-gated options you are offered is not something you
+  //     plan; it is something you read off the screen, which is exactly what
+  //     these badges are for.
+  //
+  // Every number below is transcribed from Port Carnelian (Guide)'s option
+  // table. Corrections go in PC_OPTIONS and nowhere else.
+  //
+  // One entry per ROW of that table:
+  //
+  //   name    the storylet, as the wiki titles it.
+  //   branch  the option inside it, where the guide splits a storylet in two
+  //           (Within their rights, A plea for pardon). Absent means the
+  //           storylet has the one line the table records.
+  //   time    [min, max] window of Time Passing in Office.
+  //   airs    [min, max] window of The Airs of Port Carnelian, or null for the
+  //           options Airs does not gate.
+  //   sd/sh/il  change in Striped Delights / Silver Horseheads / Imperial
+  //           Legitimacy.
+  //   either  the two rows that pay this much of ONE of the two currencies,
+  //           the game's choice, not yours. Held apart from sd/sh because
+  //           "+10 of one of them" is not "+10 of each".
+  //   net     total resources gained, as the guide's own Net column. Carried
+  //           rather than derived so a test can check it against the parts --
+  //           a transcription typo is invisible in game until the actions are
+  //           already spent.
+  //   needs   what the row is gated on, verbatim from the guide.
+  //   reset   the four Time 12 endings, which spend a currency rather than
+  //           gaining any: 'sd', 'sh' or 'both'.
+  //   fate    Fate-locked.
+  //   strict  the name is not distinctive enough to badge outside Port
+  //           Carnelian -- see PC_AREAS below.
+
+  const PC_TERM_ACTIONS = 26;
+
+  const PC_OPTIONS = [
+    // --- Time 1-11: the two options Airs never gates ----------------------
+    { name: 'Attend the Daily Assembly of Tigers', time: [1, 11], airs: null,
+      sd: 4, sh: 0, il: 0, net: 4 },
+    { name: 'A day in Murgatroyd’s Imperial Tea Shop', time: [1, 11], airs: null,
+      sd: 0, sh: 4, il: 0, net: 4 },
+
+    // --- Time 1-10: the two storylets with a branch either way ------------
+    { name: 'Within their rights', branch: 'Close your door without a word',
+      time: [1, 10], airs: [1, 10], sd: 15, sh: 0, il: -10, net: 5 },
+    { name: 'Within their rights', branch: '"Quickly, sir - in, in!"',
+      time: [1, 10], airs: [1, 10], sd: -10, sh: 0, il: 5, net: -5 },
+    { name: 'A plea for pardon', branch: '"Release him immediately!"',
+      time: [1, 10], airs: [91, 100], sd: 0, sh: 15, il: -10, net: 5 },
+    { name: 'A plea for pardon', branch: 'Give the executioner the nod',
+      time: [1, 10], airs: [91, 100], sd: 0, sh: -10, il: 5, net: -5 },
+
+    // --- Time 1-6 ---------------------------------------------------------
+    { name: 'A sickness in the Khaganian Quarters', time: [1, 6], airs: [1, 40],
+      sd: -20, sh: 25, il: 0, net: 5, needs: 'Striped Delights 20 x' },
+    { name: 'A tithe. Not a bribe.', time: [1, 6], airs: [11, 50],
+      sd: 15, sh: 0, il: -10, net: 5 },
+    { name: 'Survey the sapphire mines', time: [1, 6], airs: [41, 50],
+      sd: 0, sh: 0, il: 10, net: 10 },
+    { name: 'A stroll through the Blue Bazaar', time: [1, 6], airs: [51, 70],
+      sd: 0, sh: 0, il: 0, either: 10, net: 10 },
+    { name: 'Allocate funds to repair a Khanate ship', time: [1, 6], airs: [51, 90],
+      sd: 0, sh: 15, il: -10, net: 5 },
+    { name: 'The aegis of aesthetics', time: [1, 6], airs: [71, 100],
+      sd: 25, sh: -20, il: 0, net: 5, needs: 'Silver Horseheads 20 x' },
+
+    // --- Time 7-10 --------------------------------------------------------
+    { name: 'Caring for the needy', time: [7, 10], airs: [1, 30],
+      sd: 0, sh: 15, il: -10, net: 5 },
+    { name: 'A dangerous source', time: [7, 10], airs: [11, 30],
+      sd: 10, sh: 0, il: 0, net: 10, needs: 'Striped Delights 10 x',
+      note: 'Also the term’s source of Presbyterate Passphrase.' },
+    { name: 'Inconvenienced', time: [7, 10], airs: [31, 40],
+      sd: 0, sh: 0, il: 0, either: 15, net: 15, fate: true, strict: true,
+      needs: 'Inconvenienced by Your Aunt 12-16' },
+    { name: 'A shortage of workers', time: [7, 10], airs: [31, 60],
+      sd: 0, sh: 20, il: -15, net: 5, needs: 'Silver Horseheads 10 x' },
+    { name: 'A summons from the Smouldering Herald', time: [7, 10], airs: [41, 70],
+      sd: 25, sh: 0, il: -25, net: 0, needs: 'Striped Delights 25 x' },
+    { name: 'His Amused Lordship', time: [7, 10], airs: [61, 70],
+      sd: 0, sh: 0, il: 10, net: 10, strict: true,
+      needs: 'Associating with Radical Academics 5' },
+    { name: 'A man above a bookshop', time: [7, 10], airs: [71, 90],
+      sd: 0, sh: 25, il: -20, net: 5, needs: 'Silver Horseheads 25 x' },
+    { name: 'A means for praise', time: [7, 10], airs: [71, 100],
+      sd: 25, sh: -20, il: 0, net: 5, needs: 'Silver Horseheads 20 x' },
+
+    // --- Time 11 ----------------------------------------------------------
+    { name: 'The fortification of native vitality', time: [11, 11], airs: [1, 20],
+      sd: 12, sh: 0, il: 0, net: 12, needs: 'Mystery of the Elder Continent 5 x' },
+    { name: 'Building the Sky, a Public Works’ request', time: [11, 11], airs: [21, 40],
+      sd: 0, sh: 12, il: 0, net: 12, needs: 'Vision of the Surface 5 x' },
+    { name: 'Orders from on high', time: [11, 11], airs: [41, 50],
+      sd: 0, sh: 0, il: 10, net: 10 },
+    { name: 'Balancing the desires of the locals', time: [11, 11], airs: null,
+      sd: 38, sh: -30, il: 0, net: 8, needs: 'Silver Horseheads 30 x' },
+    { name: 'Negotiating the rights of the Earth', time: [11, 11], airs: null,
+      sd: -30, sh: 38, il: 0, net: 8, needs: 'Striped Delights 30 x' },
+
+    // --- Time 12: the endings ---------------------------------------------
+    { name: 'Honoured with a State Dinner', time: [12, 12], airs: null,
+      sd: 0, sh: 0, il: 0, net: null, reset: 'both',
+      needs: 'Striped Delights 1 x and Silver Horseheads 1 x',
+      note: 'Gives a Favours: Society and Favour in High Places 2 x. Worth less than '
+        + 'cashing a currency in, once you have 105 of one.' },
+    { name: 'An audience with the Banded Prince', time: [12, 12], airs: null,
+      sd: 0, sh: 0, il: 0, net: null, reset: 'sd',
+      needs: 'Striped Delights 1 x',
+      note: 'Spends your Striped Delights: Presbyterate Passphrases, Antique Mysteries, '
+        + 'and Tribute 5 x if Associating with Radical Academics is 15 or more.' },
+    { name: 'An equine festival', time: [12, 12], airs: null,
+      sd: 0, sh: 0, il: 0, net: null, reset: 'sh',
+      needs: 'Silver Horseheads 1 x',
+      note: 'Spends your Silver Horseheads: Partial Maps and Puzzling Maps.' },
+    { name: 'Host a State Dinner', time: [12, 12], airs: null,
+      sd: 0, sh: 0, il: 0, net: null, reset: 'both',
+      needs: 'Banished from the Court and Successful Terms as Governor 3',
+      note: 'Spends both currencies, but it is the one that gets you back to the '
+        + 'Empress’ Court: a Cellar of Wine, a Favour in High Places and Restored '
+        + 'to the Court of Her Enduring Majesty.' },
+  ];
+
+  // What a term's currencies buy. The guide's own reward list.
+  const PC_REWARDS = [
+    { currency: 'Silver Horseheads', via: 'An equine festival', items: [
+      { name: 'Partial Map', count: 'Horseheads / 30 + 2, rounded', worth: '2.5 Echoes each' },
+      { name: 'Puzzling Map', count: 'Horseheads / 70, rounded', worth: '12.5 Echoes each' },
+    ] },
+    { currency: 'Striped Delights', via: 'An audience with the Banded Prince', items: [
+      { name: 'Presbyterate Passphrase', count: 'Delights / 30 + 2, rounded', worth: '2.5 Echoes each' },
+      { name: 'Antique Mystery', count: 'Delights / 70, rounded', worth: '12.5 Echoes each' },
+      { name: 'Tribute', count: '5, flat', worth: 'needs Associating with Radical Academics 15' },
+    ] },
+  ];
+
+  // The guide's reward-tier table: the least of either currency that buys each
+  // step up. The rounding is what makes 105 and 176 the numbers to aim at.
+  const PC_TIERS = [
+    { at: 1, cheap: 2, dear: 0, echo: 5 },
+    { at: 35, cheap: 3, dear: 1, echo: 20 },
+    { at: 105, cheap: 6, dear: 2, echo: 40 },
+    { at: 136, cheap: 7, dear: 2, echo: 42.5 },
+    { at: 165, cheap: 8, dear: 2, echo: 45 },
+    { at: 176, cheap: 8, dear: 3, echo: 57.5 },
+    { at: 196, cheap: 9, dear: 3, echo: 60 },
+    { at: 225, cheap: 10, dear: 3, echo: 62.5 },
+    { at: 245, cheap: 10, dear: 4, echo: 75 },
+    { at: 256, cheap: 11, dear: 4, echo: 77.5 },
+    { at: 285, cheap: 12, dear: 4, echo: 80 },
+    { at: 316, cheap: 13, dear: 5, echo: 95 },
+    { at: 345, cheap: 14, dear: 5, echo: 97.5 },
+    { at: 376, cheap: 15, dear: 5, echo: 100 },
+    { at: 385, cheap: 15, dear: 6, echo: 112.5 },
+    { at: 405, cheap: 16, dear: 6, echo: 115 },
+  ];
+
+  // --- looking a storylet up ---------------------------------------------
+  //
+  // Exact match on the punctuation-squashed name, through the same normaliser
+  // the Spite and zee tables use. The one tolerance is a PREFIX: Fallen London
+  // titles a storylet inside a named activity "Fruits of the Zee: Supplication
+  // on the Shore", and nothing has confirmed whether it does the same here. So
+  // a name carrying a leading "...: " is retried on the half after the colon --
+  // which can only ever tolerate a prefix, never widen what matches.
+
+  const PC_BY_NAME = new Map();
+  const PC_BY_BRANCH = new Map();
+  for (const entry of PC_OPTIONS) {
+    const key = normalizeName(entry.name);
+    if (!PC_BY_NAME.has(key)) PC_BY_NAME.set(key, []);
+    PC_BY_NAME.get(key).push(entry);
+    if (entry.branch) PC_BY_BRANCH.set(normalizeName(entry.branch), entry);
+  }
+
+  function pcKeys(name) {
+    const raw = String(name == null ? '' : name);
+    const keys = [normalizeName(raw)];
+    const colon = raw.indexOf(':');
+    if (colon !== -1) keys.push(normalizeName(raw.slice(colon + 1)));
+    return keys.filter(Boolean);
+  }
+
+  function lookupPcStorylet(name) {
+    for (const key of pcKeys(name)) {
+      const hit = PC_BY_NAME.get(key);
+      if (hit) return hit;
+    }
+    return null;
+  }
+
+  function lookupPcBranch(name) {
+    for (const key of pcKeys(name)) {
+      const hit = PC_BY_BRANCH.get(key);
+      if (hit) return hit;
+    }
+    return null;
+  }
+
+  // --- what a row is worth ------------------------------------------------
+
+  // The guide's Net column, from the parts. A row paying "one of the two, the
+  // game's choice" is worth that much once, not twice.
+  function pcNet(entry) {
+    if (entry.reset) return null;
+    return entry.either ? entry.either : entry.sd + entry.sh + entry.il;
+  }
+
+  // The line the storylet badge speaks for: the best net on offer. Both
+  // branches of Within their rights and A plea for pardon are real choices --
+  // the losing one is how you buy Imperial Legitimacy back, which is the whole
+  // point of it -- so the tooltip lists both and only the badge picks.
+  function bestPcOption(entries) {
+    let best = null;
+    for (const entry of entries) {
+      if (pcNet(entry) == null) continue;
+      if (!best || pcNet(entry) > pcNet(best)) best = entry;
+    }
+    return best || entries[0];
+  }
+
+  const PC_CLASS = 'fl-ux-pc';
+  const PC_FLAG = 'flUxPc';
+  const PC_BRANCH_CLASS = 'fl-ux-pc-branch';
+  const PC_BRANCH_FLAG = 'flUxPcBranch';
+
+  // Imperial Legitimacy is this activity's Troubled Waters: the number that
+  // ends a term with nothing. A row that spends it is marked, whatever its net,
+  // because two rows both worth +5 are not the same row when one of them is
+  // paid for out of the thing that can kill the term.
+  const PC_LEGIT_MARK = '!';
+
+  // A ladder, not a cost scale: here a bigger number is plainly better, so it
+  // runs up the tail of the Crowds of Spite ramp to the same gold. A loss and a
+  // break-even get colours of their own because at a glance they are the rows
+  // you must not take by accident.
+  const PC_COLOR_LOSS = '#8a3b3b';
+  const PC_COLOR_EVEN = '#6b6b6b';
+  const PC_COLOR_END = '#3f5f8a';
+  function pcColor(net) {
+    if (typeof net !== 'number') return PC_COLOR_END;
+    if (net < 0) return PC_COLOR_LOSS;
+    if (net === 0) return PC_COLOR_EVEN;
+    if (net <= 4) return '#68763a';
+    if (net <= 5) return '#54783e';
+    if (net <= 8) return '#417a4c';
+    if (net <= 10) return '#357a62';
+    if (net <= 12) return '#2f7378';
+    return '#b8912f';
+  }
+
+  function pcBadgeText(entry) {
+    if (entry.reset) return 'cash out';
+    const net = pcNet(entry);
+    return (net > 0 ? '+' + net : String(net))
+      + (entry.il < 0 ? PC_LEGIT_MARK : '')
+      + (entry.fate ? ' Fate' : '');
+  }
+
+  function pcRange(pair) {
+    if (!pair) return null;
+    return pair[0] === pair[1] ? String(pair[0]) : pair[0] + '–' + pair[1];
+  }
+
+  function pcWhen(entry) {
+    return 'Time Passing in Office ' + pcRange(entry.time)
+      + ' · ' + (entry.airs ? 'Airs ' + pcRange(entry.airs) : 'any Airs');
+  }
+
+  // The currency changes, spelled out. `either` is deliberately its own
+  // sentence: "+10 of one of the two" is not "+10 of each", and a row that read
+  // as the second would look worth twice what it is.
+  function pcChangeWords(entry) {
+    if (entry.reset) {
+      if (entry.reset === 'both') return 'Spends BOTH Striped Delights and Silver Horseheads.';
+      return 'Spends all your '
+        + (entry.reset === 'sd' ? 'Striped Delights' : 'Silver Horseheads') + '.';
+    }
+    const bits = [];
+    if (entry.either) bits.push('Striped Delights OR Silver Horseheads +' + entry.either
+      + ' (the game picks which, not you)');
+    if (entry.sd) bits.push('Striped Delights ' + (entry.sd > 0 ? '+' : '') + entry.sd);
+    if (entry.sh) bits.push('Silver Horseheads ' + (entry.sh > 0 ? '+' : '') + entry.sh);
+    if (entry.il) bits.push('Imperial Legitimacy ' + (entry.il > 0 ? '+' : '') + entry.il);
+    return bits.join(', ') + '.';
+  }
+
+  function pcOptionLines(entry, lead) {
+    const lines = [lead + pcChangeWords(entry)];
+    if (!entry.reset) lines.push('      net ' + (pcNet(entry) > 0 ? '+' : '') + pcNet(entry));
+    if (entry.needs) lines.push('      needs ' + entry.needs);
+    if (entry.fate) lines.push('      Fate-locked.');
+    if (entry.note) lines.push('      ' + entry.note);
+    return lines;
+  }
+
+  const PC_FOOTER = 'Imperial Legitimacy reaching 0 ends the term at once, with no rewards '
+    + 'and a trip back to the Foreign Office. It carries over between terms; the two '
+    + 'currencies do not.';
+
+  // What to draw on a storylet heading. Pure (entries in, spec out), so every
+  // badge can be asserted on without a DOM.
+  function pcStoryletSpec(entries) {
+    const best = bestPcOption(entries);
+    const lines = [entries[0].name, pcWhen(best), ''];
+    if (entries.length === 1) {
+      lines.push.apply(lines, pcOptionLines(best, ''));
+    } else {
+      lines.push('Both branches:');
+      for (const entry of entries) {
+        lines.push.apply(lines, pcOptionLines(entry, '  • ' + entry.branch + ' — '));
+      }
+      lines.push('');
+      lines.push('The badge is the better net. The other branch is how you buy Imperial '
+        + 'Legitimacy back, which is worth taking when it is running low.');
+    }
+    lines.push('');
+    lines.push(PC_FOOTER);
+    return { text: pcBadgeText(best), color: pcColor(pcNet(best)), title: lines.join('\n') };
+  }
+
+  // And on one branch inside an opened storylet.
+  function pcBranchSpec(entry) {
+    const lines = [entry.name + ': ' + entry.branch, pcWhen(entry), ''];
+    lines.push.apply(lines, pcOptionLines(entry, ''));
+    lines.push('');
+    lines.push(PC_FOOTER);
+    return { text: pcBadgeText(entry), color: pcColor(pcNet(entry)), title: lines.join('\n') };
+  }
+
+  // --- the area gate ------------------------------------------------------
+  //
+  // A GUESS at what the screen-reader greeting says in Port Carnelian, exactly
+  // like ZEE_AREAS and unlike SPITE_AREAS: nobody has captured a greeting
+  // there. So this only ever confirms -- it never says "definitely not Port
+  // Carnelian" -- and the option table stays the real scope. Capture a real
+  // greeting and this can be tightened the way SPITE_AREAS was.
+  const PC_AREAS = ['Port Carnelian'].map(normalizeName);
+
+  function inPortCarnelian() {
+    const area = normalizeName(currentArea());
+    return !!area && PC_AREAS.indexOf(area) !== -1;
+  }
+
+  // Two names are not distinctive enough to badge on the table alone, so those
+  // two wait for the greeting to confirm where we are:
+  //
+  //   His Amused Lordship -- the wiki files this one as "His Amused Lordship
+  //     - 2", which is proof that something else already owns the plain name.
+  //   Inconvenienced -- one ordinary English word.
+  //
+  // Everything else in the table is a phrase Fallen London uses here and, as
+  // far as the wiki shows, nowhere else.
+  const PC_STORYLET_SELECTOR = '.storylet__heading, .storylet-root__heading';
+  // Shared with the Fruits of the Zee supplication badges, which own a
+  // different class and flag pair, so the two can decorate the same branch
+  // without either clearing the other.
+  const PC_BRANCH_SELECTOR = '.branch__title';
+
+  function pcRatings() {
+    const here = inPortCarnelian();
+    document.querySelectorAll(PC_STORYLET_SELECTOR).forEach(function (head) {
+      const name = headingName(head);
+      const entries = name ? lookupPcStorylet(name) : null;
+      const strict = !!entries && entries.some(function (e) { return e.strict; });
+      attachBadge(head, {
+        cls: PC_CLASS,
+        flag: PC_FLAG,
+        value: name,
+        spec: entries && (here || !strict) ? pcStoryletSpec(entries) : null,
+        place: 'after',
+      });
+    });
+    document.querySelectorAll(PC_BRANCH_SELECTOR).forEach(function (head) {
+      const name = headingName(head);
+      const entry = name ? lookupPcBranch(name) : null;
+      attachBadge(head, {
+        cls: PC_BRANCH_CLASS,
+        flag: PC_BRANCH_FLAG,
+        value: name,
+        spec: entry && (here || !entry.strict) ? pcBranchSpec(entry) : null,
+        place: 'after',
+      });
+    });
+  }
+
+  // === feature: Voyages of Scientific Discovery ==========================
+  //
+  // The Dilmun Club's scientific voyages, and the second feature here that
+  // badges storylets rather than cards. It covers three screens that look
+  // unrelated and are one economy:
+  //
+  //   PREPARATORY RESEARCH, at Your Lodgings -- turn items and Favours into
+  //     pages before you sail. Every option locks itself out once you hold
+  //     enough pages, so the ORDER you take them in decides the total.
+  //   THE ISLANDS -- Bullbone, Corpsecage and Grunting Fen, each a fixed
+  //     carousel of 21 actions measured by "Orthos is Coming!". Which pair of
+  //     actions is in front of you is decided by the Orthos band, and each pair
+  //     is the same question: pages of one type, or a pile of goods instead.
+  //   ORGANISE YOUR RESEARCH, back at Your Lodgings -- spend the pages.
+  //
+  // The three currencies are Page of Prelapsarian Archaeological Notes (AN --
+  // the island pages abbreviate it PAN), Page of Cryptopalaeontological Notes
+  // (CN) and Page of Theosophistical Notes (TN).
+  //
+  // **What the badge says, and why.** Colour is the NOTE TYPE and the text is
+  // the amount, because that is the only question these screens ask. You sail
+  // to an island for one type -- Bullbone pays CN, Corpsecage AN, Grunting Fen
+  // TN -- and at every Orthos band you are choosing between an action that pays
+  // your type and one that pays goods. Ranking those two against each other
+  // would need an exchange rate between pages and Echoes that nothing supports,
+  // so the badge does not invent one: a paying-in-goods action is LABELLED with
+  // what it pays rather than scored. On the Organise screen there is no such
+  // problem -- everything there is priced -- so those rows carry the guide's own
+  // Echoes-per-note, which is the figure that decides between them (a 500-note
+  // option pays 10 pence a note; a 120-note collation pays 6.25).
+  //
+  // Transcribed from Embarking on a Voyage of Scientific Discovery (Guide) for
+  // the two Lodgings screens, and from the "Expedition Progress" table on each
+  // island's own page (Bullbone Island, Corpsecage Island, Grunting Fen) for
+  // the carousels -- the guide transcludes those tables rather than restating
+  // them, so the island page is the source either way. Corrections go in
+  // VSD_OPTIONS and nowhere else.
+  //
+  // One entry per row of those tables:
+  //
+  //   phase     'prep' | 'island' | 'organise'.
+  //   island    which island, on a phase 'island' row.
+  //   storylet  the storylet, as the wiki titles it.
+  //   branch    the option inside it.
+  //   orthos    [min, max] band of Orthos is Coming! the row is offered in.
+  //   ch        the challenge, verbatim, or null where there is none.
+  //   an/cn/tn  pages gained. Negative on the Organise rows, which spend them.
+  //   headline  what the row pays when it pays no pages -- transcribed, not
+  //             derived, because "the item worth quoting" is a judgement.
+  //   orElse    the wiki's explicit OR: one action, two different payouts, and
+  //             the game picks. Held apart from the page counts so the two can
+  //             never be read as a sum.
+  //   luck      { odds, win, lose } for the three end-of-voyage gambles.
+  //   perNote   pence per note, on an Organise row the guide prices.
+  //   cost      what it costs, verbatim. needs: what it is gated on.
+  //   fail      what a failure costs.
+  //   note      anything that does not fit the fields above.
+
+  // A voyage is 21 actions on the island: 1 to arrive, 19 of carousel, 1 to
+  // leave, assuming every challenge passes. A failure still advances Orthos,
+  // by 1 change point instead of 2, so a bad run is longer rather than lost.
+  const VSD_ISLAND_ACTIONS = 21;
+
+  const VSD_ISLANDS = [
+    {
+      name: 'Bullbone Island',
+      region: 'Home Waters',
+      pays: 'cn',
+      best: { an: 78, cn: 249, tn: 40 },
+      epa: 1.88,
+      echoes: 39.46,
+      note: 'The bone island: Horned Skulls at 20 Survey of the Neath’s Bones each, '
+        + 'and a Shard of Glim the Size of a Small Child that trades in London for '
+        + 'Favours: Rubbery Men.',
+    },
+    {
+      name: 'Corpsecage Island',
+      region: 'Stormbones',
+      pays: 'an',
+      best: { an: 249, cn: 40, tn: 78 },
+      epa: 2.00,
+      echoes: 42.08,
+      note: 'Also where the Beatific Stone is, the Renown: The Church 40 faction item.',
+    },
+    {
+      name: 'Grunting Fen',
+      region: 'The Sea of Voices',
+      pays: 'tn',
+      best: { an: 40, cn: 124, tn: 249 },
+      epa: 2.21,
+      echoes: 46.50,
+      needs: 'Screaming Map',
+      note: 'The best Echoes per action of the three, and the only one you need an '
+        + 'item to reach.',
+    },
+  ];
+
+  const VSD_OPTIONS = [
+    // === Preparatory Research, at Your Lodgings ==========================
+    //
+    // Every one of these locks itself out above a page count, so the order
+    // matters: take the cheap 50s while you are under 101, and the big
+    // single-type options while you are under 301.
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Pay someone else to research for you',
+      an: 50, cn: 50, tn: 50, cost: 'Memory of Distant Shores 80 x',
+      needs: 'locked at 101 pages of any type' },
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Have instruments ground',
+      an: 50, cn: 50, tn: 50, cost: 'Whirring Contraption 1 x',
+      needs: 'locked at 101 pages of any type' },
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Consult your current work',
+      an: 40, cn: 40, tn: 40, cost: 'Volume of Collated Research 1 x',
+      needs: 'locked at 101 pages of any type' },
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Find promising students',
+      an: 50, cn: 50, tn: 50,
+      cost: 'Favours: Urchins 2 x, Favours: The Church 2 x, Favours: Revolutionaries 2 x',
+      needs: 'locked at 101 pages of any type',
+      note: 'The guide lists the three Favours without an OR between them, so this is '
+        + 'read as all three.' },
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Examine your collection of curiosities',
+      an: 150, cn: 0, tn: 0, cost: 'Collection of Curiosities 1 x',
+      needs: 'locked at 301 AN' },
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Consult the Masters of the Bazaar',
+      an: 100, cn: 0, tn: 0, cost: 'Connected: The Masters of the Bazaar 2 CP',
+      needs: 'Connected: The Masters of the Bazaar 3; locked at 301 AN' },
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Trade in academic favours',
+      an: 0, cn: 100, tn: 0,
+      cost: 'Connected: Benthic 91–114 CP, Connected: Summerset 91–114 CP',
+      needs: 'Connected: Benthic 20 and Connected: Summerset 20; locked at 301 CN' },
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Test your Unearthly Fossil',
+      an: 0, cn: 80, tn: 0, cost: 'Unearthly Fossil 1 x', needs: 'locked at 301 CN' },
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Look at the current trend for Theosophistry',
+      an: 0, cn: 0, tn: 50, cost: 'Favours: Society 3 x', needs: 'locked at 101 TN' },
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Summarise your experiences in the Wars of Illusion',
+      an: 0, cn: 0, tn: 35, cost: 'Extraordinary Implication 1 x',
+      needs: 'Embroiled in the Wars of Illusion 25; locked at 101 TN' },
+
+    // === Bullbone Island ==================================================
+    { phase: 'island', island: 'Bullbone Island', orthos: [0, 3],
+      storylet: 'Bullbone Island', branch: 'The bones of Bullbone',
+      ch: 'Watchful 120', an: 0, cn: 12, tn: 0,
+      orElse: 'CN 4 x and a Horned Skull instead',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Bullbone Island', orthos: [0, 3],
+      storylet: 'Bullbone Island', branch: 'Wild bees',
+      ch: 'Watchful 120', an: 0, cn: 0, tn: 0,
+      headline: 'Beeswax ×120', gain: 'Lump of Lamplighter Beeswax 120 x',
+      fail: 'Wounds +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Bullbone Island', orthos: [0, 3],
+      storylet: 'Bullbone Island', branch: 'A skull of Bullbone, borrowed',
+      ch: null, an: 0, cn: 0, tn: 0,
+      headline: 'Skull ×1', gain: 'Horned Skull 1 x', cost: 'Survey of the Neath’s Bones 20 x' },
+
+    { phase: 'island', island: 'Bullbone Island', orthos: [4, 5],
+      storylet: 'The Little Cave', branch: 'Oho – a little writing',
+      ch: 'Watchful 123', an: 13, cn: 0, tn: 0, gain: 'Walking the Falling Cities +1 CP',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Bullbone Island', orthos: [4, 5],
+      storylet: 'The Little Cave', branch: 'Weasels about',
+      ch: 'Watchful 123', an: 0, cn: 0, tn: 0,
+      headline: 'Scarab ×12', gain: 'Phosphorescent Scarab 12 x',
+      fail: 'Wounds +1 CP, Orthos +1 CP instead of +2' },
+
+    { phase: 'island', island: 'Bullbone Island', orthos: [6, 6],
+      storylet: 'Where the Wild Mandrakes Grow', branch: 'Creaking in the breeze',
+      ch: 'Watchful 124', an: 0, cn: 13, tn: 0,
+      gain: 'Seeing through the Eyes of Icarus +1 CP',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Bullbone Island', orthos: [6, 6],
+      storylet: 'Where the Wild Mandrakes Grow', branch: 'Someone lives near the mandrake-copse',
+      ch: 'Watchful 123', an: 0, cn: 0, tn: 0,
+      headline: 'Hints ×124', gain: 'Whispered Hint 124 x',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+
+    { phase: 'island', island: 'Bullbone Island', orthos: [7, 7],
+      storylet: 'Sparkling around the Copse', branch: 'Acquisition and screaming',
+      ch: 'Watchful 126', an: 0, cn: 0, tn: 0,
+      headline: 'Glim ×126', gain: 'Shard of Glim 126 x',
+      fail: 'Wounds +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Bullbone Island', orthos: [7, 7],
+      storylet: 'Sparkling around the Copse', branch: 'Looking up', strict: true,
+      ch: 'Watchful 126', an: 0, cn: 0, tn: 0,
+      headline: 'Pearls ×126',
+      gain: 'Moon-Pearl 126 x, Seeing through the Eyes of Icarus +1 CP',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+
+    { phase: 'island', island: 'Bullbone Island', orthos: [8, 8],
+      storylet: 'The Unterzee Waits Silently', branch: 'Creeping closer',
+      ch: 'Watchful 124', an: 0, cn: 0, tn: 0,
+      headline: 'Screams ×2',
+      gain: 'Aeolian Scream 2 x, Seeing through the Eyes of Icarus +1 CP',
+      fail: 'Nightmares +1 CP — Orthos goes to 9 either way' },
+    { phase: 'island', island: 'Bullbone Island', orthos: [8, 8],
+      storylet: 'Spiritual happenings', branch: 'Search the island', strict: true,
+      ch: 'Watchful 128', an: 0, cn: 0, tn: 40, gain: 'Memory of Distant Shores 2 x',
+      fail: 'Nightmares +1 CP — Orthos goes to 9 either way' },
+
+    { phase: 'island', island: 'Bullbone Island', orthos: [9, 9],
+      storylet: 'Gather the Riches of Bullbone Island', branch: 'Making money', strict: true,
+      ch: null, an: 0, cn: 0, tn: 0,
+      headline: 'Glim ×860', gain: 'Deshrieked Mandrake 1 x, Shard of Glim 860 x' },
+    { phase: 'island', island: 'Bullbone Island', orthos: [9, 9],
+      storylet: 'Gather the Riches of Bullbone Island', branch: 'That enormous Glim-Shard',
+      ch: null, an: 0, cn: 0, tn: 0,
+      headline: 'Great Shard', gain: 'Shard of Glim the Size of a Small Child 1 x',
+      note: 'The Shard trades in London for Favours: Rubbery Men.' },
+    { phase: 'island', island: 'Bullbone Island', orthos: [9, 9],
+      storylet: 'Finish your notes on Bullbone Island', branch: 'Write up your notes',
+      ch: null, an: 0, cn: 150, tn: 0 },
+
+    { phase: 'island', island: 'Bullbone Island', orthos: [10, 10],
+      storylet: 'Orthos has Found You', branch: 'Time to go', strict: true,
+      ch: null, an: 0, cn: 0, tn: 0, leave: true },
+    { phase: 'island', island: 'Bullbone Island', orthos: [10, 10],
+      storylet: 'Orthos has Found You', branch: 'Tarry a little', strict: true,
+      ch: 'Luck 70%', an: 0, cn: 0, tn: 0,
+      luck: { odds: 0.7, type: 'cn', win: 20, lose: 15 },
+      fail: 'CN −5, AN −5, TN −5' },
+    { phase: 'island', island: 'Bullbone Island', orthos: [10, 10],
+      storylet: 'Orthos has Found You', branch: 'Cut it fine', strict: true,
+      ch: 'Luck 30%', an: 0, cn: 0, tn: 0,
+      luck: { odds: 0.3, type: 'cn', win: 40, lose: 15 },
+      fail: 'CN −5, AN −5, TN −5' },
+
+    // === Corpsecage Island ================================================
+    { phase: 'island', island: 'Corpsecage Island', orthos: [0, 3],
+      storylet: 'Corpsecage Island', branch: 'Digging up bones and rough justice',
+      ch: 'Watchful 120', an: 12, cn: 0, tn: 0, gain: 'Walking the Falling Cities +1 CP',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Corpsecage Island', orthos: [0, 3],
+      storylet: 'Corpsecage Island', branch: 'The Corpsecage bat',
+      ch: 'Watchful 120', an: 0, cn: 0, tn: 0,
+      headline: 'Clues ×60', gain: 'Cryptic Clue 60 x, Walking the Falling Cities +1 CP',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+
+    { phase: 'island', island: 'Corpsecage Island', orthos: [4, 5],
+      storylet: 'The Religions of Corpsecage Island', branch: 'Examine the ruins for clues',
+      ch: 'Watchful 122', an: 0, cn: 0, tn: 13, gain: 'Walking the Falling Cities +1 CP',
+      orElse: 'Mystery of the Elder Continent 5 x instead',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Corpsecage Island', orthos: [4, 5],
+      storylet: 'The Religions of Corpsecage Island', branch: 'What’s written here?',
+      ch: 'Watchful 122', an: 0, cn: 0, tn: 0,
+      headline: 'Clues ×61', gain: 'Cryptic Clue 61 x',
+      orElse: 'Mystery of the Elder Continent 5 x and Walking the Falling Cities +1 CP instead',
+      fail: 'Wounds +1 CP, Orthos +1 CP instead of +2' },
+
+    { phase: 'island', island: 'Corpsecage Island', orthos: [6, 6],
+      storylet: 'Up the Hill', branch: 'See what you can dig up', strict: true,
+      ch: 'Watchful 124', an: 13, cn: 0, tn: 0, gain: 'Walking the Falling Cities +1 CP',
+      fail: 'Wounds +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Corpsecage Island', orthos: [6, 6],
+      storylet: 'Up the Hill', branch: 'Caging ancient echoes',
+      ch: 'Watchful 124', an: 0, cn: 0, tn: 0,
+      headline: 'Shrieks ×62', gain: 'Primordial Shriek 62 x',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+
+    { phase: 'island', island: 'Corpsecage Island', orthos: [7, 7],
+      storylet: 'Another Sort of Relic', branch: 'Rummage around the fire',
+      ch: 'Watchful 127', an: 0, cn: 0, tn: 0,
+      headline: 'Jade ×77',
+      gain: 'Prison Shiv 1 x (up to 1), Prisoner’s Mask 1 x, Jade Fragment 77 x, '
+        + 'Proscribed Material 12 x',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Corpsecage Island', orthos: [7, 7],
+      storylet: 'Another Sort of Relic', branch: 'A message long cold',
+      ch: 'Watchful 127', an: 0, cn: 0, tn: 0,
+      headline: 'Maps ×10',
+      gain: 'Map Scrap 10 x, Cryptic Clue 13 x, Seeing through the Eyes of Icarus +1 CP',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+
+    { phase: 'island', island: 'Corpsecage Island', orthos: [8, 8],
+      storylet: 'The Shore Near the Jetty', branch: 'The zee-caves',
+      ch: 'Watchful 127', an: 0, cn: 0, tn: 0,
+      headline: 'Proscribed ×125', gain: 'Proscribed Material 125 x',
+      fail: 'Wounds +1 CP — Orthos goes to 9 either way' },
+    { phase: 'island', island: 'Corpsecage Island', orthos: [8, 8],
+      storylet: 'The Back of Corpsecage', branch: 'Inauspicious iron',
+      ch: 'Watchful 127', an: 0, cn: 40, tn: 0,
+      gain: 'Nodule of Warm Amber 10 x, Seeing through the Eyes of Icarus +1 CP',
+      fail: 'Nightmares +1 CP — Orthos goes to 9 either way' },
+
+    { phase: 'island', island: 'Corpsecage Island', orthos: [9, 9],
+      storylet: 'Looking for Relics', branch: 'In the bag you go',
+      ch: null, an: 0, cn: 0, tn: 0,
+      headline: 'Relics ×200',
+      gain: 'Relic of the Third City 100 x, Relic of the Fourth City 100 x' },
+    { phase: 'island', island: 'Corpsecage Island', orthos: [9, 9],
+      storylet: 'Finish your notes on Corpsecage Island', branch: 'Writing it all down',
+      ch: null, an: 150, cn: 0, tn: 0 },
+
+    { phase: 'island', island: 'Corpsecage Island', orthos: [10, 10],
+      storylet: 'Orthos Has Set Upon You', branch: 'Time to go', strict: true,
+      ch: null, an: 0, cn: 0, tn: 0, leave: true },
+    { phase: 'island', island: 'Corpsecage Island', orthos: [10, 10],
+      storylet: 'Orthos Has Set Upon You', branch: 'Tarry a little', strict: true,
+      ch: 'Luck 70%', an: 0, cn: 0, tn: 0,
+      luck: { odds: 0.7, type: 'an', win: 20, lose: 15 },
+      fail: 'CN −5, AN −5, TN −5' },
+    { phase: 'island', island: 'Corpsecage Island', orthos: [10, 10],
+      storylet: 'Orthos Has Set Upon You', branch: 'Cut it fine', strict: true,
+      ch: 'Luck 30%', an: 0, cn: 0, tn: 0,
+      luck: { odds: 0.3, type: 'an', win: 40, lose: 15 },
+      fail: 'CN −5, AN −5, TN −5' },
+
+    // === Grunting Fen =====================================================
+    { phase: 'island', island: 'Grunting Fen', orthos: [0, 3],
+      storylet: 'Grunting Fen', branch: 'Listen to the island',
+      ch: 'Watchful 120', an: 0, cn: 0, tn: 12, gain: 'Touched by Fingerwork +1 CP',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Grunting Fen', orthos: [0, 3],
+      storylet: 'Grunting Fen', branch: 'Do a survey', strict: true,
+      ch: 'Watchful 122', an: 0, cn: 0, tn: 0,
+      headline: 'Clues ×11', gain: 'Cryptic Clue 11 x, Map Scrap 10 x',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+
+    { phase: 'island', island: 'Grunting Fen', orthos: [4, 5],
+      storylet: 'What is Grunting Fen Made of?', branch: 'What manner of things live here?',
+      ch: 'Watchful 122', an: 0, cn: 12, tn: 0, gain: 'Touched by Fingerwork +1 CP',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Grunting Fen', orthos: [4, 5],
+      storylet: 'What is Grunting Fen Made of?', branch: 'Try some beach-combing instead',
+      ch: 'Watchful 124', an: 0, cn: 0, tn: 0,
+      headline: 'Glim ×100',
+      gain: 'Shard of Glim 100 x, Phosphorescent Scarab 1 x, Relic of the Fourth City 3 x',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+
+    { phase: 'island', island: 'Grunting Fen', orthos: [6, 6],
+      storylet: 'The Skull of a Long-Dead God?',
+      branch: 'What can you learn of matters spiritual and supernatural?',
+      ch: 'Watchful 124', an: 0, cn: 0, tn: 13, gain: 'Touched by Fingerwork +1 CP',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Grunting Fen', orthos: [6, 6],
+      storylet: 'The Skull of a Long-Dead God?', branch: 'Follow the trail of history',
+      ch: 'Watchful 126', an: 0, cn: 0, tn: 0,
+      headline: 'Shores ×2', gain: 'Memory of Distant Shores 2 x, Cryptic Clue 13 x',
+      fail: 'Nightmares +1 CP, Orthos +1 CP',
+      note: 'The island page records NO Orthos gain on a success here — the only action '
+        + 'in the carousel that does not advance the clock when it works. Treat that as '
+        + 'the page having it, not as confirmed in game.' },
+
+    { phase: 'island', island: 'Grunting Fen', orthos: [7, 7],
+      storylet: 'The Treasures of Grunting Fen', branch: 'Catch some', strict: true,
+      ch: 'Watchful 126', an: 0, cn: 13, tn: 0,
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Grunting Fen', orthos: [7, 7],
+      storylet: 'The Treasures of Grunting Fen', branch: 'How about we make this more... interesting?',
+      ch: 'Watchful 128', an: 0, cn: 0, tn: 0,
+      headline: 'Rostygold ×228', gain: 'Piece of Rostygold 228 x',
+      fail: 'Piece of Rostygold −100, Nightmares +1 CP, Orthos +1 CP instead of +2',
+      note: 'The one action on any of the three islands whose failure takes something '
+        + 'off you rather than only costing the difference in Orthos.' },
+
+    { phase: 'island', island: 'Grunting Fen', orthos: [8, 8],
+      storylet: 'Knowledge that Seeped into the Water',
+      branch: 'No more peculiar than anything else here',
+      ch: 'Watchful 126', an: 40, cn: 0, tn: 0, gain: 'Touched by Fingerwork +1 CP',
+      fail: 'Nightmares +1 CP — Orthos goes to 9 either way' },
+    { phase: 'island', island: 'Grunting Fen', orthos: [8, 8],
+      storylet: 'The Rarer Artifacts', branch: 'Go searching', strict: true,
+      ch: 'Watchful 127', an: 0, cn: 0, tn: 0,
+      headline: 'Pearls ×200',
+      gain: 'Moon-Pearl 200 x, Jade Fragment 100 x, Shard of Glim 200 x',
+      fail: 'Wounds +1 CP — Orthos goes to 9 either way' },
+
+    { phase: 'island', island: 'Grunting Fen', orthos: [9, 9],
+      storylet: 'Spiritual riches', branch: 'Untapped wealth',
+      ch: null, an: 0, cn: 0, tn: 0,
+      headline: 'Implications ×6', gain: 'Extraordinary Implication 6 x' },
+    { phase: 'island', island: 'Grunting Fen', orthos: [9, 9],
+      storylet: 'Describe Grunting Fen in Theosophistical terms', branch: 'Rich insights',
+      ch: null, an: 0, cn: 0, tn: 150, gain: 'Touched by Fingerwork +1 CP' },
+
+    { phase: 'island', island: 'Grunting Fen', orthos: [10, 10],
+      storylet: 'Orthos Seeks To Take Your Work', branch: 'Time to go', strict: true,
+      ch: null, an: 0, cn: 0, tn: 0, leave: true },
+    { phase: 'island', island: 'Grunting Fen', orthos: [10, 10],
+      storylet: 'Orthos Seeks To Take Your Work', branch: 'Tarry a little', strict: true,
+      ch: 'Luck 70%', an: 0, cn: 0, tn: 0,
+      luck: { odds: 0.7, type: 'tn', win: 20, lose: 15 },
+      fail: 'CN −5, AN −5, TN −5' },
+    { phase: 'island', island: 'Grunting Fen', orthos: [10, 10],
+      storylet: 'Orthos Seeks To Take Your Work', branch: 'Cut it fine', strict: true,
+      ch: 'Luck 30%', an: 0, cn: 0, tn: 0,
+      luck: { odds: 0.3, type: 'tn', win: 40, lose: 15 },
+      fail: 'CN −5, AN −5, TN −5' },
+
+    // === Organise your Research, at Your Lodgings =========================
+    //
+    // These SPEND pages, so their page counts are negative, and the figure that
+    // separates them is the guide's pence per note rather than the total.
+    { phase: 'organise', storylet: 'Organise your Research',
+      branch: 'Collate your cryptopalaeontological work',
+      an: 0, cn: -120, tn: 0, perNote: 6.25, worth: 7.5,
+      gain: 'Volume of Collated Research 3 x, Volume of your Cryptopalaeontological Work' },
+    { phase: 'organise', storylet: 'Organise your Research',
+      branch: 'Collate your prelapsarian archaeological work',
+      an: -120, cn: 0, tn: 0, perNote: 6.25, worth: 7.5,
+      gain: 'Volume of Collated Research 3 x, Volume of your Prelapsarian Archaeological Work' },
+    { phase: 'organise', storylet: 'Organise your Research',
+      branch: 'Collate your research into Theosophistry',
+      an: 0, cn: 0, tn: -120, perNote: 6.25, worth: 7.5,
+      gain: 'Volume of Collated Research 3 x, Volume of your Theosophistical Work' },
+    { phase: 'organise', storylet: 'Organise your Research',
+      branch: 'Speak to professional persons with academic pretensions',
+      an: -500, cn: 0, tn: 0, perNote: 10, worth: 50,
+      gain: 'Uncanny Incunabulum 4 x' },
+    { phase: 'organise', storylet: 'Organise your Research',
+      branch: 'Speak to naturalists, hunters and the breeders of monsters',
+      an: 0, cn: -500, tn: 0, perNote: 10, worth: 50,
+      gain: 'Storm-Threnody 4 x' },
+    { phase: 'organise', storylet: 'Organise your Research',
+      branch: 'Sell your Theosophistical conclusions',
+      an: 0, cn: 0, tn: -500, perNote: 10, worth: 50,
+      gain: 'Extraordinary Implication 5 x, Scrap of Incendiary Gossip 50 x, '
+        + 'Bottle of Broken Giant 1844 5 x, Confident Smile 1 x' },
+    { phase: 'organise', storylet: 'Organise your Research',
+      branch: 'Gather all your work into a library',
+      an: -250, cn: -250, tn: -250, gain: 'Voluminous Library' },
+    { phase: 'organise', storylet: 'Organise your Research',
+      branch: 'Re-establish your academic reputation',
+      an: -500, cn: -500, tn: -500,
+      gain: 'Removes Unwelcome at the University, Connected: Benthic +30 CP, '
+        + 'Connected: Summerset +30 CP' },
+    { phase: 'organise', storylet: 'Organise your Research', branch: 'Breed a beast',
+      an: 0, cn: -500, tn: 0, gain: 'Bifurcated Owl',
+      cost: 'a Hound of Heaven, a Corresponding Ocelot, an Ocular Toadbeast, an '
+        + 'Obdurate Stallion and a Slavering Dream-Hound' },
+    { phase: 'organise', storylet: 'Organise your Research',
+      branch: 'Another round of preliminary research',
+      an: -50, cn: -50, tn: -50, gain: 'Opens Preparatory Research again' },
+  ];
+
+  // --- the three currencies ------------------------------------------------
+  //
+  // Colour is the note TYPE, not an amount, because that is the question these
+  // screens ask: you are on one island for one type, and at every Orthos band
+  // one of the two actions in front of you pays it. Three hues far enough apart
+  // to be told apart at a glance on Fallen London's dark ground, plus two
+  // neutrals for the rows that pay no pages at all.
+  const VSD_NOTES = {
+    an: { key: 'an', tag: 'AN', name: 'Page of Prelapsarian Archaeological Notes', color: '#8a6420' },
+    cn: { key: 'cn', tag: 'CN', name: 'Page of Cryptopalaeontological Notes', color: '#3d6591' },
+    tn: { key: 'tn', tag: 'TN', name: 'Page of Theosophistical Notes', color: '#5f4b8b' },
+  };
+  const VSD_NOTE_KEYS = ['an', 'cn', 'tn'];
+
+  const VSD_COLOR_GOODS = '#4a5560';  // pays no pages: labelled, never scored
+  const VSD_COLOR_LEAVE = '#2f6b3f';  // the free way off the island
+  const VSD_COLOR_SPEND = '#6b6b6b';  // an Organise row with no priced figure
+  const VSD_COLOR_BEST = '#b8912f';   // the best pence-per-note on the Organise screen
+
+  const VSD_CLASS = 'fl-ux-vsd';
+  const VSD_FLAG = 'flUxVsd';
+  const VSD_BRANCH_CLASS = 'fl-ux-vsd-branch';
+  const VSD_BRANCH_FLAG = 'flUxVsdBranch';
+
+  // A Luck row is ranked on its EXPECTED value, the one case where the wiki
+  // gives both outcomes and the odds -- the same rule `zeeTwScore` follows, and
+  // for the same reason. It matters here: "Cut it fine" advertises twice the
+  // pages of "Tarry a little" and is worth a sixth of it once the 70% chance of
+  // losing five of each type is priced in.
+  function vsdLuckValue(luck) {
+    return luck.odds * luck.win - (1 - luck.odds) * luck.lose;
+  }
+
+  // How many pages a row moves, and of which types. Returns null for a row that
+  // moves none -- which is a different claim from zero, and is why the badge
+  // labels those rows rather than printing "+0".
+  function vsdPages(entry) {
+    const moved = VSD_NOTE_KEYS.filter(function (key) { return entry[key]; });
+    if (!moved.length) return null;
+    const total = moved.reduce(function (sum, key) { return sum + entry[key]; }, 0);
+    const same = moved.length === 3
+      && entry.an === entry.cn && entry.cn === entry.tn;
+    return { keys: moved, total: total, all: same, each: same ? entry.an : null };
+  }
+
+  function vsdSigned(n) {
+    return (n > 0 ? '+' : '') + n;
+  }
+
+  // The best pence-per-note the Organise screen offers. Derived, so adding a
+  // row with a better rate re-colours the table rather than lying about it.
+  const VSD_BEST_PER_NOTE = VSD_OPTIONS.reduce(function (best, entry) {
+    return typeof entry.perNote === 'number' && entry.perNote > best ? entry.perNote : best;
+  }, 0);
+
+  function vsdBadgeText(entry) {
+    if (entry.leave) return 'leave';
+    if (entry.luck) {
+      // One decimal, and only where it is not a whole number: "≈+9.5" says
+      // "this is arithmetic, not a promise" better than "+9" would.
+      const ev = vsdLuckValue(entry.luck);
+      const shown = Math.round(ev * 10) / 10;
+      return '≈' + VSD_NOTES[entry.luck.type].tag + ' ' + vsdSigned(shown) + '?';
+    }
+    const pages = vsdPages(entry);
+    if (!pages) return entry.headline || 'no pages';
+    if (pages.all) return 'all ' + vsdSigned(pages.each);
+    if (pages.keys.length === 1) {
+      const key = pages.keys[0];
+      return VSD_NOTES[key].tag + ' ' + vsdSigned(entry[key]);
+    }
+    return vsdSigned(pages.total) + ' pages';
+  }
+
+  function vsdColor(entry) {
+    if (entry.leave) return VSD_COLOR_LEAVE;
+    if (entry.luck) return VSD_NOTES[entry.luck.type].color;
+    const pages = vsdPages(entry);
+    if (!pages) return VSD_COLOR_GOODS;
+    if (entry.phase === 'organise') {
+      return entry.perNote === VSD_BEST_PER_NOTE ? VSD_COLOR_BEST : VSD_COLOR_SPEND;
+    }
+    if (pages.keys.length === 1) return VSD_NOTES[pages.keys[0]].color;
+    // Pays every type at once: no one hue is honest, so it gets the neutral and
+    // the amount carries the meaning.
+    return VSD_COLOR_SPEND;
+  }
+
+  // --- the tooltip ---------------------------------------------------------
+
+  function vsdWhen(entry) {
+    if (entry.phase === 'island') {
+      return entry.island + ' · Orthos is Coming! '
+        + (entry.orthos[0] === entry.orthos[1]
+          ? String(entry.orthos[0]) : entry.orthos[0] + '–' + entry.orthos[1]);
+    }
+    return entry.phase === 'prep' ? 'Preparatory Research, at Your Lodgings'
+      : 'Organise your Research, at Your Lodgings';
+  }
+
+  function vsdPageWords(entry) {
+    const pages = vsdPages(entry);
+    if (!pages) return null;
+    return pages.keys.map(function (key) {
+      return VSD_NOTES[key].name + ' ' + vsdSigned(entry[key]);
+    }).join(', ');
+  }
+
+  function vsdSpec(entry) {
+    const lines = [entry.storylet + ': ' + entry.branch, vsdWhen(entry), ''];
+
+    if (entry.leave) {
+      lines.push('Ends the visit. Nothing gained, nothing risked.');
+    } else if (entry.luck) {
+      const note = VSD_NOTES[entry.luck.type];
+      lines.push('A gamble, and the badge is its EXPECTED value, not the number it '
+        + 'advertises: ' + Math.round(entry.luck.odds * 100) + '% of ' + note.tag + ' +'
+        + entry.luck.win + ', ' + Math.round((1 - entry.luck.odds) * 100) + '% of losing '
+        + '5 of each type.');
+      lines.push('Expected: ' + note.tag + ' ' + vsdSigned(Math.round(vsdLuckValue(entry.luck) * 10) / 10)
+        + ' a page, counting the failure.');
+    } else {
+      const words = vsdPageWords(entry);
+      if (words) lines.push('Pages: ' + words);
+      if (entry.headline && !words) lines.push('No pages. Pays goods instead.');
+    }
+
+    if (entry.gain) lines.push('Gives: ' + entry.gain);
+    if (entry.orElse) lines.push('OR, the game’s choice, not yours: ' + entry.orElse);
+    if (entry.cost) lines.push('Costs: ' + entry.cost);
+    if (entry.needs) lines.push('Needs: ' + entry.needs);
+    if (entry.ch) lines.push('Challenge: ' + entry.ch);
+    if (entry.fail) lines.push('Failure: ' + entry.fail);
+    if (typeof entry.perNote === 'number') {
+      lines.push('Worth about ' + entry.worth + ' Echoes — ' + entry.perNote + ' pence a page'
+        + (entry.perNote === VSD_BEST_PER_NOTE ? ', the best rate on this screen.' : '.'));
+    }
+    if (entry.note) lines.push(entry.note);
+
+    lines.push('');
+    lines.push(entry.phase === 'island'
+      ? 'A visit is ' + VSD_ISLAND_ACTIONS + ' actions if every challenge passes. A failure '
+        + 'still moves Orthos, by 1 change point rather than 2, so it lengthens the visit '
+        + 'rather than ending it. You cannot leave early.'
+      : 'Every Preparatory Research option locks itself out above a page count, so the '
+        + 'order you take them in decides the total.');
+    return { text: vsdBadgeText(entry), color: vsdColor(entry), title: lines.join('\n') };
+  }
+
+  // A storylet holds one or more of these. The badge takes the row that pays
+  // the most pages of the island's own type -- that is what you sailed for --
+  // and the tooltip lists every branch, so the goods row is never hidden.
+  function vsdIslandType(name) {
+    const island = VSD_ISLANDS.find(function (i) { return i.name === name; });
+    return island ? island.pays : null;
+  }
+
+  function bestVsdOption(entries) {
+    const wanted = entries[0].island ? vsdIslandType(entries[0].island) : null;
+    let best = null;
+    let bestScore = -Infinity;
+    for (const entry of entries) {
+      let score;
+      if (entry.leave) score = -1;
+      else if (entry.luck) score = vsdLuckValue(entry.luck);
+      else if (wanted && entry[wanted]) score = entry[wanted];
+      else {
+        const pages = vsdPages(entry);
+        score = pages ? pages.total : 0;
+      }
+      if (score > bestScore) { bestScore = score; best = entry; }
+    }
+    return best || entries[0];
+  }
+
+  function vsdStoryletSpec(entries) {
+    if (entries.length === 1) return vsdSpec(entries[0]);
+    const best = bestVsdOption(entries);
+    const wanted = entries[0].island ? vsdIslandType(entries[0].island) : null;
+    const lines = [entries[0].storylet, vsdWhen(entries[0]), ''];
+    lines.push(entries.length + ' options here:');
+    for (const entry of entries) {
+      const words = vsdPageWords(entry);
+      lines.push('  • ' + entry.branch + ' — '
+        + (entry.leave ? 'ends the visit'
+          : entry.luck ? 'a gamble, expected ' + VSD_NOTES[entry.luck.type].tag + ' '
+            + vsdSigned(Math.round(vsdLuckValue(entry.luck) * 10) / 10)
+          : words || entry.gain || 'no pages')
+        + (entry.ch ? ' [' + entry.ch + ']' : ''));
+    }
+    lines.push('');
+    lines.push(wanted
+      ? 'The badge is the option paying the most ' + VSD_NOTES[wanted].tag
+        + ', which is what this island is for. The others pay goods, and whether that '
+        + 'is worth more to you is not a question this table can answer.'
+      : 'The badge is the option paying the most pages.');
+    lines.push('');
+    lines.push('Open the storylet and every option is badged in its own right.');
+    return { text: vsdBadgeText(best), color: vsdColor(best), title: lines.join('\n') };
+  }
+
+  // --- looking one up ------------------------------------------------------
+  //
+  // The trap here, and it is this feature's whole reason for needing more than
+  // a Map: THE SAME BRANCH NAME IS ON ALL THREE ISLANDS. "Time to go", "Tarry a
+  // little" and "Cut it fine" each appear three times, paying a different note
+  // type on each island, and so does the storylet name "Bullbone Island" /
+  // "Grunting Fen" / "Corpsecage Island", which is also the AREA name. A badge
+  // that guessed which island you were on would quote the wrong currency a
+  // third of the time, so ambiguity is resolved from the page or not at all.
+
+  const VSD_BY_STORYLET = new Map();
+  const VSD_BY_BRANCH = new Map();
+  for (const entry of VSD_OPTIONS) {
+    const sKey = normalizeName(entry.storylet);
+    if (!VSD_BY_STORYLET.has(sKey)) VSD_BY_STORYLET.set(sKey, []);
+    VSD_BY_STORYLET.get(sKey).push(entry);
+    const bKey = normalizeName(entry.branch);
+    if (!VSD_BY_BRANCH.has(bKey)) VSD_BY_BRANCH.set(bKey, []);
+    VSD_BY_BRANCH.get(bKey).push(entry);
+  }
+
+  // Where are we? The greeting first, then the storylet heading on screen --
+  // an opened storylet named after an island is as good as the greeting, and
+  // it is there on the very screen the branches are.
+  function vsdIslandHere() {
+    const area = normalizeName(currentArea());
+    for (const island of VSD_ISLANDS) {
+      if (area === normalizeName(island.name)) return island.name;
+    }
+    const heads = document.querySelectorAll('.storylet-root__heading');
+    for (const head of heads) {
+      const rows = VSD_BY_STORYLET.get(normalizeName(headingName(head)));
+      if (rows && rows.length && rows[0].island) return rows[0].island;
+    }
+    return null;
+  }
+
+  // Narrow a set of same-named rows down to one. Returns null rather than
+  // guessing -- a badge that names the wrong island's currency is worse than
+  // no badge.
+  function vsdDisambiguate(rows, island) {
+    if (rows.length === 1) return rows[0];
+    if (!island) return null;
+    const here = rows.filter(function (r) { return r.island === island; });
+    return here.length === 1 ? here[0] : null;
+  }
+
+  function lookupVsdBranch(name, island) {
+    const rows = VSD_BY_BRANCH.get(normalizeName(name));
+    return rows ? vsdDisambiguate(rows, island) : null;
+  }
+
+  // A storylet's rows, all of them, for the one island we are on.
+  function lookupVsdStorylet(name, island) {
+    const rows = VSD_BY_STORYLET.get(normalizeName(name));
+    if (!rows) return null;
+    const islands = new Set(rows.map(function (r) { return r.island; }));
+    if (islands.size <= 1) return rows;
+    if (!island) return null;
+    const here = rows.filter(function (r) { return r.island === island; });
+    return here.length ? here : null;
+  }
+
+  // --- the area gate -------------------------------------------------------
+  //
+  // Confirm-only, like ZEE_AREAS and PC_AREAS: nobody has captured a greeting
+  // on any of the three islands, so these names are a GUESS taken from the
+  // wiki's own page titles. It may say "yes" and must never say "no".
+  const VSD_AREAS = VSD_ISLANDS.map(function (i) { return normalizeName(i.name); });
+
+  function inVsdIsland() {
+    const area = normalizeName(currentArea());
+    return !!area && VSD_AREAS.indexOf(area) !== -1;
+  }
+
+  // `strict` is for one thing only: a BRANCH NAME that is an ordinary English
+  // phrase and could title an option anywhere in London -- "Time to go",
+  // "Looking up", "Making money", "Search the island", "Do a survey", "Catch
+  // some", "Go searching", "See what you can dig up", "Tarry a little", "Cut it
+  // fine". Those wait until the greeting or an opened storylet confirms one of
+  // the three islands.
+  //
+  // It is deliberately NOT on the rest, including the branches of the storylets
+  // named after their islands. Those names ("The bones of Bullbone", "The
+  // Corpsecage bat") are phrases the wiki shows here and nowhere else, and
+  // spreading `strict` to them would black the feature out on the storylet
+  // LIST -- where no storylet is open to resolve the island and the greeting is
+  // an unverified guess, which is exactly where the badges are most use.
+  // A STORYLET heading needs its own list rather than "any of my branches is
+  // strict". Deriving it from the branches would gate "Sparkling around the
+  // Copse" on the one ordinary option inside it, which is the over-strictness
+  // this is meant to avoid. Four storylet names earn it: the three that are
+  // also the ISLAND's name, where the heading is indistinguishable from the
+  // place, and "Up the Hill".
+  const VSD_STRICT_STORYLETS = [
+    'Bullbone Island', 'Corpsecage Island', 'Grunting Fen', 'Up the Hill',
+  ].map(normalizeName);
+
+  const VSD_STORYLET_SELECTOR = '.storylet__heading, .storylet-root__heading';
+  const VSD_BRANCH_SELECTOR = '.branch__title';
+
+  function vsdRatings() {
+    const island = vsdIslandHere();
+    const confirmed = !!island || inVsdIsland();
+
+    document.querySelectorAll(VSD_STORYLET_SELECTOR).forEach(function (head) {
+      const name = headingName(head);
+      const entries = name ? lookupVsdStorylet(name, island) : null;
+      const strict = !!entries
+        && VSD_STRICT_STORYLETS.indexOf(normalizeName(entries[0].storylet)) !== -1;
+      attachBadge(head, {
+        cls: VSD_CLASS,
+        flag: VSD_FLAG,
+        // The island is in the flag as well as the name: the same storylet
+        // heading on two different islands is two different badges.
+        value: name + '@' + (island || '-'),
+        spec: entries && (confirmed || !strict) ? vsdStoryletSpec(entries) : null,
+        place: 'after',
+      });
+    });
+
+    document.querySelectorAll(VSD_BRANCH_SELECTOR).forEach(function (head) {
+      const name = headingName(head);
+      const entry = name ? lookupVsdBranch(name, island) : null;
+      attachBadge(head, {
+        cls: VSD_BRANCH_CLASS,
+        flag: VSD_BRANCH_FLAG,
+        value: name + '@' + (island || '-'),
+        spec: entry && (confirmed || !entry.strict) ? vsdSpec(entry) : null,
+        place: 'after',
+      });
+    });
+  }
+
   // === shared: the launcher ==============================================
   //
   // A floating button, parked beside FL's own travel control, that opens a
@@ -3339,6 +4522,22 @@
       label: 'Zailing',
       hint: 'Routes, Zee Peril, Troubled Waters and every card at zee',
       render: renderZailingPanel,
+    },
+    {
+      id: 'port-carnelian',
+      icon: '🐅',
+      label: 'Port Carnelian',
+      hint: 'A governor’s term: every option by the clock, what it changes, and what '
+        + 'the two currencies cash in for',
+      render: renderPortCarnelianPanel,
+    },
+    {
+      id: 'scientific-voyages',
+      icon: '🔬',
+      label: 'Scientific Voyages',
+      hint: 'The three islands, every action on them, and what the three kinds of '
+        + 'research page are finally worth',
+      render: renderVsdPanel,
     },
     {
       id: 'fruits-of-the-zee',
@@ -5686,6 +6885,477 @@
     ]);
   }
 
+  // === panel: Port Carnelian =============================================
+  //
+  // The reference half of the governorship: how to get there at all, the rules
+  // a term is played by, every option the guide records grouped by the clock,
+  // what the two currencies cash in for and where the rounding steps are.
+  //
+  // Unlike the Zailing panel there is no "your hand, ranked" block at the top:
+  // Port Carnelian deals no opportunity cards, so what is in front of you is
+  // the storylet list itself -- which is already badged.
+
+  const PC_TIME_GROUPS = [
+    { key: '1-11', label: 'Time Passing in Office 1–11 — always on offer' },
+    { key: '1-10', label: 'Time Passing in Office 1–10' },
+    { key: '1-6', label: 'Time Passing in Office 1–6 — the first half' },
+    { key: '7-10', label: 'Time Passing in Office 7–10 — the second half' },
+    { key: '11-11', label: 'Time Passing in Office 11 — the last working action' },
+    { key: '12-12', label: 'Time Passing in Office 12 — the endings' },
+  ];
+
+  // One row of the table is one ROW of the guide, so a storylet the guide
+  // splits in two gets a line and a badge each -- which is the same thing the
+  // in-game branch badges do, and the reason this is not `pcStoryletSpec` for
+  // everything.
+  function pcBadgeNode(entry) {
+    return makeBadge(entry.branch ? pcBranchSpec(entry) : pcStoryletSpec([entry]), PC_CLASS);
+  }
+
+  function pcOptionRow(entry) {
+    const row = h('tr', null, [
+      h('td', { css: TD }, [
+        h('div', null, [wikiLink(entry.name, entry.name)]),
+        entry.branch
+          ? h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, ['→ ' + entry.branch])
+          : null,
+        entry.needs
+          ? h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, ['needs ' + entry.needs])
+          : null,
+      ]),
+      h('td', { css: TD + 'white-space:nowrap;color:' + UI.dim + ';' },
+        [entry.airs ? pcRange(entry.airs) : 'any']),
+      h('td', { css: TD + 'text-align:center;' }, [pcBadgeNode(entry)]),
+      h('td', { css: TD + 'color:' + UI.dim + ';' }, [
+        h('div', { css: 'color:' + UI.text + ';' }, [pcChangeWords(entry)]),
+        entry.note ? h('div', { css: 'font-size:11px;' }, [entry.note]) : null,
+      ]),
+    ]);
+    // Filtered on this rather than on textContent, so a term can match a
+    // requirement or a note the collapsed row does not spell out.
+    row.dataset.pcSearch = (entry.name + ' ' + (entry.branch || '') + ' '
+      + (entry.needs || '') + ' ' + (entry.note || '') + ' ' + pcChangeWords(entry)).toLowerCase();
+    return row;
+  }
+
+  function renderPortCarnelianPanel() {
+    const section = function (title, children) {
+      return h('div', { css: 'margin-top:14px;' }, [
+        h('div', {
+          css: 'font:bold 11px ' + UI.font + ';letter-spacing:.06em;text-transform:uppercase;'
+            + 'color:' + UI.accent + ';margin-bottom:5px;',
+        }, [title]),
+        children,
+      ]);
+    };
+    const table = function (heads, rows) {
+      return h('table', { css: 'width:100%;border-collapse:collapse;' }, [
+        h('thead', null, [h('tr', null, heads.map(function (head) {
+          return h('th', { css: TH + (head.right ? 'text-align:right;' : ''), title: head.title || '' }, [head.text]);
+        }))]),
+        h('tbody', null, rows),
+      ]);
+    };
+
+    // --- the rules, up top where they belong -------------------------------
+    const rules = h('div', {
+      css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent
+        + ';background:' + UI.bgAlt + ';font-size:12px;line-height:1.6;',
+    }, [
+      h('div', { css: 'color:' + UI.accent + ';font-weight:bold;' },
+        ['A term is ' + PC_TERM_ACTIONS + ' actions']),
+      h('div', null, ['Raise ', wikiLink('Striped Delights', 'Striped Delights'), ' or ',
+        wikiLink('Silver Horseheads', 'Silver Horseheads'),
+        ' as high as you can, then cash ONE of them in at Time 12.']),
+      h('div', null, [
+        h('span', { css: 'color:#c98a8a;' }, ['Never let ']),
+        wikiLink('Imperial Legitimacy', 'Imperial Legitimacy'),
+        h('span', { css: 'color:#c98a8a;' }, [' reach 0']),
+        ' — the only option left is “The sword falls”, you are sent back to zee with '
+        + 'nothing, and getting it back means raising Working toward a Foreign Posting to 7 '
+        + 'at the Foreign Office all over again. Legitimacy carries over between terms; '
+        + 'the two currencies do not.',
+      ]),
+      h('div', null, [wikiLink('The Airs of Port Carnelian', 'The Airs of Port Carnelian'),
+        ' is re-rolled every single action, so which options you are offered is read off '
+        + 'the screen, not planned. There are no opportunity cards here.']),
+    ]);
+
+    // --- every option, grouped by the clock --------------------------------
+    const optionRows = [];
+    for (const group of PC_TIME_GROUPS) {
+      const inGroup = PC_OPTIONS.filter(function (e) { return e.time.join('-') === group.key; });
+      if (!inGroup.length) continue;
+      const header = h('tr', null, [h('td', {
+        colSpan: 4,
+        css: 'padding:8px 8px 3px;font:bold 11px ' + UI.font + ';letter-spacing:.05em;'
+          + 'text-transform:uppercase;color:' + UI.dim + ';border-bottom:1px solid ' + UI.line + ';',
+      }, [group.label])]);
+      header.dataset.pcGroup = '1';
+      optionRows.push(header);
+      for (const entry of inGroup) optionRows.push(pcOptionRow(entry));
+    }
+
+    const search = h('input', {
+      type: 'text',
+      placeholder: 'filter options, requirements, rewards…',
+      css: 'flex:1;min-width:140px;box-sizing:border-box;padding:3px 7px;background:' + UI.bgAlt
+        + ';color:' + UI.text + ';border:1px solid ' + UI.line + ';border-radius:3px;font:12px ' + UI.font + ';',
+      on: {
+        input: function (e) {
+          const term = String(e.currentTarget.value || '').trim().toLowerCase();
+          for (const row of optionRows) {
+            if (row.dataset.pcGroup) continue;
+            row.hidden = !!term && row.dataset.pcSearch.indexOf(term) === -1;
+          }
+          let group = null, shown = 0;
+          for (const row of optionRows) {
+            if (row.dataset.pcGroup) {
+              if (group) group.hidden = shown === 0;
+              group = row; shown = 0;
+            } else if (!row.hidden) shown++;
+          }
+          if (group) group.hidden = shown === 0;
+        },
+      },
+    });
+
+    return h('div', { css: 'padding:0 12px 12px;' }, [
+      rules,
+
+      section('Getting there', h('div', { css: 'color:' + UI.dim + ';font-size:12px;line-height:1.7;' }, [
+        h('div', null, ['1. Be ', wikiLink('Banished from the Court', 'Banished from the Court'),
+          ' — the end of the Court storyline, after the Tomb-Colonies.']),
+        h('div', null, ['2. Raise ',
+          wikiLink('Working toward a Foreign Posting', 'Working toward a Foreign Posting'),
+          ' to 7 at ', wikiLink('The Foreign Office', 'The Foreign Office'), ', then take ',
+          wikiLink('The Manifestation of Promise', 'The Manifestation of Promise'), '.']),
+        h('div', null, ['3. Put to zee from ', wikiLink('Wolfstack Docks', 'Wolfstack Docks'),
+          ', pick ', wikiLink('Destination: The Elder Continent', 'The Elder Continent'),
+          ' at the southern edge of the map, then ',
+          wikiLink('Set a course for Port Carnelian', 'Set a course for Port Carnelian'), '.']),
+        h('div', { css: 'margin-top:5px;' }, ['Coming back after a sword falls is step 2 again, '
+          + 'ending on ', wikiLink('The Value of Good Names', 'The Value of Good Names'),
+          ' instead — or The Manifestation of Promise, if you have never finished a term.']),
+      ])),
+
+      section('Every option', h('div', null, [
+        h('div', { css: 'display:flex;align-items:center;gap:8px;margin-bottom:6px;' }, [search]),
+        table([
+          { text: 'Option' },
+          { text: 'Airs', title: 'The window of The Airs of Port Carnelian this is offered in. Re-rolled every action.' },
+          { text: '' },
+          { text: 'What it changes' },
+        ], optionRows),
+      ])),
+
+      section('Cashing out', h('div', null, [
+        h('div', { css: 'color:' + UI.dim + ';font-size:12px;line-height:1.7;' },
+          PC_REWARDS.map(function (reward) {
+            return h('div', { css: 'margin-bottom:4px;' }, [
+              h('span', { css: 'color:' + UI.text + ';' }, [reward.currency + ' — ']),
+              wikiLink(reward.via, reward.via),
+              h('div', { css: 'font-size:11px;' }, [reward.items.map(function (item) {
+                return h('div', null, ['· ', wikiLink(item.name, item.name),
+                  ' × (' + item.count + ') — ' + item.worth]);
+              })]),
+            ]);
+          })),
+        h('div', { css: 'margin-top:8px;' }, [table([
+          { text: 'Currency', right: true, title: 'The least Silver Horseheads or Striped Delights that buys this step.' },
+          { text: '2.5 Echo items', right: true },
+          { text: '12.5 Echo items', right: true },
+          { text: 'Echoes', right: true },
+        ], PC_TIERS.map(function (tier) {
+          // 105 and 176 are the two steps the strategy alternates between.
+          const pick = tier.at === 105 || tier.at === 176;
+          return h('tr', null, [
+            h('td', { css: TD + 'text-align:right;' + (pick ? 'color:' + UI.accent + ';font-weight:bold;' : '') },
+              [String(tier.at)]),
+            h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' }, [String(tier.cheap)]),
+            h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' }, [String(tier.dear)]),
+            h('td', { css: TD + 'text-align:right;' + (pick ? 'color:' + UI.accent + ';' : '') },
+              [String(tier.echo)]),
+          ]);
+        }))]),
+      ])),
+
+      section('Strategy', h('div', { css: 'color:' + UI.dim + ';font-size:12px;line-height:1.7;' }, [
+        h('div', null, ['Take the biggest net on the screen, whichever resource it is in — '
+          + 'the airs-gated options trade all three for each other anyway.']),
+        h('div', null, ['Keep Imperial Legitimacy under 90: several options are hidden above it. '
+          + 'Gaining it is unreliable (about a 10% chance per re-roll of Airs), so trade '
+          + 'Delights for Horseheads rather than spending Legitimacy where you can.']),
+        h('div', null, ['Stock Silver Horseheads while Time is 1–6. In the 7–10 range you can '
+          + 'trade Horseheads for Delights at a net +5 but not the other way round.']),
+        h('div', null, ['Cash out at ', h('b', null, ['105']), ' or ', h('b', null, ['176']),
+          ' rather than around 140 — the rounding pays better at those two, and alternating '
+          + 'them is worth roughly 61.25 Echoes a cycle (about 2.36 EPA).']),
+        h('div', null, ['Once ', wikiLink('Offering Tribute to the Court of the Wakeful Eye', 'Tribute'),
+          ' is unlocked, always cash in Striped Delights: the flat 5 Tribute is worth about '
+          + '12.5 Echoes on its own.']),
+        h('div', null, ['Two finished terms unlock ', wikiLink('Host a State Dinner', 'Host a State Dinner'),
+          ' at the end of the third, which restores you to the Empress’ Court.']),
+      ])),
+
+      h('div', { css: 'margin-top:12px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+        h('div', null, ['The badge is the option’s ', h('b', null, ['net']),
+          ' change in resources, the guide’s own figure. ',
+          h('b', null, [PC_LEGIT_MARK]), ' means it is paid for out of Imperial Legitimacy; ',
+          h('b', null, ['Fate']), ' that it is Fate-locked; ',
+          h('b', null, ['cash out']), ' that it ends the term and spends a currency.']),
+        h('div', null, ['A storylet with two branches is badged with the better net, and both '
+          + 'are in its tooltip; open it and each branch is badged in its own right.']),
+        h('div', { css: 'margin-top:6px;' }, ['Data from ',
+          wikiLink('Port Carnelian (Guide)', 'Port Carnelian (Guide)'), ' on the Fallen London wiki.']),
+      ]),
+    ]);
+  }
+
+  // === panel: Voyages of Scientific Discovery ============================
+  //
+  // The reference half: how the voyage is unlocked at all, what each island
+  // pays and what it costs to get there, the whole action table grouped by
+  // phase and island and searchable, and what the pages are finally worth.
+  //
+  // Like the Port Carnelian panel and unlike the Zailing one it opens with no
+  // "your hand, ranked" block: these islands deal no opportunity cards. The one
+  // card the voyage adds is The Fleet of Truth, and it is at zee rather than
+  // here, so it lives in ZEE_CARDS and the Zailing panel where it belongs.
+
+  const VSD_GROUPS = [
+    { key: 'prep', label: 'Preparatory Research — at Your Lodgings, before you sail' },
+    { key: 'island:Bullbone Island', label: 'Bullbone Island — Home Waters, pays CN' },
+    { key: 'island:Corpsecage Island', label: 'Corpsecage Island — Stormbones, pays AN' },
+    { key: 'island:Grunting Fen', label: 'Grunting Fen — The Sea of Voices, pays TN' },
+    { key: 'organise', label: 'Organise your Research — at Your Lodgings, spending the pages' },
+  ];
+
+  function vsdGroupKey(entry) {
+    return entry.phase === 'island' ? 'island:' + entry.island : entry.phase;
+  }
+
+  function vsdBadgeNode(entry) {
+    return makeBadge(vsdSpec(entry), VSD_CLASS);
+  }
+
+  function vsdOptionRow(entry) {
+    const row = h('tr', null, [
+      h('td', { css: TD }, [
+        h('div', null, [wikiLink(entry.branch, entry.branch)]),
+        h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, ['in ', wikiLink(entry.storylet, entry.storylet)]),
+        entry.needs
+          ? h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, ['needs ' + entry.needs])
+          : null,
+      ]),
+      h('td', { css: TD + 'white-space:nowrap;color:' + UI.dim + ';' }, [
+        entry.orthos
+          ? (entry.orthos[0] === entry.orthos[1]
+            ? String(entry.orthos[0]) : entry.orthos[0] + '–' + entry.orthos[1])
+          : '—',
+      ]),
+      h('td', { css: TD + 'text-align:center;' }, [vsdBadgeNode(entry)]),
+      h('td', { css: TD + 'color:' + UI.dim + ';font-size:11px;white-space:nowrap;' },
+        [entry.ch || '—']),
+      h('td', { css: TD + 'color:' + UI.dim + ';' }, [
+        entry.gain ? h('div', { css: 'color:' + UI.text + ';' }, [entry.gain]) : null,
+        entry.cost ? h('div', null, ['costs ' + entry.cost]) : null,
+        entry.orElse ? h('div', { css: 'color:#c9a04a;' }, ['or, the game’s choice: ' + entry.orElse]) : null,
+        entry.fail ? h('div', null, ['failure: ' + entry.fail]) : null,
+        entry.note ? h('div', null, [entry.note]) : null,
+      ]),
+    ]);
+    row.dataset.vsdSearch = [entry.branch, entry.storylet, entry.island || '', entry.ch || '',
+      entry.gain || '', entry.cost || '', entry.needs || '', entry.note || '',
+      entry.headline || ''].join(' ').toLowerCase();
+    return row;
+  }
+
+  function renderVsdPanel() {
+    const section = function (title, children) {
+      return h('div', { css: 'margin-top:14px;' }, [
+        h('div', {
+          css: 'font:bold 11px ' + UI.font + ';letter-spacing:.06em;text-transform:uppercase;'
+            + 'color:' + UI.accent + ';margin-bottom:5px;',
+        }, [title]),
+        children,
+      ]);
+    };
+    const table = function (heads, rows) {
+      return h('table', { css: 'width:100%;border-collapse:collapse;' }, [
+        h('thead', null, [h('tr', null, heads.map(function (head) {
+          return h('th', { css: TH + (head.right ? 'text-align:right;' : ''), title: head.title || '' }, [head.text]);
+        }))]),
+        h('tbody', null, rows),
+      ]);
+    };
+
+    // --- the three currencies, up top -------------------------------------
+    const intro = h('div', {
+      css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent
+        + ';background:' + UI.bgAlt + ';font-size:12px;line-height:1.6;',
+    }, [
+      h('div', { css: 'color:' + UI.accent + ';font-weight:bold;' }, ['Three kinds of page']),
+      h('div', null, VSD_NOTE_KEYS.map(function (key) {
+        const note = VSD_NOTES[key];
+        return h('div', null, [
+          h('span', {
+            css: 'display:inline-block;min-width:26px;text-align:center;margin-right:6px;'
+              + 'padding:0 4px;border-radius:2px;font:bold 10px arial,sans-serif;'
+              + 'line-height:14px;color:#fff;background:' + note.color + ';',
+          }, [note.tag]),
+          wikiLink(note.name, note.name),
+        ]);
+      })),
+      h('div', { css: 'margin-top:5px;' }, ['The island pages write AN as ',
+        h('b', null, ['PAN']), '; it is the same page.']),
+      h('div', null, ['A visit is ', h('b', null, [String(VSD_ISLAND_ACTIONS)]),
+        ' actions if every challenge passes — 1 to arrive, 19 of carousel, 1 to leave. '
+        + 'A failure still moves ', wikiLink('Orthos is Coming!', 'Orthos is Coming!'),
+        ', by 1 change point rather than 2, so it lengthens the visit rather than ending '
+        + 'it. You cannot leave early, and your outfit is locked — wear Watchful gear.']),
+    ]);
+
+    // --- the action table -------------------------------------------------
+    const optionRows = [];
+    for (const group of VSD_GROUPS) {
+      const inGroup = VSD_OPTIONS.filter(function (e) { return vsdGroupKey(e) === group.key; });
+      if (!inGroup.length) continue;
+      const header = h('tr', null, [h('td', {
+        colSpan: 5,
+        css: 'padding:8px 8px 3px;font:bold 11px ' + UI.font + ';letter-spacing:.05em;'
+          + 'text-transform:uppercase;color:' + UI.dim + ';border-bottom:1px solid ' + UI.line + ';',
+      }, [group.label])]);
+      header.dataset.vsdGroup = '1';
+      optionRows.push(header);
+      for (const entry of inGroup) optionRows.push(vsdOptionRow(entry));
+    }
+
+    const search = h('input', {
+      type: 'text',
+      placeholder: 'filter actions, rewards, requirements…',
+      css: 'flex:1;min-width:140px;box-sizing:border-box;padding:3px 7px;background:' + UI.bgAlt
+        + ';color:' + UI.text + ';border:1px solid ' + UI.line + ';border-radius:3px;font:12px ' + UI.font + ';',
+      on: {
+        input: function (e) {
+          const term = String(e.currentTarget.value || '').trim().toLowerCase();
+          for (const row of optionRows) {
+            if (row.dataset.vsdGroup) continue;
+            row.hidden = !!term && row.dataset.vsdSearch.indexOf(term) === -1;
+          }
+          let group = null, shown = 0;
+          for (const row of optionRows) {
+            if (row.dataset.vsdGroup) {
+              if (group) group.hidden = shown === 0;
+              group = row; shown = 0;
+            } else if (!row.hidden) shown++;
+          }
+          if (group) group.hidden = shown === 0;
+        },
+      },
+    });
+
+    return h('div', { css: 'padding:0 12px 12px;' }, [
+      intro,
+
+      section('Getting the voyage at all', h('div', { css: 'color:' + UI.dim + ';font-size:12px;line-height:1.7;' }, [
+        h('div', null, ['The Dilmun Club wants: Watchful 120, ',
+          wikiLink('A Person of Some Importance', 'A Person of Some Importance'),
+          ', Associating with Radical Academics 3, Cultivating an Acquaintance with His '
+          + 'Amused Lordship 3, and Featuring in the Tales of the University 30.']),
+        h('div', null, ['Then ', wikiLink('A Sneering Gentleman', 'A Sneering Gentleman'),
+          ' on Ladybones Road — His Amused Lordship’s valet keeps losing the paperwork. '
+          + 'Correcting him costs a Blackmail Material, 2 Books of Hidden Bodies and 5 '
+          + 'Extraordinary Implications.']),
+        h('div', null, ['Then ', wikiLink('Upstairs at the Bridge Without', 'Upstairs at the Bridge Without'),
+          ' in the Bazaar Side-streets, and a ship of your own.']),
+        h('div', { css: 'margin-top:5px;' }, ['Once you are Embarking 3, ',
+          wikiLink('The Fleet of Truth', 'The Fleet of Truth'),
+          ' joins your zee deck — 5 pages of every type. It is in the Zailing panel, '
+          + 'with the rest of the deck.']),
+      ])),
+
+      section('Which island', h('div', null, [
+        table([
+          { text: 'Island' },
+          { text: 'Region' },
+          { text: 'AN', right: true, title: 'Page of Prelapsarian Archaeological Notes available per visit.' },
+          { text: 'CN', right: true, title: 'Page of Cryptopalaeontological Notes available per visit.' },
+          { text: 'TN', right: true, title: 'Page of Theosophistical Notes available per visit.' },
+          { text: 'EPA', right: true, title: 'Echoes per action of the material rewards, not counting the zailing there and back.' },
+        ], VSD_ISLANDS.map(function (island) {
+          return h('tr', null, [
+            h('td', { css: TD }, [
+              h('div', null, [wikiLink(island.name, island.name)]),
+              island.needs
+                ? h('div', { css: 'color:#c9a04a;font-size:11px;' }, ['needs a ', wikiLink(island.needs, island.needs)])
+                : null,
+            ]),
+            h('td', { css: TD + 'color:' + UI.dim + ';' }, [wikiLink(island.region, island.region)]),
+          ].concat(VSD_NOTE_KEYS.map(function (key) {
+            const lead = island.pays === key;
+            return h('td', {
+              css: TD + 'text-align:right;'
+                + (lead ? 'color:' + VSD_NOTES[key].color + ';font-weight:bold;' : 'color:' + UI.dim + ';'),
+            }, [String(island.best[key])]);
+          })).concat([
+            h('td', { css: TD + 'text-align:right;' }, [island.epa.toFixed(2)]),
+          ]));
+        })),
+        h('div', { css: 'margin-top:5px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' },
+          VSD_ISLANDS.map(function (island) {
+            return h('div', null, [h('span', { css: 'color:' + UI.text + ';' }, [island.name + ': ']),
+              island.note + ' Up to ' + island.echoes.toFixed(2) + ' Echoes a visit.']);
+          })),
+      ])),
+
+      section('Every action', h('div', null, [
+        h('div', { css: 'display:flex;align-items:center;gap:8px;margin-bottom:6px;' }, [search]),
+        table([
+          { text: 'Action' },
+          { text: 'Orthos', title: 'The Orthos is Coming! band this is offered in. There is no such gate on the two Lodgings screens.' },
+          { text: '' },
+          { text: 'Challenge' },
+          { text: 'What else it gives' },
+        ], optionRows),
+      ])),
+
+      section('Getting the most preparatory research', h('div', { css: 'color:' + UI.dim + ';font-size:12px;line-height:1.7;' }, [
+        h('div', null, [h('span', { css: 'color:' + VSD_NOTES.an.color + ';font-weight:bold;' }, ['AN 450: ']),
+          'three of any 50-page option and two Examine your collection of curiosities. '
+          + 'Also yields 150 of each of the other two.']),
+        h('div', null, [h('span', { css: 'color:' + VSD_NOTES.cn.color + ';font-weight:bold;' }, ['CN 400: ']),
+          'one Consult your current work, two of any 50-page option, two Test your Unearthly '
+          + 'Fossil and one Trade in academic favours. Also yields 140 of each of the others. '
+          + 'Swapping the Trade for a third Fossil gives 370 instead — a small loss, and no '
+          + 'Connected: Benthic 20 / Summerset 20 to arrange.']),
+        h('div', null, [h('span', { css: 'color:' + VSD_NOTES.tn.color + ';font-weight:bold;' }, ['TN 150: ']),
+          'three of any 50-page option. Also yields 150 of each of the others.']),
+        h('div', { css: 'margin-top:5px;' }, ['The order matters: every option locks itself out '
+          + 'above a page count (101 for the cheap ones, 301 for the big single-type ones), so '
+          + 'take the 50s first. Finish with any “Enough … research” option to reach Embarking 3.']),
+      ])),
+
+      h('div', { css: 'margin-top:12px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+        h('div', null, ['The badge is what the action pays in ', h('b', null, ['pages']),
+          ', coloured by type. An action that pays no pages is ', h('b', null, ['labelled']),
+          ' with what it does pay instead rather than scored — pages and Echoes have no '
+          + 'exchange rate here, and inventing one would be the badge choosing your voyage '
+          + 'for you.']),
+        h('div', null, ['On the Organise screen the badge is the guide’s ',
+          h('b', null, ['pence per page']), ', which is the figure that separates those '
+          + 'rows; the best rate is picked out in gold.']),
+        h('div', null, ['The three end-of-visit gambles carry ', h('b', null, ['≈']),
+          ' and their ', h('b', null, ['expected']), ' value, not the number they advertise: '
+          + 'Tarry a little is worth about six times Cut it fine once the failure is priced in.']),
+        h('div', { css: 'margin-top:6px;' }, ['Data from ',
+          wikiLink('Embarking on a Voyage of Scientific Discovery (Guide)',
+            'Embarking on a Voyage of Scientific Discovery (Guide)'),
+          ' and the Expedition Progress table on each island’s own page.']),
+      ]),
+    ]);
+  }
+
   // === panel: Fruits of the Zee ==========================================
   //
   // The checklist half of the festival work, and the reason the badges can say
@@ -7243,6 +8913,16 @@
     { name: 'fotz-depth-control', run: fotzDepthControls },
     // The only feature that decorates a storylet's OPTIONS rather than cards.
     { name: 'fotz-supplication', run: fotzSupplicationBranches },
+    // Port Carnelian deals no opportunity cards at all, so this one badges the
+    // storylet list and the branches inside an opened storylet instead. It
+    // shares `.branch__title` with the feature above and owns a different class
+    // and flag, so the two never clear each other.
+    { name: 'port-carnelian', run: pcRatings },
+    // The third feature on `.branch__title`, and the first that has to work out
+    // WHICH of three islands a branch belongs to before it can say anything:
+    // "Time to go", "Tarry a little" and "Cut it fine" are on all three and pay
+    // a different research page on each.
+    { name: 'scientific-voyages', run: vsdRatings },
   ];
 
   // === dispatch ==========================================================
