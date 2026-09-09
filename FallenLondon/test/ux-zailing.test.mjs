@@ -109,7 +109,7 @@ class FakeObserver { observe() {} }
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { ZEE_CARDS, ZEE_ROUTES, ZEE_REGIONS, ZEE_MENACES, ZEE_WINDS, ZEE_SAFE_DOCKS,'
+    'return { ZEE_CARDS, ZEE_ROUTES, ZEE_REGIONS, ZEE_MENACES, ZEE_WINDS, ZEE_PORTS,'
     + ' SPITE_CARDS, normalizeName, lookupZeeCard, zeeCardFor, bestZeeLine, zeeHasBetterGated,'
     + ' zeeBadgeSpec, zeeColor, zeeProgScore, zeeTwScore, zeeTwWord, zeeSpeedWord, inZee,'
     + ' attachBadge, ZEE_CLASS, ZEE_FLAG, ZEE_URGENT_COLOR, ZEE_GATED_MARK, SPITE_CLASS,'
@@ -208,9 +208,58 @@ check('the wind cards are the three the guide names',
    ['Northern Wind', 'A Wind from the North'],
    ['Eastern Wind', 'A Distant Gleam']]);
 
+// --- the ports -------------------------------------------------------------
+
+const port = (name) => api.ZEE_PORTS.find((p) => (p.as || p.name) === name);
+
 check('the Pillared Sea and the Snares have no safe dock at all',
-  api.ZEE_SAFE_DOCKS.filter((d) => d.names.join() === 'none').map((d) => d.region),
+  api.ZEE_REGIONS.map((r) => r.name).filter((region) =>
+    !api.ZEE_PORTS.some((p) => p.safe === true && p.regions.includes(region))),
   ['The Pillared Sea', 'The Snares']);
+
+check('every port sits in a region the region table knows',
+  api.ZEE_PORTS.flatMap((p) => p.regions)
+    .filter((r) => !api.ZEE_REGIONS.some((x) => x.name === r)), []);
+
+check('the safe docks are exactly the nine the guide ticks',
+  // The whole point of the column: docking at one of these, and only one of
+  // these, wipes Troubled Waters and every zee-threat.
+  api.ZEE_PORTS.filter((p) => p.safe === true && !p.once).map((p) => p.as || p.name),
+  ['London', 'Mutton Island', 'Port Carnelian', 'The Court of the Wakeful Eye', 'Abbey Rock',
+   'Apis Meet', 'The Chapel of Lights', 'Polythreme', "Khan's Heart"]);
+
+check('and the two one-time places that also reset are kept out of that list',
+  api.ZEE_PORTS.filter((p) => p.safe === true && p.once).map((p) => p.as || p.name),
+  ['The Approach to the Mountain', 'Avid Horizon (NORTH)']);
+
+check('a port that resets nothing is false, and a place that is not a dock is null',
+  // Three claims, three values. Folding the last two together would sell
+  // Gaider's Mourn as a harbour and the crocodile grounds as a port.
+  [port('Godfall').safe, port('Feral Crocodile Hunting Grounds').safe,
+   port('London').safe],
+  [false, null, true]);
+
+check('Port Cecil and Tanah-Chook keep the guide table’s cross, with the conflict recorded',
+  api.ZEE_PORTS.filter((p) => /sort key says safe/.test(p.note || ''))
+    .map((p) => [p.as || p.name, p.safe]),
+  [['Port Cecil', false], ['The Tomb Colonies (Tanah-Chook)', false]]);
+
+check('a port with no requirement at all says so with null, not an empty string',
+  [port('London').unlock, port('Mutton Island').unlock, port("Hunter's Keep").unlock],
+  [null, null, null]);
+
+check('the two Fate-locked destinations are marked',
+  api.ZEE_PORTS.filter((p) => p.fate).map((p) => p.as || p.name),
+  ['Apis Meet', 'The Tomb Colonies (Tanah-Chook)']);
+
+check('the lifeberg grounds are listed in all three regions they drift through',
+  port('Lifeberg Hunting Grounds').regions,
+  ["Shepherd's Wash", 'The Sea of Voices', 'The Salt Steppe']);
+
+check('the science islands are the three the voyages feature badges',
+  api.ZEE_PORTS.filter((p) => /Voyage of Scientific Discovery/.test(p.unlock || ''))
+    .map((p) => p.as || p.name),
+  ['Bullbone Island', 'Corpsecage Island', 'Grunting Fen']);
 
 // --- picking the line the badge speaks for ---------------------------------
 
@@ -422,6 +471,16 @@ const rows = nodes.filter((n) => n.dataset && n.dataset.zeeSearch);
 check('every card reaches the table',
   api.ZEE_CARDS.filter((c) => !rows.some((r) =>
     r.dataset.zeeSearch.startsWith(c.name.toLowerCase() + ' '))).map((c) => c.name), []);
+
+const portRows = nodes.filter((n) => n.dataset && n.dataset.zeePort);
+
+check('every port reaches the ports table, and the lifebergs reach it three times',
+  portRows.length, api.ZEE_PORTS.length + 2);
+
+check('the ports table lists a region’s safe docks under that region',
+  // Docking is the only way back to Calm Seas, so the table you read while a
+  // voyage is going wrong is "what is safe, near me".
+  portRows.filter((r) => ['London', 'Mutton Island'].includes(r.dataset.zeePort)).length, 2);
 
 check('and every region with cards of its own gets a heading',
   nodes.filter((n) => n.dataset && n.dataset.zeeGroup).length, 8);

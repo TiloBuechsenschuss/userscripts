@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      2.6
-// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A "UX" button docked INTO Fallen London's own chrome beside its travel control -- under the big Travel button on the wide layout, as one more icon in the banner on the narrow one -- so it takes up space in the page like any other control and covers nothing. It opens a menu of reference panels; the last line of that menu switches it back to floating over the page if you preferred it that way, and it falls back to floating on its own if Fallen London's chrome cannot be found. Every panel's header carries a fullscreen button beside its close button, which takes the panel off the popover and over the whole screen and back; the choice is remembered, so a long panel opens at full size every time rather than needing the button pressed again. The first panel is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, where the safe docks are, the three winds and the dreams they start, and the whole card table, searchable. (4) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: beside Fallen London’s own Travel button, where the UX button docks, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. A third panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. (5) In Port Carnelian, where a governor's term runs 26 actions and Fallen London deals no opportunity cards at all, the badges go on the storylets in the list and on the branches inside an opened one instead. Each shows the net change in resources that option makes, with a mark when the net is paid for out of Imperial Legitimacy -- the number that ends a term at once when it reaches 0, sending you back to zee with nothing -- a Fate label on the one Fate-locked option, and "cash out" on the four endings, which spend a currency rather than gaining any. Half the table is worth the same +5, so whether it costs Legitimacy is the only thing separating those rows. The tooltip carries the Time Passing in Office and Airs windows the option is offered in, every currency change with its currency named, the requirement and the note; the two options that pay ten or fifteen of ONE of the two currencies, the game's choice rather than yours, say so in words, since reading them as that much of each would make them the best options in the table by a distance. A storylet the guide splits in two is badged with the better net and keeps both branches in its tooltip, because the losing branch is how Imperial Legitimacy is bought back. A fourth panel, Port Carnelian, is the rest of the guide: how to unlock and reach the posting, the rules a term is played by, every option grouped by the clock and searchable, what the two currencies cash in for, the reward tiers with the two worth aiming at picked out, and the strategy. (6) On a Voyage of Scientific Discovery -- the Dilmun Club's expeditions to Bullbone Island, Corpsecage Island and Grunting Fen, which deal no opportunity cards either -- every action gets a badge for what it pays in research pages, coloured by which of the three kinds it is: Archaeological, Cryptopalaeontological or Theosophistical. You sail to one island for one kind, and at every step of the visit you are choosing between the action that pays it and one that pays goods instead, so an action paying no pages is labelled with what it does pay rather than scored: there is no exchange rate between pages and Echoes, and inventing one would be the badge choosing your voyage for you. The three gambles at the end of a visit carry their EXPECTED value rather than the figure they advertise, since the wiki gives both outcomes and the odds -- taking the safer of the two is worth about six times the greedier one once the failure is priced in. The tooltip carries the step of the visit the action belongs to, its challenge, everything it gives, what it costs, and what a failure costs; where the game picks between two payouts rather than you, that is said in words. The same badges cover the two screens at your Lodgings, where the pages are generated before you sail and spent afterwards, and there the figure is the guide's pence per page, because everything on that screen is priced. Three actions and three storylets have the same names on all three islands and pay a different kind of page on each, so the feature works out which island it is looking at from the greeting or from the storylet you have open, and says nothing at all rather than guess. A fifth panel, Scientific Voyages, holds the rest: how the voyage is unlocked, what each island pays and costs to reach, every action grouped by island and searchable, and how to squeeze the most preparatory research out of London first. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. Built as a feature registry so further tweaks can be added as entries.
+// @version      2.7
+// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A "UX" button docked INTO Fallen London's own chrome beside its travel control -- under the big Travel button on the wide layout, as one more icon in the banner on the narrow one -- so it takes up space in the page like any other control and covers nothing. It opens a menu of reference panels; the last line of that menu switches it back to floating over the page if you preferred it that way, and it falls back to floating on its own if Fallen London's chrome cannot be found. Every panel's header carries a fullscreen button beside its close button, which takes the panel off the popover and over the whole screen and back; the choice is remembered, so a long panel opens at full size every time rather than needing the button pressed again. The first panel is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, every port on the Unterzee -- which region it is in, whether docking there wipes Troubled Waters and the zee-threats, and what it takes to be able to sail there at all, with the hunting grounds and the one-time destinations marked as the different things they are, since a port that resets nothing and a place that is not a dock are two different answers -- the three winds and the dreams they start, and the whole card table, searchable. (4) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: beside Fallen London’s own Travel button, where the UX button docks, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. A third panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. (5) In Port Carnelian, where a governor's term runs 26 actions and Fallen London deals no opportunity cards at all, the badges go on the storylets in the list and on the branches inside an opened one instead. Each shows the net change in resources that option makes, with a mark when the net is paid for out of Imperial Legitimacy -- the number that ends a term at once when it reaches 0, sending you back to zee with nothing -- a Fate label on the one Fate-locked option, and "cash out" on the four endings, which spend a currency rather than gaining any. Half the table is worth the same +5, so whether it costs Legitimacy is the only thing separating those rows. The tooltip carries the Time Passing in Office and Airs windows the option is offered in, every currency change with its currency named, the requirement and the note; the two options that pay ten or fifteen of ONE of the two currencies, the game's choice rather than yours, say so in words, since reading them as that much of each would make them the best options in the table by a distance. A storylet the guide splits in two is badged with the better net and keeps both branches in its tooltip, because the losing branch is how Imperial Legitimacy is bought back. A fourth panel, Port Carnelian, is the rest of the guide: how to unlock and reach the posting, the rules a term is played by, every option grouped by the clock and searchable, what the two currencies cash in for, the reward tiers with the two worth aiming at picked out, and the strategy. (6) On a Voyage of Scientific Discovery -- the Dilmun Club's expeditions to Bullbone Island, Corpsecage Island and Grunting Fen, which deal no opportunity cards either -- every action gets a badge for what it pays in research pages, coloured by which of the three kinds it is: Archaeological, Cryptopalaeontological or Theosophistical. You sail to one island for one kind, and at every step of the visit you are choosing between the action that pays it and one that pays goods instead, so an action paying no pages is labelled with what it does pay rather than scored: there is no exchange rate between pages and Echoes, and inventing one would be the badge choosing your voyage for you. The three gambles at the end of a visit carry their EXPECTED value rather than the figure they advertise, since the wiki gives both outcomes and the odds -- taking the safer of the two is worth about six times the greedier one once the failure is priced in. The tooltip carries the step of the visit the action belongs to, its challenge, everything it gives, what it costs, and what a failure costs; where the game picks between two payouts rather than you, that is said in words. The same badges cover the two screens at your Lodgings, where the pages are generated before you sail and spent afterwards, and there the figure is the guide's pence per page, because everything on that screen is priced. Three actions and three storylets have the same names on all three islands and pay a different kind of page on each, so the feature works out which island it is looking at from the greeting or from the storylet you have open, and says nothing at all rather than guess. A fifth panel, Scientific Voyages, holds the rest: how the voyage is unlocked, what each island pays and costs to reach, every action grouped by island and searchable, and how to squeeze the most preparatory research out of London first. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. Built as a feature registry so further tweaks can be added as entries.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 // @run-at       document-idle
@@ -672,18 +672,109 @@
     { name: 'Unwelcome on the Waters', from: 'failed piracy', card: 'Zeeborne Pariahs' },
   ];
 
-  // Safe docks: arriving at one wipes Troubled Waters and every zee-threat
-  // (not Wounds or Nightmares). From the guide's location table -- note that
-  // being a port is not the same as being safe: Port Cecil, Godfall, Irem,
-  // Gaider's Mourn and Tanah-Chook are all ports and none of them is a reset.
-  const ZEE_SAFE_DOCKS = [
-    { region: 'Home Waters', names: ['Wolfstack Docks (London)', 'Mutton Island'] },
-    { region: "Shepherd's Wash", names: ['The Convent (Abbey Rock)', 'The Court of the Wakeful Eye', 'Heartscross House (Port Carnelian)', 'Apis Meet (Fate)'] },
-    { region: 'The Sea of Voices', names: ['Polythreme Docks'] },
-    { region: 'The Salt Steppe', names: ['The Copper Quarter (Khan’s Heart)'] },
-    { region: 'Stormbones', names: ['The Chapel of Lights — which puts you in Your Lodgings'] },
-    { region: 'The Pillared Sea', names: ['none'] },
-    { region: 'The Snares', names: ['none'] },
+  // Where you can dock, what region it is in, whether arriving there wipes
+  // Troubled Waters and every zee-threat with it, and what it takes to be
+  // able to sail there at all.
+  //
+  // From the guide's Locations table, its "One-Time and Similar Locations"
+  // and "Hunting Locations" tables, and its "Discovering locations" prose,
+  // which is where the `how` lines come from.
+  //
+  // Three things this table deliberately keeps apart, because they are three
+  // different claims and one `safe` boolean would fold them into two:
+  //
+  //   safe: true    docking here resets Troubled Waters and the zee-threats.
+  //   safe: false   a real dock that resets nothing. Port Cecil, Godfall,
+  //                 Irem, Gaider's Mourn and Tanah-Chook are all ports and
+  //                 none of them is a reset.
+  //   safe: null    not a dock at all (the hunting grounds), so the question
+  //                 does not arise -- they reset nothing either, but nobody
+  //                 sails to one expecting a harbour.
+  //
+  // One conflict in the source, recorded rather than resolved: the guide's
+  // table shows Port Cecil and Tanah-Chook with a plain "unsafe" cross, while
+  // the hidden sort key on those two cells reads "safe". The visible cross is
+  // what is here, since that is what the table says to a reader, and both
+  // rows carry a note saying so. Report either way round in-game.
+  //
+  // `unlock` is what has to be true before the destination appears; null
+  // means nothing at all. `how` is the way that quality is come by, where the
+  // guide spells it out. To add or correct a port: edit ZEE_PORTS.
+  const ZEE_PORTS = [
+    // --- ordinary destinations -------------------------------------------
+    { name: 'Wolfstack Docks', as: 'London', regions: ['Home Waters'], safe: true, unlock: null },
+    { name: 'Mutton Island', regions: ['Home Waters'], safe: true, unlock: null,
+      note: 'Home of the Fruits of the Zee Festival.' },
+    { name: "Hunter's Keep", regions: ['Home Waters'], safe: false, unlock: null },
+    { name: 'Bullbone Island', regions: ['Home Waters'], safe: false,
+      unlock: 'Embarking on a Voyage of Scientific Discovery 3' },
+    { name: 'Heartscross House', as: 'Port Carnelian', regions: ["Shepherd's Wash"], safe: true,
+      unlock: 'Imperial Legitimacy', how: 'Granted at the Foreign Office in London.' },
+    { name: 'The Court of the Wakeful Eye', regions: ["Shepherd's Wash"], safe: true,
+      unlock: 'Associating with Radical Academics 20',
+      note: 'Also needs a successful governorship at Heartscross House.' },
+    { name: 'The Convent', as: 'Abbey Rock', regions: ["Shepherd's Wash"], safe: true,
+      unlock: 'Ambition: Bag a Legend! 44' },
+    { name: 'Apis Meet', regions: ["Shepherd's Wash"], safe: true, unlock: 'Flint', fate: true },
+    { name: 'Godfall', regions: ["Shepherd's Wash"], safe: false, unlock: 'Discovered: Godfall',
+      how: 'Draw Row, row, row in Shepherd’s Wash and spend some wine, or spend a Relatively Safe Zee Lane at Wolfstack with Making Progress in the Labyrinth of Tigers 16.' },
+    { name: 'Iron Republic Streets', as: 'The Iron Republic', regions: ["Shepherd's Wash"], safe: false,
+      unlock: 'Iron Republic Safe-Conduct', how: 'From Spending Secrets and Counting the Days.' },
+    { name: 'The Chapel of Lights', regions: ['Stormbones'], safe: true,
+      unlock: 'Seeking Mr Eaten\'s Name 49, A Book of Crimson Prayer',
+      note: 'Docking here puts you in Your Lodgings.' },
+    { name: 'Port Cecil', regions: ['Stormbones'], safe: false,
+      unlock: 'Discovered: The Principles of Coral',
+      how: 'Embarking on a Voyage of Scientific Discovery, plus either drawing A Coral Commotion in Stormbones or spending 8 x Partial Map.',
+      note: 'The guide’s table marks it unsafe; its hidden sort key says safe. Unverified in-game.' },
+    { name: 'Corpsecage Island', regions: ['Stormbones'], safe: false,
+      unlock: 'Embarking on a Voyage of Scientific Discovery 3',
+      note: 'Has a separate option for Ambition: Heart’s Desire!' },
+    { name: 'Set a course for the tomb colony of Tanah-Chook', as: 'The Tomb Colonies (Tanah-Chook)',
+      regions: ['Stormbones'], safe: false, unlock: 'All Things Must End', fate: true,
+      note: 'The guide’s table marks it unsafe; its hidden sort key says safe. Unverified in-game.' },
+    { name: 'Polythreme Docks', as: 'Polythreme', regions: ['The Sea of Voices'], safe: true,
+      unlock: 'Screaming Map',
+      note: 'Reachable before you own a ship, with A Ticket to Polythreme at Wolfstack Docks.' },
+    { name: 'Mangrove College', regions: ['The Sea of Voices'], safe: false,
+      unlock: 'Discovered: Mangrove College',
+      how: 'Discovered by passing by — zail to anywhere in the Sea of Voices.' },
+    { name: 'Grunting Fen', regions: ['The Sea of Voices'], safe: false,
+      unlock: 'Embarking on a Voyage of Scientific Discovery 3, Screaming Map' },
+    { name: 'The Copper Quarter', as: "Khan's Heart", regions: ['The Salt Steppe'], safe: true,
+      unlock: 'Discovered: The Khanate',
+      how: 'By passing by (zail for the Sea of Voices, then switch destination to London), by a Salt Steppe Atlas option at Zeefaring 3, or from the Balmoral story with a Salt Steppe Atlas.' },
+    { name: 'Irem', regions: ['The Pillared Sea'], safe: false, unlock: 'Iremi Zee-Chart' },
+    { name: "Gaider's Mourn", regions: ['The Snares'], safe: false,
+      unlock: "Discovered: Corsair's Forest, Discovered: Gaider's Mourn",
+      how: 'Spend a Relatively Safe Zee Lane on A Return to Terra Firma at base Zeefaring 5.' },
+
+    // --- one-time and similar --------------------------------------------
+    { name: 'A Secluded Coastline', as: 'Your Flotilla', regions: ['Home Waters'], safe: false,
+      once: true, unlock: 'Ambition: Light Fingers! 51-64' },
+    { name: 'The Approach to the Mountain', regions: ["Shepherd's Wash"], safe: true, once: true,
+      unlock: 'Seeking Mr Eaten\'s Name 63, The Hollow Heart',
+      note: 'Moves you to Your Lodgings via The Chapel of Lights.' },
+    { name: 'Cline', regions: ["Shepherd's Wash"], safe: false, once: true,
+      unlock: 'Associating with Radical Academics exactly 100' },
+    { name: 'Avid Horizon', regions: ['Stormbones'], safe: false, once: true,
+      unlock: 'Embarked on a Sanctioned Expedition to the North' },
+    { name: 'Avid Horizon', as: 'Avid Horizon (NORTH)', regions: ['Stormbones'], safe: true, once: true,
+      unlock: 'Seeking Mr Eaten\'s Name 77',
+      note: 'Safe, and it also destroys your ship and your An Explorer of the Unterzee qualities.' },
+
+    // --- hunting grounds: not docks --------------------------------------
+    { name: 'Hunt a feral crocodile', as: 'Feral Crocodile Hunting Grounds', regions: ['Home Waters'],
+      safe: null, hunt: true, unlock: 'Monstrous Anatomy 5' },
+    { name: 'Estimated Angler Crab Population', as: 'Angler Crab Spawning Grounds',
+      regions: ["Shepherd's Wash"], safe: null, hunt: true,
+      unlock: 'Estimated Angler Crab Population, base Monstrous Anatomy 1' },
+    { name: 'Remaining Mass of the Ravenous Lifeberg', as: 'Lifeberg Hunting Grounds',
+      regions: ["Shepherd's Wash", 'The Sea of Voices', 'The Salt Steppe'], safe: null, hunt: true,
+      unlock: 'Remaining Mass of the Ravenous Lifeberg, base Monstrous Anatomy 1' },
+    { name: 'Plated Seal', as: 'Plated Seal Spawning Grounds', regions: ['Stormbones'],
+      safe: null, hunt: true,
+      unlock: 'Making Progress in the Labyrinth of Tigers 16, and no Plated Seals in hand' },
   ];
 
   // The three winds, each of which starts a dream storyline back in London.
@@ -6655,6 +6746,44 @@
     return makeBadge(zeeBadgeSpec(card), ZEE_CLASS);
   }
 
+  // What a port is called on the zee map. `name` is the wiki page, which is
+  // not always what Fallen London puts on the destination -- the governor's
+  // seat is the page "Heartscross House" and the destination "Port Carnelian".
+  function zeePortLabel(port) {
+    return port.as || port.name;
+  }
+
+  // The three claims kept apart: a reset, a dock that is not one, and a place
+  // that is not a dock at all. A blank cell would read as the second.
+  function zeePortSafeCell(port) {
+    if (port.safe === null) {
+      return h('span', { css: 'color:' + UI.dim + ';', title: 'Not a dock — nothing to reset.' }, ['not a dock']);
+    }
+    return port.safe
+      ? h('span', { css: 'color:#7fae92;font-weight:bold;', title: 'Docking here wipes Troubled Waters and every zee-threat.' }, ['✔ safe'])
+      : h('span', { css: 'color:#c98a8a;', title: 'A dock, but arriving resets nothing.' }, ['✘']);
+  }
+
+  function zeePortRow(port) {
+    const row = h('tr', null, [
+      h('td', { css: TD }, [
+        h('div', null, [
+          wikiLink(port.name, zeePortLabel(port)),
+          port.fate ? h('span', { css: 'color:#8a6b3b;margin-left:5px;', title: 'Fate-locked.' }, ['Fate']) : null,
+          port.once ? h('span', { css: 'color:' + UI.dim + ';margin-left:5px;', title: 'A one-time destination, sailed to for a storyline rather than visited.' }, ['once']) : null,
+        ]),
+      ]),
+      h('td', { css: TD + 'white-space:nowrap;' }, [zeePortSafeCell(port)]),
+      h('td', { css: TD + 'color:' + UI.dim + ';' }, [
+        h('div', { css: 'color:' + UI.text + ';' }, [port.unlock || 'nothing — it is there from the start']),
+        port.how ? h('div', { css: 'font-size:11px;' }, [port.how]) : null,
+        port.note ? h('div', { css: 'font-size:11px;' }, [port.note]) : null,
+      ]),
+    ]);
+    row.dataset.zeePort = zeePortLabel(port);
+    return row;
+  }
+
   function zeeCardRow(card) {
     const best = bestZeeLine(card);
     const opt = best && best.opt;
@@ -6725,6 +6854,22 @@
           css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.line
             + ';background:' + UI.bgAlt + ';color:' + UI.dim + ';font-size:12px;line-height:1.5;',
         }, ['No zee cards on screen. Everything below is reference material for when there are.']);
+
+    // --- the ports, region by region --------------------------------------
+    // In ZEE_REGIONS order, which is the order the regions were listed in
+    // above, so the two tables read the same way down the page. A port in
+    // several regions (only the lifebergs) is listed under each of them.
+    const portRows = [];
+    for (const region of ZEE_REGIONS) {
+      const here = ZEE_PORTS.filter(function (p) { return p.regions.indexOf(region.name) !== -1; });
+      if (!here.length) continue;
+      portRows.push(h('tr', null, [h('td', {
+        colSpan: 3,
+        css: 'padding:8px 8px 3px;font:bold 11px ' + UI.font + ';letter-spacing:.05em;'
+          + 'text-transform:uppercase;color:' + UI.dim + ';border-bottom:1px solid ' + UI.line + ';',
+      }, [region.name])]));
+      for (const port of here) portRows.push(zeePortRow(port));
+    }
 
     // --- the searchable card table ---------------------------------------
     const REGION_ORDER = ['any', 'Home Waters', "Shepherd's Wash", 'The Sea of Voices',
@@ -6835,16 +6980,31 @@
         }))]),
       ])),
 
-      section('Safe docks', h('div', { css: 'color:' + UI.dim + ';font-size:12px;line-height:1.7;' },
-        ZEE_SAFE_DOCKS.map(function (d) {
-          return h('div', null, [
-            h('span', { css: 'color:' + UI.text + ';' }, [d.region + ': ']),
-            d.names.join(' · '),
-          ]);
-        }).concat([
-          h('div', { css: 'margin-top:5px;' }, ['Being a port is not the same as being safe — Port Cecil, '
-            + 'Godfall, Irem, Gaider’s Mourn and Tanah-Chook are all ports and none of them resets anything.']),
-        ]))),
+      section('Ports', h('div', null, [
+        h('div', { css: 'color:' + UI.dim + ';font-size:12px;line-height:1.6;margin-bottom:6px;' },
+          ZEE_REGIONS.map(function (r) {
+            const safe = ZEE_PORTS.filter(function (p) {
+              return p.safe === true && p.regions.indexOf(r.name) !== -1;
+            });
+            return h('div', null, [
+              h('span', { css: 'color:' + UI.text + ';' }, [r.name + ': ']),
+              safe.length
+                ? safe.map(function (p) { return zeePortLabel(p); }).join(' · ')
+                : h('span', { css: 'color:#c98a8a;' }, ['no safe dock at all']),
+            ]);
+          })),
+        table([
+          { text: 'Port' },
+          { text: 'Safe?', title: 'Docking at a safe port wipes Troubled Waters and every zee-threat. Wounds and Nightmares stay.' },
+          { text: 'What it takes' },
+        ], portRows),
+        h('div', { css: 'margin-top:5px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+          h('div', null, ['Being a port is not the same as being safe — Port Cecil, Godfall, Irem, '
+            + 'Gaider’s Mourn and Tanah-Chook are all ports and none of them resets anything.']),
+          h('div', null, ['The hunting grounds are not docks at all, so they reset nothing either. '
+            + 'One-time destinations are marked; you sail to those once, for a storyline.']),
+        ]),
+      ])),
 
       section('The winds', h('div', null, [
         table([{ text: 'Wind' }, { text: 'First found' }, { text: 'On the card' }, { text: 'Dream it starts in London' }],

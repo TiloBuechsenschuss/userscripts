@@ -1045,9 +1045,23 @@ navigation. Two consequences:
   scoped by the card table, the way `spite-card-ratings` started out. Capture a greeting from a
   real voyage and this can be tightened the way `SPITE_AREAS` was.
   The `zailing` panel is the reference half: routes and what they cost in actions per ship, Zee
-  Peril per region, the Troubled Waters ladder and the six zee-threat/black-card pairs, the safe
-  docks (with the warning that being a port is not being a dock), the three winds, your current
-  hand ranked, and the whole card table with a live text filter. The filter matches
+  Peril per region, the Troubled Waters ladder and the six zee-threat/black-card pairs, the
+  **ports** table, the three winds, your current hand ranked, and the whole card table with a live
+  text filter.
+  `ZEE_PORTS` replaced the old `ZEE_SAFE_DOCKS` list, and the reason is the `safe` field: it is
+  **three-valued on purpose**. `true` is a dock that wipes Troubled Waters and every zee-threat;
+  `false` is a real dock that resets nothing (Port Cecil, Godfall, Irem, Gaider's Mourn,
+  Tanah-Chook); `null` is one of the four hunting grounds, which are not docks at all. Fold the
+  last two into one boolean -- or leave the cell blank for either -- and the table starts selling
+  a crocodile hunt as a harbour. Rows also carry `unlock` (what has to be true before the
+  destination shows on the map, `null` for the three that need nothing), `how` (how that quality
+  is come by, from the guide's *Discovering locations* prose), `fate`, `once` for the one-time
+  storyline destinations, and `regions` as an array, because the lifeberg grounds drift through
+  three of them and are listed under each -- the same thing the card table does with a card drawn
+  in several regions. One conflict in the source is recorded rather than resolved: the guide's
+  table shows Port Cecil and Tanah-Chook with an unsafe cross while the hidden sort key on those
+  two cells reads `safe`. The cross is what is in the table and the note on both rows says so;
+  a player who docks at either should report which it actually was. The filter matches
   `row.dataset.zeeSearch` rather than `textContent`, so a term can hit an option the collapsed row
   does not show, and it hides a region heading whose rows have all gone.
   Note the three badge features can never collide on one card -- no name is in more than one
@@ -1615,6 +1629,10 @@ Confirmed live by the author:
   ("Welcome to The Sea of Voices"), the ocean, or something else entirely; `inZee()` is written
   to fail closed on the one card that leans on it and open on everything else. Move this up on a
   report, and say what the greeting actually said.
+  The **ports table** (added 2026-09-09) is transcription too, and it has one open question of its
+  own: the guide marks **Port Cecil** and **Tanah-Chook** unsafe while the hidden sort key on both
+  cells says safe, and the table follows the visible cross. Dock at either with Troubled Waters
+  above 1 and report whether it reset.
 
 - The **Port Carnelian badges and panel** (added 2026-09-09), for the same two reasons and one
   more. The transcription and `PC_AREAS` are unverified exactly as the zee ones are — nobody has
@@ -1857,6 +1875,10 @@ Current tests:
   gated and piracy lines never quoted, and a card with nothing else admitting `gated` rather than
   going quiet. Then the badge marks, the two prefix-matched bounty cards, the `strictZee` gate in
   all three greeting states, and redraw-on-reuse (React hands the next card the same container).
+  It also pins `ZEE_PORTS`: the nine safe docks as a list (so a tenth cannot appear by accident),
+  the three-valued `safe` field with one row of each kind, the two Fate-locked destinations, the
+  recorded Port Cecil / Tanah-Chook conflict, that every port names a region `ZEE_REGIONS` knows,
+  and that the regions with no safe dock at all are derived rather than hard-coded.
   It also builds the whole panel, the way `ux-factions.test.mjs` does, since that is the only way
   to catch a typo in a few hundred hand-built nodes -- including that a multi-region card is
   listed under each of its regions while an everywhere card is listed once.
