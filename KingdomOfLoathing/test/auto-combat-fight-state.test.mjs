@@ -35,6 +35,23 @@
 //     steps are ordered first precisely because those options vanish from the
 //     page when you aren't carrying a key, which is what makes "the key if
 //     possible, otherwise the drawer" fall out of ordering alone.
+//   - The built-in, zone-independent choice rules: that "Peering Through Your
+//     Peridot" takes "I choose peace" wherever it turns up, that the rule is
+//     keyed on the encounter's NAME (so it doesn't fire on some other choice
+//     that happens to offer a peaceful-sounding button), and that a page not
+//     offering that label falls through to asking rather than pressing
+//     whatever else is there.
+//   - That a choice with exactly one option is taken without asking, and that
+//     two options are not.
+//   - Inside the Palindome, the ticket-farming zone: that every one of its
+//     noncombats is answered with the free or cheapest option and never with
+//     one that spends papayas, HP or a rubber axe; that the Talisman o'
+//     Namsilat guard reads the accessory slots out of api.php's status (the
+//     zone is not merely hard to reach without it, it is not there, and KoL
+//     says so without spending the turn); that a ticket counts as acquired
+//     only off an acquire line, since the encounter's own prose names the
+//     raffle either way; and that the daily tally resets by comparing day
+//     keys rather than by any timer.
 //   - The last-zone entry's url reading: only 'adventure.php?snarfblat=N' is a
 //     zone we may re-request in a loop, and a place.php action url is not.
 //
@@ -65,8 +82,9 @@ const wrapped = src
   .replace('  bootButton();',
     '  return { fightOverIn, hasFightForms, fightOver, inFight, pageKind, ' +
     'normalizeName, findMacroId, fightFields, describeAction, blockerIn, ' +
-    'usableRemembered, planSteps, planPick, snarfblatOf, readLastAdventure, ' +
-    'ZONES, MACRO_NAMES };');
+    'usableRemembered, planSteps, planPick, rulePick, soloPick, ' +
+    'ticketAcquiredIn, dayKeyFromStatus, nextTicketRecord, itemCount, ' +
+    'snarfblatOf, readLastAdventure, ZONES, MACRO_NAMES };');
 
 if (!wrapped.includes('globalThis.__ac') || wrapped.includes('\n  bootButton();')) {
   console.log('FAIL | could not re-expose the internals; the anchors in ' +
@@ -507,14 +525,237 @@ check('a resolved snarfblat matches the registered bedroom entry',
   api.snarfblatOf(bedroom.url), '393');
 
 // ---------------------------------------------------------------------------
+// Built-in choice rules (any zone)
+//
+// Labels are the wiki's, and are unverified against a live peridot page --
+// which is the case these assertions are really about: a rule fires only when
+// the page is offering the label, so a drifted one asks instead of guessing.
+// ---------------------------------------------------------------------------
+
+const PERIDOT = [
+  { value: '1', text: 'skeleton' },
+  { value: '2', text: 'ghost' },
+  { value: '6', text: 'I choose peace' },
+];
+
+check('the peridot choice takes the peace option, by value not by position', [
+  api.rulePick('Peering Through Your Peridot', PERIDOT).option,
+  api.rulePick('peering through your peridot', PERIDOT).option,
+], ['6', '6']);
+
+// The rule is keyed on the encounter name. Another choice offering the same
+// words is not this choice, and must not be answered by this rule.
+check('a different encounter offering the same label is left alone',
+  api.rulePick('Some Other Choice', PERIDOT), null);
+
+// Same failure direction as a stale plan step: no label, no rule.
+check('a peridot page without the peace option falls through to asking',
+  api.rulePick('Peering Through Your Peridot',
+               PERIDOT.filter(o => o.value !== '6')), null);
+
+check('a choice with no name matches no rule',
+  api.rulePick('', PERIDOT), null);
+
+// ---------------------------------------------------------------------------
+// One-option choices
+// ---------------------------------------------------------------------------
+
+check('a lone option is taken without asking, as a string', [
+  api.soloPick([{ value: 1, text: 'Continue' }]),
+  api.soloPick(SIMPLE),
+  api.soloPick([]),
+], ['1', null, null]);
+
+// ---------------------------------------------------------------------------
+// Inside the Palindome
+//
+// Option lists are the wiki's button labels for each noncombat; the numbers
+// are the choice ids from each adventure's own wiki page and the option
+// ordering is KoLmafia's ChoiceAdventures. Both are unverified in-game, so
+// what these really pin is that a farming run answers with the free or
+// cheapest option and never with one that spends something.
+// ---------------------------------------------------------------------------
+
+const palindome = api.ZONES.find(z => z.key === 'palindome');
+
+check('the zone is Inside the Palindome, not the retired one', [
+  !!palindome, palindome && palindome.url,
+], [true, 'adventure.php?snarfblat=386']);
+
+const PAPAYA_WAR = [
+  { value: '1', text: 'Dive into the bunker' },
+  { value: '2', text: 'Leap into the fray!' },
+  { value: '3', text: 'Give the men a pep talk' },
+];
+const SUNBATHE = [
+  { value: '1', text: 'A Little While' },
+  { value: '2', text: 'A Medium While' },
+  { value: '3', text: 'A Long While' },
+];
+const DRESSER = [
+  { value: '1', text: 'Look in the drawer' },
+  { value: '2', text: 'Ignawer the drawer' },
+];
+const DENIM_AXES = [
+  { value: '1', text: 'Sure!' },
+  { value: '2', text: 'No Thanks.' },
+];
+
+const palPick = (which, options) => {
+  const got = api.planPick(palindome, which, options);
+  return got && got.option;
+};
+
+check('each Palindome noncombat is answered without asking', [
+  palPick('127', PAPAYA_WAR),
+  palPick('126', SUNBATHE),
+  palPick('180', DRESSER),
+  palPick('2', DENIM_AXES),
+], ['3', '1', '2', '2']);
+
+// What must never be picked: option 2 of the papaya war spends 3 papayas (or
+// 60-68 HP), a medium or long while spends the turn on Sunburned, and "Sure!"
+// spends a rubber axe. Farming a ticket is not worth any of them.
+check('no Palindome step spends an item, HP or a turn on an effect', [
+  palPick('127', PAPAYA_WAR) === '2',
+  palPick('126', SUNBATHE) === '3',
+  palPick('2', DENIM_AXES) === '1',
+], [false, false, false]);
+
+// Same failure direction as the bedroom: a number that no longer agrees with
+// its label asks instead of pressing whatever is at that number now.
+check('a renumbered Palindome option falls through to asking',
+  palPick('180', [
+    { value: '1', text: 'Ignawer the drawer' },
+    { value: '2', text: 'Look in the drawer' },
+  ]), null);
+
+check('every planned Palindome choice is annotated too', [
+  Object.keys(palindome.plan).sort(),
+  Object.keys(palindome.hints).sort(),
+], [['126', '127', '180', '2'], ['126', '127', '180', '2']]);
+
+// ---------------------------------------------------------------------------
+// The Talisman guard
+//
+// Equipment ids come from api.php's status block (KoLmafia's ApiRequest sample
+// is the shape). The Palindome is not merely hard to reach without the
+// talisman -- it is not there at all, and KoL says so without spending the
+// turn, so a loop that missed this would re-request the zone until its request
+// budget ran out.
+// ---------------------------------------------------------------------------
+
+const guardWith = (equipment) =>
+  palindome.guard({ status: { raw: equipment ? { equipment: equipment } : {} } });
+
+check('the talisman is accepted in any accessory slot', [
+  guardWith({ acc1: '486', acc2: '0', acc3: '0' }),
+  guardWith({ acc1: '0', acc2: '486', acc3: '0' }),
+  guardWith({ acc1: '0', acc2: '0', acc3: 486 }),
+], [null, null, null]);
+
+check('without the talisman the run stops before the request goes out',
+  /Talisman/.test(guardWith({ acc1: '5460', acc2: '4309', acc3: '6530' })), true);
+
+// Wearing it somewhere it doesn't count is not wearing it.
+check('the talisman in a non-accessory slot is not equipped for this',
+  /Talisman/.test(guardWith({ hat: '486', acc1: '0', acc2: '0', acc3: '0' })), true);
+
+// api.php not reporting equipment is not evidence of anything; the blocker
+// text below is what catches that case.
+check('no equipment block means no opinion', guardWith(null), null);
+
+// ---------------------------------------------------------------------------
+// The ticket, and the day it belongs to
+// ---------------------------------------------------------------------------
+
+// The acquire line, with KoL's own markup around the item name.
+const TICKET_PAGE =
+  '<html><body><center><table><tr><td>You are be-bopping along in the ' +
+  'Palindome when you spy, far off in the distance, an elf being beset.' +
+  '</td></tr></table><p>You acquire an item: <b>Elf Farm Raffle ticket</b>' +
+  '</center></body></html>';
+
+// The encounter's own prose names the raffle without anything having landed --
+// which is why the match is anchored to the acquire line and not to the words.
+const TICKET_PROSE_ONLY =
+  '<html><body>"I guess I can give you this ticket to our Elf Farm Raffle..."' +
+  '</body></html>';
+
+check('a ticket is only read as acquired off the acquire line', [
+  api.ticketAcquiredIn(TICKET_PAGE),
+  api.ticketAcquiredIn(TICKET_PROSE_ONLY),
+  api.ticketAcquiredIn('You acquire an item: <b>papaya</b>'),
+  api.ticketAcquiredIn(null),
+], [true, false, false, false]);
+
+// The run ends on the drop, because a second ticket cannot fall while the
+// first is in your inventory.
+const onResult = (html) =>
+  palindome.onResult({ html: html, status: { name: 'Tester' } });
+
+check('landing a ticket ends the run, and says so',
+  /Elf Farm Raffle ticket/.test(onResult(TICKET_PAGE) || ''), true);
+
+// The elf without a readable acquire line still ends the run: either it landed
+// and the run is over anyway, or the page has changed and grinding on would
+// spend the rest of the day's adventures on a drop that cannot come.
+check('the elf without a readable drop also ends the run',
+  /check your inventory/.test(
+    onResult('<html><body>Flee to me, remote elf!</body></html>') || ''), true);
+
+check('an ordinary Palindome page does not end the run',
+  onResult('<html><body>You acquire an item: <b>papaya</b></body></html>'), null);
+
+// The day key: api.php's `rollover` is one value for a whole KoL day, so it is
+// a day key as it stands. Falling back through daynumber to the browser's date
+// keeps the tally working rather than merging two days into one.
+check('the day key prefers rollover, then daynumber, then the local date', [
+  api.dayKeyFromStatus({ raw: { rollover: '1757600000', daynumber: '812' } }),
+  api.dayKeyFromStatus({ raw: { daynumber: '812' } }),
+  api.dayKeyFromStatus({ raw: {} }).slice(0, 1),
+  api.dayKeyFromStatus(null).slice(0, 1),
+], ['r1757600000', 'd812', 'l', 'l']);
+
+// Reading the tally with a day key that doesn't match the stored one IS the
+// reset -- there is no timer, and nothing has to be running at rollover.
+check('the tally adds up within a day and starts over on the next', [
+  api.nextTicketRecord(null, 'r1', 1),
+  api.nextTicketRecord({ day: 'r1', count: 2 }, 'r1', 1),
+  api.nextTicketRecord({ day: 'r1', count: 2 }, 'r2', 1),
+  api.nextTicketRecord({ day: 'r1', count: 2 }, 'r1', 0),
+  api.nextTicketRecord({ day: 'r1', count: 'junk' }, 'r1', 1),
+], [
+  { day: 'r1', count: 1 },
+  { day: 'r1', count: 3 },
+  { day: 'r2', count: 1 },
+  { day: 'r1', count: 2 },
+  { day: 'r1', count: 1 },
+]);
+
+// The inventory map is what "are you already carrying one?" is read from, and a
+// shape we don't understand has to be distinguishable from "you have none":
+// the first refuses to start, the second is the normal case.
+check('an unreadable inventory is not the same as an empty one', [
+  api.itemCount({ '500': '2', '486': '1' }, 500),
+  api.itemCount({ '486': '1' }, 500),
+  api.itemCount([], 500),
+  api.itemCount(null, 500),
+], [2, 0, null, null]);
+
+// ---------------------------------------------------------------------------
 // Blockers
 // ---------------------------------------------------------------------------
 
 check('the run-ending messages are recognised', [
   api.blockerIn('<b>You don\'t have enough Adventures left to do that.</b>'),
   api.blockerIn('You\'re too beaten up to go on an adventure.'),
+  api.blockerIn('You find yourself unable to get near the Palindome.'),
+  api.blockerIn("No, that isn't a place yet."),
   api.blockerIn('<p>You acquire an item: <b>old coin purse</b>'),
-], ['out of adventures', 'beaten up', null]);
+], ['out of adventures', 'beaten up',
+    "the Palindome isn't reachable (Talisman o' Namsilat not equipped?)",
+    'that zone is not open to you yet', null]);
 
 console.log(failures ? '\n' + failures + ' FAILURE(S)' : '\nAll checks passed.');
 process.exit(failures ? 1 : 0);

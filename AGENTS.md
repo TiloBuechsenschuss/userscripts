@@ -564,7 +564,8 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
 
 - `auto-combat.js` adds an "Auto" button to the **charpane**, under the Last Adventure
   readout, opening a panel that adventures a chosen zone for a chosen number of
-  turns. Two entries: The Haunted Bedroom, and **"wherever I adventured last"** — a `dynamic`
+  turns. Three entries: The Haunted Bedroom, Inside the Palindome, and **"wherever I
+  adventured last"** — a `dynamic`
   registry entry with no url of its own, which `resolveZone` turns into a real zone from
   `api.php`'s `lastadv` block (falling back to the charpane's own last-adventure link) **once,
   at the start of the run**. Once and not per turn, because after turn one the last zone *is*
@@ -594,6 +595,34 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   (bookkeeping, and the zone's own "we're done" signal). Add a zone as an entry, not as a branch.
   Note the split between the two choice fields: **`hints` never picks anything and `plan`
   always does**, so wiki knowledge that might be stale belongs in the first.
+  Two more hooks exist for the checks a turn-by-turn `guard` can't do: **`preflight(ctx)`** is
+  async and runs **once**, after the zone resolves and before the first turn, for a check that
+  costs a request of its own; **`liveNote(status)`** returns extra text (or a promise of it) for
+  the panel's note line.
+  **Inside the Palindome** (snarfblat 386 — 119 is the retired one) exists to farm the *Elf Farm
+  Raffle ticket*, and every part of it follows from one wiki line: the elf does not turn up at
+  all while a ticket is in your inventory. So `preflight` reads `api.php?what=inventory` and
+  **refuses to start** when you hold one (or when the inventory can't be read — starting blind
+  would spend the whole run on a drop that cannot come), `onResult` **ends the run** on the
+  acquire line, and a per-character daily tally (`tm-autocombat-tickets:<character>`, keyed by
+  `api.php`'s `rollover` exactly as `auto-mine.js` keys its turn counter) is what the panel's
+  note reports. The `guard` checks the accessory slots in `api.php`'s `equipment` block for the
+  **Talisman o' Namsilat** (item 486): without it the Palindome isn't merely hard to reach, it
+  isn't there, and KoL answers "You find yourself unable to get near the Palindome" *without
+  spending the turn* — which a loop would otherwise repeat until its request budget ran out.
+  That wording, and KoL's generic "No, that isn't a place yet.", are both in `BLOCKERS` as the
+  backstop for when `api.php` reports no equipment at all. The zone's `plan` answers its four
+  noncombats with the free or cheapest option (pep talk, a little while, ignawer the drawer, no
+  thanks), never the ones that spend papayas, HP or a rubber axe.
+  Above the zone sits **`CHOICE_RULES`**, a zone-independent table matched on the choice's
+  **name** — for a choice an *item* hands you, which follows the item rather than living in any
+  zone. Its one entry is *Peering Through Your Peridot*, answered with "I choose peace" so a
+  grind doesn't spend the peridot's monster pick on whatever it walked into. Same
+  offered-or-nothing rule as a plan: the label has to be on the page or the rule doesn't fire,
+  which is what keeps an unverified wiki label from pressing some other button. Order of
+  precedence per choice: zone `plan`, then `CHOICE_RULES`, then your remembered pick, then
+  `soloPick` — **a choice offering exactly one button is taken without asking**, since there is
+  no decision in it, and nothing is remembered from one — and only then the prompt.
   Combat defaults to handing the whole fight to a saved combat macro named **"Auto-Attack
   until finished"** (`MACRO_NAMES`, matched case- and punctuation-insensitively against the
   fight page's own `select[name=whichmacro]`, so the id always comes off the page) — KoL runs
@@ -1988,7 +2017,14 @@ Current tests:
   buttons. It also covers the bedroom's `plan`: that the substat drawers are taken without
   asking, that the ghost-key step is skipped by *not being on the page* rather than by any
   inventory check, that the mahogany's bottom drawer and the rustic's jilted mistress are never
-  picked, and both directions of the number/label agreement rule. Plus the last-zone reading:
+  picked, and both directions of the number/label agreement rule. The Palindome's plan is
+  pinned the same way, plus its talisman guard (read off `api.php`'s accessory slots), that a
+  ticket counts as acquired only off an acquire line — the encounter's prose names the raffle
+  either way — and that the daily tally resets by comparing day keys rather than by any timer.
+  The zone-independent rules
+  are pinned the same way: the peridot choice takes the peace option by *value*, a different
+  encounter offering the same label is left alone (the rule is keyed on the name), and a page
+  without that label falls through to asking. Plus that one option is taken and two are not. Plus the last-zone reading:
   `lastadv` parsing, and that a `place.php` action url is not a grindable zone. Note it
   re-exposes the internals by replacing the single `bootButton();` line; move that line and
   this test needs the same edit.

@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/auto-combat.js
-// @version      0.5
-// @description  Adds an "Auto" button to the charpane, under the Last Adventure readout, that opens a small panel: pick a zone, say how many adventures, press Start, and it adventures there for you. Fights are handed to your "Auto-Attack until finished" combat macro when you have one saved, and fall back to attacking round by round when you don't. Choice adventures work like the Twilight Heroes script: the first time one comes up the run pauses and the panel offers its options (annotated with what the zone's wiki page says each does); pick one and it's remembered, and answered by itself from then on. A "remembered choices" list lets you review or forget any of them. Turns are counted from api.php's adventure total rather than from requests sent, and anything it doesn't recognise stops the run rather than guessing. Two zones: The Haunted Bedroom, whose nightstands are answered from a built-in plan (the drawer with the substats in it, and the ghost key ahead of it where the key is worth more), and "wherever I adventured last", which reads your last adventure from api.php when you press Start and grinds there with the ordinary ask-once-then-remember handling.
+// @version      0.7
+// @description  Adds an "Auto" button to the charpane, under the Last Adventure readout, that opens a small panel: pick a zone, say how many adventures, press Start, and it adventures there for you. Fights are handed to your "Auto-Attack until finished" combat macro when you have one saved, and fall back to attacking round by round when you don't. Choice adventures work like the Twilight Heroes script: the first time one comes up the run pauses and the panel offers its options (annotated with what the zone's wiki page says each does); pick one and it's remembered, and answered by itself from then on. A "remembered choices" list lets you review or forget any of them. A choice that offers only one button is taken without asking, and a small built-in rule table answers a choice by name wherever it turns up -- "Peering Through Your Peridot" takes "I choose peace" when that option is on the page. Turns are counted from api.php's adventure total rather than from requests sent, and anything it doesn't recognise stops the run rather than guessing. Three zones: The Haunted Bedroom, whose nightstands are answered from a built-in plan (the drawer with the substats in it, and the ghost key ahead of it where the key is worth more); Inside the Palindome, which farms the Elf Farm Raffle ticket -- it refuses to start when you are already carrying a ticket (the elf stays away until they are used) or without the Talisman o' Namsilat equipped, answers the zone's noncombats with the free or cheapest option, stops the run the moment a ticket drops, and keeps a per-character tally of the tickets you have picked up today; and "wherever I adventured last", which reads your last adventure from api.php when you press Start and grinds there with the ordinary ask-once-then-remember handling.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
 // @match        https://www.kingdomofloathing.com/topmenu.php*
@@ -78,6 +78,15 @@
   // on the encounter's name because TH has no choice ids; KoL does, and the id
   // is exact where a name is only nearly unique.)
   const CHOICES_KEY = 'tm-autocombat-choices';
+  // Elf Farm Raffle tickets picked up today, per character:
+  //   'tm-autocombat-tickets:<character>' -> { day: '<day key>', count: N }
+  // See "THE KoL DAY" below for what a day key is and why the tally is kept
+  // per character.
+  const TICKETS_KEY = 'tm-autocombat-tickets';
+
+  // Item ids, from KoLmafia's src/data/items.txt.
+  const ELF_TICKET_ITEM = 500;   // Elf Farm Raffle ticket
+  const TALISMAN_ITEM = 486;     // Talisman o' Namsilat
 
   // Pause between requests. KoL is a small game on modest hardware and this is
   // a bot loop; keep it civil. Raise it, don't lower it.
@@ -134,6 +143,14 @@
   //             see "PRE-PICKED CHOICES" below for the rules it picks under.
   //   guard(ctx)     Optional. Called before each turn; return a string to stop
   //                  with that reason, or null to proceed.
+  //   preflight(ctx) Optional, and async. Called ONCE, after the zone is
+  //                  resolved and before the first turn: for the checks that
+  //                  cost a request and only make sense once (is the drop we
+  //                  came for already in your inventory?). Return a string to
+  //                  refuse the run, or null to proceed.
+  //   liveNote(status) Optional. Extra text for the panel's note line, given
+  //                  api.php's status; may return a promise. Used for the
+  //                  things that are only true right now.
   //   combat(ctx)    Optional. Per-round policy returning an ACTION. Falls back
   //                  to DEFAULT_COMBAT.
   //   onResult(ctx)  Optional. Called after each resolved turn; return a string
@@ -268,6 +285,141 @@
             why: 'leave',
           },
         ],
+      },
+    },
+    {
+      key: 'palindome',
+      name: 'Inside the Palindome',
+      // snarfblat 386, from KoLmafia's src/data/adventures.txt. (119 is the
+      // pre-2014 Palindome, a different, retired zone -- don't take the number
+      // from an old walkthrough.)
+      url: 'adventure.php?snarfblat=386',
+      note: 'Farms the Elf Farm Raffle ticket and stops the moment one ' +
+            'drops. Needs the Talisman o\' Namsilat equipped.',
+      // The noncombats, from the wiki's Inside the Palindome page. Numbers are
+      // the choice ids off each adventure's own wiki page (its `num`), and the
+      // option ordering is KoLmafia's ChoiceAdventures, which lists them in
+      // button order. Both are UNVERIFIED in-game, which is what the
+      // number-AND-label rule in "PRE-PICKED CHOICES" is for.
+      //
+      // The pre-Awkward ones (Rod Nevada, Vendor and Do Geese See God?) are
+      // deliberately absent: they are one-time photograph purchases, not
+      // things a farming loop should answer, so they stop and ask.
+      hints: {
+        // Denim Axes Examined -- only shows up with a rubber axe on you.
+        '2': {
+          '1': 'trade a rubber axe for a denim axe',
+          '2': 'no thanks -- nothing, and does not cost a turn',
+        },
+        // Sun at Noon, Tan Us
+        '126': {
+          '1': 'a little while: Moxie substats (about your mainstat, max 250)',
+          '2': 'a medium while: more Moxie (max 350), or 10 turns of Sunburned',
+          '3': 'a long while: 10 turns of Sunburned',
+        },
+        // No sir, away! A papaya war is on!
+        '127': {
+          '1': 'dive into the bunker: 3 papayas',
+          '2': 'leap into the fray: stats, but SPENDS 3 papayas (or 60-68 HP)',
+          '3': 'pep talk: stats to all three (about your mainstat, max 100)',
+          '4': '5 papayas, then pick again (KoLmafia lists this; the wiki does not)',
+        },
+        // A Pre-War Dresser Drawer, Pa!
+        '180': {
+          '1': 'look in the drawer: 200-300 Meat, or Ye Olde Navy Fleece with Torso Awaregness',
+          '2': 'ignawer the drawer -- nothing, and does not cost a turn',
+        },
+      },
+      // Farming answers. The zone is here for one drop and every noncombat is
+      // a detour from it, so each of these is either the cheapest way out or
+      // the one that costs nothing at all.
+      plan: {
+        '2': [
+          { option: '2', match: /no,?\s*thanks/i, why: 'no thanks (free)' },
+        ],
+        '126': [
+          { option: '1', match: /a little while/i, why: 'a little while (Moxie, no sunburn)' },
+        ],
+        '127': [
+          { option: '3', match: /pep talk/i, why: 'pep talk (stats, spends no papayas)' },
+        ],
+        '180': [
+          { option: '2', match: /ignawer/i, why: 'ignawer the drawer (free)' },
+        ],
+      },
+      // The panel's line for this zone: what the day has produced, and what
+      // you are carrying -- which is what decides whether starting a run is
+      // worth anything at all (see preflight).
+      liveNote: function (status) {
+        const today = ticketsToday(status);
+        const tally = today + ' ticket' + (today === 1 ? '' : 's') + ' today';
+        return getInventory().then(function (inv) {
+          const held = itemCount(inv, ELF_TICKET_ITEM);
+          return held === null
+            ? tally + '; I can\'t read your inventory.'
+            : tally + '; carrying ' + held + '.';
+        }, function () {
+          return tally + '; I can\'t read your inventory.';
+        });
+      },
+      // Checked ONCE, before the first turn. "Flee to me, remote elf!" does
+      // not happen at all while an Elf Farm Raffle ticket is in your inventory
+      // -- so a run started holding one would spend every adventure it was
+      // given and could not possibly find another. That is a refusal, not a
+      // warning.
+      preflight: async function (ctx) {
+        let inv;
+        try {
+          inv = await getInventory();
+        } catch (e) {
+          return 'I could not read your inventory (' + e.message + '), so I ' +
+                 'can\'t tell whether the elf would turn up at all';
+        }
+        const held = itemCount(inv, ELF_TICKET_ITEM);
+        if (held === null) {
+          return 'api.php sent an inventory I don\'t understand, so I can\'t ' +
+                 'tell whether you are already carrying a ticket';
+        }
+        if (held > 0) {
+          return 'you are already carrying ' + held + ' Elf Farm Raffle ticket' +
+                 (held === 1 ? '' : 's') + ' -- the elf stays away until they ' +
+                 'are used, so this run would spend its adventures for nothing';
+        }
+        ctx.log('no tickets on hand; ' + ticketsToday(ctx.status) +
+                ' picked up today so far.');
+        return null;
+      },
+      // The Palindome is only THERE while the Talisman o' Namsilat is
+      // equipped: without it KoL answers "You find yourself unable to get near
+      // the Palindome" and spends no turn, which a loop would repeat until its
+      // request budget ran out. api.php's status carries the worn equipment,
+      // so the run is stopped before the request goes out. Quiet when api.php
+      // reports no equipment at all -- the blocker text is the backstop there.
+      guard: function (ctx) {
+        const eq = ctx.status && ctx.status.raw && ctx.status.raw.equipment;
+        if (!eq) return null;
+        const worn = [eq.acc1, eq.acc2, eq.acc3].map(function (v) { return String(v); });
+        if (worn.indexOf(String(TALISMAN_ITEM)) !== -1) return null;
+        return 'the Talisman o\' Namsilat is not equipped, so there is no ' +
+               'Palindome to adventure in';
+      },
+      // The ticket is the whole point of the zone, and a second one cannot
+      // drop while the first is in your inventory -- so landing one ends the
+      // run rather than merely being logged.
+      onResult: function (ctx) {
+        if (ticketAcquiredIn(ctx.html)) {
+          return 'got an Elf Farm Raffle ticket (' + recordTicket(ctx.status) +
+                 ' today)';
+        }
+        // The elf turned up but the acquire line didn't parse. Stop anyway:
+        // either the ticket landed and the run is over regardless, or
+        // something about the page has changed, and grinding on would spend
+        // the rest of your adventures on a drop that cannot come.
+        if (/flee to me,? remote elf/i.test(ctx.html)) {
+          return 'the elf turned up but I could not read the ticket landing ' +
+                 '-- check your inventory';
+        }
+        return null;
       },
     },
     {
@@ -474,6 +626,158 @@
   }
 
   // ===================================================================
+  // BUILT-IN CHOICE RULES (any zone)
+  //
+  // A zone's `plan` answers a choice because of WHERE YOU ARE STANDING. These
+  // answer one because of WHAT IT IS -- a choice an item hands you follows the
+  // item around and belongs to no zone, so hanging it off a zone entry would
+  // be the wrong shelf. Matched on the choice's NAME rather than its number:
+  // the name is the part the page and the wiki agree on, and it is what the
+  // player recognises in the log.
+  //
+  //   { match: /choice name/, option: /label/, why: 'for the log' }
+  //
+  // Same offered-or-nothing rule as a plan: the label has to be on the page
+  // this turn, or the rule doesn't fire and the ordinary remembered-then-ask
+  // path runs. A rule outranks a remembered pick for the same reason a plan
+  // does -- it is the more deliberate of the two, and it is maintained here.
+  // ===================================================================
+
+  const CHOICE_RULES = [
+    {
+      // The Peridot of Peril's "which monster do you want" screen. "I choose
+      // peace" is the walk-away option: it closes the choice without taking a
+      // fight off the list. That is what a grind wants -- the peridot's pick
+      // is worth spending deliberately, not on whatever the loop walked into.
+      // UNVERIFIED against a live page: the encounter name and the label are
+      // the wiki's. Nothing here is keyed to a choice number, and a label that
+      // has drifted falls through to asking rather than pressing some other
+      // button.
+      match: /peering through your peridot/i,
+      option: /\bi\s+choose\s+peace\b/i,
+      why: "built-in rule: leave the peridot's pick alone",
+    },
+  ];
+
+  function rulePick(name, options) {
+    if (!name) return null;
+    for (const rule of CHOICE_RULES) {
+      if (!rule.match.test(name)) continue;
+      for (const o of options) {
+        if (!rule.option.test(o.text || '')) continue;
+        return { option: String(o.value), label: o.text, why: rule.why };
+      }
+    }
+    return null;
+  }
+
+  // A choice offering exactly ONE button is not a decision -- it is a
+  // "continue" page wearing a choice's clothes (a chained result screen, or an
+  // encounter whose other options need something you aren't carrying). Take it
+  // instead of stopping the run so the player can press the only button there
+  // is. Nothing is remembered from it: no preference was expressed, and the
+  // same choice with its full set of options must still ask.
+  function soloPick(options) {
+    return options && options.length === 1 ? String(options[0].value) : null;
+  }
+
+  // ===================================================================
+  // THE KoL DAY, AND WHAT A RUN GOT OUT OF IT
+  //
+  // "Today" is KoL's day, not the browser's: rollover is 3:30am Arizona time,
+  // which for most players lands in the middle of an afternoon. api.php's
+  // status carries `rollover`, the unix time of the NEXT one -- constant for
+  // the whole of a KoL day and different on the next, so it is a day key as it
+  // stands. `daynumber` is the fallback if a future api.php drops it, and the
+  // browser's own date is the last resort. Same three sources, and the same
+  // reasoning, as auto-mine.js's turns-spent-today counter.
+  //
+  // Nothing has to be running for the tally to start over, and there is no
+  // timer: reading it with a day key that doesn't match the stored one IS the
+  // reset. It is kept per character (a multi's runs are not one player's day)
+  // and it is cosmetic -- a lost count costs nobody a turn.
+  // ===================================================================
+
+  function localDayKey() {
+    const now = new Date();
+    return 'l' + now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate();
+  }
+
+  function dayKeyFromStatus(status) {
+    const raw = (status && status.raw) || {};
+    const rollover = num(raw.rollover);
+    if (rollover) return 'r' + rollover;
+    const daynumber = num(raw.daynumber);
+    if (daynumber) return 'd' + daynumber;
+    return localDayKey();
+  }
+
+  function ticketsKeyFor(status) {
+    const name = status && status.name ? String(status.name).trim() : '';
+    return TICKETS_KEY + ':' + (name || 'unknown');
+  }
+
+  // Pure, so the rollover arithmetic can be tested without storage: a stored
+  // record, the day it is being read on and how many tickets to add, giving
+  // the record to store next. A record from a day that is over reads as zero
+  // rather than being carried into today.
+  function nextTicketRecord(record, dayKey, delta) {
+    const stored = record && record.day === dayKey ? num(record.count) : 0;
+    const base = stored === null || stored < 0 ? 0 : stored;
+    return { day: dayKey, count: base + Math.max(0, delta || 0) };
+  }
+
+  function loadTickets(status) {
+    try {
+      const raw = JSON.parse(localStorage.getItem(ticketsKeyFor(status)));
+      if (raw && typeof raw === 'object') return raw;
+    } catch (e) { /* unreadable; nothing was recorded as far as we know */ }
+    return { day: null, count: 0 };
+  }
+
+  function ticketsToday(status) {
+    return nextTicketRecord(loadTickets(status), dayKeyFromStatus(status), 0).count;
+  }
+
+  function recordTicket(status) {
+    const next = nextTicketRecord(loadTickets(status), dayKeyFromStatus(status), 1);
+    try { localStorage.setItem(ticketsKeyFor(status), JSON.stringify(next)); }
+    catch (e) { /* storage unavailable; the tally is cosmetic, carry on */ }
+    return next.count;
+  }
+
+  // KoL announces a drop as `You acquire an item: <b>Elf Farm Raffle ticket</b>`,
+  // and the tags between the two halves vary. Matched inside an acquire line
+  // rather than on the item name alone, because the encounter's own prose says
+  // "ticket to our Elf Farm Raffle" whether or not anything landed.
+  function ticketAcquiredIn(html) {
+    return /You acquire an item:\s*(?:<[^>]*>\s*)*Elf Farm Raffle ticket/i
+      .test(String(html == null ? '' : html));
+  }
+
+  // api.php?what=inventory answers with a flat { '<item id>': '<count>' } map.
+  // Shape taken from KoLmafia's ApiRequest/InventoryManager, and UNVERIFIED
+  // against a live response -- which is why itemCount reports "I don't
+  // understand this" separately from "you have none of those", and why the one
+  // caller refuses to start rather than assuming the second.
+  async function getInventory() {
+    const res = await fetch(
+      ORIGIN + '/api.php?what=inventory&for=tm-auto-combat',
+      { credentials: 'same-origin', cache: 'no-store' }
+    );
+    if (!res.ok) throw new Error('api.php returned HTTP ' + res.status);
+    return await res.json();
+  }
+
+  // How many of an item the inventory map says you have: a number, or null
+  // when what came back isn't a map at all.
+  function itemCount(inv, id) {
+    if (!inv || typeof inv !== 'object' || Array.isArray(inv)) return null;
+    const n = num(inv[String(id)]);
+    return n === null ? 0 : n;
+  }
+
+  // ===================================================================
   // RUN STATE
   // ===================================================================
 
@@ -601,6 +905,15 @@
     { re: /You'?re too beaten up/i,                     why: 'beaten up' },
     { re: /you can'?t (?:currently )?get there/i,       why: 'zone not reachable' },
     { re: /you shouldn'?t be here|not allowed here/i,   why: 'zone closed to you' },
+    // Zone-specific, and the reason it's worth its line: without the Talisman
+    // o' Namsilat equipped the Palindome simply isn't there, and KoL says so
+    // WITHOUT spending the turn -- so a loop that didn't recognise this would
+    // re-request the zone until its budget ran out. (Wiki, Kingdom of
+    // Exploathing note.)
+    { re: /unable to get near the Palindome/i,          why: "the Palindome isn't reachable (Talisman o' Namsilat not equipped?)" },
+    // KoL's own generic "there is nothing here for you yet", the string
+    // KoLmafia's AdventureRequest reads as "You can't get to that area yet."
+    { re: /No, that isn'?t a place yet/i,               why: 'that zone is not open to you yet' },
   ];
 
   function blockerIn(html) {
@@ -949,13 +1262,16 @@
         throw Stop('choice ' + which + ' offers no options I can read');
       }
 
-      // The zone's plan first, then what you taught it, then ask. When both
-      // exist the plan wins: it is the more deliberate of the two, it is the
-      // one that gets maintained alongside the zone, and a pick remembered
-      // from before the zone had a plan should not quietly outrank it.
+      // The zone's plan first, then a built-in rule for this choice, then
+      // what you taught it, then ask. When a plan (or a rule) and a memory
+      // both exist the written-down one wins: it is the more deliberate of
+      // the two, it is the one that gets maintained alongside the zone, and a
+      // pick remembered from before the zone had a plan should not quietly
+      // outrank it.
       // ("remembered choices…" still lists that pick, and forgetting it is
       // how you tell the two apart.)
-      const planned = planPick(RUN.zone, which, options);
+      const planned = planPick(RUN.zone, which, options) ||
+                      rulePick(name, options);
       const known = rememberedChoice(which);
       let option = null;
 
@@ -977,6 +1293,16 @@
         } else if (known) {
           log('choice ' + which + ' is not offering your remembered option ' +
               known.option + ' this time; asking again.', 'warn');
+        }
+      }
+
+      if (option === null) {
+        const solo = soloPick(options);
+        if (solo !== null) {
+          option = solo;
+          log('choice ' + which + (name ? ' (' + name + ')' : '') +
+              ' offers one option; taking it (option ' + solo +
+              (options[0].text ? ': ' + options[0].text : '') + ')');
         }
       }
 
@@ -1061,6 +1387,14 @@
       RUN.zone = zone;
 
       RUN.startAdv = status.adventures;
+
+      // Once, before anything is spent: the checks that cost a request of
+      // their own. A refusal here has to come before the first turn, because
+      // what it usually means is that this run could not possibly work.
+      if (zone.preflight) {
+        const refuse = await zone.preflight(makeCtx({ status: status }));
+        if (refuse) throw Stop(refuse);
+      }
 
       if (status.adventures !== null && status.adventures < turns) {
         log('only ' + status.adventures + ' adventures left; will stop there.',
@@ -1245,7 +1579,11 @@
     zoneSel.value = prefs.zone;
     pop.appendChild(zoneSel);
 
-    const note = el(d, 'div', 'color:#555;font-size:11px;min-height:26px');
+    // white-space keeps the newline the live half writes (see syncNote): the
+    // note is set with textContent, and without it that newline would collapse
+    // into the sentence before it.
+    const note = el(d, 'div',
+                    'color:#555;font-size:11px;min-height:26px;white-space:pre-line');
     pop.appendChild(note);
 
     // "Wherever I adventured last" is the one entry whose label doesn't say
@@ -1259,11 +1597,17 @@
       const base = (z && z.note) || '';
       note.textContent = base;
       const mine = ++noteSeq;
-      if (!z || !z.dynamic) return;
+      if (!z || (!z.dynamic && !z.liveNote)) return;
       getStatus().then(function (status) {
         if (mine !== noteSeq || !note.isConnected) return;
+        if (z.liveNote) {
+          return Promise.resolve(z.liveNote(status)).then(function (extra) {
+            if (mine !== noteSeq || !note.isConnected || !extra) return;
+            note.textContent = base + '\n' + extra;
+          });
+        }
         const last = readLastAdventure(status) || lastAdventureFromCharpane();
-        note.textContent = base + ' Right now that is ' +
+        note.textContent = base + '\nRight now that is ' +
           (last ? (last.name || last.url) : 'somewhere I can\'t read') + '.';
       }).catch(function () { /* leave the plain note up */ });
     }
