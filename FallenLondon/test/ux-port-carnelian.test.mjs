@@ -25,6 +25,15 @@
 //    on the table alone.
 //  - And that no Port Carnelian name collides with the three card tables, so
 //    nothing can be badged twice.
+//  - The cash-out calculator: the endings are the only badges in this script
+//    that quote YOUR numbers rather than a table, so the arithmetic behind
+//    them is pinned against the guide's own reward-tier table row by row --
+//    including the one row of it that disagrees with the rounding the wiki
+//    states, which is named here rather than quietly rounded around. Then that
+//    a Favour is worth 0 Echoes and says so with a mark; that Tribute rides on
+//    a quality and never on the total; that a figure with nothing read behind
+//    it is a dash or a label, never a zero; and that a stale reading is marked
+//    rather than passed off as current.
 //
 // Numbers come from Port Carnelian (Guide) on fallenlondon.wiki.
 //
@@ -77,6 +86,14 @@ function makeEl(tag) {
       p.childNodes.splice(p.childNodes.indexOf(this) + 1, 0, node);
     },
     addEventListener() {},
+    // `characterName()` and the background-refresh frame both go through
+    // getAttribute, and a stub without it throws out of the banking path.
+    attributes: {},
+    getAttribute(name) {
+      return Object.prototype.hasOwnProperty.call(this.attributes, name)
+        ? this.attributes[name] : null;
+    },
+    setAttribute(name, value) { this.attributes[name] = String(value); },
     querySelector(sel) {
       const cls = sel.replace(/^\./, '');
       return this.children.find((c) => String(c.className).split(/\s+/).includes(cls)) || null;
@@ -122,6 +139,22 @@ const fakeDoc = {
 };
 class FakeObserver { observe() {} }
 
+// The cash-out calculator reads your purse off the Myself tab and banks it, so
+// this suite needs somewhere to bank it to. A plain Map is enough.
+const store = new Map();
+const fakeStorage = {
+  getItem: (k) => (store.has(k) ? store.get(k) : null),
+  setItem: (k, v) => { store.set(k, String(v)); },
+  removeItem: (k) => { store.delete(k); },
+};
+
+// Timers are stubbed to no-ops so the background refresh can be exercised
+// without a hidden frame's 20-second poll keeping the process alive. The
+// refresh promise then simply never settles, which is exactly what a test that
+// only counts whether the frame was BOOKED wants.
+const noTimer = () => 0;
+const frameCount = () => fakeDoc.body.children.filter((el) => el.tagName === 'IFRAME').length;
+
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
@@ -132,11 +165,17 @@ const wrapped = src
     + ' pcBadgeText, pcStoryletSpec, pcBranchSpec, pcHeadingSpec, pcChangeWords, pcWhen, pcRange,'
     + ' inPortCarnelian, PANELS, FEATURES, renderPortCarnelianPanel,'
     + ' attachBadge, BADGE_CLASS, PC_CLASS, PC_FLAG, PC_BRANCH_CLASS, PC_BRANCH_FLAG,'
-    + ' FOTZ_BRANCH_CLASS, FOTZ_BRANCH_FLAG }; })();');
+    + ' FOTZ_BRANCH_CLASS, FOTZ_BRANCH_FLAG,'
+    + ' PC_CASHOUTS, PC_QUALITIES, PC_FAVOUR_MARK, PC_STALE_MARK, PC_SOCIETY_CAP,'
+    + ' PC_ECHO_CHEAP, PC_ECHO_DEAR, pcRound, pcCashEcho, pcNextStep, pcCashout, pcCashoutAll,'
+    + ' pcEchoText, pcCashBadgeText, pcFromQualities, bankPcQualities, pcPurse,'
+    + ' pcMaybeRefresh, pcBestCashout }; })();');
 const fn = new Function(
   'document', 'MutationObserver', 'requestAnimationFrame', 'getComputedStyle', 'console',
+  'localStorage', 'setInterval', 'setTimeout', 'clearInterval', 'clearTimeout',
   wrapped + '\nreturn globalThis.__flux;');
-const api = fn(fakeDoc, FakeObserver, () => {}, () => ({ position: 'relative' }), console);
+const api = fn(fakeDoc, FakeObserver, () => {}, () => ({ position: 'relative' }), console,
+  fakeStorage, noTimer, noTimer, () => {}, () => {});
 
 let failures = 0;
 function check(label, got, expected) {
@@ -265,9 +304,15 @@ check('and a row that BUYS Legitimacy back carries the other mark, not the same 
 check('the Fate-locked row says so on the badge itself',
   api.pcBadgeText(row('Inconvenienced')), '+15 Fate');
 
-check('an ending is labelled rather than scored',
-  api.PC_OPTIONS.filter((e) => e.reset).map((e) => api.pcBadgeText(e)),
-  ['cash out', 'cash out', 'cash out', 'cash out']);
+// With nothing read, the two endings that pay a FIXED reward are still priced
+// -- a Cellar of Wine is 12.5 Echoes whatever your purse holds -- while the two
+// that cash a currency in cannot be, and say so rather than showing a 0. Only
+// Honoured with a State Dinner carries the Favour mark: it is the one that pays
+// a FACTION Favour, the capped story quality. A Favour in High Places is an
+// ordinary item and is priced, not marked.
+check('an ending is priced where it can be and labelled where it cannot',
+  api.PC_OPTIONS.filter((e) => e.reset).map((e) => api.pcBadgeText(e, null)),
+  ['25E ' + api.PC_FAVOUR_MARK, 'cash out', 'cash out', '25E']);
 
 check('the losing branch reads as the loss it is, and as the Legitimacy it buys',
   api.pcBadgeText(row('Within their rights', '"Quickly, sir - in, in!"')),
@@ -625,6 +670,296 @@ check('the feature and the panel are both registered',
   [api.FEATURES.some((f) => f.name === 'port-carnelian'),
    api.PANELS.some((p) => p.id === 'port-carnelian' && p.render === api.renderPortCarnelianPanel)],
   [true, true]);
+
+// --- the cash-out calculator -----------------------------------------------
+//
+// The four Time 12 endings are the only badges in this script that quote YOUR
+// numbers rather than a table, which makes the arithmetic behind them worth
+// pinning twice over: once against the formulas on the ending pages, and once
+// against the guide's own reward-tier table, which was written from the same
+// mechanic by somebody else.
+
+const purseOf = (over) => Object.assign({
+  sd: null, sh: null, legitimacy: null, time: 12, academics: null, society: null,
+  live: false, at: Date.now(), partial: false, stale: false, sig: 'test',
+}, over || {});
+
+const cashFor = (name, purse) => api.pcCashout(row(name), purse);
+const prince = (purse) => cashFor('An audience with the Banded Prince', purse);
+const festival = (purse) => cashFor('An equine festival', purse);
+
+// The two tables have to line up: an ending with no payout would badge a label
+// for ever, and a payout with no ending would never be drawn at all.
+check('every ending has a payout and every payout an ending, and they agree on what is spent',
+  api.PC_OPTIONS.filter((e) => e.reset).map((e) => [e.name, e.reset]).sort(),
+  api.PC_CASHOUTS.map((plan) => [plan.name, plan.spends]).sort());
+
+check('the two prices are the wiki\'s own, and nothing else is priced at all',
+  [api.PC_ECHO_CHEAP, api.PC_ECHO_DEAR,
+   [].concat(...api.PC_CASHOUTS.map((plan) => plan.items.map((i) => i.echo)))
+     .filter((echo) => echo !== 0 && echo !== api.PC_ECHO_CHEAP && echo !== api.PC_ECHO_DEAR)],
+  [2.5, 12.5, []]);
+
+// Fallen London rounds a half to the nearest EVEN number, not up. It is the
+// whole reason 105 and 176 are the figures to cash out at, so it is the first
+// thing here.
+check('rounding is bankers\' — a half goes to the nearest even number, not up',
+  [0.5, 1.5, 2.5, 3.5, 5.5, 2.4, 2.6, 7].map(api.pcRound),
+  [0, 2, 2, 4, 6, 2, 3, 7]);
+
+// The cross-check that makes the calculator worth trusting: PC_TIERS is the
+// guide's table, transcribed, and PC_CASHOUTS is the ending pages' formula.
+// Neither is derived from the other, so every row they agree on is two
+// independent sources agreeing.
+check('the formula reproduces the guide\'s whole reward-tier table, bar one row',
+  api.PC_TIERS.filter((tier) => {
+    const cash = prince(purseOf({ sd: tier.at }));
+    return !(cash.items[0].count === tier.cheap && cash.items[1].count === tier.dear
+      && cash.echo === tier.echo);
+  }).map((tier) => tier.at),
+  [35]);
+
+// And that row named, rather than rounded around quietly: 35/70 is exactly a
+// half, which is the one place bankers' rounding and rounding-up differ. Three
+// other rows of the same table (176, 316, 385) are only reachable with
+// bankers', so the calculator follows bankers' and this is the dissent.
+check('the row that disagrees is 35, where bankers\' rounding pays the dear item from 36',
+  [prince(purseOf({ sd: 34 })).items[1].count,
+   prince(purseOf({ sd: 35 })).items[1].count,
+   prince(purseOf({ sd: 36 })).items[1].count],
+  [0, 0, 1]);
+
+check('and the three rows that only exist under bankers\' rounding are in the tier table',
+  [175, 176, 315, 316].map((n) => prince(purseOf({ sd: n })).items[1].count),
+  [2, 3, 4, 5]);
+
+check('the two currency endings run one formula and differ only in what they hand you',
+  [prince(purseOf({ sd: 105 })).items.slice(0, 2).map((i) => [i.name, i.count]),
+   festival(purseOf({ sh: 105 })).items.slice(0, 2).map((i) => [i.name, i.count])],
+  [[['Presbyterate Passphrase', 6], ['Antique Mystery', 2]],
+   [['Partial Map', 6], ['Puzzling Map', 2]]]);
+
+// --- what the badge says ----------------------------------------------------
+
+check('an ending badge is what cashing out pays right now',
+  [api.pcBadgeText(row('An audience with the Banded Prince'), purseOf({ sd: 105 })),
+   api.pcBadgeText(row('An equine festival'), purseOf({ sh: 176 }))],
+  ['40E', '57.5E']);
+
+// A reading a minute old is a figure that may already be wrong -- every action
+// of a term moves both currencies -- so it is MARKED rather than hidden (which
+// would leave the screen blank in the one place this feature exists for) or
+// used silently (which would be a confident wrong number).
+check('a stale reading is marked, not hidden and not passed off as current',
+  api.pcBadgeText(row('An equine festival'), purseOf({ sh: 176, stale: true })),
+  '57.5E ' + api.PC_STALE_MARK);
+
+check('and the mark is a shape, so it survives with every colour stripped off',
+  [api.PC_STALE_MARK !== api.PC_FAVOUR_MARK, api.PC_FAVOUR_MARK.length > 0], [true, true]);
+
+check('a currency ending with nothing read says so rather than quoting the empty purse',
+  [api.pcBadgeText(row('An equine festival'), null),
+   api.pcBadgeText(row('An equine festival'), purseOf({ sh: 0 }))],
+  ['cash out', '5E']);
+
+// --- Favours, which this calculator refuses to price ------------------------
+
+check('a faction Favour counts as 0 Echoes and says so with a mark instead of a figure',
+  (() => {
+    const cash = cashFor('Honoured with a State Dinner', purseOf({ society: 2 }));
+    return [cash.echo, cash.favours, cash.items.map((i) => [i.name, i.count, i.each])];
+  })(),
+  [25, true, [['Favours: Society', 1, 0], ['Favour in High Places', 2, 12.5]]]);
+
+// The trap this pins: "Favour in High Places" is named like the story quality
+// and is nothing of the sort -- an ordinary Influence item the Bazaar buys at
+// 12.5. Zeroing it took this ending from 25 Echoes to 0 in the first cut.
+check('a Favour in High Places is an item, so it is priced and carries no mark',
+  (() => {
+    const cash = cashFor('Host a State Dinner', null);
+    return [cash.echo, cash.favours, cash.items.map((i) => [i.name, i.count, i.each])];
+  })(),
+  [25, false, [['Cellar of Wine', 1, 12.5], ['Favour in High Places', 1, 12.5]]]);
+
+check('and the only thing the `favour` field marks is the capped story quality',
+  [].concat(...api.PC_CASHOUTS.map((plan) => plan.items))
+    .filter((item) => item.favour).map((item) => [item.name, item.echo || 0, item.cap || null]),
+  [['Favours: Society', 0, api.PC_SOCIETY_CAP]]);
+
+// The page's own Game Instructions: the Society favour comes only while you
+// have fewer than 7. Not given and given-then-wasted are different claims.
+check('at the cap of 7 the Society favour is not given at all',
+  (() => {
+    const cash = cashFor('Honoured with a State Dinner', purseOf({ society: 7 }));
+    return [cash.items[0].count, cash.items[0].capped];
+  })(),
+  [0, true]);
+
+check('and with your Favours unread it is left unsure rather than assumed either way',
+  (() => {
+    const cash = cashFor('Honoured with a State Dinner', purseOf({}));
+    return [cash.items[0].count, cash.items[0].unsure, cash.items[0].capped];
+  })(),
+  [1, true, false]);
+
+// Tribute has no market price at all -- it is a story quality for the Court of
+// the Wakeful Eye -- so it is listed and never totalled, and it depends on a
+// quality rather than on the currency.
+check('Tribute rides on Associating with Radical Academics 15, and never on the total',
+  (() => {
+    const under = prince(purseOf({ sd: 105, academics: 14 }));
+    const over = prince(purseOf({ sd: 105, academics: 15 }));
+    return [under.items[2].count, over.items[2].count, under.echo, over.echo];
+  })(),
+  [0, 5, 40, 40]);
+
+check('and with that quality unread the Tribute row is unsure, not counted out',
+  prince(purseOf({ sd: 105 })).items[2].unsure, true);
+
+// --- the next step up -------------------------------------------------------
+
+check('the next step up is the next ROUNDING step, not the next Delight',
+  (() => {
+    const next = prince(purseOf({ sd: 105 })).next;
+    return [next.at, next.more, next.echo];
+  })(),
+  [136, 31, 42.5]);
+
+check('a fixed-reward ending has no next step, having no currency behind it',
+  [cashFor('Honoured with a State Dinner', purseOf({ sd: 105 })).next,
+   cashFor('Host a State Dinner', purseOf({ sd: 105 })).next],
+  [null, null]);
+
+check('and with nothing read there is no step to quote either',
+  prince(null).next, null);
+
+// --- the tooltip, which is the whole argument -------------------------------
+
+check('the ending tooltip carries the sum, not just the answer',
+  (() => {
+    const title = api.pcStoryletSpec([row('An audience with the Banded Prince')],
+      purseOf({ sd: 105, academics: 15 })).title;
+    return ['Striped Delights 105', '6 × Presbyterate Passphrase', '2 × Antique Mystery',
+      '= 40E', 'Next step up at 136 (+31)', '5 × Tribute'].map((bit) => title.includes(bit));
+  })(),
+  [true, true, true, true, true, true]);
+
+// The actual decision at Time 12: a fixed reward empties a purse that may be
+// worth forty Echoes, and the badge alone cannot say that.
+check('a fixed-reward ending says what emptying both purses gives up',
+  (() => {
+    const title = api.pcStoryletSpec([row('Honoured with a State Dinner')],
+      purseOf({ sd: 105, sh: 30 })).title;
+    return [title.includes('This empties BOTH purses'),
+      title.includes('Striped Delights 40E'), title.includes('Silver Horseheads 7.5E')];
+  })(),
+  [true, true, true]);
+
+check('every ending tooltip carries the rule that faction Favours are worth 0 here',
+  api.PC_OPTIONS.filter((e) => e.reset)
+    .filter((e) => !api.pcStoryletSpec([e], null).title
+      .includes(api.PC_FAVOUR_MARK + ' a faction Favour')).map((e) => e.name),
+  []);
+
+check('and a working option is untouched by all of this — no purse, no cash lines',
+  (() => {
+    const purse = purseOf({ sd: 105, sh: 105 });
+    const spec = api.pcStoryletSpec([row('A tithe. Not a bribe.')], purse);
+    return [spec.title.includes('Cash out now'), spec.text, !!spec.cash];
+  })(),
+  [false, '+5' + api.PC_LEGIT_SPEND_MARK, false]);
+
+check('an ending spec flags itself, which is how the pass knows one is on screen',
+  api.PC_OPTIONS.filter((e) => !!api.pcStoryletSpec([e], null).cash !== !!e.reset).map((e) => e.name),
+  []);
+
+check('the panel names a best ending only when all four can be compared',
+  (() => {
+    const read = api.pcCashoutAll(purseOf({ sd: 105, sh: 30 }));
+    const unread = api.pcCashoutAll(null);
+    return [api.pcBestCashout(read).name, api.pcBestCashout(unread)];
+  })(),
+  ['An audience with the Banded Prince', null]);
+
+// --- reading the purse ------------------------------------------------------
+
+check('the purse is the term\'s own qualities, and the two that price the endings first',
+  api.PC_QUALITIES.slice(0, 2), ['Striped Delights', 'Silver Horseheads']);
+
+// Same rule as every other scrape here: FL renders no row for a quality you
+// have none of, so absent means 0 -- but only while the tab's search box is
+// empty, because a filtered list makes absent mean "not on screen".
+check('an absent quality is 0 on an unfiltered list and simply missing on a filtered one',
+  [api.pcFromQualities({ values: new Map(), filtered: false })['Striped Delights'],
+   'Striped Delights' in api.pcFromQualities({ values: new Map(), filtered: true })],
+  [0, false]);
+
+// --- the background refresh -------------------------------------------------
+//
+// These three run in this order on purpose: `pcMaybeRefresh` is throttled on
+// module state, so the first booking is the only one that can be counted.
+
+check('a working option on screen books no background refresh',
+  (() => {
+    const before = frameCount();
+    area = 'Heartscross House';
+    stage = { storylet: [], branch: [branchHeading('A tithe. Not a bribe.')] };
+    pcRun();
+    return frameCount() - before;
+  })(),
+  0);
+
+check('an ending with nothing read behind it books exactly one',
+  (() => {
+    const before = frameCount();
+    stage = { storylet: [], branch: [branchHeading('An equine festival')] };
+    pcRun();
+    return frameCount() - before;
+  })(),
+  1);
+
+check('and scanning again does not book a second, a scan being a few a second',
+  (() => {
+    const before = frameCount();
+    pcRun();
+    pcRun();
+    return frameCount() - before;
+  })(),
+  0);
+
+// --- and the whole way through ----------------------------------------------
+//
+// Banking a reading mutates nothing in the page, so the badge has to be
+// redrawn by the purse being part of its identity rather than by the observer.
+
+check('banking a reading redraws an ending badge that was already on screen',
+  (() => {
+    const head = branchHeading('An equine festival');
+    stage = { storylet: [], branch: [head] };
+    area = 'Heartscross House';
+    pcRun();
+    const before = badgeTexts([head])[0];
+    api.bankPcQualities({
+      values: new Map([['Silver Horseheads', { quality: 'Silver Horseheads', level: 176 }]]),
+      filtered: false,
+    });
+    pcRun();
+    return [before, badgeTexts([head])[0]];
+  })(),
+  ['cash out', '57.5E']);
+
+check('and the panel is built against the same reading, ending rows and all',
+  (() => {
+    const root = api.renderPortCarnelianPanel();
+    let text = '';
+    (function walk(el) {
+      if (!el) return;
+      if (el.nodeType === 3) { text += el.nodeValue; return; }
+      for (const child of el.childNodes || []) walk(child);
+    })(root);
+    return [text.includes('Cash out now'), text.includes('57.5E'), text.includes('★ best right now')];
+  })(),
+  [true, true, true]);
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall good');
 process.exit(failures ? 1 : 0);

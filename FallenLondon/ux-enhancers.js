@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      2.8
-// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A "UX" button docked INTO Fallen London's own chrome beside its travel control -- under the big Travel button on the wide layout, as one more icon in the banner on the narrow one -- so it takes up space in the page like any other control and covers nothing. It opens a menu of reference panels; the last line of that menu switches it back to floating over the page if you preferred it that way, and it falls back to floating on its own if Fallen London's chrome cannot be found. Every panel's header carries a fullscreen button beside its close button, which takes the panel off the popover and over the whole screen and back; the choice is remembered, so a long panel opens at full size every time rather than needing the button pressed again. The first panel is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, every port on the Unterzee -- which region it is in, whether docking there wipes Troubled Waters and the zee-threats, and what it takes to be able to sail there at all, with the hunting grounds and the one-time destinations marked as the different things they are, since a port that resets nothing and a place that is not a dock are two different answers -- the three winds and the dreams they start, and the whole card table, searchable. (4) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: beside Fallen London’s own Travel button, where the UX button docks, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. A third panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. (5) In Port Carnelian, where a governor's term runs 26 actions and Fallen London deals no opportunity cards at all, the badges go on storylets and on their options instead. The whole term is one storylet, Matters of State, so what is rated is the list of options inside it -- and the options of the two of those that open into a storylet of their own. Each shows the net change in resources that option makes, with a mark for what it does to Imperial Legitimacy -- the number that ends a term at once when it reaches 0, sending you back to zee with nothing: a down mark when the net was paid for out of Legitimacy, an up mark when the option buys Legitimacy back instead, and no mark at all when it leaves Legitimacy alone. The colour says the same thing the mark does and nothing else -- red for spending Legitimacy, green for buying it back, light blue for the rows that leave it alone, slate for the endings -- so the marks are enough on their own for anyone who cannot separate the red from the green. Then a Fate label on the one Fate-locked option, and "cash out" on the four endings, which spend a currency rather than gaining any. Half the table is worth the same +5, so whether it costs Legitimacy is the only thing separating those rows. The tooltip carries the Time Passing in Office and Airs windows the option is offered in, every currency change with its currency named, the requirement and the note; the two options that pay ten or fifteen of ONE of the two currencies, the game's choice rather than yours, say so in words, since reading them as that much of each would make them the best options in the table by a distance. A storylet the guide splits in two is badged with the better net and keeps both branches in its tooltip, because the losing branch is how Imperial Legitimacy is bought back. A fourth panel, Port Carnelian, is the rest of the guide: how to unlock and reach the posting, the rules a term is played by, every option grouped by the clock and searchable, what the two currencies cash in for, the reward tiers with the two worth aiming at picked out, and the strategy. (6) On a Voyage of Scientific Discovery -- the Dilmun Club's expeditions to Bullbone Island, Corpsecage Island and Grunting Fen, which deal no opportunity cards either -- every action gets a badge for what it pays in research pages, coloured by which of the three kinds it is: Archaeological, Cryptopalaeontological or Theosophistical. You sail to one island for one kind, and at every step of the visit you are choosing between the action that pays it and one that pays goods instead, so an action paying no pages is labelled with what it does pay rather than scored: there is no exchange rate between pages and Echoes, and inventing one would be the badge choosing your voyage for you. The three gambles at the end of a visit carry their EXPECTED value rather than the figure they advertise, since the wiki gives both outcomes and the odds -- taking the safer of the two is worth about six times the greedier one once the failure is priced in. The tooltip carries the step of the visit the action belongs to, its challenge, everything it gives, what it costs, and what a failure costs; where the game picks between two payouts rather than you, that is said in words. The same badges cover the two screens at your Lodgings, where the pages are generated before you sail and spent afterwards, and there the figure is the guide's pence per page, because everything on that screen is priced. Three actions and three storylets have the same names on all three islands and pay a different kind of page on each, so the feature works out which island it is looking at from the greeting or from the storylet you have open, and says nothing at all rather than guess. A fifth panel, Scientific Voyages, holds the rest: how the voyage is unlocked, what each island pays and costs to reach, every action grouped by island and searchable, and how to squeeze the most preparatory research out of London first. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. Built as a feature registry so further tweaks can be added as entries.
+// @version      2.9
+// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A "UX" button docked INTO Fallen London's own chrome beside its travel control -- under the big Travel button on the wide layout, as one more icon in the banner on the narrow one -- so it takes up space in the page like any other control and covers nothing. It opens a menu of reference panels; the last line of that menu switches it back to floating over the page if you preferred it that way, and it falls back to floating on its own if Fallen London's chrome cannot be found. Every panel's header carries a fullscreen button beside its close button, which takes the panel off the popover and over the whole screen and back; the choice is remembered, so a long panel opens at full size every time rather than needing the button pressed again. The first panel is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, every port on the Unterzee -- which region it is in, whether docking there wipes Troubled Waters and the zee-threats, and what it takes to be able to sail there at all, with the hunting grounds and the one-time destinations marked as the different things they are, since a port that resets nothing and a place that is not a dock are two different answers -- the three winds and the dreams they start, and the whole card table, searchable. (4) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: beside Fallen London’s own Travel button, where the UX button docks, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. A third panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. (5) In Port Carnelian, where a governor's term runs 26 actions and Fallen London deals no opportunity cards at all, the badges go on storylets and on their options instead. The whole term is one storylet, Matters of State, so what is rated is the list of options inside it -- and the options of the two of those that open into a storylet of their own. Each shows the net change in resources that option makes, with a mark for what it does to Imperial Legitimacy -- the number that ends a term at once when it reaches 0, sending you back to zee with nothing: a down mark when the net was paid for out of Legitimacy, an up mark when the option buys Legitimacy back instead, and no mark at all when it leaves Legitimacy alone. The colour says the same thing the mark does and nothing else -- red for spending Legitimacy, green for buying it back, light blue for the rows that leave it alone, slate for the endings -- so the marks are enough on their own for anyone who cannot separate the red from the green. Then a Fate label on the one Fate-locked option, and "cash out" on the four endings, which spend a currency rather than gaining any. The four endings carry a figure rather than only a label: each shows what cashing out would pay you RIGHT NOW, in Echoes, worked out from your own Striped Delights and Silver Horseheads. Fallen London states both on the Myself tab and nowhere near the port, so the script reads them where they are shown, remembers them, and refreshes them in a hidden frame -- in the background while an ending is on screen, and again when the panel is opened on a stale reading -- exactly the way the festival reads how deep you are. A faction Favour is marked with an icon and priced at 0: it is a story quality capped at 7 rather than an item, nothing buys one, and pricing it would let a fixed reward out-rank a real cash-out on a number nobody acts on. Tribute, which has no market price either, is listed the same way and left out of the total. A Favour in High Places is not one of those despite the name -- it is an ordinary item the Bazaar buys -- so it is priced like any other. A question mark says the reading behind the figure is over a minute old, since every action of a term moves both currencies, and the plain "cash out" label is what is left when your numbers have never been read. The tooltip carries the whole sum: what you hold, what it turns into, what each piece is worth, what the next rounding step up would cost you -- 105 and 176 are worth waiting for and 140 is not -- and, for the two endings that pay a fixed reward and empty both purses, what taking one gives up. Half the table is worth the same +5, so whether it costs Legitimacy is the only thing separating those rows. The tooltip carries the Time Passing in Office and Airs windows the option is offered in, every currency change with its currency named, the requirement and the note; the two options that pay ten or fifteen of ONE of the two currencies, the game's choice rather than yours, say so in words, since reading them as that much of each would make them the best options in the table by a distance. A storylet the guide splits in two is badged with the better net and keeps both branches in its tooltip, because the losing branch is how Imperial Legitimacy is bought back. A fourth panel, Port Carnelian, opens on the same calculator -- your purse, and all four endings priced against it with the best one named in words -- and then holds the rest of the guide: how to unlock and reach the posting, the rules a term is played by, every option grouped by the clock and searchable, what the two currencies cash in for, the reward tiers with the two worth aiming at picked out and a letter against the step each of your two currencies is standing on, and the strategy. (6) On a Voyage of Scientific Discovery -- the Dilmun Club's expeditions to Bullbone Island, Corpsecage Island and Grunting Fen, which deal no opportunity cards either -- every action gets a badge for what it pays in research pages, coloured by which of the three kinds it is: Archaeological, Cryptopalaeontological or Theosophistical. You sail to one island for one kind, and at every step of the visit you are choosing between the action that pays it and one that pays goods instead, so an action paying no pages is labelled with what it does pay rather than scored: there is no exchange rate between pages and Echoes, and inventing one would be the badge choosing your voyage for you. The three gambles at the end of a visit carry their EXPECTED value rather than the figure they advertise, since the wiki gives both outcomes and the odds -- taking the safer of the two is worth about six times the greedier one once the failure is priced in. The tooltip carries the step of the visit the action belongs to, its challenge, everything it gives, what it costs, and what a failure costs; where the game picks between two payouts rather than you, that is said in words. The same badges cover the two screens at your Lodgings, where the pages are generated before you sail and spent afterwards, and there the figure is the guide's pence per page, because everything on that screen is priced. Three actions and three storylets have the same names on all three islands and pay a different kind of page on each, so the feature works out which island it is looking at from the greeting or from the storylet you have open, and says nothing at all rather than guess. A fifth panel, Scientific Voyages, holds the rest: how the voyage is unlocked, what each island pays and costs to reach, every action grouped by island and searchable, and how to squeeze the most preparatory research out of London first. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. Built as a feature registry so further tweaks can be added as entries.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 // @run-at       document-idle
@@ -3643,6 +3643,385 @@
     { at: 405, cheap: 16, dear: 6, echo: 115 },
   ];
 
+
+  // --- cashing out --------------------------------------------------------
+  //
+  // A term ends by spending ONE of the two currencies, and everything before
+  // it is played for that figure. So the endings carry the one number no table
+  // can hold: what YOUR Striped Delights and Silver Horseheads are worth if
+  // you cash them in now.
+  //
+  // The formulas are the ENDING PAGES rather than the guide's summary -- An
+  // audience with the Banded Prince and An equine festival state them outright
+  // (and agree with it):
+  //
+  //   cheap item   round(2 + currency / 30)    2.5 Echo each
+  //   dear item    round(currency / 70)       12.5 Echo each
+  //
+  // ROUNDING IS BANKERS' ROUNDING -- a half goes to the nearest EVEN number.
+  // That is the wiki's Rounding page, and PC_TIERS is the cross-check that it
+  // is the rule in force here: the guide's own tier table steps at 176, 316
+  // and 385, which are exactly the thresholds bankers' rounding gives (round
+  // half UP would put the first two at 175 and 315). One row of that table
+  // dissents -- it lists a dear item from 35, where 35/70 is exactly 0.5 and
+  // bankers' rounding pays none until 36. Three rows and a stated mechanic
+  // against one row, so the calculator rounds bankers' and this comment is the
+  // record of the row that disagrees. `pcCashout` is checked against the whole
+  // tier table in the tests, with that row named as the exception.
+  //
+  // A FACTION FAVOUR COUNTS AS 0 ECHO, deliberately, and is marked instead.
+  // "Favours: Society" and its eleven siblings are STORY QUALITIES capped at
+  // 7, not items: you cannot sell one, and the wiki's occasional ~4 Echo
+  // figure for them is a notional price for something that never reaches the
+  // Bazaar. Pricing them would let an ending out-rank a real cash-out on a
+  // number nobody acts on, so they are worth 0 here and carry PC_FAVOUR_MARK,
+  // which is a SHAPE: the claim survives with every colour stripped off it.
+  //
+  // A FAVOUR IN HIGH PLACES IS NOT ONE OF THOSE. Despite the name it is an
+  // ordinary Influence item -- it sits in Possessions and the Bazaar buys it
+  // at 12.5 Echoes -- so it is priced like any other item and carries no mark.
+  // The two are told apart by the `favour` field, which means the story
+  // quality and nothing else. (First cut of this table had it backwards and
+  // priced the item at 0, which cost Honoured with a State Dinner 25 of its
+  // 25 Echoes.)
+  //
+  // Tribute is the real second case: a story quality for the Court of the
+  // Wakeful Eye with no market price at all. It is listed, the guide's own
+  // "about 12.5 Echoes" estimate is quoted as an estimate, and it is not in
+  // the total.
+
+  const PC_ECHO_CHEAP = 2.5;
+  const PC_ECHO_DEAR = 12.5;
+
+  // A Favour: worth having, worth nothing on the market by the rule above.
+  const PC_FAVOUR_MARK = '❖';
+  // The reading behind the figure is older than PC_FRESH_MS, so it may already
+  // be wrong: every action of a term moves both currencies.
+  const PC_STALE_MARK = '?';
+
+  const PC_SOCIETY_FAVOUR = 'Favours: Society';
+  const PC_SOCIETY_CAP = 7;
+  const PC_ACADEMICS = 'Associating with Radical Academics';
+  const PC_TRIBUTE_AT = 15;
+
+  // Round half to EVEN. Written out rather than Math.round because Math.round
+  // takes halves UP, which is the one case this whole table turns on.
+  function pcRound(value) {
+    const down = Math.floor(value);
+    const rest = value - down;
+    if (rest > 0.5) return down + 1;
+    if (rest < 0.5) return down;
+    return down % 2 === 0 ? down : down + 1;
+  }
+
+  // One entry per ending, matched to its PC_OPTIONS row by name.
+  //
+  //   spends   'sd' / 'sh' / 'both' -- which currency the payout is counted
+  //            from, and 'both' for the two that pay a fixed reward and empty
+  //            both purses.
+  //   items    what it hands you. `count(n)` for a figure that scales off the
+  //            currency, `flat` for one that does not. `echo` is 0 for
+  //            anything with no market price, and `favour: true` marks a
+  //            FACTION FAVOUR -- the capped story quality, not the Influence
+  //            item called a Favour in High Places -- which is the same claim
+  //            said twice, once as a 0 and once as a mark.
+  //   extras   what the ending gives that is not a countable reward at all.
+  //
+  // Transcribed from the four ENDING PAGES (Honoured with a State Dinner, An
+  // audience with the Banded Prince, An equine festival, Host a State Dinner),
+  // not from the guide's table. Corrections go here and nowhere else.
+  const PC_CASHOUTS = [
+    {
+      name: 'An audience with the Banded Prince',
+      spends: 'sd',
+      currency: 'Striped Delights',
+      items: [
+        { name: 'Presbyterate Passphrase', echo: PC_ECHO_CHEAP,
+          count: function (n) { return pcRound(2 + n / 30); } },
+        { name: 'Antique Mystery', echo: PC_ECHO_DEAR,
+          count: function (n) { return pcRound(n / 70); } },
+        { name: 'Tribute', echo: 0, flat: 5,
+          needs: { quality: PC_ACADEMICS, atLeast: PC_TRIBUTE_AT },
+          note: 'a story quality for the Court of the Wakeful Eye. No market price, so it is '
+            + 'not in the total; the guide reckons the five at about 12.5 Echoes.' },
+      ],
+    },
+    {
+      name: 'An equine festival',
+      spends: 'sh',
+      currency: 'Silver Horseheads',
+      items: [
+        { name: 'Partial Map', echo: PC_ECHO_CHEAP,
+          count: function (n) { return pcRound(2 + n / 30); } },
+        { name: 'Puzzling Map', echo: PC_ECHO_DEAR,
+          count: function (n) { return pcRound(n / 70); } },
+      ],
+    },
+    {
+      name: 'Honoured with a State Dinner',
+      spends: 'both',
+      currency: null,
+      items: [
+        // The page's own Game Instructions: "this will get you a Society
+        // favour, IF YOU HAVE FEWER THAN 7". At the cap it pays none, which is
+        // a different claim from paying one you cannot hold.
+        { name: PC_SOCIETY_FAVOUR, echo: 0, flat: 1, favour: true, cap: PC_SOCIETY_CAP },
+        { name: 'Favour in High Places', echo: PC_ECHO_DEAR, flat: 2 },
+      ],
+      extras: ['Successful Terms as Governor +1'],
+    },
+    {
+      name: 'Host a State Dinner',
+      spends: 'both',
+      currency: null,
+      items: [
+        { name: 'Cellar of Wine', echo: PC_ECHO_DEAR, flat: 1 },
+        { name: 'Favour in High Places', echo: PC_ECHO_DEAR, flat: 1 },
+      ],
+      extras: ['Restored to the Court of Her Enduring Majesty — the reason to take this one, '
+        + 'and not a thing Echoes can price', 'Persuasive +160 CP',
+        'Successful Terms as Governor +1'],
+    },
+  ];
+
+  const PC_CASHOUT_BY_NAME = new Map(
+    PC_CASHOUTS.map(function (plan) { return [normalizeName(plan.name), plan]; }));
+
+  // --- your purse ---------------------------------------------------------
+  //
+  // Fallen London states both currencies on the Myself tab and nowhere near
+  // the storylet you are standing in, so this borrows the festival's plumbing
+  // whole: bank a reading whenever that tab goes by, refresh it in a hidden
+  // frame when the panel opens on a stale one or when an ending is on screen,
+  // and label every figure with its age. A term moves both currencies EVERY
+  // action, so a reading goes stale fast -- and a stale one is MARKED rather
+  // than quietly used or quietly dropped.
+
+  const PC_CACHE_KEY = 'fl-ux-pc';
+  const PC_FRESH_MS = 60 * 1000;
+
+  const PC_QUALITIES = [
+    'Striped Delights',
+    'Silver Horseheads',
+    'Imperial Legitimacy',
+    'Time Passing in Office',
+    PC_ACADEMICS,
+    PC_SOCIETY_FAVOUR,
+  ];
+
+  // Bumped whenever a reading is re-banked, and the memo below hangs off it --
+  // `pcPurse` is called once per heading on every debounced scan.
+  let pcGen = 0;
+
+  // Same rule as the factions and festival scrapes: FL does not render a
+  // quality you have none of, so ABSENT means 0 -- but only while the tab's
+  // search box is empty, because a filtered list makes absent mean "not on
+  // screen" instead.
+  function pcFromQualities(scan) {
+    const values = {};
+    const zeroIsSafe = !scan.filtered;
+    for (const name of PC_QUALITIES) {
+      const q = scan.values.get(name);
+      if (q) values[name] = q.level;
+      else if (zeroIsSafe) values[name] = 0;
+    }
+    return values;
+  }
+
+  function bankPcQualities(scan) {
+    if (!scan) return false;
+    const values = pcFromQualities(scan);
+    if (!Object.keys(values).length) return false;
+    saveCache(PC_CACHE_KEY, {
+      v: 1, at: Date.now(), character: characterName() || null,
+      partial: scan.filtered, values: values,
+    });
+    pcGen++;
+    return true;
+  }
+
+  // Live if the Myself tab is on screen, else the banked answer, else null.
+  function readPcState() {
+    const scan = readQualities();
+    if (scan) {
+      const values = pcFromQualities(scan);
+      if (Object.keys(values).length) {
+        return {
+          live: true, at: Date.now(), character: characterName(),
+          partial: scan.filtered, values: values,
+        };
+      }
+    }
+    const rec = loadCache(PC_CACHE_KEY, 1);
+    if (!rec || !rec.values) return null;
+    return {
+      live: false, at: rec.at, character: rec.character || null,
+      partial: !!rec.partial, values: rec.values,
+    };
+  }
+
+  // What the badges need: the figures, how old they are, and a signature that
+  // changes when any of that does. Null for "nothing has ever been read",
+  // which every caller has to say rather than guess around.
+  //
+  // The age in the signature is BUCKETED. A raw timestamp there would differ
+  // on every scan, so every badge would be rebuilt on every DOM mutation for
+  // ever -- and each of those writes is itself a mutation.
+  let pcPurseMemo = null;
+  function pcPurse() {
+    const key = pcGen + '@' + Math.floor(Date.now() / PC_FRESH_MS);
+    if (pcPurseMemo && pcPurseMemo.key === key) return pcPurseMemo.value;
+    let value = null;
+    try {
+      value = buildPcPurse();
+    } catch (e) {
+      value = null;
+    }
+    pcPurseMemo = { key: key, value: value };
+    return value;
+  }
+
+  function buildPcPurse() {
+    const state = readPcState();
+    if (!state) return null;
+    const at = function (name) {
+      const v = state.values[name];
+      return typeof v === 'number' ? v : null;
+    };
+    const stale = !state.live && (Date.now() - state.at) > PC_FRESH_MS;
+    const purse = {
+      sd: at('Striped Delights'),
+      sh: at('Silver Horseheads'),
+      legitimacy: at('Imperial Legitimacy'),
+      time: at('Time Passing in Office'),
+      academics: at(PC_ACADEMICS),
+      society: at(PC_SOCIETY_FAVOUR),
+      live: !!state.live,
+      at: state.at,
+      partial: !!state.partial,
+      stale: stale,
+    };
+    purse.sig = [purse.sd, purse.sh, purse.academics, purse.society,
+      purse.live ? 'live' : (stale ? 'stale' : 'fresh')].join('/');
+    return purse;
+  }
+
+  // --- what an ending pays ------------------------------------------------
+  //
+  // Pure: an ending row and a purse in, the payout out. `purse` may be null
+  // (never read) and any figure in it may be null, and the result says so
+  // rather than filling the gap with a zero -- "no Delights" and "your
+  // Delights have not been read" are different claims, and only one of them is
+  // safe to put on a badge.
+
+  function pcCashPlan(entry) {
+    return PC_CASHOUT_BY_NAME.get(normalizeName(entry.name)) || null;
+  }
+
+  // The priced part of a payout at a given figure of the currency. Used both
+  // for the total and to find the next step up.
+  function pcCashEcho(plan, n) {
+    let echo = 0;
+    for (const item of plan.items) {
+      if (!item.echo) continue;
+      echo += item.echo * (item.count ? item.count(n) : item.flat);
+    }
+    return echo;
+  }
+
+  // The least of the currency that pays MORE than you would get now. The
+  // rounding is the whole reason to ask: 105 and 176 are worth waiting for and
+  // 140 is not. Searched rather than read off PC_TIERS, so the two stay
+  // independent and the tests can check one against the other.
+  function pcNextStep(plan, have) {
+    if (have == null || !plan.currency) return null;
+    const now = pcCashEcho(plan, have);
+    for (let n = have + 1; n <= have + 200; n++) {
+      const then = pcCashEcho(plan, n);
+      if (then > now) return { at: n, more: n - have, echo: then };
+    }
+    return null;
+  }
+
+  function pcCashout(entry, purse) {
+    const plan = pcCashPlan(entry);
+    if (!plan) return null;
+    const have = !purse ? null
+      : (plan.spends === 'sd' ? purse.sd : (plan.spends === 'sh' ? purse.sh : null));
+    const items = [];
+    let echo = 0;
+    let priced = true;
+    let favours = false;
+    for (const item of plan.items) {
+      const row = {
+        name: item.name, each: item.echo || 0, favour: !!item.favour,
+        note: item.note || null, count: null, unsure: false, capped: false,
+      };
+      if (item.count) row.count = have == null ? null : item.count(have);
+      else row.count = item.flat;
+      if (row.count == null) row.unsure = true;
+      if (item.needs) {
+        row.needs = item.needs;
+        const level = purse && item.needs.quality === PC_ACADEMICS ? purse.academics : null;
+        if (level == null) row.unsure = true;
+        else if (level < item.needs.atLeast) row.count = 0;
+      }
+      if (item.cap) {
+        const level = purse ? purse.society : null;
+        if (level == null) row.unsure = true;
+        else if (level >= item.cap) { row.count = 0; row.capped = true; }
+      }
+      if (row.favour) favours = true;
+      if (row.each) {
+        if (row.count == null) priced = false;
+        else echo += row.count * row.each;
+      }
+      items.push(row);
+    }
+    return {
+      name: plan.name,
+      spends: plan.spends,
+      currency: plan.currency,
+      have: have,
+      items: items,
+      extras: plan.extras || null,
+      echo: priced ? echo : null,
+      favours: favours,
+      next: pcNextStep(plan, have),
+      // Only a payout that depends on a READING can go stale. The two fixed
+      // ones are as true an hour later as they are now.
+      stale: !!(purse && purse.stale && plan.currency),
+      read: purse ? purse.at : null,
+      live: !!(purse && purse.live),
+    };
+  }
+
+  // Every ending at once, so a tooltip can say what taking this one gives up.
+  // That comparison is the actual decision at Time 12: Honoured with a State
+  // Dinner pays two Favours and empties a purse that may be worth 40 Echoes.
+  function pcCashoutAll(purse) {
+    return PC_CASHOUTS.map(function (plan) { return pcCashout(plan, purse); });
+  }
+
+  // Which ending pays most, or null when that cannot be said. "Best" is a
+  // COMPARISON, so it is only made when every ending can be compared: with a
+  // currency unread the two fixed rewards would win by default, and the mark
+  // would be an artefact of the missing reading rather than a claim about your
+  // term.
+  function pcBestCashout(cashouts) {
+    if (!cashouts.length) return null;
+    if (!cashouts.every(function (cash) { return cash.echo != null; })) return null;
+    let best = null;
+    for (const cash of cashouts) if (!best || cash.echo > best.echo) best = cash;
+    return best;
+  }
+
+  // 40E, 57.5E. The halves are real -- a dear item is 12.5 Echoes -- so they
+  // are not rounded away.
+  function pcEchoText(echo) {
+    return (Math.round(echo * 100) / 100) + 'E';
+  }
+
   // --- looking a storylet up ---------------------------------------------
   //
   // Exact match on the punctuation-squashed name, through the same normaliser
@@ -3773,8 +4152,20 @@
     return { color: PC_COLOR_NEUTRAL, ink: PC_INK_NEUTRAL };
   }
 
-  function pcBadgeText(entry) {
-    if (entry.reset) return 'cash out';
+  // The endings' badge is the only figure in this feature that comes from YOUR
+  // numbers rather than the table, so it says how sure of them it is: a favour
+  // mark when part of the payout is Favours (0 Echoes, by the rule above), a
+  // question mark when the reading behind it is over a minute old, and the
+  // original 'cash out' label when there is no reading at all.
+  function pcCashBadgeText(cash) {
+    if (!cash) return 'cash out';
+    const mark = cash.favours ? ' ' + PC_FAVOUR_MARK : '';
+    if (cash.echo == null) return 'cash out' + mark;
+    return pcEchoText(cash.echo) + mark + (cash.stale ? ' ' + PC_STALE_MARK : '');
+  }
+
+  function pcBadgeText(entry, purse) {
+    if (entry.reset) return pcCashBadgeText(pcCashout(entry, purse));
     const net = pcNet(entry);
     return (net > 0 ? '+' + net : String(net))
       + pcLegitMark(entry)
@@ -3818,6 +4209,75 @@
     return lines;
   }
 
+  // The cash-out arithmetic, spelled out. This is the whole argument for the
+  // one badge here that quotes your own numbers: what you hold, what it turns
+  // into, what that is worth, what the next step up would cost you in actions
+  // -- and, for the two endings that pay a fixed reward, what taking one gives
+  // up, since they empty both purses.
+  function pcCashLines(cash, others) {
+    const lines = [''];
+    if (!cash.currency) {
+      lines.push('Cash out now — a fixed reward, whatever the two purses hold:');
+    } else if (cash.have == null) {
+      lines.push('Cash out now — your ' + cash.currency + ' has not been read yet, '
+        + 'so this cannot be priced.');
+    } else {
+      lines.push('Cash out now — ' + cash.currency + ' ' + cash.have + ' ('
+        + (cash.live ? 'read live' : 'read ' + ageText(cash.read)) + '):');
+    }
+    for (const row of cash.items) {
+      let line = '  ' + (row.count == null ? '?' : row.count) + ' × ' + row.name;
+      if (row.favour) line += ' ' + PC_FAVOUR_MARK;
+      if (row.each) line += ' (' + pcEchoText(row.each) + ' each)';
+      if (row.needs) line += ' — needs ' + row.needs.quality + ' ' + row.needs.atLeast;
+      if (row.capped) line += ' — you are at the cap of ' + PC_SOCIETY_CAP
+        + ', so this one is not given at all';
+      lines.push(line);
+      if (row.note) lines.push('      ' + row.note);
+    }
+    if (cash.echo != null) {
+      lines.push('  = ' + pcEchoText(cash.echo) + (cash.favours ? ', and the Favours' : ''));
+    }
+    if (cash.next) {
+      lines.push('  Next step up at ' + cash.next.at + ' (+' + cash.next.more + ') — '
+        + pcEchoText(cash.next.echo) + '. The rounding is why 105 and 176 are worth '
+        + 'waiting for and 140 is not.');
+    }
+    for (const extra of (cash.extras || [])) lines.push('  also ' + extra);
+    if (cash.spends === 'both') {
+      const rivals = (others || []).filter(function (other) {
+        return other !== cash && other.currency && other.echo != null && other.echo > 0;
+      });
+      if (rivals.length) {
+        lines.push('  This empties BOTH purses. Cashing one in instead: '
+          + rivals.map(function (other) {
+            return other.currency + ' ' + pcEchoText(other.echo);
+          }).join(', ') + '.');
+      }
+    }
+    if (cash.stale) {
+      lines.push('  ' + PC_STALE_MARK + ' this reading is over a minute old and every action '
+        + 'of a term moves both currencies, so the figure may already be behind.');
+    }
+    return lines;
+  }
+
+  const PC_CASH_FOOTER = PC_FAVOUR_MARK + ' a faction Favour: a story quality capped at '
+    + PC_SOCIETY_CAP + ', which you cannot sell. Those — and Tribute, which has no market '
+    + 'price either — count as 0 here rather than let a fixed reward out-rank a real cash-out '
+    + 'on a number nobody acts on. A Favour in High Places is NOT one of them: despite the '
+    + 'name it is an ordinary item, and it is priced like one. Item prices are the Bazaar\'s: '
+    + '2.5 for a cheap one, 12.5 for a dear one, at the wiki\'s bankers\' rounding.';
+
+  function pcCashBlock(entry, purse) {
+    if (!entry.reset) return [];
+    const all = pcCashoutAll(purse);
+    const key = normalizeName(entry.name);
+    const cash = all.filter(function (one) { return normalizeName(one.name) === key; })[0];
+    if (!cash) return [];
+    return pcCashLines(cash, all).concat(['', PC_CASH_FOOTER]);
+  }
+
   // Carried on every tooltip, neutral rows included, because it is the legend
   // for the two marks as well as the rule they are about.
   const PC_FOOTER = PC_LEGIT_SPEND_MARK + ' this net is paid for out of Imperial Legitimacy. '
@@ -3828,7 +4288,7 @@
 
   // What to draw on a storylet heading. Pure (entries in, spec out), so every
   // badge can be asserted on without a DOM.
-  function pcStoryletSpec(entries) {
+  function pcStoryletSpec(entries, purse) {
     const best = bestPcOption(entries);
     const lines = [entries[0].name, pcWhen(best), ''];
     if (entries.length === 1) {
@@ -3842,20 +4302,32 @@
       lines.push('The badge is the better net. The other branch is how you buy Imperial '
         + 'Legitimacy back, which is worth taking when it is running low.');
     }
+    lines.push.apply(lines, pcCashBlock(best, purse));
     lines.push('');
     lines.push(PC_FOOTER);
     const paint = pcPaint(best);
-    return { text: pcBadgeText(best), color: paint.color, ink: paint.ink, title: lines.join('\n') };
+    return {
+      text: pcBadgeText(best, purse), color: paint.color, ink: paint.ink,
+      // `cash` is not for makeBadge, which ignores it. It is how `pcRatings`
+      // knows an ending is on screen -- the one place a stale reading would be
+      // a wrong number rather than a missing one, and so the only place worth
+      // booting a hidden frame for.
+      cash: !!best.reset, title: lines.join('\n'),
+    };
   }
 
   // And on one branch inside an opened storylet.
-  function pcBranchSpec(entry) {
+  function pcBranchSpec(entry, purse) {
     const lines = [entry.name + ': ' + entry.branch, pcWhen(entry), ''];
     lines.push.apply(lines, pcOptionLines(entry, ''));
+    lines.push.apply(lines, pcCashBlock(entry, purse));
     lines.push('');
     lines.push(PC_FOOTER);
     const paint = pcPaint(entry);
-    return { text: pcBadgeText(entry), color: paint.color, ink: paint.ink, title: lines.join('\n') };
+    return {
+      text: pcBadgeText(entry, purse), color: paint.color, ink: paint.ink,
+      cash: !!entry.reset, title: lines.join('\n'),
+    };
   }
 
   // What to draw on ONE heading, whichever kind of heading it is.
@@ -3876,16 +4348,16 @@
   //
   // `here` is the area gate, passed in rather than read, so the whole thing
   // stays pure: name and gate in, badge description out.
-  function pcHeadingSpec(name, here) {
+  function pcHeadingSpec(name, here, purse) {
     if (!name) return null;
     const entries = lookupPcStorylet(name);
     if (entries) {
       const strict = entries.some(function (e) { return e.strict; });
-      return here || !strict ? pcStoryletSpec(entries) : null;
+      return here || !strict ? pcStoryletSpec(entries, purse) : null;
     }
     const entry = lookupPcBranch(name);
     if (!entry) return null;
-    return here || !entry.strict ? pcBranchSpec(entry) : null;
+    return here || !entry.strict ? pcBranchSpec(entry, purse) : null;
   }
 
   // --- the area gate ------------------------------------------------------
@@ -3929,28 +4401,50 @@
   // without either clearing the other.
   const PC_BRANCH_SELECTOR = '.branch__title';
 
+  // The endings are the one screen in this feature where a stale reading is a
+  // WRONG number rather than a missing one, so standing in front of one is
+  // what pays for a background refresh: the same hidden-frame load of /myself
+  // the panels use, throttled to one a minute and off entirely when the
+  // auto-refresh toggle is. `schedule()` afterwards because banking a reading
+  // mutates nothing in the page, so nothing else would redraw the badge.
+  let pcRefreshAt = 0;
+  function pcMaybeRefresh(purse) {
+    if (!autoRefreshEnabled()) return;
+    if (purse && (purse.live || !purse.stale)) return;
+    if (Date.now() - pcRefreshAt < PC_FRESH_MS) return;
+    pcRefreshAt = Date.now();
+    refreshBackgroundState().then(function () { schedule(); });
+  }
+
   function pcRatings() {
     const here = inPortCarnelian();
+    const purse = pcPurse();
     // The gate is part of a badge's identity, not just the name. A strict row
     // draws nothing until the greeting can be read, and the greeting is read
     // fresh on every scan -- so without this in `value`, a row suppressed on
     // one scan would keep its "nothing to say" flag and never redraw once the
-    // greeting turned up.
-    const sig = here ? '@here' : '@?';
+    // greeting turned up. The purse is in there for the same reason: an
+    // ending's badge IS your Delights and Horseheads, so a badge drawn before
+    // the reading arrived has to redraw when it does.
+    const sig = (here ? '@here' : '@?') + '#' + (purse ? purse.sig : 'unread');
+    let ending = false;
     function decorate(cls, flag) {
       return function (head) {
         const name = headingName(head);
+        const spec = pcHeadingSpec(name, here, purse);
+        if (spec && spec.cash) ending = true;
         attachBadge(head, {
           cls: cls,
           flag: flag,
           value: name && name + sig,
-          spec: pcHeadingSpec(name, here),
+          spec: spec,
           place: 'after',
         });
       };
     }
     document.querySelectorAll(PC_STORYLET_SELECTOR).forEach(decorate(PC_CLASS, PC_FLAG));
     document.querySelectorAll(PC_BRANCH_SELECTOR).forEach(decorate(PC_BRANCH_CLASS, PC_BRANCH_FLAG));
+    if (ending) pcMaybeRefresh(purse);
   }
 
   // === feature: Voyages of Scientific Discovery ==========================
@@ -6254,6 +6748,7 @@
         });
         if (bankQualities(scan)) changed = true;
         if (bankFotzQualities(scan)) changed = true;
+        if (bankPcQualities(scan)) changed = true;
       }
       const here = readPossessions();
       if (!here || !here.size) {
@@ -7223,11 +7718,12 @@
   // splits in two gets a line and a badge each -- which is the same thing the
   // in-game branch badges do, and the reason this is not `pcStoryletSpec` for
   // everything.
-  function pcBadgeNode(entry) {
-    return makeBadge(entry.branch ? pcBranchSpec(entry) : pcStoryletSpec([entry]), PC_CLASS);
+  function pcBadgeNode(entry, purse) {
+    return makeBadge(
+      entry.branch ? pcBranchSpec(entry, purse) : pcStoryletSpec([entry], purse), PC_CLASS);
   }
 
-  function pcOptionRow(entry) {
+  function pcOptionRow(entry, purse) {
     const row = h('tr', null, [
       h('td', { css: TD }, [
         h('div', null, [wikiLink(entry.name, entry.name)]),
@@ -7240,7 +7736,7 @@
       ]),
       h('td', { css: TD + 'white-space:nowrap;color:' + UI.dim + ';' },
         [entry.airs ? pcRange(entry.airs) : 'any']),
-      h('td', { css: TD + 'text-align:center;' }, [pcBadgeNode(entry)]),
+      h('td', { css: TD + 'text-align:center;' }, [pcBadgeNode(entry, purse)]),
       h('td', { css: TD + 'color:' + UI.dim + ';' }, [
         h('div', { css: 'color:' + UI.text + ';' }, [pcChangeWords(entry)]),
         entry.note ? h('div', { css: 'font-size:11px;' }, [entry.note]) : null,
@@ -7253,7 +7749,20 @@
     return row;
   }
 
-  function renderPortCarnelianPanel() {
+  function renderPortCarnelianPanel(ctx) {
+    // The one live thing in this panel. Everything else here is the guide; the
+    // purse is your own numbers, off the Myself tab, and the four endings are
+    // priced against it. Same refresh rule as the festival panel: if the
+    // reading is stale and auto-refresh is on, boot /myself in a hidden frame
+    // and redraw when it lands.
+    const purse = pcPurse();
+    const cashouts = pcCashoutAll(purse);
+    let busy = false;
+    if (ctx && autoRefreshEnabled() && (!purse || purse.stale)) {
+      busy = true;
+      refreshBackgroundState().then(function () { ctx.rerender(); });
+    }
+
     const section = function (title, children) {
       return h('div', { css: 'margin-top:14px;' }, [
         h('div', {
@@ -7308,7 +7817,7 @@
       }, [group.label])]);
       header.dataset.pcGroup = '1';
       optionRows.push(header);
-      for (const entry of inGroup) optionRows.push(pcOptionRow(entry));
+      for (const entry of inGroup) optionRows.push(pcOptionRow(entry, purse));
     }
 
     const search = h('input', {
@@ -7335,8 +7844,137 @@
       },
     });
 
+    // --- what your term is worth right now --------------------------------
+    //
+    // The four endings priced against the purse. The best one is marked with a
+    // WORD as well as the accent colour, because a colour is not a claim this
+    // reader can always read; and an ending whose figure cannot be worked out
+    // shows a dash rather than a zero, since "no Delights" and "your Delights
+    // have not been read" are different answers.
+    const cashFigure = function (cash) {
+      return cash.echo == null ? '–' : pcEchoText(cash.echo);
+    };
+    const bestCash = pcBestCashout(cashouts);
+    const purseStat = function (label, value, title) {
+      return h('div', { title: title || '', css: 'min-width:92px;' }, [
+        h('div', {
+          css: 'color:' + UI.dim + ';font-size:10px;letter-spacing:.05em;text-transform:uppercase;',
+        }, [label]),
+        h('div', { css: 'color:' + UI.text + ';font:bold 15px ' + UI.font + ';' },
+          [value == null ? '–' : String(value)]),
+      ]);
+    };
+    const cashItemLine = function (row) {
+      return h('div', null, [
+        h('span', { css: 'color:' + UI.text + ';' },
+          [(row.count == null ? '?' : row.count) + ' × ' + row.name]),
+        row.favour ? h('span', {
+          title: 'A faction Favour: a story quality capped at ' + PC_SOCIETY_CAP
+            + ', which you cannot sell. Priced at 0 Echoes here.',
+          css: 'color:' + UI.accent + ';',
+        }, [' ' + PC_FAVOUR_MARK]) : null,
+        row.each ? h('span', { css: 'color:' + UI.dim + ';' },
+          [' (' + pcEchoText(row.each) + ' each)']) : null,
+        row.needs ? h('div', { css: 'font-size:11px;' },
+          ['needs ' + row.needs.quality + ' ' + row.needs.atLeast]) : null,
+        row.capped ? h('div', { css: 'font-size:11px;color:#e0a24a;' },
+          ['you are at the cap of ' + PC_SOCIETY_CAP + ', so this one is not given']) : null,
+      ]);
+    };
+    const cashRow = function (cash) {
+      const best = cash === bestCash;
+      return h('tr', null, [
+        h('td', { css: TD }, [
+          h('div', null, [wikiLink(cash.name, cash.name)]),
+          h('div', { css: 'font-size:11px;color:' + UI.dim + ';' }, [
+            cash.currency
+              ? (cash.have == null ? 'your ' + cash.currency + ' has not been read'
+                : cash.currency + ' ' + cash.have)
+              : 'spends both purses, pays a fixed reward',
+          ]),
+          best ? h('div', { css: 'font-size:11px;color:' + UI.accent + ';font-weight:bold;' },
+            ['★ best right now']) : null,
+        ]),
+        h('td', { css: TD + 'color:' + UI.dim + ';font-size:12px;' },
+          cash.items.map(cashItemLine)),
+        h('td', { css: TD + 'text-align:right;white-space:nowrap;'
+          + (best ? 'color:' + UI.accent + ';font-weight:bold;' : '') }, [
+          h('div', null, [cashFigure(cash)]),
+          cash.next ? h('div', { css: 'font-size:11px;font-weight:normal;color:' + UI.dim + ';' },
+            ['next at ' + cash.next.at + ' (+' + cash.next.more + ') — '
+              + pcEchoText(cash.next.echo)]) : null,
+        ]),
+      ]);
+    };
+
+    const cashOutNow = h('div', null, [
+      h('div', {
+        css: 'display:flex;flex-wrap:wrap;gap:10px 18px;margin-bottom:8px;',
+      }, [
+        purseStat('Striped Delights', purse && purse.sd, 'Cashed in at An audience with the Banded Prince.'),
+        purseStat('Silver Horseheads', purse && purse.sh, 'Cashed in at An equine festival.'),
+        purseStat('Legitimacy', purse && purse.legitimacy,
+          'Imperial Legitimacy. At 0 the term ends at once with no rewards.'),
+        purseStat('Time in office', purse && purse.time,
+          'Time Passing in Office. The endings are offered at 12.'),
+        purseStat('Society favours',
+          purse && purse.society == null ? null
+            : (purse ? purse.society + '/' + PC_SOCIETY_CAP : null),
+          'Honoured with a State Dinner pays a Society favour only while this is under '
+            + PC_SOCIETY_CAP + '.'),
+      ]),
+      table([
+        { text: 'Ending' },
+        { text: 'Pays' },
+        { text: 'Echoes', right: true, title: 'Faction Favours and Tribute count as 0 — '
+          + 'story qualities, not items, and nothing sells them. A Favour in High Places is an '
+          + 'ordinary item and is priced like one.' },
+      ], cashouts.map(cashRow)),
+      h('div', { css: 'margin-top:6px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+        purse && purse.partial
+          ? h('div', null, ['The Myself tab was filtered when this was read, so a figure '
+            + 'missing from it is not a zero — clear that search box and refresh.'])
+          : null,
+        h('div', { css: 'display:flex;align-items:center;gap:8px;flex-wrap:wrap;' }, [
+          h('span', null, [purse
+            ? ('Your numbers: ' + (purse.live ? 'live' : ageText(purse.at))
+              + (purse.stale ? ' — every action of a term moves both currencies' : ''))
+            : 'Your numbers have never been read.']),
+          h('button', {
+            type: 'button',
+            disabled: busy,
+            title: 'Load /myself in a hidden frame and re-read it.',
+            css: 'border:1px solid ' + UI.line + ';border-radius:3px;background:transparent;color:'
+              + (busy ? UI.dim : UI.accent) + ';font:11px ' + UI.font + ';padding:1px 7px;'
+              + 'cursor:' + (busy ? 'default' : 'pointer') + ';',
+            on: {
+              click: function () {
+                if (busy || !ctx) return;
+                busy = true;
+                ctx.rerender();
+                refreshBackgroundState().then(function () { ctx.rerender(); });
+              },
+            },
+          }, [busy ? 'Refreshing…' : 'Refresh']),
+          h('label', {
+            title: 'Refresh automatically when this panel opens on stale numbers.',
+            css: 'display:inline-flex;align-items:center;gap:4px;cursor:pointer;',
+          }, [
+            h('input', {
+              type: 'checkbox',
+              checked: autoRefreshEnabled(),
+              on: { change: function (e) { setAutoRefresh(!!e.currentTarget.checked); } },
+            }),
+            'auto',
+          ]),
+        ]),
+      ]),
+    ]);
+
     return h('div', { css: 'padding:0 12px 12px;' }, [
       rules,
+
+      section('Cash out now', cashOutNow),
 
       section('Getting there', h('div', { css: 'color:' + UI.dim + ';font-size:12px;line-height:1.7;' }, [
         h('div', null, ['1. Be ', wikiLink('Banished from the Court', 'Banished from the Court'),
@@ -7381,9 +8019,17 @@
           { text: '2.5 Echo items', right: true },
           { text: '12.5 Echo items', right: true },
           { text: 'Echoes', right: true },
-        ], PC_TIERS.map(function (tier) {
+          { text: 'You', title: 'D — your Striped Delights reach this step. H — your Silver Horseheads do.' },
+        ], PC_TIERS.map(function (tier, i) {
           // 105 and 176 are the two steps the strategy alternates between.
           const pick = tier.at === 105 || tier.at === 176;
+          // Which step each purse is standing on. A LETTER rather than a
+          // highlight, so the row still says so with the colour stripped off,
+          // and one letter per currency because the two are on different rows.
+          const ceiling = PC_TIERS[i + 1] ? PC_TIERS[i + 1].at : Infinity;
+          const on = function (have) { return have != null && have >= tier.at && have < ceiling; };
+          const you = [purse && on(purse.sd) ? 'D' : null, purse && on(purse.sh) ? 'H' : null]
+            .filter(Boolean).join(' ');
           return h('tr', null, [
             h('td', { css: TD + 'text-align:right;' + (pick ? 'color:' + UI.accent + ';font-weight:bold;' : '') },
               [String(tier.at)]),
@@ -7391,6 +8037,10 @@
             h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' }, [String(tier.dear)]),
             h('td', { css: TD + 'text-align:right;' + (pick ? 'color:' + UI.accent + ';' : '') },
               [String(tier.echo)]),
+            h('td', {
+              css: TD + 'font-weight:bold;color:' + UI.accent + ';',
+              title: you ? 'Where your purse stands: D Striped Delights, H Silver Horseheads.' : '',
+            }, [you]),
           ]);
         }))]),
       ])),
@@ -7419,8 +8069,15 @@
           h('b', null, [PC_LEGIT_SPEND_MARK]), ' means that net is paid for out of Imperial '
           + 'Legitimacy; ', h('b', null, [PC_LEGIT_GAIN_MARK]),
           ' that the line buys Legitimacy back; no mark that it leaves Legitimacy alone. ',
-          h('b', null, ['Fate']), ' means it is Fate-locked; ',
-          h('b', null, ['cash out']), ' that it ends the term and spends a currency.']),
+          h('b', null, ['Fate']), ' means it is Fate-locked. The four endings carry what '
+          + 'cashing out would pay you ', h('b', null, ['right now']),
+          ' — Echoes, from your own Striped Delights and Silver Horseheads off the Myself tab — '
+          + 'with ', h('b', null, [PC_FAVOUR_MARK]),
+          ' when part of the payout is a faction Favour — a story quality capped at '
+          + PC_SOCIETY_CAP + ', which nothing buys, so it counts as 0 — ',
+          h('b', null, [PC_STALE_MARK]), ' when the reading behind the figure is over a minute '
+          + 'old, and the old ', h('b', null, ['cash out']),
+          ' label when your numbers have never been read at all.']),
         h('div', null, ['Colour says the same thing the mark does and nothing else — red for '
           + 'spending Legitimacy, green for buying it back, light blue for leaving it alone, '
           + 'slate for the endings. The mark is the one that always reads.']),
@@ -7750,7 +8407,14 @@
     const sig = items.length + '/' + owned.length + '|' + (search ? search.value : '');
     if (sig === lastFotzSig) return;
     lastFotzSig = sig;
-    if (items.length) bankFotzQualities(readQualities());
+    if (items.length) {
+      const scan = readQualities();
+      bankFotzQualities(scan);
+      // The Port Carnelian purse rides along on the same scrape rather than
+      // paying for a third pass over a few hundred quality rows. One reader,
+      // three consumers.
+      bankPcQualities(scan);
+    }
     if (owned.length) bankItemCounts(readPossessionCounts());
   }
 

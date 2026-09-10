@@ -1456,13 +1456,60 @@ navigation. Two consequences:
   named activity ("Fruits of the Zee: Supplication on the Shore") and nothing has confirmed
   whether it does the same here. It can only ever *tolerate* a prefix — the remainder still has
   to match exactly — so it cannot widen what matches.
-  The `port-carnelian` panel is the reference half: how to unlock and reach the posting, the
-  rules a term is played by, every option grouped by the Time Passing window with the same live
-  text filter the Zailing panel has (on `row.dataset.pcSearch`, so a term can hit a requirement
-  the collapsed row does not show), what each currency cashes in for, `PC_TIERS` with the two
-  rounding steps worth aiming at (105 and 176) picked out in the accent, and the strategy. It has
-  **no "your hand, ranked" block** — there is no hand here; the storylet list is the hand, and it
-  is already badged.
+  **The endings are a calculator, not a label** (added 2026-09-10). `cash out` said what the
+  four Time 12 rows *do* and nothing about which one to take, and the whole term is played for
+  that choice. So each now carries what cashing out would pay you **right now**, in Echoes,
+  off your own Striped Delights and Silver Horseheads. `PC_CASHOUTS` is one entry per ending,
+  transcribed from the four **ending pages** rather than the guide's table, and `pcCashout`
+  is the usual pure function: a row and a purse in, a payout out.
+  Three rules hold it up. **Bankers' rounding** — `pcRound` takes a half to the nearest *even*
+  number, which is the wiki's stated mechanic and is what makes 105 and 176 the figures to aim
+  at. The cross-check is `PC_TIERS`: the guide's tier table was written from the same mechanic
+  by somebody else, and every row of it comes back out of the formula except **35**, where
+  35/70 is exactly a half and bankers' rounding pays the dear item only from 36. Three rows of
+  that same table (176, 316, 385) are reachable *only* under bankers', so the calculator rounds
+  bankers' and the dissenting row is named in the comment and in the test rather than rounded
+  around quietly.
+  **A faction Favour is worth 0 Echoes and carries `PC_FAVOUR_MARK` (`❖`) instead.**
+  `Favours: Society` and its siblings are story qualities capped at 7, not items: nothing buys
+  one, and the wiki's occasional ~4 Echo figure is notional. Pricing them would let a fixed
+  reward out-rank a real cash-out on a number nobody acts on. Tribute gets the same treatment
+  for the same reason — a story quality with no market price — listed, with the guide's "about
+  12.5 Echoes" quoted as the estimate it is, and left out of the total. Both are marks and
+  words, never colour.
+  **A Favour in High Places is not one of those**, despite the name: it is an ordinary
+  Influence item the Bazaar buys at 12.5, so it is priced like any other item and carries no
+  mark. The `favour` field means the capped story quality and nothing else. The first cut of
+  `PC_CASHOUTS` had this backwards and priced the item at 0, which took Honoured with a State
+  Dinner from 25 Echoes to 0 — the kind of error a badge states confidently and a term pays
+  for.
+  **A figure nobody has read is not a zero.** With no reading the two currency endings keep the
+  old `cash out` label, while the two that pay a fixed reward are still priced (a Cellar of
+  Wine is 12.5 Echoes whatever your purse holds); a reading over `PC_FRESH_MS` old is marked
+  `PC_STALE_MARK` (`?`) rather than hidden or used silently, because every action of a term
+  moves both currencies; and at the Society cap of 7, Honoured with a State Dinner pays **no**
+  Society favour, which the ending page states and which is a different claim from paying one
+  you cannot hold.
+  The plumbing is the festival's, reused rather than rebuilt: `PC_QUALITIES` off the Myself tab
+  into `PC_CACHE_KEY` by `bankPcQualities`, banked from the same scrape `fotz-capture` already
+  makes and from `refreshBackgroundState`, and `pcPurse()` memoised on a `pcGen` counter with
+  the age **bucketed** into the key — a raw timestamp there would rebuild every badge on every
+  mutation for ever. The purse is in `attachBadge`'s `value` for the same reason the gate is:
+  an ending's badge *is* your Delights, so a badge drawn before the reading landed has to
+  redraw when it does. And because banking mutates nothing in the page, `pcMaybeRefresh` calls
+  `schedule()` itself afterwards. It books a hidden-frame load of `/myself` only when an ending
+  is actually on screen (`spec.cash` says so), only when the reading is stale, at most one a
+  minute, and never when the auto-refresh toggle is off.
+  The `port-carnelian` panel opens on that calculator — the purse, the four endings priced with
+  the best one marked **in words** as well as in the accent, and the next rounding step — over
+  the same Refresh / auto controls the other two panels carry. Then the reference half: how to
+  unlock and reach the posting, the rules a term is played by, every option grouped by the Time
+  Passing window with the same live text filter the Zailing panel has (on
+  `row.dataset.pcSearch`, so a term can hit a requirement the collapsed row does not show),
+  what each currency cashes in for, `PC_TIERS` with the two rounding steps worth aiming at (105
+  and 176) picked out in the accent and a **D** / **H** letter against the step each of your
+  two currencies is standing on, and the strategy. It has **no "your hand, ranked" block** —
+  there is no hand here; the storylet list is the hand, and it is already badged.
 
   `scientific-voyages` is the fifth, for the Dilmun Club's **Voyages of Scientific
   Discovery**, and it is the first that has to work out **which of three places** a heading
@@ -1744,6 +1791,14 @@ Confirmed live by the author:
   (2026-09-10) — they do open into a storylet of their own with their two branches beneath, and
   both levels badge. What is still unseen is whether the branch badges sit beside the
   supplication ones without either clearing the other, which no screen has yet shown both of.
+  The **cash-out calculator** (added 2026-09-10) adds two things to report. First, whether
+  Fallen London writes *Striped Delights* and *Silver Horseheads* on the Myself tab under
+  exactly those names, and whether they are there at all outside a term — the whole figure
+  rests on that scrape, and a name that does not match reads as a purse of 0, which is why an
+  unread purse is a label rather than a number. Second, the **rounding**: cash out on a purse
+  the badge prices and say what the game actually handed over. The one figure worth catching a
+  term at is **35** of either currency, where the guide's tier table and the wiki's stated
+  bankers' rounding disagree — the badge says no dear item there, the guide's table says one.
 
 - The **Voyages of Scientific Discovery badges and panel** (added 2026-09-09). Same two
   reasons again — the transcription, and `VSD_AREAS` being a guess at three greetings nobody
@@ -2004,7 +2059,15 @@ Current tests:
   comes out badged option by option and that a `strict` row redraws when the greeting arrives
   instead of keeping its flag. It also pins that no Port Carnelian name is in `ZEE_CARDS`,
   `SPITE_CARDS` or `FOTZ_CARDS`, and builds the whole panel, which is the only way to catch a
-  typo in a few hundred hand-built nodes. Extend it whenever you touch `PC_OPTIONS`.
+  typo in a few hundred hand-built nodes. Then the **cash-out calculator**: `pcRound` pinned as
+  bankers' rounding outright, the formula reproducing the guide's whole tier table with the one
+  dissenting row (35) named rather than rounded around, a Favour worth 0 and marked, Tribute
+  riding on a quality and never on the total, the Society cap paying nothing rather than
+  something wasted, an unread figure coming back as a label or a dash rather than a zero, a
+  stale one marked, and the background refresh booked once — only with an ending on screen, and
+  not again on the next scan. It ends by banking a reading and running the pass again, which is
+  the only thing that shows a badge redrawing on numbers that arrived without the page changing.
+  Extend it whenever you touch `PC_OPTIONS` or `PC_CASHOUTS`.
 - `FallenLondon/test/ux-scientific-voyages.test.mjs` — asserts `ux-enhancers.js`'s Voyages of
   Scientific Discovery feature. The centre of it is the **ambiguity**: that a branch name
   shared by the three islands resolves to `null` without an island and to the right row with
