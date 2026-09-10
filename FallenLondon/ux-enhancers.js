@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      2.7
-// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A "UX" button docked INTO Fallen London's own chrome beside its travel control -- under the big Travel button on the wide layout, as one more icon in the banner on the narrow one -- so it takes up space in the page like any other control and covers nothing. It opens a menu of reference panels; the last line of that menu switches it back to floating over the page if you preferred it that way, and it falls back to floating on its own if Fallen London's chrome cannot be found. Every panel's header carries a fullscreen button beside its close button, which takes the panel off the popover and over the whole screen and back; the choice is remembered, so a long panel opens at full size every time rather than needing the button pressed again. The first panel is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, every port on the Unterzee -- which region it is in, whether docking there wipes Troubled Waters and the zee-threats, and what it takes to be able to sail there at all, with the hunting grounds and the one-time destinations marked as the different things they are, since a port that resets nothing and a place that is not a dock are two different answers -- the three winds and the dreams they start, and the whole card table, searchable. (4) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: beside Fallen London’s own Travel button, where the UX button docks, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. A third panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. (5) In Port Carnelian, where a governor's term runs 26 actions and Fallen London deals no opportunity cards at all, the badges go on the storylets in the list and on the branches inside an opened one instead. Each shows the net change in resources that option makes, with a mark when the net is paid for out of Imperial Legitimacy -- the number that ends a term at once when it reaches 0, sending you back to zee with nothing -- a Fate label on the one Fate-locked option, and "cash out" on the four endings, which spend a currency rather than gaining any. Half the table is worth the same +5, so whether it costs Legitimacy is the only thing separating those rows. The tooltip carries the Time Passing in Office and Airs windows the option is offered in, every currency change with its currency named, the requirement and the note; the two options that pay ten or fifteen of ONE of the two currencies, the game's choice rather than yours, say so in words, since reading them as that much of each would make them the best options in the table by a distance. A storylet the guide splits in two is badged with the better net and keeps both branches in its tooltip, because the losing branch is how Imperial Legitimacy is bought back. A fourth panel, Port Carnelian, is the rest of the guide: how to unlock and reach the posting, the rules a term is played by, every option grouped by the clock and searchable, what the two currencies cash in for, the reward tiers with the two worth aiming at picked out, and the strategy. (6) On a Voyage of Scientific Discovery -- the Dilmun Club's expeditions to Bullbone Island, Corpsecage Island and Grunting Fen, which deal no opportunity cards either -- every action gets a badge for what it pays in research pages, coloured by which of the three kinds it is: Archaeological, Cryptopalaeontological or Theosophistical. You sail to one island for one kind, and at every step of the visit you are choosing between the action that pays it and one that pays goods instead, so an action paying no pages is labelled with what it does pay rather than scored: there is no exchange rate between pages and Echoes, and inventing one would be the badge choosing your voyage for you. The three gambles at the end of a visit carry their EXPECTED value rather than the figure they advertise, since the wiki gives both outcomes and the odds -- taking the safer of the two is worth about six times the greedier one once the failure is priced in. The tooltip carries the step of the visit the action belongs to, its challenge, everything it gives, what it costs, and what a failure costs; where the game picks between two payouts rather than you, that is said in words. The same badges cover the two screens at your Lodgings, where the pages are generated before you sail and spent afterwards, and there the figure is the guide's pence per page, because everything on that screen is priced. Three actions and three storylets have the same names on all three islands and pay a different kind of page on each, so the feature works out which island it is looking at from the greeting or from the storylet you have open, and says nothing at all rather than guess. A fifth panel, Scientific Voyages, holds the rest: how the voyage is unlocked, what each island pays and costs to reach, every action grouped by island and searchable, and how to squeeze the most preparatory research out of London first. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. Built as a feature registry so further tweaks can be added as entries.
+// @version      2.8
+// @description  A grab-bag of small quality-of-life tweaks for Fallen London. (1) A "UX" button docked INTO Fallen London's own chrome beside its travel control -- under the big Travel button on the wide layout, as one more icon in the banner on the narrow one -- so it takes up space in the page like any other control and covers nothing. It opens a menu of reference panels; the last line of that menu switches it back to floating over the page if you preferred it that way, and it falls back to floating on its own if Fallen London's chrome cannot be found. Every panel's header carries a fullscreen button beside its close button, which takes the panel off the popover and over the whole screen and back; the choice is remembered, so a long panel opens at full size every time rather than needing the button pressed again. The first panel is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. (2) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (3) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. A second panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, every port on the Unterzee -- which region it is in, whether docking there wipes Troubled Waters and the zee-threats, and what it takes to be able to sail there at all, with the hunting grounds and the one-time destinations marked as the different things they are, since a port that resets nothing and a place that is not a dock are two different answers -- the three winds and the dreams they start, and the whole card table, searchable. (4) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: beside Fallen London’s own Travel button, where the UX button docks, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. A third panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. (5) In Port Carnelian, where a governor's term runs 26 actions and Fallen London deals no opportunity cards at all, the badges go on storylets and on their options instead. The whole term is one storylet, Matters of State, so what is rated is the list of options inside it -- and the options of the two of those that open into a storylet of their own. Each shows the net change in resources that option makes, with a mark for what it does to Imperial Legitimacy -- the number that ends a term at once when it reaches 0, sending you back to zee with nothing: a down mark when the net was paid for out of Legitimacy, an up mark when the option buys Legitimacy back instead, and no mark at all when it leaves Legitimacy alone. The colour says the same thing the mark does and nothing else -- red for spending Legitimacy, green for buying it back, light blue for the rows that leave it alone, slate for the endings -- so the marks are enough on their own for anyone who cannot separate the red from the green. Then a Fate label on the one Fate-locked option, and "cash out" on the four endings, which spend a currency rather than gaining any. Half the table is worth the same +5, so whether it costs Legitimacy is the only thing separating those rows. The tooltip carries the Time Passing in Office and Airs windows the option is offered in, every currency change with its currency named, the requirement and the note; the two options that pay ten or fifteen of ONE of the two currencies, the game's choice rather than yours, say so in words, since reading them as that much of each would make them the best options in the table by a distance. A storylet the guide splits in two is badged with the better net and keeps both branches in its tooltip, because the losing branch is how Imperial Legitimacy is bought back. A fourth panel, Port Carnelian, is the rest of the guide: how to unlock and reach the posting, the rules a term is played by, every option grouped by the clock and searchable, what the two currencies cash in for, the reward tiers with the two worth aiming at picked out, and the strategy. (6) On a Voyage of Scientific Discovery -- the Dilmun Club's expeditions to Bullbone Island, Corpsecage Island and Grunting Fen, which deal no opportunity cards either -- every action gets a badge for what it pays in research pages, coloured by which of the three kinds it is: Archaeological, Cryptopalaeontological or Theosophistical. You sail to one island for one kind, and at every step of the visit you are choosing between the action that pays it and one that pays goods instead, so an action paying no pages is labelled with what it does pay rather than scored: there is no exchange rate between pages and Echoes, and inventing one would be the badge choosing your voyage for you. The three gambles at the end of a visit carry their EXPECTED value rather than the figure they advertise, since the wiki gives both outcomes and the odds -- taking the safer of the two is worth about six times the greedier one once the failure is priced in. The tooltip carries the step of the visit the action belongs to, its challenge, everything it gives, what it costs, and what a failure costs; where the game picks between two payouts rather than you, that is said in words. The same badges cover the two screens at your Lodgings, where the pages are generated before you sail and spent afterwards, and there the figure is the guide's pence per page, because everything on that screen is priced. Three actions and three storylets have the same names on all three islands and pay a different kind of page on each, so the feature works out which island it is looking at from the greeting or from the storylet you have open, and says nothing at all rather than guess. A fifth panel, Scientific Voyages, holds the rest: how the voyage is unlocked, what each island pays and costs to reach, every action grouped by island and searchable, and how to squeeze the most preparatory research out of London first. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. Built as a feature registry so further tweaks can be added as entries.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 // @run-at       document-idle
@@ -497,11 +497,60 @@
   // can disagree about -- "A Constable!" / "A Constable", "A... pickpocket?" /
   // "A pickpocket" -- and the hyphen in "The Rat-Catcher". None of the squashed
   // keys collide with each other.
+  //
+  // HTML TAGS COME OFF FIRST, and they have to: Fallen London writes markup
+  // into the names it hands us. A festival ship's Possessions label italicises
+  // its class -- the attribute holds `&lt;i&gt;Obstinate&lt;/i&gt;-class
+  // Cruiser`, which the HTML parser decodes, so `getAttribute` returns real
+  // tags. Squashing that straight away does not remove the tags, it DISSOLVES
+  // them: `<` `>` and `/` go, and their letters stay behind as words, giving
+  // "i obstinate i class cruiser" where the table says "obstinate class
+  // cruiser". A ship the player was wearing therefore read as un-owned
+  // (reported 2026-09-10, with the capture).
+  //
+  // Only a real tag is taken -- `</?tag …>` -- and never any pair of angle
+  // brackets, so prose that happens to contain `a < b > c` still loses the
+  // brackets to the squash and keeps every word around them.
+  const TAG_RE = /<\/?[a-z][a-z0-9]*(?:\s[^<>]*)?>/gi;
+
   function normalizeName(name) {
     return String(name == null ? '' : name)
+      .replace(TAG_RE, ' ')
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, ' ')
       .trim();
+  }
+
+  // The key an ITEM is filed under: `normalizeName` with a leading article
+  // thrown away as well.
+  //
+  // Every table in this file takes an item's name from its WIKI PAGE TITLE,
+  // which keeps the article -- "A Faceted Decanter of Drownie Effluvia", "An
+  // Inquisitive Lamp-cat". Fallen London's own Possessions markup drops it:
+  // the captured `aria-label` reads "Scrimshander Carving Knife", not "A
+  // Scrimshander Carving Knife". So the two vocabularies disagree on a word
+  // that carries no meaning, and a straight `normalizeName` comparison filed
+  // them as two different items -- which is exactly what happened (reported
+  // 2026-09-10: the checklist called a Decanter missing that was sitting in
+  // the player's hold).
+  //
+  // Patching the table entry would have fixed ONE row. It is a whole class:
+  // the same table already spells the Knife the game's way and the Jillyfleur
+  // Cloak the wiki's, and every faction and Renown item is transcribed from
+  // the wiki too. So the gap is closed once, here, at the one boundary where a
+  // wiki name is compared against a game name -- and the tables go on citing
+  // their source, which is what makes them checkable.
+  //
+  // Used on BOTH sides: the possessions map is keyed by it and every lookup
+  // goes through it, so it does not matter which side has the article. It is
+  // deliberately NOT what card and storylet names use -- there a leading "A"
+  // is part of a title Fallen London and the wiki agree on ("A Reef of
+  // Wrecks"), and throwing it away would only invite a collision.
+  function itemKey(name) {
+    const key = normalizeName(name);
+    // Never down to nothing: an item actually called "The" keeps its name.
+    const bare = key.replace(/^(?:a|an|the) +/, '');
+    return bare || key;
   }
 
   const SPITE_BY_NAME = new Map(
@@ -1989,15 +2038,24 @@
   // the Fallen London wiki. Corrections go in these tables and nowhere else.
   //
   // **Re-read the guide, don't trust a copy of it.** The wiki gains this
-  // year's content as the festival runs: A Graveyard of Derelict Debris and
-  // its Rust-Eaten Ration were added to the guide's own card table within a
-  // day of this being transcribed, and the first anyone knew of it was a card
-  // turning up unbadged in a real hand. When a card comes up unbadged, the
-  // guide is the first place to look, not the last.
+  // year's content as the festival runs, and it did so twice in a week:
+  //
+  //   2026-09-03  A Graveyard of Derelict Debris and its Rust-Eaten Ration
+  //     were added to the guide's own card table within a day of this being
+  //     transcribed, and the first anyone knew of it was a card turning up
+  //     unbadged in a real hand.
+  //   2026-09-10  week two opened and the Ration's three Luggage were named,
+  //     clearing the last `pending` entry in these tables. Re-reading for that
+  //     also turned up two Fate prices the guide's Item Comparison table had
+  //     never corrected -- see FOTZ_CORALS.
+  //
+  // When a card comes up unbadged, the guide is the first place to look, not
+  // the last; and when a week of the festival turns over, re-read it whether
+  // anything looks wrong or not.
 
   // Which of the three versions of a coral item you get is NOT random, which
   // is the single most useful thing on this page: it is decided by Sights at
-  // the Festival at the moment you break the coral open. Verified on all five
+  // the Festival at the moment you break the coral open. Verified on all six
   // option pages (Offer the King your <coral>), which each list three
   // outcomes:
   //
@@ -2020,9 +2078,17 @@
     { lo: 67, hi: 100, trader: 'the Enigmatic Angler' },
   ];
 
-  // The five corals. Each is claimed from one card at any depth, and traded
+  // The six corals. Each is claimed from one card at any depth, and traded
   // (An Audience with the King-in-Coral -> Present him with a shard of coral)
   // for one of three items that are mechanically identical to each other.
+  //
+  // `fate` is what the King-in-Coral's Hoard charges for one of the three, and
+  // it comes from the HOARD OPTION PAGES (`Fate Cost`), not from the guide's
+  // Item Comparison table. The two disagree on two of the corals -- the table
+  // still prices the Grasping Coral gloves at 30 when every one of the three
+  // option pages says 10, and prices the Gorgonian Reef-Rock's clothing at
+  // nothing at all when the Hoard sells all three for 20 -- and the option
+  // page wins here as it does everywhere else in this file.
   const FOTZ_CORALS = [
     {
       coral: 'Barnacled Headpiece', card: 'Among the Deep-Fish', slot: 'Hat', fate: 30,
@@ -2030,11 +2096,11 @@
       bis: 'Strict best-in-slot for Troubled Waters reduction.',
     },
     {
-      coral: 'Gorgonian Reef-Rock', card: 'A Rusting Anchor', slot: 'Clothing', fate: null,
+      coral: 'Gorgonian Reef-Rock', card: 'A Rusting Anchor', slot: 'Clothing', fate: 20,
       variants: ['Concealing Skirt', 'Henchman’s Greatcoat', 'Obscurant’s Shawl'],
     },
     {
-      coral: 'Grasping Coral', card: 'A Reef of Wrecks', slot: 'Gloves', fate: 30,
+      coral: 'Grasping Coral', card: 'A Reef of Wrecks', slot: 'Gloves', fate: 10,
       variants: ['Gossamer Palms', 'Mournclimber’s Wraps', 'Loomweavers'],
       bis: 'Shared best-in-slot with the Bazaar’s Pair of Lenguals.',
     },
@@ -2050,18 +2116,24 @@
     // THIS YEAR'S NEW ONE, and the reason to re-read the guide rather than
     // trusting a transcription taken a day earlier: it was added to the wiki
     // between the two (found 2026-09-03, after a card in a real hand came up
-    // unbadged). Its three items are NOT published -- the guide's own table
-    // says "(Coming in week 2)" three times and the page carries an
-    // `{{Incomplete}}` banner -- so `variants` is null rather than guessed at,
-    // and everything downstream has to cope with not knowing them.
+    // unbadged). Its three Luggage were then WITHHELD until week two -- the
+    // guide's own table said "(Coming in week 2)" three times under an
+    // `{{Incomplete}}` banner -- so `variants` stayed null rather than being
+    // guessed at, and everything downstream had to cope with not knowing them.
+    //
+    // Published 2026-09-10, when week two opened. The names and the band each
+    // one belongs to are taken from the option page, Offer the King your
+    // Rust-Eaten Ration, which states all three outright -- not from the
+    // guide's summary table, though the two agree here. Dangerous +2 and
+    // Monstrous Anatomy +1, per the item pages.
+    //
+    // The `pending` machinery is deliberately LEFT IN even though nothing uses
+    // it now: a coral whose items are not published is the normal state of the
+    // festival's first week, and next year's new one will need it again.
     {
       coral: 'Rust-Eaten Ration', card: 'A Graveyard of Derelict Debris', slot: 'Luggage',
       fate: null,
-      variants: null,
-      pendingLabel: 'Luggage',
-      pending: 'New this year, and the three Luggage it becomes are not published yet — the '
-        + 'wiki says "coming in week 2" and lists no names. The item raises Dangerous and '
-        + 'Monstrous Anatomy, per the game’s own instruction text on the option.',
+      variants: ['Accomodating Oyster', 'Sentient Zee-Chest', 'Fateful Net'],
     },
   ];
 
@@ -3640,36 +3712,72 @@
   const PC_BRANCH_CLASS = 'fl-ux-pc-branch';
   const PC_BRANCH_FLAG = 'flUxPcBranch';
 
-  // Imperial Legitimacy is this activity's Troubled Waters: the number that
-  // ends a term with nothing. A row that spends it is marked, whatever its net,
-  // because two rows both worth +5 are not the same row when one of them is
-  // paid for out of the thing that can kill the term.
-  const PC_LEGIT_MARK = '!';
+  // --- the mark, and then the colour --------------------------------------
+  //
+  // Imperial Legitimacy is this activity's Troubled Waters: the number that,
+  // at 0, ends the term at once with no rewards and a trip back to the Foreign
+  // Office. Nine of the rows are worth exactly +5, so the net separates almost
+  // nothing and what an option does to Legitimacy separates everything. That
+  // is what a Port Carnelian badge is really about, and it is said TWICE --
+  // once in a mark and once in a colour.
+  //
+  // Two marks, not one, and they are told apart by SHAPE:
+  //
+  //   up    the option BUYS Legitimacy back. Both of these cost resources to
+  //         take -- they are the rows worth taking when Legitimacy is low.
+  //   down  the option's net was paid for OUT OF Legitimacy.
+  //   none  it does not touch Legitimacy at all.
+  //
+  // Shape rather than colour because THE COLOUR MAY NOT BE READABLE. This
+  // repo's reader is red-green weak (see AGENTS.md), and red against green is
+  // exactly the pair that collapses. Read the marks alone and every badge here
+  // is complete; the colour only makes a screenful quicker to skim. Anything
+  // added to this feature later has to hold to that -- a claim that exists
+  // only in a hue is a claim this reader cannot see.
+  const PC_LEGIT_GAIN_MARK = '▲';
+  const PC_LEGIT_SPEND_MARK = '▼';
 
-  // A ladder, not a cost scale: here a bigger number is plainly better, so it
-  // runs up the tail of the Crowds of Spite ramp to the same gold. A loss and a
-  // break-even get colours of their own because at a glance they are the rows
-  // you must not take by accident.
-  const PC_COLOR_LOSS = '#8a3b3b';
-  const PC_COLOR_EVEN = '#6b6b6b';
+  function pcLegitMark(entry) {
+    if (entry.reset || !entry.il) return '';
+    return entry.il > 0 ? PC_LEGIT_GAIN_MARK : PC_LEGIT_SPEND_MARK;
+  }
+
+  // The colour says the same thing the mark does, and nothing else. It is NOT
+  // a ladder up the net any more: ranking nine identical +5s by shade was
+  // spending the one channel this badge has on the number that varies least.
+  //
+  // The two Legitimacy hues are still picked to survive the deficiency as far
+  // as a hue can. They are separated along the BLUE-YELLOW axis, which
+  // red-green weakness leaves intact: the green leans teal and the red leans
+  // warm brick, rather than being the textbook pair that reads as one muddy
+  // colour twice.
+  const PC_COLOR_LEGIT_GAIN = '#1b7d67';   // teal-leaning green, white ink
+  const PC_COLOR_LEGIT_SPEND = '#a33520';  // warm brick red, white ink
+  // Legitimacy-neutral -- most of the table, and the rows with nothing to warn
+  // about. Light blue because it is the one family neither of those two can be
+  // taken for under any deficiency. It is a LIGHT background, so it takes dark
+  // ink: white on it is not legible (the DEPTH_INK lesson).
+  const PC_COLOR_NEUTRAL = '#8ec6dd';
+  const PC_INK_NEUTRAL = '#0f2a33';
+  // The four Time 12 endings. Legitimacy-IRRELEVANT rather than neutral, and
+  // they read "cash out" rather than a number, so a deep slate blue keeps them
+  // out of the light blue run without implying they are on the same scale.
   const PC_COLOR_END = '#3f5f8a';
-  function pcColor(net) {
-    if (typeof net !== 'number') return PC_COLOR_END;
-    if (net < 0) return PC_COLOR_LOSS;
-    if (net === 0) return PC_COLOR_EVEN;
-    if (net <= 4) return '#68763a';
-    if (net <= 5) return '#54783e';
-    if (net <= 8) return '#417a4c';
-    if (net <= 10) return '#357a62';
-    if (net <= 12) return '#2f7378';
-    return '#b8912f';
+
+  // Colour and ink together, since the light one cannot take the default white.
+  // `ink` is left off the dark three so makeBadge's own default stands.
+  function pcPaint(entry) {
+    if (entry.reset) return { color: PC_COLOR_END };
+    if (entry.il > 0) return { color: PC_COLOR_LEGIT_GAIN };
+    if (entry.il < 0) return { color: PC_COLOR_LEGIT_SPEND };
+    return { color: PC_COLOR_NEUTRAL, ink: PC_INK_NEUTRAL };
   }
 
   function pcBadgeText(entry) {
     if (entry.reset) return 'cash out';
     const net = pcNet(entry);
     return (net > 0 ? '+' + net : String(net))
-      + (entry.il < 0 ? PC_LEGIT_MARK : '')
+      + pcLegitMark(entry)
       + (entry.fate ? ' Fate' : '');
   }
 
@@ -3710,7 +3818,11 @@
     return lines;
   }
 
-  const PC_FOOTER = 'Imperial Legitimacy reaching 0 ends the term at once, with no rewards '
+  // Carried on every tooltip, neutral rows included, because it is the legend
+  // for the two marks as well as the rule they are about.
+  const PC_FOOTER = PC_LEGIT_SPEND_MARK + ' this net is paid for out of Imperial Legitimacy. '
+    + PC_LEGIT_GAIN_MARK + ' this line buys Legitimacy back. No mark: it does not touch it.\n'
+    + 'Imperial Legitimacy reaching 0 ends the term at once, with no rewards '
     + 'and a trip back to the Foreign Office. It carries over between terms; the two '
     + 'currencies do not.';
 
@@ -3732,7 +3844,8 @@
     }
     lines.push('');
     lines.push(PC_FOOTER);
-    return { text: pcBadgeText(best), color: pcColor(pcNet(best)), title: lines.join('\n') };
+    const paint = pcPaint(best);
+    return { text: pcBadgeText(best), color: paint.color, ink: paint.ink, title: lines.join('\n') };
   }
 
   // And on one branch inside an opened storylet.
@@ -3741,17 +3854,60 @@
     lines.push.apply(lines, pcOptionLines(entry, ''));
     lines.push('');
     lines.push(PC_FOOTER);
-    return { text: pcBadgeText(entry), color: pcColor(pcNet(entry)), title: lines.join('\n') };
+    const paint = pcPaint(entry);
+    return { text: pcBadgeText(entry), color: paint.color, ink: paint.ink, title: lines.join('\n') };
+  }
+
+  // What to draw on ONE heading, whichever kind of heading it is.
+  //
+  // Fallen London does not lay this activity out the way the guide reads it.
+  // Captured in-game 2026-09-10: the port has a SINGLE storylet, "Matters of
+  // State" (wiki ID 194331, location Heartscross House), and every row of the
+  // guide's table is an OPTION inside it. So the names the guide calls
+  // storylets arrive on `.branch__title`; and the guide's own branch names --
+  // "Close your door without a word" and the other three -- only appear once
+  // one of the two split storylets has been opened, by which point THAT is the
+  // `.storylet-root__heading`. Either kind of name can turn up under either
+  // selector, so both lookups are tried on both. This is what the feature got
+  // wrong on its first outing: matching the table's storylet names against
+  // storylet headings alone, it drew nothing at all in Port Carnelian.
+  //
+  // No name is in both tables, so which lookup wins is never a judgement call.
+  //
+  // `here` is the area gate, passed in rather than read, so the whole thing
+  // stays pure: name and gate in, badge description out.
+  function pcHeadingSpec(name, here) {
+    if (!name) return null;
+    const entries = lookupPcStorylet(name);
+    if (entries) {
+      const strict = entries.some(function (e) { return e.strict; });
+      return here || !strict ? pcStoryletSpec(entries) : null;
+    }
+    const entry = lookupPcBranch(name);
+    if (!entry) return null;
+    return here || !entry.strict ? pcBranchSpec(entry) : null;
   }
 
   // --- the area gate ------------------------------------------------------
   //
-  // A GUESS at what the screen-reader greeting says in Port Carnelian, exactly
-  // like ZEE_AREAS and unlike SPITE_AREAS: nobody has captured a greeting
-  // there. So this only ever confirms -- it never says "definitely not Port
-  // Carnelian" -- and the option table stays the real scope. Capture a real
-  // greeting and this can be tightened the way SPITE_AREAS was.
-  const PC_AREAS = ['Port Carnelian'].map(normalizeName);
+  // Captured in-game 2026-09-10, in the screen-reader greeting:
+  //
+  //   It's TheFairUnknown! Welcome to Heartscross House, delicious friend!
+  //
+  // The greeting names the governor's SEAT rather than the port. "Heartscross
+  // House" is the wiki page; "Port Carnelian" is only what the zee map calls
+  // the destination -- the very split ZEE_PORTS already records with `as`. The
+  // original one-name guess here was that destination name, which the greeting
+  // never says, so the gate could not fire and both strict rows stayed dark
+  // for a whole term.
+  //
+  // Both names are listed: the capture is from the seat screen, and nothing
+  // promises every screen of a term greets you the same way.
+  //
+  // Still confirm-only, like ZEE_AREAS and unlike SPITE_AREAS: it may say
+  // "yes, definitely here" and must never say "no". The option table stays the
+  // real scope.
+  const PC_AREAS = ['Heartscross House', 'Port Carnelian'].map(normalizeName);
 
   function inPortCarnelian() {
     const area = normalizeName(currentArea());
@@ -3775,29 +3931,26 @@
 
   function pcRatings() {
     const here = inPortCarnelian();
-    document.querySelectorAll(PC_STORYLET_SELECTOR).forEach(function (head) {
-      const name = headingName(head);
-      const entries = name ? lookupPcStorylet(name) : null;
-      const strict = !!entries && entries.some(function (e) { return e.strict; });
-      attachBadge(head, {
-        cls: PC_CLASS,
-        flag: PC_FLAG,
-        value: name,
-        spec: entries && (here || !strict) ? pcStoryletSpec(entries) : null,
-        place: 'after',
-      });
-    });
-    document.querySelectorAll(PC_BRANCH_SELECTOR).forEach(function (head) {
-      const name = headingName(head);
-      const entry = name ? lookupPcBranch(name) : null;
-      attachBadge(head, {
-        cls: PC_BRANCH_CLASS,
-        flag: PC_BRANCH_FLAG,
-        value: name,
-        spec: entry && (here || !entry.strict) ? pcBranchSpec(entry) : null,
-        place: 'after',
-      });
-    });
+    // The gate is part of a badge's identity, not just the name. A strict row
+    // draws nothing until the greeting can be read, and the greeting is read
+    // fresh on every scan -- so without this in `value`, a row suppressed on
+    // one scan would keep its "nothing to say" flag and never redraw once the
+    // greeting turned up.
+    const sig = here ? '@here' : '@?';
+    function decorate(cls, flag) {
+      return function (head) {
+        const name = headingName(head);
+        attachBadge(head, {
+          cls: cls,
+          flag: flag,
+          value: name && name + sig,
+          spec: pcHeadingSpec(name, here),
+          place: 'after',
+        });
+      };
+    }
+    document.querySelectorAll(PC_STORYLET_SELECTOR).forEach(decorate(PC_CLASS, PC_FLAG));
+    document.querySelectorAll(PC_BRANCH_SELECTOR).forEach(decorate(PC_BRANCH_CLASS, PC_BRANCH_FLAG));
   }
 
   // === feature: Voyages of Scientific Discovery ==========================
@@ -5805,7 +5958,7 @@
       const label = labelled && labelled.getAttribute('aria-label');
       const name = label && itemNameFromLabel(label);
       if (!name) return;
-      const key = normalizeName(name);
+      const key = itemKey(name);
       const count = itemCountFromNode(el, label);
       const seen = held.get(key);
       if (!seen) held.set(key, { name: name, count: count });
@@ -5928,7 +6081,7 @@
   function bankPossessions(owned) {
     if (!owned || !owned.size) return false;
     saveCache(ITEMS_KEY, {
-      v: 1, at: Date.now(), character: characterName() || null,
+      v: 2, at: Date.now(), character: characterName() || null,
       owned: [...owned],
     });
     return true;
@@ -5970,7 +6123,9 @@
     if (live && live.size) {
       items = { live: true, at: Date.now(), owned: live };
     } else {
-      const rec = loadCache(ITEMS_KEY, 1);
+      // Version 2: version 1 was keyed by `normalizeName`, so every article-
+      // carrying name in it is filed under a key nothing looks up any more.
+      const rec = loadCache(ITEMS_KEY, 2);
       if (rec && rec.owned) items = { live: false, at: rec.at, owned: new Set(rec.owned) };
     }
 
@@ -5984,10 +6139,10 @@
       if (items) {
         if (faction.items.length) {
           rec.claimed = faction.items.map(function (i) {
-            return items.owned.has(normalizeName(i.name));
+            return items.owned.has(itemKey(i.name));
           });
         }
-        rec.hasItem = items.owned.has(normalizeName(faction.item.name));
+        rec.hasItem = items.owned.has(itemKey(faction.item.name));
       }
       if (Object.keys(rec).length) values.set(faction.key, rec);
     }
@@ -7261,9 +7416,14 @@
       h('div', { css: 'margin-top:12px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
         h('div', null, ['The badge is the option’s ', h('b', null, ['net']),
           ' change in resources, the guide’s own figure. ',
-          h('b', null, [PC_LEGIT_MARK]), ' means it is paid for out of Imperial Legitimacy; ',
-          h('b', null, ['Fate']), ' that it is Fate-locked; ',
+          h('b', null, [PC_LEGIT_SPEND_MARK]), ' means that net is paid for out of Imperial '
+          + 'Legitimacy; ', h('b', null, [PC_LEGIT_GAIN_MARK]),
+          ' that the line buys Legitimacy back; no mark that it leaves Legitimacy alone. ',
+          h('b', null, ['Fate']), ' means it is Fate-locked; ',
           h('b', null, ['cash out']), ' that it ends the term and spends a currency.']),
+        h('div', null, ['Colour says the same thing the mark does and nothing else — red for '
+          + 'spending Legitimacy, green for buying it back, light blue for leaving it alone, '
+          + 'slate for the endings. The mark is the one that always reads.']),
         h('div', null, ['A storylet with two branches is badged with the better net, and both '
           + 'are in its tooltip; open it and each branch is badged in its own right.']),
         h('div', { css: 'margin-top:6px;' }, ['Data from ',
@@ -7572,7 +7732,7 @@
     const rows = [];
     held.forEach(function (rec, key) { rows.push([key, rec.name, rec.count]); });
     saveCache(COUNTS_KEY, {
-      v: 1, at: Date.now(), character: characterName() || null, held: rows,
+      v: 2, at: Date.now(), character: characterName() || null, held: rows,
     });
     fotzGen++;
     return true;
@@ -7595,7 +7755,8 @@
   }
 
   function loadCounts() {
-    const rec = loadCache(COUNTS_KEY, 1);
+    // Version 2, for the reason ITEMS_KEY is: the keys changed under it.
+    const rec = loadCache(COUNTS_KEY, 2);
     if (!rec || !Array.isArray(rec.held)) return null;
     const held = new Map();
     for (const row of rec.held) held.set(row[0], { name: row[1], count: row[2] });
@@ -7686,9 +7847,9 @@
       if (rec && rec.values && rec.values[FOTZ_BRIDE_QUALITY] > 0) bride = true;
     }
     return {
-      has: function (name) { return held.has(normalizeName(name)); },
+      has: function (name) { return held.has(itemKey(name)); },
       count: function (name) {
-        const rec = held.get(normalizeName(name));
+        const rec = held.get(itemKey(name));
         return rec ? rec.count : 0;
       },
       bride: bride,
@@ -7711,11 +7872,11 @@
     const held = state && state.held;
     const holds = function (name) {
       if (!held) return null;
-      return held.has(normalizeName(name));
+      return held.has(itemKey(name));
     };
     const countOf = function (name) {
       if (!held) return null;
-      const rec = held.get(normalizeName(name));
+      const rec = held.get(itemKey(name));
       return rec ? rec.count : 0;
     };
     const quality = function (name) {
@@ -7978,7 +8139,7 @@
     const held = state && state.held;
     const countOf = function (name) {
       if (!held) return null;
-      const rec = held.get(normalizeName(name));
+      const rec = held.get(itemKey(name));
       return rec ? rec.count : 0;
     };
     const rows = [];

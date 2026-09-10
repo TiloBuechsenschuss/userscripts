@@ -75,12 +75,25 @@ Work in this order. **TRAP** marks the ones that get skipped.
    entry in, description out, no DOM. That is what makes the arithmetic behind every badge
    testable, and every existing feature does it.
 
-6. **Colour is a value, not decoration.** One colour per value the table actually pays, and
-   test *that* — "adjacent steps differ" passes happily while two real values collide, which
-   is exactly how `fotzColor` shipped with 125 and 150 the same colour. A cost scale runs
-   green→red (`zeeColor`); a reward ladder runs up to gold. If the palette is **light** (so
-   it reads on FL's dark card art), pass `spec.ink` — white on light is not legible, and the
-   contrast in both directions belongs in the test.
+6. **Colour is a value, not decoration — and never the only carrier.** The reader is
+   **red-green weak**, so a claim that lives only in a hue is a claim they cannot read. Every
+   badge must still say what it means with the colour stripped off: a mark told apart by
+   **shape** (`▲`/`▼`, `★`, `?`, `▾`), a word, or the number itself. Then:
+   - **A ramp is for a number, not a category.** One colour per value the table actually pays,
+     and test *that* — "adjacent steps differ" passes happily while two real values collide,
+     which is exactly how `fotzColor` shipped with 125 and 150 the same colour. A cost scale
+     runs green→red (`zeeColor`); a reward ladder runs up to gold. Both are quantities, and
+     the quantity is printed on the badge too.
+   - **Never make red-against-green the whole distinction.** Where the metaphor is right
+     anyway, separate the two along the **blue-yellow** axis, which red-green weakness leaves
+     intact — lean the green teal, the red warm brick (`PC_COLOR_LEGIT_GAIN` /
+     `PC_COLOR_LEGIT_SPEND`) — and give each side its own **shape** as well.
+   - **Spending the channel on the wrong axis is a real failure mode.** `pcColor` ranked nine
+     identical +5s by shade, which read as a ranking that was not there; `pcPaint` now colours
+     the thing that actually varies.
+   If the palette is **light** (so it reads on FL's dark card art), pass `spec.ink` — white on
+   light is not legible, and the contrast in both directions belongs in the test. So does a
+   test that the **text alone** separates two things a colour separates.
 
 7. **Write the tooltip as the whole argument.** It is not a caption: on a phone there is no
    hover, so `makeBadge` also opens the same text as a tap panel, and it is the only place

@@ -267,7 +267,8 @@ const wrapped = src
     + ' FOTZ_MARK_NEED, FOTZ_MARK_DONE, FOTZ_MARK_UNSURE, FOTZ_CLASS,'
     + ' lookupFotzCard, fotzOptionsAt, fotzBadgeSpec, fotzMissingFrom, fotzColor,'
     + ' FOTZ_FAVOUR_COLORS, FOTZ_INK, FOTZ_COLOR_NEED, FOTZ_COLOR_HELD, FOTZ_COLOR_UNSURE,'
-    + ' fotzCollection, fotzLedger, readFotzState, fotzHoldings, captureFotzState,'
+    + ' fotzCollection, fotzLedger, readFotzState, fotzHoldings, captureFotzState, itemKey,'
+    + ' FOTZ_ECONOMY,'
     + ' fotzUniquesByDepth, fotzSplitUniques,'
     + ' fotzSetDepth, fotzDepth, fotzDepthFloor, fotzReadDepth, depthSourceText,'
     + ' FOTZ_READ_FRESH_MS, showDepthControl, nextDepthChoice, fotzDepthControls,'
@@ -690,19 +691,62 @@ check('the coral variants are in Sights order, from the option pages',
       ['Scrimshaw Sabatons', 'Bright-Buckled Boots', 'Riddlefisher’s Footsteps']],
     ['Spinebound Oddity', 'Adornment',
       ['‘Rosegate Blend’ Roll-ups', 'Mourning Locket', 'Justificande Cufflinks']],
-    // Null, not three guesses: the wiki's own table says "(Coming in week 2)"
-    // three times over and the page carries an {{Incomplete}} banner.
-    ['Rust-Eaten Ration', 'Luggage', null],
+    // Withheld until week two opened, then published 2026-09-10. Taken from
+    // the option page (Offer the King your Rust-Eaten Ration), which states
+    // the Sights band for each of the three outright.
+    ['Rust-Eaten Ration', 'Luggage',
+      ['Accomodating Oyster', 'Sentient Zee-Chest', 'Fateful Net']],
   ]);
 
-check('a coral whose items are not published yet says so instead of guessing',
-  api.FOTZ_CORALS.filter((c) => !c.variants).map((c) => [c.coral, !!c.pending, c.pendingLabel]),
-  [['Rust-Eaten Ration', true, 'Luggage']]);
+check('all six corals are published now, so nothing is left guessing',
+  api.FOTZ_CORALS.filter((c) => !c.variants).map((c) => c.coral), []);
 
-check('every published coral offers exactly three variants, and no variant is shared',
-  [api.FOTZ_CORALS.filter((c) => c.variants).every((c) => c.variants.length === 3),
-    new Set(api.FOTZ_CORALS.filter((c) => c.variants).flatMap((c) => c.variants)).size],
-  [true, 15]);
+check('every coral offers exactly three variants, and no variant is shared',
+  [api.FOTZ_CORALS.every((c) => c.variants.length === 3),
+    new Set(api.FOTZ_CORALS.flatMap((c) => c.variants)).size],
+  [true, 18]);
+
+// The Hoard's Fate prices, which come from the option pages rather than from
+// the guide's Item Comparison table. The table is stale on two of these: it
+// still says 30 for the Grasping Coral gloves where all three option pages say
+// 10, and says nothing for the Gorgonian Reef-Rock clothing where the Hoard
+// sells all three for 20. The Luggage is not in the Hoard at all, which is a
+// null and not a 0 -- there is no Fate route to it, at any price.
+check('the Hoard price of each coral, from the option pages and not the table',
+  api.FOTZ_CORALS.map((c) => [c.coral, c.fate]),
+  [['Barnacled Headpiece', 30], ['Gorgonian Reef-Rock', 20], ['Grasping Coral', 10],
+    ['Pedestrian Polyp', 15], ['Spinebound Oddity', 20], ['Rust-Eaten Ration', null]]);
+
+// --- the unpublished-coral path, which nothing in the table exercises now ---
+//
+// A coral whose three items have not been named yet is the NORMAL state of the
+// festival's first week: this year's arrived that way and next year's will
+// too. Nothing in the live table is in that state any more, so the path is
+// driven here from a real coral temporarily pushed back into it -- otherwise
+// it ships untested and breaks quietly twelve months from now.
+{
+  const ration = api.FOTZ_CORALS.find((c) => c.coral === 'Rust-Eaten Ration');
+  const published = ration.variants;
+  ration.variants = null;
+  ration.pendingLabel = 'Luggage';
+  ration.pending = 'Not published yet.';
+  try {
+    check('an unpublished coral is still listed, however much you already hold',
+      api.fotzUniquesByDepth({ has: () => true, bride: true, sig: 'all-pending' })
+        .map((row) => row.entries.map((e) => e.label)),
+      [['Rust-Eaten Ration'], ['Rust-Eaten Ration'], ['Rust-Eaten Ration'],
+        ['Rust-Eaten Ration'], ['Rust-Eaten Ration']]);
+
+    check('...and it owes you a SLOT, not three names it cannot give',
+      api.fotzUniquesByDepth({ has: () => false, bride: false, sig: 'none-pending' })[0]
+        .entries.filter((e) => e.pending).map((e) => [e.label, e.missing]),
+      [['Rust-Eaten Ration', ['Luggage']]]);
+  } finally {
+    ration.variants = published;
+    delete ration.pendingLabel;
+    delete ration.pending;
+  }
+}
 
 // --- the trade-in values ---------------------------------------------------
 
@@ -813,20 +857,21 @@ check('the collection is one item per coral, plus the dive, stall and Bride item
     collection.groups[0].corals.every((c) => c.rows.length === 1)],
   [19, 6, true]);
 
-// The unpublished coral is now countable in a way it wasn't: it is ONE item
-// (any of three Luggage), not three unnamed ones, so counting it fabricates
-// nothing. Whether you HOLD it still can't be checked without a name, so it
-// stays unknown rather than missing.
-check('the unpublished coral counts as one item, of unknown ownership',
+// Every coral is ONE item -- any of its three -- so the newly published one
+// joins the others rather than adding three names to the headline. Now that it
+// has names, whether you hold it is a real question with a real answer, where
+// before it could only be `null`.
+check('the newly published coral is one item, and its ownership is now knowable',
   (() => {
-    const entry = collection.groups[0].corals.find((c) => c.coral.variants == null);
+    const entry = collection.groups[0].corals
+      .find((c) => c.coral.coral === 'Rust-Eaten Ration');
     return [!!entry.pending, entry.rows.length, entry.rows[0].count, entry.rows[0].held];
   })(),
-  [true, 1, true, null]);
+  [false, 1, true, false]);
 
 check('and it still counts towards how many corals are worth diving for',
   // Five: this character holds a Gossamer Palms, which finishes the Grasping
-  // Coral outright, leaving four published corals and the unpublished one.
+  // Coral outright, and none of the other five corals' items.
   collection.coralsWanted, 5);
 
 // The reported bug (2026-09-04): a coral sitting in your hold is one you have
@@ -844,8 +889,11 @@ check('and it still counts towards how many corals are worth diving for',
   check('a coral already in your hold is not one to dive for again',
     carrying.coralsWanted, 0);
 
-  check('...including the unpublished one, whose items cannot be held at all',
-    carrying.groups[0].corals.filter((c) => c.pending).map((c) => c.inHand), [1]);
+  check('...including the newest one, whose Luggage this character does not hold',
+    carrying.groups[0].corals
+      .filter((c) => c.coral.coral === 'Rust-Eaten Ration')
+      .map((c) => [c.inHand, c.rows[0].held]),
+    [[1, false]]);
 
   // Depth 1 is still right here, but for a REASON, and a different one: this
   // character has no Cured Jillyfleur Cloak, which is depths 1-2 and gone the
@@ -874,6 +922,134 @@ check('and it still counts towards how many corals are worth diving for',
     carrying.groups[0].corals.every((c) => c.rows[0].held !== true), true);
 }
 
+// --- the leading article -----------------------------------------------
+//
+// Reported 2026-09-10: the checklist said this character was missing "A
+// Faceted Decanter of Drownie Effluvia" while their Possessions plainly held
+// one. The tables take an item's name from its WIKI PAGE TITLE, which carries
+// the leading article; Fallen London's own `aria-label` on the Possessions tab
+// drops it. "a faceted decanter of drownie effluvia" and "faceted decanter of
+// drownie effluvia" are two different keys, so the lookup missed.
+//
+// It is not one item's typo. The same table already spells the Scrimshander
+// Carving Knife the game's way and the Jillyfleur Cloak the wiki's, and the
+// faction and Renown items are transcribed from the wiki too, so the mismatch
+// is a whole CLASS. `itemKey` closes it at the one boundary where the two
+// vocabularies meet, in both directions, and nothing else changes.
+
+check('an item name matches whether or not the leading article is there',
+  [api.itemKey('A Faceted Decanter of Drownie Effluvia')
+    === api.itemKey('Faceted Decanter of Drownie Effluvia'),
+   api.itemKey('The Forsaken Crown of a Grand Devil')
+    === api.itemKey('Forsaken Crown of a Grand Devil'),
+   api.itemKey('An Inquisitive Lamp-cat') === api.itemKey('Inquisitive Lamp-cat')],
+  [true, true, true]);
+
+// It strips the article at the FRONT and nowhere else: "of a Grand Devil"
+// keeps its own, and a name that is only an article is left alone rather than
+// reduced to nothing.
+check('and only the leading one is stripped',
+  [api.itemKey('The Forsaken Crown of a Grand Devil'), api.itemKey('An Obscurant\u2019s Shawl'),
+   api.itemKey('The')],
+  ['forsaken crown of a grand devil', 'obscurant s shawl', 'the']);
+
+check('no two names anywhere in these tables collapse onto each other',
+  (() => {
+    const names = [
+      ...api.FOTZ_CORALS.flatMap((c) => [c.coral, ...(c.variants || [])]),
+      ...api.FOTZ_TREASURES.map((t) => t.name),
+      ...api.FOTZ_EQUIPMENT.map((e) => e.name),
+      ...api.FOTZ_STALL.map((e) => e.name),
+      ...api.FOTZ_SHIPS.map((e) => e.name),
+      ...api.FOTZ_ECONOMY.map((e) => e.name),
+      ...api.FOTZ_BRIDE_ITEMS.map((e) => e.name),
+      ...api.FOTZ_FATE_ITEMS.map((e) => e.name),
+    ];
+    const keys = names.map(api.itemKey);
+    return [names.length, new Set(keys).size];
+  })(),
+  (() => {
+    const n = [
+      ...api.FOTZ_CORALS.flatMap((c) => [c.coral, ...(c.variants || [])]),
+      ...api.FOTZ_TREASURES.map((t) => t.name),
+      ...api.FOTZ_EQUIPMENT.map((e) => e.name),
+      ...api.FOTZ_STALL.map((e) => e.name),
+      ...api.FOTZ_SHIPS.map((e) => e.name),
+      ...api.FOTZ_ECONOMY.map((e) => e.name),
+      ...api.FOTZ_BRIDE_ITEMS.map((e) => e.name),
+      ...api.FOTZ_FATE_ITEMS.map((e) => e.name),
+    ].length;
+    return [n, n];
+  })());
+
+// The bug as reported, end to end: the game's own label, the wiki's own name.
+{
+  const before = ownedEls;
+  ownedEls = [
+    ownedEl('Faceted Decanter of Drownie Effluvia', 1),
+    ownedEl('Scrimshander Carving Knife', 1),
+  ];
+  const own = api.fotzCollection(api.readFotzState());
+  ownedEls = before;
+
+  check('a Decanter the game labels without its article reads as held',
+    own.groups.flatMap((g) => (g.rows || []))
+      .filter((r) => r.name === 'A Faceted Decanter of Drownie Effluvia')
+      .map((r) => r.held),
+    [true]);
+
+  check('...and the Knife, which the table already spells the game\'s way, still does',
+    own.groups.flatMap((g) => (g.rows || []))
+      .filter((r) => r.name === 'Scrimshander Carving Knife').map((r) => r.held),
+    [true]);
+}
+
+// --- markup inside a name --------------------------------------------------
+//
+// Reported 2026-09-10, the same afternoon as the article: the festival ships
+// were reading as un-owned by a player wearing one. Fallen London ITALICISES
+// the class name inside the label, and writes the markup as entities in the
+// attribute, so the HTML parser hands `getAttribute` real tags back:
+//
+//   aria-label="&lt;i&gt;Obstinate&lt;/i&gt;-class Cruiser; Dangerous +5; …"
+//     -> "<i>Obstinate</i>-class Cruiser; Dangerous +5; …"
+//
+// `normalizeName` squashes every non-alphanumeric run to a space, so the tags
+// did not vanish -- they DISSOLVED, leaving their letters behind as words:
+// "i obstinate i class cruiser" against the table's "obstinate class cruiser".
+// Stripping the tags before the squash is the fix, and it belongs in
+// `normalizeName` rather than in the item path, because a tag's letters are
+// markup wherever they turn up.
+
+const SHIP_LABEL = '<i>Obstinate</i>-class Cruiser';
+
+check('a name wearing markup normalises to the same key as the plain one',
+  [api.normalizeName(SHIP_LABEL), api.itemKey(SHIP_LABEL)],
+  ['obstinate class cruiser', 'obstinate class cruiser']);
+
+// Only real tags go. The squash still owns everything else, so a stray angle
+// bracket in prose cannot take the words around it with it.
+check('and only a tag is stripped, not any pair of angle brackets',
+  [api.normalizeName('Bottle of Broken Giant 1844'),
+   api.normalizeName('a < b > c'),
+   api.normalizeName('<b>The</b> <em>Widow</em>')],
+  ['bottle of broken giant 1844', 'a b c', 'the widow']);
+
+{
+  const before = ownedEls;
+  // The label verbatim from the capture, as the DOM hands it back: entities
+  // decoded, the whole thing semicolon-separated.
+  ownedEls = [ownedEl(SHIP_LABEL, 1)];
+  const own = api.fotzCollection(api.readFotzState());
+  ownedEls = before;
+
+  check('the ship you are wearing reads as owned, italics and all',
+    own.groups.find((g) => g.key === 'ships').rows
+      .map((r) => [r.name, r.held]),
+    [['Obstinate-class Cruiser', true], ['Ogedei-class Liner', false],
+      ['Nyx-class Zubmersible', false], ['Il-Altun-class Yacht', false]]);
+}
+
 check('the ships and the Fate items are listed but never counted',
   collection.groups.filter((g) => g.key === 'ships' || g.key === 'fate')
     .every((g) => g.rows.every((r) => !r.count)), true);
@@ -882,8 +1058,11 @@ check('the Amber does not count until the Litter-Cyst it replaces is yours',
   collection.groups.find((g) => g.key === 'bride').rows.map((r) => [r.name, r.count]),
   [['Weeping Litter-Cyst', true], ['Nodule of Fecund Amber', false]]);
 
-check('two held, sixteen still missing, and the unpublished one unknown',
-  [collection.missing, collection.unknown], [16, 1]);
+// Seventeen, not sixteen-and-an-unknown: the Luggage having names makes the
+// Rust-Eaten Ration a question with an answer, and the answer is that this
+// character has not got it. Nothing about this festival is unknown now.
+check('two held, seventeen still missing, and nothing left unknown',
+  [collection.missing, collection.unknown], [17, 0]);
 
 check('the two it knows you have are the ones on the Possessions list',
   collection.groups.flatMap((g) => (g.rows || g.corals.flatMap((c) => c.rows)))
@@ -1362,17 +1541,14 @@ check('"last chance" lands on the depth an item drops out after',
 check('and nothing is marked "last chance" at the bottom, where nothing is lost',
   api.fotzUniquesByDepth(nothingHeld)[4].entries.filter((e) => e.last && e.to < 5), []);
 
-// ...with one exception, and it is the right one: the coral whose three items
-// are not published cannot be "held", because there is no name to hold. It
-// stays listed however much you own, which is the useful answer — you do still
-// need to dive for it.
-check('what you already hold drops out of every depth, bar the unpublished coral',
+// No exceptions any more. While the Rust-Eaten Ration's Luggage was unnamed it
+// could not be "held" at any holdings, so it stayed listed at every depth --
+// which was the useful answer then and would be a lie now. The unpublished
+// path is exercised above, on a coral pushed back into that state on purpose.
+check('what you already hold drops out of every depth, with nothing left over',
   api.fotzUniquesByDepth(everythingHeld)
     .map((row) => row.entries.map((e) => e.label)),
-  [
-    ['Rust-Eaten Ration'], ['Rust-Eaten Ration'], ['Rust-Eaten Ration'],
-    ['Rust-Eaten Ration'], ['Rust-Eaten Ration'],
-  ]);
+  [[], [], [], [], []]);
 
 check('holding one thing removes only that thing',
   (() => {
@@ -1403,10 +1579,17 @@ check('the corals are split off and stated once',
     [1, 3, 3, 3, 4],
   ]);
 
-check('the unpublished coral is flagged, so nothing prints "×1 of 3 left"',
+check('and nothing is flagged pending any more, all six being named',
   api.fotzUniquesByDepth(nothingHeld)[0].entries
-    .filter((e) => e.pending).map((e) => [e.label, e.missing]),
-  [['Rust-Eaten Ration', ['Luggage']]]);
+    .filter((e) => e.pending).map((e) => e.label),
+  []);
+
+// One item per coral even now the names are known: the three are mechanically
+// identical, so "×1 of 3 left" would be three ways of saying you own it.
+check('a named coral still owes you one slot, not three names',
+  api.fotzUniquesByDepth(nothingHeld)[0].entries
+    .filter((e) => e.label === 'Rust-Eaten Ration').map((e) => e.missing),
+  [['Luggage']]);
 
 check('one variant in hand takes its coral off the list at every depth',
   (() => {

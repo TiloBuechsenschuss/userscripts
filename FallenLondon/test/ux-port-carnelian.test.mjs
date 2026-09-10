@@ -99,9 +99,14 @@ function makeEl(tag) {
 // currentArea() reads, so the strict gate can be exercised from here. `null`
 // stands for a greeting that can't be read at all.
 let area = 'Port Carnelian';
+// The headings a scan finds, keyed by the selector that asks for them, so the
+// whole `port-carnelian` pass can be run over the markup Fallen London really
+// renders rather than only its pure parts.
+let stage = { storylet: [], branch: [] };
 const fakeDoc = {
   body: makeEl('body'),
-  querySelectorAll: () => [],
+  querySelectorAll: (sel) => (sel.includes('storylet-root__heading') ? stage.storylet
+    : sel.includes('branch__title') ? stage.branch : []),
   querySelector: (sel) => {
     if (sel.includes('.welcome') && area != null) {
       const h1 = makeEl('h1');
@@ -120,10 +125,11 @@ class FakeObserver { observe() {} }
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { PC_OPTIONS, PC_TIERS, PC_REWARDS, PC_TERM_ACTIONS, PC_LEGIT_MARK,'
-    + ' PC_COLOR_LOSS, PC_COLOR_EVEN, PC_COLOR_END, ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS,'
-    + ' normalizeName, lookupPcStorylet, lookupPcBranch, pcNet, bestPcOption, pcColor,'
-    + ' pcBadgeText, pcStoryletSpec, pcBranchSpec, pcChangeWords, pcWhen, pcRange,'
+    'return { PC_OPTIONS, PC_TIERS, PC_REWARDS, PC_TERM_ACTIONS,'
+    + ' PC_LEGIT_GAIN_MARK, PC_LEGIT_SPEND_MARK, PC_COLOR_LEGIT_GAIN, PC_COLOR_LEGIT_SPEND,'
+    + ' PC_COLOR_NEUTRAL, PC_INK_NEUTRAL, PC_COLOR_END, ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS,'
+    + ' normalizeName, lookupPcStorylet, lookupPcBranch, pcNet, bestPcOption, pcPaint, pcLegitMark,'
+    + ' pcBadgeText, pcStoryletSpec, pcBranchSpec, pcHeadingSpec, pcChangeWords, pcWhen, pcRange,'
     + ' inPortCarnelian, PANELS, FEATURES, renderPortCarnelianPanel,'
     + ' attachBadge, BADGE_CLASS, PC_CLASS, PC_FLAG, PC_BRANCH_CLASS, PC_BRANCH_FLAG,'
     + ' FOTZ_BRANCH_CLASS, FOTZ_BRANCH_FLAG }; })();');
@@ -237,9 +243,10 @@ check('each currency cashes in through its own storylet',
 // --- what the badge says ---------------------------------------------------
 
 check('the badge is the net, signed',
-  ['Survey the sapphire mines', 'A dangerous source', 'The fortification of native vitality']
+  ['A dangerous source', 'The fortification of native vitality',
+   'Attend the Daily Assembly of Tigers']
     .map((n) => api.pcBadgeText(row(n))),
-  ['+10', '+10', '+12']);
+  ['+10', '+12', '+4']);
 
 // Half the table is worth +5. Which of those +5s is paid for out of the number
 // that ends the term at 0 is the only thing separating them, so the badge marks
@@ -248,7 +255,12 @@ check('a row paid for out of Imperial Legitimacy is marked, and one that is not 
   [api.pcBadgeText(row('A tithe. Not a bribe.')),
    api.pcBadgeText(row('The aegis of aesthetics')),
    api.pcBadgeText(row('A shortage of workers'))],
-  ['+5' + api.PC_LEGIT_MARK, '+5', '+5' + api.PC_LEGIT_MARK]);
+  ['+5' + api.PC_LEGIT_SPEND_MARK, '+5', '+5' + api.PC_LEGIT_SPEND_MARK]);
+
+check('and a row that BUYS Legitimacy back carries the other mark, not the same one',
+  [api.pcBadgeText(row('Survey the sapphire mines')),
+   api.pcBadgeText(row('Orders from on high'))],
+  ['+10' + api.PC_LEGIT_GAIN_MARK, '+10' + api.PC_LEGIT_GAIN_MARK]);
 
 check('the Fate-locked row says so on the badge itself',
   api.pcBadgeText(row('Inconvenienced')), '+15 Fate');
@@ -257,27 +269,75 @@ check('an ending is labelled rather than scored',
   api.PC_OPTIONS.filter((e) => e.reset).map((e) => api.pcBadgeText(e)),
   ['cash out', 'cash out', 'cash out', 'cash out']);
 
-check('the losing branch reads as the loss it is, and carries no Legitimacy mark',
-  api.pcBadgeText(row('Within their rights', '"Quickly, sir - in, in!"')), '-5');
+check('the losing branch reads as the loss it is, and as the Legitimacy it buys',
+  api.pcBadgeText(row('Within their rights', '"Quickly, sir - in, in!"')),
+  '-5' + api.PC_LEGIT_GAIN_MARK);
 
-// The rule the Fruits of the Zee palette had to learn: "adjacent steps differ"
-// passes happily while two of the figures actually PAID share a colour. So the
-// check is over the nets this table really hands out, not over a made-up ramp.
-check('no two nets this table pays share a colour',
+// --- the palette -----------------------------------------------------------
+//
+// Colour here says what the option does to Imperial Legitimacy and nothing
+// else -- not the net, which nine rows share. THE READER IS RED-GREEN WEAK, so
+// the first and largest test is not about colour at all: it is that stripping
+// every colour off leaves each badge still saying which way Legitimacy went.
+// Anything added here later has to keep passing that.
+
+check('every Legitimacy row says which way it went in its TEXT, colour ignored',
+  api.PC_OPTIONS.filter((e) => {
+    const mark = api.pcLegitMark(e);
+    const wanted = e.reset || !e.il ? '' : (e.il > 0 ? api.PC_LEGIT_GAIN_MARK : api.PC_LEGIT_SPEND_MARK);
+    return mark !== wanted;
+  }).map((e) => e.name),
+  []);
+
+check('and the two marks are different shapes, not one shape in two colours',
+  api.PC_LEGIT_GAIN_MARK === api.PC_LEGIT_SPEND_MARK, false);
+
+check('colour follows Legitimacy: red spends it, green buys it, light blue leaves it',
+  [api.pcPaint(row('A tithe. Not a bribe.')).color,
+   api.pcPaint(row('Survey the sapphire mines')).color,
+   api.pcPaint(row('The aegis of aesthetics')).color,
+   api.pcPaint(row('Honoured with a State Dinner')).color],
+  [api.PC_COLOR_LEGIT_SPEND, api.PC_COLOR_LEGIT_GAIN, api.PC_COLOR_NEUTRAL, api.PC_COLOR_END]);
+
+check('the net no longer moves the colour, so nine identical +5s cannot look ranked',
   (() => {
-    const nets = [...new Set(api.PC_OPTIONS.map(api.pcNet).filter((n) => typeof n === 'number'))]
-      .sort((a, b) => a - b);
-    const colors = nets.map((n) => api.pcColor(n));
-    return [nets.length, new Set(colors).size];
+    const fives = api.PC_OPTIONS.filter((e) => api.pcNet(e) === 5 && e.il === 0);
+    return [fives.length > 1, new Set(fives.map((e) => api.pcPaint(e).color)).size];
   })(),
-  (() => {
-    const n = new Set(api.PC_OPTIONS.map(api.pcNet).filter((x) => typeof x === 'number')).size;
-    return [n, n];
-  })());
+  [true, 1]);
 
-check('a loss, a break-even and an ending each get a colour of their own',
-  [api.pcColor(-5), api.pcColor(0), api.pcColor(null)],
-  [api.PC_COLOR_LOSS, api.PC_COLOR_EVEN, api.PC_COLOR_END]);
+// The light one is the only one that cannot take makeBadge's default white.
+check('only the light blue carries an ink of its own, and the dark three do not',
+  api.PC_OPTIONS.map((e) => !!api.pcPaint(e).ink)
+    .map((hasInk, i) => hasInk === (api.pcPaint(api.PC_OPTIONS[i]).color === api.PC_COLOR_NEUTRAL))
+    .every(Boolean),
+  true);
+
+// Contrast in BOTH directions, which is the lesson DEPTH_INK taught: a light
+// background with the default white on it is unreadable, and so is a dark one
+// given dark ink. 4.5:1 is the WCAG AA figure for ordinary text.
+const luminance = (hex) => {
+  const ch = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+    .map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+  return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
+};
+const contrast = (a, b) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+
+check('every badge in this table clears 4.5:1 against the ink it is actually given',
+  api.PC_OPTIONS.filter((e) => {
+    const paint = api.pcPaint(e);
+    return contrast(paint.color, paint.ink || '#ffffff') < 4.5;
+  }).map((e) => e.name),
+  []);
+
+// Not a substitute for the marks -- a hue this reader may not resolve is not
+// allowed to be the message -- but the four should still not be one colour.
+check('and the four are four colours, none of them repeated',
+  new Set([api.PC_COLOR_LEGIT_GAIN, api.PC_COLOR_LEGIT_SPEND,
+    api.PC_COLOR_NEUTRAL, api.PC_COLOR_END]).size, 4);
 
 check('the change is spelled out with the currency named, never as a bare number',
   api.pcChangeWords(row('A sickness in the Khaganian Quarters')),
@@ -316,7 +376,7 @@ check('but the tooltip keeps both, because the losing one buys Legitimacy back',
 check('a branch is badged in its own right when the storylet is open',
   [api.pcBranchSpec(api.lookupPcBranch('Give the executioner the nod')).text,
    api.pcBranchSpec(api.lookupPcBranch('Close your door without a word')).text],
-  ['-5', '+5' + api.PC_LEGIT_MARK]);
+  ['-5' + api.PC_LEGIT_GAIN_MARK, '+5' + api.PC_LEGIT_SPEND_MARK]);
 
 check('every branch name resolves, and to its own row',
   api.PC_OPTIONS.filter((e) => e.branch)
@@ -354,6 +414,52 @@ check('exactly two rows are strict, and they are those two',
   api.PC_OPTIONS.filter((e) => e.strict).map((e) => e.name),
   ['Inconvenienced', 'His Amused Lordship']);
 
+check('the greeting in Port Carnelian names the seat, and that confirms it too',
+  (area = 'Heartscross House', api.inPortCarnelian()), true);
+
+// --- what the game actually renders ----------------------------------------
+//
+// Captured in-game 2026-09-10, and the reason this feature drew nothing at all
+// on its first outing: Port Carnelian has ONE storylet, "Matters of State"
+// (wiki ID 194331, location Heartscross House), and every row of the guide's
+// table is an OPTION inside it. So the names the guide calls storylets arrive
+// on `.branch__title`, not on a storylet heading, and the guide's own branch
+// names only appear once one of the two split storylets is opened. Looking a
+// name up against one selector or the other therefore misses whichever half of
+// the table is on screen. `pcHeadingSpec` tries both, on both selectors.
+
+check('a guide storylet arriving as an option of Matters of State is still badged',
+  (() => {
+    const spec = api.pcHeadingSpec('Attend the Daily Assembly of Tigers', false);
+    return spec && spec.text;
+  })(),
+  '+4');
+
+check('a split storylet opened as a storylet of its own still badges the better net',
+  (() => {
+    const spec = api.pcHeadingSpec('Within their rights', false);
+    return [spec && spec.text, !!spec && spec.title.indexOf('Both branches:') !== -1];
+  })(),
+  ['+5' + api.PC_LEGIT_SPEND_MARK, true]);
+
+check('and its options, once it is open, still badge one line each',
+  (() => {
+    const spec = api.pcHeadingSpec('Close your door without a word', false);
+    return [spec && spec.text, !!spec && spec.title.indexOf('Both branches:') === -1];
+  })(),
+  ['+5' + api.PC_LEGIT_SPEND_MARK, true]);
+
+check('the container storylet itself says nothing, having no line of its own',
+  api.pcHeadingSpec('Matters of State', true), null);
+
+check('a strict name still waits for the greeting, whichever selector it arrives on',
+  [api.pcHeadingSpec('Inconvenienced', false),
+   (api.pcHeadingSpec('Inconvenienced', true) || {}).text],
+  [null, '+15 Fate']);
+
+check('and an option nobody has priced is left alone rather than guessed at',
+  api.pcHeadingSpec('Make for your ship while the citizenry sleeps', true), null);
+
 // --- registration ----------------------------------------------------------
 
 // --- two features on one heading -------------------------------------------
@@ -370,6 +476,10 @@ function branchHeading(name) {
   const head = makeEl('h2');
   head.className = 'media__heading branch__title';
   head.textContent = name;
+  // headingName() reads the child TEXT NODES rather than textContent, so that
+  // the "W" anchor wiki-links.js appends is left out of the name. A stub
+  // heading has to carry one or it reads as nameless.
+  head.appendChild(fakeDoc.createTextNode(name));
   parent.appendChild(head);
   return head;
 }
@@ -452,6 +562,64 @@ check('the panel renders, with a row and a badge for every option in the table',
     return [rows, badges];
   })(),
   [api.PC_OPTIONS.length, api.PC_OPTIONS.length]);
+
+// --- the whole pass, over the markup a real term renders --------------------
+//
+// Transcribed from a capture of Matters of State taken in-game 2026-09-10: the
+// root heading is the storylet, and every option the guide calls a storylet is
+// a `.branch__title` beneath it. This is the shape the feature originally drew
+// nothing on, so it is worth running the registered pass over rather than only
+// the lookup underneath it.
+
+const pcRun = api.FEATURES.find((f) => f.name === 'port-carnelian').run;
+
+const badgeTexts = (heads) => heads.map((h) => {
+  const badge = h.nextElementSibling;
+  return badge && badge.classList.contains(api.BADGE_CLASS) ? badge.textContent : null;
+});
+
+check('a real Matters of State screen comes out badged option by option',
+  (() => {
+    area = 'Heartscross House';
+    const root = makeEl('h1');
+    root.className = 'media__heading storylet-root__heading';
+    root.textContent = 'Matters of State';
+    root.appendChild(fakeDoc.createTextNode('Matters of State'));
+    makeEl('div').appendChild(root);
+    const branches = ['Attend the Daily Assembly of Tigers',
+      'A day in Murgatroyd' + String.fromCharCode(8217) + 's Imperial Tea Shop',
+      'A tithe. Not a bribe.',
+      'A sickness in the Khaganian Quarters',
+      'Make for your ship while the citizenry sleeps',
+      'Accept a visitor'].map(branchHeading);
+    stage = { storylet: [root], branch: branches };
+    pcRun();
+    return [badgeTexts([root])[0], badgeTexts(branches)];
+  })(),
+  [null, ['+4', '+4', '+5' + api.PC_LEGIT_SPEND_MARK, '+5', null, null]]);
+
+check('and walking out of Port Carnelian is not what clears them, the table is',
+  (() => {
+    const head = branchHeading('Survey the sapphire mines');
+    stage = { storylet: [], branch: [head] };
+    area = null;
+    pcRun();
+    return badgeTexts([head])[0];
+  })(),
+  '+10' + api.PC_LEGIT_GAIN_MARK);
+
+check('a strict row redraws once the greeting arrives, rather than staying dark',
+  (() => {
+    const head = branchHeading('Inconvenienced');
+    stage = { storylet: [], branch: [head] };
+    area = 'Wolfstack Docks';
+    pcRun();
+    const before = badgeTexts([head])[0];
+    area = 'Heartscross House';
+    pcRun();
+    return [before, badgeTexts([head])[0]];
+  })(),
+  [null, '+15 Fate']);
 
 check('the feature and the panel are both registered',
   [api.FEATURES.some((f) => f.name === 'port-carnelian'),

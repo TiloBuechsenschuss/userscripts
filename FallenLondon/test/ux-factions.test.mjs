@@ -224,6 +224,7 @@ const wrapped = src
     + ' renderFactionsPanel, factionRow, wikiHref, mountLauncher, LAUNCHER_ID,'
     + ' parseQualityItem, readQualities, factionsFromQualities, captureFactionState,'
     + ' characterName, CACHE_KEY, ITEMS_KEY, ageText, readPossessions, itemNameFromLabel,'
+    + ' itemKey,'
     + ' autoRefreshEnabled, setAutoRefresh, stateIsFresh, currentArea,'
     + ' itemStatus, tierAt, readyItems, fullFavours, findItemNode, clickItem, openItem,'
     + ' runPendingItem, readPending, PENDING_KEY }; })();');
@@ -735,6 +736,46 @@ check('the registry holds the launcher, the background jobs and the card ratings
   ['launcher', 'faction-capture', 'fotz-capture', 'pending-item',
     'spite-card-ratings', 'zee-card-ratings', 'fotz-card-ratings', 'fotz-depth-control',
     'fotz-supplication', 'port-carnelian', 'scientific-voyages']);
+
+// --- the leading article ---------------------------------------------------
+//
+// The same mismatch the Fruits of the Zee checklist was reported for on
+// 2026-09-10, and this table has it too: these names come from the wiki, which
+// titles an item "The Seal of St Joshua", while Fallen London's Possessions
+// `aria-label` writes it without the article. Eleven of the Renown items and
+// four of the Faction Items are article-carrying, so ownership on those rows
+// was answered by string luck. `itemKey` is what closes it; this is the test
+// that stops it re-opening.
+
+check('the article-carrying item names are real, so this matters here too',
+  api.FACTIONS.flatMap((f) => [f.item.name, ...f.items.map((i) => i.name)])
+    .filter((n) => /^(?:A|An|The) /.test(n)).length > 0, true);
+
+check('an item name matches whether or not the game prints its article',
+  api.FACTIONS.flatMap((f) => [f.item.name, ...f.items.map((i) => i.name)])
+    .filter((n) => /^(?:A|An|The) /.test(n))
+    .filter((n) => api.itemKey(n) !== api.itemKey(n.replace(/^(?:A|An|The) /, ''))),
+  []);
+
+check('and no two item names in this table collapse onto each other',
+  (() => {
+    const names = api.FACTIONS.flatMap((f) => [f.item.name, ...f.items.map((i) => i.name)]);
+    return [names.length, new Set(names.map(api.itemKey)).size];
+  })(),
+  (() => {
+    const n = api.FACTIONS.flatMap((f) => [f.item.name, ...f.items.map((i) => i.name)]).length;
+    return [n, n];
+  })());
+
+// End to end, with the game's own spelling on the Possessions side.
+check('an item the game labels without its article reads as owned',
+  (() => {
+    const wiki = api.FACTIONS.flatMap((f) => f.items.map((i) => i.name))
+      .find((n) => /^(?:A|An|The) /.test(n));
+    const owned = new Set([api.itemKey(wiki.replace(/^(?:A|An|The) /, ''))]);
+    return owned.has(api.itemKey(wiki));
+  })(),
+  true);
 
 check('loading the script mounts one floating root on the body',
   [fakeDoc.body.children.length, fakeDoc.body.children[0].id], [1, api.LAUNCHER_ID]);

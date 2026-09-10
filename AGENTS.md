@@ -63,6 +63,54 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   anchors by walking from a known `<h2>`/icon, checking `colspan`/`width` attributes, etc.,
   with fallbacks rather than assuming a fixed structure. Match this style when extending them.
 - Inline styles via `el.style.cssText`; no stylesheets.
+- **An item name from the wiki is not the item name in the game.** Every table in
+  `ux-enhancers.js` takes an item's name from its **wiki page title**, which keeps the leading
+  article — *A Faceted Decanter of Drownie Effluvia*, *An Inquisitive Lamp-cat*, *The Seal of
+  St Joshua*. Fallen London's own Possessions `aria-label` **drops it**: the captured markup
+  reads `Scrimshander Carving Knife`, not *A Scrimshander Carving Knife*. Compare the two with
+  `normalizeName` and they are different items, which is exactly the bug reported 2026-09-10 —
+  the checklist called a Decanter missing that was in the player's hold.
+  Use **`itemKey`**, not `normalizeName`, anywhere an item name meets the possessions map. It
+  is `normalizeName` plus a leading `a`/`an`/`the`, and it is applied on **both** sides — the
+  map is keyed by it and every lookup goes through it — so it does not matter which side
+  carries the article. It never reduces a name to nothing, so an item called *The* keeps its
+  name.
+  `normalizeName` stays as it was for **card and storylet** names, where a leading "A" is part
+  of a title the game and the wiki agree on (*A Reef of Wrecks*) and dropping it would only
+  invite a collision. Both the Fruits of the Zee and factions suites pin that no two names in
+  their tables collapse onto each other under `itemKey`; add the same check to a new table.
+  A change to the key means the two item caches must be **version-bumped** (`ITEMS_KEY`,
+  `COUNTS_KEY`, now `v: 2`), or a returning player reads a cache filed under keys nothing
+  looks up any more.
+- **Fallen London writes HTML into the names it hands you**, so `normalizeName` strips tags
+  (`TAG_RE`) before it squashes anything. A festival ship's Possessions label italicises its
+  class: the attribute holds `&lt;i&gt;Obstinate&lt;/i&gt;-class Cruiser`, the HTML parser
+  decodes it, and `getAttribute` returns real tags. Squashing that does not remove them, it
+  **dissolves** them — the brackets and slash go, their letters stay behind as words, and
+  `<i>Obstinate</i>-class Cruiser` keys as `i obstinate i class cruiser`. A ship the player was
+  wearing read as un-owned (reported 2026-09-10, with the capture). Only a real `</?tag …>` is
+  taken, never any pair of angle brackets, so prose containing `a < b > c` keeps its words.
+  The corollary for any new scrape: **never hand a raw attribute to a matcher and assume it is
+  text.** It is whatever the game decided to put there.
+- **Colour is never the only carrier of a claim.** The person these scripts are written for is
+  **red-green weak**, so a badge, a row or a control that says what it means *only* in its hue
+  says nothing to the reader it exists for. Every claim needs a second channel that survives
+  the colour being unreadable: a mark told apart by **shape** (`▲` / `▼`, `✔` / `✘` / `not a
+  dock`, `★`, `?`), a word, or the number itself. Colour then makes a screenful quicker to
+  skim — which is worth having, and is not the message.
+  Two rules follow from it:
+  - **Never pair red against green as the whole distinction.** Where a red and a green are the
+    right metaphor anyway, separate them along the **blue-yellow** axis, which red-green
+    weakness leaves intact: lean the green toward teal and the red toward warm brick, rather
+    than using the textbook pair that reads as one muddy colour twice. See
+    `PC_COLOR_LEGIT_GAIN` / `PC_COLOR_LEGIT_SPEND`.
+  - **A ramp is for a number, not for a category.** A ladder of shades (`zeeColor`,
+    `spiteColor`, `fotzColor`) is fine — it is quantity, and the quantity is printed on the
+    badge as well. Do not spend a ramp on a distinction the reader must *name*.
+
+  When a test would otherwise assert only "these two colours differ", assert instead that the
+  **text alone** still tells them apart — see the palette block in
+  `FallenLondon/test/ux-port-carnelian.test.mjs`.
 
 ## Game-specific notes
 
@@ -1258,8 +1306,8 @@ navigation. Two consequences:
   diver carrying one of each was told three or more were missing and sent back to depth 1
   indefinitely. One coral becomes one item and the three items are mechanically identical, so
   a second coral of the same kind is a duplicate of a duplicate: `entry.inHand` now ends it,
-  the `pending` coral included, whose items are unpublished and so can never read as held
-  while the coral itself reads perfectly well. An unreadable Possessions list still leaves
+  the then-`pending` coral included, whose items were unpublished and so could never read as
+  held while the coral itself read perfectly well. An unreadable Possessions list still leaves
   `coralsWanted` **null**, and the advice still falls back to the Favour case *saying so* --
   there is no honest answer to "how many do you still need" when we cannot tell what you have.
   **Confirmed in-game by the author on 2026-09-04.**
@@ -1328,7 +1376,27 @@ navigation. Two consequences:
   *Port Carnelian (Guide)* states outright that the governorship deals none. So it walks
   `.storylet__heading, .storylet-root__heading` (the storylet in the list and the one you have
   opened, the same two selectors `wiki-links.js` uses) and `.branch__title` (the options inside
-  it, the selector `fotz-supplication` already walks). It owns a **second** class/flag pair,
+  it, the selector `fotz-supplication` already walks).
+  **The guide's shape is not the game's shape**, and getting that wrong made the feature draw
+  nothing whatever on its first outing (fixed 2026-09-10, from a capture of a real term). The
+  port has a **single** storylet -- *Matters of State*, wiki ID 194331, location Heartscross
+  House -- and every row of the guide's table is an **option inside it**. So the names the guide
+  calls storylets arrive on `.branch__title`, while the guide's own branch names appear only
+  once one of the two split storylets has been opened, by which point *that* is the
+  `.storylet-root__heading`. Either kind of name can therefore turn up under either selector.
+  `pcHeadingSpec(name, here)` is the answer: it tries `lookupPcStorylet` then `lookupPcBranch`,
+  and both selectors run through it. No name is in both tables, so which lookup wins is never a
+  judgement call. It is pure -- name and gate in, badge description out -- and the gate is
+  passed in rather than read, so the whole thing can be asserted on without a DOM. `pcRatings`'s
+  `attachBadge` value carries `@here` / `@?` alongside the name for the usual reason: the gate
+  is an input to the spec, so a `strict` row suppressed while the greeting was unreadable would
+  otherwise keep its flag and never redraw once the greeting turned up.
+  Six options of *Matters of State* are **not** in the guide's table and so are deliberately
+  unbadged -- Make for your ship while the citizenry sleeps, The sword falls, Accept a visitor,
+  Take a break from governorship to hunt for treasure, Inspect the records for mentions of the
+  Sixth Coil, and the Ambition Nemesis one. The guide prices none of them; badging them would
+  mean inventing figures.
+  It owns a **second** class/flag pair,
   `PC_BRANCH_CLASS` / `PC_BRANCH_FLAG`, precisely so the two branch features can decorate one
   heading without either clearing the other's badge — `attachBadge`'s flag is per-feature, and
   this is the first time two features have actually shared a selector.
@@ -1345,27 +1413,45 @@ navigation. Two consequences:
   **Imperial Legitimacy is this activity's Troubled Waters**, and the badge is built around that.
   Nine of the rows are worth exactly +5, so the net alone separates almost nothing; what does
   separate them is whether that +5 was paid for out of the number that, at 0, ends the term at
-  once with no rewards and a trip back to the Foreign Office. Hence `PC_LEGIT_MARK` on any row
-  with `il < 0`. The four Time 12 endings gain nothing and *spend* a currency, so they carry
+  once with no rewards and a trip back to the Foreign Office. So every badge says what the
+  option does to Legitimacy **twice** — once as a mark and once as a colour — and the mark is
+  the one that has to carry it (see the colour rule under *Conventions*). `pcLegitMark` gives
+  `PC_LEGIT_SPEND_MARK` (`▼`) to a row with `il < 0`, `PC_LEGIT_GAIN_MARK` (`▲`) to one with
+  `il > 0`, and nothing at all to a row that leaves Legitimacy alone; the two are told apart by
+  **shape**, so a badge is complete with every colour stripped off it.
+  The four Time 12 endings gain nothing and *spend* a currency, so they carry
   `reset` and a `net` of **null** rather than 0 — collapsing them onto 0 would rank them
   alongside A summons from the Smouldering Herald, which genuinely nets nothing — and they are
   labelled `cash out` instead of scored, the way the trophyless Spite cards are.
-  `pcColor` is a **ladder, not a cost scale** (the opposite of `zeeColor`): here a bigger number
-  is plainly better, so it runs up the tail of the Spite ramp to the same gold, with a red for a
-  loss, a grey for break-even and a blue for the endings. The test is the lesson the Fruits of
-  the Zee palette taught — it checks that no two of the nets *this table actually pays* share a
-  colour, not that adjacent steps of an invented ramp differ, because the latter passes happily
-  while two real values collide.
+  `pcPaint` is **not a ladder** — and it used to be one, running up the tail of the Spite ramp
+  by net, which was the wrong call twice over. It spent the badge's one colour channel on the
+  number that varies *least* (nine identical +5s given nine shades reads as a ranking that is
+  not there), and it made a distinction the reader must name out of hue alone. It now returns
+  the colour **and the ink** for what the option does to Legitimacy: `PC_COLOR_LEGIT_SPEND` a
+  warm brick red, `PC_COLOR_LEGIT_GAIN` a teal-leaning green (the blue-yellow separation the
+  colour rule asks for), `PC_COLOR_NEUTRAL` a light blue for the rows that leave Legitimacy
+  alone, and `PC_COLOR_END` a deep slate for the four endings, which are Legitimacy-*irrelevant*
+  rather than neutral and read `cash out` rather than a number. The light blue is a **light**
+  background, so it ships `PC_INK_NEUTRAL` with it — white on it is not legible, the same lesson
+  as `DEPTH_INK` — and the dark three leave `ink` undefined so `makeBadge`'s white stands.
+  The palette test is in two halves: that every Legitimacy row still says which way it went with
+  the colour ignored entirely, and that each colour clears 4.5:1 against the ink it is actually
+  given, in both directions.
   A storylet the guide splits in two (Within their rights, A plea for pardon) is badged with the
   **better** net by `bestPcOption` and keeps **both** branches in its tooltip, because the losing
   branch is not a trap — it is how Imperial Legitimacy is bought back, and it is the right move
   when Legitimacy is low. Open the storylet and each branch is badged in its own right.
-  The gate, `PC_AREAS`, is the **weak** kind, like `ZEE_AREAS` and unlike `SPITE_AREAS`: nobody
-  has captured a greeting in Port Carnelian, so `inPortCarnelian()` only ever confirms and the
-  option table stays the real scope. Exactly two rows are `strict` and wait for that confirmation
-  — **His Amused Lordship**, which the wiki files as `His Amused Lordship - 2` and so is proof
-  something else owns the plain name, and **Inconvenienced**, one ordinary English word. Capture
-  a real greeting there and this can be tightened the way `SPITE_AREAS` was.
+  The gate, `PC_AREAS`, stays the **weak** kind, like `ZEE_AREAS` and unlike `SPITE_AREAS`:
+  `inPortCarnelian()` only ever confirms, and the option table stays the real scope. The
+  greeting itself is now captured, though (2026-09-10): it reads *"Welcome to Heartscross House,
+  delicious friend!"* -- the governor's **seat**, not the port. `PC_AREAS` originally listed only
+  "Port Carnelian", which is what the **zee map** calls the destination and what the greeting
+  never says -- the very split `ZEE_PORTS` already records with `as` -- so the gate could not
+  fire and both `strict` rows stayed dark for a whole term. Both names are listed now, since the
+  capture is from the seat screen and nothing promises every screen of a term greets you the
+  same way. Exactly two rows are `strict` and wait for that confirmation — **His Amused
+  Lordship**, which the wiki files as `His Amused Lordship - 2` and so is proof something else
+  owns the plain name, and **Inconvenienced**, one ordinary English word.
   `pcKeys` tolerates a leading `"…: "` on a heading, because FL prefixes a storylet inside a
   named activity ("Fruits of the Zee: Supplication on the Shore") and nothing has confirmed
   whether it does the same here. It can only ever *tolerate* a prefix — the remainder still has
@@ -1560,6 +1646,19 @@ Confirmed live by the author:
   decorates a storylet OPTION rather than a card, so `.branch__title` and the
   after-the-heading hang are confirmed as a path in their own right.
 - The **Fruits of the Zee card badges on a real dive hand, and the panel** (2026-09-03).
+- **The festival's wiki data moves while the festival runs, so re-read it every week.** Twice
+  now this has changed the tables under us. On **2026-09-03** the new card *A Graveyard of
+  Derelict Debris* and its *Rust-Eaten Ration* appeared in the guide a day after the
+  transcription, and the first anyone knew was a card coming up unbadged in a real hand. On
+  **2026-09-10** week two opened and the Ration's three Luggage were named at last
+  (*Accomodating Oyster*, *Sentient Zee-Chest*, *Fateful Net*, taken from the option page
+  *Offer the King your Rust-Eaten Ration*, which gives the Sights band of each), clearing the
+  last `pending` entry in these tables. That same re-read caught two Fate prices in
+  `FOTZ_CORALS` that the guide's **/Item Comparison** table had never corrected: the Grasping
+  Coral gloves are **10** Fate at the Hoard, not 30, and the Gorgonian Reef-Rock clothing is
+  **20**, not unavailable — both from the Hoard option pages' own `Fate Cost`, which is the
+  source that wins here as everywhere else in the file. The lesson is the process one: when a
+  week of this festival turns over, re-read the guide whether or not anything looks wrong.
 - **SETTLED, and the answer is no: the dive depth cannot read itself** (2026-09-03). A hand
   captured mid-dive shows Fallen London renders no `li.quality-item` anywhere on that screen,
   so `fotzLiveDepth()` never fires and the badges read `100–300` rather than a single figure
@@ -1634,14 +1733,17 @@ Confirmed live by the author:
   cells says safe, and the table follows the visible cross. Dock at either with Troubled Waters
   above 1 and report whether it reset.
 
-- The **Port Carnelian badges and panel** (added 2026-09-09), for the same two reasons and one
-  more. The transcription and `PC_AREAS` are unverified exactly as the zee ones are — nobody has
-  read the greeting in Port Carnelian either. The third is that this is the first feature to
-  badge the **storylet list** rather than a hand: `.storylet__heading` is `wiki-links.js`'s own,
-  well-used selector, so the markup is not the risk, but nothing has confirmed whether Fallen
-  London **prefixes** a Port Carnelian storylet's heading the way it prefixes "Fruits of the Zee:
-  Supplication on the Shore". `pcKeys` tolerates a prefix in case it does. Report what a heading
-  there actually reads, and whether the branch badges land where the supplication ones do.
+- The **Port Carnelian badges and panel** (added 2026-09-09; the markup and the greeting
+  verified in-game 2026-09-10, the transcription still not). A capture of a real term settled
+  three of the four open questions at once: the port is one storylet, *Matters of State*, whose
+  options are the guide's rows; the greeting says **Heartscross House**; and no heading there is
+  prefixed the way "Fruits of the Zee: Supplication on the Shore" is (`pcKeys` still tolerates
+  one, harmlessly). What is left is the transcription — the guide's own numbers, unchecked
+  against a term actually played. Report a row whose badge and outcome disagree. The two split
+  storylets (*Within their rights*, *A plea for pardon*) are **confirmed working** in-game
+  (2026-09-10) — they do open into a storylet of their own with their two branches beneath, and
+  both levels badge. What is still unseen is whether the branch badges sit beside the
+  supplication ones without either clearing the other, which no screen has yet shown both of.
 
 - The **Voyages of Scientific Discovery badges and panel** (added 2026-09-09). Same two
   reasons again — the transcription, and `VSD_AREAS` being a guess at three greetings nobody
@@ -1893,10 +1995,16 @@ Current tests:
   check would pass through a real collision — see the Fruits of the Zee palette). Then the
   two-branch storylets: the badge takes the better net, the tooltip keeps both, and each branch
   badges in its own right. Then name lookup, including the `"…: "` prefix tolerance, and the
-  gate in all three greeting states with the two `strict` rows pinned by name. It also pins that
-  no Port Carnelian name is in `ZEE_CARDS`, `SPITE_CARDS` or `FOTZ_CARDS`, and builds the whole
-  panel, which is the only way to catch a typo in a few hundred hand-built nodes. Extend it
-  whenever you touch `PC_OPTIONS`.
+  gate in all three greeting states with the two `strict` rows pinned by name. Then the shape of
+  the screen itself, which is the bug that made this feature draw nothing at first: that
+  `pcHeadingSpec` resolves a guide storylet arriving as an **option** and a guide branch arriving
+  as a **storylet**, that the container *Matters of State* and the six options the guide does not
+  price are left alone rather than guessed at, and — over a stub of the captured markup, run
+  through the registered `port-carnelian` pass rather than its pure parts — that a real screen
+  comes out badged option by option and that a `strict` row redraws when the greeting arrives
+  instead of keeping its flag. It also pins that no Port Carnelian name is in `ZEE_CARDS`,
+  `SPITE_CARDS` or `FOTZ_CARDS`, and builds the whole panel, which is the only way to catch a
+  typo in a few hundred hand-built nodes. Extend it whenever you touch `PC_OPTIONS`.
 - `FallenLondon/test/ux-scientific-voyages.test.mjs` — asserts `ux-enhancers.js`'s Voyages of
   Scientific Discovery feature. The centre of it is the **ambiguity**: that a branch name
   shared by the three islands resolves to `null` without an island and to the right row with
