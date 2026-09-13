@@ -1,4 +1,4 @@
-// Ad-hoc test for FallenLondon/ux-enhancers.js's Crowds of Spite card ratings.
+// Ad-hoc test for FallenLondon/choice-helper.js's Crowds of Spite card ratings.
 //
 // There's no test runner in this repo (see AGENTS.md). This is a standalone
 // Node script: it reads the userscript, evaluates its IIFE against a stub DOM
@@ -21,14 +21,14 @@
 //
 // The card numbers come from The Crowds of Spite (Guide) on fallenlondon.wiki.
 //
-//   node FallenLondon/test/ux-crowds-of-spite.test.mjs
+//   node FallenLondon/test/choice-crowds-of-spite.test.mjs
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const src = readFileSync(join(here, '..', 'ux-enhancers.js'), 'utf8');
+const src = readFileSync(join(here, '..', 'choice-helper.js'), 'utf8');
 
 // --- stub DOM --------------------------------------------------------------
 // Just enough for the IIFE to load: an empty document, and the two globals the
@@ -353,9 +353,9 @@ area = 'The Crowds of Spite';
 
 check('the card ratings are registered alongside the other features',
   api.FEATURES.map((f) => f.name),
-  ['launcher', 'faction-capture', 'fotz-capture', 'pending-item',
-    'spite-card-ratings', 'zee-card-ratings', 'fotz-card-ratings', 'fotz-depth-control',
-    'fotz-supplication', 'port-carnelian', 'scientific-voyages']);
+  ['fotz-capture', 'spite-card-ratings', 'zee-card-ratings',
+    'fotz-card-ratings', 'fotz-depth-control', 'fotz-supplication', 'port-carnelian',
+    'scientific-voyages']);
 
 console.log(failures ? '\n' + failures + ' FAILURE(S)' : '\nAll checks passed.');
 process.exit(failures ? 1 : 0);

@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js
-// @version      1.22
+// @version      1.23
 // @description  A grab-bag of quality-of-life tweaks for Kingdom of Loathing pages. Currently: in the character pane a "heal" button that casts your heal skills until HP is full or none can raise it further, and a "max" button next to every prolongable buff you can actually cast that re-casts it as many times as your MP allows (measuring the per-cast cost live, so gear and effect discounts are accounted for) with a "refresh skills" button below the list; on the equipment inventory an "Optimize for this" button that equips the highest-value item in every slot for whatever the enchantment-sort dropdown is sorting by (with element / Monster Level / encounter pickers for the sorts that need one), and a Collapse all / Expand all button that flips every inventory category at once; a small "W" badge linking to the KoL wiki next to the last adventure in the charpane, the location name atop place.php and crypt.php, the choice-adventure name atop choice.php, each quest title in questlog.php, the monster name and the items you acquire in combat, and item names in your inventory; a banner before you enter the lair of a special-reward boss (Boss Bat, Bonerdagon, Knob Goblin King, Baron von Ratsworth) when your Monster Aggravation Device is not set to a level that forces the unique reward to drop, shown on the page you see just before committing the adventure because fight.php is already too late; on the autosell page (sellstuff_ugly.php) a toolbar with Quantity / Sell price / Name sort buttons that reorder every category at once (click again to flip the direction, or Name to restore the original order), a Single list toggle that collapses every category into one globally-sorted list, and an Expand all / Collapse all button that keeps KoL's "sellstuff" cookie in sync; at the Hermit (hermit.php) it adds a "Buy all clovers" button next to the Trade button that trades worthless items for every 11-leaf clover the Hermit still has in stock today, one at a time, then reloads and reports how many it got; at the Campground (campground.php) it guards a Beer Garden that hasn't grown for two days yet, since the fancy bottles and labels don't appear before then -- the crop is flagged and clicking it asks for confirmation first; in the Mall (mall.php) it adds a "buy all" action to each store row and a "Buy N" row per item that walks the stores cheapest-first, showing the total and the average cost per item before spending anything; in the Inventory (inventory.php) it adds a [mall] action next to [use] on every tradeable item, searching the Mall for that exact item; in the character pane (charpane.php) it keeps the link to your monster aggravation device on screen even when the dial is at 0, which is exactly when KoL hides it; and in the Daily Dungeon (choice.php) it marks the option that gets you past a door, trap or chest room without spending an adventure -- lockpicks, the Platinum Yendorian Express Card, the eleven-foot pole, the candy cane sword cane, or the Ring of Detect Boring Doors -- with a note on what it costs you; and in the Inventory a "pays out" checkbox beside KoL's own Filter box that hides every item except the ones that hand you other items or Meat when used (gift boxes, buckets, scrolls, wallets), closing the gaps by layout alone -- it writes inline styles and never moves, adds or removes a node, so KoL's own list keeps its order -- matched by item id against a list derived from the wiki and leaving out items that merely turn into a used copy of themselves; with a "group by type" box under it that sorts the survivors into multi-use recipes (a smoked potsherd makes five different things depending on how many you use at once), Meat, random yields and plain items, under a heading each -- also without moving anything, since flex order decides what is drawn where.
 // @match        https://www.kingdomofloathing.com/hermit.php*
 // @match        https://kingdomofloathing.com/hermit.php*
@@ -3604,7 +3604,7 @@
   // form. Adjust this list to whatever heals your class/path actually has.
   // ---------------------------------------------------------------------------
   const HEAL_SKILLS = [
-    { name: 'Cannelloni Cocoon', priority: 1 }, // Sauceror: heals to full
+    { name: 'Cannelloni Cocoon', priority: 1 }, // Pastamancer: heals up to 1,000 HP
     { name: 'Lasagna Bandages', priority: 2 },
     { name: 'Tongue of the Walrus', priority: 3 }, // Seal Clubber: large heal
     { name: 'Disco Power Nap', priority: 4 },
@@ -3628,8 +3628,12 @@
   const SKILL_PAGE_CANDIDATES = ['skillz.php', 'skills.php'];
 
   // The fetched skills page is cached for the session so the frequent charpane
-  // reloads (every adventure) don't re-hit the server -- what it lists only
-  // changes when you learn/forget a skill, which the refresh button forces.
+  // reloads (every adventure) don't re-hit the server. What it lists changes
+  // when you learn/forget a skill (the refresh button forces a re-read), and
+  // ALSO with your current state: skillz.php leaves out skills that would do
+  // nothing right now, so at full HP it omits Cannelloni Cocoon and the other
+  // heals. A page cached at full HP is therefore useless to the heal button,
+  // which is why runHeal always re-reads it (fetchSkillsDoc(true)).
   const CACHE_KEY = 'tm-skills-cast-max-html';
 
   // --- stat reading -----------------------------------------------------------
@@ -3656,12 +3660,16 @@
   // Fetch + parse the first candidate page that actually lists skills (contains
   // any `whichskill=<id>` reference). Returns a Document or null. Caches the raw
   // HTML in sessionStorage so repeated charpane reloads don't re-fetch, and so
-  // the heal half and the max half share one round trip.
-  async function fetchSkillsDoc() {
-    try {
-      const cached = sessionStorage.getItem(CACHE_KEY);
-      if (cached) return new DOMParser().parseFromString(cached, 'text/html');
-    } catch (e) { /* sessionStorage may be unavailable; fetch fresh */ }
+  // the heal half and the max half share one round trip. `fresh` skips the
+  // cached copy (but still stores the new one) -- the heal half needs that,
+  // see CACHE_KEY.
+  async function fetchSkillsDoc(fresh) {
+    if (!fresh) {
+      try {
+        const cached = sessionStorage.getItem(CACHE_KEY);
+        if (cached) return new DOMParser().parseFromString(cached, 'text/html');
+      } catch (e) { /* sessionStorage may be unavailable; fetch fresh */ }
+    }
     for (const path of SKILL_PAGE_CANDIDATES) {
       try {
         const res = await fetch(ORIGIN + '/' + path, { credentials: 'same-origin', cache: 'no-store' });
@@ -3749,7 +3757,9 @@
       if (status.hp.cur >= status.hp.max) { return; } // already full
 
       // Discover each configured skill's id once; ids don't change between casts.
-      const doc = await fetchSkillsDoc();
+      // Always re-read: HP is below max now, so skillz.php lists the heals it
+      // hid while HP was full -- a cached page would be missing them.
+      const doc = await fetchSkillsDoc(true);
       if (!doc) { alert('Heal: could not find the skills page.'); return; }
       const skillMap = buildSkillMap(doc);
       const skills = HEAL_SKILLS

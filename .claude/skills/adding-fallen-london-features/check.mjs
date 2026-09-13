@@ -1,5 +1,8 @@
 #!/usr/bin/env node
-// Audit the wiring of FallenLondon/ux-enhancers.js's feature registry.
+// Audit the wiring of FallenLondon/choice-helper.js's feature registry.
+// (The badge features and their panels moved there from ux-enhancers.js at its
+// 3.0; ux-enhancers.js keeps the launcher and the Factions panel, and its
+// registry is small enough that ux-factions.test.mjs pins it by hand.)
 //
 // This exists because the failure mode of adding a feature to this file is
 // never a syntax error -- it is a feature that parses, loads, and is never
@@ -22,7 +25,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
-const SCRIPT = join(repo, 'FallenLondon', 'ux-enhancers.js');
+const SCRIPT_NAME = 'choice-helper.js';
+const SCRIPT = join(repo, 'FallenLondon', SCRIPT_NAME);
 const LOADER = join(repo, 'all-in-one', 'fallen-london.js');
 const TESTDIR = join(repo, 'FallenLondon', 'test');
 
@@ -113,7 +117,10 @@ if (registries) {
   // This is the trap. Adding one entry to FEATURES or PANELS breaks the four
   // suites that pin the whole roster, and they are suites for features you did
   // not touch, so nothing points at you.
-  const suites = readdirSync(TESTDIR).filter((f) => f.endsWith('.test.mjs'));
+  // Only the suites that load THIS script: ux-factions.test.mjs pins
+  // ux-enhancers.js's own, different roster.
+  const suites = readdirSync(TESTDIR).filter((f) => f.endsWith('.test.mjs')
+    && readFileSync(join(TESTDIR, f), 'utf8').includes("'" + SCRIPT_NAME + "'"));
   const rosterSuites = suites.filter((f) =>
     /FEATURES\.map|PANELS\.map/.test(readFileSync(join(TESTDIR, f), 'utf8')));
 
@@ -206,7 +213,7 @@ const meta = (file, key) => {
 };
 
 const url = meta(SCRIPT, 'downloadURL');
-if (!url || !url.endsWith('/FallenLondon/ux-enhancers.js')) {
+if (!url || !url.endsWith('/FallenLondon/' + SCRIPT_NAME)) {
   fail('@downloadURL', 'does not end in the file\'s own path: ' + url);
 }
 
@@ -214,7 +221,7 @@ if (!url || !url.endsWith('/FallenLondon/ux-enhancers.js')) {
 // userscript manager updates on the version number and on nothing else.
 let head = null;
 try {
-  head = execFileSync('git', ['show', 'HEAD:FallenLondon/ux-enhancers.js'],
+  head = execFileSync('git', ['show', 'HEAD:FallenLondon/' + SCRIPT_NAME],
     { cwd: repo, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
 } catch { /* not a checkout, or a new file: skip the comparison */ }
 
@@ -237,7 +244,7 @@ if (head != null) {
         'still ' + meta(LOADER, 'version') + ', but the script it @requires changed');
     }
   }
-  note(changed ? 'ux-enhancers.js differs from HEAD' : 'ux-enhancers.js matches HEAD');
+  note(SCRIPT_NAME + (changed ? ' differs from HEAD' : ' matches HEAD'));
 }
 
 // --- 7. a NEW feature has to be written up ----------------------------------

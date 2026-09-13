@@ -1,0 +1,8362 @@
+// ==UserScript==
+// @name         Fallen London Choice Helper
+// @author       Tilo
+// @namespace    https://github.com/TiloBuechsenschuss
+// @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
+// @version      1.0
+// @description  Advice on what Fallen London's storylets and opportunity cards do for you, badged onto them where you make the choice. Its reference panels open from the "⚙ UX" button of Fallen London UX Enhancers, so install that as well to reach them; every badge works without it. (1) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (2) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. Its panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, every port on the Unterzee -- which region it is in, whether docking there wipes Troubled Waters and the zee-threats, and what it takes to be able to sail there at all, with the hunting grounds and the one-time destinations marked as the different things they are, since a port that resets nothing and a place that is not a dock are two different answers -- the three winds and the dreams they start, and the whole card table, searchable. (3) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: behind the UX button where that is docked beside Fallen London’s own Travel button, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. Its panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. (4) In Port Carnelian, where a governor's term runs 26 actions and Fallen London deals no opportunity cards at all, the badges go on storylets and on their options instead. The whole term is one storylet, Matters of State, so what is rated is the list of options inside it -- and the options of the two of those that open into a storylet of their own. Each shows the net change in resources that option makes, with a mark for what it does to Imperial Legitimacy -- the number that ends a term at once when it reaches 0, sending you back to zee with nothing: a down mark when the net was paid for out of Legitimacy, an up mark when the option buys Legitimacy back instead, and no mark at all when it leaves Legitimacy alone. The colour says the same thing the mark does and nothing else -- red for spending Legitimacy, green for buying it back, light blue for the rows that leave it alone, slate for the endings -- so the marks are enough on their own for anyone who cannot separate the red from the green. Then a Fate label on the one Fate-locked option, and "cash out" on the four endings, which spend a currency rather than gaining any. The four endings carry a figure rather than only a label: each shows what cashing out would pay you RIGHT NOW, in Echoes, worked out from your own Striped Delights and Silver Horseheads. Fallen London states both on the Myself tab and nowhere near the port, so the script reads them where they are shown, remembers them, and refreshes them in a hidden frame -- in the background while an ending is on screen, and again when the panel is opened on a stale reading -- exactly the way the festival reads how deep you are. A faction Favour is marked with an icon and priced at 0: it is a story quality capped at 7 rather than an item, nothing buys one, and pricing it would let a fixed reward out-rank a real cash-out on a number nobody acts on. Tribute, which has no market price either, is listed the same way and left out of the total. A Favour in High Places is not one of those despite the name -- it is an ordinary item the Bazaar buys -- so it is priced like any other. A question mark says the reading behind the figure is over a minute old, since every action of a term moves both currencies, and the plain "cash out" label is what is left when your numbers have never been read. The tooltip carries the whole sum: what you hold, what it turns into, what each piece is worth, what the next rounding step up would cost you -- 105 and 176 are worth waiting for and 140 is not -- and, for the two endings that pay a fixed reward and empty both purses, what taking one gives up. Half the table is worth the same +5, so whether it costs Legitimacy is the only thing separating those rows. The tooltip carries the Time Passing in Office and Airs windows the option is offered in, every currency change with its currency named, the requirement and the note; the two options that pay ten or fifteen of ONE of the two currencies, the game's choice rather than yours, say so in words, since reading them as that much of each would make them the best options in the table by a distance. A storylet the guide splits in two is badged with the better net and keeps both branches in its tooltip, because the losing branch is how Imperial Legitimacy is bought back. Its panel, Port Carnelian, opens on the same calculator -- your purse, and all four endings priced against it with the best one named in words -- and then holds the rest of the guide: how to unlock and reach the posting, the rules a term is played by, every option grouped by the clock and searchable, what the two currencies cash in for, the reward tiers with the two worth aiming at picked out and a letter against the step each of your two currencies is standing on, and the strategy. (5) On a Voyage of Scientific Discovery -- the Dilmun Club's expeditions to Bullbone Island, Corpsecage Island and Grunting Fen, which deal no opportunity cards either -- every action gets a badge for what it pays in research pages, coloured by which of the three kinds it is: Archaeological, Cryptopalaeontological or Theosophistical. You sail to one island for one kind, and at every step of the visit you are choosing between the action that pays it and one that pays goods instead, so an action paying no pages is labelled with what it does pay rather than scored: there is no exchange rate between pages and Echoes, and inventing one would be the badge choosing your voyage for you. The three gambles at the end of a visit carry their EXPECTED value rather than the figure they advertise, since the wiki gives both outcomes and the odds -- taking the safer of the two is worth about six times the greedier one once the failure is priced in. The tooltip carries the step of the visit the action belongs to, its challenge, everything it gives, what it costs, and what a failure costs; where the game picks between two payouts rather than you, that is said in words. The same badges cover the two screens at your Lodgings, where the pages are generated before you sail and spent afterwards, and there the figure is the guide's pence per page, because everything on that screen is priced. Three actions and three storylets have the same names on all three islands and pay a different kind of page on each, so the feature works out which island it is looking at from the greeting or from the storylet you have open, and says nothing at all rather than guess. Its panel, Scientific Voyages, holds the rest: how the voyage is unlocked, what each island pays and costs to reach, every action grouped by island and searchable, and how to squeeze the most preparatory research out of London first. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. Built as a feature registry so further advice can be added as entries.
+// @match        https://www.fallenlondon.com/*
+// @match        https://fallenlondon.com/*
+// @run-at       document-idle
+// @noframes
+// @grant        none
+// ==/UserScript==
+
+(function () {
+  'use strict';
+
+  // Advice on what Fallen London's storylets and opportunity cards do: a badge
+  // on each one this script has a table for, and a reference panel per area
+  // built on the same table. Split out of FallenLondon/ux-enhancers.js at its
+  // 3.0, which keeps the quality-of-life tweaks -- including the launcher these
+  // panels open from (see "the other Fallen London script").
+  //
+  // Fallen London is a single-page React app: there is one URL, and storylets,
+  // cards and results are swapped into the DOM client-side with no page
+  // navigation. So there is no path to gate on and no single document-idle
+  // pass that sees everything -- every feature here is instead scoped by the
+  // markup it finds, and is re-run on a debounced MutationObserver.
+  //
+  // Adding a feature (the adding-fallen-london-features skill has the rest):
+  //   1. Write a `run()` that finds its own markup and bails harmlessly when
+  //      that markup isn't on screen. It will be called on the initial pass and
+  //      again on every debounced DOM change, so it must be IDEMPOTENT and
+  //      cheap -- use `attachBadge` (or the same dataset-flag trick) rather
+  //      than blindly injecting.
+  //   2. Add a `{ name, run }` entry to FEATURES at the bottom. A feature that
+  //      throws is logged and cannot stop the others.
+  //   3. Give it its own badge class and dataset flag so two features can
+  //      decorate the same element without fighting over one flag.
+  //
+  // A feature with reference material to show adds a PANEL -- see the
+  // registry at the bottom.
+
+  const SCRIPT_ID = 'FL Choice Helper';
+
+  // === shared: small DOM helpers =========================================
+
+  // Minimal hyperscript. The panels below are a few hundred nodes of table, and
+  // this keeps them readable without an innerHTML string (which would be one
+  // more place to get escaping wrong the first time a piece of data is not
+  // hardcoded). `props` sets properties, except `style` which is merged and
+  // `title`/`href`/... which are plain properties anyway.
+  function h(tag, props, children) {
+    const el = document.createElement(tag);
+    if (props) {
+      for (const key of Object.keys(props)) {
+        const value = props[key];
+        if (value == null) continue;
+        if (key === 'style') Object.assign(el.style, value);
+        else if (key === 'css') el.style.cssText = value;
+        else if (key === 'on') for (const ev of Object.keys(value)) el.addEventListener(ev, value[ev]);
+        else el[key] = value;
+      }
+    }
+    for (const child of [].concat(children || []).flat(Infinity)) {
+      if (child == null || child === false) continue;
+      el.appendChild(typeof child === 'string' || typeof child === 'number'
+        ? document.createTextNode(String(child))
+        : child);
+    }
+    return el;
+  }
+
+  // A link to the Fallen London wiki, by the same "Go" search wiki-links.js
+  // uses: an exact title redirects straight to the article, anything else lands
+  // on the search results for the text rather than a dead redlink.
+  function wikiHref(name) {
+    const t = String(name == null ? '' : name).trim().replace(/\s+/g, ' ');
+    if (!t) return null;
+    return 'https://fallenlondon.wiki/wiki/Special:Search?'
+      + new URLSearchParams({ search: t, go: 'Go' }).toString();
+  }
+
+  function wikiLink(name, text, style) {
+    const href = wikiHref(name);
+    if (!href) return document.createTextNode(text || String(name || ''));
+    return h('a', {
+      href: href, target: '_blank', rel: 'noopener',
+      textContent: text || name,
+      title: 'FL wiki: ' + name,
+      style: Object.assign({ color: 'inherit', textDecoration: 'none', borderBottom: '1px dotted currentColor' }, style || {}),
+    });
+  }
+
+  // === shared: where you are =============================================
+  //
+  // Two places say it, and both are verified against real markup.
+  //
+  // 1. The screen-reader-only block at the top of every page:
+  //
+  //      <div id="accessible-sidebar" class="accessible-sidebar u-visually-hidden">
+  //        <h1 class="welcome"><span>It's <a href="/profile/TheFairUnknown">…</a>!</span>
+  //         Welcome to Spite, delicious friend!</h1>
+  //
+  //    Verified identical on /myself and /possessions, in both the wide and
+  //    the narrow layout, and it is there no matter which tab you are on --
+  //    which is what makes it the primary. The area has to be dug out of the
+  //    sentence, hence the regex.
+  //
+  // 2. The wide layout's VISIBLE greeting, in the sidebar's `div.travel`
+  //    (captured 2026-09-03, on Mutton Island during the Fruits of the Zee):
+  //
+  //      <p class="heading heading--3"><span>It's <a …>TheFairUnknown</a>!</span>
+  //        <br>Welcome to</p>
+  //      <p class="heading heading--2 welcome__current-area">Mutton Island,</p>
+  //      <p class="heading heading--3">delicious friend!</p>
+  //
+  //    Here the area sits in an element of its OWN, `.welcome__current-area`,
+  //    with nothing to parse but a trailing comma -- so where the sentence in
+  //    (1) is split across three paragraphs and its regex can't match, this
+  //    still reads cleanly. It is the backstop rather than the primary only
+  //    because it belongs to the wide layout's sidebar and nothing has
+  //    confirmed it exists in the narrow one.
+  function currentArea(doc) {
+    const d = doc || document;
+    const el = d.querySelector('#accessible-sidebar .welcome');
+    const text = el ? el.textContent.replace(/\s+/g, ' ') : '';
+    const m = text.match(/Welcome to (.+?),\s*delicious friend/i);
+    if (m) return m[1].trim();
+
+    const visible = d.querySelector('.welcome__current-area');
+    // Trailing comma from "Mutton Island," -- and a trailing full stop or
+    // exclamation mark too, since nothing promises the punctuation.
+    const name = visible ? visible.textContent.replace(/\s+/g, ' ').trim().replace(/[,.;!]+$/, '').trim() : '';
+    return name || null;
+  }
+
+  // === shared: badges ====================================================
+
+  // Every badge this script injects carries BADGE_CLASS plus a per-feature
+  // class. The shared class is what lets `headingName` below recognise our own
+  // decorations, whichever feature added them.
+  const BADGE_CLASS = 'fl-ux-badge';
+
+  // --- reading a badge on a phone ----------------------------------------
+  //
+  // Every badge carries its reasoning in `title`, and on a touch screen a
+  // `title` is INVISIBLE: there is no hover, and a long press raises the text
+  // selection menu rather than the tooltip. So on a phone the whole point of
+  // these badges -- the challenge, the options, what a failure costs, which
+  // Sights band pays which item -- was unreachable. The same text therefore
+  // also opens as a panel on TAP, and `title` stays exactly as it was for the
+  // desktop hover it already served.
+  //
+  // **The tap must not reach what is underneath.** On the wide hand layout the
+  // badge is positioned over `.hand__card-container`, and a click that got
+  // through to it plays the card -- an action, spent for good, on a tap that
+  // was meant to read a tooltip. React listens at its own root rather than on
+  // the node, so stopping propagation on the badge keeps the click away from
+  // it; the pointer/mouse/touch starts are stopped too, since anything bound
+  // to one of those would fire before the click ever happened.
+  const TIP_ID = 'fl-ux-tip';
+  let tipAnchor = null;
+  let tipBound = false;
+
+  function hideTip() {
+    const el = document.getElementById(TIP_ID);
+    if (el && el.remove) el.remove();
+    tipAnchor = null;
+  }
+
+  // The open panel points at a badge that a React re-render may have thrown
+  // away. Called from the same pass that draws the badges, so a tip whose
+  // badge has gone goes with it instead of hanging over an unrelated card.
+  function pruneTip() {
+    if (tipAnchor && tipAnchor.isConnected === false) hideTip();
+  }
+
+  function bindTipDismissal() {
+    if (tipBound) return;
+    tipBound = true;
+    // Capture, so it runs before the badge's own handler and a second tap on
+    // the SAME badge closes rather than redraws -- hence the badge exemption:
+    // without it this would clear `tipAnchor` and the toggle below could never
+    // see that the tip it is about to open is the one already open.
+    document.addEventListener('click', function (e) {
+      const t = e.target;
+      if (t && t.closest && t.closest('.' + BADGE_CLASS)) return;
+      hideTip();
+    }, true);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' || e.key === 'Esc') hideTip();
+    });
+    // The panel is fixed to the viewport and the badge is not, so any scroll
+    // parts them. Closing is the honest answer; chasing the anchor is not
+    // worth the frames.
+    if (typeof window !== 'undefined' && window.addEventListener) {
+      window.addEventListener('scroll', hideTip, true);
+      window.addEventListener('resize', hideTip);
+    }
+  }
+
+  function showTip(anchor, text) {
+    hideTip();
+    if (!document.body || !text) return;
+    const box = document.createElement('div');
+    box.id = TIP_ID;
+    box.textContent = text;
+    // `pre-wrap` because every one of these titles is newline-separated lines,
+    // which is what makes them readable as a panel at all.
+    box.style.cssText =
+      'position:fixed;z-index:2147483646;max-width:min(320px,calc(100vw - 12px));'
+      + 'max-height:60vh;overflow:auto;box-sizing:border-box;'
+      + 'padding:8px 10px;border:1px solid ' + UI.line + ';border-radius:4px;'
+      + 'background:' + UI.bg + ';color:' + UI.text + ';'
+      + 'font-family:' + UI.font + ';font-size:12px;line-height:1.5;'
+      + 'white-space:pre-wrap;text-align:left;box-shadow:0 4px 16px rgba(0,0,0,.6);'
+      + 'left:0;top:0;';
+    document.body.appendChild(box);
+
+    const vp = viewportSize();
+    const r = anchor.getBoundingClientRect ? anchor.getBoundingClientRect() : null;
+    if (vp && r) {
+      const w = box.offsetWidth || 0;
+      const h = box.offsetHeight || 0;
+      const left = Math.max(6, Math.min(r.left, vp.width - w - 6));
+      // Under the badge by preference, above it when the bottom of the screen
+      // is closer -- a badge low in the hand would otherwise open a panel
+      // mostly off-screen, which on a phone is most of them.
+      let top = r.bottom + 6;
+      if (top + h > vp.height - 6) {
+        top = r.top - 6 - h >= 6 ? r.top - 6 - h : Math.max(6, vp.height - h - 6);
+      }
+      box.style.left = left + 'px';
+      box.style.top = top + 'px';
+    }
+    tipAnchor = anchor;
+    bindTipDismissal();
+  }
+
+  // A badge is described by a plain { text, color, title } spec, so the
+  // deciding (per feature, pure, testable) stays separate from the drawing.
+  // `spec.ink` is the text colour, and defaults to white because that is what
+  // every badge here used to be. It exists because a badge is only legible on
+  // Fallen London's dark card art if its background is LIGHT, and white text on
+  // a light background is not legible at all -- see FOTZ_INK.
+  function makeBadge(spec, extraClass) {
+    const el = document.createElement('span');
+    el.className = extraClass ? BADGE_CLASS + ' ' + extraClass : BADGE_CLASS;
+    el.textContent = spec.text;
+    el.title = spec.title;
+    // Inline styles only (repo convention): @grant none rules out GM_addStyle,
+    // and a stylesheet is one more thing a React re-render could drop.
+    //
+    // `touch-action:manipulation` drops the double-tap-to-zoom wait, and the
+    // tap highlight and text selection are turned off so a tap reads as a
+    // press on a control rather than as picking at the text of a card.
+    el.style.cssText =
+      'display:inline-block;margin-left:4px;padding:0 4px;' +
+      'font-family:arial,sans-serif;font-size:10px;font-weight:bold;' +
+      'line-height:14px;color:' + (spec.ink || '#fff') + ';border-radius:2px;' +
+      'background:' + spec.color + ';' +
+      'text-shadow:none;white-space:nowrap;vertical-align:middle;cursor:help;' +
+      'touch-action:manipulation;-webkit-tap-highlight-color:transparent;' +
+      '-webkit-user-select:none;user-select:none;';
+
+    const swallow = function (e) { if (e.stopPropagation) e.stopPropagation(); };
+    ['pointerdown', 'mousedown', 'touchstart'].forEach(function (name) {
+      // Passive: these only ever stop propagation, and saying so up front
+      // keeps `touchstart` off the browser's scroll-blocking path.
+      el.addEventListener(name, swallow, { passive: true });
+    });
+    el.addEventListener('click', function (e) {
+      if (e.stopPropagation) e.stopPropagation();
+      if (e.preventDefault) e.preventDefault();
+      if (tipAnchor === el) hideTip();
+      else showTip(el, spec.title);
+    });
+    return el;
+  }
+
+  // Read a storylet/card name off a heading WITHOUT the badges hung inside it
+  // by us or by another script. wiki-links.js appends its "W" anchor into the
+  // very same heading element, so a plain `textContent` here would yield
+  // "A drunkW" and match nothing.
+  function headingName(el) {
+    let out = '';
+    for (const node of el.childNodes) {
+      if (node.nodeType === 3) { out += node.nodeValue; continue; }
+      if (node.nodeType !== 1) continue;
+      const cls = node.className;
+      if (typeof cls === 'string' &&
+          (cls.indexOf(BADGE_CLASS) !== -1 || cls.indexOf('fl-wiki-link') !== -1)) continue;
+      out += node.textContent;
+    }
+    return out.trim();
+  }
+
+  // Attach one badge to `host`, idempotently.
+  //
+  //   flag   dataset property this feature owns (e.g. 'flSpite'). One per
+  //          feature, so two features can badge the same element.
+  //   value  the identity of what is being badged -- normally the name. The
+  //          flag stores this rather than a boolean because React REUSES these
+  //          container nodes: play a card and the next one is rendered into the
+  //          same node, so a boolean "already done" flag would leave the old
+  //          card's badge on the new card. A changed value redraws.
+  //   spec   { text, color, title }, or null to mean "nothing to say here" --
+  //          which also clears a badge left over from a previous occupant.
+  //   place  'append' (last child -- for the image-only card containers) or
+  //          'after' (next sibling -- for headings; putting a badge INSIDE a
+  //          heading would corrupt wiki-links.js's textContent read of it).
+  //   style  optional extra inline styles, e.g. to position an overlay.
+  function attachBadge(host, opts) {
+    const cls = opts.cls;
+    // The flag records BOTH the value and whether a badge was drawn for it
+    // ('+' / '-'). Storing only the value would make the clearing path
+    // ("this card is known, but say nothing about it here") a no-op on a host
+    // that already carries a badge for that same name -- which is exactly what
+    // happens when a gate turns a feature off while its cards are on screen.
+    const key = (opts.spec ? '+' : '-') + (opts.value == null ? '' : opts.value);
+    if (host.dataset[opts.flag] === key) return;
+
+    const inside = host.querySelector('.' + cls);
+    if (inside && inside.parentNode === host) inside.remove();
+    // For an 'after' badge, walk the whole RUN of badges following the host
+    // rather than only the first. Two features can badge one heading -- the
+    // Fruits of the Zee supplication branches and the Port Carnelian ones share
+    // `.branch__title` -- and each `host.after()` inserts immediately after the
+    // host, so ours is not necessarily the nearest. Checking only
+    // `nextElementSibling` would then fail to clear our own stale badge and
+    // leave two of them behind on a node React has reused.
+    for (let next = host.nextElementSibling;
+      next && next.classList && next.classList.contains(BADGE_CLASS);
+      next = next.nextElementSibling) {
+      if (next.classList.contains(cls)) { next.remove(); break; }
+    }
+
+    host.dataset[opts.flag] = key;
+    if (!opts.spec) return;
+
+    const badge = makeBadge(opts.spec, cls);
+    if (opts.style) Object.assign(badge.style, opts.style);
+    if (opts.place === 'append') host.appendChild(badge);
+    else host.after(badge);
+  }
+
+  // === shared: the opportunity hand ======================================
+  //
+  // Where an opportunity card's name can be read, in all three shapes. These
+  // selectors are shared with wiki-links.js and verified there against real
+  // game HTML -- the two files rise and fall together, so if one moves, fix
+  // both. `visit(host, name, place, style)` is called once per card found.
+
+  function eachCardName(visit) {
+    // Full-width hand layout: the card is image-only, with NO heading anywhere,
+    // and the name lives solely in `.hand__image`'s alt/aria-label -- so a
+    // decoration has to be overlaid on the container. wiki-links.js already
+    // owns this container's TOP-RIGHT corner, hence top-left here. Empty deck
+    // slots render as `.card--empty` with no `.hand__card-container`, so they
+    // fall out naturally.
+    document.querySelectorAll('.hand__card-container').forEach(function (container) {
+      const img = container.querySelector('.hand__image');
+      const name = img && (img.getAttribute('alt') || img.getAttribute('aria-label'));
+      if (!name || !name.trim()) return;
+      if (getComputedStyle(container).position === 'static') container.style.position = 'relative';
+      visit(container, name.trim(), 'append', {
+        position: 'absolute', top: '2px', left: '2px', marginLeft: '0', zIndex: '5',
+      });
+    });
+
+    // Compact (small-media) hand layout: here the card DOES have a title, a
+    // bare `<h2 class="media__heading">` under `.hand .small-card__body`. The
+    // `.hand` scope is what keeps this off the "Opportunity deck" label and the
+    // other headings that share that class.
+    document.querySelectorAll('.hand .small-card__body .media__heading').forEach(function (h) {
+      const name = headingName(h);
+      if (name) visit(h, name, 'after', null);
+    });
+
+    // The card you have opened -- the same heading as any opened storylet, and
+    // worth decorating: that is the screen where you choose what to do with it.
+    document.querySelectorAll('.storylet-root__heading').forEach(function (h) {
+      const name = headingName(h);
+      if (name) visit(h, name, 'after', null);
+    });
+  }
+
+  // === shared: panel styling =============================================
+  //
+  // The launcher's dark chrome, which every panel is drawn in. Carried here
+  // too because the launcher lives in UX Enhancers and a panel is rendered
+  // into it by this script.
+
+  const UI = {
+    bg: '#1c1a17',
+    bgAlt: '#242119',
+    line: '#3d372c',
+    text: '#e4dcc5',
+    dim: '#a2977c',
+    accent: '#b8912f',
+    font: '"Roboto Slab", Georgia, serif',
+  };
+
+  // No viewport means nothing to position against -- which is also how this
+  // file is evaluated outside a browser, by the tests.
+  function viewportSize() {
+    if (typeof window === 'undefined') return null;
+    if (!window.innerWidth || !window.innerHeight) return null;
+    return { width: window.innerWidth, height: window.innerHeight };
+  }
+
+  const TH = 'padding:5px 8px;text-align:left;font:bold 11px ' + UI.font
+    + ';letter-spacing:.05em;text-transform:uppercase;color:' + UI.dim
+    + ';border-bottom:1px solid ' + UI.line + ';white-space:nowrap;';
+  const TD = 'padding:5px 8px;vertical-align:top;border-bottom:1px solid ' + UI.line + ';';
+
+  // Two more colours for the pips: an item you could go and get right now, and
+  // one whose Renown gate you have passed but whose Favours you have not saved
+  // up. Seeing the first at a glance is the whole point of the column -- a
+  // Renown item sits there unclaimed for months otherwise.
+  const COLOR_READY = '#9ab73c';    // Renown reached AND Favours in hand
+  // Favours cap at 7 and every one earned past that is simply thrown away, so
+  // this is the only state on the page that is actively costing you something
+  // while you look at it. Orange, not the green of "you could do this" -- a
+  // different kind of urgency.
+  const COLOR_FULL = '#d4761c';
+
+  // === shared: reading Myself and Possessions ============================
+  //
+  // The same scrape UX Enhancers' Factions panel reads, carried byte for byte.
+
+  // --- live values -------------------------------------------------------
+  //
+  // Read off the Myself tab (/myself). Selectors verified against real game
+  // HTML in BOTH the wide and the narrow layout -- for qualities the two are
+  // identical, so one set covers both -- and CONFIRMED LIVE in-game
+  // (2026-09-02): the Renown and Favours the panel showed were the right ones.
+  //
+  //   <li class="quality-item">
+  //     <div class="icon icon--circular quality-item__icon" data-branch-id="133830">
+  //       <img alt="Renown: Bohemians" ...>
+  //     <div class="quality-item__body">
+  //       <span class="... quality-item__name"><span>Renown: Bohemians 27/55 - Known to ...
+  //
+  // The img's `alt` is the quality's name WITHOUT the level, and that is what
+  // makes it the key. The visible text glues the level and a descriptive
+  // suffix onto the same string, with no separator you could rely on:
+  // "Renown: Society 34/55 -  Known in the homes of..." (note the double
+  // space) and "Renown: Rubbery Men 12/55 - !kathakathoti!". Anything parsing
+  // the name out of that text would be guessing where the name ends; strip the
+  // alt off the front instead and the level is all that is left.
+  //
+  // The faction names FL uses here match FACTIONS[].name exactly, for all
+  // twelve -- "The Church", "The Docks", "The Great Game", "Tomb-Colonies",
+  // "Rubbery Men" and the rest -- so the quality is just "Renown: " + name.
+
+  // Fallback for an item with no usable alt. Anchored on the three prefixes we
+  // care about so a quality whose NAME contains a number can't be mis-split.
+  const FACTION_QUALITY_RE =
+    /^((?:Renown|Favours|Connected):\s*.+?)\s+(\d+)(?:\s*\/\s*(\d+))?(?:\s*[-–].*)?$/;
+
+  function parseQualityItem(li) {
+    const nameEl = li.querySelector('.quality-item__name');
+    const text = nameEl ? nameEl.textContent.replace(/\s+/g, ' ').trim() : '';
+    if (!text) return null;
+
+    const img = li.querySelector('img[alt]');
+    const alt = img ? (img.getAttribute('alt') || '').trim() : '';
+    if (alt && text.slice(0, alt.length).toLowerCase() === alt.toLowerCase()) {
+      const m = /^\s*(\d+)(?:\s*\/\s*(\d+))?/.exec(text.slice(alt.length));
+      // An ACCOMPLISHMENT has no number anywhere -- FL renders it as the name
+      // and nothing else ("Discovered: the Pentamerous Bride", captured from
+      // /myself on 2026-09-06). Returning null for those dropped every one of
+      // them on the floor, which is why the festival panel kept sending
+      // someone who had already met the Bride back down to the bottom of the
+      // trench. You either have an Accomplishment or you do not, so the level
+      // it is missing is 1.
+      if (!m) return { quality: alt, level: 1, cap: null };
+      return { quality: alt, level: Number(m[1]), cap: m[2] ? Number(m[2]) : null };
+    }
+
+    const m = FACTION_QUALITY_RE.exec(text);
+    if (!m) return null;
+    return { quality: m[1].trim(), level: Number(m[2]), cap: m[3] ? Number(m[3]) : null };
+  }
+
+  // Every quality currently on screen, by name. `filtered` matters: the Myself
+  // tab has a search box, and while it has text in it the list shows only the
+  // matches -- so a quality being ABSENT stops meaning "you have none of it".
+  // Returns null when there is no quality list at all (any other tab).
+  function readQualities(doc) {
+    const d = doc || document;
+    const items = d.querySelectorAll('li.quality-item');
+    if (!items.length) return null;
+    const search = d.querySelector('input.input--item-search');
+    const values = new Map();
+    items.forEach(function (li) {
+      const q = parseQualityItem(li);
+      if (q) values.set(q.quality, q);
+    });
+    return { values: values, filtered: !!(search && search.value && search.value.trim()) };
+  }
+
+  // --- what you own ------------------------------------------------------
+  //
+  // The Possessions tab (/possessions). Verified against real game HTML, again
+  // byte-identical between the two layouts, and CONFIRMED LIVE in-game
+  // (2026-09-02): held / not-held came out right for a real character. Every
+  // item is a
+  // `[data-quality-id]` wrapping something with an `aria-label` whose first
+  // semicolon-separated field is the name:
+  //
+  //   <li class="item"><div ... data-quality-id="755">
+  //     <div aria-label="Ornate Typewriter × 2; A Fine, Elegant and Robust …">
+  //   <li class="available-item-list__item"><div ... data-quality-id="126352">
+  //     <div aria-label="Amber Cello; Persuasive +4; Steel ribs and amber …">
+  //   <div data-quality-id="340" class="equipped-item">
+  //     <div aria-label="Patent Scrutinizer Deluxe!; Watchful +7; …">
+  //
+  // Reading every `[data-quality-id]` rather than a per-section selector is
+  // what makes the three shapes -- inventory, the available-to-equip drawer,
+  // and the slot you are actually WEARING -- all count as owned. Miss the
+  // third and anyone wearing their Renown item is told they don't have it.
+  //
+  // `data-quality-id` is a stable numeric id and would be a better key than a
+  // name, but only the ids of items this character owns are visible, so there
+  // is no way to build the full table from here. Names it is; they matched the
+  // wiki's exactly for all nineteen faction and Renown items in the capture.
+  const OWNED_MARKER = '[data-quality-id]';
+
+  const ITEM_COUNT_RE = /\s*[×x]\s*(\d+)\s*$/;
+
+  function itemNameFromLabel(label) {
+    return String(label || '').split(';')[0].replace(ITEM_COUNT_RE, '').trim();
+  }
+
+  // How many of it you hold. The label only carries "× N" when N > 1, and an
+  // equipped item never carries one, so a bare name means one.
+  function itemCountFromLabel(label) {
+    const m = ITEM_COUNT_RE.exec(String(label || '').split(';')[0]);
+    return m ? Number(m[1]) : 1;
+  }
+
+  // ...and the label is not where EQUIPMENT states it. FL writes the count in
+  // two places and never in the same one: an inventory item carries it in the
+  // aria-label ("Witch-Stone × 20; A pebble…") and again in a
+  // `.js-item-value` span beside the label, but a piece of equipment in the
+  // equip drawer -- which is the only place a spare weapon, hat or pair of
+  // boots ever appears -- carries no "× N" at all and only the span:
+  //
+  //   <div class="icon icon--available-item" data-quality-id="127763">
+  //     <div aria-label="Scrimshander Carving Knife; Watchful +3; …">…</div>
+  //     <span class="js-item-value icon__value">4</span>
+  //
+  // Reading the label alone therefore counted every duplicate piece of
+  // equipment as one, and a character sitting on four Scrimshander Carving
+  // Knives was told they had no spares to trade in (reported 2026-09-06, and
+  // the markup above is that character's; the fix is confirmed in-game the
+  // same day). The span wins wherever it is
+  // there; the label stays as the fallback, and an equipped item (`.equipped-
+  // item`, which has neither) still reads as the one you are wearing.
+  function itemCountFromNode(el, label) {
+    const value = el && el.querySelector ? el.querySelector('.js-item-value') : null;
+    const n = value ? Number(String(value.textContent).replace(/[^0-9]/g, '')) : NaN;
+    if (n > 0) return n;
+    return itemCountFromLabel(label);
+  }
+
+  // Every item on the Possessions tab as a Map of normalised name ->
+  // { name, count }, or null when this isn't that tab. The null matters: the
+  // Myself tab has no `[data-quality-id]` at all, so an empty result there
+  // would otherwise read as "you own nothing".
+  //
+  // Counts are taken as a MAX and never summed, because the same item shows up
+  // more than once: an item you are wearing is both `div.equipped-item` and a
+  // row in the equip drawer. Summing would report two of everything equipped.
+  function readPossessionCounts(doc) {
+    const d = doc || document;
+    const nodes = d.querySelectorAll(OWNED_MARKER);
+    if (!nodes.length) return null;
+    const held = new Map();
+    nodes.forEach(function (el) {
+      const labelled = el.getAttribute('aria-label') != null ? el : el.querySelector('[aria-label]');
+      const label = labelled && labelled.getAttribute('aria-label');
+      const name = label && itemNameFromLabel(label);
+      if (!name) return;
+      const key = itemKey(name);
+      const count = itemCountFromNode(el, label);
+      const seen = held.get(key);
+      if (!seen) held.set(key, { name: name, count: count });
+      else if (count > seen.count) seen.count = count;
+    });
+    return held;
+  }
+
+
+  // The player's own name, from the screen-reader sidebar's "It's <name>!"
+  // greeting. That block is on every page, not just the Myself tab, which is
+  // what makes it usable as the cache's identity check. Other /profile/ links
+  // on a page can belong to other people, so this is scoped to that greeting.
+  function characterName(doc) {
+    const a = (doc || document).querySelector('#accessible-sidebar .welcome a[href^="/profile/"]');
+    const href = a ? (a.getAttribute('href') || '') : '';
+    const m = href.match(/^\/profile\/(.+)$/);
+    try {
+      return m ? decodeURIComponent(m[1]) : null;
+    } catch (e) {
+      return m ? m[1] : null;
+    }
+  }
+
+  // Every reading is banked, because it is read where it is shown -- the
+  // Myself tab, Possessions -- and wanted while you are anywhere else. A
+  // cached figure is always LABELLED with its age; it is a stale answer
+  // offered as a stale answer, never passed off as current.
+  function loadCache(key, version) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      const rec = JSON.parse(raw);
+      if (!rec || rec.v !== version) return null;
+      // A different character's numbers are worse than none. When the current
+      // name is unreadable we can't check, so the record's own name is shown.
+      const who = characterName();
+      if (who && rec.character && who !== rec.character) return null;
+      return rec;
+    } catch (e) {
+      return null; // private mode, quota, corrupt JSON -- all mean "no cache"
+    }
+  }
+
+  function saveCache(key, rec) {
+    try {
+      localStorage.setItem(key, JSON.stringify(rec));
+    } catch (e) { /* storage unavailable; the live read still works */ }
+  }
+
+  // --- refreshing without leaving the page -------------------------------
+  //
+  // `fetch('/myself')` does NOT work here, and it is worth writing down why so
+  // nobody tries it again: Fallen London is a client-rendered React app, and
+  // the HTML routes serve a ~4.7KB shell whose <div id="root"> holds a loading
+  // splash and nothing else. There is no quality list in the response to
+  // parse. (Checked against the live site, not assumed.)
+  //
+  // What does work is a hidden same-origin iframe: point it at the route, let
+  // the app boot inside it, and read its document once the markup we want has
+  // appeared. It costs a second boot of the SPA -- a few seconds and some
+  // bandwidth -- which is why it is throttled below and can be switched off.
+  // /myself and /possessions are plain views; loading them spends no actions.
+  //
+  // VERIFIED WORKING in-game (reported 2026-09-02). The guards below stay
+  // anyway: if the iframe ever comes back empty, every caller treats that as
+  // "no refresh" and falls through to the cache, so the failure mode is the
+  // panel you had before, never a wrong number.
+
+  const REFRESH_TIMEOUT_MS = 20000;
+
+  function loadInFrame(path, extract) {
+    return new Promise(function (resolve) {
+      let frame;
+      let poll = null;
+      let timer = null;
+      let settled = false;
+      const finish = function (value) {
+        if (settled) return;
+        settled = true;
+        if (poll) clearInterval(poll);
+        if (timer) clearTimeout(timer);
+        if (frame && frame.parentNode) frame.remove();
+        resolve(value || null);
+      };
+      try {
+        frame = h('iframe', {
+          src: path,
+          title: 'UX Enhancers background refresh',
+          // Off-screen rather than display:none -- a display:none iframe is
+          // allowed to skip layout, and the app inside needs to actually run.
+          css: 'position:fixed;left:-10000px;top:0;width:1280px;height:900px;'
+            + 'border:0;opacity:0;pointer-events:none;',
+        });
+        frame.setAttribute('aria-hidden', 'true');
+        frame.setAttribute('tabindex', '-1');
+        document.body.appendChild(frame);
+        poll = setInterval(function () {
+          let doc = null;
+          try {
+            doc = frame.contentDocument;
+          } catch (e) {
+            return finish(null); // cross-origin redirect (logged out, say)
+          }
+          if (!doc || !doc.body) return;
+          let got = null;
+          try {
+            got = extract(doc);
+          } catch (e) {
+            return finish(null);
+          }
+          if (got) finish(got);
+        }, 300);
+        timer = setTimeout(function () { finish(null); }, REFRESH_TIMEOUT_MS);
+      } catch (e) {
+        finish(null);
+      }
+    });
+  }
+
+  // One refresh at a time, and never two of these racing each other.
+  let refreshing = null;
+
+  // Refreshes everything the festival and Port Carnelian read, off two page
+  // loads -- and shares each page it loads, so UX Enhancers banks the Factions
+  // numbers off the same boot rather than paying for another.
+  function refreshBackgroundState() {
+    if (refreshing) return refreshing;
+    refreshing = (async function () {
+      let changed = false;
+      // Sequential, not parallel: two copies of the SPA booting at once is a
+      // lot of work for the browser, and nothing here is urgent.
+      if (!readQualities()) {
+        const scan = await loadInFrame('/myself', function (doc) {
+          const got = myselfLoaded(doc);
+          if (got) shareFrame('/myself', doc);
+          return got;
+        });
+        if (bankFotzQualities(scan)) changed = true;
+        if (bankPcQualities(scan)) changed = true;
+      }
+      const here = readPossessionCounts();
+      if (!here || !here.size) {
+        const held = await loadInFrame('/possessions', function (doc) {
+          const got = possessionsLoaded(doc);
+          if (got) shareFrame('/possessions', doc);
+          return got;
+        });
+        if (bankItemCounts(held)) changed = true;
+      }
+      return changed;
+    })().catch(function (e) {
+      console.error('FL Choice Helper: background refresh failed.', e);
+      return false;
+    }).then(function (v) {
+      refreshing = null;
+      return v;
+    });
+    return refreshing;
+  }
+
+  // Auto-refresh is on by default but remembered, so a slow connection can
+  // turn it off and keep the (labelled) cached numbers.
+  const AUTO_KEY = 'fl-ux-auto-refresh';
+
+  function autoRefreshEnabled() {
+    try {
+      return localStorage.getItem(AUTO_KEY) !== '0';
+    } catch (e) {
+      return true;
+    }
+  }
+
+  function setAutoRefresh(on) {
+    try {
+      localStorage.setItem(AUTO_KEY, on ? '1' : '0');
+    } catch (e) { /* nothing to do */ }
+  }
+
+  // Don't boot the SPA again for numbers that are already a minute old.
+  const FRESH_MS = 60 * 1000;
+
+  function stateIsFresh(state) {
+    if (!state) return false;
+    const q = state.live || (state.at && Date.now() - state.at < FRESH_MS);
+    const i = state.itemsLive || (state.itemsAt && Date.now() - state.itemsAt < FRESH_MS);
+    return !!(q && i);
+  }
+
+  function ageText(ms) {
+    const mins = Math.max(0, Math.round((Date.now() - ms) / 60000));
+    if (mins < 1) return 'moments ago';
+    if (mins < 60) return mins + (mins === 1 ? ' minute ago' : ' minutes ago');
+    const hours = Math.round(mins / 60);
+    if (hours < 24) return hours + (hours === 1 ? ' hour ago' : ' hours ago');
+    const days = Math.round(hours / 24);
+    return days + (days === 1 ? ' day ago' : ' days ago');
+  }
+
+  // === shared: the other Fallen London script ============================
+  //
+  // UX Enhancers and Choice Helper were one file until UX Enhancers 3.0. A
+  // userscript has no imports, so the two share no code: every helper both
+  // need is carried by both, byte for byte (FallenLondon/test/fl-shared-
+  // helpers.test.mjs holds them to it). What they share at RUN time goes
+  // through the page instead, as one array and one event on `window` --
+  // both scripts are `@grant none`, so both see the page's own `window`.
+  //
+  //  - PANEL_REGISTRY is the launcher menu as far as the other script is
+  //    concerned. Choice Helper pushes its panels onto it; UX Enhancers reads
+  //    it every time the menu is drawn, so which of the two loaded first does
+  //    not matter.
+  //  - FRAME_EVENT hands a hidden frame's document across while the frame is
+  //    still up. A background refresh boots the whole SPA a second time, and
+  //    before the split ONE boot of /myself banked the Factions, festival and
+  //    Port Carnelian numbers together. Two scripts each booting their own
+  //    would double that, so whoever loads a page shares it, the other banks
+  //    its own numbers off it, and its cache is then fresh enough that its
+  //    own refresh has nothing to do.
+  //
+  // Only SCRIPT_ID differs between the two files, and it is declared outside
+  // this block.
+  const PANEL_REGISTRY = '__flUxPanels';
+  const FRAME_EVENT = 'fl-ux-shared-frame';
+
+  function pageWindow() {
+    return typeof window !== 'undefined' && window && window.addEventListener ? window : null;
+  }
+
+  // The shared panel list, created by whichever script asks first.
+  function sharedPanels() {
+    const w = pageWindow();
+    if (!w) return null;
+    if (!Array.isArray(w[PANEL_REGISTRY])) w[PANEL_REGISTRY] = [];
+    return w[PANEL_REGISTRY];
+  }
+
+  // Called from inside a frame's `extract`, which is the only moment the
+  // document is guaranteed to still be there: `loadInFrame` removes the frame
+  // as soon as `extract` answers. The listeners run synchronously, so they
+  // are done reading before that happens.
+  function shareFrame(path, doc) {
+    const w = pageWindow();
+    if (!w || !w.dispatchEvent || typeof CustomEvent !== 'function') return;
+    try {
+      w.dispatchEvent(new CustomEvent(FRAME_EVENT, {
+        detail: { from: SCRIPT_ID, path: path, doc: doc },
+      }));
+    } catch (e) { /* the other script just refreshes on its own */ }
+  }
+
+  function onSharedFrame(handler) {
+    const w = pageWindow();
+    if (!w) return;
+    w.addEventListener(FRAME_EVENT, function (e) {
+      const d = e && e.detail;
+      if (!d || d.from === SCRIPT_ID || !d.doc) return;
+      try {
+        handler(d.path, d.doc);
+      } catch (err) {
+        console.error(SCRIPT_ID + ': reading a shared frame failed.', err);
+      }
+    });
+  }
+
+  // When a frame's page counts as loaded. Shared, so the page one script
+  // shares is always one the other would have accepted from its own frame.
+  function myselfLoaded(doc) {
+    const got = readQualities(doc);
+    // Wait for a list that actually has faction qualities in it -- a
+    // half-rendered page can show a handful and would bank a page of false
+    // zeroes otherwise.
+    if (!got) return null;
+    for (const key of got.values.keys()) {
+      if (/^(Renown|Favours|Connected):/.test(key)) return got;
+    }
+    return null;
+  }
+
+  function possessionsLoaded(doc) {
+    const got = readPossessionCounts(doc);
+    return got && got.size > 20 ? got : null;
+  }
+
+  // === feature: The Crowds of Spite card ratings =========================
+  //
+  // Rates the opportunity cards of The Crowds of Spite (the Pickpocket's
+  // Promenade) by how many bonus Pickpocket's Trophies they pay.
+  //
+  // Nothing here is gated on "am I in the Crowds of Spite?", because there is
+  // no verified selector for the area header. The card table IS the scope: a
+  // card whose name isn't in it gets no badge, and the names in it ("A
+  // mould-spangled curiosity shop", "A... pickpocket?", "Watchful Eyes")
+  // belong to this one area. If a name ever collides with an unrelated
+  // storylet elsewhere in London, gating is the fix -- not a shorter table.
+
+  // From The Crowds of Spite (Guide) on fallenlondon.wiki. `bonus` is the
+  // EXTRA Pickpocket's Trophies a successful pickpocket gives on top of the
+  // trophies your base Shadowy earns you from the skill table -- it is the
+  // number the badge shows. `null` means the card pays no trophies at all and
+  // needs a word instead of a score (`badge`).
+  //
+  // `inferior` marks the two targets that draw from the *inferior* skill
+  // table: their Shadowy-based trophies come off a shallower curve, so at most
+  // Shadowy levels they pay one trophy less than every other card before their
+  // bonus is even added. That is the difference the dagger on the badge flags.
+  //
+  // Every card gives Approaching your Destination +1 unless `pass`/`fail`/
+  // `note` says otherwise; `pass` is the non-pickpocketing option, `fail` is
+  // what a failed pickpocket costs.
+  //
+  // To add or correct a card: edit this array. Nothing else knows the names.
+  const SPITE_CARDS = [
+    {
+      name: 'A drunk', shadowy: 3, bonus: 0, inferior: true,
+      fail: 'Unseen -1',
+    },
+    {
+      name: 'A mould-spangled curiosity shop', shadowy: 5, bonus: 1, inferior: true,
+      pass: 'Window-shopping: Unseen +1, AYD -1',
+      fail: 'Unseen -1',
+      note: 'The only card in the area that can lower Approaching your Destination.',
+    },
+    {
+      name: 'A Street Performer', shadowy: 5, bonus: 1,
+      pass: 'Unseen +1', fail: 'Unseen -1',
+    },
+    {
+      name: 'An Argument', shadowy: 10, bonus: 1,
+      pass: 'Unseen +1', fail: 'Unseen -1',
+    },
+    {
+      name: 'Gaoler', shadowy: 10, bonus: 1,
+      fail: 'Unseen -1',
+      note: 'The pickpocket also gives Nightmares.',
+    },
+    {
+      name: 'The Costermonger', shadowy: 12, bonus: 1,
+      fail: 'Unseen -1',
+    },
+    {
+      name: 'The Rat-Catcher', shadowy: 12, bonus: null, badge: 'rats',
+      fail: 'Unseen -1, Wounds +1 CP',
+      note: 'No trophies. Gives Rat on a String +11 and Venge-Rat Corpse +1, ' +
+            'and does not raise Approaching your Destination.',
+    },
+    {
+      name: 'The Actress', shadowy: 15, bonus: 2,
+      fail: 'Unseen -1',
+    },
+    {
+      name: 'A Shopkeeper', shadowy: 20, bonus: 2,
+      fail: 'Unseen -1',
+    },
+    {
+      name: 'Watchful Eyes', shadowy: 30, bonus: null, badge: 'AYD!', warn: true,
+      fail: 'Unseen -1',
+      note: 'No trophies, and EVERY option gives AYD +2. Leave it in your hand ' +
+            'unless you actually want the promenade to end.',
+    },
+    {
+      name: 'A Constable!', shadowy: 30, bonus: 3,
+      pass: 'AYD +2', fail: 'AYD +3, Unseen -2',
+      note: 'The pickpocket itself gives AYD +2.',
+    },
+    {
+      name: 'A Special Constable', shadowy: 40, bonus: 4,
+      fail: 'AYD +2, Unseen -2',
+    },
+    {
+      name: 'A... pickpocket?', shadowy: 50, bonus: 4,
+      fail: "Pickpocket's Trophy -3",
+    },
+    {
+      name: 'Jack!', shadowy: 60, bonus: 9,
+      pass: 'AYD +3, Unseen +1', fail: 'Wounds +3 CP',
+      note: 'The pickpocket gives AYD +2. A second option (Dangerous 100) pays no ' +
+            'trophies but gives Unseen +1, a Touching Love Story and Urchin/' +
+            'Constable favours, and leaves AYD alone.',
+    },
+    {
+      name: 'The Opera Singer', shadowy: 60, bonus: 6, early: true,
+      fail: 'Unseen -1',
+    },
+    {
+      name: 'The Novelist', shadowy: 63, bonus: 7, early: true,
+      fail: 'Unseen -1',
+    },
+    {
+      name: 'The Confidence Artist', shadowy: 65, bonus: 8, early: true,
+      fail: 'Unseen -1',
+    },
+  ];
+
+  // Names are matched loosely: lowercased, with every run of non-alphanumerics
+  // squashed to one space. That absorbs the punctuation the game and the wiki
+  // can disagree about -- "A Constable!" / "A Constable", "A... pickpocket?" /
+  // "A pickpocket" -- and the hyphen in "The Rat-Catcher". None of the squashed
+  // keys collide with each other.
+  //
+  // HTML TAGS COME OFF FIRST, and they have to: Fallen London writes markup
+  // into the names it hands us. A festival ship's Possessions label italicises
+  // its class -- the attribute holds `&lt;i&gt;Obstinate&lt;/i&gt;-class
+  // Cruiser`, which the HTML parser decodes, so `getAttribute` returns real
+  // tags. Squashing that straight away does not remove the tags, it DISSOLVES
+  // them: `<` `>` and `/` go, and their letters stay behind as words, giving
+  // "i obstinate i class cruiser" where the table says "obstinate class
+  // cruiser". A ship the player was wearing therefore read as un-owned
+  // (reported 2026-09-10, with the capture).
+  //
+  // Only a real tag is taken -- `</?tag …>` -- and never any pair of angle
+  // brackets, so prose that happens to contain `a < b > c` still loses the
+  // brackets to the squash and keeps every word around them.
+  const TAG_RE = /<\/?[a-z][a-z0-9]*(?:\s[^<>]*)?>/gi;
+
+  function normalizeName(name) {
+    return String(name == null ? '' : name)
+      .replace(TAG_RE, ' ')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+  }
+
+  // The key an ITEM is filed under: `normalizeName` with a leading article
+  // thrown away as well.
+  //
+  // Every table in this file takes an item's name from its WIKI PAGE TITLE,
+  // which keeps the article -- "A Faceted Decanter of Drownie Effluvia", "An
+  // Inquisitive Lamp-cat". Fallen London's own Possessions markup drops it:
+  // the captured `aria-label` reads "Scrimshander Carving Knife", not "A
+  // Scrimshander Carving Knife". So the two vocabularies disagree on a word
+  // that carries no meaning, and a straight `normalizeName` comparison filed
+  // them as two different items -- which is exactly what happened (reported
+  // 2026-09-10: the checklist called a Decanter missing that was sitting in
+  // the player's hold).
+  //
+  // Patching the table entry would have fixed ONE row. It is a whole class:
+  // the same table already spells the Knife the game's way and the Jillyfleur
+  // Cloak the wiki's, and every faction and Renown item is transcribed from
+  // the wiki too. So the gap is closed once, here, at the one boundary where a
+  // wiki name is compared against a game name -- and the tables go on citing
+  // their source, which is what makes them checkable.
+  //
+  // Used on BOTH sides: the possessions map is keyed by it and every lookup
+  // goes through it, so it does not matter which side has the article. It is
+  // deliberately NOT what card and storylet names use -- there a leading "A"
+  // is part of a title Fallen London and the wiki agree on ("A Reef of
+  // Wrecks"), and throwing it away would only invite a collision.
+  function itemKey(name) {
+    const key = normalizeName(name);
+    // Never down to nothing: an item actually called "The" keeps its name.
+    const bare = key.replace(/^(?:a|an|the) +/, '');
+    return bare || key;
+  }
+
+  const SPITE_BY_NAME = new Map(
+    SPITE_CARDS.map(function (c) { return [normalizeName(c.name), c]; }));
+
+  function lookupSpiteCard(name) {
+    return SPITE_BY_NAME.get(normalizeName(name)) || null;
+  }
+
+  // Grey at +0 through to gold at +9. The point of the colour is that a hand
+  // can be read at a glance, without stopping to compare numbers.
+  const RATING_COLORS = [
+    '#6b6b6b', // +0
+    '#7a5c3a', // +1
+    '#8a6d3b', // +2
+    '#78733a', // +3
+    '#68763a', // +4
+    '#54783e', // +5
+    '#417a4c', // +6
+    '#357a62', // +7
+    '#2f7378', // +8
+    '#b8912f', // +9
+  ];
+  const COLOR_NO_TROPHIES = '#3f5f8a'; // pays in something other than trophies
+  const COLOR_WARN = '#8a3b3b';        // playing this is usually a mistake
+
+  const SPITE_CLASS = 'fl-ux-spite';
+  const SPITE_FLAG = 'flUxSpite';
+  const INFERIOR_MARK = '†'; // dagger
+
+  // What to draw for a card: the label, its colour and the tooltip. Kept pure
+  // (card in, description out) so it can be unit-tested without a DOM.
+  function spiteBadgeSpec(card) {
+    const scored = typeof card.bonus === 'number';
+    const text = scored
+      ? '+' + card.bonus + (card.inferior ? INFERIOR_MARK : '')
+      : (card.badge || '?');
+    const color = card.warn
+      ? COLOR_WARN
+      : (scored ? (RATING_COLORS[card.bonus] || RATING_COLORS[0]) : COLOR_NO_TROPHIES);
+
+    const lines = [card.name];
+    lines.push(scored
+      ? 'Bonus trophies: +' + card.bonus + ' (on top of what your base Shadowy gives)'
+      : 'Bonus trophies: none');
+    lines.push('Pickpocket challenge: Shadowy ' + card.shadowy);
+    if (card.inferior) {
+      lines.push(INFERIOR_MARK + ' Uses the INFERIOR skill table: the trophies your ' +
+        'base Shadowy contributes come off a lower curve, costing you about one ' +
+        'trophy compared with every other target.');
+    }
+    if (card.early) lines.push('Only appears while Approaching your Destination is below 5.');
+    if (card.pass) lines.push('Pass by: ' + card.pass);
+    if (card.fail) lines.push('Pickpocket failure: ' + card.fail);
+    if (card.note) lines.push(card.note);
+    lines.push('Unless stated otherwise, every action here gives AYD +1.');
+    return { text: text, color: color, title: lines.join('\n') };
+  }
+
+  // The area gate. FL states the area in the screen-reader greeting on every
+  // page, and during a promenade that greeting reads, verbatim:
+  //
+  //   "It's <name>! Welcome to The Crowds of Spite, delicious friend!"
+  //
+  // CONFIRMED in-game (2026-09-02), which is what let this be tightened from
+  // "allow anything we don't recognise" to an exact list. It used to carry the
+  // four route names (The Tenterhooks, Smashtile Alley, Blythenhale,
+  // Strung-Up Street) as guesses at what the promenade might call itself, plus
+  // a LONDON_ELSEWHERE deny-list to make the permissive default survivable.
+  // Both are gone, on the evidence of the same capture: the accessible map
+  // (`#accessible-sidebar .accessible-map-menu`) lists every area you can
+  // reach, and it contains "Spite", "The Crowds of Spite" and "Area-Diving in
+  // Spite" but NONE of the four route names -- so the routes are storylets
+  // inside the area, not areas, and the greeting never names one.
+  //
+  // "Spite" is the parent area and is kept for the boundary either side of a
+  // promenade; it costs nothing, since the cards only exist in the Crowds.
+  const SPITE_AREAS = [
+    'The Crowds of Spite',
+    'Spite',
+  ].map(normalizeName);
+
+  // The one remaining fail-open: if the greeting can't be read at all -- FL
+  // renamed the block, say -- fall back to allowing badges, since the card
+  // table still scopes them and losing the feature outright is the worse
+  // outcome. An area that IS readable and isn't ours now blocks, which is the
+  // whole point of the tightening.
+  function inCrowdsOfSpite() {
+    const area = normalizeName(currentArea());
+    if (!area) return true;
+    return SPITE_AREAS.indexOf(area) !== -1;
+  }
+
+  function spiteCardRatings() {
+    if (!inCrowdsOfSpite()) {
+      // Clear any badge left over from before you walked out.
+      eachCardName(function (host, name, place, style) {
+        attachBadge(host, {
+          cls: SPITE_CLASS, flag: SPITE_FLAG, value: name, spec: null,
+          place: place, style: style,
+        });
+      });
+      return;
+    }
+    eachCardName(function (host, name, place, style) {
+      const card = lookupSpiteCard(name);
+      attachBadge(host, {
+        cls: SPITE_CLASS,
+        flag: SPITE_FLAG,
+        value: name,
+        spec: card ? spiteBadgeSpec(card) : null,
+        place: place,
+        style: style,
+      });
+    });
+  }
+
+  // === feature: Zailing the Unterzee card ratings ========================
+  //
+  // Rates the opportunity cards you draw while zailing. Zailing is a race
+  // between two numbers: Zailing... (progress towards your destination, 80 for
+  // a direct route, 160 or 220 across regions) and Troubled Waters, which at 8
+  // kills you. Zee cards are NOT discardable, so the only decision you ever
+  // make out there is which of the cards in your hand to play next -- which is
+  // exactly what a badge on each card can answer.
+  //
+  // Everything below is transcribed from Zailing (Guide) and from the
+  // individual card and option pages under Category:Cards - Zailing the
+  // Unterzee on fallenlondon.wiki. Where the guide's summary table and a
+  // card's own page disagreed, the card page won (it is the page the wiki
+  // keeps up to date): the guide says A Spit of Land's island stop is -2
+  // Troubled Waters, its own option page says -1, and -1 is what is here.
+  //
+  // To add or correct a card: edit ZEE_CARDS. Nothing else knows the names.
+
+  // How far you have to get, and roughly what that costs in actions. From the
+  // guide's "Gaining progress" table. Most options give Zailing Speed + 1-5,
+  // and a failure usually gives half of that.
+  const ZEE_ROUTES = [
+    { name: 'Direct route', of: 'a destination in the region you are already in', need: 80, tramp: '2', other: '1.5', clipper: '1.5, rarely 1' },
+    { name: 'Along the currents', of: 'a region reached the way the currents run (anticlockwise)', need: 160, tramp: '3.5', other: '3', clipper: '2.5, rarely 2' },
+    { name: 'Through the Snares', of: 'the shortcut across the middle; needs Zeefaring 3', need: 160, tramp: '3.5', other: '3', clipper: '2.5, rarely 2' },
+    { name: 'Against the currents', of: 'a region reached the wrong way round', need: 220, tramp: '5', other: '4', clipper: '3' },
+  ];
+
+  // Zee Peril per region: the difficulty of every broad challenge out there.
+  // The narrow column is what a skill challenge (Zeefaring, Shapeling Arts...)
+  // scales to; the Zeefaring checks on the non-piracy cards do not scale.
+  const ZEE_REGIONS = [
+    { name: 'Home Waters', peril: 100, narrow: 3, note: 'London and Mutton Island are here' },
+    { name: "Shepherd's Wash", peril: 110, narrow: 3, note: 'Southern Wind is found here' },
+    { name: 'Stormbones', peril: 110, narrow: 3, note: 'Northern Wind is found here' },
+    { name: 'The Sea of Voices', peril: 150, narrow: 5, note: 'passing by discovers Mangrove College' },
+    { name: 'The Salt Steppe', peril: 200, narrow: 9, note: 'Eastern Wind is found here; passing by discovers the Khanate' },
+    { name: 'The Pillared Sea', peril: 210, narrow: 9, note: 'passing by discovers Irem' },
+    { name: 'The Snares', peril: 250, narrow: 12, note: 'needs Zeefaring 3; passing by discovers Corsair’s Forest' },
+  ];
+
+  // The six zee-threats. Each one on its own does little; each one TOGETHER
+  // with Troubled Waters 7 puts its own black card in your hand, and black
+  // cards are urgent, so they crowd out everything else until you clear them.
+  const ZEE_MENACES = [
+    { name: 'Rumbling Stomachs', from: 'your crew going hungry', card: 'A Worrying Appetite' },
+    { name: 'Silent Stalker', from: 'zee-monsters noticing you', card: 'Signs of Pursuit' },
+    { name: 'Creeping Fear', from: 'frightening your crew', card: 'A Growing Concern' },
+    { name: 'Groaning Hull', from: 'damaging the ship', card: 'Taking in Water' },
+    { name: 'Mutinous Whispers', from: 'disrespecting your crew', card: 'Signs of Disloyalty' },
+    { name: 'Unwelcome on the Waters', from: 'failed piracy', card: 'Zeeborne Pariahs' },
+  ];
+
+  // Where you can dock, what region it is in, whether arriving there wipes
+  // Troubled Waters and every zee-threat with it, and what it takes to be
+  // able to sail there at all.
+  //
+  // From the guide's Locations table, its "One-Time and Similar Locations"
+  // and "Hunting Locations" tables, and its "Discovering locations" prose,
+  // which is where the `how` lines come from.
+  //
+  // Three things this table deliberately keeps apart, because they are three
+  // different claims and one `safe` boolean would fold them into two:
+  //
+  //   safe: true    docking here resets Troubled Waters and the zee-threats.
+  //   safe: false   a real dock that resets nothing. Port Cecil, Godfall,
+  //                 Irem, Gaider's Mourn and Tanah-Chook are all ports and
+  //                 none of them is a reset.
+  //   safe: null    not a dock at all (the hunting grounds), so the question
+  //                 does not arise -- they reset nothing either, but nobody
+  //                 sails to one expecting a harbour.
+  //
+  // One conflict in the source, recorded rather than resolved: the guide's
+  // table shows Port Cecil and Tanah-Chook with a plain "unsafe" cross, while
+  // the hidden sort key on those two cells reads "safe". The visible cross is
+  // what is here, since that is what the table says to a reader, and both
+  // rows carry a note saying so. Report either way round in-game.
+  //
+  // `unlock` is what has to be true before the destination appears; null
+  // means nothing at all. `how` is the way that quality is come by, where the
+  // guide spells it out. To add or correct a port: edit ZEE_PORTS.
+  const ZEE_PORTS = [
+    // --- ordinary destinations -------------------------------------------
+    { name: 'Wolfstack Docks', as: 'London', regions: ['Home Waters'], safe: true, unlock: null },
+    { name: 'Mutton Island', regions: ['Home Waters'], safe: true, unlock: null,
+      note: 'Home of the Fruits of the Zee Festival.' },
+    { name: "Hunter's Keep", regions: ['Home Waters'], safe: false, unlock: null },
+    { name: 'Bullbone Island', regions: ['Home Waters'], safe: false,
+      unlock: 'Embarking on a Voyage of Scientific Discovery 3' },
+    { name: 'Heartscross House', as: 'Port Carnelian', regions: ["Shepherd's Wash"], safe: true,
+      unlock: 'Imperial Legitimacy', how: 'Granted at the Foreign Office in London.' },
+    { name: 'The Court of the Wakeful Eye', regions: ["Shepherd's Wash"], safe: true,
+      unlock: 'Associating with Radical Academics 20',
+      note: 'Also needs a successful governorship at Heartscross House.' },
+    { name: 'The Convent', as: 'Abbey Rock', regions: ["Shepherd's Wash"], safe: true,
+      unlock: 'Ambition: Bag a Legend! 44' },
+    { name: 'Apis Meet', regions: ["Shepherd's Wash"], safe: true, unlock: 'Flint', fate: true },
+    { name: 'Godfall', regions: ["Shepherd's Wash"], safe: false, unlock: 'Discovered: Godfall',
+      how: 'Draw Row, row, row in Shepherd’s Wash and spend some wine, or spend a Relatively Safe Zee Lane at Wolfstack with Making Progress in the Labyrinth of Tigers 16.' },
+    { name: 'Iron Republic Streets', as: 'The Iron Republic', regions: ["Shepherd's Wash"], safe: false,
+      unlock: 'Iron Republic Safe-Conduct', how: 'From Spending Secrets and Counting the Days.' },
+    { name: 'The Chapel of Lights', regions: ['Stormbones'], safe: true,
+      unlock: 'Seeking Mr Eaten\'s Name 49, A Book of Crimson Prayer',
+      note: 'Docking here puts you in Your Lodgings.' },
+    { name: 'Port Cecil', regions: ['Stormbones'], safe: false,
+      unlock: 'Discovered: The Principles of Coral',
+      how: 'Embarking on a Voyage of Scientific Discovery, plus either drawing A Coral Commotion in Stormbones or spending 8 x Partial Map.',
+      note: 'The guide’s table marks it unsafe; its hidden sort key says safe. Unverified in-game.' },
+    { name: 'Corpsecage Island', regions: ['Stormbones'], safe: false,
+      unlock: 'Embarking on a Voyage of Scientific Discovery 3',
+      note: 'Has a separate option for Ambition: Heart’s Desire!' },
+    { name: 'Set a course for the tomb colony of Tanah-Chook', as: 'The Tomb Colonies (Tanah-Chook)',
+      regions: ['Stormbones'], safe: false, unlock: 'All Things Must End', fate: true,
+      note: 'The guide’s table marks it unsafe; its hidden sort key says safe. Unverified in-game.' },
+    { name: 'Polythreme Docks', as: 'Polythreme', regions: ['The Sea of Voices'], safe: true,
+      unlock: 'Screaming Map',
+      note: 'Reachable before you own a ship, with A Ticket to Polythreme at Wolfstack Docks.' },
+    { name: 'Mangrove College', regions: ['The Sea of Voices'], safe: false,
+      unlock: 'Discovered: Mangrove College',
+      how: 'Discovered by passing by — zail to anywhere in the Sea of Voices.' },
+    { name: 'Grunting Fen', regions: ['The Sea of Voices'], safe: false,
+      unlock: 'Embarking on a Voyage of Scientific Discovery 3, Screaming Map' },
+    { name: 'The Copper Quarter', as: "Khan's Heart", regions: ['The Salt Steppe'], safe: true,
+      unlock: 'Discovered: The Khanate',
+      how: 'By passing by (zail for the Sea of Voices, then switch destination to London), by a Salt Steppe Atlas option at Zeefaring 3, or from the Balmoral story with a Salt Steppe Atlas.' },
+    { name: 'Irem', regions: ['The Pillared Sea'], safe: false, unlock: 'Iremi Zee-Chart' },
+    { name: "Gaider's Mourn", regions: ['The Snares'], safe: false,
+      unlock: "Discovered: Corsair's Forest, Discovered: Gaider's Mourn",
+      how: 'Spend a Relatively Safe Zee Lane on A Return to Terra Firma at base Zeefaring 5.' },
+
+    // --- one-time and similar --------------------------------------------
+    { name: 'A Secluded Coastline', as: 'Your Flotilla', regions: ['Home Waters'], safe: false,
+      once: true, unlock: 'Ambition: Light Fingers! 51-64' },
+    { name: 'The Approach to the Mountain', regions: ["Shepherd's Wash"], safe: true, once: true,
+      unlock: 'Seeking Mr Eaten\'s Name 63, The Hollow Heart',
+      note: 'Moves you to Your Lodgings via The Chapel of Lights.' },
+    { name: 'Cline', regions: ["Shepherd's Wash"], safe: false, once: true,
+      unlock: 'Associating with Radical Academics exactly 100' },
+    { name: 'Avid Horizon', regions: ['Stormbones'], safe: false, once: true,
+      unlock: 'Embarked on a Sanctioned Expedition to the North' },
+    { name: 'Avid Horizon', as: 'Avid Horizon (NORTH)', regions: ['Stormbones'], safe: true, once: true,
+      unlock: 'Seeking Mr Eaten\'s Name 77',
+      note: 'Safe, and it also destroys your ship and your An Explorer of the Unterzee qualities.' },
+
+    // --- hunting grounds: not docks --------------------------------------
+    { name: 'Hunt a feral crocodile', as: 'Feral Crocodile Hunting Grounds', regions: ['Home Waters'],
+      safe: null, hunt: true, unlock: 'Monstrous Anatomy 5' },
+    { name: 'Estimated Angler Crab Population', as: 'Angler Crab Spawning Grounds',
+      regions: ["Shepherd's Wash"], safe: null, hunt: true,
+      unlock: 'Estimated Angler Crab Population, base Monstrous Anatomy 1' },
+    { name: 'Remaining Mass of the Ravenous Lifeberg', as: 'Lifeberg Hunting Grounds',
+      regions: ["Shepherd's Wash", 'The Sea of Voices', 'The Salt Steppe'], safe: null, hunt: true,
+      unlock: 'Remaining Mass of the Ravenous Lifeberg, base Monstrous Anatomy 1' },
+    { name: 'Plated Seal', as: 'Plated Seal Spawning Grounds', regions: ['Stormbones'],
+      safe: null, hunt: true,
+      unlock: 'Making Progress in the Labyrinth of Tigers 16, and no Plated Seals in hand' },
+  ];
+
+  // The three winds, each of which starts a dream storyline back in London.
+  const ZEE_WINDS = [
+    { name: 'Southern Wind', where: "Shepherd's Wash", card: 'The Light of the Mountain', dream: 'I Shot the Albatross', cost: '15 CP of Nightmares over 11 cards' },
+    { name: 'Northern Wind', where: 'Stormbones', card: 'A Wind from the North', dream: 'Betwixt Us and the Sun', cost: '16-19 CP of Nightmares over 11 cards' },
+    { name: 'Eastern Wind', where: 'The Salt Steppe', card: 'A Distant Gleam', dream: 'Upon a Painted Sea', cost: 'no Nightmares at all, over 11 cards' },
+  ];
+
+  // --- the cards ---------------------------------------------------------
+  //
+  // Each entry is one opportunity card:
+  //
+  //   where      'any' (drawn in every region) or the regions it belongs to.
+  //   freq       the wiki's Frequency. 'High Urgency' is a black/sinister
+  //              card: urgent, so it is dealt before anything else.
+  //   urgent     set on those, because it changes how the badge reads -- an
+  //              urgent card is not a choice, it is a blockage.
+  //   strictZee  only badge this card when the area actually reads as a zee
+  //              region (see inZee below). Exactly one card needs it.
+  //   prefix     match on the card's opening words instead of the whole name,
+  //              for the two piracy cards whose title carries your quarry's
+  //              ship type.
+  //   cardNeeds  what has to be true for the card to be in your deck at all.
+  //
+  // and each option:
+  //
+  //   ch     the challenge, if any. A broad one ("Watchful vs Zee Peril") is
+  //          against the region's Zee Peril, so it gets harder the further
+  //          out you are; a narrow one ("Zeefaring 5") mostly does not.
+  //   need   what the option is gated on. `piracy` marks the ones gated on
+  //          Corsair's Colours or a bounty -- a whole separate game the
+  //          Zailing guide deliberately does not cover.
+  //   hidden the option disappears when this is true.
+  //   tw     Troubled Waters change in CP on a success (or outright, for an
+  //          option with no challenge). `twRange` keeps the wiki's wording
+  //          when it recorded a range, `twText` when it sets a level instead.
+  //   prog   Zailing progress as a multiple of your Zailing Speed: 1, 0.5, 0
+  //          for none, and 'flat80' for the one option in the whole deck that
+  //          ignores your ship and simply hands you 80.
+  //   fail   what a failed challenge costs. `rare` is the rare success.
+  const ZEE_CARDS = [
+    // --- Drawn anywhere at zee ---
+    {
+      name: 'A Blank Space on the Charts',
+      where: ['any'],
+      freq: 'High Urgency',
+      urgent: true,
+      cardNeeds: 'Troubled Waters 7, Zailing... 60',
+      note: 'Black card: drawn at Troubled Waters 7 whatever your other menaces are.',
+      opts: [
+        { text: 'There\'s an island here', ch: 'Luck 50%', tw: -5, prog: 0, men: 'Creeping Fear', fail: 'Troubled Waters set to 4, no progress, Creeping Fear, Nightmares +3' },
+        { text: 'Fortuitous fragments', need: 'Partial Map 2 x', tw: null, twText: 'Troubled Waters set to 5', prog: 0, gain: 'costs Partial Map 2' },
+        { text: 'Search the uncharted waters for your quarry', ch: 'Zeefaring 6', need: 'Chasing Down Your Bounty, Corsair\'s Colours 2', tw: -1, prog: 1, gain: 'Chasing Down Your Bounty', rare: 'TW -2-6, full speed', fail: 'TW -5, half speed, Creeping Fear', piracy: true },
+      ],
+    },
+    {
+      name: 'A Bounty Upon Your Head',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'Corsair\'s Colours 2, Chasing Down Your Bounty',
+      opts: [
+        { text: 'Open fire!', ch: 'Zeefaring 13', tw: 5, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold [See below]', rare: 'TW +3, full speed', fail: 'TW +12, half speed, Unwelcome on the Waters', piracy: true },
+        { text: 'Signal the HMS Ramillies for support', ch: 'Zeefaring 11', need: 'The Crew of HMS Ramillies', tw: 5, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold [See below]', rare: 'TW +3, full speed', fail: 'TW +12, half speed, Unwelcome on the Waters', piracy: true },
+        { text: 'Evade them!', ch: 'Zailing Speed vs Zee Peril', tw: 2, twRange: '+2-3', prog: 1, fail: 'TW +8, full speed, Unwelcome on the Waters', piracy: true },
+      ],
+    },
+    {
+      name: 'A Corvette of Her Majesty\'s Navy',
+      where: ['any'],
+      freq: 'Standard',
+      note: 'The semaphore line is full speed for -2 Troubled Waters, but it is hidden above Suspicion 5. Flying Corsair\'s Colours replaces the card with a piracy version.',
+      opts: [
+        { text: 'Exchange pleasantries via semaphore', hidden: 'Suspicion 5, Corsair\'s Colours 2', tw: -2, prog: 1 },
+        { text: 'They\'re not slowing', ch: 'Zailing Speed vs Zee Peril', need: 'Suspicion 5', tw: 3, prog: 1, men: 'Suspicion +3', fail: 'TW +9, full speed, Silent Stalker' },
+        { text: 'Rely on the Commodore\'s old codes', ch: 'A Player of Chess 5', need: 'Overworked Commodore 1 x, A Player of Chess', tw: null, twText: 'Troubled Waters falls by an amount the wiki does not record', prog: 1, men: 'clears Suspicion -3', fail: 'TW +8, full speed, Suspicion +4' },
+        { text: 'Exchange information via semaphore', ch: 'Persuasive vs Zee Peril', need: 'Chasing Down Your Bounty', tw: -2, prog: 1, gain: 'Chasing Down Your Bounty +8', fail: 'TW +6, half speed, Suspicion +2, Unwelcome on the Waters', piracy: true },
+        { text: 'Take them for all they\'ve got', ch: 'Zeefaring 5', need: 'Corsair\'s Colours 2', tw: 4, prog: 1, men: 'Suspicion +1, Unwelcome on the Waters', gain: 'Pieces of Plunder Weighing Down Your Hold 250', rare: 'TW +4, full speed', fail: 'TW +8, half speed, Suspicion +4, Unwelcome on the Waters', piracy: true },
+      ],
+    },
+    {
+      name: 'A Dream of a Cup',
+      where: ['any'],
+      freq: 'Infrequent',
+      cardNeeds: 'Delighted, Nightmares',
+      opts: [
+        { text: 'Drink the wine', need: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall exactly 6', tw: 0, prog: 0, men: 'Nightmares +3', gain: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall +4' },
+        { text: 'Awaken from a familiar dream', need: 'Still Waiting on the Host', tw: 0, prog: 0, men: 'clears Nightmares -3', gain: 'costs Having Recurring Dreams: Rosy Colours Leaping on the Wall' },
+      ],
+    },
+    {
+      name: 'A Dream of a Table',
+      where: ['any'],
+      freq: 'Infrequent',
+      cardNeeds: 'Delighted, Nightmares',
+      opts: [
+        { text: 'Join them at their table', need: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall exactly 5', tw: 0, prog: 0, men: 'Nightmares +3', gain: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall +6' },
+        { text: 'Awaken from a familiar dream', need: 'Still Waiting on the Host', tw: 0, prog: 0, men: 'clears Nightmares -3', gain: 'costs Having Recurring Dreams: Rosy Colours Leaping on the Wall' },
+      ],
+    },
+    {
+      name: 'A Dream of Ascent',
+      where: ['any'],
+      freq: 'Infrequent',
+      cardNeeds: 'Delighted, Nightmares',
+      opts: [
+        { text: 'Fly higher', need: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall exactly 4', tw: 0, prog: 0, men: 'Nightmares +3', gain: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall +5' },
+        { text: 'Awaken from a familiar dream', need: 'Still Waiting on the Host', tw: 0, prog: 0, men: 'clears Nightmares -3', gain: 'costs Having Recurring Dreams: Rosy Colours Leaping on the Wall' },
+      ],
+    },
+    {
+      name: 'A Dream of Designs',
+      where: ['any'],
+      freq: 'Infrequent',
+      cardNeeds: 'Delighted, Nightmares',
+      opts: [
+        { text: 'Sunbathe in the light', need: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall exactly 7', tw: 0, prog: 0, men: 'Nightmares +3', gain: 'Still Waiting on the Host, Whirring Contraption 11, Whirring Contraption 4' },
+        { text: 'Awaken from a familiar dream', need: 'Still Waiting on the Host', tw: 0, prog: 0, men: 'clears Nightmares -3', gain: 'costs Having Recurring Dreams: Rosy Colours Leaping on the Wall' },
+      ],
+    },
+    {
+      name: 'A Dream of Stained-Glass',
+      where: ['any'],
+      freq: 'Infrequent',
+      cardNeeds: 'Delighted, Nightmares',
+      opts: [
+        { text: 'Look into the light', need: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall 1-2', tw: 0, prog: 0, men: 'Nightmares +2', gain: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall +3' },
+        { text: 'Awaken from a familiar dream', need: 'Still Waiting on the Host', tw: 0, prog: 0, men: 'clears Nightmares -3', gain: 'costs Having Recurring Dreams: Rosy Colours Leaping on the Wall' },
+      ],
+    },
+    {
+      name: 'A Dream of Sunbeams',
+      where: ['any'],
+      freq: 'Infrequent',
+      cardNeeds: 'Delighted, Nightmares',
+      opts: [
+        { text: 'Stare through the glare', need: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall exactly 0', tw: 0, prog: 0, men: 'Nightmares +2', gain: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall +3' },
+        { text: 'Awaken from a familiar dream', need: 'Still Waiting on the Host', tw: 0, prog: 0, men: 'clears Nightmares -3', gain: 'costs Having Recurring Dreams: Rosy Colours Leaping on the Wall' },
+      ],
+    },
+    {
+      name: 'A Flock of Prophets',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'Chasing Down Your Bounty, Corsair\'s Colours 2',
+      opts: [
+        { text: 'Take auspices', ch: 'Zeefaring 13', tw: 4, prog: 1, gain: 'Chasing Down Your Bounty [See below]', rare: 'full speed', fail: 'TW +10, half speed', piracy: true },
+        { text: 'Zail around them', tw: 2, prog: 1, piracy: true },
+      ],
+    },
+    {
+      name: 'A Giant Angler Crab',
+      where: ['any'],
+      freq: 'Infrequent',
+      note: '"Ready the guns" is the good line if you have Monstrous Anatomy 3 - full speed and -2 Troubled Waters.',
+      opts: [
+        { text: 'Full reverse! Turn us away!', ch: 'Shadowy vs Zee Peril', tw: 0, prog: 0.5, fail: 'TW +8, half speed, Silent Stalker' },
+        { text: 'Ready the guns and fire at its soft spots', ch: 'Monstrous Anatomy 3', tw: -2, prog: 1, fail: 'TW +8, no progress, Silent Stalker 1' },
+        { text: 'Pursue it to its spawning grounds', ch: 'Shadowy vs Zee Peril', need: 'Zailing to Destination: Angler Crab Spawning Grounds', tw: 2, prog: 1, note: 'Zailing Speed + a flat 11 rather than the usual +1-5.', fail: 'TW +2, half speed' },
+        { text: 'Reach for your harpoon; call for ramming speed!', need: 'A Notched Bone Harpoon', tw: 1, prog: 0, men: 'clears Rumbling Stomachs', gain: 'Deep-zee Catch 5' },
+      ],
+    },
+    {
+      name: 'A Growing Concern',
+      where: ['any'],
+      freq: 'High Urgency',
+      urgent: true,
+      cardNeeds: 'Troubled Waters 7, Creeping Fear',
+      note: 'Black card: Troubled Waters 7 plus Creeping Fear.',
+      opts: [
+        { text: 'Investigate', ch: 'Luck 50%', tw: -5, prog: 0, fail: 'Troubled Waters set to 5, no progress, Nightmares +8' },
+        { text: 'Double the zailors\' rations', need: 'Crate of Incorruptible Biscuits 1 x, Foxfire Candle Stub 100 x, Bottle of Greyfields 1882 100 x', tw: null, twText: 'Troubled Waters set to 5', prog: 0, men: 'Rumbling Stomachs', gain: 'costs Crate of Incorruptible Biscuits 1, costs Foxfire Candle Stub 100, costs Bottle of Greyfields 1882 100' },
+      ],
+    },
+    {
+      name: 'A Huge Terrible Beast of the Unterzee!',
+      where: ['any'],
+      freq: 'Infrequent',
+      note: 'Both lines leave your crew with Rumbling Stomachs, which is one of the six menaces that turns Troubled Waters 7 into a black card.',
+      opts: [
+        { text: 'Delicious, delicious lumps', ch: 'Dangerous vs Zee Peril', tw: 0, prog: 1, men: 'Rumbling Stomachs', gain: 'Appalling Secret 2, Unaccountably Peckish 1, Someone Is Coming +1, Tale of Terror!! 4', fail: 'TW +10, no progress, Rumbling Stomachs' },
+        { text: 'Steam on by', tw: 3, twRange: '+3-5', prog: 1, men: 'Silent Stalker' },
+      ],
+    },
+    {
+      name: 'A Message in a Bottle',
+      where: ['any'],
+      freq: 'Very Infrequent',
+      cardNeeds: 'Corsair\'s Colours',
+      opts: [
+        { text: 'Unfurl the paper', tw: 0, prog: 0, gain: 'Directions to a Hidden Stash for one of eight ports', piracy: true },
+      ],
+    },
+    {
+      name: 'A Navigation Error',
+      where: ['any'],
+      freq: 'Infrequent',
+      note: 'A success on any of the first three lines is full speed for no Troubled Waters; the failures cost +8 or +9 and half the progress.',
+      opts: [
+        { text: 'Correct your course', ch: 'Watchful vs Zee Peril', tw: 0, prog: 1, gain: 'Map Scrap 10', fail: 'TW +8, half speed' },
+        { text: 'Listen to the Zee', ch: 'Zeefaring 5', need: 'Zeefaring', tw: 0, prog: 1, gain: 'Map Scrap 12', fail: 'TW +9, half speed' },
+        { text: 'Consider what you learned from the Starved Men', ch: 'Watchful vs Zee Peril', need: 'Written in the Glim (Quality) 3000', tw: 0, prog: 1, gain: 'Map Scrap 13', fail: 'TW +9, half speed' },
+        { text: 'Let your own star guide you', ch: 'Persuasive vs Zee Peril', need: 'A False-Star of your Own', tw: -5, prog: 1, fail: 'full speed' },
+        { text: 'Use your disorientation to your advantage', ch: 'Zeefaring 5', need: 'Chasing Down Your Bounty, Corsair\'s Colours 2', tw: 2, twRange: '+2-3', prog: 1, gain: 'Chasing Down Your Bounty [See below]', rare: 'TW -1, full speed', fail: 'TW +8, full speed', piracy: true },
+      ],
+    },
+    {
+      name: 'A Promising Wreck',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'Corsair\'s Colours 2',
+      opts: [
+        { text: 'Dive for salvage', ch: 'Zeefaring 13', tw: 2, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold [see below], Unprovenanced Artefact 1', rare: 'full speed', fail: 'TW +8, half speed, Creeping Fear', piracy: true },
+        { text: 'Zail on by', tw: 4, prog: 1, piracy: true },
+      ],
+    },
+    {
+      name: 'A Ragtag Flotilla',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'Remaining Mass of the Ravenous Lifeberg',
+      note: 'Only appears while a Ravenous Lifeberg is loose in the world.',
+      opts: [
+        { text: 'Hail a ship and inquire about their purpose', tw: -2, prog: 0.5, gain: 'Tale of Terror!! 1' },
+        { text: 'Steam on by', tw: 4, prog: 1 },
+      ],
+    },
+    {
+      name: 'A Ship of Zealots',
+      where: ['any'],
+      freq: 'Infrequent',
+      cardNeeds: 'Troubled Waters 4-7',
+      note: 'Only drawn at Troubled Waters 4-7.',
+      opts: [
+        { text: 'See them off', ch: 'Dangerous vs Zee Peril', tw: 2, prog: 1, fail: 'TW +10, full speed' },
+        { text: 'Race away from these lunatics', need: 'Zailing Speed 75', tw: 1, prog: 1 },
+        { text: 'Preach a variant creed', ch: 'Mithridacy 3', tw: 2, prog: 1, fail: 'TW +10, half speed' },
+        { text: 'Signal your experience on the Samaritan', need: 'The Banker\'s Daughter', tw: 2, prog: 1 },
+        { text: 'Send them down to the Fathomking\'s court', ch: 'Zeefaring 5', need: 'Corsair\'s Colours 2', tw: 2, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold [See below], Pieces of Plunder Weighing Down Your Hold [See below]', fail: 'TW +8, half speed', piracy: true },
+      ],
+    },
+    {
+      name: 'A Sighting of the (Bounty)',
+      prefix: 'A Sighting of the',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'Chasing Down Your Bounty, Corsair\'s Colours 2',
+      note: 'Piracy card. In game the name carries your quarry\'s ship type in place of "(Bounty)", so it is matched on its opening words.',
+      opts: [
+        { text: 'Follow that ship!', ch: 'Zeefaring 13', tw: 4, prog: 1, gain: 'Chasing Down Your Bounty [See below]', rare: 'TW +2, full speed', fail: 'TW +10, half speed', piracy: true },
+        { text: 'Let them pass over the horizon', tw: 6, prog: 1, piracy: true },
+      ],
+    },
+    {
+      name: 'A Spit of Land',
+      where: ['any'],
+      freq: 'Infrequent',
+      note: 'A coin flip: -1 Troubled Waters at half speed, or +8 at half speed.',
+      opts: [
+        { text: 'Steam on by', hidden: 'Rumbling Stomachs', tw: 1, prog: 1 },
+        { text: 'Stop briefly at the island', ch: 'Luck 50%', tw: -1, twFail: 8, prog: 0.5, fail: 'TW +8, half speed' },
+        { text: 'Stop at the behest of your crew', need: 'Shipful of Schemers', tw: 1, prog: 0.5, gain: 'Vienna Opening 1' },
+        { text: 'The Heart\'s suggestion', need: 'The Cladery Heart', tw: -1, prog: 1, gain: 'Tin of Zzoup 1' },
+      ],
+    },
+    {
+      name: 'A Wily Zailor',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'An Experienced Zailor:',
+      note: 'Not an ordinary voyage: this card belongs to a journey measured in Approaching Journey\'s End rather than Zailing..., so it makes no Zailing progress.',
+      opts: [
+        { text: 'Zail around the Pelagic Upheavals', tw: 4, prog: 0, gain: 'Approaching Journey\'s End +6' },
+        { text: 'Skirt the Howling Shoals', need: 'An Experienced Zailor: A Well-Known Navigator', tw: 4, prog: 0, gain: 'Approaching Journey\'s End +7' },
+        { text: 'Steam straight through the Beechey Currents', need: 'An Experienced Zailor: A Zee-Voyager of Note', tw: 4, prog: 0, gain: 'Approaching Journey\'s End +8, Zee-Ztory 1' },
+        { text: '"I\'ll be in my bunk." (8 FATE)', need: 'An Experienced Zailor: A Seasoned Captain, A Well-Known Navigator or A Zee-Voyager of Note', tw: 0, prog: 0 },
+      ],
+    },
+    {
+      name: 'A Worrying Appetite',
+      where: ['any'],
+      freq: 'High Urgency',
+      urgent: true,
+      cardNeeds: 'Troubled Waters 7, Rumbling Stomachs',
+      note: 'Black card: Troubled Waters 7 plus Rumbling Stomachs. The one black-card option that raises Troubled Waters instead of lowering it is "You, too, have an appetite".',
+      opts: [
+        { text: 'Scour the hold for anything edible', ch: 'Luck 50%', tw: -5, twFail: 10, prog: 0, fail: 'TW +10, no progress, Nightmares +8' },
+        { text: 'You, too, have an appetite', need: 'Unaccountably Peckish 1', tw: 2, prog: 0, men: 'Nightmares +1, clears Rumbling Stomachs', gain: 'Unaccountably Peckish 1' },
+      ],
+    },
+    {
+      name: 'An Architect\'s Dream',
+      where: ['any'],
+      freq: 'Infrequent',
+      cardNeeds: 'Delighted, Nightmares',
+      opts: [
+        { text: 'Hand him a hammer', need: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall exactly 3', tw: 0, prog: 0, men: 'Nightmares +2', gain: 'Having Recurring Dreams: Rosy Colours Leaping on the Wall +4' },
+        { text: 'Awaken from a familiar dream', need: 'Still Waiting on the Host', tw: 0, prog: 0, men: 'clears Nightmares -3', gain: 'costs Having Recurring Dreams: Rosy Colours Leaping on the Wall' },
+      ],
+    },
+    {
+      name: 'Bearing Witness to a Pilgrimage',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'The Midnight Whale: Distance from the Gant Pole 1000',
+      opts: [
+        { text: 'Hail a passing steamship', tw: 0, prog: 0.5, gain: 'Romantic Notion 25' },
+        { text: 'Steam on by', tw: 4, prog: 1, note: 'Full Zailing Speed, but without the usual +1-5 bonus.' },
+      ],
+    },
+    {
+      name: 'Cornering the (Bounty) at Last',
+      prefix: 'Cornering the',
+      where: ['any'],
+      freq: 'High Urgency',
+      urgent: true,
+      cardNeeds: 'Chasing Down Your Bounty 15',
+      note: 'Piracy card. In game the name carries your quarry\'s ship type in place of "(Bounty)", so it is matched on its opening words.',
+      opts: [
+        { text: 'Strike them down', ch: 'Zeefaring 11', need: 'Chosen Bounty Ship Type 100', tw: 3, prog: 0, gain: 'A Prolific Pirate 1, costs Chasing Down Your Bounty, Pieces of Plunder Weighing Down Your Hold [See below], In Pursuit of Wrack-Iron 1', fail: 'TW +12, no progress, Unwelcome on the Waters', piracy: true },
+        { text: 'Call off the approach', tw: -7, prog: 0, men: 'Wounds +2', gain: 'costs Chasing Down Your Bounty', piracy: true },
+      ],
+    },
+    {
+      name: 'Creaking from Above',
+      where: ['any'],
+      freq: 'Standard',
+      opts: [
+        { text: 'Glim-fall!', ch: 'Luck 50%', tw: 2, twFail: 9, prog: 1, men: 'Silent Stalker', gain: 'Shard of Glim (2 x Zee Peril), Someone Is Coming +1', fail: 'TW +9, full speed, Silent Stalker' },
+      ],
+    },
+    {
+      name: 'Passing a Lightship',
+      where: ['any'],
+      freq: 'Infrequent',
+      note: '"Zail on" is a rare thing: full speed for no Troubled Waters at all, with no challenge.',
+      opts: [
+        { text: 'Stop and exchange news', need: 'Zee-Ztory 7 x', tw: 0, prog: 0, gain: 'costs Zee-Ztory 7, Tale of Terror!! 2-10, Scrap of Incendiary Gossip 1-10' },
+        { text: 'Zail on', tw: 0, prog: 1 },
+        { text: 'Stop and exchange news', ch: 'Shadowy vs Zee Peril', need: 'Chasing Down Your Bounty, Corsair\'s Colours 2', tw: 0, prog: 1, gain: 'Chasing Down Your Bounty [See below]', fail: 'TW +7, half speed, Unwelcome on the Waters', piracy: true },
+      ],
+    },
+    {
+      name: 'Rats in the hold',
+      where: ['any'],
+      freq: 'Infrequent',
+      opts: [
+        { text: 'Negotiate with them', ch: 'Persuasive vs Zee Peril', tw: 0, prog: 1, fail: 'TW +8, full speed, Creeping Fear' },
+        { text: 'Fill the hold with traps', ch: 'Dangerous vs Zee Peril', tw: 2, prog: 1, gain: 'Rat on a String 50', fail: 'TW +8, full speed, Mutinous Whispers' },
+        { text: 'Permit Blackpelt to deal with them', need: 'Blackpelt, Venge-Pirate', tw: 0, prog: 1, gain: 'Rat on a String 4, Maniac\'s Prayer 13' },
+        { text: 'Go on a rat-catching expedition', need: 'A Notched Bone Harpoon or Ratting Piece', tw: 0, prog: 1, gain: 'Rat on a String 100' },
+        { text: 'Question them about other ships', ch: 'Dangerous vs Zee Peril', need: 'Chasing Down Your Bounty, Corsair\'s Colours 2', tw: 3, prog: 1, gain: 'Chasing Down Your Bounty [See below]', rare: 'TW +2-3, full speed', fail: 'TW +6, full speed', piracy: true },
+      ],
+    },
+    {
+      name: 'Share your Research with a Fellow Scholar',
+      where: ['any', 'The Sea of Voices'],
+      freq: 'Infrequent',
+      cardNeeds: 'Embarking on a Voyage of Scientific Discovery 3',
+      note: 'Belongs to a journey measured in Approaching Journey\'s End rather than Zailing...',
+      opts: [
+        { text: 'Correspond with a Fellow Scholar', need: 'Sulky Bat 10 x, Page of Cryptopalaeontological Notes 50 x, Page of Prelapsarian Archaeological Notes 50 x, Page of Theosophistical Notes 50 x, Embarking on a Voyage of Scientific Discovery 3', tw: 2, prog: 0, gain: 'Approaching Journey\'s End +3, 20 of each Page of Notes, Sulky Bat 4-8' },
+      ],
+    },
+    {
+      name: 'Signs of Disloyalty',
+      where: ['any'],
+      freq: 'High Urgency',
+      urgent: true,
+      cardNeeds: 'Troubled Waters 7, Mutinous Whispers',
+      note: 'Black card: Troubled Waters 7 plus Mutinous Whispers.',
+      opts: [
+        { text: 'A few private conversations', ch: 'Luck 50%', tw: -5, twFail: 2, prog: 0.5, fail: 'TW +2, half speed' },
+        { text: 'Double their pay', need: 'Shard of Glim 250 x, Moon-Pearl 250 x', tw: null, twText: 'Troubled Waters set to 5', prog: 0, gain: 'costs Shard of Glim 250, costs Moon-Pearl 250' },
+        { text: 'Remind them of their right and proper duty', ch: 'Persuasive vs Zee Peril', need: 'Most Presentable Company', tw: null, twText: 'Troubled Waters set to 5', prog: 0.5, fail: 'TW +2, half speed' },
+        { text: 'Put your money where your mouth is', ch: 'Luck 40%', need: 'High-Rolling Rantipoles, Corsair\'s Colours 2, Pieces of Plunder Weighing Down Your Hold 500 x', tw: -2, prog: 0.5, gain: 'Pieces of Plunder Weighing Down Your Hold 550', fail: 'Troubled Waters set to 5, half speed, clears Mutinous Whispers', piracy: true },
+      ],
+    },
+    {
+      name: 'Signs of Pursuit',
+      where: ['any'],
+      freq: 'High Urgency',
+      urgent: true,
+      cardNeeds: 'Troubled Waters 7, Silent Stalker',
+      note: 'Black card: Troubled Waters 7 plus Silent Stalker. Its challenge is Dangerous against a difficulty well above Zee Peril.',
+      opts: [
+        { text: 'Turn around and confront it', ch: 'Dangerous vs Zee Peril', tw: -5, prog: 0.5, fail: 'Troubled Waters set to 5, no progress, clears Silent Stalker, Groaning Hull' },
+        { text: 'Throw bait overboard', need: 'Deep-zee Catch 10 x', hidden: 'Rumbling Stomachs', tw: null, twText: 'Troubled Waters set to 5', prog: 0, men: 'Rumbling Stomachs', gain: 'costs Deep-zee Catch 10' },
+      ],
+    },
+    {
+      name: 'Spiralling Into Sorrow',
+      where: ['any'],
+      freq: 'Frequent',
+      cardNeeds: 'Associating with a Youthful Naturalist exactly 590, Spiralling Regrets',
+      opts: [
+        { text: 'Dive with the (diving-bell)', need: 'Appalling Secret', hidden: 'Wounds, A Consignment of Capricious Cargo', tw: null, twText: 'Troubled Waters set to 0', prog: 0, gain: 'Associating with a Youthful Naturalist, Shard of Glim 777, costs Zee Peril' },
+      ],
+    },
+    {
+      name: 'Submerge',
+      where: ['any', 'The Sea of Voices'],
+      freq: 'Standard',
+      cardNeeds: 'Zubmarine 1 x',
+      note: 'Belongs to a journey measured in Approaching Journey\'s End rather than Zailing...',
+      opts: [
+        { text: 'Run deep, run quiet', tw: -4, prog: 0, gain: 'Approaching Journey\'s End +2, Approaching the Gates of the Garden +?' },
+      ],
+    },
+    {
+      name: 'Taking in Water',
+      where: ['any'],
+      freq: 'High Urgency',
+      urgent: true,
+      cardNeeds: 'Troubled Waters 7, Groaning Hull',
+      note: 'Black card: Troubled Waters 7 plus Groaning Hull. The Luck 70% raises Troubled Waters either way; the brass repair is the real fix.',
+      opts: [
+        { text: 'Seal the compartment and run the pumps', ch: 'Luck 70%', tw: 2, twFail: 3, prog: 0.5, fail: 'TW +3, no progress, Wounds +3' },
+        { text: 'Stop and make field repairs', need: 'Nevercold Brass Sliver 500 x', tw: -7, prog: 0, men: 'clears Groaning Hull, Creeping Fear', gain: 'costs Nevercold Brass Sliver 500' },
+      ],
+    },
+    {
+      name: 'The Clinging Coral Mass',
+      where: ['any'],
+      freq: 'Infrequent',
+      opts: [
+        { text: '"Put your backs into it, lads!"', ch: 'Persuasive vs Zee Peril', tw: 2, prog: 1, rare: 'full speed', fail: 'TW +10, full speed, Mutinous Whispers' },
+        { text: 'Grab a hammer yourself', ch: 'Dangerous vs Zee Peril', tw: 2, prog: 1, fail: 'TW +10, full speed, Mutinous Whispers' },
+      ],
+    },
+    {
+      name: 'The Fleet of Truth',
+      where: ['any'],
+      freq: 'Infrequent',
+      cardNeeds: 'Embarking on a Voyage of Scientific Discovery 3, Troubled Waters 3-7',
+      opts: [
+        { text: 'Villainy!', ch: 'Dangerous vs Zee Peril', tw: 4, prog: 1, gain: 'Page of Cryptopalaeontological Notes 5, Page of Prelapsarian Archaeological Notes 5, Page of Theosophistical Notes 5', fail: 'TW +8, full speed' },
+        { text: 'Subterfuge', ch: 'Shadowy vs Zee Peril', need: 'Fraught Research Assistant', tw: 4, prog: 1, gain: 'Page of Cryptopalaeontological Notes 7, Page of Prelapsarian Archaeological Notes 7, Page of Theosophistical Notes 7', fail: 'TW +8, full speed' },
+        { text: 'Engage in a little bit of \'peer review\'', ch: 'Persuasive vs Zee Peril', need: 'Chasing Down Your Bounty, Corsair\'s Colours 2', tw: 2, prog: 1, gain: 'Chasing Down Your Bounty [See below]', rare: 'full speed', fail: 'TW +8, half speed, Unwelcome on the Waters', piracy: true },
+        { text: 'Hatch plans with two Shifty Scholars', need: 'Associating with a Youthful Naturalist 510-549, Favour in High Places 2 x', hidden: 'Organic Comprehension', tw: 2, prog: 0.5, gain: 'Organic Comprehension, costs Favour in High Places 2' },
+        { text: 'Rendezvous with two Shifty Scholars', need: 'Associating with a Youthful Naturalist 510-549, Organic Comprehension exactly 7', tw: 2, prog: 0.5, men: 'Silent Stalker', gain: 'Organic Comprehension, Associating with a Youthful Naturalist 10, Unearthly Fossil 10' },
+      ],
+    },
+    {
+      name: 'The Killing Wind',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'Troubled Waters 4-7',
+      note: 'Only drawn at Troubled Waters 4-7. Without Zubmersibility the only line is a coin flip that costs +4 on a success and +12 on a failure - leave it in hand while you can.',
+      opts: [
+        { text: 'Outrun the storm front', ch: 'Luck 50%', tw: 4, twFail: 12, prog: 1, men: 'Creeping Fear', fail: 'TW +12, no progress, Creeping Fear' },
+        { text: 'Make ready to dive', need: 'Zubmersibility', tw: -2, prog: 1, gain: 'Zee-Ztory 3–6' },
+        { text: 'Chart a course through the storm using your Storm in a Teacup', ch: 'Luck 60%', need: 'Ornamental Storm in a Teacup', tw: null, twText: 'Troubled Waters up by an unrecorded amount', twFail: 10, prog: 1, men: 'Creeping Fear', gain: 'Zee-Ztory 2', fail: 'TW +10, no progress, Creeping Fear' },
+      ],
+    },
+    {
+      name: 'The Sound of Wings',
+      where: ['any'],
+      freq: 'Infrequent',
+      strictZee: true,
+      cardNeeds: 'Wings of Change',
+      note: 'Fallen London draws a card of this name in eight different places; only the Unterzee one is described here, which is why it is only badged when the area reads as a zee region.',
+      opts: [
+        { text: 'Full power to the engines!', ch: 'Zeefaring 7', tw: 0, prog: 1, men: 'Wounds 2-3', gain: 'Royal-Blue Feather 6, Aeolian Scream 1', fail: 'TW +6, half speed, Wounds 3, Nightmares 1-3' },
+        { text: 'Confront it', hidden: 'Wings of Change (Not here. Not even with cannonfire.)', tw: 0, prog: 0 },
+      ],
+    },
+    {
+      name: 'Toward the Canal',
+      where: ['any'],
+      freq: 'Very Infrequent',
+      cardNeeds: 'A Person of Some Importance - is: A Shattering Force, A Legendary Charisma, An Invisible Eminence, An Extraordinary Mind, A Paramount Presence',
+      opts: [
+        { text: 'Contemplate the journey', tw: 0, prog: 1 },
+        { text: 'Commit to the choice', need: 'The Date - After Certain Neathy Affairs are Complete', tw: 0, prog: 0 },
+      ],
+    },
+    {
+      name: 'What do the Drownies Sing?',
+      where: ['any'],
+      freq: 'Standard',
+      note: 'With a Faceted Decanter of Drownie Effluvia and Kataleptic Toxicology, this is full speed for -5 Troubled Waters.',
+      opts: [
+        { text: 'Keep the crew from listening', ch: 'Persuasive vs Zee Peril', tw: 2, prog: 1, fail: 'TW +9, full speed, Creeping Fear' },
+        { text: 'Drown out the drownies', ch: 'Dangerous vs Zee Peril', tw: 2, prog: 1, fail: 'TW +9, full speed, Groaning Hull' },
+        { text: 'Cure the ignorance of your zailors', ch: 'Kataleptic Toxicology 3', need: 'A Faceted Decanter of Drownie Effluvia, Kataleptic Toxicology', tw: -5, prog: 1, fail: 'TW +12, full speed, Creeping Fear' },
+        { text: 'Listen to the songs, and for your quarry', ch: 'Monstrous Anatomy 13', need: 'Chasing Down Your Bounty, Corsair\'s Colours 2', tw: 2, prog: 1, gain: 'Chasing Down Your Bounty', rare: 'full speed', fail: 'TW +6, half speed, Nightmares +4, Silent Stalker', piracy: true },
+      ],
+    },
+    {
+      name: 'When the Carousing Stops',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'Corsair\'s Colours 2',
+      opts: [
+        { text: 'Discipline your crew', ch: 'Dangerous vs Zee Peril', tw: 4, prog: 1, fail: 'TW +10, half speed, Mutinous Whispers', piracy: true },
+        { text: 'Restart the party', ch: 'Persuasive vs Zee Peril', tw: 4, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold [see below], Bottle of Broken Giant 1844 1', rare: 'TW +2, full speed', fail: 'TW +10, half speed, Mutinous Whispers', piracy: true },
+      ],
+    },
+    {
+      name: 'Your False-Star',
+      where: ['any'],
+      freq: 'Standard',
+      cardNeeds: 'Looked Upon Fondly',
+      note: 'The best card in the deck: full Zailing Speed and Troubled Waters -5, no challenge, no cost. Needs the Looked Upon Fondly quality from the Fingerkings.',
+      opts: [
+        { text: 'Navigate by the light of your star', tw: -5, prog: 1 },
+      ],
+    },
+    {
+      name: 'Zeeborne Pariahs',
+      where: ['any'],
+      freq: 'High Urgency',
+      urgent: true,
+      cardNeeds: 'Troubled Waters 7, Unwelcome on the Waters',
+      note: 'Black card: Troubled Waters 7 plus Unwelcome on the Waters, which comes from failed piracy.',
+      opts: [
+        { text: 'Evade them!', ch: 'Luck 70%', tw: 2, twFail: 4, prog: 0.5, fail: 'TW +4, no progress, Wounds +4' },
+        { text: 'Put your crew to work disguising the ship', need: 'Inkling of Identity 50 x', tw: -7, prog: 0, men: 'clears Unwelcome on the Waters, Mutinous Whispers', gain: 'costs Inkling of Identity 50' },
+      ],
+    },
+
+    // --- Home Waters ---
+    {
+      name: 'A Steamer full of Passengers',
+      where: ['Home Waters', 'Shepherd\'s Wash'],
+      freq: 'Standard',
+      cardNeeds: 'Zailing on: Home Waters or Shepherd\'s Wash',
+      opts: [
+        { text: 'Steam past them', tw: 2, prog: 1 },
+        { text: 'Invite them aboard for a party', need: 'Luxurious', tw: 0, prog: 0, men: 'Scandal +2', gain: 'Hedonist, Pair of Scarlet Stockings of Dubious Origin 1, Secluded Address 6, costs Austere -3' },
+        { text: 'Recognise your quarry', ch: 'Dangerous vs Zee Peril', need: 'A List of Aliases, Writ in Gant', tw: 5, prog: 1, gain: 'Piece of Rostygold 250', fail: 'TW +2, full speed' },
+        { text: 'Rob them blind', ch: 'Dangerous vs Zee Peril', need: 'Corsair\'s Colours 2', tw: 2, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold 300', rare: 'TW +1, full speed', fail: 'TW +8, half speed, Unwelcome on the Waters', piracy: true },
+      ],
+    },
+    {
+      name: 'Amber in the Water',
+      where: ['Home Waters'],
+      freq: 'Abundant',
+      cardNeeds: 'The Lorn-Fluke\'s Fury, Wayland\'s Teeth Involvement Flag 2',
+      opts: [
+        { text: 'Identify a course through less viscous waters', ch: 'Zeefaring + Kataleptic Toxicology 20', tw: 2, prog: 1, fail: 'TW +7, half speed, Creeping Fear' },
+        { text: 'Revel in the delays', need: 'Luxurious', tw: 0, prog: 0.5, gain: 'Nodule of Warm Amber 10, Nodule of Deep Amber 200' },
+        { text: 'Mount your Fluke-Core upon the prow', need: 'Fluke-Core 1 x', tw: 2, prog: 1 },
+      ],
+    },
+    {
+      name: 'Enspired Shallows',
+      where: ['Home Waters'],
+      freq: 'Abundant',
+      cardNeeds: 'The Lorn-Fluke\'s Fury, Wayland\'s Teeth Involvement Flag 2',
+      opts: [
+        { text: 'Chart a careful course', ch: 'Zeefaring + Shapeling Arts 20', tw: 2, prog: 1, fail: 'TW +7, a third speed, Groaning Hull' },
+        { text: 'Navigate with the aid of your amber vision', need: 'Amber Vision of the Sea of Spines', tw: 1, prog: 1 },
+        { text: 'Barrel through', ch: 'Zailing Speed vs Zee Peril', tw: 2, prog: 1, fail: 'TW +7, no progress, Groaning Hull' },
+      ],
+    },
+    {
+      name: 'She\'s Going Down!',
+      where: ['Home Waters'],
+      freq: 'Standard',
+      note: 'Rescuing them spends the action for no progress, but it is -2 Troubled Waters and a point of Steadfast.',
+      opts: [
+        { text: 'Stop and rescue them', tw: -2, prog: 0, gain: 'Steadfast Quirk cap=10, costs Heartless -3' },
+        { text: 'Let the Unterzee have them', tw: 1, prog: 1, gain: 'Heartless Quirk cap=10, costs Magnanimous -3' },
+        { text: 'Loot the wreckage', ch: 'Zeefaring 5', need: 'Corsair\'s Colours 2', tw: 3, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold 250', rare: 'TW +2, full speed', fail: 'TW +8, full speed, Creeping Fear', piracy: true },
+      ],
+    },
+    {
+      name: 'Shipcatcher Webs',
+      where: ['Home Waters'],
+      freq: 'Abundant',
+      cardNeeds: 'Wayland\'s Teeth Involvement Flag 2 , Saplings in the Forest of Years',
+      opts: [
+        { text: 'Extrapolate a pattern from fragments', ch: 'Zeefaring 20', tw: 3, prog: 1, fail: 'TW +7, half speed, Creeping Fear' },
+        { text: 'Take the time to cut it down', need: 'Luxurious', tw: 0, prog: 0.5, gain: 'Silk Scrap 100, Whisper-Satin Scrap 4' },
+        { text: 'Look upon the labyrinth as a spider would', need: 'at least one of: Senatorial Gauze, A Disquieting Suspicion That You Might Be Spiders, Spider-Infested Eyeball', tw: 1, prog: 1 },
+      ],
+    },
+    {
+      name: 'Spiders in the Shallows',
+      where: ['Home Waters'],
+      freq: 'Abundant',
+      cardNeeds: 'Saplings in the Forest of Years',
+      opts: [
+        { text: 'Dive, dive, dive!', need: 'Zubmersibility', tw: 2, prog: 1 },
+        { text: 'Blast them apart', ch: 'Zeefaring 20', tw: 1, prog: 1, fail: 'TW +7, half speed, Silent Stalker' },
+        { text: 'Let your arachnid allies plead your case', need: 'at least one of: Fairly Tame Sorrow-Spider, Luxuriantly Coiffed Sorrow-Spider, Senatorial Spider, Spider of Silken Marvels ("You require but one arachnid ally." when locked)', tw: 2, prog: 1 },
+      ],
+    },
+    {
+      name: 'The Ebb and Flow of Regret',
+      where: ['Home Waters', 'Shepherd\'s Wash', 'The Sea of Voices', 'The Salt Steppe', 'The Pillared Sea', 'Stormbones', 'The Snares'],
+      freq: 'Abundant',
+      cardNeeds: 'Associating with a Youthful Naturalist 580-587, Spiralling Regrets',
+      note: 'An Evolution storyline card: one "Chart the sorrows of ..." option per region, each building the Comprehension of that region. The wiki lists its options under per-region headings rather than as one set, so no per-option numbers are transcribed here.',
+      opts: [
+      ],
+    },
+    {
+      name: 'Tongues of Flame',
+      where: ['Home Waters'],
+      freq: 'Abundant',
+      cardNeeds: 'The Lorn-Fluke\'s Fury, Wayland\'s Teeth Involvement Flag 2',
+      opts: [
+        { text: 'Dive, dive, dive!', need: 'Zubmersibility', tw: 1, prog: 1 },
+        { text: 'Weave through the warring sigils', ch: 'Zeefaring + A Scholar of the Correspondence 20', tw: 2, twRange: '+2-3', prog: 1, fail: 'TW +7, a third speed, Creeping Fear' },
+        { text: 'Lead your vessel on a merry dance through the fires', need: 'The Rose Giveth Its Verses to Devils and Also to You', tw: 1, twRange: '+1-2', prog: 1 },
+      ],
+    },
+    {
+      name: 'Venom-Tides',
+      where: ['Home Waters'],
+      freq: 'Abundant',
+      cardNeeds: 'Wayland\'s Teeth Involvement Flag 2 , Saplings in the Forest of Years',
+      opts: [
+        { text: 'Charge on through', ch: 'Zailing Speed vs Zee Peril', tw: 1, prog: 1, fail: 'TW +6, half speed, Groaning Hull' },
+        { text: 'Neutralise the toxins', ch: 'Zeefaring 20', tw: 2, prog: 1, fail: 'TW +7, half speed, Rumbling Stomachs' },
+        { text: 'Go for a swim', need: 'Water in the Blood', tw: 1, prog: 1 },
+      ],
+    },
+
+    // --- Shepherd's Wash ---
+    {
+      name: 'A Corsair Galley',
+      where: ['Shepherd\'s Wash'],
+      freq: 'Standard',
+      opts: [
+        { text: 'Full steam ahead!', ch: 'Zailing Speed vs Zee Peril', tw: 3, prog: 1, fail: 'TW +10, half speed, Groaning Hull' },
+        { text: 'Fire a warning shot', ch: 'Dangerous vs Zee Peril', tw: 2, prog: 1, fail: 'TW +12, half speed, Groaning Hull' },
+        { text: 'Fight back!', ch: 'Artisan of the Red Science 6', need: 'Corsair\'s Colours 2', tw: 4, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold 300', rare: 'TW +2, full speed', fail: 'TW +10, a quarter speed, Unwelcome on the Waters', piracy: true },
+      ],
+    },
+    {
+      name: 'Row, row, row',
+      where: ['Shepherd\'s Wash'],
+      freq: 'Standard',
+      note: '"Ask the monks from where they hail" is one of the two ways to discover Godfall.',
+      opts: [
+        { text: 'Zail on by', ch: 'Zailing Speed vs Zee Peril', tw: 0, prog: 1, fail: 'TW +8, half speed' },
+        { text: 'Brawl with the monks', ch: 'Dangerous vs Zee Peril', tw: 0, prog: 0, gain: 'Bottle of Broken Giant 1844 1, Zee-Ztory 2', fail: 'TW +8, no progress' },
+        { text: 'Ask the monks from where they hail', need: 'Cellar of Wine 1 x, Bottle of Morelways 1872 100 x', hidden: 'Discovered: Godfall', tw: 0, prog: 0, gain: 'costs Cellar of Wine 1, costs Bottle of Morelways 1872 100, Discovered: Godfall' },
+        { text: 'Gather your crew and engage in a proper dust-up', ch: 'Dangerous vs Zee Peril', need: 'Staunch Comrades', tw: 0, prog: 0.5, gain: 'Apostate\'s Psalm 1, Bottle of Morelways 1872 20', fail: 'TW +6, no progress, Wounds +2' },
+      ],
+    },
+    {
+      name: 'The Light of the Mountain',
+      where: ['Shepherd\'s Wash'],
+      freq: 'Standard',
+      note: 'The card that first grants Southern Wind, which starts I Shot the Albatross back in London.',
+      opts: [
+        { text: 'Fix a looking-glass on the Mountain', tw: 2, prog: 1, gain: 'Southern Wind +4 CP, or +1 CP if already present, Memory of Distant Shores 5' },
+      ],
+    },
+    {
+      name: 'The Wax-Wind',
+      where: ['Shepherd\'s Wash'],
+      freq: 'Standard',
+      note: 'Also grants Southern Wind. Hiding belowdecks is -2 Troubled Waters but spends the action; with Zubmersibility, "Dive!" is -1 and full speed.',
+      opts: [
+        { text: 'Shut off the engines and hide belowdecks', tw: -2, prog: 0, gain: 'Zee-Ztory 1' },
+        { text: 'Zail into the wind', ch: 'Shadowy vs Zee Peril', tw: 2, prog: 0.5, gain: 'Southern Wind, Zee-Ztory 1', fail: 'TW +4, no progress' },
+        { text: 'Dive!', need: 'Zubmersibility', tw: -1, prog: 1, gain: 'Southern Wind' },
+        { text: 'Zail into the eye of the storm', ch: 'Zeefaring 5', need: 'Zeefaring, Stormy-Eyed', tw: 0, prog: 0.5, gain: 'Memory of Distant Shores 1, Zee-Ztory 1, Memory of Light 1, Southern Wind' },
+      ],
+    },
+
+    // --- The Sea of Voices ---
+    {
+      name: 'A Good Meal',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      cardNeeds: 'Embarking on a Voyage of Scientific Discovery 3',
+      opts: [
+        { text: 'And a little bonus', tw: 3, prog: 1, gain: 'Page of Cryptopalaeontological Notes 3, Page of Prelapsarian Archaeological Notes 3, Page of Theosophistical Notes 3, Moon-Pearl 1' },
+      ],
+    },
+    {
+      name: 'A Hazard to Shipping',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      opts: [
+        { text: 'Set a course around the thing', ch: 'Watchful vs Zee Peril', tw: 2, prog: 1, rare: 'full speed', fail: 'TW +2, half speed, Silent Stalker' },
+      ],
+    },
+    {
+      name: 'A Light in the Fog',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      opts: [
+        { text: 'Get as close as you dare', tw: 3, prog: 0.5, gain: 'Walking the Falling Cities +5, Zee-Ztory 5' },
+        { text: 'Keep away from the lighthouse', tw: 1, prog: 1 },
+        { text: 'Listen for news of your quarry', ch: 'Watchful vs Zee Peril', need: 'Chasing Down Your Bounty, Corsair\'s Colours 2', tw: 3, prog: 1, gain: 'Chasing Down Your Bounty +10', rare: 'full speed', fail: 'TW +8, full speed, Groaning Hull', piracy: true },
+      ],
+    },
+    {
+      name: 'Crossing Paths',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      opts: [
+        { text: 'Hail the ship and have a chat with the captain', tw: -2, prog: 0.5, gain: 'Zee-Ztory 1, Walking the Falling Cities +5' },
+        { text: 'Demand to duel the steamer\'s captain', ch: 'Zeefaring 6', need: 'Corsair\'s Colours 2, Flexile Sabre', tw: 3, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold 350', rare: 'TW +1, full speed', fail: 'TW +7, half speed', piracy: true },
+        { text: 'Steam on by', tw: 4, prog: 1 },
+      ],
+    },
+    {
+      name: 'Fury of the Unterzee: Lost but not Alone',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      cardNeeds: 'Troubled Waters 10',
+      note: 'Drawn at Troubled Waters 10, on a voyage measured in Approaching Journey\'s End.',
+      opts: [
+        { text: 'A tapping on the hull', ch: 'Luck 50%', tw: -2, twRange: '-2-6', prog: 0, gain: 'Approaching Journey\'s End +2-6', fail: 'Troubled Waters cleared, no progress, Nightmares +3' },
+        { text: 'Avert what comes', need: 'Ostentatious Diamond 20 x, Whispered Hint 100 x', tw: -5, prog: 0, gain: 'Approaching Journey\'s End +2, costs Whispered Hint 100, costs Ostentatious Diamond 20' },
+      ],
+    },
+    {
+      name: 'Fury of the Unterzee: Taken',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      cardNeeds: 'Troubled Waters 10',
+      note: 'Drawn at Troubled Waters 10, on a voyage measured in Approaching Journey\'s End.',
+      opts: [
+        { text: 'Oh no', ch: 'Luck 50%', tw: -5, prog: 0, gain: 'Walking the Falling Cities, Approaching Journey\'s End +2', fail: 'Troubled Waters cleared, no progress' },
+        { text: 'Use your store of sea-lore', need: 'Zee-Ztory 20 x', tw: 0, prog: 0, gain: 'Approaching Journey\'s End, costs Zee-Ztory 20' },
+      ],
+    },
+    {
+      name: 'Listen to the Wind',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      opts: [
+        { text: 'Listen to the Voices', ch: 'Luck 50%', hidden: 'Aeolian Sensitivity', tw: 2, twFail: 7, prog: 1, gain: 'Eastern Wind +1, Northern Wind +1, Southern Wind +1, Zee-Ztory 1, Walking the Falling Cities +5', fail: 'TW +7, full speed, Creeping Fear' },
+        { text: 'Listen closely to the Voices', ch: 'Luck 60%', need: 'Aeolian Sensitivity', tw: 2, twFail: 7, prog: 1, gain: 'Zee-Ztory 1, Walking the Falling Cities +5, Eastern Wind +1, Northern Wind +1, Southern Wind +1', fail: 'TW +7, full speed, Creeping Fear' },
+        { text: 'Steam the way the voices tell you', need: 'A Scholar of the Correspondence 1', tw: 3, prog: 1 },
+      ],
+    },
+    {
+      name: 'Meeting a Local Steamer',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      opts: [
+        { text: 'Hail the steamer to exchange news', tw: -2, prog: 0.5, gain: 'Zee-Ztory 1, Walking the Falling Cities +5' },
+        { text: 'Steam on by', tw: 2, prog: 1 },
+        { text: 'I say, must you do that?', need: 'Luxurious', tw: -1, prog: 1, gain: 'Zee-Ztory 4' },
+        { text: 'Hail the steamer to exchange news, and let your Boots translate', need: 'Polythremean Captain\'s Boots', tw: 1, prog: 1, gain: 'Zee-Ztory 3, Walking the Falling Cities +5' },
+        { text: 'Board her!', ch: 'Persuasive vs Zee Peril', need: 'Corsair\'s Colours 2, Russet Brachiator', tw: 3, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold 350', rare: 'TW +2, full speed', fail: 'TW +7, half speed', piracy: true },
+      ],
+    },
+    {
+      name: 'The Giant of the Unterzee',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      note: 'The jackpot. A success is a flat Zailing... 80 - an entire direct leg in one action - for Troubled Waters +5. A failure is only half speed and +8.',
+      opts: [
+        { text: 'Erm, hello?', ch: 'Persuasive vs Zee Peril', tw: 5, prog: 'flat80', fail: 'TW +8, half speed' },
+      ],
+    },
+    {
+      name: 'The Iceberg',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      cardNeeds: 'Troubled Waters 4 - 7',
+      note: 'Only drawn at Troubled Waters 4-7. With Zubmersibility it is full speed and -2 Troubled Waters.',
+      opts: [
+        { text: 'Keep a prudent distance', ch: 'Luck 50%', tw: 4, twFail: 8, prog: 1, gain: 'Walking the Falling Cities +5', fail: 'TW +8, no progress, Creeping Fear' },
+        { text: 'Have a look around under the iceberg', need: 'Zubmersibility 1 x', tw: -2, prog: 1, gain: 'Zee-Ztory 2, Walking the Falling Cities +5' },
+      ],
+    },
+    {
+      name: 'Unfinished Pirates!',
+      where: ['The Sea of Voices'],
+      freq: 'Standard',
+      cardNeeds: 'Troubled Waters 4 - 7',
+      note: 'Only drawn at Troubled Waters 4-7.',
+      opts: [
+        { text: 'Repel Boarders!', ch: 'Dangerous vs Zee Peril', tw: 3, prog: 0.5, gain: 'Zee-Ztory 1', fail: 'TW +9, half speed, Groaning Hull' },
+        { text: 'Show them the might of your broadside', ch: 'Zeefaring 7', need: 'Corsair\'s Colours 2', tw: 4, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold 350', rare: 'TW +2, full speed', fail: 'TW +8, half speed, Unwelcome on the Waters', piracy: true },
+        { text: 'Outpace them', need: 'Zailing Speed 75 x', tw: 4, prog: 1 },
+      ],
+    },
+
+    // --- The Salt Steppe ---
+    {
+      name: 'A Chelonite Hunting Ketch',
+      where: ['The Salt Steppe'],
+      freq: 'Standard',
+      note: 'None of these lines make any Zailing progress at all - this is a trading card, not a travelling one.',
+      opts: [
+        { text: 'Hail them and purchase a bag of assorted bones', need: 'Moon-Pearl 500 x, Shard of Glim 500 x', tw: 0, prog: 0, gain: 'costs Moon-Pearl 500, costs Shard of Glim 500, Fin Bones, Collected 1-9, Withered Tentacle 2-10, Crustacean Pincer 1-5', rare: 'no progress' },
+        { text: 'Offer to help a Sharp Hunter', need: 'Chirurgical Touch', tw: 0, prog: 0, gain: 'Crystallised Curio 2' },
+        { text: 'Hail them and exchange stories', need: 'Zee-Ztory 10 x', tw: 0, prog: 0, gain: 'costs Zee-Ztory 10, Tale of Terror!! 15, costs Zee-Ztory 10, Extraordinary Implication 3' },
+        { text: 'Regale them with tales of your own hunts', need: 'A Notched Bone Harpoon, Tale of Terror!! 10 x', tw: -4, prog: 0, gain: 'costs Tale of Terror!! 10, Moon-Pearl 250, Shard of Glim 250, Fin Bones, Collected 5' },
+        { text: 'Open fire!', ch: 'Zeefaring 11', need: 'Corsair\'s Colours 2', tw: 3, prog: 0, gain: 'Pieces of Plunder Weighing Down Your Hold 400', fail: 'TW +6, no progress, Groaning Hull', piracy: true },
+        { text: 'Exchange sightings of elusive beasts', ch: 'Monstrous Anatomy 11', need: 'Chasing Down Your Bounty, Corsair\'s Colours 2', tw: 0, prog: 0, gain: 'Chasing Down Your Bounty', fail: 'no progress, Nightmares +2', piracy: true },
+      ],
+    },
+    {
+      name: 'A Distant Gleam',
+      where: ['The Salt Steppe'],
+      freq: 'Standard',
+      note: '"Fix a looking-glass on the horizon" first grants Eastern Wind, which starts Upon a Painted Sea in London - the only wind storyline that adds no Nightmares.',
+      opts: [
+        { text: 'Fix a looking-glass on the horizon', tw: 2, prog: 1, gain: 'Eastern Wind +4, Memory of Distant Shores 5' },
+        { text: 'Measure the measureless', ch: 'Artisan of the Red Science 10', need: 'Artisan of the Red Science', tw: 0, prog: 1, men: 'Nightmares +1', gain: 'Extraordinary Implication 1, Eastern Wind +1', fail: 'TW +9, half speed, Nightmares +4' },
+        { text: 'Release your Uttermost Eel into the waters', ch: 'Zeefaring 10', need: 'Uttermost Eel 1 x, Zeefaring', tw: 0, prog: 1, men: 'Nightmares +1', gain: 'Eastern Wind +2, Memory of a Much Lesser Self 1', fail: 'TW +9, half speed, Nightmares +3' },
+      ],
+    },
+    {
+      name: 'A Khaganian Patrol Vessel',
+      where: ['The Salt Steppe'],
+      freq: 'Standard',
+      opts: [
+        { text: 'Give them a wide berth', ch: 'Shadowy vs Zee Peril', tw: 0, prog: 1, fail: 'TW +8, half speed' },
+        { text: 'Brazenly hail them', ch: 'Persuasive vs Zee Peril', tw: 0, prog: 0.5, men: 'clears Suspicion -2', fail: 'half speed, Suspicion +3' },
+        { text: 'Record their position', need: 'Shrine to Saint Joshua', tw: 0, prog: 0.5, gain: 'Moves in the Great Game [see below]' },
+        { text: 'Encode signals to a Subtle Machinist', ch: 'A Player of Chess 7', need: 'Associating with a Youthful Naturalist 510-549, Favour in High Places 1 x', hidden: 'Mechanical Comprehension', tw: 2, prog: 0.5, gain: 'Mechanical Comprehension, Whirring Contraption 20, Nevercold Brass Sliver 5000, Memory of Distant Shores 100', fail: 'TW +2, half speed, Suspicion +2, Unwelcome on the Waters' },
+        { text: 'Hail them with their own passphrases', ch: 'A Player of Chess 11', need: 'Chasing Down Your Bounty', tw: 4, prog: 1, gain: 'Chasing Down Your Bounty', fail: 'TW +10, half speed, Unwelcome on the Waters, Suspicion +2', piracy: true },
+        { text: 'Man the cannons!', ch: 'Zeefaring 11', tw: 4, prog: 1, men: 'Suspicion +2, Unwelcome on the Waters', gain: 'Pieces of Plunder Weighing Down Your Hold 400', rare: 'TW +3, full speed', fail: 'TW +10, half speed, Suspicion +3, Unwelcome on the Waters', piracy: true },
+      ],
+    },
+
+    // --- The Pillared Sea ---
+    {
+      name: 'Becalmed',
+      where: ['The Pillared Sea'],
+      freq: 'Standard',
+      note: '"Cross the threshold" is not a zailing option: it drowns you into Parabola for Wounds +7-8 and sets The Mirror\'s Hunger.',
+      opts: [
+        { text: 'Shut off every light aboard; full steam ahead!', tw: 2, prog: 1, gain: 'Eastern Wind +1' },
+        { text: 'Look into the glassy water', ch: 'Luck 50%', tw: 0, prog: 0.5, men: 'Nightmares +1-4', gain: 'Having Recurring Dreams: Death by Water +1', fail: 'half speed, Nightmares +5' },
+        { text: 'Cross the threshold', need: 'Glasswork (Glasswork 5), Access to a Parabolan Base-Camp', hidden: 'The Mirror\'s Hunger', tw: 0, prog: 0 },
+      ],
+    },
+    {
+      name: 'Of the Pillars',
+      where: ['The Pillared Sea'],
+      freq: 'Standard',
+      note: 'A Luck 90% for full speed and -2 Troubled Waters. The 10% failure is expensive: +8 Troubled Waters and +8 Nightmares.',
+      opts: [
+        { text: 'You will look towards her shores', ch: 'Luck 90%', tw: -2, twFail: 8, prog: 1, gain: 'Eastern Wind +1, Northern Wind +1', fail: 'TW +8, full speed, Nightmares +8' },
+        { text: 'You will turn your helm away from her', tw: 0, prog: 0.5 },
+        { text: 'You will change currency', need: 'Justificande Coin 25 x', tw: 0, prog: 1, gain: 'costs Justificande Coin 25, Oneiromantic Revelation 1' },
+      ],
+    },
+    {
+      name: 'Ripples of Future Voyages',
+      where: ['The Pillared Sea'],
+      freq: 'Standard',
+      cardNeeds: 'Corsair\'s Colours 2',
+      opts: [
+        { text: 'You will remember finding your quarry', ch: 'Zeefaring 12', need: 'Chasing Down Your Bounty', tw: 3, prog: 1, gain: 'Chasing Down Your Bounty +15', fail: 'TW +8, half speed', piracy: true },
+        { text: 'You will remember great riches', ch: 'Mithridacy 12', tw: 3, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold 450', fail: 'TW +8, half speed', piracy: true },
+        { text: 'You will remember your safe return', ch: 'Zailing Speed vs Zee Peril', tw: -2, prog: 1, fail: 'TW +4, full speed', piracy: true },
+      ],
+    },
+
+    // --- Stormbones ---
+    {
+      name: 'A Coral Commotion',
+      where: ['Stormbones'],
+      freq: 'Standard',
+      note: '"Find a quicker route into Port Cecil" is one of the two ways to discover Port Cecil.',
+      opts: [
+        { text: 'Scavenge amidst the scrum of boats', ch: 'Luck 50%', tw: 3, twFail: 8, prog: 0.5, gain: 'Silk Scrap 50', rare: 'TW +2, half speed', fail: 'TW +8, half speed, Creeping Fear' },
+        { text: 'Weave through the throng', ch: 'Zailing Speed vs Zee Peril', tw: 3, prog: 1, fail: 'TW +10, full speed, Groaning Hull' },
+        { text: 'Find a quicker route into Port Cecil', need: 'Embarking on a Voyage of Scientific Discovery 2', hidden: 'Discovered: The Principles of Coral', tw: 0, prog: 0.5, gain: 'Discovered: The Principles of Coral' },
+      ],
+    },
+    {
+      name: 'A Mountain of the Unterzee',
+      where: ['Stormbones'],
+      freq: 'Standard',
+      opts: [
+        { text: '"Hard to port! Reverse engines!"', ch: 'Zailing Speed vs Zee Peril', tw: 3, prog: 1, men: 'Silent Stalker', gain: 'Appalling Secret 5', fail: 'TW +10, full speed, Silent Stalker' },
+        { text: '"Hold!"', need: 'The Cladery Heart', tw: -1, prog: 0, gain: 'Carved Ball of Stygian Ivory 1' },
+      ],
+    },
+    {
+      name: 'A Tiny Coral Island',
+      where: ['Stormbones'],
+      freq: 'Standard',
+      opts: [
+        { text: 'Record it and move on', tw: 3, prog: 1 },
+        { text: 'What\'s that down there?', need: 'Zubmersibility', tw: -2, prog: 1, gain: 'Appalling Secret 5' },
+        { text: 'Recognise its shape', ch: 'Shapeling Arts 3', need: 'Shapeling Arts', tw: 0, prog: 1, gain: 'Shapeling Arts +1 CP, if present, Cryptic Clue 25', fail: 'TW +3, full speed' },
+      ],
+    },
+    {
+      name: 'A Wind from the North',
+      where: ['Stormbones'],
+      freq: 'Standard',
+      note: '"Listen to the wind" first grants Northern Wind, which starts Betwixt Us and the Sun in London. It costs +6 Troubled Waters.',
+      opts: [
+        { text: 'Keep your crew on course', ch: 'Persuasive vs Zee Peril', tw: 0, prog: 1, gain: 'Northern Wind +1', fail: 'TW +12, half speed, Creeping Fear' },
+        { text: 'Help them', ch: 'Dangerous vs Zee Peril', tw: 0, prog: 1, gain: 'Northern Wind +1', fail: 'TW +5, half speed, Wounds +5' },
+        { text: 'Listen to the wind', tw: 6, prog: 1, gain: 'Northern Wind +3 CP, or +1 CP if already present, Unaccountably Peckish 1' },
+      ],
+    },
+    {
+      name: 'Sighting a Lifeberg',
+      where: ['Stormbones'],
+      freq: 'Standard',
+      note: '"Zail quickly past" is full speed for no Troubled Waters; the 2 Nightmares are usually the cheaper price.',
+      opts: [
+        { text: 'Keep your distance; make observations', ch: 'Watchful vs Zee Peril', tw: 0, prog: 0.5, gain: 'Tale of Terror!! 1, Zee-Ztory 1, Northern Wind +1', fail: 'TW +8, half speed' },
+        { text: 'Ram the lifeberg and claim a piece of it!', need: 'A Notched Bone Harpoon', tw: 0, prog: 0, gain: 'Northern Wind +3 CP, or +1 CP if already present, Extraordinary Implication 1' },
+        { text: 'Zail quickly past the lifeberg', ch: 'Zailing Speed vs Zee Peril', tw: 0, prog: 1, men: 'Nightmares +2', fail: 'TW +8, no progress, Groaning Hull 1' },
+      ],
+    },
+
+    // --- The Snares ---
+    {
+      name: 'A Fellow Mourner',
+      where: ['The Snares'],
+      freq: 'Standard',
+      cardNeeds: 'Corsair\'s Colours 2',
+      opts: [
+        { text: 'Coordinate with your sister-ship\'s Prophet', ch: 'Dangerous vs Zee Peril', need: 'Chasing Down Your Bounty', tw: 2, prog: 1, gain: 'Chasing Down Your Bounty', rare: 'full speed', fail: 'TW +10, half speed', piracy: true },
+        { text: 'Load the cannons!', ch: 'Zeefaring 13', tw: 4, prog: 1, gain: 'Pieces of Plunder Weighing Down Your Hold 500', rare: 'TW +3, full speed', fail: 'TW +10, half speed', piracy: true },
+        { text: 'Zail on by', tw: 6, prog: 1, piracy: true },
+      ],
+    },
+    {
+      name: 'A Pirate Steamer!',
+      where: ['The Snares'],
+      freq: 'Standard',
+      opts: [
+        { text: 'All power to the engines!', ch: 'Shadowy vs Zee Peril', tw: 4, prog: 1, fail: 'TW +18, half speed, Groaning Hull' },
+        { text: 'Ready the guns!', ch: 'Dangerous vs Zee Peril', tw: 4, prog: 1, fail: 'TW +16, no progress' },
+        { text: 'Flash a pass-sign of the Mourn', ch: 'Zeefaring 13', need: 'Corsair\'s Colours 2, Chasing Down Your Bounty', tw: 2, prog: 1, gain: 'Chasing Down Your Bounty +16', rare: 'TW -2-3, full speed', fail: 'TW +12, a quarter speed', piracy: true },
+      ],
+    },
+    {
+      name: 'Navigating the Snares',
+      where: ['The Snares'],
+      freq: 'Standard',
+      note: '"Slow and steady" is half speed for zero Troubled Waters - the safe line, and the reason the Snares can be less punishing than the long way round.',
+      opts: [
+        { text: 'Slow and steady does it', tw: 0, prog: 0.5 },
+        { text: 'You have places to be', ch: 'Shadowy vs Zee Peril', tw: 6, prog: 1, men: 'Mutinous Whispers', fail: 'TW +14, half speed, Groaning Hull' },
+        { text: 'Follow a route set by the HMS Ramillies', ch: 'Watchful vs Zee Peril', need: 'The Crew of HMS Ramillies', tw: 6, prog: 1, men: 'Creeping Fear', fail: 'TW +12, half speed, Unwelcome on the Waters' },
+      ],
+    },
+  ];
+
+  // Two of the piracy cards are titled after your quarry -- in game "A
+  // Sighting of the (Bounty)" reads "A Sighting of the Screaming Nun" or
+  // whatever your target happens to be -- so those match on their opening
+  // words instead of the whole name. Everything else matches exactly, through
+  // the same punctuation-squashing normaliser the Spite table uses.
+  const ZEE_BY_NAME = new Map();
+  const ZEE_BY_PREFIX = [];
+  for (const card of ZEE_CARDS) {
+    if (card.prefix) ZEE_BY_PREFIX.push([normalizeName(card.prefix), card]);
+    else ZEE_BY_NAME.set(normalizeName(card.name), card);
+  }
+
+  function lookupZeeCard(name) {
+    const key = normalizeName(name);
+    if (!key) return null;
+    const exact = ZEE_BY_NAME.get(key);
+    if (exact) return exact;
+    for (const pair of ZEE_BY_PREFIX) {
+      if (key.indexOf(pair[0] + ' ') === 0) return pair[1];
+    }
+    return null;
+  }
+
+  // How much of your Zailing Speed an option is worth. 'flat80' scores above
+  // full speed because 80 is a whole direct leg -- more than any ship's speed.
+  function zeeProgScore(prog) {
+    if (prog === 'flat80') return 2;
+    return typeof prog === 'number' ? prog : 0;
+  }
+
+  // What an option costs in Troubled Waters, for ranking purposes.
+  //
+  // Two deliberate rules here. An option whose change the wiki records as a
+  // level ("set to 5") rather than a number of CP scores as 0: we know it is a
+  // change but not its size, and inventing one would be worse than ranking it
+  // neutrally. And a LUCK challenge is scored on its expected value, because
+  // it is the one case where the wiki states both outcomes and the odds: A
+  // Spit of Land's island stop buys a point on a success and costs eight on a
+  // failure, so quoting the -1 alone would recommend a coin flip that is
+  // actually the worse half of the card. A stat challenge gets no such
+  // treatment -- the difficulty is your business, not this table's -- so it
+  // keeps its success value and the badge's "?" says as much.
+  function zeeTwScore(opt) {
+    const base = typeof opt.tw === 'number' ? opt.tw : 0;
+    const luck = opt.ch && /^Luck (\d+)%$/.exec(opt.ch);
+    if (!luck || typeof opt.twFail !== 'number') return base;
+    const odds = Number(luck[1]) / 100;
+    return odds * base + (1 - odds) * opt.twFail;
+  }
+
+  // The line the badge speaks for. Options behind a `need` are left out --
+  // their numbers would promise something you may not have -- unless the card
+  // has no unconditional line at all, in which case the best gated one is used
+  // and `gated` says so.
+  //
+  // Cheapest Troubled Waters first, more progress only as the tie-break. That
+  // is the guide's own framing (its one big table is "cards that do not
+  // increase Troubled Waters"), and it is the right way round: almost every
+  // line at zee makes full progress anyway, so the number that actually varies
+  // between the cards in your hand is what they cost you, and the thing that
+  // ends a voyage badly is Troubled Waters reaching 8. Ranking progress first
+  // instead would have the badge recommending "You have places to be" in the
+  // Snares -- half an action saved for six change points, in the deadliest
+  // water in the game. When the cheapest line is also the slow one, the badge
+  // says so with its speed mark rather than hiding it.
+  //
+  // Pure, so the arithmetic behind every badge is testable without a DOM.
+  function bestZeeLine(card) {
+    const open = card.opts.filter(function (o) { return !o.need && !o.piracy; });
+    const pool = open.length ? open : card.opts;
+    if (!pool.length) return null;
+    let best = pool[0];
+    for (const opt of pool) {
+      const dt = zeeTwScore(opt) - zeeTwScore(best);
+      if (dt < 0 || (dt === 0 && zeeProgScore(opt.prog) > zeeProgScore(best.prog))) best = opt;
+    }
+    return { opt: best, gated: !open.length };
+  }
+
+  // Is there a cheaper line on this card that the badge deliberately refused
+  // to quote, because it is gated on an item, a quality or piracy? That is the
+  // other half of the question. The Killing Wind is the case this exists for:
+  // what the badge can offer you is a coin flip that costs +4 on a success and
+  // +12 on a failure, while a Zubmarine turns the same card into -2 at full
+  // speed. The badge will not promise you a submarine, but it can point at the
+  // tooltip.
+  function zeeHasBetterGated(card, chosen) {
+    return card.opts.some(function (o) {
+      return o !== chosen && (o.need || o.piracy) && zeeTwScore(o) < zeeTwScore(chosen);
+    });
+  }
+
+  const ZEE_CLASS = 'fl-ux-zee';
+  const ZEE_FLAG = 'flUxZee';
+
+  // Colours read as a cost, not a rating: green is cheap, red is expensive,
+  // and the black cards get the dark green of their own sinister border
+  // whatever their numbers say, because what matters about them is that they
+  // are blocking your hand.
+  const ZEE_URGENT_COLOR = '#25493a';
+  const ZEE_UNKNOWN_COLOR = '#5b5b5b';
+  function zeeColor(tw) {
+    if (typeof tw !== 'number') return ZEE_UNKNOWN_COLOR;
+    if (tw <= -2) return '#2f6b3f';
+    if (tw <= 0) return '#4a7a3c';
+    if (tw <= 2) return '#7a733a';
+    if (tw <= 4) return '#8a6d3b';
+    if (tw <= 7) return '#a1622c';
+    return '#8a3b3b';
+  }
+
+  const ZEE_SPEED_MARK = { 0.5: '½', 0.25: '¼', 0: '·' };
+  const ZEE_GATED_MARK = '▾';
+
+  function zeeSpeedWord(prog) {
+    if (prog === 'flat80') return 'a flat Zailing… 80, whatever your ship';
+    if (prog === 1) return 'full Zailing Speed';
+    if (prog === 0.5) return 'half Zailing Speed';
+    if (prog === 0.25) return 'a quarter of Zailing Speed';
+    return 'no progress';
+  }
+
+  function zeeTwWord(opt) {
+    if (opt.twText) return opt.twText;
+    if (typeof opt.tw !== 'number') return 'Troubled Waters unrecorded';
+    const value = opt.twRange || (opt.tw > 0 ? '+' + opt.tw : String(opt.tw));
+    return opt.tw === 0 ? 'no Troubled Waters' : 'Troubled Waters ' + value + ' CP';
+  }
+
+  function zeeOptionLine(opt) {
+    const bits = [opt.text];
+    if (opt.ch) bits.push('[' + opt.ch + ']');
+    if (opt.need) bits.push('(needs ' + opt.need + ')');
+    if (opt.hidden) bits.push('(hidden while: ' + opt.hidden + ')');
+    let line = '  • ' + bits.join(' ') + '\n      ' + zeeTwWord(opt) + ', ' + zeeSpeedWord(opt.prog);
+    if (opt.men) line += ', ' + opt.men;
+    if (opt.gain) line += '\n      gives: ' + opt.gain;
+    if (opt.note) line += '\n      ' + opt.note;
+    if (opt.rare) line += '\n      rare success: ' + opt.rare;
+    if (opt.fail) line += '\n      failure: ' + opt.fail;
+    return line;
+  }
+
+  // What to draw for a card. Kept pure (card in, { text, color, title } out)
+  // so the whole badge can be asserted on without a browser.
+  function zeeBadgeSpec(card) {
+    const best = bestZeeLine(card);
+    if (!best) {
+      return {
+        text: '?',
+        color: ZEE_UNKNOWN_COLOR,
+        title: card.name + '\n' + (card.note || 'No options transcribed for this card.'),
+      };
+    }
+    const opt = best.opt;
+    const mark = ZEE_SPEED_MARK[opt.prog] || (opt.prog === 'flat80' ? '★' : '');
+    const value = typeof opt.tw !== 'number' ? '→' : (opt.tw > 0 ? '+' + opt.tw : String(opt.tw));
+    const text = mark + value + (opt.ch ? '?' : '') + (zeeHasBetterGated(card, opt) ? ZEE_GATED_MARK : '');
+
+    const lines = [card.name];
+    lines.push((card.where.indexOf('any') !== -1 ? 'Anywhere at zee' : card.where.join(' / '))
+      + ' · ' + card.freq + (card.urgent ? ' · URGENT: dealt before every other zee card' : ''));
+    if (card.cardNeeds) lines.push('In your deck while: ' + card.cardNeeds);
+    if (card.note) lines.push(card.note);
+    lines.push('');
+    lines.push('Best line without anything special in hand'
+      + (best.gated ? ' — there is none, so this one is gated:' : ':'));
+    // The menaces go in the headline too, not only in the list below it. The
+    // badge speaks about Troubled Waters and nothing else, so a line that is
+    // cheap in Troubled Waters and expensive in Nightmares (Becalmed's, for
+    // one) would otherwise read as free right where you are most likely to
+    // stop reading.
+    lines.push('  ' + opt.text + ' — ' + zeeTwWord(opt) + ', ' + zeeSpeedWord(opt.prog)
+      + (opt.men ? ', ' + opt.men : '')
+      + (opt.ch ? ' (on a success of ' + opt.ch + ')' : ''));
+    if (zeeHasBetterGated(card, opt)) {
+      lines.push('  ' + ZEE_GATED_MARK + ' a cheaper line exists here, behind something you may or may not have — see below.');
+    }
+    lines.push('');
+    lines.push('Every option:');
+    for (const o of card.opts) lines.push(zeeOptionLine(o));
+    lines.push('');
+    lines.push('Zee cards cannot be discarded. Troubled Waters resets at a safe dock; at 8 it kills you.');
+    return { text: text, color: card.urgent ? ZEE_URGENT_COLOR : zeeColor(opt.tw), title: lines.join('\n') };
+  }
+
+  // The area gate, and it is a weaker one than the Crowds of Spite feature's
+  // on purpose. That gate rests on a greeting captured verbatim in-game; this
+  // list is a GUESS at what the same greeting says at zee, assembled from the
+  // region names the wiki uses. So it only ever says "yes, definitely a zee
+  // region" or "can't tell" -- never "no" -- and the card table stays the real
+  // scope, exactly as the Spite feature started out.
+  //
+  // If a greeting from a real voyage is ever captured, this can be tightened
+  // into an exact list the way SPITE_AREAS was.
+  const ZEE_AREAS = [
+    'The Broad Unterzee', 'The Unterzee', 'Zailing the Unterzee',
+    'Home Waters', "Shepherd's Wash", 'The Sea of Voices',
+    'The Salt Steppe', 'The Salt Steppes', 'The Pillared Sea',
+    'Stormbones', 'The Snares',
+  ].map(normalizeName);
+
+  function inZee() {
+    const area = normalizeName(currentArea());
+    return !!area && ZEE_AREAS.indexOf(area) !== -1;
+  }
+
+  // One card is named "The Sound of Wings" and Fallen London deals a different
+  // card of that same name in eight other places, so that one waits until the
+  // area confirms we are at zee. Everything else is scoped by its name alone.
+  function zeeCardFor(name) {
+    const card = lookupZeeCard(name);
+    if (!card) return null;
+    if (card.strictZee && !inZee()) return null;
+    return card;
+  }
+
+  function zeeCardRatings() {
+    eachCardName(function (host, name, place, style) {
+      const card = zeeCardFor(name);
+      attachBadge(host, {
+        cls: ZEE_CLASS,
+        flag: ZEE_FLAG,
+        value: name,
+        spec: card ? zeeBadgeSpec(card) : null,
+        place: place,
+        style: style,
+      });
+    });
+  }
+
+  // === feature: Fruits of the Zee Festival card ratings ==================
+  //
+  // Rates the opportunity cards you draw while wreck-diving at the Fruits of
+  // the Zee Festival (Mutton Island, the first weeks of September).
+  //
+  // The festival is two weeks and the cards belong to the first one. You raise
+  // Fivefold Devotion on the shore, then dive from The Fishing Boats, Empty;
+  // each card in the hand offers ONE treasure you may claim, and "Dive deeper"
+  // is free but ends the dive if it fails. In the second week you trade what
+  // you hauled up for Thalassic Favour and spend that on equipment. So a card
+  // is worth two different things at once, and the badge says both:
+  //
+  //   * its TRADE-IN VALUE -- the Thalassic Favour the treasure is worth at
+  //     the Fruit Market, which is what pays for everything in week two; and
+  //   * whether it is a RARE ITEM you do not own yet -- the five corals, each
+  //     of which trades for one of three unique pieces of equipment, and the
+  //     six pieces of equipment from festivals past that only turn up while
+  //     diving. Those are the reason to keep diving once the Favour is banked,
+  //     and which of them you are still missing is the whole point of the
+  //     Fruits of the Zee panel further down.
+  //
+  // THE AWKWARD PART IS DEPTH. Almost every value here depends on Full Fathom
+  // Five -- A Cabin-Fragment pays 50 Favour at depth 1 and 400 at depth 5, and
+  // A Shattered Prow offers a Nuncian Pocket Watch at depths 2-4 but the
+  // Scrimshander Carving Knife only at 5 -- so a badge that ignored depth
+  // would be quoting the wrong number most of the time. `fotzDepth` is
+  // therefore three-tiered (see it below): a live read of the quality if FL
+  // happens to be rendering it, a depth you set yourself in the panel, or
+  // nothing -- and with nothing the badge shows the RANGE across the depths
+  // and says so, rather than picking a number it cannot justify. Same rule as
+  // everywhere else here: never state a figure we can't stand behind.
+  //
+  // Everything below is transcribed from Fruits of the Zee Festival (Guide),
+  // its /Item Comparison subpage, and the individual card and option pages on
+  // the Fallen London wiki. Corrections go in these tables and nowhere else.
+  //
+  // **Re-read the guide, don't trust a copy of it.** The wiki gains this
+  // year's content as the festival runs, and it did so twice in a week:
+  //
+  //   2026-09-03  A Graveyard of Derelict Debris and its Rust-Eaten Ration
+  //     were added to the guide's own card table within a day of this being
+  //     transcribed, and the first anyone knew of it was a card turning up
+  //     unbadged in a real hand.
+  //   2026-09-10  week two opened and the Ration's three Luggage were named,
+  //     clearing the last `pending` entry in these tables. Re-reading for that
+  //     also turned up two Fate prices the guide's Item Comparison table had
+  //     never corrected -- see FOTZ_CORALS.
+  //
+  // When a card comes up unbadged, the guide is the first place to look, not
+  // the last; and when a week of the festival turns over, re-read it whether
+  // anything looks wrong or not.
+
+  // Which of the three versions of a coral item you get is NOT random, which
+  // is the single most useful thing on this page: it is decided by Sights at
+  // the Festival at the moment you break the coral open. Verified on all six
+  // option pages (Offer the King your <coral>), which each list three
+  // outcomes:
+  //
+  //   Sights  1- 33 -> the Itinerant Zubmariner's stock ("above and below the
+  //                    zee" -- Saviour's Rocks, Rosegate, the Corsair's Forest)
+  //   Sights 34- 66 -> the Pirate-Poet's stock (Gaider's Mourn)
+  //   Sights 67-100 -> the Enigmatic Angler's stock (Irem)
+  //
+  // and the three traders in The Fruit Market swap coral items like-for-like,
+  // each handing out the band that is theirs and accepting the other two. So a
+  // variant you are missing has two routes: break a coral while Sights is in
+  // its band, or trade a duplicate to that band's trader. Note that breaking
+  // coral open re-rolls Sights, so you cannot line up two in a row.
+  //
+  // The guide's own summary table lists the three variants in a different
+  // order for several of the corals. The option pages win, per the usual rule.
+  const FOTZ_BANDS = [
+    { lo: 1, hi: 33, trader: 'the Itinerant Zubmariner' },
+    { lo: 34, hi: 66, trader: 'the Pirate-Poet' },
+    { lo: 67, hi: 100, trader: 'the Enigmatic Angler' },
+  ];
+
+  // The six corals. Each is claimed from one card at any depth, and traded
+  // (An Audience with the King-in-Coral -> Present him with a shard of coral)
+  // for one of three items that are mechanically identical to each other.
+  //
+  // `fate` is what the King-in-Coral's Hoard charges for one of the three, and
+  // it comes from the HOARD OPTION PAGES (`Fate Cost`), not from the guide's
+  // Item Comparison table. The two disagree on two of the corals -- the table
+  // still prices the Grasping Coral gloves at 30 when every one of the three
+  // option pages says 10, and prices the Gorgonian Reef-Rock's clothing at
+  // nothing at all when the Hoard sells all three for 20 -- and the option
+  // page wins here as it does everywhere else in this file.
+  const FOTZ_CORALS = [
+    {
+      coral: 'Barnacled Headpiece', card: 'Among the Deep-Fish', slot: 'Hat', fate: 30,
+      variants: ['Aria of Tranquillity', 'Crab-Clawed Tricorne', 'Peaceable Cowl'],
+      bis: 'Strict best-in-slot for Troubled Waters reduction.',
+    },
+    {
+      coral: 'Gorgonian Reef-Rock', card: 'A Rusting Anchor', slot: 'Clothing', fate: 20,
+      variants: ['Concealing Skirt', 'Henchman’s Greatcoat', 'Obscurant’s Shawl'],
+    },
+    {
+      coral: 'Grasping Coral', card: 'A Reef of Wrecks', slot: 'Gloves', fate: 10,
+      variants: ['Gossamer Palms', 'Mournclimber’s Wraps', 'Loomweavers'],
+      bis: 'Shared best-in-slot with the Bazaar’s Pair of Lenguals.',
+    },
+    {
+      coral: 'Pedestrian Polyp', card: 'Old Wounds', slot: 'Boots', fate: 15,
+      variants: ['Scrimshaw Sabatons', 'Bright-Buckled Boots', 'Riddlefisher’s Footsteps'],
+    },
+    {
+      coral: 'Spinebound Oddity', card: 'An Obscured Glitter', slot: 'Adornment', fate: 20,
+      variants: ['‘Rosegate Blend’ Roll-ups', 'Mourning Locket', 'Justificande Cufflinks'],
+      bis: 'Strict best-in-slot for Shadowy.',
+    },
+    // THIS YEAR'S NEW ONE, and the reason to re-read the guide rather than
+    // trusting a transcription taken a day earlier: it was added to the wiki
+    // between the two (found 2026-09-03, after a card in a real hand came up
+    // unbadged). Its three Luggage were then WITHHELD until week two -- the
+    // guide's own table said "(Coming in week 2)" three times under an
+    // `{{Incomplete}}` banner -- so `variants` stayed null rather than being
+    // guessed at, and everything downstream had to cope with not knowing them.
+    //
+    // Published 2026-09-10, when week two opened. The names and the band each
+    // one belongs to are taken from the option page, Offer the King your
+    // Rust-Eaten Ration, which states all three outright -- not from the
+    // guide's summary table, though the two agree here. Dangerous +2 and
+    // Monstrous Anatomy +1, per the item pages.
+    //
+    // The `pending` machinery is deliberately LEFT IN even though nothing uses
+    // it now: a coral whose items are not published is the normal state of the
+    // festival's first week, and next year's new one will need it again.
+    {
+      coral: 'Rust-Eaten Ration', card: 'A Graveyard of Derelict Debris', slot: 'Luggage',
+      fate: null,
+      variants: ['Accomodating Oyster', 'Sentient Zee-Chest', 'Fateful Net'],
+    },
+  ];
+
+  // --- week one, before the diving: Supplication on the Shore ------------
+  //
+  // You cannot dive at all below Fivefold Devotion 5, and how much higher you
+  // go decides how deep you can get. Devotion comes from one storylet,
+  // Supplication on the Shore, whose five options are worth **exactly the same
+  // 4 CP each** -- so the only thing that separates them is which base
+  // attribute the economy item scales off, and which item that is. Pick the
+  // one matching your best stat; there is no other consideration.
+  //
+  // **You do not get to choose freely**, which is the thing the guide's table
+  // does not tell you and a capture of the live storylet does: every option is
+  // gated on a window of *Airs of a Barren Zee*, and Airs is re-rolled by the
+  // action you just took. Typically two of the five are on offer at a time. So
+  // the useful question is not "which is best" but "which of the ones in front
+  // of me right now matches my best stat" -- and that is a question you have
+  // while looking at the storylet, not while reading a table, which is why
+  // these get badged in the game as well as listed in the panel.
+  //
+  // The windows and the ids come from the five option pages; the two the game
+  // showed with a requirement icon (Airs 60-100 and "outside 21-79") agree
+  // with them exactly, which is the check that they are real.
+  //
+  // The four attributes, with a glyph apiece. `color` is for text on the
+  // panel's dark ground, `badge` for white text on a filled badge -- the same
+  // hue at two weights, since one value cannot do both legibly. The stat's
+  // name is always rendered beside the glyph, so a font without the emoji
+  // loses nothing.
+  const FOTZ_STATS = {
+    Watchful: { icon: '👁', color: '#6f9fd8', badge: '#3d6591' },
+    Shadowy: { icon: '🗝', color: '#9b83c9', badge: '#5f4b8b' },
+    Dangerous: { icon: '⚔', color: '#c2645a', badge: '#8f3f36' },
+    Persuasive: { icon: '🎭', color: '#c9a04a', badge: '#8a6420' },
+  };
+
+  const FOTZ_SUPPLICATION = [
+    {
+      text: 'Construct toy boats to scuttle on the reef', id: 259469,
+      gain: 'Zee-Ztory', stat: 'Shadowy', airs: '0–40',
+    },
+    {
+      text: 'Sacrifice landed victuals to the zee', id: 259492,
+      gain: 'Cryptic Clue', stat: 'Watchful', airs: '20–60',
+    },
+    {
+      text: 'Gather flotsam for the King-in-Coral', id: 259493,
+      gain: 'Memory of Distant Shores', stat: 'Watchful', airs: '40–80',
+      note: 'Memories turn in 40 at a time with 2 Sworn Statements, which is what makes '
+        + 'this the option to take if you are also grinding Skulls in Coral in Jericho Locks.',
+    },
+    {
+      text: 'Perform in a Mutton Island mystery play', id: 259494,
+      gain: 'Maniac’s Prayer', stat: 'Persuasive', airs: '60–100',
+    },
+    {
+      text: 'Assist in the preparation of a well-rite', id: 259531,
+      gain: 'Tale of Terror!!', stat: 'Dangerous', airs: '0–20 or 80+',
+    },
+  ];
+
+  // The other two branches on the same storylet. Neither raises Devotion by
+  // the usual 4, so neither belongs in the table above -- but both are on
+  // screen beside the ones that do, and an unlabelled option next to labelled
+  // ones reads as an oversight. `strict` on the Chef because his name is the
+  // one here generic enough to belong to some other storylet.
+  const FOTZ_SUPPLICATION_OTHER = [
+    {
+      text: 'Speak to the Custodial Chef', id: 259471, strict: true,
+      badge: 'free', note: 'Costs no action and gives nothing: the Chef opening proceedings.',
+    },
+    {
+      text: 'Seek out one of the Fathomking’s servants', id: 259496,
+      badge: '7 Fate', warn: true,
+      note: 'Sets Fivefold Devotion straight to 11, the cap — which is otherwise 17 '
+        + 'supplications. Quoted from the game’s own description of the branch.',
+    },
+  ];
+
+  const FOTZ_BRANCHES = FOTZ_SUPPLICATION.concat(FOTZ_SUPPLICATION_OTHER);
+
+  const FOTZ_BRANCH_BY_NAME = new Map(
+    FOTZ_BRANCHES.map(function (o) { return [normalizeName(o.text), o]; }));
+
+  function lookupFotzBranch(name) {
+    return FOTZ_BRANCH_BY_NAME.get(normalizeName(name)) || null;
+  }
+
+  // Every option, every time. There is no variation to model.
+  const FOTZ_DEVOTION_CP = 4;
+
+  // Fivefold Devotion is a pyramidal quality: going from level n to n+1 costs
+  // n+1 CP, so reaching L costs L(L+1)/2 altogether. At 4 CP an action that is
+  // 4 actions to the minimum of 5 and 17 to the cap of 11 -- and a dive itself
+  // is 2 more (one to leave the boat, one to claim the treasure).
+  //
+  // Pure, and worth being pure: the whole ladder is checked against the
+  // guide's own table, which reads 5 (6 Act) through to 11 (19 Act).
+  function fotzDevotionCP(level) {
+    return (level * (level + 1)) / 2;
+  }
+
+  function fotzDevotionLadder() {
+    const rows = [];
+    for (let level = 5; level <= 11; level++) {
+      const actions = Math.ceil(fotzDevotionCP(level) / FOTZ_DEVOTION_CP);
+      rows.push({ level: level, cp: fotzDevotionCP(level), actions: actions, dive: actions + 2 });
+    }
+    return rows;
+  }
+
+  // How many more supplications from where you are now. `from` may be null --
+  // we then have no idea, and neither does the caller. It is an upper bound
+  // either way: FL shows the level but not the change points inside it, so
+  // this assumes you have just this moment arrived at `from`.
+  function fotzActionsToDevotion(from, to) {
+    if (from == null || from >= to) return 0;
+    return Math.ceil((fotzDevotionCP(to) - fotzDevotionCP(from)) / FOTZ_DEVOTION_CP);
+  }
+
+  // Where to stop, and how deep to go once you are there.
+  //
+  // **From a comment on the guide** -- cs-comment-99376, by the player whose
+  // Monte Carlo produced the Favour-per-action figures the guide itself
+  // quotes. It models the festival the way it is actually played: four
+  // collecting STAGES and then a Favour grind, each stage pairing a Devotion
+  // with the depth that pays the items still outstanding. Verbatim:
+  //
+  //   1) Get all your corals with 5 Devotion 1 depth. If you don't get the
+  //      coral you want, 100 favours is a decent FPA but rerolling with a 50%
+  //      dive is a good option too + pick up Jillyfleur here too.
+  //   2) 8 devotion depth 2, if not then "reroll" 90% to depth 3 until
+  //      Wrecking boots + Nuncian watch (or maybe devotion 9 for Nuncian watch
+  //      if it's really evading you).
+  //   3) 10 devotion depth 4 until Mary Lloyd + Effluvia; if at depth 4 you get
+  //      terrible pickings, go depth 5 and maybe pick up Scrimshander instead.
+  //   4) 11 devotion depth 5 until Scrimshander (worst case do storylet or pick
+  //      up max favours if you don't see it).
+  //   5a) The expected return optimal strategy = Devotion 9 = 15.4 FPA
+  //   5b) 10 devotion depth 3-5 = 14.6 FPA
+  //   5c) 11 devotion, 14.3 FPA, 0% drowning.
+  //
+  // This replaced a ladder keyed on the coral count alone (5/7/8/10, and
+  // nothing at all to say about the six dive-only items), which had no source
+  // but a reading of the guide's prose.
+  //
+  // The stages are ordered, and the FIRST one with anything outstanding wins.
+  // That falls out right for the shallow-only items without a special case:
+  // the Jillyfleur Cloak is depths 1-2 and sits in stage 1, so it is collected
+  // while you are still up there rather than thrown away by a deeper dive.
+  const FOTZ_DIVE_PLAN = [
+    { stage: 1, level: 5, depth: 1, corals: true, items: ['A Cured Jillyfleur Cloak'] },
+    { stage: 2, level: 8, depth: 2, items: ['Wrecking Boots', 'Nuncian Pocket Watch'] },
+    {
+      stage: 3, level: 10, depth: 4,
+      items: ['Semi-Automated Mary Lloyd', 'A Faceted Decanter of Drownie Effluvia'],
+    },
+    { stage: 4, level: 11, depth: 5, items: ['Scrimshander Carving Knife'] },
+  ];
+
+  // The three the comment simulated, best first. `depth` is quoted only where
+  // it quoted one: Devotion 9 is given as a Devotion, not as a depth, and
+  // inventing one for it would be putting a number in the comment's mouth.
+  const FOTZ_FAVOUR_RUN = [
+    { level: 9, depth: null, fpa: 15.4, note: 'the expected-return optimum' },
+    { level: 10, depth: '3–5', fpa: 14.6, note: null },
+    { level: 11, depth: 5, fpa: 14.3, note: 'and never drowns' },
+  ];
+
+  // "depth 5" but "depths 3-5": the Favour run quotes one of each.
+  function fotzDepthPhrase(depth) {
+    return (typeof depth === 'number' ? 'depth ' : 'depths ') + depth;
+  }
+
+  function andList(names) {
+    if (names.length < 2) return names[0] || '';
+    return names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1];
+  }
+
+  // `wants` is { corals, items }: how many corals are still worth diving for
+  // (null when Possessions have never been read) and the dive-only equipment
+  // you have not got. Pure, so the whole plan is testable without a DOM.
+  function fotzDiveAdvice(wants) {
+    const corals = wants && wants.corals != null ? wants.corals : 0;
+    const items = (wants && wants.items) || [];
+    for (const plan of FOTZ_DIVE_PLAN) {
+      const here = items.filter(function (n) { return plan.items.indexOf(n) !== -1; });
+      const wantsCorals = !!plan.corals && corals > 0;
+      if (!wantsCorals && !here.length) continue;
+
+      let why;
+      if (plan.stage === 1) {
+        why = (wantsCorals
+          ? corals + (corals === 1 ? ' coral' : ' corals') + ' still to dive up, and they '
+            + 'turn up at every depth — so dive as cheaply and as often as you can. A '
+            + 'poor draw is still 100 Favour, and rerolling with a 50% dive is fine.'
+          : '')
+          + (here.length
+            ? (wantsCorals ? ' ' : '') + andList(here) + ' is depths 1–2, so take it '
+              + 'while you are still up here — a deeper dive throws it away.'
+            : '');
+      } else if (plan.stage === 2) {
+        why = andList(here) + ' next: dive to 2, and reroll on to 3 (about 90% of the time) '
+          + 'when the draw is poor. If the Watch keeps evading you, 9 buys some consistency.';
+      } else if (plan.stage === 3) {
+        // Only offer the Knife as the consolation while it still IS one:
+        // sending someone deep for a thing already in their hold is noise.
+        const knife = 'Scrimshander Carving Knife';
+        why = andList(here) + ': dive to 4, and on terrible pickings carry on to 5 '
+          + (items.indexOf(knife) !== -1
+            ? 'and take the ' + knife + ' instead.'
+            : 'and take the Favour instead.');
+      } else {
+        why = andList(here) + ' only, and it is depth 5 and nowhere else. Worst case, take '
+          + 'the storylet or the biggest Favour on the table.';
+      }
+      return {
+        stage: plan.stage, level: plan.level, depth: plan.depth,
+        corals: wantsCorals ? corals : 0, items: here, why: why,
+      };
+    }
+
+    const best = FOTZ_FAVOUR_RUN[0];
+    return {
+      stage: 5, level: best.level, depth: best.depth, corals: 0, items: [],
+      alternatives: FOTZ_FAVOUR_RUN,
+      why: 'Nothing left to collect, so this is a Favour run. The comment’s simulation '
+        + 'puts Devotion ' + best.level + ' ahead at ' + best.fpa + ' Favour per action, '
+        + 'against ' + FOTZ_FAVOUR_RUN.slice(1).map(function (alt) {
+          return alt.fpa + ' at ' + alt.level
+            + (alt.depth ? ' (' + fotzDepthPhrase(alt.depth) + ')' : '');
+        }).join(' and ') + ' — the last of which never drowns you.',
+    };
+  }
+
+  // Pure economy treasure: worth nothing but the Favour it trades for. These
+  // are the Fruit Market's numbers (Treasures to Trade), which are also what
+  // the diving table's "Total Favour Value" column adds up to.
+  const FOTZ_TREASURES = [
+    { name: 'Witch-Stone', favour: 10 },
+    { name: 'Collection of Zee-Glass', favour: 20 },
+    { name: 'Salt-Smoothed Shiv', favour: 50 },
+    { name: 'Sodden Mass', favour: 100 },
+    {
+      name: 'Skull in Coral', favour: 125,
+      note: 'Also a usable Osteology skull, and the one treasure that survives the '
+        + 'end of the festival. Limited to ten trade-ins.',
+    },
+    {
+      name: 'Urchin Spine', favour: 125,
+      note: 'Replaces Skull in Coral once ten have been received.',
+    },
+    { name: 'Long-Lost Zee Trunk', favour: 200 },
+  ];
+
+  // The six pieces of equipment from festivals past that turn up while diving.
+  // `favour` is what trading a DUPLICATE back pays; `stall` is what buying one
+  // at the Island Stalls costs in week two -- always the cheaper of the two,
+  // which is the argument for diving them up rather than buying them.
+  const FOTZ_EQUIPMENT = [
+    {
+      name: 'A Cured Jillyfleur Cloak', slot: 'Clothing', card: 'Well-Disguised Trinkets',
+      depths: [1, 2], favour: 100, stall: 50, fate: 10,
+      note: 'Early-game; outclassed by Far Khanate Lacquered Armour. Unlocks one of '
+        + 'several ways into the Clay Tailor Club.',
+    },
+    {
+      name: 'Wrecking Boots', slot: 'Boots', card: 'Tangled in the Rigging',
+      depths: [2, 3], favour: 100, stall: 50, fate: 10,
+      note: 'Early-game, no uses; a peer of the Bazaar’s Pair of Ratskin Boots.',
+    },
+    {
+      name: 'Nuncian Pocket Watch', slot: 'Weapon', card: 'A Shattered Prow',
+      depths: [2, 4], favour: 150, stall: 75, fate: 10,
+      bis: 'Shared best-in-slot for Respectable.',
+      note: 'Unlocks Hillchanger Tower options in Ealing Gardens and the Railway.',
+    },
+    {
+      name: 'Semi-Automated Mary Lloyd', slot: 'Transport', card: 'Tangled in the Rigging',
+      depths: [4, 5], favour: 200, stall: 100, fate: 30,
+      bis: 'Strict non-Fate, non-Hellworm best-in-slot for BDR.',
+    },
+    {
+      name: 'A Faceted Decanter of Drownie Effluvia', slot: 'Weapon',
+      card: 'Well-Disguised Trinkets', depths: [3, 5], favour: 300, stall: 150, fate: 5,
+      note: 'Unlocks Cure the ignorance of your zailors while Zailing — Troubled Waters '
+        + 'down on a Kataleptic Toxicology check, and progress with it.',
+    },
+    {
+      name: 'Scrimshander Carving Knife', slot: 'Weapon', card: 'A Shattered Prow',
+      depths: [5, 5], favour: 400, stall: 200, fate: 5,
+      note: 'No stats. Unlocks Carve away some evidence of age, which removes '
+        + 'Skeleton: Antiquity.',
+    },
+  ];
+
+  // Week two only: the Island Stalls, for Thalassic Favour. Nothing here can be
+  // dived for. The prices are the stall table's in the guide; where the Item
+  // Comparison page disagrees (it says 250 for the Lamp-cat, 30 Fate for the
+  // Guinea-Pig) the price list is what this follows.
+  const FOTZ_STALL = [
+    {
+      name: 'A Submerged Rector', slot: 'Companion', favour: 100, fate: 15,
+      note: 'Early-game Persuasive companion. Unlocks options in the Upper River, the '
+        + 'Evenlode and Burrow-infra-Mump.',
+    },
+    {
+      name: 'Keelgraspers', slot: 'Gloves', favour: 150, fate: 10,
+      bis: 'Shared best-in-slot for BDR.',
+    },
+    {
+      name: 'Sun-Seared Silken Gloves', slot: 'Gloves', favour: 150, fate: 10,
+      bis: 'Shared best-in-slot for A Player of Chess and for BDR.',
+    },
+    {
+      name: 'Inquisitive Lamp-cat', slot: 'Companion', favour: 200, fate: 15,
+      note: 'Unremarkable now, but its Hallowmas upgrade (Feline Pariah) is shared '
+        + 'best-in-slot for Monstrous Anatomy and Shadowy.',
+    },
+    {
+      name: 'The Forsaken Crown of a Grand Devil', slot: 'Hat', favour: 250, fate: 30,
+      bis: 'Shared best-in-slot for Artisan of the Red Science.',
+    },
+    {
+      name: 'Corpulent Carriage', slot: 'Transport', favour: 250, fate: 30,
+      bis: 'Shared best-in-slot for Monstrous Anatomy.',
+    },
+  ];
+
+  // The four festival ships, bought with your current ship plus Favour. The
+  // 500-1920 spread is which class you are trading in: a Zubmarine, a Majestic
+  // Pleasure Yacht or another festival ship brings every one of these to 500.
+  const FOTZ_SHIPS = [
+    {
+      name: 'Obstinate-class Cruiser', slot: 'Ship', peer: 'Rusty Tramp Steamer', fate: 20,
+      note: 'The only ship that reduces Troubled Waters, and it adds Dangerous and Dreaded.',
+    },
+    {
+      name: 'Ogedei-class Liner', slot: 'Ship', peer: 'Swift Zee-Clipper', fate: 20,
+      note: 'As fast as the Clipper, plus Dangerous and Dreaded.',
+    },
+    {
+      name: 'Nyx-class Zubmersible', slot: 'Ship', peer: 'Zubmarine', fate: 20,
+      note: 'A Shadowy, Dreaded Zubmarine.',
+    },
+    {
+      name: 'Il-Altun-class Yacht', slot: 'Ship', peer: 'Majestic Pleasure Yacht', fate: 20,
+      note: 'The Yacht, plus Persuasive.',
+    },
+  ];
+
+  // Reaching the bottom of the trench reveals Her Fivefold Symmetry, and
+  // begging audience there earns the Accomplishment. In week two that is what
+  // lets the King-in-Coral hand the Litter-Cyst over.
+  const FOTZ_BRIDE_QUALITY = 'Discovered: the Pentamerous Bride';
+  const FOTZ_BRIDE_ITEMS = [
+    {
+      name: 'Weeping Litter-Cyst', slot: 'Transport',
+      how: 'Dive to Full Fathom Five 5, beg audience with the Pentamerous Bride, then '
+        + 'Accept a briny gift from the King-in-Coral in week two.',
+      bis: 'Shared best-in-slot for Zeefaring.',
+    },
+    {
+      name: 'Nodule of Fecund Amber', slot: null,
+      how: 'Accept a fecund gift instead — offered only once you already hold the '
+        + 'Litter-Cyst from a previous festival.',
+      note: 'Not equipment: a Most Valuable rubbery item, sells for 312.50.',
+    },
+  ];
+
+  // Fate-only, from the King-in-Coral's Hoard. Listed so the checklist is
+  // honest about being a complete roster, but never counted as "missing":
+  // these cost money rather than actions, and several are obtainable elsewhere.
+  const FOTZ_FATE_ITEMS = [
+    { name: 'Pre-Emptive Guinea-Pig', slot: 'Weapon', fate: 20 },
+    { name: '‘For Your Own Good’ Compass', slot: 'Weapon', fate: 15 },
+    {
+      name: 'Mutersalt', slot: 'Weapon', fate: 15,
+      note: 'Also free during the Railway, from the Liberationist marshland track.',
+    },
+    {
+      name: 'Consignment of Scintillack Snuff', slot: 'Weapon', fate: 10,
+      note: 'Don’t buy it here — get it from Balmoral and research the recipe.',
+    },
+    {
+      name: 'Viscountess’ Bejewelled Collar', slot: 'Adornment', fate: 10,
+      note: 'Also from the Sacroboscan Calendar.',
+    },
+    {
+      name: 'Viscount’s Bejewelled Collar', slot: 'Adornment', fate: 10,
+      note: 'Also from the Sacroboscan Calendar.',
+    },
+    {
+      name: 'Bloodstained Eolith', slot: null, fate: 15,
+      note: 'Also a rare failure when disambiguating Eoliths in your lab.',
+    },
+    {
+      name: 'Sinning Jenny’s Forsaken Wimple!', slot: 'Hat', fate: null,
+      note: 'A different item from Sinning Jenny’s Forsaken Wimple, for reasons known '
+        + 'only to Failbetter.',
+    },
+  ];
+
+  // Pure Favour-to-Echoes conversions at the stalls: a guaranteed E0.1 per
+  // Favour, which is the floor every other use of Favour is judged against.
+  const FOTZ_ECONOMY = [
+    { name: 'Oneiric Pearl', favour: 625 },
+    { name: 'Baited Riddle', favour: 625 },
+    { name: 'Vestige of a Starlit Reverie', favour: 3125 },
+    { name: 'Sample of Lacreous Affection', favour: 3125 },
+  ];
+
+  // The qualities worth reading off the Myself tab for this festival. Every
+  // one is a real quality (checked on the wiki), not an item -- Thalassic
+  // Favour included, which is why it is absent from the possessions scrape.
+  const FOTZ_QUALITIES = [
+    'Thalassic Favour',
+    'Fivefold Devotion',
+    'Full Fathom Five',
+    'Sights at the Festival',
+    'A Fruitless Harvest',
+    // Decides which supplication options you are offered, and is re-rolled by
+    // every one you take.
+    'Airs of a Barren Zee',
+    FOTZ_BRIDE_QUALITY,
+  ];
+
+  // --- the card table ----------------------------------------------------
+  //
+  // One entry per card in the diving deck, plus the storylet at the bottom of
+  // the trench. Each `opts` entry is one claim you can make and the depths it
+  // is offered at, so "what can I take from this card at depth 3" is a filter
+  // rather than a special case; A Cabin-Fragment pays a different amount at
+  // every one of the five, so it simply has five entries with the same text.
+  //
+  //   favour  the Thalassic Favour the reward trades for, in total
+  //   gain    what you actually receive
+  //   coral   a coral, i.e. one of three unique items in week two
+  //   item    a named unique piece of equipment
+  //   bride   the Accomplishment at the bottom of the trench
+  //
+  // `min` is the card's own Full Fathom Five requirement, which is also the
+  // only depth signal available without reading a quality (see `fotzDepth`).
+  // `strict` marks the two names generic enough that some other card in London
+  // could plausibly share one; those are badged only where we can tell we are
+  // at the festival -- the same treatment The Sound of Wings gets at zee.
+  const FOTZ_CARDS = [
+    {
+      name: 'A Reef of Wrecks',
+      opts: [{
+        text: 'Claim a piece of cast-off coral', depths: [1, 5], favour: 0,
+        coral: 'Grasping Coral',
+      }],
+    },
+    {
+      name: 'A Rusting Anchor',
+      opts: [{
+        text: 'Claim a piece of layered coral', depths: [1, 5], favour: 0,
+        coral: 'Gorgonian Reef-Rock',
+      }],
+    },
+    {
+      name: 'Among the Deep-Fish',
+      opts: [{
+        text: 'Claim a piece of cast-off coral', depths: [1, 5], favour: 0,
+        coral: 'Barnacled Headpiece',
+      }],
+    },
+    {
+      name: 'An Obscured Glitter',
+      opts: [{
+        text: 'Claim a piece of shining coral', depths: [1, 5], favour: 0,
+        coral: 'Spinebound Oddity',
+      }],
+    },
+    {
+      name: 'Old Wounds', strict: true,
+      opts: [{
+        text: 'Claim a piece of cast-off coral', depths: [1, 5], favour: 0,
+        coral: 'Pedestrian Polyp',
+      }],
+    },
+    {
+      name: 'A Graveyard of Derelict Debris',
+      opts: [{
+        text: 'Claim a piece of bulbous coral', depths: [1, 5], favour: 0,
+        coral: 'Rust-Eaten Ration',
+      }],
+    },
+    {
+      name: 'A Cabin-Fragment',
+      opts: [
+        { text: 'Take what you can', depths: [1, 1], favour: 50, gain: 'Witch-Stone ×5' },
+        { text: 'Take what you can', depths: [2, 2], favour: 100, gain: 'Witch-Stone ×10' },
+        {
+          text: 'Take what you can', depths: [3, 3], favour: 200,
+          gain: 'Witch-Stone ×10, Collection of Zee-Glass ×5',
+        },
+        {
+          text: 'Take what you can', depths: [4, 4], favour: 300,
+          gain: 'Collection of Zee-Glass ×5, Long-Lost Zee Trunk',
+        },
+        {
+          text: 'Take what you can', depths: [5, 5], favour: 400,
+          gain: 'Witch-Stone ×10, Collection of Zee-Glass ×5, Long-Lost Zee Trunk',
+        },
+      ],
+    },
+    {
+      name: 'Easy Pickings', strict: true,
+      opts: [
+        {
+          text: 'Claim an assortment of cast-off oddments', depths: [1, 1], favour: 100,
+          gain: 'Sodden Mass',
+        },
+        {
+          text: 'Claim an assortment of cast-off oddments', depths: [2, 3], favour: 150,
+          gain: 'Sodden Mass, Salt-Smoothed Shiv',
+        },
+        {
+          text: 'Claim an assortment of cast-off oddments', depths: [4, 5], favour: 300,
+          gain: 'Sodden Mass ×2, Salt-Smoothed Shiv ×2',
+        },
+      ],
+    },
+    {
+      name: 'Unlucky Prisoner',
+      opts: [
+        {
+          text: 'Rummage through the remains', depths: [1, 1], favour: 50,
+          gain: 'Salt-Smoothed Shiv',
+        },
+        {
+          text: 'Rummage through the remains', depths: [2, 2], favour: 100,
+          gain: 'Salt-Smoothed Shiv ×2',
+        },
+        {
+          text: 'Rummage through the remains', depths: [3, 3], favour: 150,
+          gain: 'Salt-Smoothed Shiv ×3',
+        },
+        {
+          text: 'Rummage through the remains', depths: [4, 4], favour: 125,
+          gain: 'Skull in Coral (or Urchin Spine)',
+        },
+        {
+          text: 'Rummage through the remains', depths: [5, 5], favour: 175,
+          gain: 'Skull in Coral (or Urchin Spine), Salt-Smoothed Shiv',
+        },
+      ],
+      note: 'The only card that pays a Skull in Coral, which is the one treasure that '
+        + 'outlives the festival.',
+    },
+    {
+      name: 'Tangled in the Rigging', min: 2,
+      opts: [
+        {
+          text: 'Liberate the Wrecking Boots', depths: [2, 3], favour: 100,
+          item: 'Wrecking Boots',
+        },
+        {
+          text: 'Retrieve a Semi-Automated Mary Lloyd', depths: [4, 5], favour: 200,
+          item: 'Semi-Automated Mary Lloyd',
+        },
+      ],
+    },
+    {
+      name: 'Well-Disguised Trinkets',
+      opts: [
+        {
+          text: 'Snatch a Cured Jillyfleur Cloak', depths: [1, 2], favour: 100,
+          item: 'A Cured Jillyfleur Cloak',
+        },
+        {
+          text: 'Retrieve a Faceted Decanter of Drownie Effluvia', depths: [3, 5], favour: 300,
+          item: 'A Faceted Decanter of Drownie Effluvia',
+        },
+      ],
+    },
+    {
+      name: 'A Shattered Prow', min: 2,
+      opts: [
+        {
+          text: 'Dive for a Nuncian Pocket Watch', depths: [2, 4], favour: 150,
+          item: 'Nuncian Pocket Watch',
+        },
+        {
+          text: 'Pry free a Scrimshander Carving Knife', depths: [5, 5], favour: 400,
+          item: 'Scrimshander Carving Knife',
+        },
+      ],
+    },
+    // Not a card: the storylet the bottom of the trench reveals. It is in this
+    // table because `eachCardName` decorates an opened storylet's heading too,
+    // and because this is the one place at the festival where the right move
+    // is to take NO treasure -- the Accomplishment is worth more.
+    {
+      name: 'Her Fivefold Symmetry', min: 5, storylet: true,
+      opts: [{
+        text: 'Beg audience with this ancient power', depths: [5, 5], favour: 0,
+        bride: true, gain: 'Discovered: the Pentamerous Bride, and no item',
+      }],
+      note: 'Foregoes a treasure. The Accomplishment is what lets the King-in-Coral '
+        + 'hand you a Weeping Litter-Cyst in week two.',
+    },
+  ];
+
+  const FOTZ_BY_NAME = new Map(
+    FOTZ_CARDS.map(function (c) { return [normalizeName(c.name), c]; }));
+
+  const FOTZ_CORAL_BY_NAME = new Map(
+    FOTZ_CORALS.map(function (c) { return [c.coral, c]; }));
+
+  function lookupFotzCard(name) {
+    return FOTZ_BY_NAME.get(normalizeName(name)) || null;
+  }
+
+  // --- where you are -----------------------------------------------------
+  //
+  // **Both halves are now CONFIRMED**, captured verbatim in-game 2026-09-03,
+  // which makes this an exact list of the SPITE_AREAS kind rather than the
+  // permissive guess it started as:
+  //
+  //   on the island   "It's ‹name›! Welcome to Mutton Island, delicious friend!"
+  //   mid-dive        "It's ‹name›! Welcome to the Royal Approach, delicious friend!"
+  //
+  // Note the game writes the second with a lower-case "the". It does not
+  // matter -- `normalizeName` folds case -- but it is worth knowing that the
+  // wiki's `location = The Royal Approach` and the game's greeting are the
+  // same string only after normalising.
+  //
+  // Wreckers' Cove is the one entry still unread: the week-two market lives
+  // there by name, though the storylets are filed under Mutton Island, so it
+  // is kept in case the greeting changes for the market. An extra entry can
+  // only widen the allow-list, never wrongly block; a MISSING one would
+  // wrongly block, which is the risk that matters now that this list is
+  // allowed to say no.
+  const FOTZ_AREAS = [
+    'Mutton Island',
+    'The Royal Approach',
+    'Wreckers’ Cove',
+    'Wreckers\' Cove',
+  ].map(normalizeName);
+
+  // The one you are actually underwater in. Separate from the list above
+  // because it answers a different question -- see `forgetStaleDepth`.
+  const FOTZ_DIVE_AREAS = ['The Royal Approach'].map(normalizeName);
+
+  function inFotzArea() {
+    const area = normalizeName(currentArea());
+    return !!area && FOTZ_AREAS.indexOf(area) !== -1;
+  }
+
+  function inDiveArea() {
+    const area = normalizeName(currentArea());
+    return !!area && FOTZ_DIVE_AREAS.indexOf(area) !== -1;
+  }
+
+  // The sturdier confirmation, and the one that needs no unverified markup at
+  // all: nine of the eleven card names could not plausibly belong to anything
+  // else in London, so one of them in the hand proves where you are. A
+  // three-card dive hand can hardly avoid holding at least one.
+  function fotzHandConfirms() {
+    let seen = false;
+    eachCardName(function (host, name) {
+      if (seen) return;
+      const card = lookupFotzCard(name);
+      if (card && !card.strict) seen = true;
+    });
+    return seen;
+  }
+
+  // THREE answers, not two, and the middle one is the point of having captured
+  // both greetings:
+  //
+  //   'yes'      the greeting names a festival area, or the hand proves it
+  //   'no'       the greeting names somewhere else entirely -- badge nothing
+  //   'unknown'  there is no greeting to read; the card table is the only scope
+  //
+  // 'no' is new. Until both areas were confirmed this could only ever say yes,
+  // because refusing on an unverified list risked blacking out the feature in
+  // the very place it is for. Now it can refuse, which is what keeps a Fruits
+  // of the Zee badge off a card somewhere else in London that happens to share
+  // a name -- the same tightening `SPITE_AREAS` got.
+  function fotzWhere() {
+    if (!normalizeName(currentArea())) return 'unknown';
+    if (inFotzArea()) return 'yes';
+    // Somewhere unexpected, but an unmistakable dive hand still outranks a
+    // list that might be missing an area nobody has visited yet.
+    return fotzHandConfirms() ? 'yes' : 'no';
+  }
+
+  // --- how deep you are --------------------------------------------------
+  //
+  // Full Fathom Five, 1 to 5, and nearly everything the badge says turns on
+  // it. Three sources, best first:
+  //
+  //  1. A LIVE quality read. `readQualities` finds `li.quality-item`, which is
+  //     verified markup on the Myself tab. **In practice this never fires**:
+  //     a hand captured mid-dive (2026-09-03) shows FL renders no quality
+  //     items anywhere on the diving screen, so the depth is only ever the one
+  //     you set yourself. It is kept because it costs one failed
+  //     `querySelectorAll` and would start working for nothing if FL ever put
+  //     the quality on that screen -- but do not plan around it.
+  //     It is deliberately live-only, with no fall back to the cache: a banked
+  //     depth from three minutes ago is a WRONG answer rather than a stale
+  //     one, because it changes with every successful dive.
+  //  2. What you set yourself, kept in sessionStorage -- a dive is one
+  //     sitting, and a depth should not outlive the tab. Set from the panel
+  //     or, while you are in the Royal Approach, from the control this script
+  //     puts in the page: behind UX Enhancers' docked button beside Fallen
+  //     London's own travel button, and again above the diving hand.
+  //  3. A BANKED quality read, off the Myself tab -- the one place Full
+  //     Fathom Five is reliably rendered. CONFIRMED WORKING in-game
+  //     (2026-09-04): the panel fetches it and the depth comes back, so a
+  //     dive no longer opens with the badges quoting a range. Opening the
+  //     Fruits of the Zee panel loads
+  //     /myself in a hidden frame the same way it loads /possessions, so this
+  //     is normally seconds old. It is used ONLY inside `FOTZ_READ_FRESH_MS`,
+  //     because the number changes with every successful dive: past that
+  //     window an old reading is not stale, it is wrong, and no answer beats
+  //     a wrong one. It sits BELOW what you set by hand for the same reason --
+  //     you know you have just dived, and the bank does not.
+  //  4. Nothing. Then the badge shows the range across every depth and says
+  //     so. The card table still gives a FLOOR (A Shattered Prow and Tangled
+  //     in the Rigging need depth 2, Her Fivefold Symmetry depth 5), which is
+  //     used to trim impossible depths out of that range -- but never to
+  //     invent a single depth.
+  const FOTZ_DEPTH_KEY = 'fl-ux-fotz-depth';
+  const FOTZ_QUALITY_DEPTH = 'Full Fathom Five';
+
+  function fotzLiveDepth() {
+    let scan = null;
+    try {
+      scan = readQualities();
+    } catch (e) {
+      return null;
+    }
+    if (!scan) return null;
+    const q = scan.values.get(FOTZ_QUALITY_DEPTH);
+    if (!q || !(q.level >= 1) || q.level > 5) return null;
+    return q.level;
+  }
+
+  function fotzSetDepth(depth) {
+    try {
+      if (depth == null) sessionStorage.removeItem(FOTZ_DEPTH_KEY);
+      else sessionStorage.setItem(FOTZ_DEPTH_KEY, String(depth));
+    } catch (e) { /* private mode; the badge just stays on the range */ }
+  }
+
+  function fotzChosenDepth() {
+    try {
+      const raw = sessionStorage.getItem(FOTZ_DEPTH_KEY);
+      const n = raw == null ? NaN : Number(raw);
+      return n >= 1 && n <= 5 ? n : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // The floor the hand itself proves, or null. Only ever a lower bound.
+  function fotzDepthFloor() {
+    let floor = 0;
+    eachCardName(function (host, name) {
+      const card = lookupFotzCard(name);
+      if (card && card.min && card.min > floor) floor = card.min;
+    });
+    return floor || null;
+  }
+
+  // A depth you set by hand outlives the dive it was set for -- it is kept for
+  // the whole tab session -- and the moment you surface it is not stale, it is
+  // WRONG: the next dive starts at 1. Until the mid-dive greeting was captured
+  // there was no way to notice you had left. Now there is, so leaving the
+  // Royal Approach throws the setting away and the badges go back to showing
+  // the range until you say otherwise.
+  //
+  // Only ever acts on a greeting it can actually read. An unreadable one means
+  // "no idea where you are", which is not grounds for discarding anything.
+  function forgetStaleDepth() {
+    const area = normalizeName(currentArea());
+    if (!area || inDiveArea()) return;
+    if (fotzChosenDepth() != null) fotzSetDepth(null);
+  }
+
+  // How long a depth read off the Myself tab is worth anything. One dive
+  // changes it, so this is deliberately short -- it is the window in which the
+  // reading the panel just took is still the reading rather than a memory of
+  // one.
+  const FOTZ_READ_FRESH_MS = 60 * 1000;
+
+  // The banked Myself reading, or null. Null covers every doubt: no bank, no
+  // timestamp, a stale one, or a level outside 1-5 (0 is what the scrape
+  // writes when you are not diving at all, and that is not a depth).
+  function fotzReadDepth() {
+    let rec = null;
+    try {
+      rec = loadCache(FOTZ_CACHE_KEY, 1);
+    } catch (e) {
+      return null;
+    }
+    if (!rec || !rec.values || !(rec.at > 0)) return null;
+    if (Date.now() - rec.at > FOTZ_READ_FRESH_MS) return null;
+    const n = rec.values[FOTZ_QUALITY_DEPTH];
+    if (!(n >= 1) || n > 5) return null;
+    return { depth: n, at: rec.at };
+  }
+
+  // { depth, source, at } -- source is 'quality', 'set', 'read', or null for
+  // none of them. `at` is when a 'read' was taken, and null for the others.
+  function fotzDepth() {
+    const live = fotzLiveDepth();
+    if (live) return { depth: live, source: 'quality', at: null };
+    const chosen = fotzChosenDepth();
+    if (chosen) return { depth: chosen, source: 'set', at: null };
+    const read = fotzReadDepth();
+    if (read) return { depth: read.depth, source: 'read', at: read.at };
+    return { depth: null, source: null, at: null };
+  }
+
+  // Opening the festival panel while you are actually down there has to go and
+  // LOOK, even when the banked numbers are fresh by the panel's usual standard:
+  // every figure on that screen is quoted at a depth that changed the last time
+  // you acted, and Full Fathom Five is only ever rendered on the Myself tab.
+  // `stateIsFresh` is left alone -- it is shared with the Factions panel, which
+  // has no such problem.
+  //
+  // The timestamp is what stops this being a loop. A refresh ends in a
+  // re-render, which asks this again; a refresh that banked nothing (a
+  // logged-out iframe, say) would still answer "go and look", and the panel
+  // would boot the SPA over and over.
+  let depthRefreshAt = 0;
+  function wantsDepthRefresh() {
+    if (!inDiveArea()) return false;
+    if (readQualities()) return false; // the Myself tab is already on screen
+    return Date.now() - depthRefreshAt > FOTZ_READ_FRESH_MS;
+  }
+
+  // One phrase for where the depth came from, shared by the panel and the
+  // in-page control so the two can never word it differently. The badge
+  // tooltip says it in its own words, because it has a whole line for it.
+  function depthSourceText(at, floor) {
+    if (at.source === 'quality') return 'read from Full Fathom Five: ' + at.depth;
+    if (at.source === 'set') return 'set to ' + at.depth;
+    if (at.source === 'read') return 'read off Myself ' + ageText(at.at) + ': ' + at.depth;
+    return floor ? 'unknown, at least ' + floor : 'unknown';
+  }
+
+  // --- reading a card ----------------------------------------------------
+
+  function fotzOptionAt(opt, depth) {
+    return depth >= opt.depths[0] && depth <= opt.depths[1];
+  }
+
+  // Every claim this card offers at `depth`; at a known depth that is always
+  // exactly one, which is what lets the badge be a single number. With no
+  // depth it is every claim, minus any the floor rules out.
+  function fotzOptionsAt(card, depth, floor) {
+    if (depth) return card.opts.filter(function (o) { return fotzOptionAt(o, depth); });
+    if (!floor) return card.opts.slice();
+    return card.opts.filter(function (o) { return o.depths[1] >= floor; });
+  }
+
+  // What one claim would hand you that you haven't already got. `holdings` is
+  // the ownership reading; when it is null nothing is known, and this returns
+  // null so the badge can say as much instead of guessing. Pure, so the marks
+  // are testable.
+  //
+  //   holdings = { has(name) -> bool, bride: bool, sig: string }
+  function fotzMissingFrom(opt, holdings) {
+    if (!holdings) return null; // can't tell
+    if (opt.coral) {
+      const coral = FOTZ_CORAL_BY_NAME.get(opt.coral);
+      if (!coral) return [];
+      // **A coral already in your hold finishes the card**, whether or not
+      // week two has opened and let you break it. One coral becomes one item
+      // and the three items are mechanically identical, so a second coral of
+      // the same kind is a duplicate of a duplicate -- there is nothing left
+      // to dive for. This is the rule `coralsWanted` already applied to the
+      // dive advice; applying it here is what stops the "unique rewards still
+      // down there" list from sending you after six corals you are carrying
+      // (reported 2026-09-06). It comes before the `pending` case on purpose:
+      // a pending coral's items can never read as held, but the coral itself
+      // reads perfectly well, and it is the coral you dive for. Confirmed
+      // in-game by the author on 2026-09-06.
+      if (holdings.count && holdings.count(opt.coral) > 0) return [];
+      // A coral whose three items have not been published yet: nobody can
+      // hold what does not exist, so it is missing.
+      if (!coral.variants) return [coral.pendingLabel || coral.slot];
+      // **Any one of the three finishes it.** The three versions of a coral
+      // item are mechanically identical -- same slot, same stats, different
+      // name and description -- so a second one is a change of outfit, not a
+      // reward. Holding one means this card has nothing left to give you.
+      const got = coral.variants.some(function (v) { return holdings.has(v); });
+      return got ? [] : [coral.slot];
+    }
+    if (opt.item) return holdings.has(opt.item) ? [] : [opt.item];
+    if (opt.bride) return holdings.bride ? [] : [FOTZ_BRIDE_QUALITY];
+    return []; // pure economy treasure: nothing to collect
+  }
+
+  // Does this card offer anything collectable at all? Independent of what you
+  // own, so a treasure-only card stays unmarked rather than wearing a tick it
+  // hasn't earned.
+  function fotzOffersRare(opts) {
+    return opts.some(function (o) { return !!(o.coral || o.item || o.bride); });
+  }
+
+  // --- what is still out there, and how deep it is -----------------------
+  //
+  // The question the checklist cannot answer: a dive commits you to a depth,
+  // and the unique rewards are not spread evenly down the trench. Some are
+  // only deep (the Scrimshander Knife is depth 5 and nowhere else) and -- the
+  // part that actually costs people items -- some are only SHALLOW. A Cured
+  // Jillyfleur Cloak is depths 1-2; dive past 2 and it is gone for that dive.
+  // So "what am I missing" and "how deep should I go" are different questions,
+  // and this answers the second.
+  //
+  // Currency-only cards fall out for free: `fotzMissingFrom` returns an empty
+  // list for anything that pays nothing but Favour, so A Cabin-Fragment, Easy
+  // Pickings and Unlucky Prisoner never appear here.
+  //
+  // Pure, and derived from FOTZ_CARDS rather than from a second table -- the
+  // depths are already stated there once and must not be stated twice.
+  function fotzUniquesByDepth(holdings) {
+    const rows = [];
+    for (let depth = 1; depth <= 5; depth++) {
+      const entries = [];
+      for (const card of FOTZ_CARDS) {
+        for (const opt of fotzOptionsAt(card, depth, null)) {
+          const missing = fotzMissingFrom(opt, holdings);
+          if (!missing || !missing.length) continue;
+          const coral = opt.coral ? FOTZ_CORAL_BY_NAME.get(opt.coral) : null;
+          entries.push({
+            card: card.name,
+            coral: opt.coral || null,
+            // Its `missing` is one placeholder, not one real item, so the
+            // renderer must not print "×1" and imply two of three are done.
+            pending: !!(coral && !coral.variants),
+            // How many of the coral you are already sitting on, the same
+            // number the card badge shows in brackets.
+            held: opt.coral && holdings && holdings.count ? holdings.count(opt.coral) : 0,
+            bride: !!opt.bride,
+            label: opt.coral || opt.item || FOTZ_BRIDE_QUALITY,
+            missing: missing,
+            from: opt.depths[0],
+            to: opt.depths[1],
+            // The two marks worth drawing: this is the shallowest depth it
+            // appears at, and this is the last one before it is out of reach.
+            first: opt.depths[0] === depth,
+            last: opt.depths[1] === depth,
+          });
+        }
+      }
+      rows.push({ depth: depth, entries: entries });
+    }
+    return rows;
+  }
+
+  // The corals are claimable at every depth, so listing them five times says
+  // nothing. Split them off and state them once.
+  function fotzSplitUniques(rows) {
+    const everywhere = new Map();
+    for (const row of rows) {
+      for (const entry of row.entries) {
+        if (entry.from === 1 && entry.to === 5 && !everywhere.has(entry.label)) {
+          everywhere.set(entry.label, entry);
+        }
+      }
+    }
+    return {
+      everywhere: Array.from(everywhere.values()),
+      byDepth: rows.map(function (row) {
+        return {
+          depth: row.depth,
+          entries: row.entries.filter(function (e) { return !everywhere.has(e.label); }),
+        };
+      }),
+    };
+  }
+
+  const FOTZ_CLASS = 'fl-ux-fotz';
+  const FOTZ_FLAG = 'flUxFotz';
+  const FOTZ_MARK_NEED = '★';   // something here you haven't got
+  const FOTZ_MARK_DONE = '✓';   // you hold everything this card offers
+  // '?' rather than the '–' the Factions pips use for an unknown: this mark is a
+  // PREFIX to a number, and '–400' reads as minus four hundred.
+  const FOTZ_MARK_UNSURE = '?'; // no Possessions read, so no claim either way
+
+  // Colour is the trade-in value, so a hand ranks itself at a glance. The two
+  // kinds that pay no Favour at all -- a coral, and the Bride at the bottom of
+  // the trench -- are coloured by whether you still NEED them instead, since
+  // for those the Favour column isn't the question being asked.
+  //
+  // REWORKED 2026-09-04, on the author's report that several of these were
+  // barely visible and that too many cards shared a colour. Both were true.
+  // The replacement is CONFIRMED legible on real card art, in a live hand --
+  // which is the half a contrast ratio cannot settle.
+  // The old ramp was six dark, desaturated bands -- greens, browns and a grey
+  // -- drawn over Fallen London's dark card ARTWORK, which is what made the
+  // low end disappear; and six bands cannot separate the eight figures this
+  // festival actually pays, so 125 and 150 came out the same colour, and so
+  // did 175 and 200.
+  //
+  // The rule now: one colour per figure, every one of them LIGHT enough to sit
+  // on artwork, and the eight ordered as a single rotation of the hue wheel
+  // from aqua round through blue, violet and rose to gold. That keeps the two
+  // properties that matter at once -- adjacent steps are plainly different
+  // colours, and the sequence still reads as a ladder rather than a set of
+  // unrelated labels.
+  //
+  // Light backgrounds are why FOTZ_INK exists. Every colour below is under
+  // 3:1 against white and over 5.5:1 against this near-black, so the badges
+  // carry dark text; `makeBadge` defaults to white for the other features,
+  // whose palettes are still dark.
+  const FOTZ_INK = '#14181c';
+
+  const FOTZ_FAVOUR_COLORS = [
+    [400, '#f0c23c'], // gold
+    [300, '#ef9440'], // orange
+    [200, '#ef7a86'], // rose
+    [175, '#e878c0'], // magenta
+    [150, '#c07ad8'], // orchid
+    [125, '#8f8ae8'], // periwinkle
+    [100, '#5aa6e8'], // light blue
+    [0, '#5fd3e0'],   // aqua -- 50, and anything below it
+  ];
+
+  // Gold twice over, and deliberately: a coral you still need is the prize on
+  // that card the way 400 Favour is the prize on a numbered one. They cannot
+  // be confused, because a coral badge reads "coral" and never a figure.
+  const FOTZ_COLOR_NEED = '#f0c23c';
+  // Held and unsure are the two that should NOT shout, so they are the only
+  // neutrals left -- but lifted well clear of the old #4a5560, which was so
+  // close to the page that a badge wearing it read as a smudge.
+  const FOTZ_COLOR_HELD = '#8797a8';
+  const FOTZ_COLOR_UNSURE = '#9a9a9a';
+
+  // Thresholds rather than an exact lookup, so a figure the table does not
+  // currently pay still lands somewhere sensible instead of nowhere. The last
+  // entry is `0`, so this always returns.
+  function fotzColor(favour) {
+    for (const step of FOTZ_FAVOUR_COLORS) if (favour >= step[0]) return step[1];
+    return FOTZ_FAVOUR_COLORS[FOTZ_FAVOUR_COLORS.length - 1][1];
+  }
+
+  function fotzRangeText(favours) {
+    const lo = Math.min.apply(null, favours);
+    const hi = Math.max.apply(null, favours);
+    return lo === hi ? String(lo) : lo + '–' + hi;
+  }
+
+  // What you are already carrying, for the badge's brackets. Several names at
+  // once when the depth is unknown and the card offers a different item at
+  // each of them -- the bracket is then a range, low to high, the same shape
+  // the Favour figure takes rather than a number picked from one of them.
+  // Empty when you hold none, so an untouched hand stays as quiet as it was,
+  // and empty when Possessions have never been read, since a "(0)" there would
+  // be a claim we cannot make.
+  function fotzHeldSuffix(names, holdings) {
+    if (!names.length || !holdings || !holdings.count) return '';
+    const counts = names.map(function (n) { return holdings.count(n); });
+    if (!Math.max.apply(null, counts)) return '';
+    return ' (' + fotzRangeText(counts) + ')';
+  }
+
+  function fotzDepthWord(opt) {
+    return opt.depths[0] === opt.depths[1]
+      ? 'Depth ' + opt.depths[0]
+      : 'Depths ' + opt.depths[0] + '–' + opt.depths[1];
+  }
+
+  // The badge, as a pure { text, color, title } spec. `depth` may be null.
+  function fotzBadgeSpec(card, depth, source, floor, holdings) {
+    const opts = fotzOptionsAt(card, depth, floor);
+    if (!opts.length) return null; // nothing claimable at this depth
+
+    const rare = fotzOffersRare(opts);
+    let missing = [];
+    let unsure = false;
+    for (const opt of opts) {
+      const gone = fotzMissingFrom(opt, holdings);
+      if (gone == null) unsure = true;
+      else missing = missing.concat(gone);
+    }
+    const mark = !rare ? ''
+      : (unsure ? FOTZ_MARK_UNSURE : (missing.length ? FOTZ_MARK_NEED : FOTZ_MARK_DONE));
+
+    const favours = opts.map(function (o) { return o.favour; })
+      .filter(function (v) { return v > 0; });
+    const value = favours.length ? fotzRangeText(favours) : null;
+
+    // How many of this card's coral you are already holding. Every coral card
+    // otherwise wears an identical `★coral`, which flattens a real difference:
+    // one you have never seen and one you already have two of are not the same
+    // card to draw. `(N)` is only shown when N > 0, so a hand of untouched
+    // corals stays as quiet as it was.
+    const coralOpt = opts.filter(function (o) { return o.coral; })[0] || null;
+    const coralHeld = coralOpt && holdings && holdings.count
+      ? holdings.count(coralOpt.coral) : 0;
+
+    // The same treatment for the named UNIQUE EQUIPMENT -- the Wrecking Boots,
+    // the Scrimshander Carving Knife and the rest. Those cards do pay Favour,
+    // so they used to wear that figure and read exactly like A Cabin-Fragment;
+    // but a card that is only worth its Favour and a card that is also a piece
+    // of kit you may not own are not the same draw, and the figure is the less
+    // interesting half. So they are labelled `item` the way a coral is
+    // labelled `coral`, with what you already hold in brackets -- which for
+    // one of these is the number of SPARES, since a single one finishes the
+    // collection and any beyond that is trade-in stock. Nothing is lost: the
+    // colour is still the Favour ramp and the tooltip still quotes the figure.
+    const itemNames = opts.filter(function (o) { return o.item; })
+      .map(function (o) { return o.item; })
+      .filter(function (n, i, all) { return all.indexOf(n) === i; });
+
+    // The Favour stays on the badge, in front, where every other card carries
+    // it -- a spare IS its trade-in value, so a badge that had dropped the
+    // figure would be hiding the one number that says what the spare is worth.
+    // Colour alone cannot do that job: it is a six-step ramp, so it separates
+    // 400 from 100 but never 300 from 400.
+    const label = itemNames.length
+      ? (value != null ? value + ' · ' : '') + 'item' + fotzHeldSuffix(itemNames, holdings)
+      : (value != null ? value
+        : (opts.some(function (o) { return o.bride; })
+          ? 'Bride'
+          : 'coral' + fotzHeldSuffix(coralOpt ? [coralOpt.coral] : [], holdings)));
+
+    const color = value != null
+      ? fotzColor(Math.max.apply(null, favours))
+      : (unsure ? FOTZ_COLOR_UNSURE : (missing.length ? FOTZ_COLOR_NEED : FOTZ_COLOR_HELD));
+
+    const lines = [card.name];
+    lines.push(depth
+      ? 'Your depth: ' + depth + (source === 'quality'
+        ? ' (read from Full Fathom Five)'
+        : (source === 'read'
+          ? ' (read off the Myself tab — a dive changes it, so correct it on the '
+            + 'depth control if you have gone deeper)'
+          : ' (as you set it)'))
+      : 'Depth unknown, so every depth is listed'
+        + (floor ? ', from ' + floor + ' up — this hand proves at least that' : '')
+        + '. Set it on the depth control beside the Travel button, or in '
+        + '⚙ UX → Fruits of the Zee, for one exact figure.');
+
+    for (const opt of opts) {
+      let line = (depth ? '' : fotzDepthWord(opt) + ': ') + opt.text;
+      if (opt.favour > 0) line += ' — ' + opt.favour + ' Favour';
+      if (opt.gain) line += ' (' + opt.gain + ')';
+      lines.push(line);
+      if (opt.coral) {
+        const coral = FOTZ_CORAL_BY_NAME.get(opt.coral);
+        // What the "(N)" on the badge means, and what it implies. One coral
+        // becomes one item, so needing three variants and holding one coral
+        // means two more dives -- that subtraction is the useful form of the
+        // number, and there is room for it here where there is none on a badge.
+        // Asked of the ITEM, not of `fotzMissingFrom` -- which now answers
+        // "nothing left to dive for" the moment the coral is in your hold, so
+        // it can no longer tell the two sentences below apart.
+        const done = !!(coral && coral.variants && holdings && holdings.has
+          && coral.variants.some(function (v) { return holdings.has(v); }));
+        if (coralHeld) {
+          lines.push('  You are holding ' + coralHeld + ' ' + opt.coral
+            + (coralHeld === 1 ? '' : 's') + ' already'
+            + (done ? ' — spare, since you already have the item it becomes.'
+              : (coral && coral.variants
+                ? ' — one is all it takes, so there is nothing left to dive for here.'
+                : '.')));
+        }
+        if (coral && !coral.variants) {
+          lines.push('  ' + opt.coral + ' → one of three ' + coral.slot + ' in week two.');
+          lines.push('  ' + coral.pending);
+        } else {
+          // The three are the same item wearing different names, so which one
+          // you get is a question of taste. Said plainly, because the Sights
+          // bands below otherwise look like something you have to plan around.
+          lines.push('  ' + opt.coral + ' → one of three '
+            + (coral ? coral.slot : 'items') + ' in week two. All three are mechanically '
+            + 'identical, so any one of them finishes this card for good.');
+          lines.push('  Which name you get is decided by Sights at the Festival: '
+            + FOTZ_BANDS.map(function (band, i) {
+              return band.lo + '–' + band.hi + ' ' + (coral ? coral.variants[i] : '?');
+            }).join(', ') + '.');
+        }
+      }
+      if (opt.item) {
+        // The badge's brackets, spelled out: a second one of these is not a
+        // second reward, it is a treasure you can trade in for its Favour, and
+        // there is room to say so here where there is none on a badge.
+        const itemHeld = holdings && holdings.count ? holdings.count(opt.item) : 0;
+        lines.push('  ' + opt.item + (holdings
+          ? (holdings.has(opt.item)
+            ? ' — you already have ' + (itemHeld > 1
+              ? itemHeld + ', so ' + (itemHeld - 1) + ' of them are spare'
+                + (opt.favour > 0
+                  ? ' and worth ' + opt.favour + ' Favour each at the market.' : '.')
+              : 'one.')
+            : ' — you do NOT have one yet.')
+          : ' — whether you have one is unknown; open the Fruits of the Zee panel to '
+            + 'read your Possessions.'));
+      }
+    }
+    if (missing.length) {
+      lines.push(FOTZ_MARK_NEED + ' Still missing: ' + missing.join(', ') + '.');
+    } else if (rare && !unsure) {
+      lines.push(FOTZ_MARK_DONE + ' You already hold everything this card offers.');
+    }
+    if (card.note) lines.push(card.note);
+    lines.push('One card’s reward per dive. Diving deeper is free, but failing the dive '
+      + 'ends it and hands you menaces.');
+
+    return {
+      text: mark ? mark + label : label,
+      color: color,
+      ink: FOTZ_INK,
+      title: lines.join('\n'),
+    };
+  }
+
+  // --- badging the supplication branches ---------------------------------
+  //
+  // The one place in this script that decorates a storylet's OPTIONS rather
+  // than a card. Markup captured 2026-09-03, verbatim:
+  //
+  //   <div class="media branch media--branch" data-branch-id="259494">
+  //     <div class="media__left branch__left"> … </div>
+  //     <div class="media__body branch__body"><div>
+  //       <div class="branch__plan-buttonlet"> … </div>
+  //       <h2 class="media__heading heading heading--3 branch__title">Perform
+  //         in a Mutton Island mystery play</h2>
+  //
+  // The badge goes AFTER the `h2`, the same way it does for a card heading --
+  // never inside it, so anything reading the heading's text still sees the
+  // plain name. (`wiki-links.js` deliberately leaves `.branch__title` alone,
+  // so nothing else is decorating these.)
+  //
+  // Note the game already tells you what an option is gated on, with its own
+  // requirement icons. What it never says is which of your attributes the
+  // reward scales off -- and since Airs decides which options you are even
+  // offered, that is the whole decision. So that is all the badge says.
+
+  const FOTZ_BRANCH_CLASS = 'fl-ux-fotz-branch';
+  const FOTZ_BRANCH_FLAG = 'flUxFotzBranch';
+  const FOTZ_BRANCH_SELECTOR = '.branch__title';
+
+  // The storylet these branches belong to, from the same capture: the game
+  // prefixes the wiki's title, so it reads "Fruits of the Zee: Supplication on
+  // the Shore". Matched loosely on the distinctive half.
+  function onSupplicationStorylet() {
+    const heads = document.querySelectorAll('.storylet-root__heading');
+    for (const head of heads) {
+      if (normalizeName(headingName(head)).indexOf('supplication on the shore') !== -1) return true;
+    }
+    return false;
+  }
+
+  function fotzBranchSpec(opt) {
+    const stat = opt.stat ? FOTZ_STATS[opt.stat] : null;
+    const lines = [opt.text];
+    if (stat) {
+      lines.push('Scales off ' + opt.stat + ': the better your base ' + opt.stat
+        + ', the more of it you get.');
+      lines.push('Gives: ' + opt.gain + ', and Fivefold Devotion +4 CP.');
+      lines.push('Offered while Airs of a Barren Zee is ' + opt.airs + '.');
+      lines.push('Every option here pays the same +4 CP, so the attribute is the only '
+        + 'thing that separates them — but Airs decides which are on offer, and it is '
+        + 're-rolled each time you act, so you cannot always have the one you want.');
+    }
+    if (opt.note) lines.push(opt.note);
+
+    return {
+      text: stat ? stat.icon + ' ' + opt.stat : opt.badge,
+      color: stat ? stat.badge : (opt.warn ? '#8a3b3b' : '#4a5560'),
+      title: lines.join('\n'),
+    };
+  }
+
+  function fotzSupplicationBranches() {
+    const here = onSupplicationStorylet();
+    document.querySelectorAll(FOTZ_BRANCH_SELECTOR).forEach(function (head) {
+      const name = headingName(head);
+      const opt = name ? lookupFotzBranch(name) : null;
+      // A name generic enough to belong elsewhere is only badged where the
+      // storylet above it confirms where we are.
+      const spec = opt && (!opt.strict || here) ? fotzBranchSpec(opt) : null;
+      attachBadge(head, {
+        cls: FOTZ_BRANCH_CLASS,
+        flag: FOTZ_BRANCH_FLAG,
+        value: name,
+        spec: spec,
+        place: 'after',
+      });
+    });
+  }
+
+  function fotzCardRatings() {
+    // Surfacing invalidates a depth you set by hand, and this is the pass that
+    // notices. Before the depth is read, so the badges never quote it once.
+    forgetStaleDepth();
+
+    const where = fotzWhere();
+    const at = fotzDepth();
+    const floor = at.depth ? null : fotzDepthFloor();
+    const holdings = fotzHoldings();
+    eachCardName(function (host, name, place, style) {
+      const card = lookupFotzCard(name);
+      // Three gates, narrowest first. Somewhere the greeting places OUTSIDE
+      // the festival, nothing is ours -- and clearing rather than skipping is
+      // what takes the badges off a hand you walked away with. Where the
+      // greeting can't be read at all the card table is the only scope, and
+      // the two generic names sit that one out, the same way The Sound of
+      // Wings does when we can't tell we're at zee.
+      const spec = card && where !== 'no' && (!card.strict || where === 'yes')
+        ? fotzBadgeSpec(card, at.depth, at.source, floor, holdings)
+        : null;
+      attachBadge(host, {
+        cls: FOTZ_CLASS,
+        flag: FOTZ_FLAG,
+        // The flag has to move when the DEPTH or your holdings change, not
+        // only when the card does -- otherwise setting your depth leaves every
+        // badge already in the hand quoting the old one. The SOURCE is in here
+        // as well: the same depth read off Myself and set by hand are the same
+        // number with a different tooltip behind it.
+        value: name + '@' + (at.depth || 'x') + (at.source || '-')
+          + '/' + (holdings ? holdings.sig : 'x'),
+        spec: spec,
+        place: place,
+        style: style,
+      });
+    });
+  }
+
+  // === feature: Port Carnelian ===========================================
+  //
+  // A term as Governor of Port Carnelian is a fixed-length activity, 26 actions
+  // long, and it is the one supported area in this script with NO OPPORTUNITY
+  // CARDS at all -- the guide says so outright. So this is the first feature
+  // whose badges live on STORYLETS and on their BRANCHES rather than on a hand.
+  //
+  // A term is a race between three numbers:
+  //
+  //   Striped Delights and Silver Horseheads -- the two currencies. At the end
+  //     of the term you cash ONE of them in; the more of it you have, the more
+  //     Presbyterate Passphrases / Antique Mysteries (Delights) or Partial
+  //     Maps / Puzzling Maps (Horseheads) you get.
+  //   Imperial Legitimacy -- the thing that ends a term badly. At 0 the only
+  //     option left is "The sword falls": you are thrown back to zee with
+  //     nothing, and getting Legitimacy back means a trip to the Foreign
+  //     Office. It does NOT reset between terms.
+  //
+  // Which options are in front of you is decided by two more:
+  //
+  //   Time Passing in Office -- 1 to 12, the clock on the term.
+  //   The Airs of Port Carnelian -- 1 to 100, RE-ROLLED EVERY TIME YOU ACT. So
+  //     which of the airs-gated options you are offered is not something you
+  //     plan; it is something you read off the screen, which is exactly what
+  //     these badges are for.
+  //
+  // Every number below is transcribed from Port Carnelian (Guide)'s option
+  // table. Corrections go in PC_OPTIONS and nowhere else.
+  //
+  // One entry per ROW of that table:
+  //
+  //   name    the storylet, as the wiki titles it.
+  //   branch  the option inside it, where the guide splits a storylet in two
+  //           (Within their rights, A plea for pardon). Absent means the
+  //           storylet has the one line the table records.
+  //   time    [min, max] window of Time Passing in Office.
+  //   airs    [min, max] window of The Airs of Port Carnelian, or null for the
+  //           options Airs does not gate.
+  //   sd/sh/il  change in Striped Delights / Silver Horseheads / Imperial
+  //           Legitimacy.
+  //   either  the two rows that pay this much of ONE of the two currencies,
+  //           the game's choice, not yours. Held apart from sd/sh because
+  //           "+10 of one of them" is not "+10 of each".
+  //   net     total resources gained, as the guide's own Net column. Carried
+  //           rather than derived so a test can check it against the parts --
+  //           a transcription typo is invisible in game until the actions are
+  //           already spent.
+  //   needs   what the row is gated on, verbatim from the guide.
+  //   reset   the four Time 12 endings, which spend a currency rather than
+  //           gaining any: 'sd', 'sh' or 'both'.
+  //   fate    Fate-locked.
+  //   strict  the name is not distinctive enough to badge outside Port
+  //           Carnelian -- see PC_AREAS below.
+
+  const PC_TERM_ACTIONS = 26;
+
+  const PC_OPTIONS = [
+    // --- Time 1-11: the two options Airs never gates ----------------------
+    { name: 'Attend the Daily Assembly of Tigers', time: [1, 11], airs: null,
+      sd: 4, sh: 0, il: 0, net: 4 },
+    { name: 'A day in Murgatroyd’s Imperial Tea Shop', time: [1, 11], airs: null,
+      sd: 0, sh: 4, il: 0, net: 4 },
+
+    // --- Time 1-10: the two storylets with a branch either way ------------
+    { name: 'Within their rights', branch: 'Close your door without a word',
+      time: [1, 10], airs: [1, 10], sd: 15, sh: 0, il: -10, net: 5 },
+    { name: 'Within their rights', branch: '"Quickly, sir - in, in!"',
+      time: [1, 10], airs: [1, 10], sd: -10, sh: 0, il: 5, net: -5 },
+    { name: 'A plea for pardon', branch: '"Release him immediately!"',
+      time: [1, 10], airs: [91, 100], sd: 0, sh: 15, il: -10, net: 5 },
+    { name: 'A plea for pardon', branch: 'Give the executioner the nod',
+      time: [1, 10], airs: [91, 100], sd: 0, sh: -10, il: 5, net: -5 },
+
+    // --- Time 1-6 ---------------------------------------------------------
+    { name: 'A sickness in the Khaganian Quarters', time: [1, 6], airs: [1, 40],
+      sd: -20, sh: 25, il: 0, net: 5, needs: 'Striped Delights 20 x' },
+    { name: 'A tithe. Not a bribe.', time: [1, 6], airs: [11, 50],
+      sd: 15, sh: 0, il: -10, net: 5 },
+    { name: 'Survey the sapphire mines', time: [1, 6], airs: [41, 50],
+      sd: 0, sh: 0, il: 10, net: 10 },
+    { name: 'A stroll through the Blue Bazaar', time: [1, 6], airs: [51, 70],
+      sd: 0, sh: 0, il: 0, either: 10, net: 10 },
+    { name: 'Allocate funds to repair a Khanate ship', time: [1, 6], airs: [51, 90],
+      sd: 0, sh: 15, il: -10, net: 5 },
+    { name: 'The aegis of aesthetics', time: [1, 6], airs: [71, 100],
+      sd: 25, sh: -20, il: 0, net: 5, needs: 'Silver Horseheads 20 x' },
+
+    // --- Time 7-10 --------------------------------------------------------
+    { name: 'Caring for the needy', time: [7, 10], airs: [1, 30],
+      sd: 0, sh: 15, il: -10, net: 5 },
+    { name: 'A dangerous source', time: [7, 10], airs: [11, 30],
+      sd: 10, sh: 0, il: 0, net: 10, needs: 'Striped Delights 10 x',
+      note: 'Also the term’s source of Presbyterate Passphrase.' },
+    { name: 'Inconvenienced', time: [7, 10], airs: [31, 40],
+      sd: 0, sh: 0, il: 0, either: 15, net: 15, fate: true, strict: true,
+      needs: 'Inconvenienced by Your Aunt 12-16' },
+    { name: 'A shortage of workers', time: [7, 10], airs: [31, 60],
+      sd: 0, sh: 20, il: -15, net: 5, needs: 'Silver Horseheads 10 x' },
+    { name: 'A summons from the Smouldering Herald', time: [7, 10], airs: [41, 70],
+      sd: 25, sh: 0, il: -25, net: 0, needs: 'Striped Delights 25 x' },
+    { name: 'His Amused Lordship', time: [7, 10], airs: [61, 70],
+      sd: 0, sh: 0, il: 10, net: 10, strict: true,
+      needs: 'Associating with Radical Academics 5' },
+    { name: 'A man above a bookshop', time: [7, 10], airs: [71, 90],
+      sd: 0, sh: 25, il: -20, net: 5, needs: 'Silver Horseheads 25 x' },
+    { name: 'A means for praise', time: [7, 10], airs: [71, 100],
+      sd: 25, sh: -20, il: 0, net: 5, needs: 'Silver Horseheads 20 x' },
+
+    // --- Time 11 ----------------------------------------------------------
+    { name: 'The fortification of native vitality', time: [11, 11], airs: [1, 20],
+      sd: 12, sh: 0, il: 0, net: 12, needs: 'Mystery of the Elder Continent 5 x' },
+    { name: 'Building the Sky, a Public Works’ request', time: [11, 11], airs: [21, 40],
+      sd: 0, sh: 12, il: 0, net: 12, needs: 'Vision of the Surface 5 x' },
+    { name: 'Orders from on high', time: [11, 11], airs: [41, 50],
+      sd: 0, sh: 0, il: 10, net: 10 },
+    { name: 'Balancing the desires of the locals', time: [11, 11], airs: null,
+      sd: 38, sh: -30, il: 0, net: 8, needs: 'Silver Horseheads 30 x' },
+    { name: 'Negotiating the rights of the Earth', time: [11, 11], airs: null,
+      sd: -30, sh: 38, il: 0, net: 8, needs: 'Striped Delights 30 x' },
+
+    // --- Time 12: the endings ---------------------------------------------
+    { name: 'Honoured with a State Dinner', time: [12, 12], airs: null,
+      sd: 0, sh: 0, il: 0, net: null, reset: 'both',
+      needs: 'Striped Delights 1 x and Silver Horseheads 1 x',
+      note: 'Gives a Favours: Society and Favour in High Places 2 x. Worth less than '
+        + 'cashing a currency in, once you have 105 of one.' },
+    { name: 'An audience with the Banded Prince', time: [12, 12], airs: null,
+      sd: 0, sh: 0, il: 0, net: null, reset: 'sd',
+      needs: 'Striped Delights 1 x',
+      note: 'Spends your Striped Delights: Presbyterate Passphrases, Antique Mysteries, '
+        + 'and Tribute 5 x if Associating with Radical Academics is 15 or more.' },
+    { name: 'An equine festival', time: [12, 12], airs: null,
+      sd: 0, sh: 0, il: 0, net: null, reset: 'sh',
+      needs: 'Silver Horseheads 1 x',
+      note: 'Spends your Silver Horseheads: Partial Maps and Puzzling Maps.' },
+    { name: 'Host a State Dinner', time: [12, 12], airs: null,
+      sd: 0, sh: 0, il: 0, net: null, reset: 'both',
+      needs: 'Banished from the Court and Successful Terms as Governor 3',
+      note: 'Spends both currencies, but it is the one that gets you back to the '
+        + 'Empress’ Court: a Cellar of Wine, a Favour in High Places and Restored '
+        + 'to the Court of Her Enduring Majesty.' },
+  ];
+
+  // What a term's currencies buy. The guide's own reward list.
+  const PC_REWARDS = [
+    { currency: 'Silver Horseheads', via: 'An equine festival', items: [
+      { name: 'Partial Map', count: 'Horseheads / 30 + 2, rounded', worth: '2.5 Echoes each' },
+      { name: 'Puzzling Map', count: 'Horseheads / 70, rounded', worth: '12.5 Echoes each' },
+    ] },
+    { currency: 'Striped Delights', via: 'An audience with the Banded Prince', items: [
+      { name: 'Presbyterate Passphrase', count: 'Delights / 30 + 2, rounded', worth: '2.5 Echoes each' },
+      { name: 'Antique Mystery', count: 'Delights / 70, rounded', worth: '12.5 Echoes each' },
+      { name: 'Tribute', count: '5, flat', worth: 'needs Associating with Radical Academics 15' },
+    ] },
+  ];
+
+  // The guide's reward-tier table: the least of either currency that buys each
+  // step up. The rounding is what makes 105 and 176 the numbers to aim at.
+  const PC_TIERS = [
+    { at: 1, cheap: 2, dear: 0, echo: 5 },
+    { at: 35, cheap: 3, dear: 1, echo: 20 },
+    { at: 105, cheap: 6, dear: 2, echo: 40 },
+    { at: 136, cheap: 7, dear: 2, echo: 42.5 },
+    { at: 165, cheap: 8, dear: 2, echo: 45 },
+    { at: 176, cheap: 8, dear: 3, echo: 57.5 },
+    { at: 196, cheap: 9, dear: 3, echo: 60 },
+    { at: 225, cheap: 10, dear: 3, echo: 62.5 },
+    { at: 245, cheap: 10, dear: 4, echo: 75 },
+    { at: 256, cheap: 11, dear: 4, echo: 77.5 },
+    { at: 285, cheap: 12, dear: 4, echo: 80 },
+    { at: 316, cheap: 13, dear: 5, echo: 95 },
+    { at: 345, cheap: 14, dear: 5, echo: 97.5 },
+    { at: 376, cheap: 15, dear: 5, echo: 100 },
+    { at: 385, cheap: 15, dear: 6, echo: 112.5 },
+    { at: 405, cheap: 16, dear: 6, echo: 115 },
+  ];
+
+
+  // --- cashing out --------------------------------------------------------
+  //
+  // A term ends by spending ONE of the two currencies, and everything before
+  // it is played for that figure. So the endings carry the one number no table
+  // can hold: what YOUR Striped Delights and Silver Horseheads are worth if
+  // you cash them in now.
+  //
+  // The formulas are the ENDING PAGES rather than the guide's summary -- An
+  // audience with the Banded Prince and An equine festival state them outright
+  // (and agree with it):
+  //
+  //   cheap item   round(2 + currency / 30)    2.5 Echo each
+  //   dear item    round(currency / 70)       12.5 Echo each
+  //
+  // ROUNDING IS BANKERS' ROUNDING -- a half goes to the nearest EVEN number.
+  // That is the wiki's Rounding page, and PC_TIERS is the cross-check that it
+  // is the rule in force here: the guide's own tier table steps at 176, 316
+  // and 385, which are exactly the thresholds bankers' rounding gives (round
+  // half UP would put the first two at 175 and 315). One row of that table
+  // dissents -- it lists a dear item from 35, where 35/70 is exactly 0.5 and
+  // bankers' rounding pays none until 36. Three rows and a stated mechanic
+  // against one row, so the calculator rounds bankers' and this comment is the
+  // record of the row that disagrees. `pcCashout` is checked against the whole
+  // tier table in the tests, with that row named as the exception.
+  //
+  // A FACTION FAVOUR COUNTS AS 0 ECHO, deliberately, and is marked instead.
+  // "Favours: Society" and its eleven siblings are STORY QUALITIES capped at
+  // 7, not items: you cannot sell one, and the wiki's occasional ~4 Echo
+  // figure for them is a notional price for something that never reaches the
+  // Bazaar. Pricing them would let an ending out-rank a real cash-out on a
+  // number nobody acts on, so they are worth 0 here and carry PC_FAVOUR_MARK,
+  // which is a SHAPE: the claim survives with every colour stripped off it.
+  //
+  // A FAVOUR IN HIGH PLACES IS NOT ONE OF THOSE. Despite the name it is an
+  // ordinary Influence item -- it sits in Possessions and the Bazaar buys it
+  // at 12.5 Echoes -- so it is priced like any other item and carries no mark.
+  // The two are told apart by the `favour` field, which means the story
+  // quality and nothing else. (First cut of this table had it backwards and
+  // priced the item at 0, which cost Honoured with a State Dinner 25 of its
+  // 25 Echoes.)
+  //
+  // Tribute is the real second case: a story quality for the Court of the
+  // Wakeful Eye with no market price at all. It is listed, the guide's own
+  // "about 12.5 Echoes" estimate is quoted as an estimate, and it is not in
+  // the total.
+
+  const PC_ECHO_CHEAP = 2.5;
+  const PC_ECHO_DEAR = 12.5;
+
+  // A Favour: worth having, worth nothing on the market by the rule above.
+  const PC_FAVOUR_MARK = '❖';
+  // The reading behind the figure is older than PC_FRESH_MS, so it may already
+  // be wrong: every action of a term moves both currencies.
+  const PC_STALE_MARK = '?';
+
+  const PC_SOCIETY_FAVOUR = 'Favours: Society';
+  const PC_SOCIETY_CAP = 7;
+  const PC_ACADEMICS = 'Associating with Radical Academics';
+  const PC_TRIBUTE_AT = 15;
+
+  // Round half to EVEN. Written out rather than Math.round because Math.round
+  // takes halves UP, which is the one case this whole table turns on.
+  function pcRound(value) {
+    const down = Math.floor(value);
+    const rest = value - down;
+    if (rest > 0.5) return down + 1;
+    if (rest < 0.5) return down;
+    return down % 2 === 0 ? down : down + 1;
+  }
+
+  // One entry per ending, matched to its PC_OPTIONS row by name.
+  //
+  //   spends   'sd' / 'sh' / 'both' -- which currency the payout is counted
+  //            from, and 'both' for the two that pay a fixed reward and empty
+  //            both purses.
+  //   items    what it hands you. `count(n)` for a figure that scales off the
+  //            currency, `flat` for one that does not. `echo` is 0 for
+  //            anything with no market price, and `favour: true` marks a
+  //            FACTION FAVOUR -- the capped story quality, not the Influence
+  //            item called a Favour in High Places -- which is the same claim
+  //            said twice, once as a 0 and once as a mark.
+  //   extras   what the ending gives that is not a countable reward at all.
+  //
+  // Transcribed from the four ENDING PAGES (Honoured with a State Dinner, An
+  // audience with the Banded Prince, An equine festival, Host a State Dinner),
+  // not from the guide's table. Corrections go here and nowhere else.
+  const PC_CASHOUTS = [
+    {
+      name: 'An audience with the Banded Prince',
+      spends: 'sd',
+      currency: 'Striped Delights',
+      items: [
+        { name: 'Presbyterate Passphrase', echo: PC_ECHO_CHEAP,
+          count: function (n) { return pcRound(2 + n / 30); } },
+        { name: 'Antique Mystery', echo: PC_ECHO_DEAR,
+          count: function (n) { return pcRound(n / 70); } },
+        { name: 'Tribute', echo: 0, flat: 5,
+          needs: { quality: PC_ACADEMICS, atLeast: PC_TRIBUTE_AT },
+          note: 'a story quality for the Court of the Wakeful Eye. No market price, so it is '
+            + 'not in the total; the guide reckons the five at about 12.5 Echoes.' },
+      ],
+    },
+    {
+      name: 'An equine festival',
+      spends: 'sh',
+      currency: 'Silver Horseheads',
+      items: [
+        { name: 'Partial Map', echo: PC_ECHO_CHEAP,
+          count: function (n) { return pcRound(2 + n / 30); } },
+        { name: 'Puzzling Map', echo: PC_ECHO_DEAR,
+          count: function (n) { return pcRound(n / 70); } },
+      ],
+    },
+    {
+      name: 'Honoured with a State Dinner',
+      spends: 'both',
+      currency: null,
+      items: [
+        // The page's own Game Instructions: "this will get you a Society
+        // favour, IF YOU HAVE FEWER THAN 7". At the cap it pays none, which is
+        // a different claim from paying one you cannot hold.
+        { name: PC_SOCIETY_FAVOUR, echo: 0, flat: 1, favour: true, cap: PC_SOCIETY_CAP },
+        { name: 'Favour in High Places', echo: PC_ECHO_DEAR, flat: 2 },
+      ],
+      extras: ['Successful Terms as Governor +1'],
+    },
+    {
+      name: 'Host a State Dinner',
+      spends: 'both',
+      currency: null,
+      items: [
+        { name: 'Cellar of Wine', echo: PC_ECHO_DEAR, flat: 1 },
+        { name: 'Favour in High Places', echo: PC_ECHO_DEAR, flat: 1 },
+      ],
+      extras: ['Restored to the Court of Her Enduring Majesty — the reason to take this one, '
+        + 'and not a thing Echoes can price', 'Persuasive +160 CP',
+        'Successful Terms as Governor +1'],
+    },
+  ];
+
+  const PC_CASHOUT_BY_NAME = new Map(
+    PC_CASHOUTS.map(function (plan) { return [normalizeName(plan.name), plan]; }));
+
+  // --- your purse ---------------------------------------------------------
+  //
+  // Fallen London states both currencies on the Myself tab and nowhere near
+  // the storylet you are standing in, so this borrows the festival's plumbing
+  // whole: bank a reading whenever that tab goes by, refresh it in a hidden
+  // frame when the panel opens on a stale one or when an ending is on screen,
+  // and label every figure with its age. A term moves both currencies EVERY
+  // action, so a reading goes stale fast -- and a stale one is MARKED rather
+  // than quietly used or quietly dropped.
+
+  const PC_CACHE_KEY = 'fl-ux-pc';
+  const PC_FRESH_MS = 60 * 1000;
+
+  const PC_QUALITIES = [
+    'Striped Delights',
+    'Silver Horseheads',
+    'Imperial Legitimacy',
+    'Time Passing in Office',
+    PC_ACADEMICS,
+    PC_SOCIETY_FAVOUR,
+  ];
+
+  // Bumped whenever a reading is re-banked, and the memo below hangs off it --
+  // `pcPurse` is called once per heading on every debounced scan.
+  let pcGen = 0;
+
+  // Same rule as the factions and festival scrapes: FL does not render a
+  // quality you have none of, so ABSENT means 0 -- but only while the tab's
+  // search box is empty, because a filtered list makes absent mean "not on
+  // screen" instead.
+  function pcFromQualities(scan) {
+    const values = {};
+    const zeroIsSafe = !scan.filtered;
+    for (const name of PC_QUALITIES) {
+      const q = scan.values.get(name);
+      if (q) values[name] = q.level;
+      else if (zeroIsSafe) values[name] = 0;
+    }
+    return values;
+  }
+
+  function bankPcQualities(scan) {
+    if (!scan) return false;
+    const values = pcFromQualities(scan);
+    if (!Object.keys(values).length) return false;
+    saveCache(PC_CACHE_KEY, {
+      v: 1, at: Date.now(), character: characterName() || null,
+      partial: scan.filtered, values: values,
+    });
+    pcGen++;
+    return true;
+  }
+
+  // Live if the Myself tab is on screen, else the banked answer, else null.
+  function readPcState() {
+    const scan = readQualities();
+    if (scan) {
+      const values = pcFromQualities(scan);
+      if (Object.keys(values).length) {
+        return {
+          live: true, at: Date.now(), character: characterName(),
+          partial: scan.filtered, values: values,
+        };
+      }
+    }
+    const rec = loadCache(PC_CACHE_KEY, 1);
+    if (!rec || !rec.values) return null;
+    return {
+      live: false, at: rec.at, character: rec.character || null,
+      partial: !!rec.partial, values: rec.values,
+    };
+  }
+
+  // What the badges need: the figures, how old they are, and a signature that
+  // changes when any of that does. Null for "nothing has ever been read",
+  // which every caller has to say rather than guess around.
+  //
+  // The age in the signature is BUCKETED. A raw timestamp there would differ
+  // on every scan, so every badge would be rebuilt on every DOM mutation for
+  // ever -- and each of those writes is itself a mutation.
+  let pcPurseMemo = null;
+  function pcPurse() {
+    const key = pcGen + '@' + Math.floor(Date.now() / PC_FRESH_MS);
+    if (pcPurseMemo && pcPurseMemo.key === key) return pcPurseMemo.value;
+    let value = null;
+    try {
+      value = buildPcPurse();
+    } catch (e) {
+      value = null;
+    }
+    pcPurseMemo = { key: key, value: value };
+    return value;
+  }
+
+  function buildPcPurse() {
+    const state = readPcState();
+    if (!state) return null;
+    const at = function (name) {
+      const v = state.values[name];
+      return typeof v === 'number' ? v : null;
+    };
+    const stale = !state.live && (Date.now() - state.at) > PC_FRESH_MS;
+    const purse = {
+      sd: at('Striped Delights'),
+      sh: at('Silver Horseheads'),
+      legitimacy: at('Imperial Legitimacy'),
+      time: at('Time Passing in Office'),
+      academics: at(PC_ACADEMICS),
+      society: at(PC_SOCIETY_FAVOUR),
+      live: !!state.live,
+      at: state.at,
+      partial: !!state.partial,
+      stale: stale,
+    };
+    purse.sig = [purse.sd, purse.sh, purse.academics, purse.society,
+      purse.live ? 'live' : (stale ? 'stale' : 'fresh')].join('/');
+    return purse;
+  }
+
+  // --- what an ending pays ------------------------------------------------
+  //
+  // Pure: an ending row and a purse in, the payout out. `purse` may be null
+  // (never read) and any figure in it may be null, and the result says so
+  // rather than filling the gap with a zero -- "no Delights" and "your
+  // Delights have not been read" are different claims, and only one of them is
+  // safe to put on a badge.
+
+  function pcCashPlan(entry) {
+    return PC_CASHOUT_BY_NAME.get(normalizeName(entry.name)) || null;
+  }
+
+  // The priced part of a payout at a given figure of the currency. Used both
+  // for the total and to find the next step up.
+  function pcCashEcho(plan, n) {
+    let echo = 0;
+    for (const item of plan.items) {
+      if (!item.echo) continue;
+      echo += item.echo * (item.count ? item.count(n) : item.flat);
+    }
+    return echo;
+  }
+
+  // The least of the currency that pays MORE than you would get now. The
+  // rounding is the whole reason to ask: 105 and 176 are worth waiting for and
+  // 140 is not. Searched rather than read off PC_TIERS, so the two stay
+  // independent and the tests can check one against the other.
+  function pcNextStep(plan, have) {
+    if (have == null || !plan.currency) return null;
+    const now = pcCashEcho(plan, have);
+    for (let n = have + 1; n <= have + 200; n++) {
+      const then = pcCashEcho(plan, n);
+      if (then > now) return { at: n, more: n - have, echo: then };
+    }
+    return null;
+  }
+
+  function pcCashout(entry, purse) {
+    const plan = pcCashPlan(entry);
+    if (!plan) return null;
+    const have = !purse ? null
+      : (plan.spends === 'sd' ? purse.sd : (plan.spends === 'sh' ? purse.sh : null));
+    const items = [];
+    let echo = 0;
+    let priced = true;
+    let favours = false;
+    for (const item of plan.items) {
+      const row = {
+        name: item.name, each: item.echo || 0, favour: !!item.favour,
+        note: item.note || null, count: null, unsure: false, capped: false,
+      };
+      if (item.count) row.count = have == null ? null : item.count(have);
+      else row.count = item.flat;
+      if (row.count == null) row.unsure = true;
+      if (item.needs) {
+        row.needs = item.needs;
+        const level = purse && item.needs.quality === PC_ACADEMICS ? purse.academics : null;
+        if (level == null) row.unsure = true;
+        else if (level < item.needs.atLeast) row.count = 0;
+      }
+      if (item.cap) {
+        const level = purse ? purse.society : null;
+        if (level == null) row.unsure = true;
+        else if (level >= item.cap) { row.count = 0; row.capped = true; }
+      }
+      if (row.favour) favours = true;
+      if (row.each) {
+        if (row.count == null) priced = false;
+        else echo += row.count * row.each;
+      }
+      items.push(row);
+    }
+    return {
+      name: plan.name,
+      spends: plan.spends,
+      currency: plan.currency,
+      have: have,
+      items: items,
+      extras: plan.extras || null,
+      echo: priced ? echo : null,
+      favours: favours,
+      next: pcNextStep(plan, have),
+      // Only a payout that depends on a READING can go stale. The two fixed
+      // ones are as true an hour later as they are now.
+      stale: !!(purse && purse.stale && plan.currency),
+      read: purse ? purse.at : null,
+      live: !!(purse && purse.live),
+    };
+  }
+
+  // Every ending at once, so a tooltip can say what taking this one gives up.
+  // That comparison is the actual decision at Time 12: Honoured with a State
+  // Dinner pays two Favours and empties a purse that may be worth 40 Echoes.
+  function pcCashoutAll(purse) {
+    return PC_CASHOUTS.map(function (plan) { return pcCashout(plan, purse); });
+  }
+
+  // Which ending pays most, or null when that cannot be said. "Best" is a
+  // COMPARISON, so it is only made when every ending can be compared: with a
+  // currency unread the two fixed rewards would win by default, and the mark
+  // would be an artefact of the missing reading rather than a claim about your
+  // term.
+  function pcBestCashout(cashouts) {
+    if (!cashouts.length) return null;
+    if (!cashouts.every(function (cash) { return cash.echo != null; })) return null;
+    let best = null;
+    for (const cash of cashouts) if (!best || cash.echo > best.echo) best = cash;
+    return best;
+  }
+
+  // 40E, 57.5E. The halves are real -- a dear item is 12.5 Echoes -- so they
+  // are not rounded away.
+  function pcEchoText(echo) {
+    return (Math.round(echo * 100) / 100) + 'E';
+  }
+
+  // --- looking a storylet up ---------------------------------------------
+  //
+  // Exact match on the punctuation-squashed name, through the same normaliser
+  // the Spite and zee tables use. The one tolerance is a PREFIX: Fallen London
+  // titles a storylet inside a named activity "Fruits of the Zee: Supplication
+  // on the Shore", and nothing has confirmed whether it does the same here. So
+  // a name carrying a leading "...: " is retried on the half after the colon --
+  // which can only ever tolerate a prefix, never widen what matches.
+
+  const PC_BY_NAME = new Map();
+  const PC_BY_BRANCH = new Map();
+  for (const entry of PC_OPTIONS) {
+    const key = normalizeName(entry.name);
+    if (!PC_BY_NAME.has(key)) PC_BY_NAME.set(key, []);
+    PC_BY_NAME.get(key).push(entry);
+    if (entry.branch) PC_BY_BRANCH.set(normalizeName(entry.branch), entry);
+  }
+
+  function pcKeys(name) {
+    const raw = String(name == null ? '' : name);
+    const keys = [normalizeName(raw)];
+    const colon = raw.indexOf(':');
+    if (colon !== -1) keys.push(normalizeName(raw.slice(colon + 1)));
+    return keys.filter(Boolean);
+  }
+
+  function lookupPcStorylet(name) {
+    for (const key of pcKeys(name)) {
+      const hit = PC_BY_NAME.get(key);
+      if (hit) return hit;
+    }
+    return null;
+  }
+
+  function lookupPcBranch(name) {
+    for (const key of pcKeys(name)) {
+      const hit = PC_BY_BRANCH.get(key);
+      if (hit) return hit;
+    }
+    return null;
+  }
+
+  // --- what a row is worth ------------------------------------------------
+
+  // The guide's Net column, from the parts. A row paying "one of the two, the
+  // game's choice" is worth that much once, not twice.
+  function pcNet(entry) {
+    if (entry.reset) return null;
+    return entry.either ? entry.either : entry.sd + entry.sh + entry.il;
+  }
+
+  // The line the storylet badge speaks for: the best net on offer. Both
+  // branches of Within their rights and A plea for pardon are real choices --
+  // the losing one is how you buy Imperial Legitimacy back, which is the whole
+  // point of it -- so the tooltip lists both and only the badge picks.
+  function bestPcOption(entries) {
+    let best = null;
+    for (const entry of entries) {
+      if (pcNet(entry) == null) continue;
+      if (!best || pcNet(entry) > pcNet(best)) best = entry;
+    }
+    return best || entries[0];
+  }
+
+  const PC_CLASS = 'fl-ux-pc';
+  const PC_FLAG = 'flUxPc';
+  const PC_BRANCH_CLASS = 'fl-ux-pc-branch';
+  const PC_BRANCH_FLAG = 'flUxPcBranch';
+
+  // --- the mark, and then the colour --------------------------------------
+  //
+  // Imperial Legitimacy is this activity's Troubled Waters: the number that,
+  // at 0, ends the term at once with no rewards and a trip back to the Foreign
+  // Office. Nine of the rows are worth exactly +5, so the net separates almost
+  // nothing and what an option does to Legitimacy separates everything. That
+  // is what a Port Carnelian badge is really about, and it is said TWICE --
+  // once in a mark and once in a colour.
+  //
+  // Two marks, not one, and they are told apart by SHAPE:
+  //
+  //   up    the option BUYS Legitimacy back. Both of these cost resources to
+  //         take -- they are the rows worth taking when Legitimacy is low.
+  //   down  the option's net was paid for OUT OF Legitimacy.
+  //   none  it does not touch Legitimacy at all.
+  //
+  // Shape rather than colour because THE COLOUR MAY NOT BE READABLE. This
+  // repo's reader is red-green weak (see AGENTS.md), and red against green is
+  // exactly the pair that collapses. Read the marks alone and every badge here
+  // is complete; the colour only makes a screenful quicker to skim. Anything
+  // added to this feature later has to hold to that -- a claim that exists
+  // only in a hue is a claim this reader cannot see.
+  const PC_LEGIT_GAIN_MARK = '▲';
+  const PC_LEGIT_SPEND_MARK = '▼';
+
+  function pcLegitMark(entry) {
+    if (entry.reset || !entry.il) return '';
+    return entry.il > 0 ? PC_LEGIT_GAIN_MARK : PC_LEGIT_SPEND_MARK;
+  }
+
+  // The colour says the same thing the mark does, and nothing else. It is NOT
+  // a ladder up the net any more: ranking nine identical +5s by shade was
+  // spending the one channel this badge has on the number that varies least.
+  //
+  // The two Legitimacy hues are still picked to survive the deficiency as far
+  // as a hue can. They are separated along the BLUE-YELLOW axis, which
+  // red-green weakness leaves intact: the green leans teal and the red leans
+  // warm brick, rather than being the textbook pair that reads as one muddy
+  // colour twice.
+  const PC_COLOR_LEGIT_GAIN = '#1b7d67';   // teal-leaning green, white ink
+  const PC_COLOR_LEGIT_SPEND = '#a33520';  // warm brick red, white ink
+  // Legitimacy-neutral -- most of the table, and the rows with nothing to warn
+  // about. Light blue because it is the one family neither of those two can be
+  // taken for under any deficiency. It is a LIGHT background, so it takes dark
+  // ink: white on it is not legible (the DEPTH_INK lesson).
+  const PC_COLOR_NEUTRAL = '#8ec6dd';
+  const PC_INK_NEUTRAL = '#0f2a33';
+  // The four Time 12 endings. Legitimacy-IRRELEVANT rather than neutral, and
+  // they read "cash out" rather than a number, so a deep slate blue keeps them
+  // out of the light blue run without implying they are on the same scale.
+  const PC_COLOR_END = '#3f5f8a';
+
+  // Colour and ink together, since the light one cannot take the default white.
+  // `ink` is left off the dark three so makeBadge's own default stands.
+  function pcPaint(entry) {
+    if (entry.reset) return { color: PC_COLOR_END };
+    if (entry.il > 0) return { color: PC_COLOR_LEGIT_GAIN };
+    if (entry.il < 0) return { color: PC_COLOR_LEGIT_SPEND };
+    return { color: PC_COLOR_NEUTRAL, ink: PC_INK_NEUTRAL };
+  }
+
+  // The endings' badge is the only figure in this feature that comes from YOUR
+  // numbers rather than the table, so it says how sure of them it is: a favour
+  // mark when part of the payout is Favours (0 Echoes, by the rule above), a
+  // question mark when the reading behind it is over a minute old, and the
+  // original 'cash out' label when there is no reading at all.
+  function pcCashBadgeText(cash) {
+    if (!cash) return 'cash out';
+    const mark = cash.favours ? ' ' + PC_FAVOUR_MARK : '';
+    if (cash.echo == null) return 'cash out' + mark;
+    return pcEchoText(cash.echo) + mark + (cash.stale ? ' ' + PC_STALE_MARK : '');
+  }
+
+  function pcBadgeText(entry, purse) {
+    if (entry.reset) return pcCashBadgeText(pcCashout(entry, purse));
+    const net = pcNet(entry);
+    return (net > 0 ? '+' + net : String(net))
+      + pcLegitMark(entry)
+      + (entry.fate ? ' Fate' : '');
+  }
+
+  function pcRange(pair) {
+    if (!pair) return null;
+    return pair[0] === pair[1] ? String(pair[0]) : pair[0] + '–' + pair[1];
+  }
+
+  function pcWhen(entry) {
+    return 'Time Passing in Office ' + pcRange(entry.time)
+      + ' · ' + (entry.airs ? 'Airs ' + pcRange(entry.airs) : 'any Airs');
+  }
+
+  // The currency changes, spelled out. `either` is deliberately its own
+  // sentence: "+10 of one of the two" is not "+10 of each", and a row that read
+  // as the second would look worth twice what it is.
+  function pcChangeWords(entry) {
+    if (entry.reset) {
+      if (entry.reset === 'both') return 'Spends BOTH Striped Delights and Silver Horseheads.';
+      return 'Spends all your '
+        + (entry.reset === 'sd' ? 'Striped Delights' : 'Silver Horseheads') + '.';
+    }
+    const bits = [];
+    if (entry.either) bits.push('Striped Delights OR Silver Horseheads +' + entry.either
+      + ' (the game picks which, not you)');
+    if (entry.sd) bits.push('Striped Delights ' + (entry.sd > 0 ? '+' : '') + entry.sd);
+    if (entry.sh) bits.push('Silver Horseheads ' + (entry.sh > 0 ? '+' : '') + entry.sh);
+    if (entry.il) bits.push('Imperial Legitimacy ' + (entry.il > 0 ? '+' : '') + entry.il);
+    return bits.join(', ') + '.';
+  }
+
+  function pcOptionLines(entry, lead) {
+    const lines = [lead + pcChangeWords(entry)];
+    if (!entry.reset) lines.push('      net ' + (pcNet(entry) > 0 ? '+' : '') + pcNet(entry));
+    if (entry.needs) lines.push('      needs ' + entry.needs);
+    if (entry.fate) lines.push('      Fate-locked.');
+    if (entry.note) lines.push('      ' + entry.note);
+    return lines;
+  }
+
+  // The cash-out arithmetic, spelled out. This is the whole argument for the
+  // one badge here that quotes your own numbers: what you hold, what it turns
+  // into, what that is worth, what the next step up would cost you in actions
+  // -- and, for the two endings that pay a fixed reward, what taking one gives
+  // up, since they empty both purses.
+  function pcCashLines(cash, others) {
+    const lines = [''];
+    if (!cash.currency) {
+      lines.push('Cash out now — a fixed reward, whatever the two purses hold:');
+    } else if (cash.have == null) {
+      lines.push('Cash out now — your ' + cash.currency + ' has not been read yet, '
+        + 'so this cannot be priced.');
+    } else {
+      lines.push('Cash out now — ' + cash.currency + ' ' + cash.have + ' ('
+        + (cash.live ? 'read live' : 'read ' + ageText(cash.read)) + '):');
+    }
+    for (const row of cash.items) {
+      let line = '  ' + (row.count == null ? '?' : row.count) + ' × ' + row.name;
+      if (row.favour) line += ' ' + PC_FAVOUR_MARK;
+      if (row.each) line += ' (' + pcEchoText(row.each) + ' each)';
+      if (row.needs) line += ' — needs ' + row.needs.quality + ' ' + row.needs.atLeast;
+      if (row.capped) line += ' — you are at the cap of ' + PC_SOCIETY_CAP
+        + ', so this one is not given at all';
+      lines.push(line);
+      if (row.note) lines.push('      ' + row.note);
+    }
+    if (cash.echo != null) {
+      lines.push('  = ' + pcEchoText(cash.echo) + (cash.favours ? ', and the Favours' : ''));
+    }
+    if (cash.next) {
+      lines.push('  Next step up at ' + cash.next.at + ' (+' + cash.next.more + ') — '
+        + pcEchoText(cash.next.echo) + '. The rounding is why 105 and 176 are worth '
+        + 'waiting for and 140 is not.');
+    }
+    for (const extra of (cash.extras || [])) lines.push('  also ' + extra);
+    if (cash.spends === 'both') {
+      const rivals = (others || []).filter(function (other) {
+        return other !== cash && other.currency && other.echo != null && other.echo > 0;
+      });
+      if (rivals.length) {
+        lines.push('  This empties BOTH purses. Cashing one in instead: '
+          + rivals.map(function (other) {
+            return other.currency + ' ' + pcEchoText(other.echo);
+          }).join(', ') + '.');
+      }
+    }
+    if (cash.stale) {
+      lines.push('  ' + PC_STALE_MARK + ' this reading is over a minute old and every action '
+        + 'of a term moves both currencies, so the figure may already be behind.');
+    }
+    return lines;
+  }
+
+  const PC_CASH_FOOTER = PC_FAVOUR_MARK + ' a faction Favour: a story quality capped at '
+    + PC_SOCIETY_CAP + ', which you cannot sell. Those — and Tribute, which has no market '
+    + 'price either — count as 0 here rather than let a fixed reward out-rank a real cash-out '
+    + 'on a number nobody acts on. A Favour in High Places is NOT one of them: despite the '
+    + 'name it is an ordinary item, and it is priced like one. Item prices are the Bazaar\'s: '
+    + '2.5 for a cheap one, 12.5 for a dear one, at the wiki\'s bankers\' rounding.';
+
+  function pcCashBlock(entry, purse) {
+    if (!entry.reset) return [];
+    const all = pcCashoutAll(purse);
+    const key = normalizeName(entry.name);
+    const cash = all.filter(function (one) { return normalizeName(one.name) === key; })[0];
+    if (!cash) return [];
+    return pcCashLines(cash, all).concat(['', PC_CASH_FOOTER]);
+  }
+
+  // Carried on every tooltip, neutral rows included, because it is the legend
+  // for the two marks as well as the rule they are about.
+  const PC_FOOTER = PC_LEGIT_SPEND_MARK + ' this net is paid for out of Imperial Legitimacy. '
+    + PC_LEGIT_GAIN_MARK + ' this line buys Legitimacy back. No mark: it does not touch it.\n'
+    + 'Imperial Legitimacy reaching 0 ends the term at once, with no rewards '
+    + 'and a trip back to the Foreign Office. It carries over between terms; the two '
+    + 'currencies do not.';
+
+  // What to draw on a storylet heading. Pure (entries in, spec out), so every
+  // badge can be asserted on without a DOM.
+  function pcStoryletSpec(entries, purse) {
+    const best = bestPcOption(entries);
+    const lines = [entries[0].name, pcWhen(best), ''];
+    if (entries.length === 1) {
+      lines.push.apply(lines, pcOptionLines(best, ''));
+    } else {
+      lines.push('Both branches:');
+      for (const entry of entries) {
+        lines.push.apply(lines, pcOptionLines(entry, '  • ' + entry.branch + ' — '));
+      }
+      lines.push('');
+      lines.push('The badge is the better net. The other branch is how you buy Imperial '
+        + 'Legitimacy back, which is worth taking when it is running low.');
+    }
+    lines.push.apply(lines, pcCashBlock(best, purse));
+    lines.push('');
+    lines.push(PC_FOOTER);
+    const paint = pcPaint(best);
+    return {
+      text: pcBadgeText(best, purse), color: paint.color, ink: paint.ink,
+      // `cash` is not for makeBadge, which ignores it. It is how `pcRatings`
+      // knows an ending is on screen -- the one place a stale reading would be
+      // a wrong number rather than a missing one, and so the only place worth
+      // booting a hidden frame for.
+      cash: !!best.reset, title: lines.join('\n'),
+    };
+  }
+
+  // And on one branch inside an opened storylet.
+  function pcBranchSpec(entry, purse) {
+    const lines = [entry.name + ': ' + entry.branch, pcWhen(entry), ''];
+    lines.push.apply(lines, pcOptionLines(entry, ''));
+    lines.push.apply(lines, pcCashBlock(entry, purse));
+    lines.push('');
+    lines.push(PC_FOOTER);
+    const paint = pcPaint(entry);
+    return {
+      text: pcBadgeText(entry, purse), color: paint.color, ink: paint.ink,
+      cash: !!entry.reset, title: lines.join('\n'),
+    };
+  }
+
+  // What to draw on ONE heading, whichever kind of heading it is.
+  //
+  // Fallen London does not lay this activity out the way the guide reads it.
+  // Captured in-game 2026-09-10: the port has a SINGLE storylet, "Matters of
+  // State" (wiki ID 194331, location Heartscross House), and every row of the
+  // guide's table is an OPTION inside it. So the names the guide calls
+  // storylets arrive on `.branch__title`; and the guide's own branch names --
+  // "Close your door without a word" and the other three -- only appear once
+  // one of the two split storylets has been opened, by which point THAT is the
+  // `.storylet-root__heading`. Either kind of name can turn up under either
+  // selector, so both lookups are tried on both. This is what the feature got
+  // wrong on its first outing: matching the table's storylet names against
+  // storylet headings alone, it drew nothing at all in Port Carnelian.
+  //
+  // No name is in both tables, so which lookup wins is never a judgement call.
+  //
+  // `here` is the area gate, passed in rather than read, so the whole thing
+  // stays pure: name and gate in, badge description out.
+  function pcHeadingSpec(name, here, purse) {
+    if (!name) return null;
+    const entries = lookupPcStorylet(name);
+    if (entries) {
+      const strict = entries.some(function (e) { return e.strict; });
+      return here || !strict ? pcStoryletSpec(entries, purse) : null;
+    }
+    const entry = lookupPcBranch(name);
+    if (!entry) return null;
+    return here || !entry.strict ? pcBranchSpec(entry, purse) : null;
+  }
+
+  // --- the area gate ------------------------------------------------------
+  //
+  // Captured in-game 2026-09-10, in the screen-reader greeting:
+  //
+  //   It's TheFairUnknown! Welcome to Heartscross House, delicious friend!
+  //
+  // The greeting names the governor's SEAT rather than the port. "Heartscross
+  // House" is the wiki page; "Port Carnelian" is only what the zee map calls
+  // the destination -- the very split ZEE_PORTS already records with `as`. The
+  // original one-name guess here was that destination name, which the greeting
+  // never says, so the gate could not fire and both strict rows stayed dark
+  // for a whole term.
+  //
+  // Both names are listed: the capture is from the seat screen, and nothing
+  // promises every screen of a term greets you the same way.
+  //
+  // Still confirm-only, like ZEE_AREAS and unlike SPITE_AREAS: it may say
+  // "yes, definitely here" and must never say "no". The option table stays the
+  // real scope.
+  const PC_AREAS = ['Heartscross House', 'Port Carnelian'].map(normalizeName);
+
+  function inPortCarnelian() {
+    const area = normalizeName(currentArea());
+    return !!area && PC_AREAS.indexOf(area) !== -1;
+  }
+
+  // Two names are not distinctive enough to badge on the table alone, so those
+  // two wait for the greeting to confirm where we are:
+  //
+  //   His Amused Lordship -- the wiki files this one as "His Amused Lordship
+  //     - 2", which is proof that something else already owns the plain name.
+  //   Inconvenienced -- one ordinary English word.
+  //
+  // Everything else in the table is a phrase Fallen London uses here and, as
+  // far as the wiki shows, nowhere else.
+  const PC_STORYLET_SELECTOR = '.storylet__heading, .storylet-root__heading';
+  // Shared with the Fruits of the Zee supplication badges, which own a
+  // different class and flag pair, so the two can decorate the same branch
+  // without either clearing the other.
+  const PC_BRANCH_SELECTOR = '.branch__title';
+
+  // The endings are the one screen in this feature where a stale reading is a
+  // WRONG number rather than a missing one, so standing in front of one is
+  // what pays for a background refresh: the same hidden-frame load of /myself
+  // the panels use, throttled to one a minute and off entirely when the
+  // auto-refresh toggle is. `schedule()` afterwards because banking a reading
+  // mutates nothing in the page, so nothing else would redraw the badge.
+  let pcRefreshAt = 0;
+  function pcMaybeRefresh(purse) {
+    if (!autoRefreshEnabled()) return;
+    if (purse && (purse.live || !purse.stale)) return;
+    if (Date.now() - pcRefreshAt < PC_FRESH_MS) return;
+    pcRefreshAt = Date.now();
+    refreshBackgroundState().then(function () { schedule(); });
+  }
+
+  function pcRatings() {
+    const here = inPortCarnelian();
+    const purse = pcPurse();
+    // The gate is part of a badge's identity, not just the name. A strict row
+    // draws nothing until the greeting can be read, and the greeting is read
+    // fresh on every scan -- so without this in `value`, a row suppressed on
+    // one scan would keep its "nothing to say" flag and never redraw once the
+    // greeting turned up. The purse is in there for the same reason: an
+    // ending's badge IS your Delights and Horseheads, so a badge drawn before
+    // the reading arrived has to redraw when it does.
+    const sig = (here ? '@here' : '@?') + '#' + (purse ? purse.sig : 'unread');
+    let ending = false;
+    function decorate(cls, flag) {
+      return function (head) {
+        const name = headingName(head);
+        const spec = pcHeadingSpec(name, here, purse);
+        if (spec && spec.cash) ending = true;
+        attachBadge(head, {
+          cls: cls,
+          flag: flag,
+          value: name && name + sig,
+          spec: spec,
+          place: 'after',
+        });
+      };
+    }
+    document.querySelectorAll(PC_STORYLET_SELECTOR).forEach(decorate(PC_CLASS, PC_FLAG));
+    document.querySelectorAll(PC_BRANCH_SELECTOR).forEach(decorate(PC_BRANCH_CLASS, PC_BRANCH_FLAG));
+    if (ending) pcMaybeRefresh(purse);
+  }
+
+  // === feature: Voyages of Scientific Discovery ==========================
+  //
+  // The Dilmun Club's scientific voyages, and the second feature here that
+  // badges storylets rather than cards. It covers three screens that look
+  // unrelated and are one economy:
+  //
+  //   PREPARATORY RESEARCH, at Your Lodgings -- turn items and Favours into
+  //     pages before you sail. Every option locks itself out once you hold
+  //     enough pages, so the ORDER you take them in decides the total.
+  //   THE ISLANDS -- Bullbone, Corpsecage and Grunting Fen, each a fixed
+  //     carousel of 21 actions measured by "Orthos is Coming!". Which pair of
+  //     actions is in front of you is decided by the Orthos band, and each pair
+  //     is the same question: pages of one type, or a pile of goods instead.
+  //   ORGANISE YOUR RESEARCH, back at Your Lodgings -- spend the pages.
+  //
+  // The three currencies are Page of Prelapsarian Archaeological Notes (AN --
+  // the island pages abbreviate it PAN), Page of Cryptopalaeontological Notes
+  // (CN) and Page of Theosophistical Notes (TN).
+  //
+  // **What the badge says, and why.** Colour is the NOTE TYPE and the text is
+  // the amount, because that is the only question these screens ask. You sail
+  // to an island for one type -- Bullbone pays CN, Corpsecage AN, Grunting Fen
+  // TN -- and at every Orthos band you are choosing between an action that pays
+  // your type and one that pays goods. Ranking those two against each other
+  // would need an exchange rate between pages and Echoes that nothing supports,
+  // so the badge does not invent one: a paying-in-goods action is LABELLED with
+  // what it pays rather than scored. On the Organise screen there is no such
+  // problem -- everything there is priced -- so those rows carry the guide's own
+  // Echoes-per-note, which is the figure that decides between them (a 500-note
+  // option pays 10 pence a note; a 120-note collation pays 6.25).
+  //
+  // Transcribed from Embarking on a Voyage of Scientific Discovery (Guide) for
+  // the two Lodgings screens, and from the "Expedition Progress" table on each
+  // island's own page (Bullbone Island, Corpsecage Island, Grunting Fen) for
+  // the carousels -- the guide transcludes those tables rather than restating
+  // them, so the island page is the source either way. Corrections go in
+  // VSD_OPTIONS and nowhere else.
+  //
+  // One entry per row of those tables:
+  //
+  //   phase     'prep' | 'island' | 'organise'.
+  //   island    which island, on a phase 'island' row.
+  //   storylet  the storylet, as the wiki titles it.
+  //   branch    the option inside it.
+  //   orthos    [min, max] band of Orthos is Coming! the row is offered in.
+  //   ch        the challenge, verbatim, or null where there is none.
+  //   an/cn/tn  pages gained. Negative on the Organise rows, which spend them.
+  //   headline  what the row pays when it pays no pages -- transcribed, not
+  //             derived, because "the item worth quoting" is a judgement.
+  //   orElse    the wiki's explicit OR: one action, two different payouts, and
+  //             the game picks. Held apart from the page counts so the two can
+  //             never be read as a sum.
+  //   luck      { odds, win, lose } for the three end-of-voyage gambles.
+  //   perNote   pence per note, on an Organise row the guide prices.
+  //   cost      what it costs, verbatim. needs: what it is gated on.
+  //   fail      what a failure costs.
+  //   note      anything that does not fit the fields above.
+
+  // A voyage is 21 actions on the island: 1 to arrive, 19 of carousel, 1 to
+  // leave, assuming every challenge passes. A failure still advances Orthos,
+  // by 1 change point instead of 2, so a bad run is longer rather than lost.
+  const VSD_ISLAND_ACTIONS = 21;
+
+  const VSD_ISLANDS = [
+    {
+      name: 'Bullbone Island',
+      region: 'Home Waters',
+      pays: 'cn',
+      best: { an: 78, cn: 249, tn: 40 },
+      epa: 1.88,
+      echoes: 39.46,
+      note: 'The bone island: Horned Skulls at 20 Survey of the Neath’s Bones each, '
+        + 'and a Shard of Glim the Size of a Small Child that trades in London for '
+        + 'Favours: Rubbery Men.',
+    },
+    {
+      name: 'Corpsecage Island',
+      region: 'Stormbones',
+      pays: 'an',
+      best: { an: 249, cn: 40, tn: 78 },
+      epa: 2.00,
+      echoes: 42.08,
+      note: 'Also where the Beatific Stone is, the Renown: The Church 40 faction item.',
+    },
+    {
+      name: 'Grunting Fen',
+      region: 'The Sea of Voices',
+      pays: 'tn',
+      best: { an: 40, cn: 124, tn: 249 },
+      epa: 2.21,
+      echoes: 46.50,
+      needs: 'Screaming Map',
+      note: 'The best Echoes per action of the three, and the only one you need an '
+        + 'item to reach.',
+    },
+  ];
+
+  const VSD_OPTIONS = [
+    // === Preparatory Research, at Your Lodgings ==========================
+    //
+    // Every one of these locks itself out above a page count, so the order
+    // matters: take the cheap 50s while you are under 101, and the big
+    // single-type options while you are under 301.
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Pay someone else to research for you',
+      an: 50, cn: 50, tn: 50, cost: 'Memory of Distant Shores 80 x',
+      needs: 'locked at 101 pages of any type' },
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Have instruments ground',
+      an: 50, cn: 50, tn: 50, cost: 'Whirring Contraption 1 x',
+      needs: 'locked at 101 pages of any type' },
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Consult your current work',
+      an: 40, cn: 40, tn: 40, cost: 'Volume of Collated Research 1 x',
+      needs: 'locked at 101 pages of any type' },
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Find promising students',
+      an: 50, cn: 50, tn: 50,
+      cost: 'Favours: Urchins 2 x, Favours: The Church 2 x, Favours: Revolutionaries 2 x',
+      needs: 'locked at 101 pages of any type',
+      note: 'The guide lists the three Favours without an OR between them, so this is '
+        + 'read as all three.' },
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Examine your collection of curiosities',
+      an: 150, cn: 0, tn: 0, cost: 'Collection of Curiosities 1 x',
+      needs: 'locked at 301 AN' },
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Consult the Masters of the Bazaar',
+      an: 100, cn: 0, tn: 0, cost: 'Connected: The Masters of the Bazaar 2 CP',
+      needs: 'Connected: The Masters of the Bazaar 3; locked at 301 AN' },
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Trade in academic favours',
+      an: 0, cn: 100, tn: 0,
+      cost: 'Connected: Benthic 91–114 CP, Connected: Summerset 91–114 CP',
+      needs: 'Connected: Benthic 20 and Connected: Summerset 20; locked at 301 CN' },
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Test your Unearthly Fossil',
+      an: 0, cn: 80, tn: 0, cost: 'Unearthly Fossil 1 x', needs: 'locked at 301 CN' },
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Look at the current trend for Theosophistry',
+      an: 0, cn: 0, tn: 50, cost: 'Favours: Society 3 x', needs: 'locked at 101 TN' },
+    { phase: 'prep', storylet: 'Preparatory Research', branch: 'Summarise your experiences in the Wars of Illusion',
+      an: 0, cn: 0, tn: 35, cost: 'Extraordinary Implication 1 x',
+      needs: 'Embroiled in the Wars of Illusion 25; locked at 101 TN' },
+
+    // === Bullbone Island ==================================================
+    { phase: 'island', island: 'Bullbone Island', orthos: [0, 3],
+      storylet: 'Bullbone Island', branch: 'The bones of Bullbone',
+      ch: 'Watchful 120', an: 0, cn: 12, tn: 0,
+      orElse: 'CN 4 x and a Horned Skull instead',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Bullbone Island', orthos: [0, 3],
+      storylet: 'Bullbone Island', branch: 'Wild bees',
+      ch: 'Watchful 120', an: 0, cn: 0, tn: 0,
+      headline: 'Beeswax ×120', gain: 'Lump of Lamplighter Beeswax 120 x',
+      fail: 'Wounds +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Bullbone Island', orthos: [0, 3],
+      storylet: 'Bullbone Island', branch: 'A skull of Bullbone, borrowed',
+      ch: null, an: 0, cn: 0, tn: 0,
+      headline: 'Skull ×1', gain: 'Horned Skull 1 x', cost: 'Survey of the Neath’s Bones 20 x' },
+
+    { phase: 'island', island: 'Bullbone Island', orthos: [4, 5],
+      storylet: 'The Little Cave', branch: 'Oho – a little writing',
+      ch: 'Watchful 123', an: 13, cn: 0, tn: 0, gain: 'Walking the Falling Cities +1 CP',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Bullbone Island', orthos: [4, 5],
+      storylet: 'The Little Cave', branch: 'Weasels about',
+      ch: 'Watchful 123', an: 0, cn: 0, tn: 0,
+      headline: 'Scarab ×12', gain: 'Phosphorescent Scarab 12 x',
+      fail: 'Wounds +1 CP, Orthos +1 CP instead of +2' },
+
+    { phase: 'island', island: 'Bullbone Island', orthos: [6, 6],
+      storylet: 'Where the Wild Mandrakes Grow', branch: 'Creaking in the breeze',
+      ch: 'Watchful 124', an: 0, cn: 13, tn: 0,
+      gain: 'Seeing through the Eyes of Icarus +1 CP',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Bullbone Island', orthos: [6, 6],
+      storylet: 'Where the Wild Mandrakes Grow', branch: 'Someone lives near the mandrake-copse',
+      ch: 'Watchful 123', an: 0, cn: 0, tn: 0,
+      headline: 'Hints ×124', gain: 'Whispered Hint 124 x',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+
+    { phase: 'island', island: 'Bullbone Island', orthos: [7, 7],
+      storylet: 'Sparkling around the Copse', branch: 'Acquisition and screaming',
+      ch: 'Watchful 126', an: 0, cn: 0, tn: 0,
+      headline: 'Glim ×126', gain: 'Shard of Glim 126 x',
+      fail: 'Wounds +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Bullbone Island', orthos: [7, 7],
+      storylet: 'Sparkling around the Copse', branch: 'Looking up', strict: true,
+      ch: 'Watchful 126', an: 0, cn: 0, tn: 0,
+      headline: 'Pearls ×126',
+      gain: 'Moon-Pearl 126 x, Seeing through the Eyes of Icarus +1 CP',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+
+    { phase: 'island', island: 'Bullbone Island', orthos: [8, 8],
+      storylet: 'The Unterzee Waits Silently', branch: 'Creeping closer',
+      ch: 'Watchful 124', an: 0, cn: 0, tn: 0,
+      headline: 'Screams ×2',
+      gain: 'Aeolian Scream 2 x, Seeing through the Eyes of Icarus +1 CP',
+      fail: 'Nightmares +1 CP — Orthos goes to 9 either way' },
+    { phase: 'island', island: 'Bullbone Island', orthos: [8, 8],
+      storylet: 'Spiritual happenings', branch: 'Search the island', strict: true,
+      ch: 'Watchful 128', an: 0, cn: 0, tn: 40, gain: 'Memory of Distant Shores 2 x',
+      fail: 'Nightmares +1 CP — Orthos goes to 9 either way' },
+
+    { phase: 'island', island: 'Bullbone Island', orthos: [9, 9],
+      storylet: 'Gather the Riches of Bullbone Island', branch: 'Making money', strict: true,
+      ch: null, an: 0, cn: 0, tn: 0,
+      headline: 'Glim ×860', gain: 'Deshrieked Mandrake 1 x, Shard of Glim 860 x' },
+    { phase: 'island', island: 'Bullbone Island', orthos: [9, 9],
+      storylet: 'Gather the Riches of Bullbone Island', branch: 'That enormous Glim-Shard',
+      ch: null, an: 0, cn: 0, tn: 0,
+      headline: 'Great Shard', gain: 'Shard of Glim the Size of a Small Child 1 x',
+      note: 'The Shard trades in London for Favours: Rubbery Men.' },
+    { phase: 'island', island: 'Bullbone Island', orthos: [9, 9],
+      storylet: 'Finish your notes on Bullbone Island', branch: 'Write up your notes',
+      ch: null, an: 0, cn: 150, tn: 0 },
+
+    { phase: 'island', island: 'Bullbone Island', orthos: [10, 10],
+      storylet: 'Orthos has Found You', branch: 'Time to go', strict: true,
+      ch: null, an: 0, cn: 0, tn: 0, leave: true },
+    { phase: 'island', island: 'Bullbone Island', orthos: [10, 10],
+      storylet: 'Orthos has Found You', branch: 'Tarry a little', strict: true,
+      ch: 'Luck 70%', an: 0, cn: 0, tn: 0,
+      luck: { odds: 0.7, type: 'cn', win: 20, lose: 15 },
+      fail: 'CN −5, AN −5, TN −5' },
+    { phase: 'island', island: 'Bullbone Island', orthos: [10, 10],
+      storylet: 'Orthos has Found You', branch: 'Cut it fine', strict: true,
+      ch: 'Luck 30%', an: 0, cn: 0, tn: 0,
+      luck: { odds: 0.3, type: 'cn', win: 40, lose: 15 },
+      fail: 'CN −5, AN −5, TN −5' },
+
+    // === Corpsecage Island ================================================
+    { phase: 'island', island: 'Corpsecage Island', orthos: [0, 3],
+      storylet: 'Corpsecage Island', branch: 'Digging up bones and rough justice',
+      ch: 'Watchful 120', an: 12, cn: 0, tn: 0, gain: 'Walking the Falling Cities +1 CP',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Corpsecage Island', orthos: [0, 3],
+      storylet: 'Corpsecage Island', branch: 'The Corpsecage bat',
+      ch: 'Watchful 120', an: 0, cn: 0, tn: 0,
+      headline: 'Clues ×60', gain: 'Cryptic Clue 60 x, Walking the Falling Cities +1 CP',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+
+    { phase: 'island', island: 'Corpsecage Island', orthos: [4, 5],
+      storylet: 'The Religions of Corpsecage Island', branch: 'Examine the ruins for clues',
+      ch: 'Watchful 122', an: 0, cn: 0, tn: 13, gain: 'Walking the Falling Cities +1 CP',
+      orElse: 'Mystery of the Elder Continent 5 x instead',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Corpsecage Island', orthos: [4, 5],
+      storylet: 'The Religions of Corpsecage Island', branch: 'What’s written here?',
+      ch: 'Watchful 122', an: 0, cn: 0, tn: 0,
+      headline: 'Clues ×61', gain: 'Cryptic Clue 61 x',
+      orElse: 'Mystery of the Elder Continent 5 x and Walking the Falling Cities +1 CP instead',
+      fail: 'Wounds +1 CP, Orthos +1 CP instead of +2' },
+
+    { phase: 'island', island: 'Corpsecage Island', orthos: [6, 6],
+      storylet: 'Up the Hill', branch: 'See what you can dig up', strict: true,
+      ch: 'Watchful 124', an: 13, cn: 0, tn: 0, gain: 'Walking the Falling Cities +1 CP',
+      fail: 'Wounds +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Corpsecage Island', orthos: [6, 6],
+      storylet: 'Up the Hill', branch: 'Caging ancient echoes',
+      ch: 'Watchful 124', an: 0, cn: 0, tn: 0,
+      headline: 'Shrieks ×62', gain: 'Primordial Shriek 62 x',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+
+    { phase: 'island', island: 'Corpsecage Island', orthos: [7, 7],
+      storylet: 'Another Sort of Relic', branch: 'Rummage around the fire',
+      ch: 'Watchful 127', an: 0, cn: 0, tn: 0,
+      headline: 'Jade ×77',
+      gain: 'Prison Shiv 1 x (up to 1), Prisoner’s Mask 1 x, Jade Fragment 77 x, '
+        + 'Proscribed Material 12 x',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Corpsecage Island', orthos: [7, 7],
+      storylet: 'Another Sort of Relic', branch: 'A message long cold',
+      ch: 'Watchful 127', an: 0, cn: 0, tn: 0,
+      headline: 'Maps ×10',
+      gain: 'Map Scrap 10 x, Cryptic Clue 13 x, Seeing through the Eyes of Icarus +1 CP',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+
+    { phase: 'island', island: 'Corpsecage Island', orthos: [8, 8],
+      storylet: 'The Shore Near the Jetty', branch: 'The zee-caves',
+      ch: 'Watchful 127', an: 0, cn: 0, tn: 0,
+      headline: 'Proscribed ×125', gain: 'Proscribed Material 125 x',
+      fail: 'Wounds +1 CP — Orthos goes to 9 either way' },
+    { phase: 'island', island: 'Corpsecage Island', orthos: [8, 8],
+      storylet: 'The Back of Corpsecage', branch: 'Inauspicious iron',
+      ch: 'Watchful 127', an: 0, cn: 40, tn: 0,
+      gain: 'Nodule of Warm Amber 10 x, Seeing through the Eyes of Icarus +1 CP',
+      fail: 'Nightmares +1 CP — Orthos goes to 9 either way' },
+
+    { phase: 'island', island: 'Corpsecage Island', orthos: [9, 9],
+      storylet: 'Looking for Relics', branch: 'In the bag you go',
+      ch: null, an: 0, cn: 0, tn: 0,
+      headline: 'Relics ×200',
+      gain: 'Relic of the Third City 100 x, Relic of the Fourth City 100 x' },
+    { phase: 'island', island: 'Corpsecage Island', orthos: [9, 9],
+      storylet: 'Finish your notes on Corpsecage Island', branch: 'Writing it all down',
+      ch: null, an: 150, cn: 0, tn: 0 },
+
+    { phase: 'island', island: 'Corpsecage Island', orthos: [10, 10],
+      storylet: 'Orthos Has Set Upon You', branch: 'Time to go', strict: true,
+      ch: null, an: 0, cn: 0, tn: 0, leave: true },
+    { phase: 'island', island: 'Corpsecage Island', orthos: [10, 10],
+      storylet: 'Orthos Has Set Upon You', branch: 'Tarry a little', strict: true,
+      ch: 'Luck 70%', an: 0, cn: 0, tn: 0,
+      luck: { odds: 0.7, type: 'an', win: 20, lose: 15 },
+      fail: 'CN −5, AN −5, TN −5' },
+    { phase: 'island', island: 'Corpsecage Island', orthos: [10, 10],
+      storylet: 'Orthos Has Set Upon You', branch: 'Cut it fine', strict: true,
+      ch: 'Luck 30%', an: 0, cn: 0, tn: 0,
+      luck: { odds: 0.3, type: 'an', win: 40, lose: 15 },
+      fail: 'CN −5, AN −5, TN −5' },
+
+    // === Grunting Fen =====================================================
+    { phase: 'island', island: 'Grunting Fen', orthos: [0, 3],
+      storylet: 'Grunting Fen', branch: 'Listen to the island',
+      ch: 'Watchful 120', an: 0, cn: 0, tn: 12, gain: 'Touched by Fingerwork +1 CP',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Grunting Fen', orthos: [0, 3],
+      storylet: 'Grunting Fen', branch: 'Do a survey', strict: true,
+      ch: 'Watchful 122', an: 0, cn: 0, tn: 0,
+      headline: 'Clues ×11', gain: 'Cryptic Clue 11 x, Map Scrap 10 x',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+
+    { phase: 'island', island: 'Grunting Fen', orthos: [4, 5],
+      storylet: 'What is Grunting Fen Made of?', branch: 'What manner of things live here?',
+      ch: 'Watchful 122', an: 0, cn: 12, tn: 0, gain: 'Touched by Fingerwork +1 CP',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Grunting Fen', orthos: [4, 5],
+      storylet: 'What is Grunting Fen Made of?', branch: 'Try some beach-combing instead',
+      ch: 'Watchful 124', an: 0, cn: 0, tn: 0,
+      headline: 'Glim ×100',
+      gain: 'Shard of Glim 100 x, Phosphorescent Scarab 1 x, Relic of the Fourth City 3 x',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+
+    { phase: 'island', island: 'Grunting Fen', orthos: [6, 6],
+      storylet: 'The Skull of a Long-Dead God?',
+      branch: 'What can you learn of matters spiritual and supernatural?',
+      ch: 'Watchful 124', an: 0, cn: 0, tn: 13, gain: 'Touched by Fingerwork +1 CP',
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Grunting Fen', orthos: [6, 6],
+      storylet: 'The Skull of a Long-Dead God?', branch: 'Follow the trail of history',
+      ch: 'Watchful 126', an: 0, cn: 0, tn: 0,
+      headline: 'Shores ×2', gain: 'Memory of Distant Shores 2 x, Cryptic Clue 13 x',
+      fail: 'Nightmares +1 CP, Orthos +1 CP',
+      note: 'The island page records NO Orthos gain on a success here — the only action '
+        + 'in the carousel that does not advance the clock when it works. Treat that as '
+        + 'the page having it, not as confirmed in game.' },
+
+    { phase: 'island', island: 'Grunting Fen', orthos: [7, 7],
+      storylet: 'The Treasures of Grunting Fen', branch: 'Catch some', strict: true,
+      ch: 'Watchful 126', an: 0, cn: 13, tn: 0,
+      fail: 'Nightmares +1 CP, Orthos +1 CP instead of +2' },
+    { phase: 'island', island: 'Grunting Fen', orthos: [7, 7],
+      storylet: 'The Treasures of Grunting Fen', branch: 'How about we make this more... interesting?',
+      ch: 'Watchful 128', an: 0, cn: 0, tn: 0,
+      headline: 'Rostygold ×228', gain: 'Piece of Rostygold 228 x',
+      fail: 'Piece of Rostygold −100, Nightmares +1 CP, Orthos +1 CP instead of +2',
+      note: 'The one action on any of the three islands whose failure takes something '
+        + 'off you rather than only costing the difference in Orthos.' },
+
+    { phase: 'island', island: 'Grunting Fen', orthos: [8, 8],
+      storylet: 'Knowledge that Seeped into the Water',
+      branch: 'No more peculiar than anything else here',
+      ch: 'Watchful 126', an: 40, cn: 0, tn: 0, gain: 'Touched by Fingerwork +1 CP',
+      fail: 'Nightmares +1 CP — Orthos goes to 9 either way' },
+    { phase: 'island', island: 'Grunting Fen', orthos: [8, 8],
+      storylet: 'The Rarer Artifacts', branch: 'Go searching', strict: true,
+      ch: 'Watchful 127', an: 0, cn: 0, tn: 0,
+      headline: 'Pearls ×200',
+      gain: 'Moon-Pearl 200 x, Jade Fragment 100 x, Shard of Glim 200 x',
+      fail: 'Wounds +1 CP — Orthos goes to 9 either way' },
+
+    { phase: 'island', island: 'Grunting Fen', orthos: [9, 9],
+      storylet: 'Spiritual riches', branch: 'Untapped wealth',
+      ch: null, an: 0, cn: 0, tn: 0,
+      headline: 'Implications ×6', gain: 'Extraordinary Implication 6 x' },
+    { phase: 'island', island: 'Grunting Fen', orthos: [9, 9],
+      storylet: 'Describe Grunting Fen in Theosophistical terms', branch: 'Rich insights',
+      ch: null, an: 0, cn: 0, tn: 150, gain: 'Touched by Fingerwork +1 CP' },
+
+    { phase: 'island', island: 'Grunting Fen', orthos: [10, 10],
+      storylet: 'Orthos Seeks To Take Your Work', branch: 'Time to go', strict: true,
+      ch: null, an: 0, cn: 0, tn: 0, leave: true },
+    { phase: 'island', island: 'Grunting Fen', orthos: [10, 10],
+      storylet: 'Orthos Seeks To Take Your Work', branch: 'Tarry a little', strict: true,
+      ch: 'Luck 70%', an: 0, cn: 0, tn: 0,
+      luck: { odds: 0.7, type: 'tn', win: 20, lose: 15 },
+      fail: 'CN −5, AN −5, TN −5' },
+    { phase: 'island', island: 'Grunting Fen', orthos: [10, 10],
+      storylet: 'Orthos Seeks To Take Your Work', branch: 'Cut it fine', strict: true,
+      ch: 'Luck 30%', an: 0, cn: 0, tn: 0,
+      luck: { odds: 0.3, type: 'tn', win: 40, lose: 15 },
+      fail: 'CN −5, AN −5, TN −5' },
+
+    // === Organise your Research, at Your Lodgings =========================
+    //
+    // These SPEND pages, so their page counts are negative, and the figure that
+    // separates them is the guide's pence per note rather than the total.
+    { phase: 'organise', storylet: 'Organise your Research',
+      branch: 'Collate your cryptopalaeontological work',
+      an: 0, cn: -120, tn: 0, perNote: 6.25, worth: 7.5,
+      gain: 'Volume of Collated Research 3 x, Volume of your Cryptopalaeontological Work' },
+    { phase: 'organise', storylet: 'Organise your Research',
+      branch: 'Collate your prelapsarian archaeological work',
+      an: -120, cn: 0, tn: 0, perNote: 6.25, worth: 7.5,
+      gain: 'Volume of Collated Research 3 x, Volume of your Prelapsarian Archaeological Work' },
+    { phase: 'organise', storylet: 'Organise your Research',
+      branch: 'Collate your research into Theosophistry',
+      an: 0, cn: 0, tn: -120, perNote: 6.25, worth: 7.5,
+      gain: 'Volume of Collated Research 3 x, Volume of your Theosophistical Work' },
+    { phase: 'organise', storylet: 'Organise your Research',
+      branch: 'Speak to professional persons with academic pretensions',
+      an: -500, cn: 0, tn: 0, perNote: 10, worth: 50,
+      gain: 'Uncanny Incunabulum 4 x' },
+    { phase: 'organise', storylet: 'Organise your Research',
+      branch: 'Speak to naturalists, hunters and the breeders of monsters',
+      an: 0, cn: -500, tn: 0, perNote: 10, worth: 50,
+      gain: 'Storm-Threnody 4 x' },
+    { phase: 'organise', storylet: 'Organise your Research',
+      branch: 'Sell your Theosophistical conclusions',
+      an: 0, cn: 0, tn: -500, perNote: 10, worth: 50,
+      gain: 'Extraordinary Implication 5 x, Scrap of Incendiary Gossip 50 x, '
+        + 'Bottle of Broken Giant 1844 5 x, Confident Smile 1 x' },
+    { phase: 'organise', storylet: 'Organise your Research',
+      branch: 'Gather all your work into a library',
+      an: -250, cn: -250, tn: -250, gain: 'Voluminous Library' },
+    { phase: 'organise', storylet: 'Organise your Research',
+      branch: 'Re-establish your academic reputation',
+      an: -500, cn: -500, tn: -500,
+      gain: 'Removes Unwelcome at the University, Connected: Benthic +30 CP, '
+        + 'Connected: Summerset +30 CP' },
+    { phase: 'organise', storylet: 'Organise your Research', branch: 'Breed a beast',
+      an: 0, cn: -500, tn: 0, gain: 'Bifurcated Owl',
+      cost: 'a Hound of Heaven, a Corresponding Ocelot, an Ocular Toadbeast, an '
+        + 'Obdurate Stallion and a Slavering Dream-Hound' },
+    { phase: 'organise', storylet: 'Organise your Research',
+      branch: 'Another round of preliminary research',
+      an: -50, cn: -50, tn: -50, gain: 'Opens Preparatory Research again' },
+  ];
+
+  // --- the three currencies ------------------------------------------------
+  //
+  // Colour is the note TYPE, not an amount, because that is the question these
+  // screens ask: you are on one island for one type, and at every Orthos band
+  // one of the two actions in front of you pays it. Three hues far enough apart
+  // to be told apart at a glance on Fallen London's dark ground, plus two
+  // neutrals for the rows that pay no pages at all.
+  const VSD_NOTES = {
+    an: { key: 'an', tag: 'AN', name: 'Page of Prelapsarian Archaeological Notes', color: '#8a6420' },
+    cn: { key: 'cn', tag: 'CN', name: 'Page of Cryptopalaeontological Notes', color: '#3d6591' },
+    tn: { key: 'tn', tag: 'TN', name: 'Page of Theosophistical Notes', color: '#5f4b8b' },
+  };
+  const VSD_NOTE_KEYS = ['an', 'cn', 'tn'];
+
+  const VSD_COLOR_GOODS = '#4a5560';  // pays no pages: labelled, never scored
+  const VSD_COLOR_LEAVE = '#2f6b3f';  // the free way off the island
+  const VSD_COLOR_SPEND = '#6b6b6b';  // an Organise row with no priced figure
+  const VSD_COLOR_BEST = '#b8912f';   // the best pence-per-note on the Organise screen
+
+  const VSD_CLASS = 'fl-ux-vsd';
+  const VSD_FLAG = 'flUxVsd';
+  const VSD_BRANCH_CLASS = 'fl-ux-vsd-branch';
+  const VSD_BRANCH_FLAG = 'flUxVsdBranch';
+
+  // A Luck row is ranked on its EXPECTED value, the one case where the wiki
+  // gives both outcomes and the odds -- the same rule `zeeTwScore` follows, and
+  // for the same reason. It matters here: "Cut it fine" advertises twice the
+  // pages of "Tarry a little" and is worth a sixth of it once the 70% chance of
+  // losing five of each type is priced in.
+  function vsdLuckValue(luck) {
+    return luck.odds * luck.win - (1 - luck.odds) * luck.lose;
+  }
+
+  // How many pages a row moves, and of which types. Returns null for a row that
+  // moves none -- which is a different claim from zero, and is why the badge
+  // labels those rows rather than printing "+0".
+  function vsdPages(entry) {
+    const moved = VSD_NOTE_KEYS.filter(function (key) { return entry[key]; });
+    if (!moved.length) return null;
+    const total = moved.reduce(function (sum, key) { return sum + entry[key]; }, 0);
+    const same = moved.length === 3
+      && entry.an === entry.cn && entry.cn === entry.tn;
+    return { keys: moved, total: total, all: same, each: same ? entry.an : null };
+  }
+
+  function vsdSigned(n) {
+    return (n > 0 ? '+' : '') + n;
+  }
+
+  // The best pence-per-note the Organise screen offers. Derived, so adding a
+  // row with a better rate re-colours the table rather than lying about it.
+  const VSD_BEST_PER_NOTE = VSD_OPTIONS.reduce(function (best, entry) {
+    return typeof entry.perNote === 'number' && entry.perNote > best ? entry.perNote : best;
+  }, 0);
+
+  function vsdBadgeText(entry) {
+    if (entry.leave) return 'leave';
+    if (entry.luck) {
+      // One decimal, and only where it is not a whole number: "≈+9.5" says
+      // "this is arithmetic, not a promise" better than "+9" would.
+      const ev = vsdLuckValue(entry.luck);
+      const shown = Math.round(ev * 10) / 10;
+      return '≈' + VSD_NOTES[entry.luck.type].tag + ' ' + vsdSigned(shown) + '?';
+    }
+    const pages = vsdPages(entry);
+    if (!pages) return entry.headline || 'no pages';
+    if (pages.all) return 'all ' + vsdSigned(pages.each);
+    if (pages.keys.length === 1) {
+      const key = pages.keys[0];
+      return VSD_NOTES[key].tag + ' ' + vsdSigned(entry[key]);
+    }
+    return vsdSigned(pages.total) + ' pages';
+  }
+
+  function vsdColor(entry) {
+    if (entry.leave) return VSD_COLOR_LEAVE;
+    if (entry.luck) return VSD_NOTES[entry.luck.type].color;
+    const pages = vsdPages(entry);
+    if (!pages) return VSD_COLOR_GOODS;
+    if (entry.phase === 'organise') {
+      return entry.perNote === VSD_BEST_PER_NOTE ? VSD_COLOR_BEST : VSD_COLOR_SPEND;
+    }
+    if (pages.keys.length === 1) return VSD_NOTES[pages.keys[0]].color;
+    // Pays every type at once: no one hue is honest, so it gets the neutral and
+    // the amount carries the meaning.
+    return VSD_COLOR_SPEND;
+  }
+
+  // --- the tooltip ---------------------------------------------------------
+
+  function vsdWhen(entry) {
+    if (entry.phase === 'island') {
+      return entry.island + ' · Orthos is Coming! '
+        + (entry.orthos[0] === entry.orthos[1]
+          ? String(entry.orthos[0]) : entry.orthos[0] + '–' + entry.orthos[1]);
+    }
+    return entry.phase === 'prep' ? 'Preparatory Research, at Your Lodgings'
+      : 'Organise your Research, at Your Lodgings';
+  }
+
+  function vsdPageWords(entry) {
+    const pages = vsdPages(entry);
+    if (!pages) return null;
+    return pages.keys.map(function (key) {
+      return VSD_NOTES[key].name + ' ' + vsdSigned(entry[key]);
+    }).join(', ');
+  }
+
+  function vsdSpec(entry) {
+    const lines = [entry.storylet + ': ' + entry.branch, vsdWhen(entry), ''];
+
+    if (entry.leave) {
+      lines.push('Ends the visit. Nothing gained, nothing risked.');
+    } else if (entry.luck) {
+      const note = VSD_NOTES[entry.luck.type];
+      lines.push('A gamble, and the badge is its EXPECTED value, not the number it '
+        + 'advertises: ' + Math.round(entry.luck.odds * 100) + '% of ' + note.tag + ' +'
+        + entry.luck.win + ', ' + Math.round((1 - entry.luck.odds) * 100) + '% of losing '
+        + '5 of each type.');
+      lines.push('Expected: ' + note.tag + ' ' + vsdSigned(Math.round(vsdLuckValue(entry.luck) * 10) / 10)
+        + ' a page, counting the failure.');
+    } else {
+      const words = vsdPageWords(entry);
+      if (words) lines.push('Pages: ' + words);
+      if (entry.headline && !words) lines.push('No pages. Pays goods instead.');
+    }
+
+    if (entry.gain) lines.push('Gives: ' + entry.gain);
+    if (entry.orElse) lines.push('OR, the game’s choice, not yours: ' + entry.orElse);
+    if (entry.cost) lines.push('Costs: ' + entry.cost);
+    if (entry.needs) lines.push('Needs: ' + entry.needs);
+    if (entry.ch) lines.push('Challenge: ' + entry.ch);
+    if (entry.fail) lines.push('Failure: ' + entry.fail);
+    if (typeof entry.perNote === 'number') {
+      lines.push('Worth about ' + entry.worth + ' Echoes — ' + entry.perNote + ' pence a page'
+        + (entry.perNote === VSD_BEST_PER_NOTE ? ', the best rate on this screen.' : '.'));
+    }
+    if (entry.note) lines.push(entry.note);
+
+    lines.push('');
+    lines.push(entry.phase === 'island'
+      ? 'A visit is ' + VSD_ISLAND_ACTIONS + ' actions if every challenge passes. A failure '
+        + 'still moves Orthos, by 1 change point rather than 2, so it lengthens the visit '
+        + 'rather than ending it. You cannot leave early.'
+      : 'Every Preparatory Research option locks itself out above a page count, so the '
+        + 'order you take them in decides the total.');
+    return { text: vsdBadgeText(entry), color: vsdColor(entry), title: lines.join('\n') };
+  }
+
+  // A storylet holds one or more of these. The badge takes the row that pays
+  // the most pages of the island's own type -- that is what you sailed for --
+  // and the tooltip lists every branch, so the goods row is never hidden.
+  function vsdIslandType(name) {
+    const island = VSD_ISLANDS.find(function (i) { return i.name === name; });
+    return island ? island.pays : null;
+  }
+
+  function bestVsdOption(entries) {
+    const wanted = entries[0].island ? vsdIslandType(entries[0].island) : null;
+    let best = null;
+    let bestScore = -Infinity;
+    for (const entry of entries) {
+      let score;
+      if (entry.leave) score = -1;
+      else if (entry.luck) score = vsdLuckValue(entry.luck);
+      else if (wanted && entry[wanted]) score = entry[wanted];
+      else {
+        const pages = vsdPages(entry);
+        score = pages ? pages.total : 0;
+      }
+      if (score > bestScore) { bestScore = score; best = entry; }
+    }
+    return best || entries[0];
+  }
+
+  function vsdStoryletSpec(entries) {
+    if (entries.length === 1) return vsdSpec(entries[0]);
+    const best = bestVsdOption(entries);
+    const wanted = entries[0].island ? vsdIslandType(entries[0].island) : null;
+    const lines = [entries[0].storylet, vsdWhen(entries[0]), ''];
+    lines.push(entries.length + ' options here:');
+    for (const entry of entries) {
+      const words = vsdPageWords(entry);
+      lines.push('  • ' + entry.branch + ' — '
+        + (entry.leave ? 'ends the visit'
+          : entry.luck ? 'a gamble, expected ' + VSD_NOTES[entry.luck.type].tag + ' '
+            + vsdSigned(Math.round(vsdLuckValue(entry.luck) * 10) / 10)
+          : words || entry.gain || 'no pages')
+        + (entry.ch ? ' [' + entry.ch + ']' : ''));
+    }
+    lines.push('');
+    lines.push(wanted
+      ? 'The badge is the option paying the most ' + VSD_NOTES[wanted].tag
+        + ', which is what this island is for. The others pay goods, and whether that '
+        + 'is worth more to you is not a question this table can answer.'
+      : 'The badge is the option paying the most pages.');
+    lines.push('');
+    lines.push('Open the storylet and every option is badged in its own right.');
+    return { text: vsdBadgeText(best), color: vsdColor(best), title: lines.join('\n') };
+  }
+
+  // --- looking one up ------------------------------------------------------
+  //
+  // The trap here, and it is this feature's whole reason for needing more than
+  // a Map: THE SAME BRANCH NAME IS ON ALL THREE ISLANDS. "Time to go", "Tarry a
+  // little" and "Cut it fine" each appear three times, paying a different note
+  // type on each island, and so does the storylet name "Bullbone Island" /
+  // "Grunting Fen" / "Corpsecage Island", which is also the AREA name. A badge
+  // that guessed which island you were on would quote the wrong currency a
+  // third of the time, so ambiguity is resolved from the page or not at all.
+
+  const VSD_BY_STORYLET = new Map();
+  const VSD_BY_BRANCH = new Map();
+  for (const entry of VSD_OPTIONS) {
+    const sKey = normalizeName(entry.storylet);
+    if (!VSD_BY_STORYLET.has(sKey)) VSD_BY_STORYLET.set(sKey, []);
+    VSD_BY_STORYLET.get(sKey).push(entry);
+    const bKey = normalizeName(entry.branch);
+    if (!VSD_BY_BRANCH.has(bKey)) VSD_BY_BRANCH.set(bKey, []);
+    VSD_BY_BRANCH.get(bKey).push(entry);
+  }
+
+  // Where are we? The greeting first, then the storylet heading on screen --
+  // an opened storylet named after an island is as good as the greeting, and
+  // it is there on the very screen the branches are.
+  function vsdIslandHere() {
+    const area = normalizeName(currentArea());
+    for (const island of VSD_ISLANDS) {
+      if (area === normalizeName(island.name)) return island.name;
+    }
+    const heads = document.querySelectorAll('.storylet-root__heading');
+    for (const head of heads) {
+      const rows = VSD_BY_STORYLET.get(normalizeName(headingName(head)));
+      if (rows && rows.length && rows[0].island) return rows[0].island;
+    }
+    return null;
+  }
+
+  // Narrow a set of same-named rows down to one. Returns null rather than
+  // guessing -- a badge that names the wrong island's currency is worse than
+  // no badge.
+  function vsdDisambiguate(rows, island) {
+    if (rows.length === 1) return rows[0];
+    if (!island) return null;
+    const here = rows.filter(function (r) { return r.island === island; });
+    return here.length === 1 ? here[0] : null;
+  }
+
+  function lookupVsdBranch(name, island) {
+    const rows = VSD_BY_BRANCH.get(normalizeName(name));
+    return rows ? vsdDisambiguate(rows, island) : null;
+  }
+
+  // A storylet's rows, all of them, for the one island we are on.
+  function lookupVsdStorylet(name, island) {
+    const rows = VSD_BY_STORYLET.get(normalizeName(name));
+    if (!rows) return null;
+    const islands = new Set(rows.map(function (r) { return r.island; }));
+    if (islands.size <= 1) return rows;
+    if (!island) return null;
+    const here = rows.filter(function (r) { return r.island === island; });
+    return here.length ? here : null;
+  }
+
+  // --- the area gate -------------------------------------------------------
+  //
+  // Confirm-only, like ZEE_AREAS and PC_AREAS: nobody has captured a greeting
+  // on any of the three islands, so these names are a GUESS taken from the
+  // wiki's own page titles. It may say "yes" and must never say "no".
+  const VSD_AREAS = VSD_ISLANDS.map(function (i) { return normalizeName(i.name); });
+
+  function inVsdIsland() {
+    const area = normalizeName(currentArea());
+    return !!area && VSD_AREAS.indexOf(area) !== -1;
+  }
+
+  // `strict` is for one thing only: a BRANCH NAME that is an ordinary English
+  // phrase and could title an option anywhere in London -- "Time to go",
+  // "Looking up", "Making money", "Search the island", "Do a survey", "Catch
+  // some", "Go searching", "See what you can dig up", "Tarry a little", "Cut it
+  // fine". Those wait until the greeting or an opened storylet confirms one of
+  // the three islands.
+  //
+  // It is deliberately NOT on the rest, including the branches of the storylets
+  // named after their islands. Those names ("The bones of Bullbone", "The
+  // Corpsecage bat") are phrases the wiki shows here and nowhere else, and
+  // spreading `strict` to them would black the feature out on the storylet
+  // LIST -- where no storylet is open to resolve the island and the greeting is
+  // an unverified guess, which is exactly where the badges are most use.
+  // A STORYLET heading needs its own list rather than "any of my branches is
+  // strict". Deriving it from the branches would gate "Sparkling around the
+  // Copse" on the one ordinary option inside it, which is the over-strictness
+  // this is meant to avoid. Four storylet names earn it: the three that are
+  // also the ISLAND's name, where the heading is indistinguishable from the
+  // place, and "Up the Hill".
+  const VSD_STRICT_STORYLETS = [
+    'Bullbone Island', 'Corpsecage Island', 'Grunting Fen', 'Up the Hill',
+  ].map(normalizeName);
+
+  const VSD_STORYLET_SELECTOR = '.storylet__heading, .storylet-root__heading';
+  const VSD_BRANCH_SELECTOR = '.branch__title';
+
+  function vsdRatings() {
+    const island = vsdIslandHere();
+    const confirmed = !!island || inVsdIsland();
+
+    document.querySelectorAll(VSD_STORYLET_SELECTOR).forEach(function (head) {
+      const name = headingName(head);
+      const entries = name ? lookupVsdStorylet(name, island) : null;
+      const strict = !!entries
+        && VSD_STRICT_STORYLETS.indexOf(normalizeName(entries[0].storylet)) !== -1;
+      attachBadge(head, {
+        cls: VSD_CLASS,
+        flag: VSD_FLAG,
+        // The island is in the flag as well as the name: the same storylet
+        // heading on two different islands is two different badges.
+        value: name + '@' + (island || '-'),
+        spec: entries && (confirmed || !strict) ? vsdStoryletSpec(entries) : null,
+        place: 'after',
+      });
+    });
+
+    document.querySelectorAll(VSD_BRANCH_SELECTOR).forEach(function (head) {
+      const name = headingName(head);
+      const entry = name ? lookupVsdBranch(name, island) : null;
+      attachBadge(head, {
+        cls: VSD_BRANCH_CLASS,
+        flag: VSD_BRANCH_FLAG,
+        value: name + '@' + (island || '-'),
+        spec: entry && (confirmed || !entry.strict) ? vsdSpec(entry) : null,
+        place: 'after',
+      });
+    });
+  }
+
+  // === panel: zailing ====================================================
+  //
+  // The reference half of the zailing work: the numbers that decide a voyage
+  // before any single card does -- how much Zailing... a route needs, what Zee
+  // Peril each region sets every broad challenge to, which menace turns
+  // Troubled Waters 7 into which black card, and where the nearest reset is --
+  // plus the whole card table the badges are drawn from, searchable.
+  //
+  // It opens with whatever zee cards are on screen right now, ranked, because
+  // that is the question you actually have while the panel is open.
+
+  function zeeHandRows() {
+    const seen = new Map();
+    eachCardName(function (host, name) {
+      const card = zeeCardFor(name);
+      if (card && !seen.has(card.name)) seen.set(card.name, card);
+    });
+    const cards = Array.from(seen.values());
+    cards.sort(function (a, b) {
+      // Urgent first: they are dealt before everything else anyway, so a hand
+      // holding one is really a hand of one.
+      if (!!a.urgent !== !!b.urgent) return a.urgent ? -1 : 1;
+      const la = bestZeeLine(a), lb = bestZeeLine(b);
+      if (!la || !lb) return la ? -1 : 1;
+      // Same order the badge is chosen in: cheapest first, faster to break a tie.
+      const dt = zeeTwScore(la.opt) - zeeTwScore(lb.opt);
+      if (dt) return dt;
+      return zeeProgScore(lb.opt.prog) - zeeProgScore(la.opt.prog);
+    });
+    return cards;
+  }
+
+  function zeeBadgeNode(card) {
+    return makeBadge(zeeBadgeSpec(card), ZEE_CLASS);
+  }
+
+  // What a port is called on the zee map. `name` is the wiki page, which is
+  // not always what Fallen London puts on the destination -- the governor's
+  // seat is the page "Heartscross House" and the destination "Port Carnelian".
+  function zeePortLabel(port) {
+    return port.as || port.name;
+  }
+
+  // The three claims kept apart: a reset, a dock that is not one, and a place
+  // that is not a dock at all. A blank cell would read as the second.
+  function zeePortSafeCell(port) {
+    if (port.safe === null) {
+      return h('span', { css: 'color:' + UI.dim + ';', title: 'Not a dock — nothing to reset.' }, ['not a dock']);
+    }
+    return port.safe
+      ? h('span', { css: 'color:#7fae92;font-weight:bold;', title: 'Docking here wipes Troubled Waters and every zee-threat.' }, ['✔ safe'])
+      : h('span', { css: 'color:#c98a8a;', title: 'A dock, but arriving resets nothing.' }, ['✘']);
+  }
+
+  function zeePortRow(port) {
+    const row = h('tr', null, [
+      h('td', { css: TD }, [
+        h('div', null, [
+          wikiLink(port.name, zeePortLabel(port)),
+          port.fate ? h('span', { css: 'color:#8a6b3b;margin-left:5px;', title: 'Fate-locked.' }, ['Fate']) : null,
+          port.once ? h('span', { css: 'color:' + UI.dim + ';margin-left:5px;', title: 'A one-time destination, sailed to for a storyline rather than visited.' }, ['once']) : null,
+        ]),
+      ]),
+      h('td', { css: TD + 'white-space:nowrap;' }, [zeePortSafeCell(port)]),
+      h('td', { css: TD + 'color:' + UI.dim + ';' }, [
+        h('div', { css: 'color:' + UI.text + ';' }, [port.unlock || 'nothing — it is there from the start']),
+        port.how ? h('div', { css: 'font-size:11px;' }, [port.how]) : null,
+        port.note ? h('div', { css: 'font-size:11px;' }, [port.note]) : null,
+      ]),
+    ]);
+    row.dataset.zeePort = zeePortLabel(port);
+    return row;
+  }
+
+  function zeeCardRow(card) {
+    const best = bestZeeLine(card);
+    const opt = best && best.opt;
+    const row = h('tr', null, [
+      h('td', { css: TD + 'white-space:nowrap;' }, [
+        wikiLink(card.name, card.name),
+        card.urgent ? h('span', { css: 'color:#7fae92;margin-left:5px;', title: 'A black card: urgent, so it is dealt before every other zee card.' }, ['urgent']) : null,
+      ]),
+      h('td', { css: TD + 'text-align:center;' }, [zeeBadgeNode(card)]),
+      h('td', { css: TD + 'color:' + UI.dim + ';' }, [
+        opt ? h('div', null, [
+          h('span', { css: 'color:' + UI.text + ';' }, [opt.text]),
+          ' — ' + zeeTwWord(opt) + ', ' + zeeSpeedWord(opt.prog) + (opt.ch ? ' (' + opt.ch + ')' : ''),
+        ]) : null,
+        best && best.gated ? h('div', { css: 'color:#8a6b3b;' }, ['Every line here is gated on something.']) : null,
+        card.note ? h('div', null, [card.note]) : null,
+      ]),
+    ]);
+    // The search box filters on this rather than on textContent, so a term can
+    // match an option you can't see in the collapsed row.
+    row.dataset.zeeSearch = (card.name + ' ' + card.where.join(' ') + ' ' + (card.note || '') + ' '
+      + card.opts.map(function (o) { return o.text + ' ' + (o.need || '') + ' ' + (o.gain || ''); }).join(' ')).toLowerCase();
+    return row;
+  }
+
+  function renderZailingPanel() {
+    const hand = zeeHandRows();
+
+    const section = function (title, children) {
+      return h('div', { css: 'margin-top:14px;' }, [
+        h('div', {
+          css: 'font:bold 11px ' + UI.font + ';letter-spacing:.06em;text-transform:uppercase;'
+            + 'color:' + UI.accent + ';margin-bottom:5px;',
+        }, [title]),
+        children,
+      ]);
+    };
+    const table = function (heads, rows) {
+      return h('table', { css: 'width:100%;border-collapse:collapse;' }, [
+        h('thead', null, [h('tr', null, heads.map(function (head) {
+          return h('th', { css: TH + (head.right ? 'text-align:right;' : ''), title: head.title || '' }, [head.text]);
+        }))]),
+        h('tbody', null, rows),
+      ]);
+    };
+
+    // --- the hand ---------------------------------------------------------
+    const handBlock = hand.length
+      ? h('div', {
+          css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent
+            + ';background:' + UI.bgAlt + ';font-size:12px;line-height:1.6;',
+        }, [
+          h('div', { css: 'color:' + UI.accent + ';font-weight:bold;' }, [
+            hand.length === 1 ? '1 zee card on screen' : hand.length + ' zee cards on screen',
+            h('span', { css: 'color:' + UI.dim + ';font-weight:normal;' }, [' — best first']),
+          ]),
+          hand.map(function (card) {
+            const best = bestZeeLine(card);
+            return h('div', null, [
+              zeeBadgeNode(card),
+              h('span', { css: 'margin-left:6px;' }, [card.name]),
+              best ? h('span', { css: 'color:' + UI.dim + ';' },
+                [' — ' + best.opt.text + ' (' + zeeTwWord(best.opt) + ', ' + zeeSpeedWord(best.opt.prog) + ')']) : null,
+            ]);
+          }),
+        ])
+      : h('div', {
+          css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.line
+            + ';background:' + UI.bgAlt + ';color:' + UI.dim + ';font-size:12px;line-height:1.5;',
+        }, ['No zee cards on screen. Everything below is reference material for when there are.']);
+
+    // --- the ports, region by region --------------------------------------
+    // In ZEE_REGIONS order, which is the order the regions were listed in
+    // above, so the two tables read the same way down the page. A port in
+    // several regions (only the lifebergs) is listed under each of them.
+    const portRows = [];
+    for (const region of ZEE_REGIONS) {
+      const here = ZEE_PORTS.filter(function (p) { return p.regions.indexOf(region.name) !== -1; });
+      if (!here.length) continue;
+      portRows.push(h('tr', null, [h('td', {
+        colSpan: 3,
+        css: 'padding:8px 8px 3px;font:bold 11px ' + UI.font + ';letter-spacing:.05em;'
+          + 'text-transform:uppercase;color:' + UI.dim + ';border-bottom:1px solid ' + UI.line + ';',
+      }, [region.name])]));
+      for (const port of here) portRows.push(zeePortRow(port));
+    }
+
+    // --- the searchable card table ---------------------------------------
+    const REGION_ORDER = ['any', 'Home Waters', "Shepherd's Wash", 'The Sea of Voices',
+      'The Salt Steppe', 'The Pillared Sea', 'Stormbones', 'The Snares'];
+    const REGION_TITLE = { any: 'Drawn anywhere at zee' };
+    const cardRows = [];
+    for (const region of REGION_ORDER) {
+      const inRegion = ZEE_CARDS.filter(function (c) {
+        return c.where.indexOf(region) !== -1 && (region === 'any' || c.where.indexOf('any') === -1);
+      });
+      if (!inRegion.length) continue;
+      const header = h('tr', null, [h('td', {
+        colSpan: 3,
+        css: 'padding:8px 8px 3px;font:bold 11px ' + UI.font + ';letter-spacing:.05em;'
+          + 'text-transform:uppercase;color:' + UI.dim + ';border-bottom:1px solid ' + UI.line + ';',
+      }, [REGION_TITLE[region] || region])]);
+      header.dataset.zeeGroup = '1';
+      cardRows.push(header);
+      for (const card of inRegion) cardRows.push(zeeCardRow(card));
+    }
+
+    const search = h('input', {
+      type: 'text',
+      placeholder: 'filter cards, options, requirements…',
+      css: 'flex:1;min-width:140px;box-sizing:border-box;padding:3px 7px;background:' + UI.bgAlt
+        + ';color:' + UI.text + ';border:1px solid ' + UI.line + ';border-radius:3px;font:12px ' + UI.font + ';',
+      on: {
+        input: function (e) {
+          const term = String(e.currentTarget.value || '').trim().toLowerCase();
+          for (const row of cardRows) {
+            if (row.dataset.zeeGroup) continue;
+            row.hidden = !!term && row.dataset.zeeSearch.indexOf(term) === -1;
+          }
+          // A region heading with nothing left under it is just noise.
+          let group = null, shown = 0;
+          for (const row of cardRows) {
+            if (row.dataset.zeeGroup) {
+              if (group) group.hidden = shown === 0;
+              group = row; shown = 0;
+            } else if (!row.hidden) shown++;
+          }
+          if (group) group.hidden = shown === 0;
+        },
+      },
+    });
+
+    return h('div', { css: 'padding:0 12px 12px;' }, [
+      handBlock,
+
+      section('Getting there', h('div', null, [
+        table([
+          { text: 'Route' },
+          { text: 'Zailing…', right: true, title: 'How much Zailing... the leg needs.' },
+          { text: 'Tramp Steamer', right: true, title: 'Rusty Tramp Steamer, Zailing Speed 45.' },
+          { text: 'Most ships', right: true, title: 'Zailing Speed 55.' },
+          { text: 'Zee-Clipper', right: true, title: 'Swift Zee-Clipper or Ogedei-class Liner, Zailing Speed 75.' },
+        ], ZEE_ROUTES.map(function (r) {
+          return h('tr', null, [
+            h('td', { css: TD }, [
+              h('div', { css: 'color:' + UI.text + ';' }, [r.name]),
+              h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [r.of]),
+            ]),
+            h('td', { css: TD + 'text-align:right;' }, [String(r.need)]),
+            h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' }, [r.tramp]),
+            h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' }, [r.other]),
+            h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' }, [r.clipper]),
+          ]);
+        })),
+        h('div', { css: 'margin-top:5px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+          'Actions are the guide’s averages. Crossing a region gives a Zee Leg; only the last '
+          + 'leg, inside your destination’s own region, is the 80.',
+        ]),
+      ])),
+
+      section('Where you are', h('div', null, [
+        table([
+          { text: 'Region' },
+          { text: 'Zee Peril', right: true, title: 'Every broad challenge out there — Watchful, Shadowy, Dangerous, Persuasive — is set to this.' },
+          { text: 'Narrow', right: true, title: 'What a skill challenge scales to. The non-piracy Zeefaring checks do not scale at all.' },
+          { text: '' },
+        ], ZEE_REGIONS.map(function (r) {
+          return h('tr', null, [
+            h('td', { css: TD }, [wikiLink(r.name, r.name)]),
+            h('td', { css: TD + 'text-align:right;' }, [String(r.peril)]),
+            h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' }, [String(r.narrow)]),
+            h('td', { css: TD + 'color:' + UI.dim + ';' }, [r.note]),
+          ]);
+        })),
+      ])),
+
+      section('Troubled Waters', h('div', null, [
+        h('div', { css: 'color:' + UI.dim + ';font-size:12px;line-height:1.6;' }, [
+          h('div', null, ['1–5 Calm Seas · 6–7 Lashing Waves · ',
+            h('span', { css: 'color:#c98a8a;' }, ['8 is a Demise at Zee']),
+            ' — it kills you or drives you mad, and it takes precedence over arriving.']),
+          h('div', null, ['Docking somewhere safe wipes it, and every zee-threat with it. Wounds and Nightmares stay.']),
+          h('div', null, ['At 7 you start drawing black cards — one per zee-threat you are carrying. '
+            + 'They are urgent, so with two of them your hand holds nothing else.']),
+        ]),
+        h('div', { css: 'margin-top:8px;' }, [table([
+          { text: 'Zee-threat' }, { text: 'Comes from' }, { text: 'Its black card at Troubled Waters 7' },
+        ], ZEE_MENACES.map(function (m) {
+          return h('tr', null, [
+            h('td', { css: TD }, [wikiLink(m.name, m.name)]),
+            h('td', { css: TD + 'color:' + UI.dim + ';' }, [m.from]),
+            h('td', { css: TD }, [wikiLink(m.card, m.card)]),
+          ]);
+        }))]),
+      ])),
+
+      section('Ports', h('div', null, [
+        h('div', { css: 'color:' + UI.dim + ';font-size:12px;line-height:1.6;margin-bottom:6px;' },
+          ZEE_REGIONS.map(function (r) {
+            const safe = ZEE_PORTS.filter(function (p) {
+              return p.safe === true && p.regions.indexOf(r.name) !== -1;
+            });
+            return h('div', null, [
+              h('span', { css: 'color:' + UI.text + ';' }, [r.name + ': ']),
+              safe.length
+                ? safe.map(function (p) { return zeePortLabel(p); }).join(' · ')
+                : h('span', { css: 'color:#c98a8a;' }, ['no safe dock at all']),
+            ]);
+          })),
+        table([
+          { text: 'Port' },
+          { text: 'Safe?', title: 'Docking at a safe port wipes Troubled Waters and every zee-threat. Wounds and Nightmares stay.' },
+          { text: 'What it takes' },
+        ], portRows),
+        h('div', { css: 'margin-top:5px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+          h('div', null, ['Being a port is not the same as being safe — Port Cecil, Godfall, Irem, '
+            + 'Gaider’s Mourn and Tanah-Chook are all ports and none of them resets anything.']),
+          h('div', null, ['The hunting grounds are not docks at all, so they reset nothing either. '
+            + 'One-time destinations are marked; you sail to those once, for a storyline.']),
+        ]),
+      ])),
+
+      section('The winds', h('div', null, [
+        table([{ text: 'Wind' }, { text: 'First found' }, { text: 'On the card' }, { text: 'Dream it starts in London' }],
+          ZEE_WINDS.map(function (w) {
+            return h('tr', null, [
+              h('td', { css: TD }, [wikiLink(w.name, w.name)]),
+              h('td', { css: TD + 'color:' + UI.dim + ';' }, [w.where]),
+              h('td', { css: TD }, [wikiLink(w.card, w.card)]),
+              h('td', { css: TD + 'color:' + UI.dim + ';' }, [
+                h('div', null, [wikiLink('Having Recurring Dreams: ' + w.dream, w.dream)]),
+                h('div', { css: 'font-size:11px;' }, [w.cost]),
+              ]),
+            ]);
+          })),
+        h('div', { css: 'margin-top:5px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+          'A finished dream storyline pays an Oneiric Pearl and resets. Winds survive docking.',
+        ]),
+      ])),
+
+      section('Every zee card', h('div', null, [
+        h('div', { css: 'display:flex;align-items:center;gap:8px;margin-bottom:6px;' }, [search]),
+        table([{ text: 'Card' }, { text: '' }, { text: 'Best line with nothing special in hand' }], cardRows),
+      ])),
+
+      h('div', { css: 'margin-top:12px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+        h('div', null, ['The badge is the Troubled Waters cost, in change points, of the best line you '
+          + 'can take with nothing special in hand. ',
+          h('b', null, ['?']), ' means that is a challenge’s success value; ',
+          h('b', null, ['½']), ' that the line only makes half progress; ',
+          h('b', null, ['·']), ' that it makes none; ',
+          h('b', null, ['★']), ' the one line that hands you a flat 80; ',
+          h('b', null, [ZEE_GATED_MARK]), ' that a cheaper line exists behind an item, a quality or piracy.']),
+        h('div', null, ['Options behind an item or a quality are in the tooltip but never in the badge, '
+          + 'and piracy lines (Corsair’s Colours, a bounty) are left out of it too.']),
+        h('div', { css: 'margin-top:6px;' }, ['Data from ',
+          wikiLink('Zailing (Guide)', 'Zailing (Guide)'), ' and the individual card pages on the Fallen London wiki.']),
+      ]),
+    ]);
+  }
+
+  // === panel: Port Carnelian =============================================
+  //
+  // The reference half of the governorship: how to get there at all, the rules
+  // a term is played by, every option the guide records grouped by the clock,
+  // what the two currencies cash in for and where the rounding steps are.
+  //
+  // Unlike the Zailing panel there is no "your hand, ranked" block at the top:
+  // Port Carnelian deals no opportunity cards, so what is in front of you is
+  // the storylet list itself -- which is already badged.
+
+  const PC_TIME_GROUPS = [
+    { key: '1-11', label: 'Time Passing in Office 1–11 — always on offer' },
+    { key: '1-10', label: 'Time Passing in Office 1–10' },
+    { key: '1-6', label: 'Time Passing in Office 1–6 — the first half' },
+    { key: '7-10', label: 'Time Passing in Office 7–10 — the second half' },
+    { key: '11-11', label: 'Time Passing in Office 11 — the last working action' },
+    { key: '12-12', label: 'Time Passing in Office 12 — the endings' },
+  ];
+
+  // One row of the table is one ROW of the guide, so a storylet the guide
+  // splits in two gets a line and a badge each -- which is the same thing the
+  // in-game branch badges do, and the reason this is not `pcStoryletSpec` for
+  // everything.
+  function pcBadgeNode(entry, purse) {
+    return makeBadge(
+      entry.branch ? pcBranchSpec(entry, purse) : pcStoryletSpec([entry], purse), PC_CLASS);
+  }
+
+  function pcOptionRow(entry, purse) {
+    const row = h('tr', null, [
+      h('td', { css: TD }, [
+        h('div', null, [wikiLink(entry.name, entry.name)]),
+        entry.branch
+          ? h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, ['→ ' + entry.branch])
+          : null,
+        entry.needs
+          ? h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, ['needs ' + entry.needs])
+          : null,
+      ]),
+      h('td', { css: TD + 'white-space:nowrap;color:' + UI.dim + ';' },
+        [entry.airs ? pcRange(entry.airs) : 'any']),
+      h('td', { css: TD + 'text-align:center;' }, [pcBadgeNode(entry, purse)]),
+      h('td', { css: TD + 'color:' + UI.dim + ';' }, [
+        h('div', { css: 'color:' + UI.text + ';' }, [pcChangeWords(entry)]),
+        entry.note ? h('div', { css: 'font-size:11px;' }, [entry.note]) : null,
+      ]),
+    ]);
+    // Filtered on this rather than on textContent, so a term can match a
+    // requirement or a note the collapsed row does not spell out.
+    row.dataset.pcSearch = (entry.name + ' ' + (entry.branch || '') + ' '
+      + (entry.needs || '') + ' ' + (entry.note || '') + ' ' + pcChangeWords(entry)).toLowerCase();
+    return row;
+  }
+
+  function renderPortCarnelianPanel(ctx) {
+    // The one live thing in this panel. Everything else here is the guide; the
+    // purse is your own numbers, off the Myself tab, and the four endings are
+    // priced against it. Same refresh rule as the festival panel: if the
+    // reading is stale and auto-refresh is on, boot /myself in a hidden frame
+    // and redraw when it lands.
+    const purse = pcPurse();
+    const cashouts = pcCashoutAll(purse);
+    let busy = false;
+    if (ctx && autoRefreshEnabled() && (!purse || purse.stale)) {
+      busy = true;
+      refreshBackgroundState().then(function () { ctx.rerender(); });
+    }
+
+    const section = function (title, children) {
+      return h('div', { css: 'margin-top:14px;' }, [
+        h('div', {
+          css: 'font:bold 11px ' + UI.font + ';letter-spacing:.06em;text-transform:uppercase;'
+            + 'color:' + UI.accent + ';margin-bottom:5px;',
+        }, [title]),
+        children,
+      ]);
+    };
+    const table = function (heads, rows) {
+      return h('table', { css: 'width:100%;border-collapse:collapse;' }, [
+        h('thead', null, [h('tr', null, heads.map(function (head) {
+          return h('th', { css: TH + (head.right ? 'text-align:right;' : ''), title: head.title || '' }, [head.text]);
+        }))]),
+        h('tbody', null, rows),
+      ]);
+    };
+
+    // --- the rules, up top where they belong -------------------------------
+    const rules = h('div', {
+      css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent
+        + ';background:' + UI.bgAlt + ';font-size:12px;line-height:1.6;',
+    }, [
+      h('div', { css: 'color:' + UI.accent + ';font-weight:bold;' },
+        ['A term is ' + PC_TERM_ACTIONS + ' actions']),
+      h('div', null, ['Raise ', wikiLink('Striped Delights', 'Striped Delights'), ' or ',
+        wikiLink('Silver Horseheads', 'Silver Horseheads'),
+        ' as high as you can, then cash ONE of them in at Time 12.']),
+      h('div', null, [
+        h('span', { css: 'color:#c98a8a;' }, ['Never let ']),
+        wikiLink('Imperial Legitimacy', 'Imperial Legitimacy'),
+        h('span', { css: 'color:#c98a8a;' }, [' reach 0']),
+        ' — the only option left is “The sword falls”, you are sent back to zee with '
+        + 'nothing, and getting it back means raising Working toward a Foreign Posting to 7 '
+        + 'at the Foreign Office all over again. Legitimacy carries over between terms; '
+        + 'the two currencies do not.',
+      ]),
+      h('div', null, [wikiLink('The Airs of Port Carnelian', 'The Airs of Port Carnelian'),
+        ' is re-rolled every single action, so which options you are offered is read off '
+        + 'the screen, not planned. There are no opportunity cards here.']),
+    ]);
+
+    // --- every option, grouped by the clock --------------------------------
+    const optionRows = [];
+    for (const group of PC_TIME_GROUPS) {
+      const inGroup = PC_OPTIONS.filter(function (e) { return e.time.join('-') === group.key; });
+      if (!inGroup.length) continue;
+      const header = h('tr', null, [h('td', {
+        colSpan: 4,
+        css: 'padding:8px 8px 3px;font:bold 11px ' + UI.font + ';letter-spacing:.05em;'
+          + 'text-transform:uppercase;color:' + UI.dim + ';border-bottom:1px solid ' + UI.line + ';',
+      }, [group.label])]);
+      header.dataset.pcGroup = '1';
+      optionRows.push(header);
+      for (const entry of inGroup) optionRows.push(pcOptionRow(entry, purse));
+    }
+
+    const search = h('input', {
+      type: 'text',
+      placeholder: 'filter options, requirements, rewards…',
+      css: 'flex:1;min-width:140px;box-sizing:border-box;padding:3px 7px;background:' + UI.bgAlt
+        + ';color:' + UI.text + ';border:1px solid ' + UI.line + ';border-radius:3px;font:12px ' + UI.font + ';',
+      on: {
+        input: function (e) {
+          const term = String(e.currentTarget.value || '').trim().toLowerCase();
+          for (const row of optionRows) {
+            if (row.dataset.pcGroup) continue;
+            row.hidden = !!term && row.dataset.pcSearch.indexOf(term) === -1;
+          }
+          let group = null, shown = 0;
+          for (const row of optionRows) {
+            if (row.dataset.pcGroup) {
+              if (group) group.hidden = shown === 0;
+              group = row; shown = 0;
+            } else if (!row.hidden) shown++;
+          }
+          if (group) group.hidden = shown === 0;
+        },
+      },
+    });
+
+    // --- what your term is worth right now --------------------------------
+    //
+    // The four endings priced against the purse. The best one is marked with a
+    // WORD as well as the accent colour, because a colour is not a claim this
+    // reader can always read; and an ending whose figure cannot be worked out
+    // shows a dash rather than a zero, since "no Delights" and "your Delights
+    // have not been read" are different answers.
+    const cashFigure = function (cash) {
+      return cash.echo == null ? '–' : pcEchoText(cash.echo);
+    };
+    const bestCash = pcBestCashout(cashouts);
+    const purseStat = function (label, value, title) {
+      return h('div', { title: title || '', css: 'min-width:92px;' }, [
+        h('div', {
+          css: 'color:' + UI.dim + ';font-size:10px;letter-spacing:.05em;text-transform:uppercase;',
+        }, [label]),
+        h('div', { css: 'color:' + UI.text + ';font:bold 15px ' + UI.font + ';' },
+          [value == null ? '–' : String(value)]),
+      ]);
+    };
+    const cashItemLine = function (row) {
+      return h('div', null, [
+        h('span', { css: 'color:' + UI.text + ';' },
+          [(row.count == null ? '?' : row.count) + ' × ' + row.name]),
+        row.favour ? h('span', {
+          title: 'A faction Favour: a story quality capped at ' + PC_SOCIETY_CAP
+            + ', which you cannot sell. Priced at 0 Echoes here.',
+          css: 'color:' + UI.accent + ';',
+        }, [' ' + PC_FAVOUR_MARK]) : null,
+        row.each ? h('span', { css: 'color:' + UI.dim + ';' },
+          [' (' + pcEchoText(row.each) + ' each)']) : null,
+        row.needs ? h('div', { css: 'font-size:11px;' },
+          ['needs ' + row.needs.quality + ' ' + row.needs.atLeast]) : null,
+        row.capped ? h('div', { css: 'font-size:11px;color:#e0a24a;' },
+          ['you are at the cap of ' + PC_SOCIETY_CAP + ', so this one is not given']) : null,
+      ]);
+    };
+    const cashRow = function (cash) {
+      const best = cash === bestCash;
+      return h('tr', null, [
+        h('td', { css: TD }, [
+          h('div', null, [wikiLink(cash.name, cash.name)]),
+          h('div', { css: 'font-size:11px;color:' + UI.dim + ';' }, [
+            cash.currency
+              ? (cash.have == null ? 'your ' + cash.currency + ' has not been read'
+                : cash.currency + ' ' + cash.have)
+              : 'spends both purses, pays a fixed reward',
+          ]),
+          best ? h('div', { css: 'font-size:11px;color:' + UI.accent + ';font-weight:bold;' },
+            ['★ best right now']) : null,
+        ]),
+        h('td', { css: TD + 'color:' + UI.dim + ';font-size:12px;' },
+          cash.items.map(cashItemLine)),
+        h('td', { css: TD + 'text-align:right;white-space:nowrap;'
+          + (best ? 'color:' + UI.accent + ';font-weight:bold;' : '') }, [
+          h('div', null, [cashFigure(cash)]),
+          cash.next ? h('div', { css: 'font-size:11px;font-weight:normal;color:' + UI.dim + ';' },
+            ['next at ' + cash.next.at + ' (+' + cash.next.more + ') — '
+              + pcEchoText(cash.next.echo)]) : null,
+        ]),
+      ]);
+    };
+
+    const cashOutNow = h('div', null, [
+      h('div', {
+        css: 'display:flex;flex-wrap:wrap;gap:10px 18px;margin-bottom:8px;',
+      }, [
+        purseStat('Striped Delights', purse && purse.sd, 'Cashed in at An audience with the Banded Prince.'),
+        purseStat('Silver Horseheads', purse && purse.sh, 'Cashed in at An equine festival.'),
+        purseStat('Legitimacy', purse && purse.legitimacy,
+          'Imperial Legitimacy. At 0 the term ends at once with no rewards.'),
+        purseStat('Time in office', purse && purse.time,
+          'Time Passing in Office. The endings are offered at 12.'),
+        purseStat('Society favours',
+          purse && purse.society == null ? null
+            : (purse ? purse.society + '/' + PC_SOCIETY_CAP : null),
+          'Honoured with a State Dinner pays a Society favour only while this is under '
+            + PC_SOCIETY_CAP + '.'),
+      ]),
+      table([
+        { text: 'Ending' },
+        { text: 'Pays' },
+        { text: 'Echoes', right: true, title: 'Faction Favours and Tribute count as 0 — '
+          + 'story qualities, not items, and nothing sells them. A Favour in High Places is an '
+          + 'ordinary item and is priced like one.' },
+      ], cashouts.map(cashRow)),
+      h('div', { css: 'margin-top:6px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+        purse && purse.partial
+          ? h('div', null, ['The Myself tab was filtered when this was read, so a figure '
+            + 'missing from it is not a zero — clear that search box and refresh.'])
+          : null,
+        h('div', { css: 'display:flex;align-items:center;gap:8px;flex-wrap:wrap;' }, [
+          h('span', null, [purse
+            ? ('Your numbers: ' + (purse.live ? 'live' : ageText(purse.at))
+              + (purse.stale ? ' — every action of a term moves both currencies' : ''))
+            : 'Your numbers have never been read.']),
+          h('button', {
+            type: 'button',
+            disabled: busy,
+            title: 'Load /myself in a hidden frame and re-read it.',
+            css: 'border:1px solid ' + UI.line + ';border-radius:3px;background:transparent;color:'
+              + (busy ? UI.dim : UI.accent) + ';font:11px ' + UI.font + ';padding:1px 7px;'
+              + 'cursor:' + (busy ? 'default' : 'pointer') + ';',
+            on: {
+              click: function () {
+                if (busy || !ctx) return;
+                busy = true;
+                ctx.rerender();
+                refreshBackgroundState().then(function () { ctx.rerender(); });
+              },
+            },
+          }, [busy ? 'Refreshing…' : 'Refresh']),
+          h('label', {
+            title: 'Refresh automatically when this panel opens on stale numbers.',
+            css: 'display:inline-flex;align-items:center;gap:4px;cursor:pointer;',
+          }, [
+            h('input', {
+              type: 'checkbox',
+              checked: autoRefreshEnabled(),
+              on: { change: function (e) { setAutoRefresh(!!e.currentTarget.checked); } },
+            }),
+            'auto',
+          ]),
+        ]),
+      ]),
+    ]);
+
+    return h('div', { css: 'padding:0 12px 12px;' }, [
+      rules,
+
+      section('Cash out now', cashOutNow),
+
+      section('Getting there', h('div', { css: 'color:' + UI.dim + ';font-size:12px;line-height:1.7;' }, [
+        h('div', null, ['1. Be ', wikiLink('Banished from the Court', 'Banished from the Court'),
+          ' — the end of the Court storyline, after the Tomb-Colonies.']),
+        h('div', null, ['2. Raise ',
+          wikiLink('Working toward a Foreign Posting', 'Working toward a Foreign Posting'),
+          ' to 7 at ', wikiLink('The Foreign Office', 'The Foreign Office'), ', then take ',
+          wikiLink('The Manifestation of Promise', 'The Manifestation of Promise'), '.']),
+        h('div', null, ['3. Put to zee from ', wikiLink('Wolfstack Docks', 'Wolfstack Docks'),
+          ', pick ', wikiLink('Destination: The Elder Continent', 'The Elder Continent'),
+          ' at the southern edge of the map, then ',
+          wikiLink('Set a course for Port Carnelian', 'Set a course for Port Carnelian'), '.']),
+        h('div', { css: 'margin-top:5px;' }, ['Coming back after a sword falls is step 2 again, '
+          + 'ending on ', wikiLink('The Value of Good Names', 'The Value of Good Names'),
+          ' instead — or The Manifestation of Promise, if you have never finished a term.']),
+      ])),
+
+      section('Every option', h('div', null, [
+        h('div', { css: 'display:flex;align-items:center;gap:8px;margin-bottom:6px;' }, [search]),
+        table([
+          { text: 'Option' },
+          { text: 'Airs', title: 'The window of The Airs of Port Carnelian this is offered in. Re-rolled every action.' },
+          { text: '' },
+          { text: 'What it changes' },
+        ], optionRows),
+      ])),
+
+      section('Cashing out', h('div', null, [
+        h('div', { css: 'color:' + UI.dim + ';font-size:12px;line-height:1.7;' },
+          PC_REWARDS.map(function (reward) {
+            return h('div', { css: 'margin-bottom:4px;' }, [
+              h('span', { css: 'color:' + UI.text + ';' }, [reward.currency + ' — ']),
+              wikiLink(reward.via, reward.via),
+              h('div', { css: 'font-size:11px;' }, [reward.items.map(function (item) {
+                return h('div', null, ['· ', wikiLink(item.name, item.name),
+                  ' × (' + item.count + ') — ' + item.worth]);
+              })]),
+            ]);
+          })),
+        h('div', { css: 'margin-top:8px;' }, [table([
+          { text: 'Currency', right: true, title: 'The least Silver Horseheads or Striped Delights that buys this step.' },
+          { text: '2.5 Echo items', right: true },
+          { text: '12.5 Echo items', right: true },
+          { text: 'Echoes', right: true },
+          { text: 'You', title: 'D — your Striped Delights reach this step. H — your Silver Horseheads do.' },
+        ], PC_TIERS.map(function (tier, i) {
+          // 105 and 176 are the two steps the strategy alternates between.
+          const pick = tier.at === 105 || tier.at === 176;
+          // Which step each purse is standing on. A LETTER rather than a
+          // highlight, so the row still says so with the colour stripped off,
+          // and one letter per currency because the two are on different rows.
+          const ceiling = PC_TIERS[i + 1] ? PC_TIERS[i + 1].at : Infinity;
+          const on = function (have) { return have != null && have >= tier.at && have < ceiling; };
+          const you = [purse && on(purse.sd) ? 'D' : null, purse && on(purse.sh) ? 'H' : null]
+            .filter(Boolean).join(' ');
+          return h('tr', null, [
+            h('td', { css: TD + 'text-align:right;' + (pick ? 'color:' + UI.accent + ';font-weight:bold;' : '') },
+              [String(tier.at)]),
+            h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' }, [String(tier.cheap)]),
+            h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' }, [String(tier.dear)]),
+            h('td', { css: TD + 'text-align:right;' + (pick ? 'color:' + UI.accent + ';' : '') },
+              [String(tier.echo)]),
+            h('td', {
+              css: TD + 'font-weight:bold;color:' + UI.accent + ';',
+              title: you ? 'Where your purse stands: D Striped Delights, H Silver Horseheads.' : '',
+            }, [you]),
+          ]);
+        }))]),
+      ])),
+
+      section('Strategy', h('div', { css: 'color:' + UI.dim + ';font-size:12px;line-height:1.7;' }, [
+        h('div', null, ['Take the biggest net on the screen, whichever resource it is in — '
+          + 'the airs-gated options trade all three for each other anyway.']),
+        h('div', null, ['Keep Imperial Legitimacy under 90: several options are hidden above it. '
+          + 'Gaining it is unreliable (about a 10% chance per re-roll of Airs), so trade '
+          + 'Delights for Horseheads rather than spending Legitimacy where you can.']),
+        h('div', null, ['Stock Silver Horseheads while Time is 1–6. In the 7–10 range you can '
+          + 'trade Horseheads for Delights at a net +5 but not the other way round.']),
+        h('div', null, ['Cash out at ', h('b', null, ['105']), ' or ', h('b', null, ['176']),
+          ' rather than around 140 — the rounding pays better at those two, and alternating '
+          + 'them is worth roughly 61.25 Echoes a cycle (about 2.36 EPA).']),
+        h('div', null, ['Once ', wikiLink('Offering Tribute to the Court of the Wakeful Eye', 'Tribute'),
+          ' is unlocked, always cash in Striped Delights: the flat 5 Tribute is worth about '
+          + '12.5 Echoes on its own.']),
+        h('div', null, ['Two finished terms unlock ', wikiLink('Host a State Dinner', 'Host a State Dinner'),
+          ' at the end of the third, which restores you to the Empress’ Court.']),
+      ])),
+
+      h('div', { css: 'margin-top:12px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+        h('div', null, ['The badge is the option’s ', h('b', null, ['net']),
+          ' change in resources, the guide’s own figure. ',
+          h('b', null, [PC_LEGIT_SPEND_MARK]), ' means that net is paid for out of Imperial '
+          + 'Legitimacy; ', h('b', null, [PC_LEGIT_GAIN_MARK]),
+          ' that the line buys Legitimacy back; no mark that it leaves Legitimacy alone. ',
+          h('b', null, ['Fate']), ' means it is Fate-locked. The four endings carry what '
+          + 'cashing out would pay you ', h('b', null, ['right now']),
+          ' — Echoes, from your own Striped Delights and Silver Horseheads off the Myself tab — '
+          + 'with ', h('b', null, [PC_FAVOUR_MARK]),
+          ' when part of the payout is a faction Favour — a story quality capped at '
+          + PC_SOCIETY_CAP + ', which nothing buys, so it counts as 0 — ',
+          h('b', null, [PC_STALE_MARK]), ' when the reading behind the figure is over a minute '
+          + 'old, and the old ', h('b', null, ['cash out']),
+          ' label when your numbers have never been read at all.']),
+        h('div', null, ['Colour says the same thing the mark does and nothing else — red for '
+          + 'spending Legitimacy, green for buying it back, light blue for leaving it alone, '
+          + 'slate for the endings. The mark is the one that always reads.']),
+        h('div', null, ['A storylet with two branches is badged with the better net, and both '
+          + 'are in its tooltip; open it and each branch is badged in its own right.']),
+        h('div', { css: 'margin-top:6px;' }, ['Data from ',
+          wikiLink('Port Carnelian (Guide)', 'Port Carnelian (Guide)'), ' on the Fallen London wiki.']),
+      ]),
+    ]);
+  }
+
+  // === panel: Voyages of Scientific Discovery ============================
+  //
+  // The reference half: how the voyage is unlocked at all, what each island
+  // pays and what it costs to get there, the whole action table grouped by
+  // phase and island and searchable, and what the pages are finally worth.
+  //
+  // Like the Port Carnelian panel and unlike the Zailing one it opens with no
+  // "your hand, ranked" block: these islands deal no opportunity cards. The one
+  // card the voyage adds is The Fleet of Truth, and it is at zee rather than
+  // here, so it lives in ZEE_CARDS and the Zailing panel where it belongs.
+
+  const VSD_GROUPS = [
+    { key: 'prep', label: 'Preparatory Research — at Your Lodgings, before you sail' },
+    { key: 'island:Bullbone Island', label: 'Bullbone Island — Home Waters, pays CN' },
+    { key: 'island:Corpsecage Island', label: 'Corpsecage Island — Stormbones, pays AN' },
+    { key: 'island:Grunting Fen', label: 'Grunting Fen — The Sea of Voices, pays TN' },
+    { key: 'organise', label: 'Organise your Research — at Your Lodgings, spending the pages' },
+  ];
+
+  function vsdGroupKey(entry) {
+    return entry.phase === 'island' ? 'island:' + entry.island : entry.phase;
+  }
+
+  function vsdBadgeNode(entry) {
+    return makeBadge(vsdSpec(entry), VSD_CLASS);
+  }
+
+  function vsdOptionRow(entry) {
+    const row = h('tr', null, [
+      h('td', { css: TD }, [
+        h('div', null, [wikiLink(entry.branch, entry.branch)]),
+        h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, ['in ', wikiLink(entry.storylet, entry.storylet)]),
+        entry.needs
+          ? h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, ['needs ' + entry.needs])
+          : null,
+      ]),
+      h('td', { css: TD + 'white-space:nowrap;color:' + UI.dim + ';' }, [
+        entry.orthos
+          ? (entry.orthos[0] === entry.orthos[1]
+            ? String(entry.orthos[0]) : entry.orthos[0] + '–' + entry.orthos[1])
+          : '—',
+      ]),
+      h('td', { css: TD + 'text-align:center;' }, [vsdBadgeNode(entry)]),
+      h('td', { css: TD + 'color:' + UI.dim + ';font-size:11px;white-space:nowrap;' },
+        [entry.ch || '—']),
+      h('td', { css: TD + 'color:' + UI.dim + ';' }, [
+        entry.gain ? h('div', { css: 'color:' + UI.text + ';' }, [entry.gain]) : null,
+        entry.cost ? h('div', null, ['costs ' + entry.cost]) : null,
+        entry.orElse ? h('div', { css: 'color:#c9a04a;' }, ['or, the game’s choice: ' + entry.orElse]) : null,
+        entry.fail ? h('div', null, ['failure: ' + entry.fail]) : null,
+        entry.note ? h('div', null, [entry.note]) : null,
+      ]),
+    ]);
+    row.dataset.vsdSearch = [entry.branch, entry.storylet, entry.island || '', entry.ch || '',
+      entry.gain || '', entry.cost || '', entry.needs || '', entry.note || '',
+      entry.headline || ''].join(' ').toLowerCase();
+    return row;
+  }
+
+  function renderVsdPanel() {
+    const section = function (title, children) {
+      return h('div', { css: 'margin-top:14px;' }, [
+        h('div', {
+          css: 'font:bold 11px ' + UI.font + ';letter-spacing:.06em;text-transform:uppercase;'
+            + 'color:' + UI.accent + ';margin-bottom:5px;',
+        }, [title]),
+        children,
+      ]);
+    };
+    const table = function (heads, rows) {
+      return h('table', { css: 'width:100%;border-collapse:collapse;' }, [
+        h('thead', null, [h('tr', null, heads.map(function (head) {
+          return h('th', { css: TH + (head.right ? 'text-align:right;' : ''), title: head.title || '' }, [head.text]);
+        }))]),
+        h('tbody', null, rows),
+      ]);
+    };
+
+    // --- the three currencies, up top -------------------------------------
+    const intro = h('div', {
+      css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent
+        + ';background:' + UI.bgAlt + ';font-size:12px;line-height:1.6;',
+    }, [
+      h('div', { css: 'color:' + UI.accent + ';font-weight:bold;' }, ['Three kinds of page']),
+      h('div', null, VSD_NOTE_KEYS.map(function (key) {
+        const note = VSD_NOTES[key];
+        return h('div', null, [
+          h('span', {
+            css: 'display:inline-block;min-width:26px;text-align:center;margin-right:6px;'
+              + 'padding:0 4px;border-radius:2px;font:bold 10px arial,sans-serif;'
+              + 'line-height:14px;color:#fff;background:' + note.color + ';',
+          }, [note.tag]),
+          wikiLink(note.name, note.name),
+        ]);
+      })),
+      h('div', { css: 'margin-top:5px;' }, ['The island pages write AN as ',
+        h('b', null, ['PAN']), '; it is the same page.']),
+      h('div', null, ['A visit is ', h('b', null, [String(VSD_ISLAND_ACTIONS)]),
+        ' actions if every challenge passes — 1 to arrive, 19 of carousel, 1 to leave. '
+        + 'A failure still moves ', wikiLink('Orthos is Coming!', 'Orthos is Coming!'),
+        ', by 1 change point rather than 2, so it lengthens the visit rather than ending '
+        + 'it. You cannot leave early, and your outfit is locked — wear Watchful gear.']),
+    ]);
+
+    // --- the action table -------------------------------------------------
+    const optionRows = [];
+    for (const group of VSD_GROUPS) {
+      const inGroup = VSD_OPTIONS.filter(function (e) { return vsdGroupKey(e) === group.key; });
+      if (!inGroup.length) continue;
+      const header = h('tr', null, [h('td', {
+        colSpan: 5,
+        css: 'padding:8px 8px 3px;font:bold 11px ' + UI.font + ';letter-spacing:.05em;'
+          + 'text-transform:uppercase;color:' + UI.dim + ';border-bottom:1px solid ' + UI.line + ';',
+      }, [group.label])]);
+      header.dataset.vsdGroup = '1';
+      optionRows.push(header);
+      for (const entry of inGroup) optionRows.push(vsdOptionRow(entry));
+    }
+
+    const search = h('input', {
+      type: 'text',
+      placeholder: 'filter actions, rewards, requirements…',
+      css: 'flex:1;min-width:140px;box-sizing:border-box;padding:3px 7px;background:' + UI.bgAlt
+        + ';color:' + UI.text + ';border:1px solid ' + UI.line + ';border-radius:3px;font:12px ' + UI.font + ';',
+      on: {
+        input: function (e) {
+          const term = String(e.currentTarget.value || '').trim().toLowerCase();
+          for (const row of optionRows) {
+            if (row.dataset.vsdGroup) continue;
+            row.hidden = !!term && row.dataset.vsdSearch.indexOf(term) === -1;
+          }
+          let group = null, shown = 0;
+          for (const row of optionRows) {
+            if (row.dataset.vsdGroup) {
+              if (group) group.hidden = shown === 0;
+              group = row; shown = 0;
+            } else if (!row.hidden) shown++;
+          }
+          if (group) group.hidden = shown === 0;
+        },
+      },
+    });
+
+    return h('div', { css: 'padding:0 12px 12px;' }, [
+      intro,
+
+      section('Getting the voyage at all', h('div', { css: 'color:' + UI.dim + ';font-size:12px;line-height:1.7;' }, [
+        h('div', null, ['The Dilmun Club wants: Watchful 120, ',
+          wikiLink('A Person of Some Importance', 'A Person of Some Importance'),
+          ', Associating with Radical Academics 3, Cultivating an Acquaintance with His '
+          + 'Amused Lordship 3, and Featuring in the Tales of the University 30.']),
+        h('div', null, ['Then ', wikiLink('A Sneering Gentleman', 'A Sneering Gentleman'),
+          ' on Ladybones Road — His Amused Lordship’s valet keeps losing the paperwork. '
+          + 'Correcting him costs a Blackmail Material, 2 Books of Hidden Bodies and 5 '
+          + 'Extraordinary Implications.']),
+        h('div', null, ['Then ', wikiLink('Upstairs at the Bridge Without', 'Upstairs at the Bridge Without'),
+          ' in the Bazaar Side-streets, and a ship of your own.']),
+        h('div', { css: 'margin-top:5px;' }, ['Once you are Embarking 3, ',
+          wikiLink('The Fleet of Truth', 'The Fleet of Truth'),
+          ' joins your zee deck — 5 pages of every type. It is in the Zailing panel, '
+          + 'with the rest of the deck.']),
+      ])),
+
+      section('Which island', h('div', null, [
+        table([
+          { text: 'Island' },
+          { text: 'Region' },
+          { text: 'AN', right: true, title: 'Page of Prelapsarian Archaeological Notes available per visit.' },
+          { text: 'CN', right: true, title: 'Page of Cryptopalaeontological Notes available per visit.' },
+          { text: 'TN', right: true, title: 'Page of Theosophistical Notes available per visit.' },
+          { text: 'EPA', right: true, title: 'Echoes per action of the material rewards, not counting the zailing there and back.' },
+        ], VSD_ISLANDS.map(function (island) {
+          return h('tr', null, [
+            h('td', { css: TD }, [
+              h('div', null, [wikiLink(island.name, island.name)]),
+              island.needs
+                ? h('div', { css: 'color:#c9a04a;font-size:11px;' }, ['needs a ', wikiLink(island.needs, island.needs)])
+                : null,
+            ]),
+            h('td', { css: TD + 'color:' + UI.dim + ';' }, [wikiLink(island.region, island.region)]),
+          ].concat(VSD_NOTE_KEYS.map(function (key) {
+            const lead = island.pays === key;
+            return h('td', {
+              css: TD + 'text-align:right;'
+                + (lead ? 'color:' + VSD_NOTES[key].color + ';font-weight:bold;' : 'color:' + UI.dim + ';'),
+            }, [String(island.best[key])]);
+          })).concat([
+            h('td', { css: TD + 'text-align:right;' }, [island.epa.toFixed(2)]),
+          ]));
+        })),
+        h('div', { css: 'margin-top:5px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' },
+          VSD_ISLANDS.map(function (island) {
+            return h('div', null, [h('span', { css: 'color:' + UI.text + ';' }, [island.name + ': ']),
+              island.note + ' Up to ' + island.echoes.toFixed(2) + ' Echoes a visit.']);
+          })),
+      ])),
+
+      section('Every action', h('div', null, [
+        h('div', { css: 'display:flex;align-items:center;gap:8px;margin-bottom:6px;' }, [search]),
+        table([
+          { text: 'Action' },
+          { text: 'Orthos', title: 'The Orthos is Coming! band this is offered in. There is no such gate on the two Lodgings screens.' },
+          { text: '' },
+          { text: 'Challenge' },
+          { text: 'What else it gives' },
+        ], optionRows),
+      ])),
+
+      section('Getting the most preparatory research', h('div', { css: 'color:' + UI.dim + ';font-size:12px;line-height:1.7;' }, [
+        h('div', null, [h('span', { css: 'color:' + VSD_NOTES.an.color + ';font-weight:bold;' }, ['AN 450: ']),
+          'three of any 50-page option and two Examine your collection of curiosities. '
+          + 'Also yields 150 of each of the other two.']),
+        h('div', null, [h('span', { css: 'color:' + VSD_NOTES.cn.color + ';font-weight:bold;' }, ['CN 400: ']),
+          'one Consult your current work, two of any 50-page option, two Test your Unearthly '
+          + 'Fossil and one Trade in academic favours. Also yields 140 of each of the others. '
+          + 'Swapping the Trade for a third Fossil gives 370 instead — a small loss, and no '
+          + 'Connected: Benthic 20 / Summerset 20 to arrange.']),
+        h('div', null, [h('span', { css: 'color:' + VSD_NOTES.tn.color + ';font-weight:bold;' }, ['TN 150: ']),
+          'three of any 50-page option. Also yields 150 of each of the others.']),
+        h('div', { css: 'margin-top:5px;' }, ['The order matters: every option locks itself out '
+          + 'above a page count (101 for the cheap ones, 301 for the big single-type ones), so '
+          + 'take the 50s first. Finish with any “Enough … research” option to reach Embarking 3.']),
+      ])),
+
+      h('div', { css: 'margin-top:12px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+        h('div', null, ['The badge is what the action pays in ', h('b', null, ['pages']),
+          ', coloured by type. An action that pays no pages is ', h('b', null, ['labelled']),
+          ' with what it does pay instead rather than scored — pages and Echoes have no '
+          + 'exchange rate here, and inventing one would be the badge choosing your voyage '
+          + 'for you.']),
+        h('div', null, ['On the Organise screen the badge is the guide’s ',
+          h('b', null, ['pence per page']), ', which is the figure that separates those '
+          + 'rows; the best rate is picked out in gold.']),
+        h('div', null, ['The three end-of-visit gambles carry ', h('b', null, ['≈']),
+          ' and their ', h('b', null, ['expected']), ' value, not the number they advertise: '
+          + 'Tarry a little is worth about six times Cut it fine once the failure is priced in.']),
+        h('div', { css: 'margin-top:6px;' }, ['Data from ',
+          wikiLink('Embarking on a Voyage of Scientific Discovery (Guide)',
+            'Embarking on a Voyage of Scientific Discovery (Guide)'),
+          ' and the Expedition Progress table on each island’s own page.']),
+      ]),
+    ]);
+  }
+
+  // === panel: Fruits of the Zee ==========================================
+  //
+  // The checklist half of the festival work, and the reason the badges can say
+  // "you still need this": what the festival has to give, and which of it you
+  // already hold.
+  //
+  // It reads the same two pages the Factions panel does and through the same
+  // plumbing -- qualities off the Myself tab, items off Possessions, both
+  // banked in localStorage and refreshable in a hidden frame -- so opening
+  // this panel from the middle of a dive still has something to say. Every
+  // reading is labelled with its age, and an item whose ownership can't be
+  // established is a dash, never a "no". Thalassic Favour is a QUALITY, not an
+  // item, which is why it comes from the first scrape and not the second.
+
+  const FOTZ_CACHE_KEY = 'fl-ux-fotz';
+  const COUNTS_KEY = 'fl-ux-item-counts';
+
+  // Bumped whenever anything the badges depend on is re-banked. `fotzHoldings`
+  // is called once per card per scan, so it memoises on this rather than
+  // re-parsing a few hundred cached item names on every DOM mutation.
+  let fotzGen = 0;
+
+  // The festival's own qualities, off a Myself scrape. Same rule as the
+  // factions scrape: FL doesn't render a quality you have none of, so absent
+  // means 0 -- but only while the tab's search box is empty, because a
+  // filtered list makes absent mean "not on screen" instead.
+  function fotzFromQualities(scan) {
+    const values = {};
+    const zeroIsSafe = !scan.filtered;
+    for (const name of FOTZ_QUALITIES) {
+      const q = scan.values.get(name);
+      if (q) values[name] = q.level;
+      else if (zeroIsSafe) values[name] = 0;
+    }
+    return values;
+  }
+
+  function bankFotzQualities(scan) {
+    if (!scan) return false;
+    const values = fotzFromQualities(scan);
+    if (!Object.keys(values).length) return false;
+    saveCache(FOTZ_CACHE_KEY, {
+      v: 1, at: Date.now(), character: characterName() || null,
+      partial: scan.filtered, values: values,
+    });
+    fotzGen++;
+    return true;
+  }
+
+  // `held` is readPossessionCounts' Map. Stored as an array of pairs, since a
+  // Map doesn't survive JSON.
+  function bankItemCounts(held) {
+    if (!held || !held.size) return false;
+    const rows = [];
+    held.forEach(function (rec, key) { rows.push([key, rec.name, rec.count]); });
+    saveCache(COUNTS_KEY, {
+      v: 2, at: Date.now(), character: characterName() || null, held: rows,
+    });
+    fotzGen++;
+    return true;
+  }
+
+  // The counterpart of `captureFactionState`: watch for the two tabs going by
+  // and bank what they say. Separate from it, and with its own signature, so
+  // the factions plumbing stays exactly as it was.
+  let lastFotzSig = null;
+  function captureFotzState() {
+    const items = document.querySelectorAll('li.quality-item');
+    const owned = document.querySelectorAll(OWNED_MARKER);
+    if (!items.length && !owned.length) { lastFotzSig = null; return; }
+    const search = document.querySelector('input.input--item-search');
+    const sig = items.length + '/' + owned.length + '|' + (search ? search.value : '');
+    if (sig === lastFotzSig) return;
+    lastFotzSig = sig;
+    if (items.length) {
+      const scan = readQualities();
+      bankFotzQualities(scan);
+      // The Port Carnelian purse rides along on the same scrape rather than
+      // paying for a third pass over a few hundred quality rows. One reader,
+      // three consumers.
+      bankPcQualities(scan);
+    }
+    if (owned.length) bankItemCounts(readPossessionCounts());
+  }
+
+  function loadCounts() {
+    // Version 2, for the reason ITEMS_KEY is: the keys changed under it.
+    const rec = loadCache(COUNTS_KEY, 2);
+    if (!rec || !Array.isArray(rec.held)) return null;
+    const held = new Map();
+    for (const row of rec.held) held.set(row[0], { name: row[1], count: row[2] });
+    return { at: rec.at, held: held };
+  }
+
+  // Everything this panel shows, live where it can be and banked where it
+  // can't. Any field may be missing; the renderer draws a dash for it. Field
+  // names match the factions state so `stateIsFresh` covers both.
+  function readFotzState() {
+    let qualities = null;
+    const scan = readQualities();
+    if (scan) {
+      const values = fotzFromQualities(scan);
+      if (Object.keys(values).length) {
+        qualities = {
+          live: true, at: Date.now(), character: characterName(),
+          partial: scan.filtered, values: values,
+        };
+      }
+    }
+    if (!qualities) {
+      const rec = loadCache(FOTZ_CACHE_KEY, 1);
+      if (rec) {
+        qualities = {
+          live: false, at: rec.at, character: rec.character,
+          partial: !!rec.partial, values: rec.values,
+        };
+      }
+    }
+
+    let items = null;
+    const live = readPossessionCounts();
+    if (live && live.size) {
+      items = { live: true, at: Date.now(), held: live };
+    } else {
+      const rec = loadCounts();
+      if (rec) items = { live: false, at: rec.at, held: rec.held };
+    }
+
+    if (!qualities && !items) return null;
+    return {
+      live: !!(qualities && qualities.live),
+      at: qualities ? qualities.at : null,
+      character: (qualities && qualities.character) || null,
+      partial: !!(qualities && qualities.partial),
+      values: new Map(Object.entries((qualities && qualities.values) || {})),
+      itemsLive: !!(items && items.live),
+      itemsAt: items ? items.at : null,
+      held: items ? items.held : null,
+    };
+  }
+
+  // What the BADGES need, and nothing more: can we answer "do you have this?"
+  // and "have you met the Bride?". Null means we cannot, and the badge then
+  // says so rather than guessing.
+  let holdingsMemo = null;
+  function fotzHoldings() {
+    if (holdingsMemo && holdingsMemo.gen === fotzGen) return holdingsMemo.value;
+    let value = null;
+    try {
+      value = buildFotzHoldings();
+    } catch (e) {
+      value = null;
+    }
+    holdingsMemo = { gen: fotzGen, value: value };
+    return value;
+  }
+
+  function buildFotzHoldings() {
+    const live = readPossessionCounts();
+    const items = (live && live.size) ? { held: live } : loadCounts();
+    if (!items) return null;
+    const held = items.held;
+    // The Bride is an Accomplishment, so it comes off the quality scrape, not
+    // possessions -- and an unreadable one has to stay false rather than
+    // become an unknown, or the storylet at the bottom of the trench would
+    // never get a mark at all. It errs towards "go and do it". Confirmed
+    // in-game by the author on 2026-09-06, once `parseQualityItem` learned to
+    // read a quality that states no level.
+    let bride = false;
+    const scan = readQualities();
+    if (scan) {
+      const q = scan.values.get(FOTZ_BRIDE_QUALITY);
+      if (q && q.level > 0) bride = true;
+    } else {
+      const rec = loadCache(FOTZ_CACHE_KEY, 1);
+      if (rec && rec.values && rec.values[FOTZ_BRIDE_QUALITY] > 0) bride = true;
+    }
+    return {
+      has: function (name) { return held.has(itemKey(name)); },
+      count: function (name) {
+        const rec = held.get(itemKey(name));
+        return rec ? rec.count : 0;
+      },
+      bride: bride,
+      sig: String(fotzGen),
+    };
+  }
+
+  // --- the collection ----------------------------------------------------
+  //
+  // One flat row per collectable thing, grouped for display. `count` is
+  // whether the row belongs in the "you are missing N of M" headline: the
+  // Fate-only items don't (they cost money, not actions), the ships don't (you
+  // can only own one at a time), and the Nodule of Fecund Amber doesn't until
+  // you already hold the Litter-Cyst it is the consolation prize for.
+  //
+  // `held` is true / false / null, and null is a real answer meaning "your
+  // Possessions have never been read". Pure apart from the state it is handed,
+  // so the arithmetic in the headline is testable.
+  function fotzCollection(state) {
+    const held = state && state.held;
+    const holds = function (name) {
+      if (!held) return null;
+      return held.has(itemKey(name));
+    };
+    const countOf = function (name) {
+      if (!held) return null;
+      const rec = held.get(itemKey(name));
+      return rec ? rec.count : 0;
+    };
+    const quality = function (name) {
+      const v = state && state.values ? state.values.get(name) : undefined;
+      return typeof v === 'number' ? v : null;
+    };
+
+    const favour = quality('Thalassic Favour');
+    const sights = quality('Sights at the Festival');
+    const bandOf = function (value) {
+      if (value == null) return null;
+      for (let i = 0; i < FOTZ_BANDS.length; i++) {
+        if (value >= FOTZ_BANDS[i].lo && value <= FOTZ_BANDS[i].hi) return i;
+      }
+      return null;
+    };
+    const sightsBand = bandOf(sights);
+
+    const groups = [];
+
+    // 1. The coral equipment: the year's actual prize, and the only part of
+    //    the collection where the game tells you exactly how to get the piece
+    //    you are missing.
+    groups.push({
+      key: 'coral',
+      title: 'Coral equipment',
+      hint: 'Dive for the coral in week one, break it open in week two. Each coral becomes '
+        + 'one of three items — and the three are mechanically IDENTICAL, differing only in '
+        + 'name and description, so holding any one of them is the whole prize. They are '
+        + 'counted that way here: one item per coral, not three.',
+      corals: FOTZ_CORALS.map(function (coral) {
+        const inHand = countOf(coral.coral);
+        // ONE row per coral, not one per variant. The three versions of a
+        // coral item have the same stats and the same slot; only the name and
+        // the flavour differ, so collecting all three is a matter of taste
+        // rather than of getting anything. Counting them as three would put
+        // ten items nobody needs into the "missing" headline.
+        //
+        // `which` is which of the three you actually hold, kept for display:
+        // the variant detail is still worth SHOWING, it is just not worth
+        // COUNTING. A coral whose items are not published yet has no names to
+        // check at all, so it stays unknown rather than missing.
+        const which = coral.variants
+          ? coral.variants.filter(function (name) { return holds(name) === true; })
+          : [];
+        const have = !coral.variants ? null
+          : (held ? which.length > 0 : null);
+        return {
+          coral: coral,
+          inHand: inHand,
+          pending: !coral.variants,
+          which: which,
+          rows: [{
+            name: coral.slot,
+            slot: coral.slot,
+            coralName: coral.coral,
+            held: have,
+            count: true,
+            variants: coral.variants,
+            which: which,
+            pending: !coral.variants,
+            // "Do this now": you are holding the coral and have none of the
+            // three items. Which of them you would get no longer matters, so
+            // this no longer waits on Sights sitting in a particular band --
+            // any band pays out something you don't have.
+            ready: have === false && !!inHand,
+            how: coral.variants
+              ? 'Dive a ' + coral.coral + ' off ' + coral.card + ', then break it open in '
+                + 'week two. Any of the three is the same item mechanically; Sights at the '
+                + 'Festival decides which name you get.'
+              : coral.pending,
+            note: coral.variants ? null : coral.pending,
+            fate: coral.fate,
+            bis: coral.bis,
+          }],
+        };
+      }),
+    });
+
+    // 2. Equipment from festivals past: dive for it, or buy it back cheaper
+    //    than the trade-in value at the stalls.
+    groups.push({
+      key: 'dive',
+      title: 'Equipment from festivals past',
+      hint: 'Only these six turn up while diving. Buying one at the stalls always '
+        + 'costs less Favour than trading a spare one in pays, so dive first.',
+      rows: FOTZ_EQUIPMENT.map(function (item) {
+        const have = holds(item.name);
+        return {
+          name: item.name,
+          slot: item.slot,
+          held: have,
+          count: true,
+          spare: countOf(item.name) == null ? null : Math.max(0, countOf(item.name) - 1),
+          spareEach: item.favour,
+          ready: have === false && favour != null && favour >= item.stall,
+          how: 'Dive to depth ' + (item.depths[0] === item.depths[1]
+            ? item.depths[0] : item.depths[0] + '–' + item.depths[1])
+            + ' and take it off ' + item.card + ', or buy it at the Island Stalls for '
+            + item.stall + ' Favour.',
+          favour: item.stall,
+          fate: item.fate,
+          bis: item.bis,
+          note: item.note,
+        };
+      }),
+    });
+
+    // 3. The stalls: week two, Favour only, nothing here can be dived up.
+    groups.push({
+      key: 'stall',
+      title: 'Island Stalls only',
+      hint: 'Week two, for Thalassic Favour. None of these can be dived for.',
+      rows: FOTZ_STALL.map(function (item) {
+        const have = holds(item.name);
+        return {
+          name: item.name,
+          slot: item.slot,
+          held: have,
+          count: true,
+          ready: have === false && favour != null && favour >= item.favour,
+          how: item.favour + ' Favour at the Island Stalls.',
+          favour: item.favour,
+          fate: item.fate,
+          bis: item.bis,
+          note: item.note,
+        };
+      }),
+    });
+
+    // 4. The bottom of the trench.
+    groups.push({
+      key: 'bride',
+      title: 'The Pentamerous Bride',
+      hint: 'Dive all the way down, take no treasure, and beg audience. The '
+        + 'Accomplishment is what the King-in-Coral pays out on in week two.',
+      rows: FOTZ_BRIDE_ITEMS.map(function (item, i) {
+        const have = holds(item.name);
+        // The Amber is what you get INSTEAD of the Litter-Cyst, so it is only
+        // part of the collection once the Cyst is already yours.
+        const applies = i === 0 || holds(FOTZ_BRIDE_ITEMS[0].name) === true;
+        return {
+          name: item.name,
+          slot: item.slot,
+          held: have,
+          count: i === 0,
+          dim: !applies,
+          how: item.how,
+          bis: item.bis,
+          note: item.note,
+        };
+      }),
+    });
+
+    // 5. The ships. Listed, never counted -- one ship at a time.
+    groups.push({
+      key: 'ships',
+      title: 'Festival ships',
+      hint: 'Traded for your current ship plus 500–1920 Favour. Trading in a '
+        + 'Zubmarine, a Majestic Pleasure Yacht or another festival ship brings every '
+        + 'one of them down to 500. Not counted below: you can only have one ship.',
+      rows: FOTZ_SHIPS.map(function (ship) {
+        return {
+          name: ship.name,
+          slot: 'Ship',
+          held: holds(ship.name),
+          count: false,
+          how: 'Trade your current ship plus 500–1920 Favour to the Green-Gilled '
+            + 'Shipwright. Replaces ' + ship.peer + '.',
+          fate: ship.fate,
+          note: ship.note,
+        };
+      }),
+    });
+
+    // 6. Fate. Listed for completeness, never counted.
+    groups.push({
+      key: 'fate',
+      title: 'Fate only',
+      hint: 'From the King-in-Coral’s Hoard, for Fate rather than Favour. Not counted '
+        + 'below — and several are obtainable elsewhere for nothing.',
+      rows: FOTZ_FATE_ITEMS.map(function (item) {
+        return {
+          name: item.name,
+          slot: item.slot,
+          held: holds(item.name),
+          count: false,
+          how: item.fate ? item.fate + ' Fate.' : 'Fate, at the Hoard.',
+          fate: item.fate,
+          note: item.note,
+        };
+      }),
+    });
+
+    // The headline. Only `count` rows, and an unknown is neither missing nor
+    // held -- it is counted as unknown and said so, because "you are missing
+    // 28 of 28" would be a lie told to someone who simply hasn't opened
+    // Possessions yet.
+    let total = 0;
+    let missing = 0;
+    let unknown = 0;
+    const wanted = [];
+    for (const group of groups) {
+      const rows = group.rows || group.corals.reduce(function (all, c) {
+        return all.concat(c.rows);
+      }, []);
+      for (const row of rows) {
+        if (!row.count) continue;
+        total++;
+        if (row.held === false) { missing++; wanted.push(row); }
+        else if (row.held == null) unknown++;
+      }
+    }
+
+    return {
+      groups: groups,
+      total: total,
+      missing: missing,
+      unknown: unknown,
+      wanted: wanted,
+      ready: wanted.filter(function (r) { return r.ready; }),
+      favour: favour,
+      sights: sights,
+      sightsBand: sightsBand,
+      devotion: quality('Fivefold Devotion'),
+      // How many corals are still worth DIVING FOR. It is one of the two
+      // numbers that decide how much Devotion is worth raising, so it comes
+      // out of the collection rather than being counted again in the renderer.
+      // An unreadable Possessions list leaves it null, and the advice then
+      // falls back to the Favour case rather than inventing a count -- there
+      // is no honest answer to "how many do you need" when we cannot tell what
+      // you have.
+      //
+      // **A coral already in your hold does not count** (fixed 2026-09-04, on
+      // a report that the advice kept saying depth 1 to someone carrying one
+      // of each). One coral becomes one item and the three items are
+      // mechanically identical, so a second coral of the same kind is a
+      // duplicate of a duplicate: there is nothing left to dive for once you
+      // are carrying one, whether or not week two has opened and let you break
+      // it. That goes for the `pending` coral too -- its items are unpublished
+      // and so can never read as held, but the coral itself reads perfectly
+      // well, and it is the coral you dive for.
+      coralsWanted: !held ? null : groups[0].corals.filter(function (entry) {
+        if (entry.inHand) return false;
+        return entry.pending || entry.rows[0].held === false;
+      }).length,
+      // The dive-only equipment you have not got, by name. `held` is null for
+      // an unread Possessions list, which is NOT the same as missing, so only
+      // an explicit false counts.
+      itemsWanted: !held ? [] : (groups.filter(function (g) { return g.key === 'dive'; })[0]
+        .rows.filter(function (row) { return row.held === false; })
+        .map(function (row) { return row.name; })),
+    };
+  }
+
+  // What your treasures would fetch at the Fruit Market, and what your spare
+  // equipment would. Both vanish when the festival ends (equipment aside,
+  // which now survives), so this is the "cash in before it's gone" number.
+  function fotzLedger(state) {
+    const held = state && state.held;
+    const countOf = function (name) {
+      if (!held) return null;
+      const rec = held.get(itemKey(name));
+      return rec ? rec.count : 0;
+    };
+    const rows = [];
+    let total = 0;
+    for (const treasure of FOTZ_TREASURES) {
+      const n = countOf(treasure.name);
+      if (!n) continue;
+      total += n * treasure.favour;
+      rows.push({ name: treasure.name, each: treasure.favour, count: n,
+        subtotal: n * treasure.favour, note: treasure.note });
+    }
+    const spares = [];
+    for (const item of FOTZ_EQUIPMENT) {
+      const n = countOf(item.name);
+      if (n == null || n < 2) continue;
+      const extra = n - 1;
+      total += extra * item.favour;
+      spares.push({ name: item.name, each: item.favour, count: extra,
+        subtotal: extra * item.favour });
+    }
+    return { rows: rows, spares: spares, total: total, known: !!held };
+  }
+
+  // --- rendering ---------------------------------------------------------
+
+  const FOTZ_PIP_HELD = '◆';
+  const FOTZ_PIP_MISSING = '◇';
+  const FOTZ_PIP_UNKNOWN = '–';
+
+  // Same three-state rule as the factions pips: filled when you have it,
+  // hollow when you don't, a dash when there is no source for the answer. A
+  // hollow pip you could act on RIGHT NOW is promoted to a filled "!" in the
+  // ready colour, which is the one thing this panel exists to point at.
+  function fotzPip(row) {
+    if (row.held == null) {
+      return h('span', {
+        title: 'Not known — your Possessions have not been read yet.',
+        css: 'color:' + UI.dim + ';font-size:13px;',
+      }, [FOTZ_PIP_UNKNOWN]);
+    }
+    if (row.held) {
+      return h('span', {
+        title: 'You have this.',
+        css: 'color:' + UI.accent + ';font-size:13px;',
+      }, [FOTZ_PIP_HELD]);
+    }
+    if (row.ready) {
+      return h('span', {
+        title: 'You can get this right now.',
+        css: 'display:inline-block;color:#17190c;background:' + COLOR_READY
+          + ';border-radius:3px;padding:0 5px;font-weight:bold;',
+      }, ['!']);
+    }
+    return h('span', {
+      title: 'You do not have this yet.',
+      css: 'color:' + UI.dim + ';font-size:13px;',
+    }, [FOTZ_PIP_MISSING]);
+  }
+
+  function fotzItemRow(row) {
+    return h('tr', { css: row.dim ? 'opacity:.55;' : '' }, [
+      h('td', { css: TD + 'text-align:center;width:1%;' }, [fotzPip(row)]),
+      h('td', { css: TD }, [
+        wikiLink(row.name, row.name),
+        row.slot ? h('span', { css: 'color:' + UI.dim + ';font-size:11px;' },
+          [' · ' + row.slot]) : null,
+        row.bis ? h('div', { css: 'color:' + UI.accent + ';font-size:11px;' }, [row.bis]) : null,
+        row.spare ? h('div', { css: 'color:' + UI.dim + ';font-size:11px;' },
+          [row.spare + (row.spare === 1 ? ' spare' : ' spares') + ' — worth '
+            + (row.spare * row.spareEach) + ' Favour traded back']) : null,
+      ]),
+      h('td', { css: TD + 'color:' + UI.dim + ';font-size:11px;line-height:1.5;' }, [
+        row.held ? null : h('div', null, [row.how]),
+        row.note ? h('div', null, [row.note]) : null,
+        row.fate ? h('div', null, ['Or ' + row.fate + ' Fate at the Hoard.']) : null,
+      ]),
+    ]);
+  }
+
+  // The cards on screen, ranked the way the badge colours them: the ones
+  // offering something you still need first, then by trade-in value.
+  function fotzHandRows(depth, source, floor, holdings) {
+    const seen = new Map();
+    eachCardName(function (host, name) {
+      const card = lookupFotzCard(name);
+      if (card && !seen.has(card.name)) seen.set(card.name, card);
+    });
+    const rated = [];
+    for (const card of seen.values()) {
+      const opts = fotzOptionsAt(card, depth, floor);
+      if (!opts.length) continue;
+      let missing = [];
+      for (const opt of opts) {
+        const gone = fotzMissingFrom(opt, holdings);
+        if (gone) missing = missing.concat(gone);
+      }
+      const favours = opts.map(function (o) { return o.favour; });
+      rated.push({
+        card: card,
+        opts: opts,
+        missing: missing,
+        best: Math.max.apply(null, favours),
+        spec: fotzBadgeSpec(card, depth, source, floor, holdings),
+      });
+    }
+    rated.sort(function (a, b) {
+      if (!!a.missing.length !== !!b.missing.length) return a.missing.length ? -1 : 1;
+      return b.best - a.best;
+    });
+    return rated;
+  }
+
+  // The render context of the last Fruits of the Zee panel opened, so setting
+  // the depth in the page can redraw one that is open behind it. A context
+  // whose panel has since been closed, or replaced by another, is harmless:
+  // the launcher's `rerender` does nothing once its body is out of the page.
+  let fotzPanelCtx = null;
+
+  function renderFotzPanel(ctx) {
+    if (ctx) fotzPanelCtx = ctx;
+    const state = readFotzState();
+    const at = fotzDepth();
+    const floor = at.depth ? null : fotzDepthFloor();
+    const collection = fotzCollection(state);
+    const ledger = fotzLedger(state);
+    const hand = fotzHandRows(at.depth, at.source, floor, fotzHoldings());
+
+    let busy = false;
+    if (ctx && autoRefreshEnabled() && (!stateIsFresh(state) || wantsDepthRefresh())) {
+      busy = true;
+      depthRefreshAt = Date.now();
+      refreshBackgroundState().then(function () { ctx.rerender(); });
+    }
+
+    const section = function (title, children) {
+      return h('div', { css: 'margin-top:14px;' }, [
+        h('div', {
+          css: 'font:bold 11px ' + UI.font + ';letter-spacing:.06em;text-transform:uppercase;'
+            + 'color:' + UI.accent + ';margin-bottom:5px;',
+        }, [title]),
+        children,
+      ]);
+    };
+    const note = function (text) {
+      return h('div', { css: 'color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, text);
+    };
+    const table = function (heads, rows) {
+      return h('table', { css: 'width:100%;border-collapse:collapse;' }, [
+        heads ? h('thead', null, [h('tr', null, heads.map(function (head) {
+          return h('th', { css: TH + (head.right ? 'text-align:right;' : '') }, [head.text]);
+        }))]) : null,
+        h('tbody', null, rows),
+      ]);
+    };
+
+    // --- your numbers, and where they came from --------------------------
+    const value = function (name) {
+      const v = state && state.values ? state.values.get(name) : undefined;
+      return typeof v === 'number' ? String(v) : '–';
+    };
+    const stat = function (label, name, title) {
+      return h('div', { title: title || '', css: 'min-width:96px;' }, [
+        h('div', { css: 'color:' + UI.dim + ';font-size:10px;letter-spacing:.05em;'
+          + 'text-transform:uppercase;' }, [label]),
+        h('div', { css: 'color:' + UI.text + ';font:bold 15px ' + UI.font + ';' },
+          [value(name)]),
+      ]);
+    };
+
+    const banners = [];
+
+    banners.push(h('div', {
+      css: 'margin:10px 0 0;padding:8px 10px;background:' + UI.bgAlt
+        + ';border-left:3px solid ' + UI.accent + ';display:flex;gap:14px;flex-wrap:wrap;',
+    }, [
+      stat('Favour', 'Thalassic Favour', 'Thalassic Favour — what week two is paid in.'),
+      stat('Devotion', 'Fivefold Devotion', 'Fivefold Devotion — 5 to dive at all, 11 is the cap.'),
+      stat('Depth', 'Full Fathom Five', 'Full Fathom Five — how deep you are right now.'),
+      stat('Sights', 'Sights at the Festival',
+        'Sights at the Festival — decides which of the three coral items you get.'),
+      stat('Airs', 'Airs of a Barren Zee',
+        'Airs of a Barren Zee — decides which supplication options you are offered, '
+          + 'and is re-rolled every time you take one.'),
+      stat('Harvest', 'A Fruitless Harvest', 'A Fruitless Harvest — the festival’s own story.'),
+    ]));
+
+    if (!state) {
+      banners.push(h('div', {
+        css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent
+          + ';background:' + UI.bgAlt + ';color:' + UI.dim + ';font-size:12px;line-height:1.5;',
+      }, [
+        'Nothing read yet. Open the ',
+        h('a', { href: '/myself', css: 'color:' + UI.text + ';' }, ['Myself']),
+        ' and ',
+        h('a', { href: '/possessions', css: 'color:' + UI.text + ';' }, ['Possessions']),
+        ' tabs once — or press Refresh — and both will be remembered here.',
+      ]));
+    }
+
+    // --- the headline: what you are still missing ------------------------
+    if (collection.ready.length) {
+      banners.push(h('div', {
+        css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + COLOR_READY
+          + ';background:#23280f;color:' + UI.text + ';font-size:12px;line-height:1.6;',
+      }, [
+        h('div', { css: 'color:' + COLOR_READY + ';font-weight:bold;' }, [
+          h('span', {
+            css: 'display:inline-block;color:#17190c;background:' + COLOR_READY
+              + ';border-radius:3px;padding:0 5px;margin-right:6px;',
+          }, ['!']),
+          collection.ready.length === 1
+            ? '1 thing you can collect right now'
+            : collection.ready.length + ' things you can collect right now',
+        ]),
+        collection.ready.map(function (row) {
+          return h('div', null, [
+            wikiLink(row.name, row.name),
+            h('span', { css: 'color:' + UI.dim + ';' }, [' — ' + row.how]),
+          ]);
+        }),
+      ]));
+    }
+
+    banners.push(h('div', {
+      css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent
+        + ';background:' + UI.bgAlt + ';font-size:12px;line-height:1.6;',
+    }, [
+      h('div', { css: 'color:' + UI.accent + ';font-weight:bold;' }, [
+        collection.unknown === collection.total
+          ? 'The festival collection is ' + collection.total + ' items'
+          : 'Missing ' + collection.missing + ' of ' + collection.total
+            + ' festival items'
+            + (collection.unknown ? ' (' + collection.unknown + ' unknown)' : ''),
+      ]),
+      collection.unknown === collection.total
+        ? note(['Which of them you hold is not known yet — read your Possessions and '
+          + 'this becomes a checklist.'])
+        : (collection.missing
+          ? h('div', { css: 'color:' + UI.dim + ';' }, [
+            collection.wanted.map(function (r) { return r.name; }).join(', '), '.'])
+          : note(['Nothing left to collect. The ships and the Fate items below are not '
+            + 'counted.'])),
+    ]));
+
+    // --- what is still down there, depth by depth ------------------------
+    //
+    // A dive commits you to a depth, and the unique rewards are not spread
+    // evenly: some are only at the bottom, and some are only at the top and
+    // are LOST by diving past them. This is the block that says which.
+    {
+      const holdings = fotzHoldings();
+      const split = fotzSplitUniques(fotzUniquesByDepth(holdings));
+      const chip = function (entry) {
+        const shallow = entry.to < 5;
+        return h('span', {
+          title: entry.card + ' — depth ' + (entry.from === entry.to
+            ? entry.from : entry.from + '–' + entry.to)
+            + (entry.pending
+              ? '\nAll three of its items are still unpublished — see the checklist below.'
+              : (entry.coral
+                ? '\nBecomes one of three ' + entry.missing[0] + ', all mechanically '
+                  + 'identical, and you have none of them yet.'
+                : ''))
+            + (entry.held
+              ? '\nYou are already holding ' + entry.held + ' of the coral itself.' : ''),
+          css: 'display:inline-block;margin:2px 5px 2px 0;padding:1px 6px;border-radius:3px;'
+            + 'background:' + (entry.last && shallow ? '#5a3a1c' : UI.bg)
+            + ';border:1px solid ' + (entry.last && shallow ? COLOR_FULL : UI.line)
+            + ';color:' + UI.text + ';font-size:11px;white-space:nowrap;',
+        }, [
+          entry.bride ? 'the Pentamerous Bride' : entry.label,
+          // A coral you are already carrying is a different prospect from one
+          // you have never seen -- same as the card badge's brackets.
+          entry.held
+            ? h('span', { css: 'color:' + UI.dim + ';' }, [' (' + entry.held + ')'])
+            : null,
+          entry.last && shallow
+            ? h('span', { css: 'color:' + COLOR_FULL + ';' }, [' · last chance'])
+            : null,
+        ]);
+      };
+
+      const anything = split.everywhere.length
+        || split.byDepth.some(function (row) { return row.entries.length; });
+
+      banners.push(h('div', {
+        css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent
+          + ';background:' + UI.bgAlt + ';font-size:12px;line-height:1.6;',
+      }, [
+        h('div', { css: 'color:' + UI.accent + ';font-weight:bold;' },
+          ['Unique rewards still down there, by depth']),
+        !holdings
+          ? note(['Your Possessions have not been read, so what you are still missing is not '
+            + 'known. Press Refresh above and this fills in.'])
+          : (!anything
+            ? note(['Nothing unique left to dive for. Everything below this is Favour.'])
+            : h('div', null, [
+              split.everywhere.length
+                ? h('div', { css: 'margin:4px 0 6px;' }, [
+                  h('span', { css: 'color:' + UI.dim + ';' }, ['At every depth: ']),
+                  split.everywhere.map(chip),
+                ])
+                : null,
+              table(
+                [{ text: 'Depth' }, { text: 'Only here, or here as well' }],
+                split.byDepth.map(function (row) {
+                  const here = at.depth === row.depth;
+                  return h('tr', { css: here ? 'background:' + UI.bg + ';' : '' }, [
+                    h('td', {
+                      css: TD + 'white-space:nowrap;color:'
+                        + (here ? UI.accent : UI.text) + ';',
+                    }, [
+                      String(row.depth),
+                      here
+                        ? h('span', { css: 'color:' + COLOR_READY + ';font-size:11px;' },
+                          [' ← you'])
+                        : null,
+                    ]),
+                    h('td', { css: TD }, [
+                      row.entries.length
+                        ? row.entries.map(chip)
+                        : h('span', { css: 'color:' + UI.dim + ';' },
+                          ['— nothing but the corals and Favour']),
+                    ]),
+                  ]);
+                })),
+              note(['A dive commits you to a depth and pays one reward, so the marked ones '
+                + 'are the ones diving deeper throws away for that dive.']),
+            ])),
+      ]));
+    }
+
+    if (state && state.partial) {
+      banners.push(h('div', {
+        css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid #8a6b3b;background:'
+          + UI.bgAlt + ';color:' + UI.dim + ';font-size:12px;line-height:1.5;',
+      }, ['The Myself tab’s search box is filtering the list — anything not on screen '
+        + 'is shown as – rather than guessed at 0.']));
+    }
+
+    // Where the numbers came from, plus the two controls, exactly as the
+    // Factions panel does it.
+    banners.push(h('div', {
+      css: 'margin:10px 0 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;'
+        + 'color:' + UI.dim + ';font-size:11px;',
+    }, [
+      h('span', null, [
+        'Qualities: ' + (state && state.live ? 'live'
+          : (state && state.at ? ageText(state.at) : 'never read'))
+        + '  ·  items: ' + (state && state.itemsAt
+          ? (state.itemsLive ? 'live' : ageText(state.itemsAt)) : 'never read')
+        + (state && state.character ? '  ·  ' + state.character : ''),
+      ]),
+      h('button', {
+        type: 'button',
+        disabled: busy,
+        title: 'Load /myself and /possessions in a hidden frame and re-read them.',
+        css: 'border:1px solid ' + UI.line + ';border-radius:3px;background:transparent;color:'
+          + (busy ? UI.dim : UI.accent) + ';font:11px ' + UI.font + ';padding:1px 7px;'
+          + 'cursor:' + (busy ? 'default' : 'pointer') + ';',
+        on: {
+          click: function () {
+            if (busy || !ctx) return;
+            busy = true;
+            ctx.rerender();
+            refreshBackgroundState().then(function () { ctx.rerender(); });
+          },
+        },
+      }, [busy ? 'Refreshing…' : 'Refresh']),
+      h('label', {
+        title: 'Refresh automatically when this panel opens on stale numbers.',
+        css: 'display:inline-flex;align-items:center;gap:4px;cursor:pointer;',
+      }, [
+        h('input', {
+          type: 'checkbox',
+          checked: autoRefreshEnabled(),
+          on: { change: function (e) { setAutoRefresh(!!e.currentTarget.checked); } },
+        }),
+        'auto',
+      ]),
+    ]));
+
+    // --- the depth control -----------------------------------------------
+    //
+    // Here rather than nowhere because the badges cannot be exact without it
+    // and FL may never show us Full Fathom Five. It is deliberately not
+    // remembered past the tab: a stale depth is a wrong badge.
+    const depthButton = function (n) {
+      const on = at.source === 'set' && at.depth === n;
+      return h('button', {
+        type: 'button',
+        title: n == null ? 'Let the depth be read from the game, if it can be.'
+          : 'You are at Full Fathom Five ' + n + '.',
+        css: 'border:1px solid ' + (on ? UI.accent : UI.line) + ';border-radius:3px;'
+          + 'background:' + (on ? UI.accent : 'transparent') + ';color:'
+          + (on ? '#17190c' : UI.text) + ';font:' + (on ? 'bold ' : '') + '12px ' + UI.font
+          + ';padding:2px 9px;cursor:pointer;',
+        on: {
+          click: function () {
+            fotzSetDepth(n);
+            if (ctx) ctx.rerender();
+          },
+        },
+      }, [n == null ? 'auto' : String(n)]);
+    };
+
+    const depthBlock = h('div', {
+      css: 'margin:10px 0 0;padding:8px 10px;background:' + UI.bgAlt
+        + ';border-left:3px solid ' + (at.depth ? UI.accent : UI.line) + ';font-size:12px;',
+    }, [
+      h('div', { css: 'display:flex;align-items:center;gap:6px;flex-wrap:wrap;' }, [
+        h('span', { css: 'color:' + UI.dim + ';margin-right:4px;' }, ['Your dive depth:']),
+        depthButton(null), depthButton(1), depthButton(2), depthButton(3),
+        depthButton(4), depthButton(5),
+        h('span', { css: 'color:' + (at.depth ? UI.accent : UI.dim) + ';margin-left:4px;' },
+          [depthSourceText(at, floor)]),
+      ]),
+      note([at.depth
+        ? 'Every badge is showing the figure for depth ' + at.depth + '.'
+          + (at.source === 'read'
+            ? ' That reading came off the Myself tab, which opening this panel reloads — '
+              + 'but a dive changes it, so set it here the moment you go deeper.'
+            : '')
+        : 'Without a depth the badges show the range across every depth. Fallen London '
+          + 'only states Full Fathom Five on the Myself tab, never on the diving screen, '
+          + 'so set it here and the badges become exact. Cleared when the tab closes.',
+      ]),
+      note(['The same buttons are in the page while you are in the Royal Approach — '
+        + 'beside Fallen London’s Travel button and above your hand — so you need '
+        + 'not open this panel to correct the depth mid-dive.']),
+    ]);
+    banners.push(depthBlock);
+
+    // --- the hand ---------------------------------------------------------
+    const handBlock = hand.length
+      ? h('div', {
+        css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent
+          + ';background:' + UI.bgAlt + ';font-size:12px;line-height:1.6;',
+      }, [
+        h('div', { css: 'color:' + UI.accent + ';font-weight:bold;' }, [
+          hand.length === 1 ? '1 festival card on screen'
+            : hand.length + ' festival cards on screen',
+          h('span', { css: 'color:' + UI.dim + ';font-weight:normal;' },
+            [' — what you still need first, then by value']),
+        ]),
+        hand.map(function (rated) {
+          return h('div', null, [
+            rated.spec ? makeBadge(rated.spec, FOTZ_CLASS) : null,
+            h('span', { css: 'margin-left:6px;' }, [rated.card.name]),
+            h('span', { css: 'color:' + UI.dim + ';' }, [
+              ' — ' + rated.opts.map(function (o) {
+                return o.text + (o.favour ? ' (' + o.favour + ')' : '');
+              }).join(' / '),
+            ]),
+            rated.missing.length
+              ? h('div', { css: 'color:' + COLOR_READY + ';' },
+                ['   ' + FOTZ_MARK_NEED + ' ' + rated.missing.join(', ')])
+              : null,
+          ]);
+        }),
+      ])
+      : h('div', {
+        css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.line
+          + ';background:' + UI.bgAlt + ';color:' + UI.dim + ';font-size:12px;line-height:1.5;',
+      }, ['No festival cards on screen. Everything below is the checklist and the '
+        + 'reference tables for when there are.']);
+    banners.push(handBlock);
+
+    // --- the checklist ----------------------------------------------------
+    const groupBlocks = collection.groups.map(function (group) {
+      const inner = group.corals
+        ? group.corals.map(function (entry) {
+          return h('div', { css: 'margin-top:8px;' }, [
+            h('div', { css: 'font-size:12px;color:' + UI.text + ';' }, [
+              wikiLink(entry.coral.coral, entry.coral.coral),
+              h('span', { css: 'color:' + UI.dim + ';font-size:11px;' }, [
+                ' · ' + entry.coral.slot + ' · from ',
+              ]),
+              wikiLink(entry.coral.card, entry.coral.card,
+                { color: UI.dim, fontSize: '11px' }),
+              entry.inHand
+                ? h('span', {
+                  css: 'margin-left:6px;color:' + COLOR_READY + ';font-size:11px;',
+                }, [entry.inHand + ' in hand'])
+                : null,
+            ]),
+            table(null, entry.rows.map(function (row) {
+              return h('tr', null, [
+                h('td', { css: TD + 'text-align:center;width:1%;' }, [fotzPip(row)]),
+                h('td', { css: TD }, [
+                  h('span', { css: 'color:' + UI.text + ';' }, [
+                    row.pending
+                      ? 'Three ' + row.slot + ', names not published yet'
+                      : 'Any one of three ' + row.slot,
+                  ]),
+                  row.bis
+                    ? h('div', { css: 'color:' + UI.accent + ';font-size:11px;' }, [row.bis])
+                    : null,
+                  // The variant detail is worth SHOWING even though it is no
+                  // longer worth counting: the one you hold is ticked, and the
+                  // Sights band that pays each name is in its tooltip, for the
+                  // times you do want a particular one.
+                  row.variants
+                    ? h('div', { css: 'font-size:11px;margin-top:2px;' },
+                      row.variants.map(function (name, i) {
+                        const mine = row.which.indexOf(name) !== -1;
+                        const band = FOTZ_BANDS[i];
+                        return h('span', {
+                          title: name + ' — Sights at the Festival ' + band.lo + '–' + band.hi
+                            + ' when you break the coral open, or trade a spare to '
+                            + band.trader
+                            + (collection.sightsBand === i ? '\nYour Sights is in this band now.'
+                              : ''),
+                          css: 'margin-right:8px;white-space:nowrap;color:'
+                            + (mine ? UI.accent : UI.dim) + ';',
+                        }, [mine ? '✓ ' + name : name]);
+                      }))
+                    : h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [row.note]),
+                ]),
+              ]);
+            })),
+          ]);
+        })
+        : table(null, group.rows.map(fotzItemRow));
+
+      return h('div', { css: 'margin-top:12px;' }, [
+        h('div', {
+          css: 'font:bold 11px ' + UI.font + ';letter-spacing:.06em;text-transform:uppercase;'
+            + 'color:' + UI.accent + ';',
+        }, [group.title]),
+        note([group.hint]),
+        inner,
+      ]);
+    });
+
+    // --- the ledger -------------------------------------------------------
+    const ledgerBlock = !ledger.known
+      ? note(['Your Possessions have not been read, so there is nothing to total up yet.'])
+      : (ledger.rows.length || ledger.spares.length
+        ? h('div', null, [
+          table([{ text: 'Treasure' }, { text: 'Held', right: true },
+            { text: 'Each', right: true }, { text: 'Favour', right: true }],
+          ledger.rows.map(function (row) {
+            return h('tr', null, [
+              h('td', { css: TD }, [
+                wikiLink(row.name, row.name),
+                row.note ? h('div', { css: 'color:' + UI.dim + ';font-size:11px;' },
+                  [row.note]) : null,
+              ]),
+              h('td', { css: TD + 'text-align:right;' }, [String(row.count)]),
+              h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' },
+                [String(row.each)]),
+              h('td', { css: TD + 'text-align:right;' }, [String(row.subtotal)]),
+            ]);
+          }).concat(ledger.spares.map(function (row) {
+            return h('tr', null, [
+              h('td', { css: TD }, [
+                wikiLink(row.name, row.name),
+                h('span', { css: 'color:' + UI.dim + ';font-size:11px;' }, [' · spare']),
+              ]),
+              h('td', { css: TD + 'text-align:right;' }, [String(row.count)]),
+              h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' },
+                [String(row.each)]),
+              h('td', { css: TD + 'text-align:right;' }, [String(row.subtotal)]),
+            ]);
+          })).concat([
+            h('tr', null, [
+              h('td', { css: TD + 'font-weight:bold;' }, ['Total']),
+              h('td', { css: TD }, ['']),
+              h('td', { css: TD }, ['']),
+              h('td', {
+                css: TD + 'text-align:right;font-weight:bold;color:' + UI.accent + ';',
+              }, [String(ledger.total)]),
+            ]),
+          ])),
+          note(['With the ' + (collection.favour == null ? '–' : collection.favour)
+            + ' Favour you already hold, that is '
+            + (collection.favour == null ? ledger.total + ' plus whatever you have'
+              : collection.favour + ledger.total)
+            + '. Treasures left over when the festival ends become Memories of Distant '
+            + 'Shores at 10 Favour to 1, so trade them.']),
+        ])
+        : note(['No festival treasures on hand. Everything you dive up shows here with '
+          + 'what it trades for.']));
+
+    // --- reference --------------------------------------------------------
+    const depthTable = table(
+      [{ text: 'Card' }, { text: 'Take' }, { text: 'Depth' },
+        { text: 'Favour', right: true }, { text: 'You get' }],
+      FOTZ_CARDS.filter(function (c) { return !c.storylet; }).reduce(function (rows, card) {
+        return rows.concat(card.opts.map(function (opt, i) {
+          const here = at.depth && fotzOptionAt(opt, at.depth);
+          return h('tr', { css: here ? 'background:' + UI.bgAlt + ';' : '' }, [
+            h('td', { css: TD + 'white-space:nowrap;' },
+              [i === 0 ? wikiLink(card.name, card.name) : '']),
+            h('td', { css: TD + 'font-size:11px;' }, [opt.text]),
+            h('td', { css: TD + 'white-space:nowrap;font-size:11px;color:' + UI.dim + ';' },
+              [opt.depths[0] === opt.depths[1] ? String(opt.depths[0])
+                : opt.depths[0] + '–' + opt.depths[1]]),
+            h('td', { css: TD + 'text-align:right;' },
+              [opt.favour ? String(opt.favour) : '—']),
+            h('td', { css: TD + 'font-size:11px;color:' + UI.dim + ';' },
+              [opt.gain || opt.coral || opt.item || '']),
+          ]);
+        }));
+      }, []));
+
+    // --- raising Devotion -------------------------------------------------
+    //
+    // The five supplication options all pay the same 4 CP, so the table is
+    // really a lookup from "which stat am I best at" to "which option". The
+    // stat is the column that matters, which is why it leads and wears a
+    // colour; the name is always spelled out beside the glyph so a font
+    // without the emoji loses nothing.
+    const statPip = function (name) {
+      const stat = FOTZ_STATS[name];
+      return h('span', { css: 'white-space:nowrap;color:' + (stat ? stat.color : UI.text) + ';' }, [
+        h('span', {
+          css: 'font-size:13px;margin-right:5px;',
+          title: name,
+        }, [stat ? stat.icon : '?']),
+        name,
+      ]);
+    };
+
+    const advice = fotzDiveAdvice(
+      { corals: collection.coralsWanted, items: collection.itemsWanted });
+    const ladder = fotzDevotionLadder();
+    const toGo = fotzActionsToDevotion(collection.devotion, advice.level);
+
+    const supplicationBlock = h('div', null, [
+      note(['Every option on ', wikiLink('Supplication on the Shore', 'Supplication on the Shore'),
+        ' pays the same ', h('b', null, ['+4 CP']), ' of Fivefold Devotion, so the only thing '
+        + 'that separates them is which attribute the economy item scales off. But you are only '
+        + 'offered the ones whose ', h('b', null, ['Airs of a Barren Zee']), ' window you are in '
+        + '— usually two of the five — and taking one re-rolls Airs, so you cannot always have '
+        + 'the one you want. These are badged in the game as well, on the options themselves.']),
+      table(
+        [{ text: 'Scales off' }, { text: 'Option' }, { text: 'You get' }, { text: 'Offered at' }],
+        FOTZ_SUPPLICATION.map(function (opt) {
+          return h('tr', null, [
+            h('td', { css: TD + 'white-space:nowrap;' }, [statPip(opt.stat)]),
+            h('td', { css: TD }, [
+              wikiLink(opt.text, opt.text),
+              opt.note
+                ? h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [opt.note])
+                : null,
+            ]),
+            h('td', { css: TD + 'white-space:nowrap;' }, [wikiLink(opt.gain, opt.gain)]),
+            h('td', {
+              css: TD + 'white-space:nowrap;font-size:11px;color:' + UI.dim + ';',
+              title: 'Airs of a Barren Zee ' + opt.airs,
+            }, ['Airs ' + opt.airs]),
+          ]);
+        })),
+      note(['Two more branches share the storylet and raise no Devotion: ',
+        wikiLink('Speak to the Custodial Chef', 'Speak to the Custodial Chef'),
+        ' costs nothing and gives nothing, and seeking out one of the Fathomking’s servants '
+        + 'sets Devotion straight to 11 for 7 Fate — which is otherwise 17 supplications.']),
+
+      // How far to take it, and how far that is from here.
+      h('div', {
+        css: 'margin-top:10px;padding:8px 10px;border-left:3px solid ' + UI.accent
+          + ';background:' + UI.bgAlt + ';font-size:12px;line-height:1.6;',
+      }, [
+        h('div', { css: 'color:' + UI.accent + ';font-weight:bold;' }, [
+          'Stop at Fivefold Devotion ' + advice.level
+            + (advice.depth ? ', then dive to depth ' + advice.depth : ''),
+          collection.devotion != null
+            ? h('span', { css: 'color:' + UI.dim + ';font-weight:normal;' }, [
+              collection.devotion >= advice.level
+                ? ' — you are at ' + collection.devotion + '. Go diving.'
+                : ' — you are at ' + collection.devotion + ', so at most '
+                  + toGo + (toGo === 1 ? ' more action' : ' more actions') + '.',
+            ])
+            : null,
+        ]),
+        note([advice.why]),
+        // The Favour run is the one stage with a real choice in it, so its
+        // three options are laid out rather than folded into the sentence.
+        advice.alternatives
+          ? note(['Devotion ', h('b', null, [String(advice.alternatives[0].level)]),
+            ' is the pick; ',
+            advice.alternatives.slice(1).map(function (alt, i) {
+              return h('span', null, [
+                i ? ', ' : '',
+                'Devotion ' + alt.level
+                  + (alt.depth ? ' at ' + fotzDepthPhrase(alt.depth) : '')
+                  + ' pays ' + alt.fpa + (alt.note ? ' ' + alt.note : ''),
+              ]);
+            }),
+            '. Favour per action, from the comment’s own simulation.'])
+          : null,
+        note(['Staged after ',
+          h('a', {
+            href: 'https://fallenlondon.wiki/wiki/Fruits_of_the_Zee_Festival_(Guide)'
+              + '#cs-comment-99376',
+            target: '_blank', rel: 'noopener',
+            css: 'color:' + UI.accent + ';',
+          }, ['a comment on the guide']),
+          ' — collect in depth order, then grind Favour.']),
+        collection.coralsWanted == null
+          ? note(['(Counted as a Favour run: your Possessions have not been read, so what '
+            + 'you still need is not known.)'])
+          : null,
+        collection.devotion != null && collection.devotion < advice.level
+          ? note(['"At most" because Fallen London shows the level but not the change points '
+            + 'inside it, so this assumes you have only just reached ' + collection.devotion
+            + '.'])
+          : null,
+      ]),
+
+      table(
+        [{ text: 'Devotion' }, { text: 'CP', right: true },
+          { text: 'Supplications', right: true }, { text: 'With the dive', right: true }],
+        ladder.map(function (row) {
+          const here = collection.devotion === row.level;
+          const target = advice.level === row.level;
+          return h('tr', {
+            css: target ? 'background:' + UI.bgAlt + ';' : '',
+          }, [
+            h('td', { css: TD + 'color:' + (target ? UI.accent : UI.text) + ';' }, [
+              String(row.level),
+              here ? h('span', { css: 'color:' + COLOR_READY + ';' }, [' ← you']) : null,
+              row.level === 5
+                ? h('span', { css: 'color:' + UI.dim + ';font-size:11px;' }, [' minimum'])
+                : null,
+              row.level === 11
+                ? h('span', { css: 'color:' + UI.dim + ';font-size:11px;' }, [' cap'])
+                : null,
+            ]),
+            h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' }, [String(row.cp)]),
+            h('td', { css: TD + 'text-align:right;' }, [String(row.actions)]),
+            h('td', { css: TD + 'text-align:right;color:' + UI.dim + ';' }, [String(row.dive)]),
+          ]);
+        })),
+      note(['Devotion is pyramidal, so each level costs one more change point than the last. '
+        + 'A dive itself is 2 actions on top — one to leave the boat, one to claim the '
+        + 'treasure. Diving deeper is free, but failing the attempt ends the dive.']),
+    ]);
+
+    const stallTable = table([{ text: 'Item' }, { text: 'Favour', right: true }],
+      FOTZ_STALL.concat(FOTZ_EQUIPMENT.map(function (e) {
+        return { name: e.name, favour: e.stall, slot: e.slot };
+      })).sort(function (a, b) { return a.favour - b.favour; })
+        .map(function (item) {
+          const afford = collection.favour != null && collection.favour >= item.favour;
+          return h('tr', null, [
+            h('td', { css: TD }, [wikiLink(item.name, item.name)]),
+            h('td', {
+              css: TD + 'text-align:right;color:' + (afford ? COLOR_READY : UI.dim) + ';',
+              title: afford ? 'You can afford this now.' : '',
+            }, [String(item.favour)]),
+          ]);
+        }));
+
+    const body = h('div', { css: 'padding:0 12px 12px;' }, [
+      banners,
+
+      section('Still missing', h('div', null, groupBlocks)),
+
+      section('Treasures to trade', ledgerBlock),
+
+      section('Raising Fivefold Devotion', supplicationBlock),
+
+      section('What each card pays, by depth', h('div', null, [
+        depthTable,
+        note(['One reward per dive. The wiki’s best all-round line is to raise Fivefold '
+          + 'Devotion to 10 and then keep diving until a card worth 300 Favour or more '
+          + 'turns up, or you hit the bottom.']),
+      ])),
+
+      section('Buying it instead', h('div', null, [
+        stallTable,
+        note([
+          'Plus a wrecked shipment for 95 Favour — a random parcel of saleable items '
+            + 'worth about 9.4 Echoes, so a shade under the flat 0.1 Echo per Favour '
+            + 'guaranteed by ',
+          FOTZ_ECONOMY.map(function (item, i) {
+            return h('span', null, [
+              i ? (i === FOTZ_ECONOMY.length - 1 ? ' and ' : ', ') : '',
+              wikiLink(item.name, item.name),
+              h('span', { css: 'color:' + UI.dim + ';' }, [' (' + item.favour + ')']),
+            ]);
+          }),
+          '.',
+        ]),
+      ])),
+
+      h('div', { css: 'margin-top:12px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+        h('div', null, ['The badge on a card is the Thalassic Favour its treasure trades '
+          + 'for. ', h('b', null, [FOTZ_MARK_NEED]), ' means it also offers something you '
+          + 'have not got; ', h('b', null, [FOTZ_MARK_DONE]), ' that you already hold '
+          + 'everything it offers; ', h('b', null, [FOTZ_MARK_UNSURE]),
+        ' that your Possessions have not been read, so neither can be said. A coral or '
+          + 'the Bride pays no Favour, so those are labelled instead and coloured by '
+          + 'whether you still need them. A card offering a named piece of unique '
+          + 'equipment adds “item” after its figure, since it is worth more than the '
+          + 'Favour it trades for; the brackets on “item” or “coral” are how many you '
+          + 'are already carrying, and for an item that is how many are spare. Tap a '
+          + 'badge to read what is behind it — the hover tooltip is invisible on a '
+          + 'phone.']),
+        h('div', { css: 'margin-top:6px;' }, ['Data from ',
+          wikiLink('Fruits of the Zee Festival (Guide)', 'Fruits of the Zee Festival (Guide)'),
+          ', its Item Comparison subpage, and the individual card and option pages on the '
+          + 'Fallen London wiki.']),
+      ]),
+    ]);
+
+    return body;
+  }
+
+  // === feature: the depth control, in the page ===========================
+  //
+  // CONFIRMED WORKING in-game (2026-09-04), both mounts: the tap sets the
+  // depth and every badge in the hand re-quotes itself.
+  //
+  // Full Fathom Five decides every figure the festival badges quote, and
+  // Fallen London does not render it on the diving screen at all -- so the
+  // panel has always carried a control for setting it by hand. This is that
+  // control, in the page, where the dive is: you go one deeper, you tap the
+  // next number, and every badge in the hand is right again without opening
+  // anything.
+  //
+  // It appears in TWO places on purpose, because they are reached differently:
+  //
+  //   docked  beside Fallen London's travel control, immediately behind the UX
+  //           button Fallen London UX Enhancers docks there
+  //           (`launcherDockHost`), so it is part of the chrome and always in
+  //           the same spot. Without that script, or with its button set to
+  //           float, there is no docked copy; the in-page one is unaffected.
+  //           In the mobile
+  //           banner a row of six buttons would be wider than the whole icon
+  //           strip, so there it collapses to ONE button that shows the depth
+  //           and cycles auto -> 1 -> ... -> 5 -> auto -- which is also the
+  //           quickest thing on a phone, since going a level deeper is then
+  //           one tap.
+  //   in-page above the diving hand, which is where you are already looking.
+  //
+  // Only in the Royal Approach. Anywhere else both are removed -- and
+  // `forgetStaleDepth` has thrown the setting away by then, so the control and
+  // the badges can never disagree about it.
+  //
+  // Everything here has to be IDEMPOTENT and quiet, because it is redrawn by
+  // the same debounced scan whose MutationObserver its own writes would
+  // trigger: rebuilding the buttons on every scan is an infinite loop. Hence
+  // the signature flag -- the same trick `attachBadge` uses, a dataset entry
+  // holding the value the node was last drawn for.
+
+  const DEPTH_ROW_ID = 'fl-ux-depth-row';
+  const DEPTH_DOCK_ID = 'fl-ux-depth-dock';
+  // UX Enhancers' launcher root and button. A CROSS-FILE CONTRACT: these are
+  // that script's ids, and the docked control is found by them. Change them in
+  // both scripts or not at all.
+  const LAUNCHER_ID = 'fl-ux-launcher';
+  const LAUNCHER_BUTTON_ID = 'fl-ux-launcher-button';
+  const DEPTH_SIG_FLAG = 'flUxDepthSig';
+  const DEPTH_CHOICES = [null, 1, 2, 3, 4, 5];
+
+  // A LIGHT BLUE card, not the dark chrome `UI` gives the panels (changed
+  // 2026-09-04, on the author's request, and confirmed in the page). The reason it differs is where it
+  // lives: a panel is a screen of ours that you opened, and dark is right
+  // there, but this thing sits in Fallen London's own page -- over the dark
+  // storylet column, beside the travel control -- where one more dark box is
+  // one more thing to look past. Light blue reads as ours, and as a control.
+  //
+  // It also puts the control in the same visual family as the badges it
+  // governs, whose ramp starts at aqua and light blue.
+  //
+  // A light card means dark text, the same trade FOTZ_INK makes: `UI.text` is
+  // a cream meant for a near-black background and is illegible on this.
+  const DEPTH_BG = '#cfe6f7';   // the card
+  const DEPTH_EDGE = '#8fbfe0'; // its border, and an unchosen button's
+  const DEPTH_INK = '#14181c';  // everything written on it
+  const DEPTH_DIM = '#476076';  // ...except the quieter half, which is this
+  const DEPTH_ON = '#1b6499';   // the depth you actually chose
+
+  let depthRow = null;
+  let depthDock = null;
+
+  // In the Royal Approach. The greeting is the gate; where there is no
+  // greeting to read at all, an unmistakable dive hand still proves it -- the
+  // same escape hatch `fotzWhere` keeps.
+  function showDepthControl() {
+    if (inDiveArea()) return true;
+    return !normalizeName(currentArea()) && fotzHandConfirms();
+  }
+
+  // Where the one-button form goes next. Anything but a hand-set depth starts
+  // the cycle at 1 rather than stepping off a number you did not choose.
+  function nextDepthChoice(at) {
+    if (at.source !== 'set') return 1;
+    const i = DEPTH_CHOICES.indexOf(at.depth);
+    return DEPTH_CHOICES[(i + 1) % DEPTH_CHOICES.length];
+  }
+
+  // What the drawn control depends on. The age BUCKET rather than the
+  // timestamp: a banked reading says how old it is in words, so those words
+  // have to be allowed to change -- but only every so often, or this would
+  // redraw on every scan and the observer would never settle.
+  function depthSig(at, floor) {
+    const age = at.at ? Math.floor((Date.now() - at.at) / 15000) : 'x';
+    return [at.depth || 'x', at.source || '-', floor || 'x', age].join('/');
+  }
+
+  // Setting the depth has to reach three things: these controls, the badges
+  // (whose flag carries the depth, so a scan is enough to redraw them), and a
+  // Fruits of the Zee panel that happens to be open behind all this.
+  function setDepthFromControl(n) {
+    fotzSetDepth(n);
+    try {
+      fotzDepthControls();
+    } catch (e) { /* the scan below gets another go at it */ }
+    if (fotzPanelCtx) {
+      try {
+        fotzPanelCtx.rerender();
+      } catch (e) { /* ditto */ }
+    }
+    schedule();
+  }
+
+  // The docked form sits inside Fallen London's own chrome and the in-page one
+  // sits directly above a hand of cards. Neither click is the game's to hear.
+  function depthTap(handler) {
+    return function (e) {
+      if (e && e.preventDefault) e.preventDefault();
+      if (e && e.stopPropagation) e.stopPropagation();
+      handler();
+    };
+  }
+
+  // The chosen depth is a solid blue chip on the light card; the rest are
+  // outlines. That is the one distinction the control has to make at a glance,
+  // and it survives being the only thing you can see out of the corner of an
+  // eye while you are reading the cards themselves.
+  function depthChoiceButton(n, at) {
+    const on = at.source === 'set' && at.depth === n;
+    return h('button', {
+      type: 'button',
+      title: n == null
+        ? 'Stop overriding it — read the depth off Full Fathom Five where that is possible.'
+        : 'You are at Full Fathom Five ' + n + '.',
+      css: 'border:1px solid ' + (on ? DEPTH_ON : DEPTH_EDGE) + ';border-radius:3px;'
+        + 'background:' + (on ? DEPTH_ON : 'transparent') + ';color:'
+        + (on ? '#ffffff' : DEPTH_INK) + ';font:' + (on ? 'bold ' : '') + '12px ' + UI.font
+        + ';padding:1px 7px;margin:0;line-height:1.5;cursor:pointer;',
+      on: { click: depthTap(function () { setDepthFromControl(n); }) },
+    }, [n == null ? 'auto' : String(n)]);
+  }
+
+  // The card itself, wherever it is drawn. Both mounts share this so the
+  // docked copy and the in-page one cannot drift apart.
+  function styleDepthCard(host, at) {
+    host.style.cssText = 'display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;'
+      + 'box-sizing:border-box;padding:5px 9px;border-radius:4px;'
+      + 'background:' + DEPTH_BG + ';border:1px solid ' + DEPTH_EDGE + ';'
+      + 'border-left:3px solid ' + (at.depth ? DEPTH_ON : DEPTH_EDGE) + ';'
+      + 'color:' + DEPTH_INK + ';list-style:none;vertical-align:middle;';
+  }
+
+  function fillDepthRow(host, at, floor) {
+    host.textContent = '';
+    host.appendChild(h('span', { css: 'color:' + DEPTH_DIM + ';font:11px ' + UI.font + ';' },
+      ['Dive depth:']));
+    for (const n of DEPTH_CHOICES) host.appendChild(depthChoiceButton(n, at));
+    host.appendChild(h('span', {
+      css: 'color:' + (at.depth ? DEPTH_ON : DEPTH_DIM) + ';font:11px ' + UI.font + ';',
+    }, [depthSourceText(at, floor)]));
+  }
+
+  function fillDepthCycle(host, at, floor) {
+    const next = nextDepthChoice(at);
+    host.textContent = '';
+    host.appendChild(h('button', {
+      type: 'button',
+      title: 'Dive depth: ' + depthSourceText(at, floor) + '. Tap for '
+        + (next == null ? 'auto' : next) + '.',
+      css: 'border:0;border-radius:3px;background:transparent;color:'
+        + (at.depth ? DEPTH_ON : DEPTH_DIM) + ';font:' + (at.depth ? 'bold ' : '') + '15px '
+        + UI.font + ';padding:0 2px;margin:0;line-height:1;cursor:pointer;',
+      on: { click: depthTap(function () { setDepthFromControl(next); }) },
+    }, ['🌊' + (at.depth || '?')]));
+  }
+
+  // Where UX Enhancers has docked its launcher button, as a host to queue up
+  // behind, or null. Read off the page by id, because the button belongs to
+  // the other script: docked, its parent is a wrapper -- a `span` beside the
+  // Travel button, an `li` in the mobile banner -- inside Fallen London's own
+  // chrome; floating, its parent is the launcher's root on the body, and there
+  // is nothing in the chrome to sit behind.
+  function launcherDockHost() {
+    const button = document.getElementById(LAUNCHER_BUTTON_ID);
+    const dock = button && button.parentNode;
+    const container = dock && dock.parentNode;
+    if (!dock || !container || dock.nodeType !== 1 || dock.id === LAUNCHER_ID) return null;
+    const tag = String(dock.tagName || '').toLowerCase();
+    if (tag !== 'li' && tag !== 'span') return null;
+    return { container: container, tag: tag, className: dock.className || '', after: dock };
+  }
+
+  // Docked immediately BEHIND the UX button, wherever UX Enhancers has put it:
+  // the launcher claims the place right after the travel control, and the two
+  // must not fight over it. The wrapper copies the button's in shape and class,
+  // so in the mobile banner it is one more `li.banner-item`.
+  function dockDepthControl(at, floor) {
+    const host = launcherDockHost();
+    if (!host) {
+      if (depthDock) {
+        depthDock.remove();
+        depthDock = null;
+      }
+      return;
+    }
+    const banner = host.tag === 'li';
+    if (!depthDock || depthDock.tagName !== host.tag.toUpperCase()) {
+      if (depthDock) depthDock.remove();
+      depthDock = h(host.tag, { id: DEPTH_DOCK_ID, className: host.className });
+    } else if (depthDock.className !== host.className) {
+      depthDock.className = host.className;
+    }
+    const sig = (banner ? 'banner' : 'row') + '/' + depthSig(at, floor);
+    if (depthDock.dataset[DEPTH_SIG_FLAG] !== sig) {
+      // The wrapper IS the card, in both shapes -- in the banner it is one
+      // light blue chip in the row of icons, which is what a control of ours
+      // should look like there. `margin` is the one thing the two disagree on:
+      // the banner packs its items tight and the sidebar does not.
+      styleDepthCard(depthDock, at);
+      depthDock.style.margin = banner ? '0 0 0 4px' : '4px 0 4px 8px';
+      if (banner) fillDepthCycle(depthDock, at, floor);
+      else fillDepthRow(depthDock, at, floor);
+      depthDock.dataset[DEPTH_SIG_FLAG] = sig;
+    }
+    if (depthDock.previousElementSibling !== host.after) {
+      host.container.insertBefore(depthDock, host.after.nextSibling);
+    }
+  }
+
+  // Above the hand. `.hand` is the block both layouts wrap the cards in -- the
+  // same markup `eachCardName`'s first two selectors hang off -- with the
+  // full-width layout's card container as the fallback if that is all there is.
+  //
+  // INSERTED rather than appended, which is the one place this is less
+  // conservative than the launcher's docking: the control belongs above the
+  // cards, not under them. React tracks its children by reference, so a
+  // foreign node between two of them survives its inserts and its removes; and
+  // if a re-render does take ours, the next scan puts it back.
+  function mountDepthRow(at, floor) {
+    const card = document.querySelector('.hand__card-container');
+    const hand = document.querySelector('.hand') || (card ? card.parentElement : null);
+    if (!hand || !hand.parentNode) {
+      if (depthRow) {
+        depthRow.remove();
+        depthRow = null;
+      }
+      return;
+    }
+    if (!depthRow) {
+      depthRow = h('div', {
+        id: DEPTH_ROW_ID,
+        title: 'Every Fruits of the Zee badge below is quoted at this depth.',
+      });
+    }
+    const sig = depthSig(at, floor);
+    if (depthRow.dataset[DEPTH_SIG_FLAG] !== sig) {
+      styleDepthCard(depthRow, at);
+      // The one difference from the docked copy: above the hand it spans the
+      // column rather than shrink-wrapping, so it reads as a header for the
+      // cards under it instead of a stray chip floating over them.
+      depthRow.style.display = 'flex';
+      depthRow.style.width = '100%';
+      depthRow.style.margin = '0 0 8px';
+      fillDepthRow(depthRow, at, floor);
+      depthRow.dataset[DEPTH_SIG_FLAG] = sig;
+    }
+    if (depthRow.parentNode !== hand.parentNode || depthRow.nextElementSibling !== hand) {
+      hand.parentNode.insertBefore(depthRow, hand);
+    }
+  }
+
+  function fotzDepthControls() {
+    if (!showDepthControl()) {
+      if (depthRow) {
+        depthRow.remove();
+        depthRow = null;
+      }
+      if (depthDock) {
+        depthDock.remove();
+        depthDock = null;
+      }
+      return;
+    }
+    const at = fotzDepth();
+    const floor = at.depth ? null : fotzDepthFloor();
+    dockDepthControl(at, floor);
+    mountDepthRow(at, floor);
+  }
+
+  // === feature registry ==================================================
+
+  const FEATURES = [
+    // Not a visible feature: it watches for the Myself and Possessions tabs
+    // going by and banks the festival's qualities and the Port Carnelian purse
+    // off the first, and how many of each item you hold off the second, which
+    // is what lets a card badge say "you still need this".
+    { name: 'fotz-capture', run: captureFotzState },
+    { name: 'spite-card-ratings', run: spiteCardRatings },
+    { name: 'zee-card-ratings', run: zeeCardRatings },
+    { name: 'fotz-card-ratings', run: fotzCardRatings },
+    // How deep you are, set in the page rather than behind the launcher. AFTER
+    // the ratings, because `fotzCardRatings` is where `forgetStaleDepth` runs:
+    // a depth thrown away on surfacing is gone before the control can draw it.
+    { name: 'fotz-depth-control', run: fotzDepthControls },
+    // The only feature that decorates a storylet's OPTIONS rather than cards.
+    { name: 'fotz-supplication', run: fotzSupplicationBranches },
+    // Port Carnelian deals no opportunity cards at all, so this one badges the
+    // storylet list and the branches inside an opened storylet instead. It
+    // shares `.branch__title` with the feature above and owns a different class
+    // and flag, so the two never clear each other.
+    { name: 'port-carnelian', run: pcRatings },
+    // The third feature on `.branch__title`, and the first that has to work out
+    // WHICH of three islands a branch belongs to before it can say anything:
+    // "Time to go", "Tarry a little" and "Cut it fine" are on all three and pay
+    // a different research page on each.
+    { name: 'scientific-voyages', run: vsdRatings },
+  ];
+
+  // A panel is a screen of its own behind UX Enhancers' launcher menu: a
+  // { id, icon, label, hint, render } entry. `render(ctx)` returns the element
+  // to show and is called fresh on every open, so a panel showing live values
+  // never has to invalidate a cache; `ctx.rerender()` redraws its body. They
+  // are handed to the launcher through PANEL_REGISTRY, in this order, after
+  // the launcher's own.
+  const PANELS = [
+    {
+      id: 'zailing',
+      icon: '⚓',
+      label: 'Zailing',
+      hint: 'Routes, Zee Peril, Troubled Waters and every card at zee',
+      render: renderZailingPanel,
+    },
+    {
+      id: 'port-carnelian',
+      icon: '🐅',
+      label: 'Port Carnelian',
+      hint: 'A governor’s term: every option by the clock, what it changes, and what '
+        + 'the two currencies cash in for',
+      render: renderPortCarnelianPanel,
+    },
+    {
+      id: 'scientific-voyages',
+      icon: '🔬',
+      label: 'Scientific Voyages',
+      hint: 'The three islands, every action on them, and what the three kinds of '
+        + 'research page are finally worth',
+      render: renderVsdPanel,
+    },
+    {
+      id: 'fruits-of-the-zee',
+      icon: '🐚',
+      label: 'Fruits of the Zee',
+      hint: 'What the festival still owes you, what your treasures trade for, and '
+        + 'what every diving card pays',
+      render: renderFotzPanel,
+    },
+  ];
+
+  function registerPanels() {
+    const shared = sharedPanels();
+    if (!shared) return;
+    for (const panel of PANELS) {
+      if (!shared.some(function (p) { return p && p.id === panel.id; })) shared.push(panel);
+    }
+  }
+
+  // === dispatch ==========================================================
+
+  let pending = false;
+  function scan() {
+    pending = false;
+    // Before anything is drawn: a tap-to-read panel whose badge React has
+    // since thrown away is pointing at nothing.
+    pruneTip();
+    for (const feature of FEATURES) {
+      try {
+        feature.run();
+      } catch (e) {
+        console.error('FL Choice Helper: feature "' + feature.name + '" failed.', e);
+      }
+    }
+  }
+  function schedule() {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(scan);
+  }
+
+  registerPanels();
+  // A page UX Enhancers loaded in a hidden frame is a page this script would
+  // otherwise load again for itself. `schedule()` afterwards, because banking
+  // a reading changes nothing in the page and so would redraw no badge.
+  onSharedFrame(function (path, doc) {
+    if (path === '/myself') {
+      const got = readQualities(doc);
+      bankFotzQualities(got);
+      bankPcQualities(got);
+    } else if (path === '/possessions') {
+      bankItemCounts(readPossessionCounts(doc));
+    }
+    schedule();
+  });
+
+  scan();
+  new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true });
+})();

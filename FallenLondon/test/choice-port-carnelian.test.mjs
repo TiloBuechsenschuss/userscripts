@@ -1,4 +1,4 @@
-// Ad-hoc test for FallenLondon/ux-enhancers.js's Port Carnelian badges.
+// Ad-hoc test for FallenLondon/choice-helper.js's Port Carnelian badges.
 //
 // There's no test runner in this repo (see AGENTS.md). This is a standalone
 // Node script: it reads the userscript, evaluates its IIFE against a stub DOM
@@ -37,14 +37,14 @@
 //
 // Numbers come from Port Carnelian (Guide) on fallenlondon.wiki.
 //
-//   node FallenLondon/test/ux-port-carnelian.test.mjs
+//   node FallenLondon/test/choice-port-carnelian.test.mjs
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const src = readFileSync(join(here, '..', 'ux-enhancers.js'), 'utf8');
+const src = readFileSync(join(here, '..', 'choice-helper.js'), 'utf8');
 
 // --- stub DOM --------------------------------------------------------------
 

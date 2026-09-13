@@ -225,7 +225,7 @@ const wrapped = src
     + ' parseQualityItem, readQualities, factionsFromQualities, captureFactionState,'
     + ' characterName, CACHE_KEY, ITEMS_KEY, ageText, readPossessions, itemNameFromLabel,'
     + ' itemKey,'
-    + ' autoRefreshEnabled, setAutoRefresh, stateIsFresh, currentArea,'
+    + ' autoRefreshEnabled, setAutoRefresh, stateIsFresh,'
     + ' itemStatus, tierAt, readyItems, fullFavours, findItemNode, clickItem, openItem,'
     + ' runPendingItem, readPending, PENDING_KEY }; })();');
 const fn = new Function(
@@ -729,13 +729,11 @@ session.clear();
 // --- the launcher ----------------------------------------------------------
 
 check('the menu offers the Factions, Zailing and Fruits of the Zee panels',
-  api.PANELS.map((p) => p.id), ['factions', 'zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee']);
+  api.PANELS.map((p) => p.id), ['factions']);
 
 check('the registry holds the launcher, the background jobs and the card ratings',
   api.FEATURES.map((f) => f.name),
-  ['launcher', 'faction-capture', 'fotz-capture', 'pending-item',
-    'spite-card-ratings', 'zee-card-ratings', 'fotz-card-ratings', 'fotz-depth-control',
-    'fotz-supplication', 'port-carnelian', 'scientific-voyages']);
+  ['launcher', 'faction-capture', 'pending-item']);
 
 // --- the leading article ---------------------------------------------------
 //

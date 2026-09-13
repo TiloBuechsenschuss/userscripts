@@ -32,9 +32,11 @@
 //  - The docked button is never mistaken for the travel control itself. Parked
 //    in `.storylets__welcome-and-travel` it matches one of TRAVEL_SELECTORS
 //    literally, which would be a quiet little infinite regress.
-//  - The Fruits of the Zee DEPTH CONTROL, which docks by the same rules and is
-//    the second thing to want the one spot beside the travel control: it has to
-//    queue up behind the launcher rather than fight it for that place, be as
+//  - The Fruits of the Zee DEPTH CONTROL, which is choice-helper.js's and so is
+//    loaded here beside this script, the way both are in a real page. It is the
+//    second thing to want the one spot beside the travel control: it finds the
+//    launcher button by id and has to queue up behind it rather than fight it
+//    for that place, be as
 //    idempotent as the launcher is (it is redrawn by the scan its own writes
 //    trigger, so a rebuild every pass would be an infinite loop), collapse to
 //    one button in the mobile banner, and be gone entirely once you surface.
@@ -325,15 +327,31 @@ const wrapped = src
     'return { mountLauncher, dockLauncher, positionLauncher, findTravelAnchor,'
     + ' dockPreferred, setDockPreferred, LAUNCHER_ID, LAUNCHER_BUTTON_ID,'
     + ' fullscreenPreferred, setFullscreenPreferred, applyPanelFullscreen,'
-    + ' PANEL_FULLSCREEN_CSS, PANEL_WINDOWED_CSS, PANELS,'
-    + ' fotzDepthControls, fotzSetDepth, DEPTH_ROW_ID, DEPTH_DOCK_ID,'
-    + ' DEPTH_BG, DEPTH_EDGE, DEPTH_INK, DEPTH_DIM, DEPTH_ON }; })();');
+    + ' PANEL_FULLSCREEN_CSS, PANEL_WINDOWED_CSS, PANELS }; })();');
 const api = new Function(
   'document', 'MutationObserver', 'requestAnimationFrame', 'getComputedStyle', 'console',
   'URLSearchParams', 'localStorage', 'sessionStorage', 'location', 'Event', 'window',
   wrapped + '\nreturn globalThis.__flux;')(
   doc, class { observe() {} }, (f) => f(), () => ({ position: 'static' }), console,
   URLSearchParams, storage, storage, { pathname: '/' }, class {}, win);
+
+// The depth control is Choice Helper's since the split, and it docks behind
+// THIS script's button, which it finds by id. So both scripts are loaded into
+// the one page, the way a player with both installed has them, and its
+// internals are merged into `api` so the depth-control checks below read as
+// they always did. Same `window` too: that is where its panels are registered.
+const choiceSrc = readFileSync(join(here, '..', 'choice-helper.js'), 'utf8');
+Object.assign(api, new Function(
+  'document', 'MutationObserver', 'requestAnimationFrame', 'getComputedStyle', 'console',
+  'URLSearchParams', 'localStorage', 'sessionStorage', 'location', 'Event', 'window',
+  choiceSrc
+    .replace('(function () {', 'globalThis.__flch = (function () {')
+    .replace(/\}\)\(\);\s*$/,
+      'return { fotzDepthControls, fotzSetDepth, DEPTH_ROW_ID, DEPTH_DOCK_ID,'
+      + ' DEPTH_BG, DEPTH_EDGE, DEPTH_INK, DEPTH_DIM, DEPTH_ON }; })();')
+  + '\nreturn globalThis.__flch;')(
+  doc, class { observe() {} }, (f) => f(), () => ({ position: 'static' }), console,
+  URLSearchParams, storage, storage, { pathname: '/' }, class {}, win));
 
 let failures = 0;
 function check(label, got, expected) {
@@ -665,6 +683,45 @@ check('the card is light, and every colour written on it is readable against it'
 
   api.fotzSetDepth(null);
   setArea(null);
+}
+
+// --- panels from the other script ------------------------------------------
+//
+// Choice Helper's panels reach this menu through `window.__flUxPanels`, and
+// nothing promises which of the two scripts runs first. So the menu is synced
+// when it is built and again every time it OPENS -- a panel registered after
+// the menu was drawn has to turn up on the next open, not never.
+{
+  layout = wideLayout();
+  api.mountLauncher();
+  const menu = () => root().children[1];
+  const labels = () => menu().querySelectorAll('button').map((b) => b.textContent);
+  const open = () => {
+    menu().style.display = 'none';
+    button().dispatch('click');
+  };
+
+  check('Choice Helper registered its four panels on the page, in order',
+    (win.__flUxPanels || []).map((p) => p.id),
+    ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee']);
+
+  open();
+  check('the menu lists them after the launcher\'s own Factions panel',
+    labels().slice(0, 5),
+    ['⚔  Factions', '⚓  Zailing', '🐅  Port Carnelian', '🔬  Scientific Voyages',
+      '🐚  Fruits of the Zee']);
+
+  win.__flUxPanels.push({ id: 'late', icon: 'L', label: 'Late', hint: '', render: () => makeEl('div') });
+  win.__flUxPanels.push({ id: 'factions', icon: 'X', label: 'Impostor', hint: '', render: () => makeEl('div') });
+  win.__flUxPanels.push({ id: 'broken', icon: 'B', label: 'Broken', hint: '' });
+  open();
+  check('a panel registered after the menu was built shows up the next time it opens',
+    labels().includes('L  Late'), true);
+  check('...an id the menu already has is not listed twice, and one with no render is dropped',
+    [labels().filter((t) => t.includes('Factions') || t.includes('Impostor')),
+      labels().some((t) => t.includes('Broken'))],
+    [['⚔  Factions'], false]);
+  win.__flUxPanels.splice(4);
 }
 
 // --- the panel's fullscreen toggle -----------------------------------------

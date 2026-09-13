@@ -64,7 +64,8 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   with fallbacks rather than assuming a fixed structure. Match this style when extending them.
 - Inline styles via `el.style.cssText`; no stylesheets.
 - **An item name from the wiki is not the item name in the game.** Every table in
-  `ux-enhancers.js` takes an item's name from its **wiki page title**, which keeps the leading
+  `FallenLondon/choice-helper.js` and `FallenLondon/ux-enhancers.js` takes an item's name from
+  its **wiki page title**, which keeps the leading
   article — *A Faceted Decanter of Drownie Effluvia*, *An Inquisitive Lamp-cat*, *The Seal of
   St Joshua*. Fallen London's own Possessions `aria-label` **drops it**: the captured markup
   reads `Scrimshander Carving Knife`, not *A Scrimshander Carving Knife*. Compare the two with
@@ -110,7 +111,7 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
 
   When a test would otherwise assert only "these two colours differ", assert instead that the
   **text alone** still tells them apart — see the palette block in
-  `FallenLondon/test/ux-port-carnelian.test.mjs`.
+  `FallenLondon/test/choice-port-carnelian.test.mjs`.
 
 ## Game-specific notes
 
@@ -432,6 +433,10 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   `buildEquipOptimizer` (`build` is far too generic here), and `addHealButton`.
   **`#tm-charpane-heal` is a cross-frame API**: `auto-mine.js` reaches into the charpane and
   clicks it when a mining run hits its HP floor. Renaming it silently breaks mining runs.
+  **`skillz.php` hides skills that would do nothing right now** — at full HP it leaves out
+  Cannelloni Cocoon and the other heals. So the shared sessionStorage copy of that page, most
+  often cached at full HP, must never feed the heal button: `runHeal` calls
+  `fetchSkillsDoc(true)` to re-read it on every click. The max buttons may keep using the cache.
   Two separate collapse-all implementations live here on purpose — the autosell one mirrors
   KoL's `sellstuff` cookie, the inventory one `inventory`; different cookies and different
   section markup, so they are not interchangeable.
@@ -855,19 +860,54 @@ navigation. Two consequences:
   live in one `TITLE_SELECTORS` array. Two things are deliberately NOT matched: the unscoped
   `.media__heading` (reused all over the SPA — would over-badge), and `.branch__title`, the per-choice
   titles inside an opened storylet (they're choices, not articles — left unlinked by request).
-- `ux-enhancers.js` is the FL grab-bag, the counterpart of `KingdomOfLoathing/ux-enhancers.js` —
+- **Two FL scripts share one feature-registry design, and they were one file until
+  `ux-enhancers.js` 3.0** (split 2026-09-13, on request). `ux-enhancers.js` is the grab-bag of
+  quality-of-life tweaks — the `launcher`, the **Factions** panel and its "use" button — and
+  `choice-helper.js` is **advice on what storylets and cards do**: every rating badge
+  (`spite-card-ratings`, `zee-card-ratings`, the `fotz-*` features, `port-carnelian`,
+  `scientific-voyages`) and the reference panel built on each one's table (Zailing, Port
+  Carnelian, Scientific Voyages, Fruits of the Zee). The rule that decided where each thing
+  went: **a panel goes where its table's badge goes**, because the two are one transcription. The
+  Factions panel's `!` pips stayed in UX Enhancers — they are about your possessions, not about
+  a storylet. The in-page dive-depth control went with the badges it exists to feed.
+  Both are the counterpart of `KingdomOfLoathing/ux-enhancers.js` —
   but note **what a feature is scoped by differs**. KoL is server-rendered, so each of its
   features declares the `.php` path it belongs to and runs once; FL has one URL and no
   navigation, so a feature here is scoped by *the markup it finds* and is re-run on the debounced
   observer. Adding one: write an idempotent `run()` that bails when its markup is absent, add a
   `{ name, run }` entry to `FEATURES`, and give it **its own badge class and dataset flag** so
   two features can decorate the same element without fighting over one flag.
-  The whole procedure for adding one — where a badge may go, how to source and shape the
-  table, which of the three gate strengths the evidence entitles you to, the tests, and the
-  four other suites that break the moment you touch the registry — is a skill:
+  The whole procedure for adding a badge feature — where a badge may go, how to source and shape
+  the table, which of the three gate strengths the evidence entitles you to, the tests, and the
+  other suites that break the moment you touch the registry — is a skill:
   `.claude/skills/adding-fallen-london-features/SKILL.md`, with a `check.mjs` beside it that
-  audits the wiring.
-  Shared plumbing worth reusing rather than re-deriving: `makeBadge`/`attachBadge` (badge
+  audits `choice-helper.js`'s wiring.
+  **What the two share, and how.** A userscript has no imports, so every helper both need — `h`,
+  `wikiLink`, `normalizeName`/`itemKey`, `UI`/`TH`/`TD`, the Myself and Possessions scrapes,
+  `loadCache`/`saveCache`, `loadInFrame`, the auto-refresh toggle — is **carried in both files,
+  byte for byte**, and `fl-shared-helpers.test.mjs` fails on any declaration the two have in
+  common that has drifted, bar a short list that differs on purpose and says why. Fix a shared
+  helper in both files or that test tells you. What they share at **run time** goes through the
+  page, since both are `@grant none` and so see the page's own `window`:
+  - **`window.__flUxPanels`** (`PANEL_REGISTRY`). Choice Helper pushes its `PANELS` onto it at
+    load; UX Enhancers' menu lists its own `PANELS` and then the registry's, **re-synced every
+    time the menu opens**, so which script loads first does not matter. Without UX Enhancers the
+    badges all still work and the panels have no menu to be in.
+  - **`fl-ux-shared-frame`** (`FRAME_EVENT`). A background refresh boots the whole SPA in a hidden
+    frame, and before the split one boot of `/myself` banked the Factions, festival and Port
+    Carnelian numbers together. Each script now has its own `refreshBackgroundState`, which banks
+    only its own numbers — and `shareFrame` hands the frame's document to the other script from
+    inside `extract`, the only moment it still exists (the listener runs synchronously, before
+    `loadInFrame` removes the frame). The other script banks its numbers off the same boot, and
+    its own refresh then finds a fresh cache and has nothing to do. `SCRIPT_ID` is how a script
+    ignores its own event.
+  - **The launcher's ids** (`fl-ux-launcher`, `fl-ux-launcher-button`). The depth control docks
+    behind the button by finding it by id (`launcherDockHost`). A **cross-file contract**: change
+    them in both scripts or not at all.
+  Storage keys and badge classes kept their `fl-ux-` names through the split on purpose: a
+  returning player's caches are still found under the keys they were banked with, and nothing
+  about a class name is visible to anyone.
+  Shared plumbing in `choice-helper.js` worth reusing rather than re-deriving: `makeBadge`/`attachBadge` (badge
   described as a pure `{text, color, title}` spec, drawn by shared code), `headingName`, and
   `eachCardName`, which walks all three shapes an opportunity card's name takes. Those three
   selectors (`.hand__card-container` + `.hand__image`'s `alt`, `.hand .small-card__body
@@ -889,7 +929,7 @@ navigation. Two consequences:
   heading than the one drawn first. Checking only the immediate sibling then fails to find the
   feature's own stale badge and leaves two of them behind on a reused node. The walk stops at the
   first non-badge sibling and removes only the one carrying that feature's class, so clearing one
-  feature's badge still never touches the other's. `ux-port-carnelian.test.mjs` pins all three of
+  feature's badge still never touches the other's. `choice-port-carnelian.test.mjs` pins all three of
   those, and the stale-badge one fails against the old single-sibling check.
   **The `title` also opens on tap** (added 2026-09-04, on a report that it was unreachable on a
   phone). A badge's whole argument lives in its `title`, and on a touch screen a `title` is
@@ -913,9 +953,11 @@ navigation. Two consequences:
   in-game by the author on 2026-09-04**, phone included — so, unusually for this repo, the
   placement and the swallowed tap are known to work rather than merely reasoned about.
   A feature that wants a screen rather than a decoration registers a **panel** instead: the
-  `launcher` feature mounts a "⚙ UX" button whose menu is built from the `PANELS` registry
-  (`{ id, icon, label, hint, render }`, `render()` called fresh on every open so a live panel
-  never has to invalidate a cache).
+  `launcher` feature mounts a "⚙ UX" button whose menu is built from UX Enhancers' own `PANELS`
+  registry followed by whatever `choice-helper.js` has put on `window.__flUxPanels`
+  (`{ id, icon, label, hint, render }`, `render(ctx)` called fresh on every open so a live panel
+  never has to invalidate a cache). A menu entry needs an `id` and a `render`; a registry entry
+  whose `id` the menu already holds is not listed twice.
   Every panel's sticky header carries a **fullscreen** button beside its close button, and the
   choice is **remembered** in `localStorage` (`fl-ux-panel-fullscreen`), so a long panel opens at
   full size every time rather than needing the button pressed again (added 2026-09-06). The
@@ -1191,9 +1233,15 @@ navigation. Two consequences:
   while `showDepthControl()` says you are in the Royal Approach -- gated on the greeting, with
   the same "an unmistakable dive hand outranks an unreadable greeting" escape hatch `fotzWhere`
   keeps. It mounts in **two** places, which answer different questions: **docked** beside FL's
-  travel control by exactly the launcher's rules (`findDockHost`), and **in-page** immediately
-  above `.hand`. The docked one sits *behind `launcherDock`* where that exists, so the two never
-  fight for the one spot after the travel anchor. In the **mobile banner** a row of six buttons
+  travel control, and **in-page** immediately above `.hand`. Since the split the docked copy
+  belongs to a different script from the launcher it sits behind, so `launcherDockHost` finds UX
+  Enhancers' button **by id** and takes that button's wrapper as its host — copying the wrapper's
+  tag and class, so in the banner it is one more `li.banner-item`, and sitting immediately after
+  it, so the two never fight for the one spot after the travel anchor. A button that is floating
+  (its parent is `#fl-ux-launcher`) or not there at all means **no docked copy**; the in-page one
+  is unaffected. Before the split it re-derived the host by the launcher's own rules
+  (`findDockHost`), which would now mean carrying `findTravelAnchor` and all its selectors twice
+  to reach the same answer. In the **mobile banner** a row of six buttons
   would be wider than the whole icon strip, so there it collapses to one button showing the depth
   and cycling `auto → 1 → … → 5 → auto` -- which is also the fastest thing on a phone, since
   going a level deeper becomes one tap. The in-page row is **inserted** rather than appended,
@@ -1220,7 +1268,10 @@ navigation. Two consequences:
   allowed to age without redrawing on every scan. And the click is **swallowed** the way a badge
   tap is: the docked form is inside FL's chrome and the in-page one sits directly over a hand of
   cards. Setting a depth reaches three things -- the controls, the badges (via a scan, since
-  their flag carries the depth) and `launcherPanelCtx`, the open panel behind all this.
+  their flag carries the depth) and `fotzPanelCtx`, the context the Fruits of the Zee panel was
+  last rendered with. The panel keeps that itself, because the launcher that owns the context is
+  in the other script; a context whose panel has since closed is a harmless no-op, since the
+  launcher's `rerender` does nothing once its body is out of the page.
   **The badge palette was reworked 2026-09-04**, on a report that several badges were barely
   visible and too many cards looked alike. Both were true, and for two different reasons. The old
   `fotzColor` was six dark, desaturated bands — greens, browns, a grey — drawn on top of Fallen
@@ -1393,9 +1444,10 @@ navigation. Two consequences:
   `.js-item-value` span first and only then off the `aria-label` — see the Possessions paragraph
   above; equipment states its quantity in the span and nowhere else, and reading the label alone
   made every spare piece of kit invisible to this ledger.
-  Two shared pieces moved for this. `refreshFactionState` is now **`refreshBackgroundState`** and
-  banks both panels' readings off the same two page loads -- booting the SPA twice more for this
-  panel would have been silly. And `fotzHoldings()` is memoised on a `fotzGen` counter bumped
+  Two shared pieces moved for this. `refreshFactionState` became **`refreshBackgroundState`**,
+  which banked both panels' readings off the same two page loads -- booting the SPA twice more for
+  this panel would have been silly. Since the split each script has its own, and the frame is
+  shared across instead (`FRAME_EVENT`, above), which keeps the one-boot property. And `fotzHoldings()` is memoised on a `fotzGen` counter bumped
   whenever anything is re-banked, because unlike the panels it runs once per card on every
   debounced scan and would otherwise re-parse a few hundred cached item names each time. The
   badge's `attachBadge` value carries the depth and that generation, not just the card name, so
@@ -1582,7 +1634,7 @@ navigation. Two consequences:
   named after their island plus `Up the Hill` — rather than "any branch of mine is strict",
   which would have gated `Sparkling around the Copse` on the one ordinary option inside it.
   This is now the **third** feature on `.branch__title`, which is what the sibling-run
-  clearing in `attachBadge` was written for; `ux-scientific-voyages.test.mjs` drives all
+  clearing in `attachBadge` was written for; `choice-scientific-voyages.test.mjs` drives all
   three at once.
   The `scientific-voyages` panel is the reference half: what the Dilmun Club wants before it
   will sponsor you, a per-island table of pages/region/EPA with each island's own kind picked
@@ -1674,7 +1726,7 @@ navigation. Two consequences:
   `input` event, since React ignores a plain `value =`), so you can see what was looked for.
 - **Refreshing the Factions panel: `fetch` does not work, and that is settled.** Fallen London is
   client-rendered — `GET /myself` returns a ~4.7KB shell whose `#root` holds a loading splash and
-  no quality list (checked against the live site, not assumed). So `refreshFactionState()` uses a
+  no quality list (checked against the live site, not assumed). So `refreshBackgroundState()` uses a
   hidden off-screen **iframe** instead: point it at the route, let the app boot inside it, poll
   `contentDocument` until the markup appears, then read it. It's off-screen rather than
   `display:none` because a `display:none` iframe may skip layout and never run the app. The two
@@ -1684,13 +1736,16 @@ navigation. Two consequences:
   whose failure path is "no refresh", never a wrong number. This is **confirmed working in-game**
   (2026-09-02) — keep every guard regardless; they are what make the failure mode "the panel you
   already had" rather than a wrong number.
-  The script carries **`@noframes`** (and so does the loader) so it doesn't boot a second copy of
+  Both scripts carry **`@noframes`** (and so does the loader), so neither boots a second copy of
   itself inside that iframe. Auto-refresh is on by default, throttled by `stateIsFresh` (skip if
   under a minute old), and switchable off in the panel — `fl-ux-auto-refresh`. Panels get a
   `ctx.rerender()` that rebuilds only the body, so a refresh landing doesn't flicker the header
   or lose scroll position.
 
-**What in `FallenLondon/ux-enhancers.js` has actually been run in the game** (as of 2026-09-06).
+**What in `FallenLondon/ux-enhancers.js` and `FallenLondon/choice-helper.js` has actually been run
+in the game** (as of 2026-09-06). Everything confirmed below was confirmed before the 2026-09-13
+split, while it was all one file; the split moved that code rather than changing it, and what it
+did add is listed under "Not verified".
 Worth keeping current, because "verified against a capture" and "seen working live" are different
 claims and this file makes both.
 
@@ -1794,6 +1849,13 @@ Confirmed live by the author:
   preference carries to the next panel, which is the whole reason it is remembered. So the
   `position:fixed`-child-of-a-fixed-root trick really does step out of the launcher's flex
   column without disturbing the docked button.
+- **The split into two scripts** (2026-09-13, `ux-enhancers.js` 3.0 + `choice-helper.js` 1.0),
+  reported working by the author the same day: *"everything seems to work"*. That covers the
+  three things the split added -- Choice Helper's panels reaching the ⚙ UX menu through
+  `window.__flUxPanels`, the hidden frame shared between the two scripts' background refreshes,
+  and the depth control docking behind the UX button by id. The report was general rather than
+  item by item, so which install route (separate scripts or the loader) and which layouts were
+  exercised is not recorded; if one of those turns up broken, that is the gap.
 
 **Not** verified in-game (reasoned about only):
 
@@ -2043,7 +2105,7 @@ Current tests:
   `So-So Spooky Resistance`) stay out of the Mr. Store bucket, and the pre-existing buckets
   still resolve. Also covers `planMrStore`, the "Insert all" planner (removal phase, consecutive
   slot packing, unowned gems). Add a case when a new IotM gem or category shows up.
-- `FallenLondon/test/ux-crowds-of-spite.test.mjs` — asserts `ux-enhancers.js`'s Crowds of Spite
+- `FallenLondon/test/choice-crowds-of-spite.test.mjs` — asserts `choice-helper.js`'s Crowds of Spite
   ratings against the wiki guide's table, plus the traps that would silently break the badge:
   name matching squashes punctuation (`A... pickpocket?`, `A Constable!`, `The Rat-Catcher`)
   without colliding two cards; `headingName()` ignores a `wiki-links.js` "W" already inside the
@@ -2055,8 +2117,9 @@ Current tests:
   other's flag. It also drives the **area gate** through a settable greeting: Spite in, a
   recognised elsewhere out, an unknown or unreadable area still in (the permissive direction),
   and a badge drawn in Spite actually coming off when you leave. Extend it whenever you touch
-  `SPITE_CARDS`; a new feature with its own pure logic gets its own `ux-*.test.mjs` beside it.
-- `FallenLondon/test/ux-zailing.test.mjs` — asserts `ux-enhancers.js`'s Zailing feature. Two
+  `SPITE_CARDS`; a new feature with its own pure logic gets its own `choice-*.test.mjs` (or, for
+  a UX Enhancers feature, `ux-*.test.mjs`) beside it.
+- `FallenLondon/test/choice-zailing.test.mjs` — asserts `choice-helper.js`'s Zailing feature. Two
   halves. The first is the transcription: the routes, the Zee Peril per region, the eight black
   cards, that every zee-threat names a card that actually exists, and the handful of numbers a
   voyage is planned around (Your False-Star's free -5, the Giant of the Unterzee's flat 80, the
@@ -2075,7 +2138,7 @@ Current tests:
   It also builds the whole panel, the way `ux-factions.test.mjs` does, since that is the only way
   to catch a typo in a few hundred hand-built nodes -- including that a multi-region card is
   listed under each of its regions while an everywhere card is listed once.
-- `FallenLondon/test/ux-port-carnelian.test.mjs` — asserts `ux-enhancers.js`'s Port Carnelian
+- `FallenLondon/test/choice-port-carnelian.test.mjs` — asserts `choice-helper.js`'s Port Carnelian
   feature. The transcription first, and the cross-check that makes it worth carrying twice: the
   guide's Net column against the currency changes it is the sum of, row by row. Then the rules a
   plausible tidy-up would quietly invert — that `either` is worth its figure **once** and only
@@ -2104,7 +2167,7 @@ Current tests:
   not again on the next scan. It ends by banking a reading and running the pass again, which is
   the only thing that shows a badge redrawing on numbers that arrived without the page changing.
   Extend it whenever you touch `PC_OPTIONS` or `PC_CASHOUTS`.
-- `FallenLondon/test/ux-scientific-voyages.test.mjs` — asserts `ux-enhancers.js`'s Voyages of
+- `FallenLondon/test/choice-scientific-voyages.test.mjs` — asserts `choice-helper.js`'s Voyages of
   Scientific Discovery feature. The centre of it is the **ambiguity**: that a branch name
   shared by the three islands resolves to `null` without an island and to the right row with
   one, that each island's gambles pay that island's own page type, and that an opened
@@ -2168,9 +2231,11 @@ Current tests:
   that `findTravelAnchor` refuses our own button even when it is the only thing the selector can
   still find. A real latent bug fell out of writing it: a rebuilt launcher reused the previous
   run's dock wrapper and re-attached the dead button with it.
-  It also covers the **Fruits of the Zee depth control** (2026-09-04), which docks by the same
-  rules and is the second thing to want the one spot after the travel control: that it queues up
-  behind `launcherDock` rather than fighting it for that place, that it is as idempotent as the
+  It also covers the **Fruits of the Zee depth control** (2026-09-04), which since the split is
+  `choice-helper.js`'s — so the suite loads **both scripts into the one stub page**, sharing its
+  `window` and its storage, and merges the control's internals into `api`. The control is the
+  second thing to want the one spot after the travel control: that it finds the launcher button
+  by id and queues up behind it rather than fighting it for that place, that it is as idempotent as the
   launcher is — it is redrawn by the scan its own writes trigger, so a rebuild every pass would
   be an infinite loop, not just a stray node — that both copies (docked, and above the hand)
   repair themselves, that the banner gets one cycling button instead of a row of six, and that
@@ -2182,7 +2247,11 @@ Current tests:
   survives a close and the next panel opens fullscreen already, and that pressing it again
   restores the popover's own size. Plus the key-coverage check on the two style patches. Its stub
   records event listeners for this; it used to drop them.
-- `FallenLondon/test/ux-fruits-of-the-zee.test.mjs` — asserts `ux-enhancers.js`'s Fruits of the
+  And **panels from the other script** (2026-09-13): Choice Helper's four registered on
+  `window.__flUxPanels` in order and listed after Factions, a panel registered after the menu was
+  built turning up the next time it opens, and an id the menu already has — or an entry with no
+  `render` — left out.
+- `FallenLondon/test/choice-fruits-of-the-zee.test.mjs` — asserts `choice-helper.js`'s Fruits of the
   Zee feature. Its stub DOM builds both the qualities and the possessions markup and is rich
   enough to **actually build the panel**, in both the mid-festival and the nothing-ever-read
   states. The bulk of it is the **per-depth Favour table**, walked depth by depth for all eleven
@@ -2209,6 +2278,20 @@ Current tests:
   most worth having a test for), that a banked `Full Fathom Five` of 0 is "not diving" rather
   than a depth, `depthSourceText`'s wording per source, and the in-page control's gate and its
   one-button cycle. Update it when you touch any of the `FOTZ_*` tables.
+- `FallenLondon/test/fl-shared-helpers.test.mjs` — asserts what `ux-enhancers.js` and
+  `choice-helper.js` share now that they are two files, which no other suite can see because
+  every other suite loads one of the two. First the **copies**: every top-level declaration the
+  two files have in common must be byte-identical, bar a short list (`SCRIPT_ID`, `FEATURES`,
+  `PANELS`, `refreshBackgroundState`, `scan`) that differs on purpose — and that list must really
+  differ, so it cannot go stale — and a named list of the shared helpers must be declared in
+  both, so a rename in one file reads as a missing copy. Then the **contract**, with both IIFEs
+  loaded into one stub page: the menu holds Factions and then Choice Helper's four panels in
+  either load order, registering twice adds nothing, and with no `window` at all UX Enhancers
+  offers its own panel and nothing throws. And the **shared frame**, both directions: a Myself
+  page one script loaded is banked by the other (festival and purse one way, Renown the other)
+  and not by the script that sent it, a Possessions page likewise (owned items one way, counts
+  the other), and a Myself page without a faction quality or a Possessions page of 20 items or
+  fewer does not count as loaded. Update it when you add a helper to both files.
 
 The re-expose trick (rename `(function () {` and `return { ... }` the helpers before `})()`) is
 how a test reaches an IIFE's internals — copy an existing test when adding one, and put it in the

@@ -1,4 +1,4 @@
-// Ad-hoc test for FallenLondon/ux-enhancers.js's Voyages of Scientific
+// Ad-hoc test for FallenLondon/choice-helper.js's Voyages of Scientific
 // Discovery badges.
 //
 // There's no test runner in this repo (see AGENTS.md). This is a standalone
@@ -31,14 +31,14 @@
 // Numbers come from Embarking on a Voyage of Scientific Discovery (Guide) and
 // the Expedition Progress table on each island's own page, on fallenlondon.wiki.
 //
-//   node FallenLondon/test/ux-scientific-voyages.test.mjs
+//   node FallenLondon/test/choice-scientific-voyages.test.mjs
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const src = readFileSync(join(here, '..', 'ux-enhancers.js'), 'utf8');
+const src = readFileSync(join(here, '..', 'choice-helper.js'), 'utf8');
 
 // --- stub DOM --------------------------------------------------------------
 

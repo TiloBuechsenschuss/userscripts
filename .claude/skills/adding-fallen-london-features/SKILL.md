@@ -1,15 +1,22 @@
 ---
 name: adding-fallen-london-features
-description: Use when adding, changing or removing a feature in FallenLondon/ux-enhancers.js — a rating badge on opportunity cards, storylets or their branches, a launcher reference panel, or a table transcribed from a Fallen London wiki guide.
+description: Use when adding, changing or removing a feature in FallenLondon/choice-helper.js — a rating badge on opportunity cards, storylets or their branches, the reference panel behind one, or a table transcribed from a Fallen London wiki guide.
 ---
 
-# Adding a feature to FallenLondon/ux-enhancers.js
+# Adding a feature to FallenLondon/choice-helper.js
 
 ## Overview
 
 **A badge is a claim, and every claim needs a source you can cite.** A badge quoting a
 line you cannot take, or a number no wiki page supports, is worse than no badge — it
 spends the player's actions for them. Everything below follows from that.
+
+Advice lives in `choice-helper.js`; `ux-enhancers.js` keeps the quality-of-life tweaks —
+the "⚙ UX" launcher and the Factions panel. The two were one file until UX Enhancers 3.0.
+A panel added here reaches the launcher's menu through `window.__flUxPanels`, and a helper
+both files carry (the Myself/Possessions scrapes, the cache, `h`, `UI`, `TH`/`TD`) must be
+changed in **both** — `fl-shared-helpers.test.mjs` fails otherwise. AGENTS.md's Fallen
+London section has the whole contract between them.
 
 Fallen London is a React SPA with one URL. Nothing you inject survives a re-render, so
 the whole script is a `FEATURES` registry re-run by a `requestAnimationFrame`-debounced
@@ -128,7 +135,7 @@ Work in this order. **TRAP** marks the ones that get skipped.
     host, so the badge drawn second sits nearer the heading than the one drawn first — which
     is why `attachBadge` walks the whole run of badge siblings to find its own. If you add a
     third feature to a shared selector, give it its own class/flag pair and re-run the
-    sibling-order tests in `ux-port-carnelian.test.mjs`.
+    sibling-order tests in `choice-port-carnelian.test.mjs`.
 
 11. **TRAP — anything you draw into the page needs a signature guard.** Your own writes
     trigger the MutationObserver that redraws you. `attachBadge`'s flag is that guard for
@@ -140,15 +147,18 @@ Work in this order. **TRAP** marks the ones that get skipped.
     lives). Wrap nothing in try/catch yourself — `scan()` already isolates each feature.
 
 13. **Panel, if the feature has reference material.** Push `{ id, icon, label, hint, render }`
-    onto `PANELS`; `render()` is called fresh on every open, so nothing needs invalidating.
+    onto `choice-helper.js`'s `PANELS` — `registerPanels` hands the list to UX Enhancers'
+    launcher at load, in order; `render(ctx)` is called fresh on every open, so nothing needs
+    invalidating. The launcher and its `ctx` are the other script's, so a panel that must be
+    redrawn from outside keeps its own `ctx` (see `fotzPanelCtx`).
     Build it with `h()` and `wikiLink()`, styles from `UI` / `TH` / `TD`. For a long table,
     copy the Zailing panel's filter: match `row.dataset.<x>Search` rather than `textContent`,
     so a term can hit an option the collapsed row does not show, and hide a group heading
     whose rows have all gone.
 
-14. **Write `FallenLondon/test/ux-<feature>.test.mjs`.** It evaluates the IIFE against a
+14. **Write `FallenLondon/test/choice-<feature>.test.mjs`.** It evaluates the IIFE against a
     stub DOM and re-exports internals by replacing the closing `})();`. Copy the harness
-    from `ux-port-carnelian.test.mjs` or `ux-fruits-of-the-zee.test.mjs` — those two are the
+    from `choice-port-carnelian.test.mjs` or `choice-fruits-of-the-zee.test.mjs` — those two are the
     stubs that implement `after()` and a derived `nextElementSibling`, which you need for
     any `'after'` badge. The others throw on `after()` and will not do.
     Pin: the table's shape, the stated-versus-derived cross-check, the ranking rule and its
@@ -156,15 +166,16 @@ Work in this order. **TRAP** marks the ones that get skipped.
     of yours is in any other feature's table, and **build the whole panel** — a few hundred
     hand-built nodes is where a typo hides.
 
-15. **TRAP — you just broke four other suites.** `ux-crowds-of-spite`, `ux-factions`,
-    `ux-fruits-of-the-zee` and `ux-zailing` each assert the **whole** `FEATURES` and
-    `PANELS` roster by hand. Adding one entry fails all four, in suites for features you
-    never touched. `check.mjs` in this directory finds this.
+15. **TRAP — you just broke three other suites.** `choice-crowds-of-spite`,
+    `choice-fruits-of-the-zee` and `choice-zailing` each assert the **whole** `FEATURES` and
+    `PANELS` roster by hand. Adding one entry fails all three, in suites for features you
+    never touched. A new **panel** breaks one more: `ux-launcher-docking` pins the four panel
+    ids Choice Helper registers. `check.mjs` in this directory finds the first three.
 
-16. **Metadata and docs.** Bump `@version` in `FallenLondon/ux-enhancers.js` **and** the
+16. **Metadata and docs.** Bump `@version` in `FallenLondon/choice-helper.js` **and** the
     loader's `@version` in `all-in-one/fallen-london.js` by hand (`bump-loaders.mjs` skips a
     loader you already edited). Extend the script's `@description` paragraph, the
-    `ux-enhancers.js` row in `README.md`, and `AGENTS.md` — the feature's own section, an
+    `choice-helper.js` row in `README.md`, and `AGENTS.md` — the feature's own section, an
     entry in the test-file list, and a line in the **"Not verified in-game"** list saying
     exactly what a player should report back. Leave `@downloadURL` alone; the path did not
     change.
@@ -172,7 +183,7 @@ Work in this order. **TRAP** marks the ones that get skipped.
 ## Verify
 
 ```sh
-node --check FallenLondon/ux-enhancers.js
+node --check FallenLondon/choice-helper.js
 node .claude/skills/adding-fallen-london-features/check.mjs
 for t in FallenLondon/test/*.test.mjs; do node "$t" | tail -1; done
 node scripts/bump-loaders.mjs --check

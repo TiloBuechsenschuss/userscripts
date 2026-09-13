@@ -1,4 +1,4 @@
-// Ad-hoc test for FallenLondon/ux-enhancers.js's Fruits of the Zee Festival
+// Ad-hoc test for FallenLondon/choice-helper.js's Fruits of the Zee Festival
 // card ratings and collection checklist.
 //
 // There's no test runner in this repo (see AGENTS.md). This is a standalone
@@ -35,14 +35,14 @@
 // Comparison subpage, and the individual card and option pages on
 // fallenlondon.wiki.
 //
-//   node FallenLondon/test/ux-fruits-of-the-zee.test.mjs
+//   node FallenLondon/test/choice-fruits-of-the-zee.test.mjs
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const src = readFileSync(join(here, '..', 'ux-enhancers.js'), 'utf8');
+const src = readFileSync(join(here, '..', 'choice-helper.js'), 'utf8');
 
 // --- stub DOM --------------------------------------------------------------
 
@@ -102,7 +102,7 @@ function makeEl(tag) {
     },
     setAttribute(k, v) { this.attrs[k] = v; },
     getAttribute(k) { return Object.prototype.hasOwnProperty.call(this.attrs, k) ? this.attrs[k] : null; },
-    // Understands the three shapes ux-enhancers.js actually asks for:
+    // Understands the three shapes choice-helper.js actually asks for:
     // `.a-class`, `[an-attribute]` and `tag[an-attribute]`.
     querySelector(sel) {
       const m = /^([a-z]+)?(?:\.([\w-]+))?(?:\[([^\]=]+)\])?$/.exec(sel);
@@ -119,7 +119,7 @@ function makeEl(tag) {
   return el;
 }
 
-// A quality on the Myself tab, in the shape ux-enhancers.js reads: the alt is
+// A quality on the Myself tab, in the shape choice-helper.js reads: the alt is
 // the key and the visible text glues the level onto it.
 function qualityLi(name, level, cap) {
   const li = makeEl('li');
@@ -1845,13 +1845,13 @@ check('and for one whose Myself and Possessions have never been read',
 
 check('the feature list, in order',
   api.FEATURES.map((f) => f.name),
-  ['launcher', 'faction-capture', 'fotz-capture', 'pending-item',
-    'spite-card-ratings', 'zee-card-ratings', 'fotz-card-ratings', 'fotz-depth-control',
-    'fotz-supplication', 'port-carnelian', 'scientific-voyages']);
+  ['fotz-capture', 'spite-card-ratings', 'zee-card-ratings',
+    'fotz-card-ratings', 'fotz-depth-control', 'fotz-supplication', 'port-carnelian',
+    'scientific-voyages']);
 
 check('the panel list, in order',
   api.PANELS.map((p) => p.id),
-  ['factions', 'zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee']);
+  ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee']);
 
 check('every panel has an icon, a label and a render function',
   api.PANELS.every((p) => !!p.icon && !!p.label && typeof p.render === 'function'), true);

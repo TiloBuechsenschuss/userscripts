@@ -1,4 +1,4 @@
-// Ad-hoc test for FallenLondon/ux-enhancers.js's Zailing the Unterzee card
+// Ad-hoc test for FallenLondon/choice-helper.js's Zailing the Unterzee card
 // ratings.
 //
 // There's no test runner in this repo (see AGENTS.md). This is a standalone
@@ -34,14 +34,14 @@
 // Numbers come from Zailing (Guide) and the individual card/option pages on
 // fallenlondon.wiki.
 //
-//   node FallenLondon/test/ux-zailing.test.mjs
+//   node FallenLondon/test/choice-zailing.test.mjs
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const src = readFileSync(join(here, '..', 'ux-enhancers.js'), 'utf8');
+const src = readFileSync(join(here, '..', 'choice-helper.js'), 'utf8');
 
 // --- stub DOM --------------------------------------------------------------
 
@@ -503,12 +503,12 @@ check('with an empty hand the panel says so rather than showing a blank list',
 
 check('the zee ratings are registered alongside the other features',
   api.FEATURES.map((f) => f.name),
-  ['launcher', 'faction-capture', 'fotz-capture', 'pending-item',
-    'spite-card-ratings', 'zee-card-ratings', 'fotz-card-ratings', 'fotz-depth-control',
-    'fotz-supplication', 'port-carnelian', 'scientific-voyages']);
+  ['fotz-capture', 'spite-card-ratings', 'zee-card-ratings',
+    'fotz-card-ratings', 'fotz-depth-control', 'fotz-supplication', 'port-carnelian',
+    'scientific-voyages']);
 
 check('the Zailing panel is in the launcher menu',
-  api.PANELS.map((p) => p.id), ['factions', 'zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee']);
+  api.PANELS.map((p) => p.id), ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee']);
 
 console.log(failures ? '\n' + failures + ' FAILURE(S)' : '\nAll checks passed.');
 process.exit(failures ? 1 : 0);
