@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/auto-combat.js
-// @version      0.7
-// @description  Adds an "Auto" button to the charpane, under the Last Adventure readout, that opens a small panel: pick a zone, say how many adventures, press Start, and it adventures there for you. Fights are handed to your "Auto-Attack until finished" combat macro when you have one saved, and fall back to attacking round by round when you don't. Choice adventures work like the Twilight Heroes script: the first time one comes up the run pauses and the panel offers its options (annotated with what the zone's wiki page says each does); pick one and it's remembered, and answered by itself from then on. A "remembered choices" list lets you review or forget any of them. A choice that offers only one button is taken without asking, and a small built-in rule table answers a choice by name wherever it turns up -- "Peering Through Your Peridot" takes "I choose peace" when that option is on the page. Turns are counted from api.php's adventure total rather than from requests sent, and anything it doesn't recognise stops the run rather than guessing. Three zones: The Haunted Bedroom, whose nightstands are answered from a built-in plan (the drawer with the substats in it, and the ghost key ahead of it where the key is worth more); Inside the Palindome, which farms the Elf Farm Raffle ticket -- it refuses to start when you are already carrying a ticket (the elf stays away until they are used) or without the Talisman o' Namsilat equipped, answers the zone's noncombats with the free or cheapest option, stops the run the moment a ticket drops, and keeps a per-character tally of the tickets you have picked up today; and "wherever I adventured last", which reads your last adventure from api.php when you press Start and grinds there with the ordinary ask-once-then-remember handling.
+// @version      0.8
+// @description  Adds an "Auto" button to the charpane, under the Last Adventure readout, that opens a small panel: pick a zone, say how many adventures, press Start, and it adventures there for you. Fights are handed to your "Auto-Attack until finished" combat macro when you have one saved, and fall back to attacking round by round when you don't. Choice adventures work like the Twilight Heroes script: the first time one comes up the run pauses and the panel offers its options (annotated with what the zone's wiki page says each does); pick one and it's remembered, and answered by itself from then on. A "remembered choices" list lets you review or forget any of them. A choice that offers only one button is taken without asking, and a small built-in rule table answers a choice by name wherever it turns up -- "Peering Through Your Peridot" takes "I choose peace" when that option is on the page. Turns are counted from api.php's adventure total rather than from requests sent, and anything it doesn't recognise stops the run rather than guessing. A "stop on level up" checkbox ends the run as soon as api.php reports a higher level than the one you started at. Four zones: The Haunted Bedroom, whose nightstands are answered from a built-in plan (the drawer with the substats in it, and the ghost key ahead of it where the key is worth more); Inside the Palindome, which farms the Elf Farm Raffle ticket -- it refuses to start when you are already carrying a ticket (the elf stays away until they are used) or without the Talisman o' Namsilat equipped, answers the zone's noncombats with the free or cheapest option, stops the run the moment a ticket drops, and keeps a per-character tally of the tickets you have picked up today; The Haunted Storage Room, which farms ghost keys -- Lights Out is answered with "Feel Your Way to the Door" and Chasin' Babies with "Do nothing", and every ghost key that drops is counted, for the run and in a per-character tally for the day; and "wherever I adventured last", which reads your last adventure from api.php when you press Start and grinds there with the ordinary ask-once-then-remember handling.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
 // @match        https://www.kingdomofloathing.com/topmenu.php*
@@ -83,10 +83,14 @@
   // See "THE KoL DAY" below for what a day key is and why the tally is kept
   // per character.
   const TICKETS_KEY = 'tm-autocombat-tickets';
+  // Ghost keys picked up today, per character, in the same shape:
+  //   'tm-autocombat-ghostkeys:<character>' -> { day: '<day key>', count: N }
+  const GHOST_KEYS_KEY = 'tm-autocombat-ghostkeys';
 
   // Item ids, from KoLmafia's src/data/items.txt.
   const ELF_TICKET_ITEM = 500;   // Elf Farm Raffle ticket
   const TALISMAN_ITEM = 486;     // Talisman o' Namsilat
+  const GHOST_KEY_ITEM = 7349;   // ghost key
 
   // Pause between requests. KoL is a small game on modest hardware and this is
   // a bot loop; keep it civil. Raise it, don't lower it.
@@ -155,10 +159,15 @@
   //                  to DEFAULT_COMBAT.
   //   onResult(ctx)  Optional. Called after each resolved turn; return a string
   //                  to end the run ("the drop we came for landed").
+  //   summary()      Optional. A line for the log when the run ends, however
+  //                  it ends ("3 ghost keys this run").
   //
-  // ctx carries { zone, turn, cycle, doc, html, url, status, monster,
+  // ctx carries { zone, turn, cycle, doc, html, htmlAll, url, status, monster,
   //               whichchoice, macroRan, log(msg), stop(reason) }, with the
-  // fields that don't apply to the moment left undefined.
+  // fields that don't apply to the moment left undefined. `html` is the page
+  // the turn settled on; `htmlAll` is every page the turn went through, joined
+  // -- a drop announced on the fight's last round is not on the page a
+  // post-combat choice leaves you on.
   // ===================================================================
 
   const ZONES = [
@@ -420,6 +429,81 @@
                  '-- check your inventory';
         }
         return null;
+      },
+    },
+    {
+      key: 'haunted-storage-room',
+      name: 'The Haunted Storage Room',
+      // snarfblat 398, from KoLmafia's src/data/adventures.txt.
+      url: 'adventure.php?snarfblat=398',
+      note: 'Farms ghost keys (the sheet ghost drops them) and counts every ' +
+            'one that lands.',
+      // The two noncombats, from the wiki's Haunted Storage Room page. The
+      // choice ids are each adventure's own wiki `num` (and KoLmafia's
+      // ChoiceAdventures comments agree on 890); the option numbers are the
+      // wiki's button order. Both are UNVERIFIED in-game, which is what the
+      // number-AND-label rule in "PRE-PICKED CHOICES" is for.
+      hints: {
+        // Lights Out in the Storage Room
+        '890': {
+          '1': 'leave -- costs no adventure',
+          '2': 'a creepy statue, then you flee -- nothing',
+          '3': "Old Agnes at the window: unlocks an option in Lights Out in the Laundry Room",
+          '4': 'a locked chest -- nothing',
+        },
+        // Chasin' Babies (the Storage Room copy)
+        '886': {
+          '1': 'try the poppet: may move a triplet ghost between rooms',
+          '2': 'try the rocking horse: may move a triplet ghost between rooms',
+          '3': 'try the jack-in-the-box: may move a triplet ghost between rooms',
+          '4': 'do nothing -- you leave the room',
+        },
+      },
+      plan: {
+        '890': [
+          { option: '1', match: /feel your way/i, why: 'feel your way to the door (free)' },
+        ],
+        // Anchored: "Do nothing" has to be the whole instruction, not a phrase
+        // inside some other option's label.
+        '886': [
+          { option: '4', match: /^\s*do nothing\b/i, why: 'do nothing' },
+        ],
+      },
+      liveNote: function (status) {
+        const today = tallyToday(GHOST_KEYS_KEY, status);
+        const tally = today + ' ghost key' + (today === 1 ? '' : 's') + ' today';
+        return getInventory().then(function (inv) {
+          const held = itemCount(inv, GHOST_KEY_ITEM);
+          return held === null
+            ? tally + '; I can\'t read your inventory.'
+            : tally + '; carrying ' + held + '.';
+        }, function () {
+          return tally + '; I can\'t read your inventory.';
+        });
+      },
+      // Nothing to refuse -- keys stack, so there is no "already carrying
+      // one" rule here the way there is for the raffle ticket. This only
+      // starts the run's own count at zero.
+      preflight: async function (ctx) {
+        RUN.ghostKeys = 0;
+        ctx.log(tallyToday(GHOST_KEYS_KEY, ctx.status) +
+                ' ghost key(s) picked up today so far.');
+        return null;
+      },
+      // Counted, never a reason to stop: the whole run is for these.
+      onResult: function (ctx) {
+        const n = ghostKeysIn(ctx.htmlAll != null ? ctx.htmlAll : ctx.html);
+        if (n > 0) {
+          RUN.ghostKeys = (RUN.ghostKeys || 0) + n;
+          const today = recordTally(GHOST_KEYS_KEY, ctx.status, n);
+          ctx.log('ghost key' + (n === 1 ? '' : 's x' + n) + '! ' +
+                  RUN.ghostKeys + ' this run, ' + today + ' today.');
+        }
+        return null;
+      },
+      summary: function () {
+        const n = RUN.ghostKeys || 0;
+        return n + ' ghost key' + (n === 1 ? '' : 's') + ' this run.';
       },
     },
     {
@@ -712,9 +796,10 @@
     return localDayKey();
   }
 
-  function ticketsKeyFor(status) {
+  // One storage slot per tally (base key) per character.
+  function tallyKeyFor(base, status) {
     const name = status && status.name ? String(status.name).trim() : '';
-    return TICKETS_KEY + ':' + (name || 'unknown');
+    return base + ':' + (name || 'unknown');
   }
 
   // Pure, so the rollover arithmetic can be tested without storage: a stored
@@ -727,24 +812,27 @@
     return { day: dayKey, count: base + Math.max(0, delta || 0) };
   }
 
-  function loadTickets(status) {
+  function loadTally(base, status) {
     try {
-      const raw = JSON.parse(localStorage.getItem(ticketsKeyFor(status)));
+      const raw = JSON.parse(localStorage.getItem(tallyKeyFor(base, status)));
       if (raw && typeof raw === 'object') return raw;
     } catch (e) { /* unreadable; nothing was recorded as far as we know */ }
     return { day: null, count: 0 };
   }
 
-  function ticketsToday(status) {
-    return nextTicketRecord(loadTickets(status), dayKeyFromStatus(status), 0).count;
+  function tallyToday(base, status) {
+    return nextTicketRecord(loadTally(base, status), dayKeyFromStatus(status), 0).count;
   }
 
-  function recordTicket(status) {
-    const next = nextTicketRecord(loadTickets(status), dayKeyFromStatus(status), 1);
-    try { localStorage.setItem(ticketsKeyFor(status), JSON.stringify(next)); }
+  function recordTally(base, status, delta) {
+    const next = nextTicketRecord(loadTally(base, status), dayKeyFromStatus(status), delta);
+    try { localStorage.setItem(tallyKeyFor(base, status), JSON.stringify(next)); }
     catch (e) { /* storage unavailable; the tally is cosmetic, carry on */ }
     return next.count;
   }
+
+  function ticketsToday(status) { return tallyToday(TICKETS_KEY, status); }
+  function recordTicket(status) { return recordTally(TICKETS_KEY, status, 1); }
 
   // KoL announces a drop as `You acquire an item: <b>Elf Farm Raffle ticket</b>`,
   // and the tags between the two halves vary. Matched inside an acquire line
@@ -753,6 +841,37 @@
   function ticketAcquiredIn(html) {
     return /You acquire an item:\s*(?:<[^>]*>\s*)*Elf Farm Raffle ticket/i
       .test(String(html == null ? '' : html));
+  }
+
+  // How many ghost keys the page says just landed. KoL writes one as
+  // `You acquire an item: <b>ghost key</b>` and several at once as
+  // `You acquire <b>ghost key (2)</b>`; the `<b>2 ghost keys</b>` spelling is
+  // accepted too. Like ticketAcquiredIn, only an acquire line counts -- the
+  // Bedroom's nightstand prose talks about ghost keys without handing any out.
+  // The multi-item wordings are UNVERIFIED against a live page.
+  function ghostKeysIn(html) {
+    const re = /You acquire (?:an item:\s*)?(?:<[^>]*>\s*)*(?:(\d[\d,]*)\s+ghost keys\b|ghost key\b(?:\s*\((\d[\d,]*)\))?)/gi;
+    const s = String(html == null ? '' : html);
+    let total = 0;
+    let m;
+    while ((m = re.exec(s)) !== null) {
+      total += num(m[1] || m[2]) || 1;
+    }
+    return total;
+  }
+
+  // The character's level, off api.php's status (`level`, a field KoLmafia's
+  // ApiRequest reads). Null when it isn't there, so "can't tell" never reads as
+  // a level change.
+  function levelOf(status) {
+    return num(status && status.raw && status.raw.level);
+  }
+
+  // Did the character level up since the run started? Only when both readings
+  // exist -- a missing one is no evidence either way.
+  function leveledUp(startLevel, status) {
+    const now = levelOf(status);
+    return startLevel !== null && now !== null && now > startLevel ? now : null;
   }
 
   // api.php?what=inventory answers with a flat { '<item id>': '<count>' } map.
@@ -792,6 +911,7 @@
     status: '',       // one-line summary for the panel header
     log: [],          // [{ t: Date, msg: string, kind: 'info'|'warn'|'error' }]
     pending: null,    // a choice waiting on the player; see askChoice
+    ghostKeys: 0,     // ghost keys picked up this run (Haunted Storage Room)
   };
 
   const LOG_LIMIT = 200;
@@ -1246,7 +1366,7 @@
 
   // Answer a choice adventure, following the chain until a non-choice page
   // comes back (a choice can hand you straight to another one, or to a fight).
-  async function runChoice(page, status) {
+  async function runChoice(page, status, seen) {
     let hops = 0;
 
     while (true) {
@@ -1318,6 +1438,7 @@
         whichchoice: which,
         option: option,
       });
+      if (seen) seen(page);
 
       const blocked = blockerIn(page.html);
       if (blocked) throw Stop(blocked);
@@ -1325,9 +1446,15 @@
   }
 
   // One turn: spend an adventure in the zone and resolve whatever comes back.
+  // The page it settles on carries `pages`, every distinct page the turn went
+  // through, so a drop on the fight's last round is still readable after a
+  // post-combat choice has replaced it (see ctx.htmlAll).
   async function runOneCycle(status) {
     RUN.cycle++;
+    const pages = [];
+    const seen = function (p) { if (p && pages.indexOf(p) === -1) pages.push(p); };
     let page = await getPage(withPwd(RUN.zone.url, status.pwd));
+    seen(page);
 
     const blocked = blockerIn(page.html);
     if (blocked) throw Stop(blocked);
@@ -1343,15 +1470,18 @@
         const m = readMonster(page);
         log('fight: ' + (m.name || 'monster' + (m.id ? ' #' + m.id : '')));
         page = await runFight(page, status);
+        seen(page);
         // Post-combat choice, if there is one (see probeChoice).
         const followUp = await probeChoice();
         if (followUp) { page = followUp; continue; }
+        page.pages = pages;
         return page;
       }
       if (kind === 'choice') {
-        page = await runChoice(page, status);
+        page = await runChoice(page, status, seen);
         continue;
       }
+      page.pages = pages;
       return page;
     }
   }
@@ -1363,7 +1493,8 @@
   // multi-page choice chains all make "requests sent" a wrong answer, and a
   // helper that over-reports how many turns it spent is worse than useless. The
   // cycle budget is the backstop for a run that stops making progress.
-  async function runSession(zone, turns) {
+  async function runSession(zone, turns, opts) {
+    opts = opts || {};
     RUN.active = true;
     RUN.stopRequested = false;
     RUN.zone = zone;
@@ -1372,10 +1503,12 @@
     RUN.cycle = 0;
     RUN.log = [];
     RUN.pending = null;
+    RUN.ghostKeys = 0;
     log('starting: ' + turns + ' adventure' + (turns === 1 ? '' : 's') +
         (zone.dynamic ? ' where you were last' : ' in ' + zone.name));
 
     let stoppedBecause = null;
+    let startLevel = null;
 
     try {
       let status = await getStatus();
@@ -1387,6 +1520,19 @@
       RUN.zone = zone;
 
       RUN.startAdv = status.adventures;
+
+      // Stop on level up: the level is read once here and compared after
+      // every turn. Unreadable means the option can't work, and the player
+      // is told so rather than left believing it's armed.
+      if (opts.stopOnLevel) {
+        startLevel = levelOf(status);
+        if (startLevel === null) {
+          log('can\'t read your level from api.php, so "stop on level up" ' +
+              'is off for this run.', 'warn');
+        } else {
+          log('will stop when you pass level ' + startLevel + '.');
+        }
+      }
 
       // Once, before anything is spent: the checks that cost a request of
       // their own. A refusal here has to come before the first turn, because
@@ -1443,9 +1589,14 @@
         const done = zone.onResult
           ? zone.onResult(makeCtx({
               doc: page.doc, html: page.html, url: page.url, status: after,
+              htmlAll: (page.pages || [page]).map(p => p.html).join('\n'),
             }))
           : null;
         if (done) throw Stop(done);
+
+        // After onResult, so a drop on the levelling turn is still counted.
+        const newLevel = opts.stopOnLevel ? leveledUp(startLevel, after) : null;
+        if (newLevel !== null) throw Stop('you levelled up (now level ' + newLevel + ')');
 
         await sleep(REQUEST_DELAY_MS);
       }
@@ -1457,6 +1608,9 @@
       RUN.pending = null;
       const spent = RUN.used + ' of ' + RUN.requested + ' adventure' +
                     (RUN.requested === 1 ? '' : 's');
+      if (RUN.zone && RUN.zone.summary) {
+        try { log(RUN.zone.summary()); } catch (e) { /* cosmetic */ }
+      }
       if (stoppedBecause) {
         log('stopped after ' + spent + ' -- ' + stoppedBecause,
             /^error:/.test(stoppedBecause) ? 'error' : 'warn');
@@ -1489,9 +1643,10 @@
     try {
       const raw = localStorage.getItem(PREFS_KEY);
       const p = raw ? JSON.parse(raw) : {};
-      return { zone: p.zone || ZONES[0].key, turns: p.turns || 5 };
+      return { zone: p.zone || ZONES[0].key, turns: p.turns || 5,
+               stopOnLevel: !!p.stopOnLevel };
     } catch (e) {
-      return { zone: ZONES[0].key, turns: 5 };
+      return { zone: ZONES[0].key, turns: 5, stopOnLevel: false };
     }
   }
 
@@ -1634,6 +1789,14 @@
     row.appendChild(stopBtn);
     pop.appendChild(row);
 
+    const levelWrap = el(d, 'label', 'display:block;font-size:11px;cursor:pointer');
+    const levelChk = d.createElement('input');
+    levelChk.type = 'checkbox';
+    levelChk.checked = !!prefs.stopOnLevel;
+    levelWrap.appendChild(levelChk);
+    levelWrap.appendChild(d.createTextNode(' stop on level up'));
+    pop.appendChild(levelWrap);
+
     // --- status, the ask-me block, and the log ---
     const statusLine = el(d, 'div', 'font-weight:bold;min-height:14px');
     statusLine.id = 'tm-autocombat-status';
@@ -1673,10 +1836,10 @@
         setStatus('give me a number of adventures first.');
         return;
       }
-      savePrefs({ zone: zone.key, turns: turns });
+      savePrefs({ zone: zone.key, turns: turns, stopOnLevel: levelChk.checked });
       // Deliberately fire-and-forget: the run outlives this handler, and every
       // failure path inside runSession already lands in the log.
-      runSession(zone, turns);
+      runSession(zone, turns, { stopOnLevel: levelChk.checked });
       syncButton();
       renderPanel();
     });

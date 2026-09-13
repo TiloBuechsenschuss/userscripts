@@ -569,8 +569,8 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
 
 - `auto-combat.js` adds an "Auto" button to the **charpane**, under the Last Adventure
   readout, opening a panel that adventures a chosen zone for a chosen number of
-  turns. Three entries: The Haunted Bedroom, Inside the Palindome, and **"wherever I
-  adventured last"** — a `dynamic`
+  turns. Four entries: The Haunted Bedroom, Inside the Palindome, The Haunted Storage Room,
+  and **"wherever I adventured last"** — a `dynamic`
   registry entry with no url of its own, which `resolveZone` turns into a real zone from
   `api.php`'s `lastadv` block (falling back to the charpane's own last-adventure link) **once,
   at the start of the run**. Once and not per turn, because after turn one the last zone *is*
@@ -619,6 +619,23 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   backstop for when `api.php` reports no equipment at all. The zone's `plan` answers its four
   noncombats with the free or cheapest option (pep talk, a little while, ignawer the drawer, no
   thanks), never the ones that spend papayas, HP or a rubber axe.
+  **The Haunted Storage Room** (snarfblat 398) farms **ghost keys** (item 7349, dropped by the
+  sheet ghost). Its `plan` answers *Lights Out in the Storage Room* (890) with "Feel Your Way to
+  the Door", which costs no adventure, and *Chasin' Babies* (886) with "Do nothing"; option
+  numbers are the wiki's button order and unverified. Keys stack and nothing stops the drop, so
+  unlike the Palindome there is no preflight refusal and a drop never ends the run: `onResult`
+  counts it (`ghostKeysIn`, acquire lines only, `(N)` and `N ghost keys` accepted for several at
+  once), into `RUN.ghostKeys` for the run and a per-character daily tally
+  (`tm-autocombat-ghostkeys:<character>`) that shares the ticket tally's day-key logic
+  (`tallyToday`/`recordTally`). A zone's optional **`summary()`** adds a line to the log however
+  the run ends. Because a drop is announced on the fight's *last round* and a post-combat choice
+  replaces that page, `runOneCycle` keeps every page a turn went through and `onResult` gets them
+  joined as **`ctx.htmlAll`** — read that, not `ctx.html`, for drops.
+  **Stop on level up** is a panel checkbox (saved in prefs as `stopOnLevel`). The run reads
+  `api.php`'s `level` once at the start and stops after any turn where it is higher
+  (`leveledUp`), checked *after* `onResult` so a drop on the levelling turn still counts. An
+  unreadable level at the start is logged as the option being off for the run, never silently
+  ignored.
   Above the zone sits **`CHOICE_RULES`**, a zone-independent table matched on the choice's
   **name** — for a choice an *item* hands you, which follows the item rather than living in any
   zone. Its one entry is *Peering Through Your Peridot*, answered with "I choose peace" so a
@@ -2142,6 +2159,9 @@ Current tests:
   pinned the same way, plus its talisman guard (read off `api.php`'s accessory slots), that a
   ticket counts as acquired only off an acquire line — the encounter's prose names the raffle
   either way — and that the daily tally resets by comparing day keys rather than by any timer.
+  The Haunted Storage Room's plan is pinned the same way, plus that a ghost key is counted only
+  off an acquire line (several at once included) and that a drop never ends the run; and stop
+  on level up reads a level change only when both `api.php` readings exist.
   The zone-independent rules
   are pinned the same way: the peridot choice takes the peace option by *value*, a different
   encounter offering the same label is left alone (the rule is keyed on the name), and a page

@@ -54,6 +54,12 @@
 //     keys rather than by any timer.
 //   - The last-zone entry's url reading: only 'adventure.php?snarfblat=N' is a
 //     zone we may re-request in a loop, and a place.php action url is not.
+//   - The Haunted Storage Room, the ghost-key zone: that Lights Out leaves by
+//     feeling for the door and Chasin' Babies does nothing, both only when
+//     number and label agree; that a ghost key is counted only off an acquire
+//     line, including several at once, and that farming it never ends the run.
+//   - Stop on level up: a level change is only read when both readings exist,
+//     so an unreadable api.php never looks like a level-up.
 //
 //   node KingdomOfLoathing/test/auto-combat-fight-state.test.mjs
 
@@ -84,6 +90,7 @@ const wrapped = src
     'normalizeName, findMacroId, fightFields, describeAction, blockerIn, ' +
     'usableRemembered, planSteps, planPick, rulePick, soloPick, ' +
     'ticketAcquiredIn, dayKeyFromStatus, nextTicketRecord, itemCount, ' +
+    'ghostKeysIn, levelOf, leveledUp, ' +
     'snarfblatOf, readLastAdventure, ZONES, MACRO_NAMES };');
 
 if (!wrapped.includes('globalThis.__ac') || wrapped.includes('\n  bootButton();')) {
@@ -742,6 +749,97 @@ check('an unreadable inventory is not the same as an empty one', [
   api.itemCount([], 500),
   api.itemCount(null, 500),
 ], [2, 0, null, null]);
+
+// ---------------------------------------------------------------------------
+// The Haunted Storage Room
+//
+// Button labels are the wiki's; choice ids are each adventure's wiki `num`
+// (890 also in KoLmafia's ChoiceAdventures comments); option numbers are the
+// wiki's button order. Unverified in-game.
+// ---------------------------------------------------------------------------
+
+const storage = api.ZONES.find(z => z.key === 'haunted-storage-room');
+
+check('the zone is The Haunted Storage Room', [
+  !!storage, storage && storage.url,
+], [true, 'adventure.php?snarfblat=398']);
+
+const LIGHTS_OUT_STORAGE = [
+  { value: '1', text: 'Feel Your Way to the Door' },
+  { value: '2', text: 'Pull Away a Sheet' },
+  { value: '3', text: 'Look Out the Window' },
+  { value: '4', text: 'Open a Chest' },
+];
+const CHASIN_BABIES = [
+  { value: '1', text: 'Try the poppet' },
+  { value: '2', text: 'Try the rocking horse' },
+  { value: '3', text: 'Try the jack-in-the-box' },
+  { value: '4', text: 'Do nothing' },
+];
+
+const storagePick = (which, options) => {
+  const got = api.planPick(storage, which, options);
+  return got && got.option;
+};
+
+check('both storage-room noncombats are answered without asking', [
+  storagePick('890', LIGHTS_OUT_STORAGE),
+  storagePick('886', CHASIN_BABIES),
+], ['1', '4']);
+
+check('a renumbered storage-room option falls through to asking', [
+  storagePick('890', [
+    { value: '1', text: 'Pull Away a Sheet' },
+    { value: '2', text: 'Feel Your Way to the Door' },
+  ]),
+  storagePick('886', [
+    { value: '4', text: 'Try the poppet' },
+    { value: '1', text: 'Do nothing' },
+  ]),
+], [null, null]);
+
+check('every planned storage-room choice is annotated too', [
+  Object.keys(storage.plan).sort(),
+  Object.keys(storage.hints).sort(),
+], [['886', '890'], ['886', '890']]);
+
+check('ghost keys are counted only off an acquire line', [
+  api.ghostKeysIn('<p>You acquire an item: <b>ghost key</b></p>'),
+  api.ghostKeysIn('You acquire <b>ghost key (3)</b>'),
+  api.ghostKeysIn('You acquire <b>2 ghost keys</b>'),
+  api.ghostKeysIn('You acquire an item: <b>ghost key</b> ... ' +
+                  'You acquire an item: <b>ghost key</b>'),
+  api.ghostKeysIn('You unlock the drawer with your ghost key.'),
+  api.ghostKeysIn('You acquire an item: <b>ghost keyring</b>'),
+  api.ghostKeysIn('You acquire an item: <b>old coin purse</b>'),
+  api.ghostKeysIn(null),
+], [1, 3, 2, 2, 0, 0, 0, 0]);
+
+const storageLogs = [];
+check('a ghost key drop is logged and never ends the run', [
+  storage.onResult({
+    htmlAll: 'fight over. You acquire an item: <b>ghost key</b>',
+    html: '<html>a post-combat page</html>',
+    status: { name: 'Tester' },
+    log: (m) => storageLogs.push(m),
+  }),
+  storageLogs.length,
+  storage.onResult({ html: 'nothing here', status: { name: 'Tester' }, log() {} }),
+], [null, 1, null]);
+
+// ---------------------------------------------------------------------------
+// Stop on level up
+// ---------------------------------------------------------------------------
+
+check('a level-up is only read when both readings exist', [
+  api.levelOf({ raw: { level: '12' } }),
+  api.levelOf({ raw: {} }),
+  api.leveledUp(12, { raw: { level: '13' } }),
+  api.leveledUp(12, { raw: { level: '12' } }),
+  api.leveledUp(null, { raw: { level: '13' } }),
+  api.leveledUp(12, { raw: {} }),
+  api.leveledUp(12, null),
+], [12, null, 13, null, null, null, null]);
 
 // ---------------------------------------------------------------------------
 // Blockers
