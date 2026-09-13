@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      3.0
-// @description  A grab-bag of small quality-of-life tweaks for Fallen London. A "UX" button docked INTO Fallen London's own chrome beside its travel control -- under the big Travel button on the wide layout, as one more icon in the banner on the narrow one -- so it takes up space in the page like any other control and covers nothing. It opens a menu of reference panels; the last line of that menu switches it back to floating over the page if you preferred it that way, and it falls back to floating on its own if Fallen London's chrome cannot be found. Every panel's header carries a fullscreen button beside its close button, which takes the panel off the popover and over the whole screen and back; the choice is remembered, so a long panel opens at full size every time rather than needing the button pressed again. The first panel is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. Fallen London Choice Helper, a separate script, adds its own panels -- Zailing, Port Carnelian, Scientific Voyages and Fruits of the Zee -- to the same menu when it is installed; the rating badges on cards and storylets that were part of this script until 3.0 live there now. Built as a feature registry so further tweaks can be added as entries.
+// @version      3.1
+// @description  A grab-bag of small quality-of-life tweaks for Fallen London. A "UX" button docked INTO Fallen London's own chrome beside its travel control -- under the big Travel button on the wide layout, as one more icon in the banner on the narrow one -- so it takes up space in the page like any other control and covers nothing. It opens a menu of reference panels; the last line of that menu switches it back to floating over the page if you preferred it that way, and it falls back to floating on its own if Fallen London's chrome cannot be found. Every panel's header carries a fullscreen button beside its close button, which takes the panel off the popover and over the whole screen and back; the choice is remembered, so a long panel opens at full size every time rather than needing the button pressed again. The first panel is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. Fallen London Choice Helper, a separate script, adds its own panels -- Zailing, Port Carnelian, Scientific Voyages and Fruits of the Zee -- to the same menu when it is installed; the rating badges on cards and storylets that were part of this script until 3.0 live there now. On the Possessions tab, picking a stat in the "Show:" filter puts a gold star on the item in every equipment slot that gives the most of it -- every one, where two tie, and none in a slot where nothing gives any -- with a line above the list saying what the stars mean and what the starred items add up to worn together. The filter also gains a BDR choice after Bizarre, which scores each item on its Bizarre, Dreaded and Respectable added together, so Bizarre +3 beats Respectable +2. A menace works too: pick Nightmares, Scandal, Suspicion or Wounds and the star goes to the item that does most against its build-up, scored the way the Menaces guide does -- reduces 1, greatly 2, massively 4, and an item that increases it counts against itself. It only ever highlights; it never equips anything. Built as a feature registry so further tweaks can be added as entries.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 // @run-at       document-idle
@@ -2382,6 +2382,408 @@
     return body;
   }
 
+  // === feature: equipment helper =========================================
+  //
+  // On the Possessions tab. When the "Show:" filter names a stat, every
+  // equipment slot's item giving the most of it gets a star -- all of them,
+  // where two tie -- and the filter gains a "BDR" choice after Bizarre, which
+  // scores an item on Bizarre, Dreaded and Respectable added together.
+  // Highlight ONLY, by request:
+  // nothing here ever clicks an item, because clicking one equips it.
+  //
+  // The markup, from a real /possessions capture (2026-09-13):
+  //
+  //   <ul class="equipment-group-list"><li class="equipment-group-list__item">
+  //     <div class="equipment-group"><h2 class="... equipment-group__name">Hat</h2>
+  //       <div class="equipment-group__slot-and-available-items">
+  //         <div class="equipment-group__equipment-slot-container ...--full">
+  //           <div data-quality-id="310" class="equipped-item">
+  //             <div aria-label="Beguiling Mask; Dangerous -1; Persuasive +6; Mysteriously…">
+  //         <ul class="available-item-list"><li class="available-item-list__item">
+  //           <div class="icon icon--emphasize icon--available-item" data-quality-id="304">
+  //             <div aria-label="Iron Hat; Dangerous +5; Persuasive -1; You can't go…">
+  //
+  // The first group is "Burden", whose `.effect-item`s are afflictions rather
+  // than equipment, so only `.equipped-item` and `.icon--available-item` count.
+  //
+  //   <span class="heading heading--3">Show:</span>
+  //   <div class="outfit-controls__dropdown-and-buttons"> ...
+  //     <div class="css-gj4dr3-singleValue">All</div>
+  //     <input id="react-select-6-input" aria-expanded="false" role="combobox" ...>
+  //
+  // That filter is a react-select, not a <select>, and its class names are
+  // generated hashes -- so it is found from its "Show:" label, its value by
+  // the `singleValue` fragment and its input by the `react-select-N-input` id,
+  // never by a whole class name.
+  //
+  // The OPEN menu was never captured (react-select draws it only while it is
+  // open), so its options are found by react-select's own id scheme,
+  // `react-select-N-option-M`. That, the BDR option and the menace options are
+  // CONFIRMED WORKING in-game by the author (2026-09-13); if "BDR" ever stops
+  // appearing in the menu, a changed id scheme is the first suspect.
+  //
+  // BDR is a fake option, on purpose (the author's call). React owns the menu,
+  // so a node of ours in it cannot change React's filter state. Picking it
+  // clicks Fallen London's own "All" option instead -- which closes the menu
+  // and puts every item back on the page -- and remembers the choice in
+  // sessionStorage; the control then reads "BDR" until a real option is
+  // picked, by click or otherwise.
+
+  const EQUIP_FLAG = 'flUxEquip';
+  const EQUIP_MARK_CLASS = 'fl-ux-equip-mark';
+  const EQUIP_SUMMARY_ID = 'fl-ux-equip-summary';
+  const EQUIP_BDR_VALUE_ID = 'fl-ux-equip-bdr-value';
+  const EQUIP_BDR_OPTION = '-option-fl-ux-bdr';
+  const EQUIP_BDR_KEY = 'fl-ux-equip-bdr';
+  const BDR_STATS = ['Bizarre', 'Dreaded', 'Respectable'];
+  // A shape, so the mark says "best" with the colour stripped off.
+  const EQUIP_MARK = '★';
+  const EQUIP_COLOR = '#e0b84a'; // light gold: reads on dark item art
+  const EQUIP_INK = '#17190c';   // so the star on it is dark
+
+  // `Iron Hat; Dangerous +5; Persuasive -1; flavour` -> dangerous 5,
+  // persuasive -1. A field that is a name and a signed number is a stat; a
+  // menace line is scored below; the flavour text matches neither and falls
+  // out. Keyed by `normalizeName`, the same way the filter's own wording is
+  // read.
+  const STAT_FIELD_RE = /^(.+?)\s+([+-]\d+)$/;
+
+  // A menace line, as the capture writes them: "Reduces Nightmares build up",
+  // "Greatly reduces Troubled Waters build up", "Greatly increases Wounds
+  // build up". Scored by the Menaces (Guide)'s "Menace Equipment" section:
+  // plain 1, "greatly" 2, "massively" 4 (the author suggested 3 for massively;
+  // the guide's figure is used, which moves only the summary's total -- an item
+  // carries one line per menace, so which item is best in a slot is the same
+  // either way). A REDUCTION is positive, because less of a menace is what a
+  // star should recommend; an increase is negative, so an item that makes a
+  // menace worse is never starred for it.
+  const MENACE_FIELD_RE = /^(?:(greatly|massively)\s+)?(reduces|increases)\s+(.+?)\s+build\s*-?\s*up$/i;
+  const MENACE_WEIGHT = { '': 1, greatly: 2, massively: 4 };
+
+  function parseItemStats(label) {
+    const stats = new Map();
+    // Which of the keys are menaces, so the summary can word them as build-up
+    // rather than as "+3 Nightmares worn together".
+    stats.menaces = new Set();
+    for (const raw of String(label || '').split(';').slice(1)) {
+      const field = raw.replace(TAG_RE, ' ').replace(/\s+/g, ' ').trim();
+      const menace = MENACE_FIELD_RE.exec(field);
+      if (menace) {
+        const key = normalizeName(menace[3]);
+        const weight = MENACE_WEIGHT[(menace[1] || '').toLowerCase()];
+        stats.set(key, (stats.get(key) || 0) + (/^r/i.test(menace[2]) ? weight : -weight));
+        stats.menaces.add(key);
+        continue;
+      }
+      const m = STAT_FIELD_RE.exec(field);
+      if (!m) continue;
+      const key = normalizeName(m[1]);
+      stats.set(key, (stats.get(key) || 0) + Number(m[2]));
+    }
+    return stats;
+  }
+
+  // Every slot on screen as { slot, items }, each item { node, id, name,
+  // equipped, stats }. The item you are wearing is a candidate like any other:
+  // if it is already the best, it is the one that gets the star.
+  function readEquipmentGroups(doc) {
+    const groups = [];
+    (doc || document).querySelectorAll('.equipment-group').forEach(function (group) {
+      const nameEl = group.querySelector('.equipment-group__name');
+      const items = [];
+      group.querySelectorAll('.equipped-item, .icon--available-item').forEach(function (node) {
+        const labelled = node.getAttribute('aria-label') != null ? node : node.querySelector('[aria-label]');
+        const label = labelled && labelled.getAttribute('aria-label');
+        if (!label) return;
+        items.push({
+          node: node,
+          id: node.getAttribute('data-quality-id') || '',
+          name: itemNameFromLabel(label),
+          equipped: String(node.className).split(/\s+/).indexOf('equipped-item') !== -1,
+          stats: parseItemStats(label),
+        });
+      });
+      if (items.length) groups.push({ slot: nameEl ? nameEl.textContent.trim() : '', items: items });
+    });
+    return groups;
+  }
+
+  // How much of `stat` an item gives. BDR is Bizarre, Dreaded and Respectable
+  // ADDED TOGETHER, which is the author's definition (2026-09-13): Bizarre +3
+  // beats Respectable +2, whatever the three come to as separate totals. The
+  // first cut compared the three as separate whole outfits and starred the
+  // largest, which put the star on a Respectable Landau (+2) over the Mary
+  // Lloyd (Bizarre +3) being worn. Do not bring that comparison back.
+  function itemScore(item, stat) {
+    if (normalizeName(stat) === 'bdr') {
+      let sum = 0;
+      for (const s of BDR_STATS) sum += item.stats.get(normalizeName(s)) || 0;
+      return sum;
+    }
+    return item.stats.get(normalizeName(stat)) || 0;
+  }
+
+  // The items tied for the most of `stat` in one slot. Nothing, when nothing in
+  // the slot gives any: a star on the least-bad "Respectable -1" would read as
+  // advice to wear it.
+  function bestInSlot(items, stat) {
+    let best = 0;
+    for (const item of items) best = Math.max(best, itemScore(item, stat));
+    if (best <= 0) return { value: 0, items: [] };
+    return {
+      value: best,
+      items: items.filter(function (item) { return itemScore(item, stat) === best; }),
+    };
+  }
+
+  // The "Show:" filter: { box, input, value, prefix, text }, or null.
+  function findShowControl(doc) {
+    const d = doc || document;
+    for (const label of d.querySelectorAll('.outfit-controls span.heading')) {
+      if (label.textContent.trim() !== 'Show:') continue;
+      const box = label.nextElementSibling;
+      if (!box) return null;
+      let input = null;
+      for (const el of box.querySelectorAll('input')) {
+        if (/^react-select-\d+-input$/.test(el.id || '')) { input = el; break; }
+      }
+      if (!input) return null;
+      let value = null;
+      for (const el of box.querySelectorAll('div')) {
+        if (typeof el.className === 'string' && el.className.indexOf('singleValue') !== -1) {
+          value = el;
+          break;
+        }
+      }
+      return {
+        box: box, input: input, value: value,
+        prefix: input.id.replace(/-input$/, ''),
+        text: value ? value.textContent.trim() : '',
+      };
+    }
+    return null;
+  }
+
+  // The open menu's real options, in order. Only ever called with the menu
+  // open (`aria-expanded`), since it walks every div on a large page.
+  function showOptions(prefix, doc) {
+    const re = new RegExp('^' + prefix + '-option-\\d+$');
+    return [...(doc || document).querySelectorAll('div')].filter(function (el) {
+      return re.test(el.id || '');
+    });
+  }
+
+  function bdrChosen() {
+    try {
+      return sessionStorage.getItem(EQUIP_BDR_KEY) === '1';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function setBdrChosen(on) {
+    try {
+      if (on) sessionStorage.setItem(EQUIP_BDR_KEY, '1');
+      else sessionStorage.removeItem(EQUIP_BDR_KEY);
+    } catch (e) { /* private mode: BDR just won't survive a reload */ }
+  }
+
+  // Picking BDR. The click on "All" comes FIRST: it is a real option, and the
+  // listener below cancels BDR on any real option, so the choice is only
+  // recorded once that click is over.
+  function chooseBdr(prefix) {
+    const all = showOptions(prefix).filter(function (o) {
+      return normalizeName(o.textContent) === 'all';
+    })[0];
+    if (all) {
+      all.click();
+    } else {
+      const input = document.getElementById(prefix + '-input');
+      if (input && input.blur) input.blur();
+    }
+    setBdrChosen(true);
+    schedule();
+  }
+
+  // One node of ours in React's menu, immediately after Bizarre (or last, if
+  // there is no Bizarre). A SHALLOW clone of that option, so it wears the
+  // option's look and none of React's children or handlers. Only the click is
+  // taken: the menu's own mousedown handler has to see the press, since that
+  // is what stops the input blurring and the menu closing under the finger.
+  function injectBdrOption(show) {
+    if (!show.input || show.input.getAttribute('aria-expanded') !== 'true') return;
+    const options = showOptions(show.prefix);
+    if (!options.length) return;
+    const after = options.filter(function (o) {
+      return normalizeName(o.textContent) === 'bizarre';
+    })[0] || options[options.length - 1];
+    const id = show.prefix + EQUIP_BDR_OPTION;
+    let ours = document.getElementById(id);
+    if (ours && ours.previousElementSibling === after) return;
+    if (!ours) {
+      ours = after.cloneNode(false);
+      ours.id = id;
+      ours.removeAttribute('aria-selected');
+      ours.removeAttribute('aria-disabled');
+      ours.textContent = 'BDR';
+      ours.title = 'Bizarre, Dreaded and Respectable added together: stars the item in '
+        + 'each slot that gives the most of the three combined.';
+      ours.addEventListener('click', function (e) {
+        if (e && e.preventDefault) e.preventDefault();
+        if (e && e.stopPropagation) e.stopPropagation();
+        chooseBdr(show.prefix);
+      });
+    }
+    after.parentNode.insertBefore(ours, after.nextSibling);
+  }
+
+  // A real option picked by click cancels BDR -- "All" included, which is the
+  // one choice the value check in `equipmentHelper` cannot see. Capture phase,
+  // so it runs before React handles the click.
+  let equipBound = false;
+  function bindEquipCancel() {
+    if (equipBound) return;
+    equipBound = true;
+    document.addEventListener('click', function (e) {
+      const t = e && e.target;
+      const option = t && t.closest ? t.closest('[id*="-option-"]') : null;
+      if (!option || !/^react-select-\d+-option-\d+$/.test(option.id)) return;
+      const show = findShowControl();
+      if (!show || option.id.indexOf(show.prefix + '-option-') !== 0) return;
+      setBdrChosen(false);
+      schedule();
+    }, true);
+  }
+
+  // While BDR is chosen the control reads "BDR". React's own value is hidden
+  // rather than rewritten -- replacing text React owns would leave React
+  // updating a text node that is no longer in the page -- and ours sits on the
+  // same grid cell after it. `pointer-events:none`, so a tap still opens the
+  // menu.
+  function showBdrValue(show, on) {
+    let ours = document.getElementById(EQUIP_BDR_VALUE_ID);
+    if (!on || !show || !show.value) {
+      if (ours) ours.remove();
+      if (show && show.value && show.value.style.visibility === 'hidden') show.value.style.visibility = '';
+      return;
+    }
+    if (show.value.style.visibility !== 'hidden') show.value.style.visibility = 'hidden';
+    if (!ours) {
+      ours = h('span', {
+        id: EQUIP_BDR_VALUE_ID,
+        textContent: 'BDR',
+        css: 'grid-area:1/1/2/3;align-self:center;pointer-events:none;white-space:nowrap;'
+          + 'color:' + ((getComputedStyle(show.value) || {}).color || 'inherit') + ';',
+      });
+    }
+    if (ours.parentNode !== show.value.parentNode || ours.previousElementSibling !== show.value) {
+      show.value.parentNode.insertBefore(ours, show.value.nextSibling);
+    }
+  }
+
+  // One item's star, idempotently. The flag carries the stat, the item and the
+  // figure, because React re-renders this list into the same nodes: a boolean
+  // would leave a star on whatever item moved into a starred node.
+  function markItem(item, key) {
+    const node = item.node;
+    if ((node.dataset[EQUIP_FLAG] || '') === (key || '')) return;
+    for (const old of node.querySelectorAll('.' + EQUIP_MARK_CLASS)) {
+      if (old.parentNode === node) old.remove();
+    }
+    node.style.boxShadow = key ? '0 0 0 2px ' + EQUIP_COLOR : '';
+    if (!key) {
+      delete node.dataset[EQUIP_FLAG];
+      return;
+    }
+    node.dataset[EQUIP_FLAG] = key;
+    if (getComputedStyle(node).position === 'static') node.style.position = 'relative';
+    // `pointer-events:none`: a tap on the star is a tap on the item, exactly as
+    // before. The reasoning lives in the summary line, which a phone can read.
+    node.appendChild(h('span', {
+      className: EQUIP_MARK_CLASS,
+      textContent: EQUIP_MARK,
+      css: 'position:absolute;top:-4px;left:-4px;z-index:5;padding:0 3px;border-radius:3px;'
+        + 'background:' + EQUIP_COLOR + ';color:' + EQUIP_INK + ';'
+        + 'font:bold 11px/14px arial,sans-serif;pointer-events:none;',
+    }));
+  }
+
+  function signed(n) {
+    return (n > 0 ? '+' : '') + n;
+  }
+
+  // The line above the list that says what the stars mean -- the only place
+  // that does, since a star cannot carry a tooltip a phone could open.
+  function equipSummary(stat, total, menace) {
+    const bdr = normalizeName(stat) === 'bdr';
+    if (menace) {
+      if (!total) return 'None of your equipment reduces ' + stat + ' build-up.';
+      return EQUIP_MARK + ' marks the item in each slot that does most against ' + stat
+        + ' build-up (every one, where two tie). Worn together they score ' + total
+        + ' on the Menaces guide\'s scale: reduces 1, greatly 2, massively 4.';
+    }
+    if (!total) {
+      return 'None of your equipment gives any '
+        + (bdr ? 'Bizarre, Dreaded or Respectable' : stat) + '.';
+    }
+    return EQUIP_MARK + ' marks the best ' + (bdr ? 'BDR' : stat)
+      + ' item in each slot (every one, where two tie): ' + signed(total) + ' '
+      + (bdr ? 'Bizarre, Dreaded and Respectable combined' : stat) + ' worn together.';
+  }
+
+  function drawEquipSummary(list, text) {
+    let el = document.getElementById(EQUIP_SUMMARY_ID);
+    if (!text || !list || !list.parentNode) {
+      if (el) el.remove();
+      return;
+    }
+    if (!el) {
+      el = h('div', {
+        id: EQUIP_SUMMARY_ID,
+        css: 'margin:8px 0;padding:6px 10px;border-left:3px solid ' + EQUIP_COLOR + ';background:'
+          + UI.bgAlt + ';color:' + UI.text + ';font:13px ' + UI.font + ';line-height:1.5;',
+      });
+    }
+    if (el.textContent !== text) el.textContent = text;
+    if (el.parentNode !== list.parentNode || el.nextElementSibling !== list) {
+      list.parentNode.insertBefore(el, list);
+    }
+  }
+
+  function equipmentHelper() {
+    const list = document.querySelector('.equipment-group-list');
+    const show = list ? findShowControl() : null;
+    if (!list || !show) {
+      drawEquipSummary(null, '');
+      return;
+    }
+    bindEquipCancel();
+    // A real option picked some way the click listener cannot see -- the
+    // keyboard, say -- shows up as a value that is no longer "All".
+    if (bdrChosen() && show.text && normalizeName(show.text) !== 'all') setBdrChosen(false);
+    const bdr = bdrChosen();
+    injectBdrOption(show);
+    showBdrValue(show, bdr);
+
+    const groups = readEquipmentGroups();
+    const stat = bdr ? 'BDR'
+      : (show.text && normalizeName(show.text) !== 'all' ? show.text : null);
+    let total = 0;
+    for (const group of groups) {
+      const best = stat ? bestInSlot(group.items, stat) : { value: 0, items: [] };
+      total += best.value;
+      for (const item of group.items) {
+        markItem(item, best.items.indexOf(item) !== -1
+          ? normalizeName(stat) + '|' + item.id + '|' + best.value : null);
+      }
+    }
+    const key = stat ? normalizeName(stat) : '';
+    const menace = !!stat && groups.some(function (group) {
+      return group.items.some(function (item) { return item.stats.menaces.has(key); });
+    });
+    drawEquipSummary(list, stat ? equipSummary(stat, total, menace) : '');
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -2392,6 +2794,9 @@
     { name: 'faction-capture', run: captureFactionState },
     // Finishes a "use" click that had to change route to get to Possessions.
     { name: 'pending-item', run: runPendingItem },
+    // Possessions: stars the best item per slot for the "Show:" stat, and
+    // adds BDR to that filter.
+    { name: 'equipment-helper', run: equipmentHelper },
   ];
 
   // === dispatch ==========================================================

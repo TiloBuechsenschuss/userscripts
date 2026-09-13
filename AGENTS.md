@@ -1724,6 +1724,57 @@ navigation. Two consequences:
   mechanism for both routes. If the page arrives and the item genuinely isn't there, it stops
   retrying and fills the search box with the name instead (via the native value setter plus an
   `input` event, since React ignores a plain `value =`), so you can see what was looked for.
+- **`equipment-helper`** (added 2026-09-13, `ux-enhancers.js` 3.1) works the Possessions tab's
+  equipment. When the **"Show:" filter** names a stat, every slot's item giving the most of it
+  gets a gold `★` and an outline — **every** item tied at the top, and **none** in a slot where
+  nothing gives more than 0, since a star on the least-bad `Respectable -1` would read as advice
+  to wear it. The item you are wearing is a candidate like any other. A summary line above the
+  list says what the stars mean and what the starred items add up to; it is the only place the
+  reasoning lives, because the star is `pointer-events:none` (a tap on it has to stay a tap on the
+  item) and so can carry no tap-to-read panel. Highlight **only**, by the author's call — clicking
+  an item equips it, so nothing here ever clicks one.
+  Stats come off the same `aria-label` the Possessions scrape reads, as the `Name ±N` fields after
+  the name (`parseItemStats`); the flavour simply fails the pattern.
+  **A menace is a line of words, not a number** (added 2026-09-13, on the author's report that a
+  Nightmares filter starred nothing): `Reduces Nightmares build up`, `Greatly reduces Troubled
+  Waters build up`, `Greatly increases Wounds build up`, all verbatim from the capture. They are
+  scored per the *Menaces (Guide)*'s **Menace Equipment** section — plain 1, "greatly" 2,
+  "massively" **4** — and signed so that a **reduction is positive**: a star recommends, and less
+  of a menace is the recommendation. An increase is negative, so an item making a menace worse is
+  never starred for it. The author first said 3 for "massively"; the guide says 4 and the guide's
+  figure is used — it moves only the summary's total, never which item wins a slot, since an item
+  carries one line per menace. (That section carries an "Incomplete" tag about its CP formulas;
+  the 1/2/4 weights are stated outright and are what this uses.) The parse keys the menace by
+  name and records it in `stats.menaces`, which is how the summary knows to talk about build-up
+  rather than "+3 Nightmares worn together". The filter's own wording for a menace option was
+  never captured; it is the bare menace name, which the author's in-game report confirms works. Slots are `.equipment-group`, and only `.equipped-item` and
+  `.icon--available-item` count, which is what keeps the **Burden** group's `.effect-item`
+  afflictions out.
+  **BDR** is the author's addition to that filter, and it is **the sum** of Bizarre, Dreaded and
+  Respectable on each item (`itemScore`), ranked per slot exactly like any other stat: Bizarre +3
+  beats Respectable +2, whatever the three come to as separate totals. The first cut (same day)
+  got this wrong — it compared the three as separate whole outfits and starred the largest, which
+  put the star on a Respectable Landau (+2) over the Mary Lloyd (Bizarre +3) the author was
+  wearing. Reported, and corrected to the author's definition; do not bring the outfit comparison
+  back.
+  **The filter is a react-select, and BDR is a fake option on purpose.** There is no `<select>`
+  behind "Show:" (the "Wear:" dropdown has a hidden one; this does not), the class names are
+  generated hashes, and React owns the menu, so a node of ours in it cannot move React's state.
+  `findShowControl` therefore finds the control from its **"Show:" label**, the value by the
+  `singleValue` fragment and the input by its `react-select-N-input` id. `injectBdrOption` puts a
+  **shallow** clone of the Bizarre option after it — the look, none of React's children — and
+  takes only the click: the menu's own mousedown handler must still see the press, or the input
+  blurs and the menu closes under the finger. Picking BDR **clicks the real "All" option** (which
+  closes the menu and puts every item back on the page) and *then* records BDR in
+  `sessionStorage` (`fl-ux-equip-bdr`) — in that order, because a click on any real option is what
+  cancels BDR, and "All" is one. A real option also cancels it when picked some way no click
+  listener sees, which shows up as a value that is no longer "All". While BDR is chosen the
+  control reads BDR: React's value is **hidden, not rewritten** (rewriting text React owns leaves
+  React updating a node that is no longer in the page), and a span of ours sits on the same grid
+  cell after it.
+  Idempotency is the usual flag: `markItem`'s dataset key carries stat, item id and figure, since
+  React re-renders the list into the same nodes, and the summary and the BDR label only write
+  when their text or place has actually changed.
 - **Refreshing the Factions panel: `fetch` does not work, and that is settled.** Fallen London is
   client-rendered — `GET /myself` returns a ~4.7KB shell whose `#root` holds a loading splash and
   no quality list (checked against the live site, not assumed). So `refreshBackgroundState()` uses a
@@ -1856,6 +1907,14 @@ Confirmed live by the author:
   and the depth control docking behind the UX button by id. The report was general rather than
   item by item, so which install route (separate scripts or the loader) and which layouts were
   exercised is not recorded; if one of those turns up broken, that is the gap.
+- The **equipment helper** (2026-09-13, `ux-enhancers.js` 3.1), reported working by the author
+  the same day (*"now everything works"*), after two rounds of corrections in-game: BDR as the
+  **sum** of the three rather than the largest whole outfit, and **menace** lines scored 1/2/4.
+  Since the open Show menu was never captured, this report is also what settles its markup
+  assumptions: the BDR option placed by react-select's `react-select-N-option-M` ids, "All" and
+  "Bizarre" found by their text, the fake option clicking the real "All", and a menace option
+  named by its bare menace. The stars' placement on the item icons is covered by the same report,
+  though it was not described item by item, nor which layouts were used.
 
 **Not** verified in-game (reasoned about only):
 
@@ -2217,6 +2276,22 @@ Current tests:
   and routed via the nav link otherwise, replayed exactly once when the page arrives, abandoned
   (not retried forever) for an item that isn't there, and dropped when stale. Update it when you
   touch `FACTIONS` or either scrape.
+- `FallenLondon/test/ux-equipment-helper.test.mjs` — asserts `ux-enhancers.js`'s equipment
+  helper, over a stub Possessions page built from **verbatim labels** out of a real capture (keep
+  them verbatim). Label parsing (flavour and "Commonplace" fall out, a negative stays negative, an
+  advanced skill reads like any stat, and the menace lines scored 1/2/4 with a reduction positive
+  and an increase negative, a multi-word menace such as Troubled Waters included); per slot, a tie starring
+  every tied item and a slot of zeroes and minuses starring none; BDR scoring an item on the three
+  **added together** — the reported case, Mary Lloyd's Bizarre +3 over the Respectable Landau's
+  +2, with an item carrying two of the three landing in between — and none of the three meaning no
+  star. On
+  the page: the Burden afflictions never starred, a second pass adding nothing, a changed stat
+  moving stars *and* outlines, All clearing everything. Then the fake BDR option, over menu
+  options stubbed in react-select's id scheme (the unverified assumption, named as such): added
+  once, after Bizarre, only while the menu is open, wearing the option's class but not its
+  `aria-selected`; picking it clicking the real All and recording BDR; the control reading BDR
+  over a hidden value; the stars and summary for the combined score; and BDR cancelled both
+  by a clicked real option and by a value changed without a click.
 - `FallenLondon/test/ux-launcher-docking.test.mjs` — asserts `ux-enhancers.js`'s launcher
   **docking**, which is the half `ux-launcher-placement.test.mjs` can't reach: that one covers
   the two placement rules, which are pure, and this one covers moving a button in and out of
