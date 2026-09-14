@@ -505,10 +505,10 @@ check('the zee ratings are registered alongside the other features',
   api.FEATURES.map((f) => f.name),
   ['fotz-capture', 'spite-card-ratings', 'zee-card-ratings',
     'fotz-card-ratings', 'fotz-depth-control', 'fotz-supplication', 'port-carnelian',
-    'scientific-voyages']);
+    'scientific-voyages', 'university-laboratory']);
 
 check('the Zailing panel is in the launcher menu',
-  api.PANELS.map((p) => p.id), ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee']);
+  api.PANELS.map((p) => p.id), ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory']);
 
 console.log(failures ? '\n' + failures + ' FAILURE(S)' : '\nAll checks passed.');
 process.exit(failures ? 1 : 0);

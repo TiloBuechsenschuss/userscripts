@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.0
-// @description  Advice on what Fallen London's storylets and opportunity cards do for you, badged onto them where you make the choice. Its reference panels open from the "⚙ UX" button of Fallen London UX Enhancers, so install that as well to reach them; every badge works without it. (1) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (2) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. Its panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, every port on the Unterzee -- which region it is in, whether docking there wipes Troubled Waters and the zee-threats, and what it takes to be able to sail there at all, with the hunting grounds and the one-time destinations marked as the different things they are, since a port that resets nothing and a place that is not a dock are two different answers -- the three winds and the dreams they start, and the whole card table, searchable. (3) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: behind the UX button where that is docked beside Fallen London’s own Travel button, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. Its panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. (4) In Port Carnelian, where a governor's term runs 26 actions and Fallen London deals no opportunity cards at all, the badges go on storylets and on their options instead. The whole term is one storylet, Matters of State, so what is rated is the list of options inside it -- and the options of the two of those that open into a storylet of their own. Each shows the net change in resources that option makes, with a mark for what it does to Imperial Legitimacy -- the number that ends a term at once when it reaches 0, sending you back to zee with nothing: a down mark when the net was paid for out of Legitimacy, an up mark when the option buys Legitimacy back instead, and no mark at all when it leaves Legitimacy alone. The colour says the same thing the mark does and nothing else -- red for spending Legitimacy, green for buying it back, light blue for the rows that leave it alone, slate for the endings -- so the marks are enough on their own for anyone who cannot separate the red from the green. Then a Fate label on the one Fate-locked option, and "cash out" on the four endings, which spend a currency rather than gaining any. The four endings carry a figure rather than only a label: each shows what cashing out would pay you RIGHT NOW, in Echoes, worked out from your own Striped Delights and Silver Horseheads. Fallen London states both on the Myself tab and nowhere near the port, so the script reads them where they are shown, remembers them, and refreshes them in a hidden frame -- in the background while an ending is on screen, and again when the panel is opened on a stale reading -- exactly the way the festival reads how deep you are. A faction Favour is marked with an icon and priced at 0: it is a story quality capped at 7 rather than an item, nothing buys one, and pricing it would let a fixed reward out-rank a real cash-out on a number nobody acts on. Tribute, which has no market price either, is listed the same way and left out of the total. A Favour in High Places is not one of those despite the name -- it is an ordinary item the Bazaar buys -- so it is priced like any other. A question mark says the reading behind the figure is over a minute old, since every action of a term moves both currencies, and the plain "cash out" label is what is left when your numbers have never been read. The tooltip carries the whole sum: what you hold, what it turns into, what each piece is worth, what the next rounding step up would cost you -- 105 and 176 are worth waiting for and 140 is not -- and, for the two endings that pay a fixed reward and empty both purses, what taking one gives up. Half the table is worth the same +5, so whether it costs Legitimacy is the only thing separating those rows. The tooltip carries the Time Passing in Office and Airs windows the option is offered in, every currency change with its currency named, the requirement and the note; the two options that pay ten or fifteen of ONE of the two currencies, the game's choice rather than yours, say so in words, since reading them as that much of each would make them the best options in the table by a distance. A storylet the guide splits in two is badged with the better net and keeps both branches in its tooltip, because the losing branch is how Imperial Legitimacy is bought back. Its panel, Port Carnelian, opens on the same calculator -- your purse, and all four endings priced against it with the best one named in words -- and then holds the rest of the guide: how to unlock and reach the posting, the rules a term is played by, every option grouped by the clock and searchable, what the two currencies cash in for, the reward tiers with the two worth aiming at picked out and a letter against the step each of your two currencies is standing on, and the strategy. (5) On a Voyage of Scientific Discovery -- the Dilmun Club's expeditions to Bullbone Island, Corpsecage Island and Grunting Fen, which deal no opportunity cards either -- every action gets a badge for what it pays in research pages, coloured by which of the three kinds it is: Archaeological, Cryptopalaeontological or Theosophistical. You sail to one island for one kind, and at every step of the visit you are choosing between the action that pays it and one that pays goods instead, so an action paying no pages is labelled with what it does pay rather than scored: there is no exchange rate between pages and Echoes, and inventing one would be the badge choosing your voyage for you. The three gambles at the end of a visit carry their EXPECTED value rather than the figure they advertise, since the wiki gives both outcomes and the odds -- taking the safer of the two is worth about six times the greedier one once the failure is priced in. The tooltip carries the step of the visit the action belongs to, its challenge, everything it gives, what it costs, and what a failure costs; where the game picks between two payouts rather than you, that is said in words. The same badges cover the two screens at your Lodgings, where the pages are generated before you sail and spent afterwards, and there the figure is the guide's pence per page, because everything on that screen is priced. Three actions and three storylets have the same names on all three islands and pay a different kind of page on each, so the feature works out which island it is looking at from the greeting or from the storylet you have open, and says nothing at all rather than guess. Its panel, Scientific Voyages, holds the rest: how the voyage is unlocked, what each island pays and costs to reach, every action grouped by island and searchable, and how to squeeze the most preparatory research out of London first. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. Built as a feature registry so further advice can be added as entries.
+// @version      1.1
+// @description  Advice on what Fallen London's storylets and opportunity cards do for you, badged onto them where you make the choice. Its reference panels open from the "⚙ UX" button of Fallen London UX Enhancers, so install that as well to reach them; every badge works without it. (1) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (2) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. Its panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, every port on the Unterzee -- which region it is in, whether docking there wipes Troubled Waters and the zee-threats, and what it takes to be able to sail there at all, with the hunting grounds and the one-time destinations marked as the different things they are, since a port that resets nothing and a place that is not a dock are two different answers -- the three winds and the dreams they start, and the whole card table, searchable. (3) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: behind the UX button where that is docked beside Fallen London’s own Travel button, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. Its panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. (4) In Port Carnelian, where a governor's term runs 26 actions and Fallen London deals no opportunity cards at all, the badges go on storylets and on their options instead. The whole term is one storylet, Matters of State, so what is rated is the list of options inside it -- and the options of the two of those that open into a storylet of their own. Each shows the net change in resources that option makes, with a mark for what it does to Imperial Legitimacy -- the number that ends a term at once when it reaches 0, sending you back to zee with nothing: a down mark when the net was paid for out of Legitimacy, an up mark when the option buys Legitimacy back instead, and no mark at all when it leaves Legitimacy alone. The colour says the same thing the mark does and nothing else -- red for spending Legitimacy, green for buying it back, light blue for the rows that leave it alone, slate for the endings -- so the marks are enough on their own for anyone who cannot separate the red from the green. Then a Fate label on the one Fate-locked option, and "cash out" on the four endings, which spend a currency rather than gaining any. The four endings carry a figure rather than only a label: each shows what cashing out would pay you RIGHT NOW, in Echoes, worked out from your own Striped Delights and Silver Horseheads. Fallen London states both on the Myself tab and nowhere near the port, so the script reads them where they are shown, remembers them, and refreshes them in a hidden frame -- in the background while an ending is on screen, and again when the panel is opened on a stale reading -- exactly the way the festival reads how deep you are. A faction Favour is marked with an icon and priced at 0: it is a story quality capped at 7 rather than an item, nothing buys one, and pricing it would let a fixed reward out-rank a real cash-out on a number nobody acts on. Tribute, which has no market price either, is listed the same way and left out of the total. A Favour in High Places is not one of those despite the name -- it is an ordinary item the Bazaar buys -- so it is priced like any other. A question mark says the reading behind the figure is over a minute old, since every action of a term moves both currencies, and the plain "cash out" label is what is left when your numbers have never been read. The tooltip carries the whole sum: what you hold, what it turns into, what each piece is worth, what the next rounding step up would cost you -- 105 and 176 are worth waiting for and 140 is not -- and, for the two endings that pay a fixed reward and empty both purses, what taking one gives up. Half the table is worth the same +5, so whether it costs Legitimacy is the only thing separating those rows. The tooltip carries the Time Passing in Office and Airs windows the option is offered in, every currency change with its currency named, the requirement and the note; the two options that pay ten or fifteen of ONE of the two currencies, the game's choice rather than yours, say so in words, since reading them as that much of each would make them the best options in the table by a distance. A storylet the guide splits in two is badged with the better net and keeps both branches in its tooltip, because the losing branch is how Imperial Legitimacy is bought back. Its panel, Port Carnelian, opens on the same calculator -- your purse, and all four endings priced against it with the best one named in words -- and then holds the rest of the guide: how to unlock and reach the posting, the rules a term is played by, every option grouped by the clock and searchable, what the two currencies cash in for, the reward tiers with the two worth aiming at picked out and a letter against the step each of your two currencies is standing on, and the strategy. (5) On a Voyage of Scientific Discovery -- the Dilmun Club's expeditions to Bullbone Island, Corpsecage Island and Grunting Fen, which deal no opportunity cards either -- every action gets a badge for what it pays in research pages, coloured by which of the three kinds it is: Archaeological, Cryptopalaeontological or Theosophistical. You sail to one island for one kind, and at every step of the visit you are choosing between the action that pays it and one that pays goods instead, so an action paying no pages is labelled with what it does pay rather than scored: there is no exchange rate between pages and Echoes, and inventing one would be the badge choosing your voyage for you. The three gambles at the end of a visit carry their EXPECTED value rather than the figure they advertise, since the wiki gives both outcomes and the odds -- taking the safer of the two is worth about six times the greedier one once the failure is priced in. The tooltip carries the step of the visit the action belongs to, its challenge, everything it gives, what it costs, and what a failure costs; where the game picks between two payouts rather than you, that is said in words. The same badges cover the two screens at your Lodgings, where the pages are generated before you sail and spent afterwards, and there the figure is the guide's pence per page, because everything on that screen is priced. Three actions and three storylets have the same names on all three islands and pay a different kind of page on each, so the feature works out which island it is looking at from the greeting or from the storylet you have open, and says nothing at all rather than guess. Its panel, Scientific Voyages, holds the rest: how the voyage is unlocked, what each island pays and costs to reach, every action grouped by island and searchable, and how to squeeze the most preparatory research out of London first. (6) In your University Laboratory every opportunity card gets a badge for the Laboratory Research its best option pays on a success, worked out at your own Equipment for Scientific Experimentation -- nearly every figure in the lab is a formula on it, and on your students' levels and how many people work there, all of which Fallen London states on the Myself tab, so the script reads them there, remembers them, and refreshes them in the background. The badge ranks only the options you can take with nothing special in hand; one behind an Unavoidable Epiphany, an Unexpected Result or an item is kept in the tooltip and marked with a down triangle when it would pay more. A star marks an option that also hands you an Unavoidable Epiphany, a solid down triangle one that uses something up, a question mark a Watchful challenge's success figure, and an approximately-equal sign the expected value of a Luck option. Where something the figure depends on has not been read -- your Equipment, a student's level -- the badge shows the range rather than a guess, in a neutral grey. Colour runs slate, blue, teal, amber, gold by tens of research, with the number always printed; Parabolan Research is marked PR in violet, and an option that pays no research says what it does instead. Open a card and every option on it is badged in its own right, each tooltip carrying the requirement, the challenge, every outcome with its formula and your figure, and where the guide's student table disagrees with the option page, both. Its panel, University Laboratory, shows your Equipment, staff, students, project and what Circulate a draft of your findings would pay right now, every laboratory card searchable, the repeatable projects, the equipment ladder, and which experts suit which projects. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. Built as a feature registry so further advice can be added as entries.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 // @run-at       document-idle
@@ -726,6 +726,7 @@
         });
         if (bankFotzQualities(scan)) changed = true;
         if (bankPcQualities(scan)) changed = true;
+        if (bankLabQualities(scan)) changed = true;
       }
       const here = readPossessionCounts();
       if (!here || !here.size) {
@@ -5702,6 +5703,1388 @@
     });
   }
 
+  // === feature: University Laboratory ====================================
+  //
+  // Your own Laboratory at the University: an opportunity deck in which almost
+  // every option pays Laboratory Research, and the first feature here whose
+  // badge is a FORMULA rather than a transcribed number. "4 + Equipment",
+  // "12 + 2 × Equipment", "(2 + 0.2 × Equipment) × √Workers × highest worker
+  // level" -- the figure depends on your Equipment for Scientific
+  // Experimentation, your students' levels and how many people work in the
+  // lab, all of which Fallen London states on the Myself tab and nowhere near
+  // the deck. So the qualities are read where they are shown and banked, the
+  // same way the festival depth and the Port Carnelian purse are.
+  //
+  // **What the badge says, and why.** A card badge is the Laboratory Research
+  // the best option on it pays ON A SUCCESS, at your Equipment, among the
+  // options you can take with nothing special in hand -- the Zailing rule. An
+  // option behind an item (an Unavoidable Epiphany, an Unexpected Result, a
+  // Searing Enigma, the Robe of Mr Cards) is left out of that ranking and kept
+  // in the tooltip, and a `▾` says one of those would pay more. The options
+  // that hand you an Unavoidable Epiphany are what a lab run is steered by, so
+  // they carry `✦`; the ones that use something up carry `▼`. Nothing here puts
+  // a research value on an Epiphany or an Unlikely Connection: the wiki gives
+  // what each is spent for, not what it is worth, and a guessed exchange rate
+  // on every card would make every ranking wrong together.
+  //
+  // Where a figure cannot be worked out it is a RANGE, never a guess: with your
+  // Equipment unread the badge covers Equipment 1 to 9, and on a student's card
+  // with the student's level unread it covers the three tiers. A Luck option
+  // carries `≈` and its expected value, since both outcomes and the odds are on
+  // the page; a Watchful challenge keeps its success figure and a `?`.
+  //
+  // Transcribed from the individual card and option pages on fallenlondon.wiki,
+  // not from University Laboratory (Guide)/Cards or /Tables, which carry a
+  // GuideNeedsWork banner and disagree with the option pages in a dozen places
+  // -- mostly student failures. Where they disagree the option page is used and
+  // the guide's figure is kept beside it (`guide7`, `guideOff`) as the
+  // cross-check: the Tables page states every student option's research at
+  // Equipment 7. Corrections go in LAB_CARDS and nowhere else.
+  //
+  // One card per entry:
+  //
+  //   name      the card, as the game titles it.
+  //   group     which panel section it belongs to.
+  //   freq      its frequency. needs: what puts it in the deck, in words.
+  //   student   on a student's card, that student's quality -- the input
+  //             `student` in a formula, and what the tier options key off.
+  //   strict    the name is an ordinary English phrase, so it is only badged
+  //             once the lab is confirmed (see `labConfirmed`).
+  //   opts      one entry per option:
+  //     branch    the option, as the game titles it. page: the wiki page, when
+  //               it differs (the wiki disambiguates same-named options).
+  //     req       [[quality, min, max?], ...] -- requirements the Myself scrape
+  //               can check. eo / notEo: Experimental Object ranges.
+  //     gate      a requirement on something special -- an item, a quality
+  //               this feature does not read, Fate. Such an option is never
+  //               the card's badge.
+  //     ch        the challenge in words; rp: Research Preparations lower it.
+  //     luck      the odds of success, for a Luck challenge.
+  //     win / rare / alt / fail
+  //               research formulas for each outcome (see `labCompute`), and
+  //               winAlso / rareAlso / altAlso / failAlso for everything else
+  //               the outcome does, verbatim.
+  //     epiphany  a success gives an Unavoidable Epiphany (✦).
+  //     consumes  what it uses up (▼).
+  //     cur       'pr' when it pays Parabolan Research instead.
+  //     label     what the badge says for an option that pays no research.
+  //     guide7    { win, fail }: the guide's Student Table figure at Equipment
+  //               7. guideOff: which of those the option page disagrees with.
+  //     note      anything else.
+
+  const LAB_Q = {
+    equipment: 'Equipment for Scientific Experimentation',
+    workers: 'Number of Workers in your Laboratory',
+    eo: 'Experimental Object',
+    research: 'Laboratory Research',
+    required: 'Total Lab Research Required',
+    disgruntlement: 'Disgruntlement among the Students',
+    prestige: 'The Prestige of your Laboratory',
+    glass: 'Glass Studies',
+  };
+
+  const LAB_STUDENTS = [
+    { key: 'shifty', name: 'Shifty Student', quality: 'Laboratory Services from a Shifty Student' },
+    { key: 'meticulous', name: 'Meticulous Student', quality: 'Laboratory Services from a Meticulous Student' },
+    { key: 'gifted', name: 'Gifted Student', quality: 'Laboratory Services from a Gifted Student' },
+    { key: 'profound', name: 'Profound Student', quality: 'Laboratory Services from a Profound Student' },
+    { key: 'visionary', name: 'Visionary Student', quality: 'Laboratory Services from a Visionary Student' },
+  ];
+
+  // The staff this feature transcribes cards for. The ambition and Fate-locked
+  // experts are not among them: most of their options are "(see page)" on the
+  // wiki, and a badge with half its options missing would rank the wrong one.
+  const LAB_STAFF = [
+    { name: 'the Numismatrix', quality: 'Laboratory Services from the Numismatrix' },
+    { name: 'Lettice, the Mercy', quality: 'Laboratory Services of Lettice the Mercy' },
+    { name: 'F.F. Gebrandt', quality: 'Laboratory Services from F.F. Gebrandt' },
+    { name: 'a Grubby Urchin', quality: 'Laboratory Services from a Grubby Urchin' },
+    { name: 'the Struggling Artist', quality: 'Found Employment for an Old Friend' },
+  ];
+
+  // The advanced skills Unorthodox Methods scales off.
+  const LAB_SKILLS = ['Artisan of the Red Science', 'Glasswork', 'Shapeling Arts', 'Kataleptic Toxicology'];
+
+  const LAB_QUALITIES = Object.keys(LAB_Q).map(function (k) { return LAB_Q[k]; })
+    .concat(LAB_STUDENTS.map(function (s) { return s.quality; }))
+    .concat(LAB_STAFF.map(function (s) { return s.quality; }))
+    .concat(LAB_SKILLS);
+
+  // Items, off Possessions. These move every few actions, so a figure resting
+  // on one is marked when the reading is over a minute old.
+  const LAB_ITEMS = {
+    epiphany: 'Unavoidable Epiphany',
+    idea: 'Unwise Idea',
+    result: 'Unexpected Result',
+    connection: 'Unlikely Connection',
+  };
+
+  // --- formulas ------------------------------------------------------------
+  //
+  // A research formula is one of:
+  //
+  //   { k, el, glass, student, workers, ideas, round }
+  //       k + el × Equipment + glass × Glass Studies + student × the card's
+  //       student level + workers × Number of Workers + ideas × Unwise Ideas.
+  //       `round` is 'up' or 'down' where the page says so.
+  //   { curve: { height, k, mid, y }, of }
+  //       the wiki's SCurveTable: y + height / (1 + e^(−k × (x − mid))), on
+  //       Equipment (`of: 'el'`) or on an advanced skill.
+  //   { team, k }
+  //       (k + team × Equipment) × √Workers × highest worker level.
+  //   { draft: true }
+  //       Circulate a draft of your findings (see `labDraft`).
+  //   { range: [lo, hi] }
+  //       "1-44", with nothing said about the distribution.
+  //
+  // Unless a page says otherwise a figure rounds half to even, which is what
+  // the wiki's own SCurve module does "as is typically used in-game".
+
+  function labLin(k, el, round) {
+    const f = { k: k, el: el };
+    if (round) f.round = round;
+    return f;
+  }
+
+  const LAB_BRIEF_CURVE = { height: 42, k: 0.4, mid: 7, y: -1 };
+  const LAB_SKILL_WIN = { height: 35, k: 0.3, mid: 6, y: 0 };
+  const LAB_SKILL_FAIL = { height: 20, k: 0.3, mid: 7, y: 0 };
+
+  const LAB_UE = 'an Unavoidable Epiphany';
+
+  const LAB_CARDS = [
+    // === a brief project (under 200 research) =============================
+    {
+      name: 'Preparing for a brief Experiment', group: 'brief', freq: 'High Urgency',
+      needs: 'a project needing less than 200 research. Dealt once, first',
+      note: 'Every option ends the card, so this is the one choice a short project gives you.',
+      opts: [
+        { branch: 'Prepare carefully', win: { curve: LAB_BRIEF_CURVE, of: 'el' },
+          winAlso: 'Research Preparations +10' },
+        { branch: 'Look for a novel angle', win: { curve: LAB_BRIEF_CURVE, of: 'el' },
+          winAlso: 'Unlikely Connection +3' },
+        { branch: 'Rely on your own brilliance', req: [[LAB_Q.equipment, 7], [LAB_Q.prestige, 20]],
+          ch: 'Watchful 170', win: labLin(-8, 4), epiphany: true, fail: { k: 10 },
+          failAlso: 'Unwise Idea +1, Wounds +2 CP',
+          note: 'The page gives the failure\'s 10 research for Equipment 7 and 9.' },
+        { branch: 'Begin with a quick jaunt into Parabola', cur: 'pr',
+          gate: 'Route: The Reflection of your Laboratory, 50 Drops of Prisoner\'s Honey and Glass Studies 2',
+          ch: 'Glasswork 5 (narrow)', win: { k: 15 },
+          winAlso: 'costs 50 Drops of Prisoner\'s Honey (25 with a Set of Cosmogone Spectacles)',
+          failAlso: 'costs 100 Drops of Prisoner\'s Honey, and no research' },
+      ],
+    },
+
+    // === setting up a long project ========================================
+    {
+      name: 'Form New Hypotheses', group: 'setup', freq: 'Frequent',
+      needs: 'a project of 200 research or more, until you take No more of this!',
+      opts: [
+        { branch: 'Review the possibilities', ch: 'Watchful 150', rp: true, win: labLin(4, 1),
+          winAlso: 'Research Preparations +5', rare: labLin(8, 1),
+          rareAlso: 'Research Preparations +20, Unwise Idea +1', fail: labLin(0, 1),
+          note: 'Rare success chance is 5%.' },
+        { branch: 'Consider every possibility', ch: 'Watchful 180', rp: true, win: labLin(4, 1),
+          winAlso: 'Unlikely Connection +5', fail: labLin(0, 1) },
+        { branch: 'No more of this!', page: 'No more of this! (Form New Hypotheses)',
+          win: labLin(8, 1), winAlso: 'removes this card for the rest of the project',
+          note: 'Needs Laboratory Research of at least a sixth of the project.' },
+      ],
+    },
+    {
+      name: 'Review the Prior Literature', group: 'setup', freq: 'Standard',
+      needs: 'a project of 200 research or more, until you take No more of this!',
+      opts: [
+        { branch: 'Read the canonical texts; make pertinent notes', ch: 'Watchful 150', rp: true,
+          win: labLin(4, 1), winAlso: 'Research Preparations +5', rare: labLin(8, 1),
+          rareAlso: 'Research Preparations +10', fail: labLin(0, 1),
+          note: 'Rare success chance is 20%.' },
+        { branch: 'Chase down every last citation', ch: 'Watchful 220', rp: true, win: labLin(4, 1),
+          winAlso: 'Unlikely Connection +5', fail: labLin(0, 1) },
+        { branch: 'Gather some unofficial literature', gate: 'Incisive Observation 5',
+          consumes: '5 Incisive Observations', ch: 'Watchful 190', rp: true, win: labLin(0, 2),
+          winAlso: 'Unlikely Connection +5', fail: labLin(0, 1),
+          note: 'The page lists a second failure paying a flat 10 research, without saying when.' },
+        { branch: 'Relate this problem to a past Enigma',
+          gate: 'a Searing Enigma, on a project of 500 research or more with at least 500 still to go',
+          eo: [[1001, 1200]], consumes: 'a Searing Enigma', ch: 'Watchful 220', rp: true,
+          win: { k: 500 }, epiphany: true, winAlso: 'discards your hand; 525 research with a Correspondence Focus',
+          fail: { k: 500 }, failAlso: '525 research with a Correspondence Focus' },
+        { branch: 'No more of this!', page: 'No more of this! (Review the Prior Literature)',
+          win: labLin(8, 1), winAlso: 'removes this card for the rest of the project' },
+      ],
+    },
+
+    // === the experiment itself ============================================
+    {
+      name: 'Engage in some Empirical Research', group: 'experiment', freq: 'Standard',
+      needs: 'Form New Hypotheses done with, and supplies in (Refresh your Consumables)',
+      opts: [
+        { branch: 'Perform a comparatively simple experiment', ch: 'Dangerous 200', rp: true,
+          win: labLin(4, 1), winAlso: 'Unexpected Result +1', rare: labLin(8, 1),
+          rareAlso: 'Unwise Idea +1', fail: labLin(0, 1), failAlso: 'Wounds +2 CP' },
+        { branch: 'Hook up all the meters and stand well back', ch: 'Dangerous 250', rp: true,
+          win: labLin(12, 2), winAlso: 'Unexpected Result +1; you are out of supplies; discards your hand',
+          rare: labLin(12, 2), rareAlso: 'Unwise Idea +1, Unexpected Result +1, Wounds +2 CP',
+          failAlso: 'Wounds +2 CP, and no research' },
+      ],
+    },
+    {
+      name: 'Refresh your Consumables', group: 'experiment', freq: 'Standard',
+      needs: 'a project of 200 research or more, while you are out of supplies',
+      opts: [
+        { branch: 'Work through a trusted intermediary', ch: 'Persuasive 150', win: labLin(8, 2),
+          alt: labLin(10, 2), fail: labLin(0, 1), failAlso: 'Scandal +2 CP',
+          note: 'Alternative success chance is 30%.' },
+        { branch: 'Rely on illicit contacts', gate: 'Connected: The Widow 5', ch: 'Shadowy 200',
+          win: labLin(-8, 4), failAlso: 'Suspicion +1–2 CP, and no research' },
+        { branch: 'Demand a delivery', gate: 'The Robe of Mr Cards', win: labLin(12, 2),
+          winAlso: 'Unexpected Result +1' },
+        { branch: 'Allow your possessions to propagate on your own',
+          gate: 'A Kitten-Sized Diamond, Liberated from the Mountain', win: labLin(12, 2),
+          winAlso: 'Unexpected Result +1' },
+        { branch: 'Appropriate whatever you need',
+          gate: 'A Vast Network of Connections Wherever the Bazaar\'s Influence can be Found',
+          win: labLin(12, 2), winAlso: 'Unexpected Result +1' },
+      ],
+    },
+    {
+      name: 'Unorthodox Methods', group: 'experiment', freq: 'Very Infrequent', strict: true,
+      needs: 'The Prestige of your Laboratory 20, an Unlikely Connection, and a project of 200 or more',
+      opts: [
+        { branch: 'Use what you know of the Red Science', ch: 'Artisan of the Red Science 7 (narrow)',
+          consumes: 'an Unlikely Connection',
+          win: { curve: LAB_SKILL_WIN, of: 'Artisan of the Red Science' }, winAlso: 'Unexpected Result +1',
+          fail: { curve: LAB_SKILL_FAIL, of: 'Artisan of the Red Science' }, failAlso: 'Wounds +1 CP' },
+        { branch: 'Perform an experiment in Parabola', gate: 'Access to a Parabolan Base-Camp',
+          ch: 'Glasswork 7 (narrow)', consumes: 'an Unlikely Connection',
+          win: { curve: LAB_SKILL_WIN, of: 'Glasswork' }, winAlso: 'Unexpected Result +1',
+          fail: { curve: LAB_SKILL_FAIL, of: 'Glasswork' }, failAlso: 'Nightmares +1 CP' },
+        { branch: 'Rearrange your brain around the problem', ch: 'Shapeling Arts 7 (narrow)',
+          consumes: 'an Unlikely Connection',
+          win: { curve: LAB_SKILL_WIN, of: 'Shapeling Arts' }, winAlso: 'Unexpected Result +1',
+          fail: { curve: LAB_SKILL_FAIL, of: 'Shapeling Arts' }, failAlso: 'Nightmares +1 CP' },
+        { branch: 'Adopt a better frame of mind', ch: 'Kataleptic Toxicology 7 (narrow)',
+          consumes: 'an Unlikely Connection',
+          win: { curve: LAB_SKILL_WIN, of: 'Kataleptic Toxicology' }, winAlso: 'Unexpected Result +1',
+          fail: { curve: LAB_SKILL_FAIL, of: 'Kataleptic Toxicology' }, failAlso: 'Wounds +1 CP' },
+      ],
+    },
+
+    // === your team ========================================================
+    {
+      name: 'Directing your Team', group: 'team', freq: 'Infrequent', strict: true,
+      needs: '3 workers, a project of 200 or more, and both set-up cards done with',
+      opts: [
+        { branch: 'Put them to work examining data', gate: 'an Unexpected Result',
+          consumes: 'an Unexpected Result', win: { team: 0.2, k: 2 }, rare: { team: 0.2, k: 2 },
+          rareAlso: 'Unwise Idea +1, Nightmares +1 CP', note: 'Rare success chance is 10%.' },
+        { branch: 'Give them a line of inquiry to follow up on', gate: LAB_UE, consumes: LAB_UE,
+          win: { team: 0.2, k: 2 },
+          note: 'The page itself calls this a weaker use of an Epiphany than the others.' },
+        { branch: 'Coordinate a plan of research', page: 'Coordinate a plan of research (No Disgruntlement)',
+          req: [[LAB_Q.disgruntlement, 0, 0]], ch: 'Persuasive 210', rp: true,
+          win: { team: 0.08, k: 2 }, fail: labLin(6, 1.25) },
+        { branch: 'Coordinate a plan of research', page: 'Coordinate a plan of research (Disgruntlement)',
+          req: [[LAB_Q.disgruntlement, 1]], ch: 'Persuasive 210', rp: true,
+          win: { team: 0.08, k: 2 }, alt: { team: 0.2, k: 2 }, altAlso: 'Disgruntlement +1 CP',
+          fail: labLin(6, 1.25), failAlso: 'Disgruntlement +1 CP' },
+        { branch: 'Give them a day off', req: [[LAB_Q.disgruntlement, 2]], win: labLin(6, 1.25, 'up'),
+          winAlso: 'Disgruntlement −2 CP' },
+        { branch: 'Take a day off', luck: 0.4, win: { team: 0.08, k: 2 },
+          winAlso: 'Nightmares −2 CP, or Suspicion −2 CP instead; Disgruntlement +2 CP if you have any',
+          fail: { team: 0.08, k: 2 },
+          failAlso: 'Wounds −2 CP, or Scandal −2 CP instead (and then Disgruntlement +2 CP if you have any)' },
+      ],
+    },
+
+    // === writing up =======================================================
+    {
+      name: 'Write Up Your Findings', group: 'writeup', freq: 'Very Infrequent', strict: true,
+      needs: 'Laboratory Research 200. Once a project',
+      opts: [
+        { branch: 'Circulate a draft of your findings', ch: 'Watchful 200', win: { draft: true },
+          consumes: 'every Unexpected Result', winAlso: 'ends the card for this project',
+          failAlso: 'Scandal +2 CP, and no research',
+          note: 'The later in a project you play it, the more it pays — the share of the project '
+            + 'done counts up to the whole of it. The panel works out the figure.' },
+        { branch: 'Organise your notes', gate: 'Unexpected Result 2', consumes: '2 Unexpected Results',
+          ch: 'Watchful 300, lowered by 10 for every Unexpected Result', rp: true,
+          win: { curve: LAB_BRIEF_CURVE, of: 'el' }, epiphany: true,
+          fail: labLin(5, 2), failAlso: 'Nightmares +2 CP' },
+      ],
+    },
+
+    // === a very long project ==============================================
+    {
+      name: 'Running out of Steam', group: 'long', freq: 'Unusual', strict: true,
+      needs: 'Laboratory Research 1,200; turns into Running out of Terms once taken',
+      opts: [
+        { branch: 'Go for a walk', page: 'Go for a walk (Fatigue)', luck: 0.5, win: labLin(18, 3),
+          winAlso: 'Unwise Idea +1; discards your hand', alt: labLin(5, 2),
+          altAlso: 'Unlikely Connection +5; discards your hand', fail: labLin(5, 2),
+          failAlso: 'Wounds −5 CP, or an Unavoidable Epiphany instead; discards your hand',
+          note: 'The expected value counts a success as the full 18 + 3 × Equipment. The page does '
+            + 'not give the odds of the alternative success, which pays the failure\'s figure, so '
+            + 'the true expectation is somewhat lower.' },
+        { branch: 'Brew another pot of tea', win: labLin(5, 2), winAlso: 'Research Preparations +10' },
+        { branch: 'Take an extended sabbatical', gate: 'A Palatial Holiday Home in the Arctic Circle',
+          win: labLin(18, 3), epiphany: true,
+          winAlso: 'Research Preparations +10, Wounds −2 CP, Nightmares −2 CP' },
+      ],
+    },
+    {
+      name: 'Running out of Terms', group: 'long', freq: 'Unusual',
+      needs: 'Laboratory Research 5,000 and 2 workers, after Running out of Steam',
+      opts: [
+        { branch: 'Pull another alphabet off the shelf', win: labLin(8, 1) },
+        { branch: 'Combine Greek and Latin', win: labLin(18, 3), winAlso: 'Scandal +1 CP' },
+      ],
+    },
+
+    // === big ideas ========================================================
+    {
+      name: 'The Intrusion of a Thought', group: 'ideas', freq: 'Infrequent',
+      needs: 'an Unwise Idea',
+      note: 'The three cash-ins pay 20 research an idea and a change point of a menace for each.',
+      opts: [
+        { branch: 'Write it down for later', win: labLin(5, 4 / 3, 'up'), winAlso: 'Unwise Idea +1' },
+        { branch: 'Perform an unsafe experiment', win: { ideas: 20 }, consumes: 'every Unwise Idea',
+          winAlso: 'Wounds +1 CP an idea; discards your hand',
+          note: 'Locked while you have Theoretical Methods.' },
+        { branch: 'Publish an unproven theory', win: { ideas: 20 }, consumes: 'every Unwise Idea',
+          winAlso: 'Scandal +1 CP an idea; discards your hand' },
+        { branch: 'Pursue an unthinkable line of inquiry', win: { ideas: 20 }, consumes: 'every Unwise Idea',
+          winAlso: 'Nightmares +1 CP an idea; discards your hand' },
+      ],
+    },
+    {
+      name: 'Eureka!', group: 'ideas', freq: 'Infrequent', strict: true,
+      needs: 'an Unavoidable Epiphany',
+      opts: [
+        { branch: 'Make a profound realisation', win: labLin(18, 3), consumes: LAB_UE },
+      ],
+    },
+
+    // === menaces ==========================================================
+    {
+      name: 'Nightmares of Your Experiment', group: 'menace', freq: 'Standard', needs: 'Nightmares 5',
+      opts: [
+        { branch: 'Take a rest', label: 'Nightmares −2', win: { k: -5 },
+          winAlso: 'Nightmares −2 CP, for 5 research' },
+        { branch: 'Use your nightmares as inspiration', win: { k: 7 }, winAlso: 'Nightmares +2 CP' },
+      ],
+    },
+    {
+      name: 'Tomb Sciences', group: 'menace', freq: 'Standard', needs: 'Scandal 5',
+      opts: [
+        { branch: 'Take a break', page: 'Take a break (from Lab Work)', label: 'Scandal −2',
+          win: { k: -5 }, winAlso: 'Scandal −2 CP, for 5 research' },
+      ],
+    },
+    {
+      name: 'See a Doctor', group: 'menace', freq: 'Standard', strict: true, needs: 'Wounds 5',
+      opts: [
+        { branch: 'Take a break', page: 'Take a break (Laboratory)', label: 'Wounds −2',
+          win: { k: -5 }, winAlso: 'Wounds −2 CP, for 5 research' },
+      ],
+    },
+    {
+      name: 'Student Complaints', group: 'menace', freq: 'Standard', strict: true,
+      needs: 'Disgruntlement among the Students 4',
+      opts: [
+        { branch: 'Persuade them that this is in their own interest', ch: 'Mithridacy 7 (narrow)',
+          label: 'Disgruntled −2', winAlso: 'Disgruntlement −2 CP', failAlso: 'Disgruntlement +1 CP' },
+        { branch: 'Offer bribes', gate: 'Solacefruit 2', consumes: '2 Solacefruit',
+          label: 'Disgruntled −1', winAlso: 'Disgruntlement −1 CP' },
+        { branch: 'Offer extensive bribes', gate: 'a Sausage About Which No One Complains',
+          consumes: 'the Sausage', label: 'Disgruntled −5', winAlso: 'Disgruntlement −5 CP' },
+      ],
+    },
+    {
+      name: 'Student Fury', group: 'menace', freq: 'Standard', strict: true,
+      needs: 'Disgruntlement among the Students 6. It has to be played',
+      opts: [
+        { branch: 'Allow them a publication', label: '−200 research', win: { k: -200 },
+          winAlso: 'Disgruntlement −7 CP, Scandal +1 CP',
+          note: 'The guide\'s card table says Scandal +2 CP; the option page says +1, and the page is used.' },
+      ],
+    },
+
+    // === a new or a small lab =============================================
+    {
+      name: 'One Day...', group: 'early', freq: 'Standard', strict: true,
+      needs: 'The Prestige of your Laboratory below 4',
+      opts: [{ branch: 'Dream of future successes', win: { k: 1 } }],
+    },
+    {
+      name: 'Blank Walls', group: 'early', freq: 'Standard', strict: true, needs: 'no Equipment at all',
+      opts: [
+        { branch: 'Prepare to buy equipment', ch: 'Watchful 200', label: 'Hints ×100',
+          winAlso: 'Whispered Hint +100', rareAlso: 'Laboratory Research +1' },
+      ],
+    },
+    {
+      name: 'Washing Up', group: 'early', freq: 'Standard', strict: true, needs: 'nobody working in the lab',
+      opts: [{ branch: 'Do what must be done', win: labLin(0, 1) }],
+    },
+    {
+      name: 'Unpacking crates', group: 'early', freq: 'Standard', strict: true, needs: 'fewer than 2 workers',
+      opts: [{ branch: 'Get the crowbar', win: labLin(0, 1) }],
+    },
+    {
+      name: 'Filing a report for the Dean', group: 'early', freq: 'Frequent', needs: 'fewer than 3 workers',
+      opts: [{ branch: 'Fill in some forms', win: labLin(0, 1) }],
+    },
+    {
+      name: 'Work with your Equipment', group: 'early', freq: 'Standard', strict: true,
+      needs: 'fewer than 3 workers',
+      opts: [
+        { branch: 'Look closely at your current project', ch: 'Watchful 200', rp: true,
+          win: labLin(6, 1.25), winAlso: 'Unexpected Result +1', fail: labLin(4, 1),
+          note: 'The guide\'s card table says 1.5 × Equipment + 5, rounded down, on a success; the '
+            + 'option page says 6 + 1.25 × Equipment, and the page is used.' },
+      ],
+    },
+
+    // === students =========================================================
+    //
+    // Levels 1-2, 3-4 and 5 each open a different option, and exactly one of
+    // the three is on the card at a time.
+    {
+      name: 'Work with your Shifty Student', group: 'students', freq: 'Standard',
+      student: LAB_STUDENTS[0].quality, needs: 'a Shifty Student',
+      opts: [
+        { branch: 'Shepherd your student through some research', page: 'Shepherd your student through some research (Shifty)',
+          req: [[LAB_STUDENTS[0].quality, 1, 2]], ch: 'Watchful 215', rp: true, win: labLin(0, 1),
+          rare: labLin(1, 1), rareAlso: 'the student goes up a level', fail: { k: 1 },
+          guide7: { win: 7, fail: 1 } },
+        { branch: 'Collaborate with your student', page: 'Collaborate with your student (Shifty)',
+          req: [[LAB_STUDENTS[0].quality, 3, 4]], ch: 'Watchful 210', rp: true, win: labLin(0, 5 / 3),
+          rare: labLin(0, 5 / 3), rareAlso: 'the student goes up a level', fail: labLin(0, 1),
+          guide7: { win: 12, fail: 7 } },
+        { branch: 'Work with your Expert Student', page: 'Work with your Expert Student (Shifty)',
+          req: [[LAB_STUDENTS[0].quality, 5, 5]], ch: 'Watchful 205', rp: true, win: labLin(0, 2),
+          rare: labLin(1, 2), rareAlso: 'Disgruntlement +1 CP', fail: labLin(0, 4 / 3, 'up'),
+          guide7: { win: 14, fail: 10 },
+          note: 'The page does not say how the failure rounds; the guide\'s 10 at Equipment 7 is '
+            + '9⅓ rounded up, so it is taken as rounding up.' },
+        { branch: 'Encourage your student to work with his colleagues',
+          page: 'Encourage your student to work with his colleagues (Shifty)',
+          req: [[LAB_Q.workers, 2]], ch: 'Persuasive 215', win: { student: 2, workers: 2 },
+          rare: { student: 3, workers: 3 }, fail: { student: 1, workers: 1 },
+          note: 'Rare success chance is 5%.' },
+      ],
+    },
+    {
+      name: 'Work with your Meticulous Student', group: 'students', freq: 'Standard',
+      student: LAB_STUDENTS[1].quality, needs: 'a Meticulous Student',
+      opts: [
+        { branch: 'Shepherd your student through some research', page: 'Shepherd your student through some research (Meticulous)',
+          req: [[LAB_STUDENTS[1].quality, 1, 2]], ch: 'Watchful 210', rp: true, win: labLin(2, 1),
+          rare: labLin(2, 1), rareAlso: 'the student goes up a level', fail: labLin(0, 1),
+          guide7: { win: 9, fail: 8 }, guideOff: ['fail'] },
+        { branch: 'Collaborate with your student', page: 'Collaborate with your student (Meticulous)',
+          req: [[LAB_STUDENTS[1].quality, 3, 4]], ch: 'Watchful 225', rp: true, win: labLin(3, 5 / 3, 'up'),
+          rare: labLin(3, 5 / 3, 'up'), rareAlso: 'the student goes up a level', fail: labLin(2, 1),
+          guide7: { win: 15, fail: 14 }, guideOff: ['fail'] },
+        { branch: 'Work with your expert student', page: 'Work with your expert student (Meticulous)',
+          req: [[LAB_STUDENTS[1].quality, 5, 5]], ch: 'Watchful 220', rp: true, win: labLin(5, 2),
+          rare: labLin(5, 2), rareAlso: 'Disgruntlement +1 CP', fail: labLin(2, 1),
+          guide7: { win: 19, fail: 18 }, guideOff: ['fail'] },
+        { branch: 'Employ her help in tabulating some data', req: [[LAB_STUDENTS[1].quality, 5, 5]],
+          gate: 'an Unexpected Result', consumes: 'an Unexpected Result', ch: 'Watchful 220', rp: true,
+          win: labLin(8, 2), rare: labLin(8, 2), rareAlso: 'Unwise Idea +1', fail: labLin(4, 1),
+          failAlso: 'still uses up the Unexpected Result' },
+        { branch: 'Follow up a hunch with your student', page: 'Follow up a hunch with your student (Meticulous)',
+          req: [[LAB_STUDENTS[1].quality, 5, 5]], gate: LAB_UE, consumes: LAB_UE,
+          ch: 'Watchful 220', rp: true, win: labLin(18, 3), rare: labLin(18, 3),
+          rareAlso: 'Unexpected Result +1, Disgruntlement +1 CP', fail: labLin(8, 2),
+          note: 'The page records no Epiphany lost on a failure.' },
+      ],
+    },
+    {
+      name: 'Work with your Gifted Student', group: 'students', freq: 'Standard',
+      student: LAB_STUDENTS[2].quality, needs: 'a Gifted Student',
+      note: 'Pair her with the Silk-Clad Expert is Fate-locked and not transcribed.',
+      opts: [
+        { branch: 'Shepherd your student through some research', page: 'Shepherd your student through some research (Gifted)',
+          req: [[LAB_STUDENTS[2].quality, 1, 2]], ch: 'Watchful 210', rp: true, win: labLin(2, 1),
+          rare: labLin(3, 5 / 3), rareAlso: 'the student goes up a level', fail: labLin(2, 1),
+          guide7: { win: 9, fail: 8 }, guideOff: ['fail'] },
+        { branch: 'Collaborate with your student', page: 'Collaborate with your student (Gifted)',
+          req: [[LAB_STUDENTS[2].quality, 3, 4]], ch: 'Watchful 215', rp: true, win: labLin(3, 5 / 3, 'up'),
+          rare: labLin(3, 5 / 3, 'up'), rareAlso: 'the student goes up a level', fail: labLin(2, 1, 'up'),
+          guide7: { win: 14, fail: 13 }, guideOff: ['win', 'fail'] },
+        { branch: 'Work with your expert student', page: 'Work with your expert student (Gifted)',
+          req: [[LAB_STUDENTS[2].quality, 5, 5]], ch: 'Watchful 220', rp: true, win: labLin(5, 2),
+          winAlso: 'Unlikely Connection +1', rare: labLin(10, 2),
+          rareAlso: 'Unlikely Connection +1, Disgruntlement +1 CP', fail: labLin(3, 5 / 3, 'up'),
+          guide7: { win: 19, fail: 15 },
+          note: 'The page also lists a second failure worth 26 at Equipment 9, with no formula.' },
+        { branch: 'Follow up a hunch with your student', page: 'Follow up a hunch with your student (Gifted)',
+          req: [[LAB_STUDENTS[2].quality, 5, 5]], gate: LAB_UE, consumes: LAB_UE,
+          ch: 'Watchful 220', rp: true, win: labLin(18, 3), rare: labLin(18, 3),
+          rareAlso: 'Unexpected Result +1, Disgruntlement +1 CP', fail: labLin(8, 2) },
+      ],
+    },
+    {
+      name: 'Work with your Profound Student', group: 'students', freq: 'Standard',
+      student: LAB_STUDENTS[3].quality, needs: 'a Profound Student',
+      note: 'Encourage your student to work with the Percipient Cricketer is Fate-locked and not transcribed.',
+      opts: [
+        { branch: 'Shepherd your student through some research', page: 'Shepherd your student through some research (Profound)',
+          req: [[LAB_STUDENTS[3].quality, 1, 2]], ch: 'Watchful 210', rp: true, win: labLin(4, 1),
+          rare: labLin(4, 1), rareAlso: 'the student goes up a level', fail: labLin(0, 1),
+          guide7: { win: 11, fail: 10 }, guideOff: ['fail'] },
+        { branch: 'Collaborate with your student', page: 'Collaborate with your student (Profound)',
+          req: [[LAB_STUDENTS[3].quality, 3, 4]], ch: 'Watchful 215', rp: true, win: labLin(7, 5 / 3, 'down'),
+          rare: labLin(7, 5 / 3, 'down'), rareAlso: 'the student goes up a level', fail: labLin(4, 1),
+          guide7: { win: 18, fail: 17 }, guideOff: ['fail'] },
+        { branch: 'Work with your expert student', page: 'Work with your expert student (Profound)',
+          req: [[LAB_STUDENTS[3].quality, 5, 5]], ch: 'Watchful 220', rp: true, win: labLin(8, 2),
+          rare: labLin(10, 2), rareAlso: 'Disgruntlement +1 CP', fail: labLin(6, 1.75),
+          guide7: { win: 23, fail: 18 }, guideOff: ['win'] },
+        { branch: 'Follow up a hunch with your student', page: 'Follow up a hunch with your student (Profound)',
+          req: [[LAB_STUDENTS[3].quality, 5, 5]], gate: LAB_UE, consumes: LAB_UE,
+          ch: 'Watchful 220', rp: true, win: labLin(18, 3), rare: labLin(18, 3),
+          rareAlso: 'Unwise Idea +1, Nightmares +1 CP, Disgruntlement +1 CP', fail: labLin(8, 2) },
+      ],
+    },
+    {
+      name: 'Work with your Visionary Student', group: 'students', freq: 'Standard',
+      student: LAB_STUDENTS[4].quality, needs: 'a Visionary Student',
+      opts: [
+        { branch: 'Shepherd your student through some research', page: 'Shepherd your student through some research (Visionary)',
+          req: [[LAB_STUDENTS[4].quality, 1, 2]], ch: 'Watchful 210', rp: true, win: labLin(4, 1),
+          rare: labLin(4, 1), rareAlso: 'the student goes up a level', fail: labLin(3, 1),
+          guide7: { win: 11, fail: 10 } },
+        { branch: 'Collaborate with your student', page: 'Collaborate with your student (Visionary)',
+          req: [[LAB_STUDENTS[4].quality, 3, 4]], ch: 'Watchful 215', rp: true, win: labLin(7, 5 / 3, 'down'),
+          rare: labLin(8, 5 / 3, 'down'), rareAlso: 'the student goes up a level',
+          fail: labLin(6, 5 / 3, 'down'), guide7: { win: 18, fail: 17 } },
+        { branch: 'Work with your expert student', page: 'Work with your expert student (Visionary)',
+          req: [[LAB_STUDENTS[4].quality, 5, 5]], ch: 'Watchful 220', rp: true, win: labLin(9, 2),
+          rare: labLin(10, 2), rareAlso: 'Disgruntlement +1 CP', fail: labLin(6.5, 1.6),
+          guide7: { win: 23, fail: 18 } },
+        { branch: 'Leave your student to their own devices', req: [[LAB_STUDENTS[4].quality, 5, 5]],
+          luck: 0.5, win: { team: 0.2, k: 2 }, winAlso: 'Unlikely Connection +1',
+          rare: { team: 0.2, k: 2 }, rareAlso: 'Unwise Idea +1',
+          fail: { team: 0.2, k: 2 }, failAlso: 'Unexpected Result +1, or Nightmares −2 CP instead',
+          note: 'Every outcome pays the same research, and none raises Disgruntlement.' },
+        { branch: 'Follow up a hunch with your student', page: 'Follow up a hunch with your student (Visionary)',
+          req: [[LAB_STUDENTS[4].quality, 5, 5]], gate: LAB_UE, consumes: LAB_UE,
+          ch: 'Watchful 220', rp: true, win: labLin(18, 3), rare: labLin(18, 3),
+          rareAlso: 'Unwise Idea +1, Nightmares +1 CP, Disgruntlement +1 CP', fail: labLin(8, 2),
+          failAlso: 'still uses up the Epiphany' },
+        { branch: 'Let them tutor your other students', req: [[LAB_STUDENTS[4].quality, 5, 5]],
+          gate: 'at least one other student in the lab',
+          ch: 'Persuasive 240, plus 2 for every level your other students have', win: labLin(8, 2),
+          winAlso: 'every other student goes up a level', fail: labLin(8, 2),
+          failAlso: 'every other student goes up a level; Disgruntlement +1 CP' },
+      ],
+    },
+
+    // === staff ============================================================
+    {
+      name: '\'Rely\' on the Struggling Artist', group: 'staff', freq: 'Very Infrequent',
+      needs: 'the Struggling Artist on a sinecure',
+      opts: [
+        { branch: 'Send him on another errand', ch: 'Persuasive 240', rp: true, label: 'Honey ×150',
+          winAlso: 'Drop of Prisoner\'s Honey +150', failAlso: 'Scandal +4 CP' },
+        { branch: 'Hook him up to all the meters and stand well out of the way', gate: 'an Unwise Idea',
+          consumes: 'an Unwise Idea', win: labLin(18, 3), epiphany: true,
+          winAlso: 'Scandal +2 CP; the Struggling Artist leaves the lab for good',
+          note: 'Locked while you have Theoretical Methods.' },
+      ],
+    },
+    {
+      name: 'A Grubby Urchin at Work', group: 'staff', freq: 'Standard', needs: 'a Grubby Urchin',
+      opts: [
+        { branch: 'Ask your grubby urchin to tidy up your papers', ch: 'Dangerous 150', win: { k: 1 },
+          fail: { k: 1 }, failAlso: 'Wounds +2 CP' },
+        { branch: 'Ask what he knows of the Storm-bird', eo: [[440, 440]], gate: 'Stormy-Eyed',
+          label: 'story' },
+      ],
+    },
+    {
+      name: 'Rely on the Numismatrix', group: 'staff', freq: 'Standard', needs: 'the Numismatrix',
+      opts: [
+        { branch: 'Ask her to help with ordinary research', page: 'Ask her to help with ordinary research (Numismatrix)',
+          eo: [[1, 249], [251, 979], [981, 1300]], win: labLin(0, 5 / 3),
+          note: 'The guide\'s card table also excludes project 30; the option page does not.' },
+        { branch: 'Ask her to help with unusual research', eo: [[1301, 1610]], ch: 'Persuasive 200',
+          win: labLin(4, 2), epiphany: true, fail: labLin(0, 5 / 3) },
+        { branch: 'Apply her particular expertise in a novel way',
+          page: 'Apply her particular expertise in a novel way (Numismatrix)',
+          gate: 'an Unlikely Connection', consumes: 'an Unlikely Connection', ch: 'Watchful 220', rp: true,
+          win: labLin(7, 2), winAlso: 'Unexpected Result +1', fail: labLin(5, 2) },
+        { branch: 'Ask for her special expertise on this project', page: 'Ask for her special expertise on this project 30',
+          eo: [[30, 30]], label: 'Numismatic +10', winAlso: 'Numismatic Research +10' },
+        { branch: 'Ask for her special expertise on this project', page: 'Ask for her special expertise on this project 250',
+          eo: [[250, 250]], win: labLin(4, 2), epiphany: true },
+        { branch: 'Ask for her special expertise on this project', page: 'Ask for her special expertise on this project 980',
+          eo: [[980, 980]], win: labLin(4, 2), epiphany: true },
+      ],
+    },
+    {
+      name: 'Rely on Lettice, the Mercy', group: 'staff', freq: 'Standard', needs: 'Lettice, the Mercy',
+      opts: [
+        { branch: 'Ask her what a Tomb Colonist would say about this', eo: [[110, 120], [1320, 1320]],
+          label: 'Third City +10', winAlso: 'Expertise of the Third City +10' },
+        { branch: 'Ask her to help with ordinary research', page: 'Ask her to help with ordinary research (Lettice)',
+          req: [[LAB_Q.equipment, 5]], win: { range: [1, 44] }, winAlso: 'Unwise Idea +0–1',
+          note: 'The page gives the range and nothing about how it is spread, so the badge does not '
+            + 'pretend to an average.' },
+        { branch: 'Take tea with Lettice', label: 'menaces −2', winAlso: 'Wounds −2 CP, Nightmares −2 CP' },
+        { branch: 'Have her supervise the Gifted Student', req: [[LAB_STUDENTS[2].quality, 5]],
+          eo: [[401, 500]], ch: 'Watchful 220', win: labLin(12, 2), winAlso: 'Unexpected Result +1',
+          fail: labLin(5, 2) },
+        { branch: 'Apply her particular expertise in a novel way',
+          page: 'Apply her particular expertise in a novel way (Lettice)',
+          gate: 'an Unlikely Connection', consumes: 'an Unlikely Connection', ch: 'Watchful 220', rp: true,
+          win: labLin(7, 2), winAlso: 'Unexpected Result +1', fail: labLin(5, 2) },
+      ],
+    },
+    {
+      name: 'Rely on F.F. Gebrandt', group: 'staff', freq: 'Standard', needs: 'F.F. Gebrandt',
+      note: 'Her card page lists only the first option; the rest are from their own option pages.',
+      opts: [
+        { branch: 'Aid F.F. Gebrandt in Refining her Formulas',
+          gate: 'Nodule of Warm Amber 5, Phosphorescent Scarab 5, Flask of Abominable Salts 5',
+          consumes: '5 each of Warm Amber, Phosphorescent Scarabs and Abominable Salts',
+          ch: 'Watchful 200', label: 'Laudanum',
+          winAlso: 'F.F. Gebrandt\'s Superior Laudanum +1, Tincture of Vigour +1, Volume of Collated Research +1',
+          failAlso: 'the Laudanum and the Tincture, but no Collated Research' },
+        { branch: 'Get her opinion on your research', notEo: [[901, 1000]], win: labLin(0, 5 / 3) },
+        { branch: 'Apply her particular expertise in a novel way',
+          page: 'Apply her particular expertise in a novel way (F.F. Gebrandt)',
+          notEo: [[901, 1000]], gate: 'an Unlikely Connection', consumes: 'an Unlikely Connection',
+          ch: 'Watchful 220', rp: true, win: labLin(7, 2), winAlso: 'Unexpected Result +1', fail: labLin(5, 2) },
+        { branch: 'Rely on her knowledge of chemistry', eo: [[901, 1000]], win: labLin(8, 1.5), epiphany: true },
+        { branch: 'Let F.F. Gebrandt employ your Profound Student', req: [[LAB_STUDENTS[3].quality, 5]],
+          eo: [[901, 1000]], ch: 'Watchful 220', win: labLin(10, 2), winAlso: 'Unexpected Result +1',
+          fail: labLin(10, 2), failAlso: 'Disgruntlement +1 CP' },
+        { branch: 'Take Tea with F.F. Gebrandt', gate: 'The Airs of London 1–25', label: 'Airs',
+          winAlso: 'changes The Airs of London' },
+      ],
+    },
+
+    // === Parabolan research ===============================================
+    {
+      name: 'The Reflection of Research', group: 'parabola', freq: 'Standard',
+      needs: 'Parabolan Methods, Glass Studies and 2 workers',
+      note: 'The ambition and Fate-locked staff have options here too, and they are not transcribed.',
+      opts: [
+        { branch: 'Employ the Reflection of a Future Dean', req: [[LAB_STUDENTS[0].quality, 1]], cur: 'pr', win: { k: 4 } },
+        { branch: 'Employ the Reflection of a Potential Librarian', req: [[LAB_STUDENTS[1].quality, 1]], cur: 'pr', win: { k: 1, glass: 1 } },
+        { branch: 'Employ the Reflection of a Young Aristocrat', req: [[LAB_STUDENTS[2].quality, 1]], cur: 'pr', win: { k: 2, glass: 1 } },
+        { branch: 'Employ the Reflection of a Deep-thinking Oak', req: [[LAB_STUDENTS[3].quality, 1]], cur: 'pr', win: { k: 2, glass: 1 } },
+        { branch: 'Employ a Cloud of Thoughts That Will Not Settle Down', req: [[LAB_STUDENTS[4].quality, 1]],
+          cur: 'pr', win: { k: 5, glass: 1 }, winAlso: 'Nightmares +1 CP' },
+        { branch: 'Try to get something useful out of a distracted artist', req: [[LAB_STAFF[4].quality, 1]], cur: 'pr', win: { k: 1, glass: 1 } },
+        { branch: 'Employ the Reflection of a Grubby Urchin', req: [[LAB_STAFF[3].quality, 1]], cur: 'pr', win: { k: 2, glass: 1 } },
+        { branch: 'Employ the Reflection of Lettice, the Mercy', req: [[LAB_STAFF[1].quality, 1]], cur: 'pr', win: { range: [1, 8] } },
+        { branch: 'Employ the Reflection of the Numismatrix', req: [[LAB_STAFF[0].quality, 1]], cur: 'pr', win: { k: 5, glass: 1 } },
+        { branch: 'Employ the Reflection of F.F. Gebrandt', req: [[LAB_STAFF[2].quality, 1]], cur: 'pr', win: { k: 2, glass: 1 } },
+        { branch: 'No more of this', page: 'No more of this (The Reflection of Research)', label: 'discard',
+          winAlso: 'removes this card for the rest of the project' },
+      ],
+    },
+  ];
+
+  // The pages' own worked examples of the team formula, which is the one piece
+  // of arithmetic here the wiki checks for us: "38 Laboratory Research with 9
+  // Equipment Level and 4 Workers (at least 1 Expert or Expert Student)".
+  const LAB_TEAM_EXAMPLES = [
+    { team: 0.2, el: 9, workers: 4, high: 5, research: 38 },
+    { team: 0.2, el: 7, workers: 3, high: 5, research: 29 },
+    { team: 0.08, el: 9, workers: 4, high: 5, research: 27 },
+    { team: 0.08, el: 7, workers: 3, high: 5, research: 22 },
+  ];
+
+  const LAB_CLASS = 'fl-ux-lab';
+  const LAB_FLAG = 'flUxLab';
+  const LAB_BRANCH_CLASS = 'fl-ux-lab-branch';
+  const LAB_BRANCH_FLAG = 'flUxLabBranch';
+
+  const LAB_EL_MIN = 1;
+  const LAB_EL_MAX = 9;
+
+  const LAB_MARK_EPIPHANY = '✦';
+  const LAB_MARK_CONSUMES = '▼';
+  const LAB_MARK_CHALLENGE = '?';
+  const LAB_MARK_EV = '≈';
+  const LAB_MARK_HIDDEN = '▾';
+  const LAB_MARK_STALE = '~';
+
+  // --- colour --------------------------------------------------------------
+  //
+  // A ramp, because research is a quantity, with the number printed on the
+  // badge as well. One colour per band of ten, running slate → blue → teal →
+  // amber → gold; the teal and the amber are told apart along the blue-yellow
+  // axis, which red-green weakness leaves alone. A range is neutral grey
+  // rather than the colour of either end, since a colour would claim a figure
+  // the badge cannot. Parabolan Research is a different currency and has its
+  // own violet; an option paying no research at all has a dark plum and a word.
+  const LAB_RAMP = [
+    { min: 40, color: '#e0b53a', ink: '#14181c' },
+    { min: 30, color: '#9a5b12' },
+    { min: 20, color: '#1f7a73' },
+    { min: 10, color: '#2d6aa0' },
+    { min: -Infinity, color: '#465262' },
+  ];
+  const LAB_COLOR_RANGE = '#6e6e6e';
+  const LAB_COLOR_PR = '#7c4dab';
+  const LAB_COLOR_LABEL = '#4a3f5a';
+
+  function labRamp(value) {
+    for (const step of LAB_RAMP) if (value >= step.min) return step;
+    return LAB_RAMP[LAB_RAMP.length - 1];
+  }
+
+  // --- arithmetic ----------------------------------------------------------
+
+  function labRound(x, how) {
+    if (how === 'up') return Math.ceil(x - 1e-9);
+    if (how === 'down') return Math.floor(x + 1e-9);
+    const floor = Math.floor(x);
+    if (Math.abs(x - floor - 0.5) < 1e-9) return floor % 2 === 0 ? floor : floor + 1;
+    return Math.round(x);
+  }
+
+  function labCurve(c, x) {
+    return labRound((c.y || 0) + c.height / (1 + Math.exp(-c.k * (x - c.mid))));
+  }
+
+  // Circulate a draft of your findings, as the option page and the wiki's
+  // calculator state it: 100 × (research done ÷ research required, at most 1)
+  // + 10 × Unexpected Results^(0.9 + research required ÷ 200,000).
+  function labDraft(done, required, results) {
+    if (done == null || required == null || results == null || !(required > 0)) return null;
+    return labRound(100 * Math.min(done / required, 1)
+      + 10 * Math.pow(results, 0.9 + required / 200000));
+  }
+
+  // What the leftovers turn into when the project ends (Put everything back
+  // where you found it), rounded down, as the calculator page states it.
+  function labCollated(items) {
+    if (!items) return null;
+    const n = function (v) { return typeof v === 'number' ? v : 0; };
+    return Math.floor(0.6 * n(items.epiphany) + 0.6 * n(items.idea)
+      + 0.2 * n(items.connection) + 0.2 * n(items.result) + 1e-9);
+  }
+
+  const LAB_LINEAR_KEYS = ['el', 'glass', 'student', 'workers', 'ideas'];
+
+  // A formula and complete inputs in, a figure out -- or null where an input
+  // it needs is missing. Never a zero standing in for "not read".
+  function labCompute(f, inp) {
+    if (!f || f.range) return null;
+    if (f.draft) return labDraft(inp.research, inp.required, inp.results);
+    if (f.team != null) {
+      if (inp.el == null || inp.workers == null || inp.high == null) return null;
+      return labRound(((f.k == null ? 2 : f.k) + f.team * inp.el) * Math.sqrt(inp.workers) * inp.high);
+    }
+    if (f.curve) {
+      const x = f.of === 'el' ? inp.el : (inp.skills ? inp.skills[f.of] : null);
+      return x == null ? null : labCurve(f.curve, x);
+    }
+    let sum = f.k || 0;
+    for (const key of LAB_LINEAR_KEYS) {
+      if (!f[key]) continue;
+      if (inp[key] == null) return null;
+      sum += f[key] * inp[key];
+    }
+    return labRound(sum, f.round);
+  }
+
+  function labUsesEl(f) {
+    return !!f && (!!f.el || f.team != null || (!!f.curve && f.of === 'el'));
+  }
+
+  function labInputs(state, card) {
+    const q = state.q;
+    const skills = {};
+    for (const s of LAB_SKILLS) skills[s] = q[s];
+    return {
+      el: q[LAB_Q.equipment],
+      glass: q[LAB_Q.glass],
+      workers: q[LAB_Q.workers],
+      student: card && card.student ? q[card.student] : null,
+      high: state.high,
+      ideas: state.items.idea,
+      results: state.items.result,
+      research: q[LAB_Q.research],
+      required: q[LAB_Q.required],
+      skills: skills,
+    };
+  }
+
+  // One outcome's research as { lo, hi }: a single figure where the inputs are
+  // read, the span over Equipment 1-9 where only the Equipment is missing (every
+  // formula here grows with Equipment), and null where anything else is.
+  function labOutcome(f, state, card) {
+    if (!f) return null;
+    if (f.range) return { lo: f.range[0], hi: f.range[1], random: true };
+    const inp = labInputs(state, card);
+    if (inp.el == null && labUsesEl(f)) {
+      const lo = labCompute(f, Object.assign({}, inp, { el: LAB_EL_MIN }));
+      const hi = labCompute(f, Object.assign({}, inp, { el: LAB_EL_MAX }));
+      if (lo == null || hi == null) return null;
+      return { lo: Math.min(lo, hi), hi: Math.max(lo, hi), elUnknown: true };
+    }
+    const v = labCompute(f, inp);
+    return v == null ? null : { lo: v, hi: v };
+  }
+
+  function labTenth(x) {
+    return Math.round(x * 10) / 10;
+  }
+
+  // What an option is worth on the badge: the success figure, or for a Luck
+  // option the expectation over success and failure.
+  function labOptionValue(opt, card, state) {
+    if (opt.label) return null;
+    const win = labOutcome(opt.win, state, card);
+    if (!win) return null;
+    if (opt.luck == null) return win;
+    const fail = opt.fail ? labOutcome(opt.fail, state, card) : { lo: 0, hi: 0 };
+    if (!fail) return null;
+    const p = opt.luck;
+    return {
+      lo: labTenth(p * win.lo + (1 - p) * fail.lo),
+      hi: labTenth(p * win.hi + (1 - p) * fail.hi),
+      ev: true, elUnknown: win.elUnknown,
+    };
+  }
+
+  function labScore(v) {
+    return v.random ? v.lo : (v.lo + v.hi) / 2;
+  }
+
+  // Can you take it? 'open', 'shut', 'unknown' (a requirement the scrape has
+  // not read), or 'gated' (a requirement on something special, or on a project
+  // number that has not been read).
+  function labStatus(opt, card, state) {
+    let unknown = false;
+    for (const r of opt.req || []) {
+      const have = state.q[r[0]];
+      if (have == null) { unknown = true; continue; }
+      if (have < r[1] || (r[2] != null && have > r[2])) return 'shut';
+    }
+    if (opt.eo || opt.notEo) {
+      const eo = state.q[LAB_Q.eo];
+      if (eo == null) return 'gated';
+      const inside = function (ranges) {
+        return ranges.some(function (g) { return eo >= g[0] && eo <= g[1]; });
+      };
+      if (opt.eo && !inside(opt.eo)) return 'shut';
+      if (opt.notEo && inside(opt.notEo)) return 'shut';
+    }
+    if (opt.gate) return 'gated';
+    return unknown ? 'unknown' : 'open';
+  }
+
+  // A figure that rests on something that moves every few actions, read more
+  // than a minute ago.
+  function labOptionStale(opt, state) {
+    const f = opt.win;
+    if (!f) return false;
+    if (f.ideas) return state.itemsStale;
+    if (f.draft) return state.stale || state.itemsStale;
+    return false;
+  }
+
+  // --- words ---------------------------------------------------------------
+
+  const LAB_INPUT_WORDS = {
+    el: 'Equipment', glass: 'Glass Studies', student: 'student level', workers: 'Workers', ideas: 'Unwise Ideas',
+  };
+  const LAB_FRACTIONS = [[5 / 3, '5/3'], [4 / 3, '4/3']];
+
+  function labCoefText(c) {
+    for (const pair of LAB_FRACTIONS) if (Math.abs(c - pair[0]) < 1e-9) return pair[1];
+    return String(c);
+  }
+
+  function labFormulaText(f) {
+    if (!f) return null;
+    if (f.range) return f.range[0] + '–' + f.range[1] + ', at random';
+    if (f.draft) {
+      return '100 × the share of the project done (at most all of it) + 10 × Unexpected Results '
+        + 'to the power of (0.9 + research required ÷ 200,000)';
+    }
+    if (f.team != null) {
+      return '(' + (f.k == null ? 2 : f.k) + ' + ' + f.team + ' × Equipment) × √Workers × highest worker level';
+    }
+    if (f.curve) {
+      return 'an S-curve on ' + (f.of === 'el' ? 'Equipment' : f.of) + ' (height ' + f.curve.height
+        + ', midpoint ' + f.curve.mid + (f.curve.y ? ', offset ' + f.curve.y : '') + ')';
+    }
+    const parts = [];
+    for (const key of LAB_LINEAR_KEYS) {
+      if (!f[key]) continue;
+      parts.push(f[key] === 1 ? LAB_INPUT_WORDS[key] : labCoefText(f[key]) + ' × ' + LAB_INPUT_WORDS[key]);
+    }
+    let text = parts.join(' + ');
+    if (f.k) text = parts.length ? (f.k < 0 ? text + ' − ' + (-f.k) : f.k + ' + ' + text) : String(f.k);
+    if (!text) text = '0';
+    if (f.round === 'up') text += ', rounded up';
+    else if (f.round === 'down') text += ', rounded down';
+    return text;
+  }
+
+  function labNumText(v) {
+    return v.lo === v.hi ? String(v.lo) : v.lo + '–' + v.hi;
+  }
+
+  function labCurrency(opt) {
+    return opt.cur === 'pr' ? 'Parabolan Research' : 'Laboratory Research';
+  }
+
+  function labOutcomeWords(f, opt, card, state) {
+    if (!f) return null;
+    const v = labOutcome(f, state, card);
+    const formula = labFormulaText(f);
+    if (!v) return labCurrency(opt) + ' ' + formula + ' — needs a reading this feature does not have yet';
+    if (f.range) return formula + ' ' + labCurrency(opt);
+    const plain = f.k != null && !LAB_LINEAR_KEYS.some(function (k) { return f[k]; })
+      && f.team == null && !f.curve && !f.draft;
+    return labNumText(v) + ' ' + labCurrency(opt) + (plain ? '' : ' (' + formula
+      + (v.elUnknown ? '; your Equipment has not been read, so this covers Equipment 1–9' : '') + ')');
+  }
+
+  function labReqWords(opt) {
+    const words = (opt.req || []).map(function (r) {
+      if (r[0] === LAB_Q.disgruntlement && r[1] === 0 && r[2] === 0) return 'no Disgruntlement among the Students';
+      if (r[2] == null) return r[0] + ' ' + r[1];
+      return r[0] + ' ' + (r[1] === r[2] ? 'exactly ' + r[1] : r[1] + '–' + r[2]);
+    });
+    const range = function (g) { return g[0] === g[1] ? String(g[0]) : g[0] + '–' + g[1]; };
+    if (opt.eo) words.push('Experimental Object ' + opt.eo.map(range).join(' or '));
+    if (opt.notEo) words.push('Experimental Object outside ' + opt.notEo.map(range).join(' and '));
+    if (opt.gate) words.push(opt.gate);
+    return words.join('; ');
+  }
+
+  function labStateLine(state) {
+    if (!state.read) {
+      return 'Your laboratory has not been read yet. Open the Myself tab once and every figure '
+        + 'becomes your own; until then anything scaling with Equipment covers Equipment 1–9.';
+    }
+    const q = state.q;
+    const bits = ['Equipment ' + q[LAB_Q.equipment], q[LAB_Q.workers] + ' workers'];
+    if (state.high != null) bits.push('highest worker level ' + state.high);
+    for (const s of LAB_STUDENTS) if (q[s.quality]) bits.push(s.name + ' ' + q[s.quality]);
+    return 'Read off Myself ' + (state.live ? 'just now' : ageText(state.at)) + ': ' + bits.join(', ') + '.';
+  }
+
+  const LAB_LEGEND = LAB_MARK_CHALLENGE + ' a challenge\'s success figure · ' + LAB_MARK_EV
+    + ' a Luck option\'s expected value · ' + LAB_MARK_EPIPHANY + ' also gives an Unavoidable Epiphany · '
+    + LAB_MARK_CONSUMES + ' uses something up · ' + LAB_MARK_HIDDEN
+    + ' an option needing something special would pay more · ' + LAB_MARK_STALE
+    + ' from a reading over a minute old · PR Parabolan Research · a–b a range, where something '
+    + 'it depends on has not been read.';
+
+  function labOptionLines(opt, card, state) {
+    const lines = [];
+    const status = labStatus(opt, card, state);
+    if (status === 'shut') lines.push('Not open to you right now.');
+    const needs = labReqWords(opt);
+    if (needs) lines.push('Needs: ' + needs);
+    if (opt.luck != null) lines.push('Luck: ' + Math.round(opt.luck * 100) + '% to succeed');
+    else if (opt.ch) lines.push('Challenge: ' + opt.ch + (opt.rp ? ', lowered by Research Preparations' : ''));
+    const out = function (title, f, also) {
+      const words = [labOutcomeWords(f, opt, card, state), also].filter(Boolean).join('; ');
+      if (words) lines.push(title + ': ' + words);
+    };
+    out(opt.ch || opt.luck != null ? 'Success' : 'Gives', opt.win, opt.winAlso);
+    out('Rare success', opt.rare, opt.rareAlso);
+    out('Alternative success', opt.alt, opt.altAlso);
+    out('Failure', opt.fail, opt.failAlso);
+    if (opt.epiphany) lines.push(LAB_MARK_EPIPHANY + ' A success gives an Unavoidable Epiphany.');
+    if (opt.consumes) lines.push(LAB_MARK_CONSUMES + ' Uses up ' + opt.consumes + '.');
+    if (opt.guide7 && opt.guideOff) {
+      const inp = labInputs(Object.assign({}, state, { q: Object.assign({}, state.q, { [LAB_Q.equipment]: 7 }) }), card);
+      for (const key of opt.guideOff) {
+        lines.push('The guide\'s Student Table says ' + opt.guide7[key] + ' on a ' + (key === 'win' ? 'success' : 'failure')
+          + ' at Equipment 7; the option page works out to ' + labCompute(opt[key], inp) + ', and the page is used.');
+      }
+    }
+    if (opt.note) lines.push(opt.note);
+    return lines;
+  }
+
+  // --- the two badges ------------------------------------------------------
+
+  function labMarks(opt, hidden) {
+    return (opt.epiphany ? LAB_MARK_EPIPHANY : '')
+      + (opt.consumes ? LAB_MARK_CONSUMES : '')
+      + (opt.ch && opt.luck == null ? LAB_MARK_CHALLENGE : '')
+      + (hidden ? LAB_MARK_HIDDEN : '');
+  }
+
+  function labPaint(opt, v) {
+    if (opt.cur === 'pr') return { color: LAB_COLOR_PR };
+    if (v.lo !== v.hi) return { color: LAB_COLOR_RANGE };
+    return labRamp(v.lo);
+  }
+
+  function labValueText(opt, v, stale) {
+    return (stale ? LAB_MARK_STALE : '') + (opt.cur === 'pr' ? 'PR ' : '')
+      + (v.ev ? LAB_MARK_EV : '') + labNumText(v);
+  }
+
+  // What the badge says for an option whose figure cannot be worked out.
+  function labUnreadText(opt) {
+    const f = opt.win;
+    if (f && f.ideas) return f.ideas + '/idea';
+    if (f && f.draft) return 'draft';
+    if (f && f.curve && f.of !== 'el') return 'skill';
+    if (f && f.team != null) return 'team';
+    return 'research';
+  }
+
+  function labOptionSpec(opt, card, state) {
+    const v = labOptionValue(opt, card, state);
+    const stale = labOptionStale(opt, state);
+    const lines = [opt.branch, 'On ' + card.name, labStateLine(state), ''].concat(labOptionLines(opt, card, state));
+    if (stale) lines.push(LAB_MARK_STALE + ' The Possessions or Myself reading behind this is over a minute old.');
+    lines.push('', LAB_LEGEND);
+    const title = lines.join('\n');
+    if (opt.label) {
+      return { text: opt.label + (opt.consumes ? LAB_MARK_CONSUMES : ''), color: LAB_COLOR_LABEL, title: title };
+    }
+    if (!v) {
+      return { text: labUnreadText(opt) + labMarks(opt, false), color: LAB_COLOR_RANGE, title: title, stale: stale };
+    }
+    const paint = labPaint(opt, v);
+    const spec = {
+      text: labValueText(opt, v, stale) + labMarks(opt, false),
+      color: paint.color, title: title, stale: stale,
+    };
+    if (paint.ink) spec.ink = paint.ink;
+    return spec;
+  }
+
+  // The card's badge: the best option you can take with nothing special in
+  // hand. See the head of this section for why the rest are left out.
+  function labCardSpec(card, state) {
+    const rows = card.opts.map(function (opt) {
+      return { opt: opt, status: labStatus(opt, card, state), value: labOptionValue(opt, card, state) };
+    });
+    const takeable = function (r) { return r.status === 'open' || r.status === 'unknown'; };
+    const ranked = rows.filter(function (r) { return takeable(r) && r.value; });
+    const pick = function (list) {
+      let best = null;
+      for (const r of list) if (!best || labScore(r.value) > labScore(best.value)) best = r;
+      return best;
+    };
+    const best = pick(ranked);
+    const sure = pick(ranked.filter(function (r) { return r.status === 'open'; }));
+
+    const lines = [card.name, labStateLine(state), ''];
+    let spec;
+    if (best) {
+      const maybe = ranked.filter(function (r) { return r.status === 'unknown'; });
+      let lo, hi;
+      if (sure) {
+        lo = sure.value.lo;
+        hi = Math.max.apply(null, [sure.value.hi].concat(maybe.map(function (r) { return r.value.hi; })));
+      } else {
+        lo = Math.min.apply(null, maybe.map(function (r) { return r.value.lo; }));
+        hi = Math.max.apply(null, maybe.map(function (r) { return r.value.hi; }));
+      }
+      const v = { lo: lo, hi: hi, ev: !!best.value.ev && lo === hi };
+      // A better figure behind something special, or one that cannot be
+      // worked out at all yet.
+      const hidden = rows.some(function (r) {
+        if (r.opt.label || r.status === 'shut') return false;
+        if (r.status === 'gated') return !r.value || r.value.hi > hi;
+        return !r.value;
+      });
+      const stale = labOptionStale(best.opt, state);
+      const paint = labPaint(best.opt, v);
+      spec = {
+        text: labValueText(best.opt, v, stale) + labMarks(best.opt, hidden),
+        color: paint.color, stale: stale,
+      };
+      if (paint.ink) spec.ink = paint.ink;
+      lines.push('Best with nothing special in hand: ' + best.opt.branch
+        + (best.status === 'unknown' ? ' (if it is open to you — something it needs has not been read)' : ''));
+      if (lo !== hi && !v.ev) {
+        lines.push(best.value.elUnknown
+          ? 'A range, because your Equipment has not been read.'
+          : 'A range, because which of these options you are offered depends on something not read yet.');
+      }
+      if (stale) lines.push(LAB_MARK_STALE + ' The reading behind this is over a minute old.');
+      if (hidden) lines.push(LAB_MARK_HIDDEN + ' An option needing something special could pay more.');
+    } else {
+      const label = rows.find(function (r) { return r.opt.label && takeable(r); });
+      if (label) {
+        spec = { text: label.opt.label, color: LAB_COLOR_LABEL };
+        lines.push('Pays no research: ' + label.opt.branch + '.');
+      } else {
+        spec = { text: LAB_MARK_HIDDEN, color: LAB_COLOR_RANGE };
+        lines.push('Nothing here you can take with nothing special in hand, or nothing that can be worked out yet.');
+      }
+    }
+
+    lines.push('');
+    lines.push('Every option:');
+    for (const r of rows) {
+      const v = r.value;
+      const what = r.opt.label ? r.opt.label
+        : v ? labValueText(r.opt, v, false) + ' ' + (r.opt.cur === 'pr' ? 'PR' : 'research')
+          + (v.random ? ' at random' : '')
+        : labUnreadText(r.opt) + ', not yet worked out';
+      const flags = [];
+      if (r.status === 'shut') flags.push('not open to you');
+      if (r.status === 'gated' || r.opt.gate) flags.push('needs ' + labReqWords(r.opt));
+      if (r.opt.luck != null) flags.push('Luck ' + Math.round(r.opt.luck * 100) + '%');
+      else if (r.opt.ch) flags.push(r.opt.ch);
+      if (r.opt.epiphany) flags.push(LAB_MARK_EPIPHANY + ' Epiphany');
+      if (r.opt.consumes) flags.push(LAB_MARK_CONSUMES + ' uses ' + r.opt.consumes);
+      lines.push('  • ' + r.opt.branch + ' — ' + what + (flags.length ? ' [' + flags.join('; ') + ']' : ''));
+    }
+    if (card.note) lines.push('', card.note);
+    lines.push('', 'Needs: ' + card.needs + '.', '', 'Open the card and every option is badged in its own right.', LAB_LEGEND);
+    spec.title = lines.join('\n');
+    return spec;
+  }
+
+  // --- reading your laboratory ---------------------------------------------
+
+  const LAB_CACHE_KEY = 'fl-ux-lab';
+  const LAB_FRESH_MS = 60 * 1000;
+  let labGen = 0;
+
+  // Same rule as every other scrape here: FL does not render a quality you have
+  // none of, so absent is 0 -- but only while the tab's search box is empty.
+  function labFromQualities(scan) {
+    const values = {};
+    const zeroIsSafe = !scan.filtered;
+    for (const name of LAB_QUALITIES) {
+      const q = scan.values.get(name);
+      if (q) values[name] = q.level;
+      else if (zeroIsSafe) values[name] = 0;
+    }
+    return values;
+  }
+
+  function bankLabQualities(scan) {
+    if (!scan) return false;
+    const values = labFromQualities(scan);
+    if (!Object.keys(values).length) return false;
+    saveCache(LAB_CACHE_KEY, {
+      v: 1, at: Date.now(), character: characterName() || null,
+      partial: scan.filtered, values: values,
+    });
+    labGen++;
+    return true;
+  }
+
+  function readLabQualities() {
+    const scan = readQualities();
+    if (scan) {
+      const values = labFromQualities(scan);
+      if (Object.keys(values).length) return { live: true, at: Date.now(), values: values };
+    }
+    const rec = loadCache(LAB_CACHE_KEY, 1);
+    return rec && rec.values ? { live: false, at: rec.at, values: rec.values } : null;
+  }
+
+  function readLabItems() {
+    const here = readPossessionCounts();
+    if (here && here.size) return { live: true, at: Date.now(), held: here };
+    const rec = loadCounts();
+    return rec ? { live: false, at: rec.at, held: rec.held } : null;
+  }
+
+  // "Highest Worker Level", which the team options multiply by. The pages'
+  // examples all say "at least 1 Expert or Expert Student" and come out at 5,
+  // so a lab with anyone in it who is not a student counts as 5, and a lab of
+  // students alone as its best student. Whether the Struggling Artist or the
+  // Urchin count as experts for this is not recorded.
+  function labHighest(q) {
+    const workers = q[LAB_Q.workers];
+    if (workers == null) return null;
+    let students = 0, top = 0;
+    for (const s of LAB_STUDENTS) {
+      const level = q[s.quality];
+      if (level == null) return null;
+      if (level > 0) { students++; top = Math.max(top, level); }
+    }
+    return workers > students ? 5 : top;
+  }
+
+  // A pure state from the two readings, so the tests can build one directly.
+  function labStateFrom(qualities, items, now) {
+    const t = now == null ? Date.now() : now;
+    const q = {};
+    for (const name of LAB_QUALITIES) {
+      const v = qualities && qualities.values ? qualities.values[name] : undefined;
+      q[name] = typeof v === 'number' ? v : null;
+    }
+    const count = function (name) {
+      if (!items || !items.held) return null;
+      const rec = items.held.get(itemKey(name));
+      return rec ? rec.count : 0;
+    };
+    const state = {
+      read: !!qualities,
+      live: !!(qualities && qualities.live),
+      at: qualities ? qualities.at : null,
+      stale: !qualities || (!qualities.live && t - qualities.at > LAB_FRESH_MS),
+      itemsRead: !!items,
+      itemsStale: !items || (!items.live && t - items.at > LAB_FRESH_MS),
+      q: q,
+      items: {},
+    };
+    for (const key of Object.keys(LAB_ITEMS)) state.items[key] = count(LAB_ITEMS[key]);
+    state.high = labHighest(q);
+    return state;
+  }
+
+  // Memoised per reading and per minute, bucketed for the reason `pcPurse`'s is:
+  // `labRatings` asks once per card per scan.
+  let labStateMemo = null;
+  function labState() {
+    const key = labGen + '/' + fotzGen + '@' + Math.floor(Date.now() / LAB_FRESH_MS);
+    if (labStateMemo && labStateMemo.key === key) return labStateMemo.value;
+    let value;
+    try {
+      value = labStateFrom(readLabQualities(), readLabItems());
+    } catch (e) {
+      value = labStateFrom(null, null);
+    }
+    value.sig = key;
+    labStateMemo = { key: key, value: value };
+    return value;
+  }
+
+  // --- looking one up ------------------------------------------------------
+
+  const LAB_BY_CARD = new Map(LAB_CARDS.map(function (card) { return [normalizeName(card.name), card]; }));
+
+  function labCardFor(name) {
+    return LAB_BY_CARD.get(normalizeName(name)) || null;
+  }
+
+  function labBranchRows(card, name) {
+    const key = normalizeName(name);
+    return card.opts.filter(function (opt) { return normalizeName(opt.branch) === key; });
+  }
+
+  // "Coordinate a plan of research" and "Ask for her special expertise on this
+  // project" are each on one card more than once, told apart by what you have.
+  // Narrow by what can be read; failing that, answer only if every candidate
+  // would say the same thing.
+  function labDisambiguate(rows, card, state) {
+    if (rows.length <= 1) return rows[0] || null;
+    const open = rows.filter(function (opt) { return labStatus(opt, card, state) !== 'shut'; });
+    if (open.length === 1) return open[0];
+    const pool = open.length ? open : rows;
+    const sig = function (opt) { return JSON.stringify([opt.win || null, opt.label || null, opt.epiphany || false]); };
+    return pool.every(function (opt) { return sig(opt) === sig(pool[0]); }) ? pool[0] : null;
+  }
+
+  // --- the area gate -------------------------------------------------------
+  //
+  // Captured in-game (2026-09-14), in the lab: "Welcome to The University,
+  // delicious friend!" -- the lab is, as the wiki says, "how The University
+  // appears in the setting Science Laboratory". So this is an EXACT list and
+  // may say no: a greeting naming anywhere else clears every lab badge.
+  //
+  // It cannot say yes on its own, though, because "The University" is also the
+  // ordinary London area outside the lab. There it narrows things to the
+  // University, which is enough to trust the ordinary-English card names (see
+  // below) -- nothing outside the lab at the University is known to share one
+  // -- but a badge on a distinctive lab card never needed the greeting anyway.
+  const LAB_AREAS = ['The University'].map(normalizeName);
+
+  // 'yes' (the University: the lab, or right outside it), 'no' (somewhere
+  // else, read verbatim), or 'unknown' (no greeting to read).
+  function labWhere() {
+    const area = normalizeName(currentArea());
+    if (!area) return 'unknown';
+    return LAB_AREAS.indexOf(area) !== -1 ? 'yes' : 'no';
+  }
+
+  // The better evidence is the deck itself. A laboratory card is only ever in
+  // a laboratory hand, so one distinctive lab card on screen -- in the hand or
+  // opened -- is the lab confirmed. `strict` is on the thirteen card names that
+  // are ordinary English ("Eureka!", "Washing Up", "Directing your Team",
+  // "Student Complaints"...), which wait for that or for the greeting. Options
+  // are badged only inside an opened lab card, never by their name alone: "Take
+  // a break" and "No more of this!" could be anywhere.
+  //
+  // Returns 'no' when the greeting names somewhere else, and otherwise whether
+  // the lab is confirmed.
+  function labConfirmed(names) {
+    const where = labWhere();
+    if (where === 'no') return 'no';
+    if (where === 'yes') return true;
+    return names.some(function (name) {
+      const card = labCardFor(name);
+      return !!card && !card.strict;
+    });
+  }
+
+  let labRefreshAt = 0;
+  function labMaybeRefresh() {
+    if (!autoRefreshEnabled()) return;
+    if (Date.now() - labRefreshAt < LAB_FRESH_MS) return;
+    labRefreshAt = Date.now();
+    refreshBackgroundState().then(function () { schedule(); });
+  }
+
+  function labRatings() {
+    const state = labState();
+    const seen = [];
+    eachCardName(function (host, name, place, style) {
+      seen.push({ host: host, name: name, place: place, style: style });
+    });
+    const gate = labConfirmed(seen.map(function (s) { return s.name; }));
+    // A greeting naming somewhere else is a verified no: nothing here speaks.
+    const elsewhere = gate === 'no';
+    const confirmed = gate === true;
+    const sig = (elsewhere ? '@away' : confirmed ? '@lab' : '@?') + '#' + state.sig;
+    let wantsReading = false;
+
+    for (const s of seen) {
+      const card = elsewhere ? null : labCardFor(s.name);
+      const spec = card && (confirmed || !card.strict) ? labCardSpec(card, state) : null;
+      if (spec && (spec.stale || !state.read)) wantsReading = true;
+      attachBadge(s.host, {
+        cls: LAB_CLASS, flag: LAB_FLAG, value: s.name + sig, spec: spec, place: s.place, style: s.style,
+      });
+    }
+
+    let open = null;
+    document.querySelectorAll('.storylet-root__heading').forEach(function (head) {
+      const card = labCardFor(headingName(head));
+      if (card) open = card;
+    });
+    const usable = open && !elsewhere && (confirmed || !open.strict) ? open : null;
+    document.querySelectorAll('.branch__title').forEach(function (head) {
+      const name = headingName(head);
+      const opt = usable && name ? labDisambiguate(labBranchRows(usable, name), usable, state) : null;
+      const spec = opt ? labOptionSpec(opt, usable, state) : null;
+      if (spec && spec.stale) wantsReading = true;
+      attachBadge(head, {
+        cls: LAB_BRANCH_CLASS, flag: LAB_BRANCH_FLAG,
+        value: name + '@' + (usable ? usable.name : '-') + sig, spec: spec, place: 'after',
+      });
+    });
+
+    // A figure that rests on a reading nobody has taken, or on one that has
+    // gone stale, pays for a background load of Myself and Possessions --
+    // throttled to one a minute and off with the auto-refresh toggle.
+    if (wantsReading) labMaybeRefresh();
+  }
+
   // === panel: zailing ====================================================
   //
   // The reference half of the zailing work: the numbers that decide a voyage
@@ -6675,6 +8058,478 @@
     ]);
   }
 
+  // === panel: University Laboratory ======================================
+  //
+  // The live half first -- your Equipment, staff and students, what the project
+  // stands at, and what Circulate a draft of your findings would pay right now
+  // -- and then the reference half, from University Laboratory (Guide) and its
+  // /Tables subpage: every card this feature badges, searchable, the repeatable
+  // projects, the equipment ladder and who the experts are good for.
+
+  const LAB_GROUPS = [
+    { key: 'brief', label: 'A brief project — under 200 research' },
+    { key: 'setup', label: 'Setting up a project of 200 research or more' },
+    { key: 'experiment', label: 'The experiment' },
+    { key: 'team', label: 'Your team' },
+    { key: 'writeup', label: 'Writing up' },
+    { key: 'long', label: 'A very long project — 1,200 research and up' },
+    { key: 'ideas', label: 'Big ideas' },
+    { key: 'students', label: 'Students' },
+    { key: 'staff', label: 'Staff' },
+    { key: 'parabola', label: 'Parabolan research' },
+    { key: 'menace', label: 'Menaces and disgruntled students' },
+    { key: 'early', label: 'A new or small laboratory' },
+  ];
+
+  // The guide's Repeatable Research table, row for row. `value` is its
+  // Expected Lab Reward Value column, as given; `pr` the Parabolan Research.
+  const LAB_PROJECTS = [
+    { eo: 810, name: 'Disambiguate an Eolith', needs: 'costs an Ambiguous Eolith', research: 10, type: 'Geology',
+      gives: 'one at random of Perfumed Gunpowder, Nodule of Trembling Amber, Unprovenanced Artefact, Bloodstained Eolith' },
+    { eo: 610, name: 'Discover the background of this bone', needs: 'costs an Unidentified Thigh Bone', research: 25,
+      type: 'Palaeontology',
+      gives: 'Monstrous Anatomy 3: a Femur of a Jurassic Beast on a success, a Femur of a Surface Deer on a failure' },
+    { eo: 610, name: 'Invent a false nature for this bone', needs: 'the second stage of the bone', research: 75, pr: 25,
+      type: 'Palaeontology', gives: 'Holy Relic of the Thigh of Saint Fiacre, Record of Successful Forgery +1' },
+    { eo: 510, name: 'Analyse your Thorned Ribcage', needs: 'costs a Thorned Ribcage', research: 350, pr: 15,
+      type: 'Palaeontology', gives: 'Searing Enigma, Monstrous Anatomy +1 CP, Shapeling Arts +1 CP' },
+    { eo: 410, name: 'Study the Focused Albatross', needs: 'Prestige 1; costs a Focused Albatross', research: 100,
+      type: 'Biology, Monstrous', gives: 'Albatross Wing 2, Incisive Observation 2', value: 1250 },
+    { eo: 820, name: 'Track recent palaeontological discoveries and the stones of the Neath',
+      needs: 'Teaching Reputation', research: 100, type: 'Geology', gives: 'Survey of the Neath\'s Bones 25', value: 1250 },
+    { eo: 820, name: 'Collate a great number of palaeontological reports', needs: 'Prestige 10, Teaching Reputation',
+      research: 2700, type: 'Geology', gives: 'Survey of the Neath\'s Bones 625', value: 31250 },
+    { eo: 310, name: 'Create an Infernal Machine',
+      needs: 'Equipment 5; costs Nevercold Brass Sliver 250, Bessemer Steel Ingot 5', research: 500, type: 'Machines',
+      gives: 'Infernal Machine' },
+    { eo: 230, name: 'Create a Cartographer\'s Hoard', needs: 'Equipment 6', research: 2700, type: 'Cartography, Nautical',
+      gives: 'Cartographer\'s Hoard', value: 31250 },
+    { eo: 1010, name: 'Research an Impossible Theorem', needs: 'Equipment 7', research: 13000, pr: 300,
+      type: 'Mathematical', gives: 'Watchful 500: an Impossible Theorem (repeatable); Nightmares +2 CP on a failure' },
+    { eo: 1020, name: 'Create a Mirthless Compendium of Statistical Observations',
+      needs: 'Teaching Reputation; with under 1 Parabolan Research', research: 100, type: 'Mathematical',
+      gives: 'with a Meticulous Student, a Mirthless Compendium; with more Parabolan Research, Hinterland Scrip 20 and Record of Successful Forgery +1',
+      value: 1250 },
+    { eo: 320, name: 'Research a Devilish Probability Distributor',
+      needs: 'Prestige 5; costs Nevercold Brass Sliver 250, Favours: Hell 3', research: 450, type: 'Machines',
+      gives: 'Devilish Probability Distributor' },
+    { eo: 1050, name: 'Remember an image that has been nagging at you',
+      needs: 'started in the Reflection of your Laboratory; Railway progress', research: 450, pr: 15,
+      type: 'Mathematical, Red Science, Correspondence',
+      gives: 'Artisan of the Red Science +2 CP below base 7; a Searing Enigma at base 7' },
+    { eo: 240, name: 'Prepare a set of Glass Gazettes', needs: 'Route: The Reflection of your Laboratory', research: 50,
+      pr: 10, type: 'Cartography', gives: 'Glass Gazette 5', value: 1250 },
+    { eo: 240, name: 'Fantasize about an atlas of the Is-Not',
+      needs: 'started in the Reflection of your Laboratory; Railway progress, Prestige 20, Glasswork 7',
+      research: 2500, pr: 65, type: 'Cartography', gives: 'Glass Gazette 125', value: 31250 },
+    { eo: 130, name: 'Construct a rifle in historical style', needs: '', research: 100, type: 'Weapons',
+      gives: 'Ancient Hunting Rifle', value: 1250 },
+    { eo: 130, name: 'Disguise your Ancient Hunting Rifle as a valuable antique',
+      needs: 'an optional second stage of the rifle', research: 1650, type: 'Weapons',
+      gives: 'Infernal Sharpshooter\'s Rifle, Record of Successful Forgery +1' },
+    { eo: 330, name: 'Study the Augmentation Device',
+      needs: 'a Highly Illegal Experimental Augmentation Device (Probably) — Whitsun', research: 100,
+      type: 'Machines, Red Science', gives: 'Direful Reflection, Artisan of the Red Science +1 CP', value: 1250 },
+    { eo: 450, name: 'Dissect the Pinewood Shark', needs: 'costs the Remains of a Pinewood Shark', research: 100,
+      type: 'Biology, Monstrous', gives: 'Incisive Observation 2, Fin Bones, Collected 38, Bone Fragments 500', value: 1250 },
+    { eo: 460, name: 'Analyse your False-Snake', needs: 'a Preserved False-Snake; Shapeling Arts 2', research: 100,
+      type: 'Biology, Toxicological',
+      gives: 'Unearthly Fossil, Memory of Distant Shores 20, Kataleptic Toxicology +1 CP', value: 1250 },
+    { eo: 520, name: 'Try the Betrayer of Measures on a human ribcage',
+      needs: 'the Betrayer of Measures; costs a Human Ribcage', research: 425, type: 'Palaeontology, Red Science',
+      gives: 'Artisan of the Red Science 5: a Mammoth Ribcage (repeatable); Artisan +1 CP either way, Nightmares +2 CP on a failure' },
+    { eo: 1350, name: 'Study the nature of the Sun-Blazoned Cuirass', needs: 'the Sun-Blazoned Cuirass', research: 550,
+      type: 'History, Monstrous', gives: 'Primaeval Hint', value: 6250 },
+    { eo: 530, name: 'Try the Betrayer of Measures on Warbler Skeleton',
+      needs: 'the Betrayer of Measures; costs a Warbler Skeleton, Nevercold Brass Sliver 1000', research: 425,
+      type: 'Palaeontology, Red Science',
+      gives: 'Artisan of the Red Science 5: a Skeleton with Seven Necks (repeatable); Artisan +1 CP either way, Nightmares +2 CP on a failure' },
+    { eo: 950, name: 'Study the properties of Attar', needs: 'A Vial of Queenly Attar', research: 450, pr: 15,
+      type: 'Chemistry, Toxicological', gives: 'Night-Whisper, Kataleptic Toxicology +1 CP', value: 6250 },
+    { eo: 1320, name: 'Study the Prelapsarian history of the Red Science',
+      needs: 'Artisan Studies 2; costs 10 each of Trace of the First City and Relics of the Second, Third and Fourth City',
+      research: 2700, type: 'History, Red Science, Correspondence',
+      gives: 'publish for a Dreadful Surmise; or, for 10 of the matching Expertise, Edicts of the First City, a Ray-Drenched Cinder, a Dreadful Surmise or a Cartographer\'s Hoard' },
+    { eo: 1340, name: 'Study your Captured Ushabti', needs: 'costs a Captured Ushabti on a success', research: 550,
+      type: 'History, Toxicological', gives: 'Primaeval Hint, Tale of Terror!!, Nightmares +1 CP', value: 6250 },
+    { eo: 540, name: 'Test the elastic limits of flesh and bone',
+      needs: 'costs a Human Arm, a Human Ribcage, Nodule of Deep Amber 100', research: 550, type: 'Palaeontology, Shapeling',
+      gives: 'Knotted Humerus, Thorned Ribcage, Withered Tentacle 2, Nodule of Trembling Amber 2, Bone Fragments 2150, Shapeling Arts +1 CP',
+      value: 6250 },
+    { eo: 260, name: 'Make a cartographical study of the ceiling', needs: 'Firmament 70; costs a Tempestuous Tale',
+      research: 550, type: 'Cartography', gives: '25 Roof-Charts and Extraordinary Implications, split by your Firmament',
+      value: 6250 },
+    { eo: 830, name: 'Study the geochemical properties of Roof drippings', needs: 'costs a Sample of Roof-Drip',
+      research: 100, type: 'Geology', gives: 'Tempestuous Tale 5, Extraordinary Implication 4', value: 1250 },
+    { eo: 960, name: 'Make a study of a few samples from a Starved citadel', needs: 'costs a Starved Expression',
+      research: 550, type: 'Chemistry, Toxicological',
+      gives: 'Tempestuous Tale 5, Emetic Revelation 2, Extraordinary Implication 15', value: 6250 },
+    { eo: 965, name: 'Study the scents most conducive to romance', needs: 'only during the Feast of the Exceptional Rose',
+      research: 550, type: 'Chemistry, Toxicological', gives: 'Captivating Ballad, Burgeoning Romance 2500', value: 6250 },
+  ];
+
+  // The guide's Equipment table. Every level but 4 and 9 has a price in
+  // Echoes, where the guide gives one; 7 is the most without Fate.
+  const LAB_EQUIPMENT = [
+    { level: 1, needs: 'Drop of Prisoner\'s Honey 500, Flask of Abominable Salts 5, Bottled Oblivion 5, Venom-Ruby 5, Bottle of Strangling Willow Absinthe 5',
+      echoes: 17.5, note: 'at the buy price of Bottled Oblivion' },
+    { level: 2, needs: 'Bejewelled Lens, Magnificent Diamond, Nodule of Deep Amber 100', echoes: 71,
+      note: 'at the assembly price of the Lens' },
+    { level: 2, needs: 'Patent Scrutinizer, Knob of Scintillack 3, Nodule of Deep Amber 590', echoes: 23.7,
+      note: 'at the buy price of the Scrutinizer; graduating Shifty Students is the cheap source of Scintillack' },
+    { level: 3, needs: 'Memory of Light 100, Phosphorescent Scarab 200', echoes: 70, note: '' },
+    { level: 4, needs: 'a Voluminous Library', echoes: null, note: 'also removes the A library of your own card' },
+    { level: 5, needs: 'Foxfire Candle Stub 100, Nevercold Brass Sliver 2000, Mourning Candle, Perfumed Gunpowder 50, Hillmover 3',
+      echoes: 186, note: 'Hillmovers at 12.5 Echoes and Gunpowder at 2.5' },
+    { level: 6, needs: 'First City Coin 700, Devilbone Die, Justificande Coin 10', echoes: 200.9,
+      note: 'First City Coins at 0.25 Echoes and Justificande Coins at 2.5' },
+    { level: 6, needs: 'The Neathy Tarot, Featuring all 77 of the Major Arcana', echoes: null,
+      note: 'a Summer item costing 20 Estival Tokens' },
+    { level: 6, needs: 'Devilish Probability Distributor 2, Mirthless Compendium of Statistical Observations 5',
+      echoes: 187.5, note: 'at their selling price; far cheaper made yourself, for 1,400 research and a Meticulous Student' },
+    { level: 6, needs: 'a certain reward from an Ambition: Heart\'s Desire! ending', echoes: null, note: '' },
+    { level: 7, needs: 'Working Rat 10, Albino Rat', echoes: 648, note: 'needs Seeking the Meaning of the Plaster Face 20' },
+    { level: 7, needs: 'Working Rat 15, Rattus Faber Bandit-Chief', echoes: 1292,
+      note: 'either way also removes the Rat Melancholy card' },
+    { level: 9, needs: '10 Fate', echoes: null, note: 'Improve your equipment as much as possible; nothing else besides' },
+  ];
+
+  // The guide's Expertise table, with how each is hired.
+  const LAB_EXPERTS = [
+    { name: 'the Numismatrix', eo: '30, 250, 980; 1301–1600 History', focus: '', pairs: '',
+      how: 'your first expert, from the Dean\'s coin commission' },
+    { name: 'Lettice, the Mercy', eo: '110–120; 401–500 Biological; 1320', focus: '',
+      pairs: 'Gifted Student, April, the Esurient Smith',
+      how: 'free if she was your companion at the Feast of the Exceptional Rose' },
+    { name: 'F.F. Gebrandt', eo: '901–1000 Chemistry', focus: '', pairs: 'Profound Student',
+      how: 'Invite F.F. Gebrandt to Collaborate' },
+    { name: 'April', eo: '10; 101–200 Weapons', focus: 'Red Science Focus', pairs: 'Profound Student, Lettice',
+      how: 'during Ambition: Bag a Legend!' },
+    { name: 'Cora Bagley', eo: '1001–1200 Mathematical', focus: '', pairs: 'Visionary Student',
+      how: 'after Ambition: Heart\'s Desire!' },
+    { name: 'the Esurient Smith', eo: '101–200 Weapons; 301–400 Engineering', focus: '',
+      pairs: 'Profound Student, Lettice', how: 'after Ambition: Nemesis' },
+    { name: 'Hephaesta', eo: '201–300 Cartography; 820', focus: 'Nautical Focus', pairs: 'Visionary Student',
+      how: 'after Ambition: Light Fingers!' },
+    { name: 'the Percipient Cricketer', eo: '', focus: 'Correspondence Focus', pairs: 'Profound Student',
+      how: 'Fate — Cricket, Anyone?' },
+    { name: 'the Reformed Protester', eo: '101–200 Weapons', focus: '', pairs: '', how: 'Fate — Five Minutes to Midday' },
+    { name: 'the Silk-Clad Expert', eo: '401–500 Biological', focus: '', pairs: 'Gifted Student',
+      how: 'Fate — Learning from a Silk-Clad Expert' },
+    { name: 'the Stoic Classicist', eo: '1301–1600 History', focus: '', pairs: '', how: 'Fate — Tauroktonos' },
+    { name: 'the Eldest Daughter', eo: '', focus: 'Toxicological Focus', pairs: '', how: 'Fate — The Frequently Deceased' },
+  ];
+
+  function labOptionRow(opt, card, state) {
+    const status = labStatus(opt, card, state);
+    const detail = [
+      labReqWords(opt) ? 'needs ' + labReqWords(opt) : null,
+      opt.winAlso ? (opt.ch || opt.luck != null ? 'success: ' : 'gives: ') + opt.winAlso : null,
+      opt.rareAlso ? 'rare success: ' + opt.rareAlso : null,
+      opt.altAlso ? 'alternative success: ' + opt.altAlso : null,
+      opt.fail || opt.failAlso
+        ? 'failure: ' + [labOutcomeWords(opt.fail, opt, card, state), opt.failAlso].filter(Boolean).join('; ')
+        : null,
+      opt.consumes ? 'uses up ' + opt.consumes : null,
+      opt.note || null,
+    ].filter(Boolean);
+    const row = h('tr', null, [
+      h('td', { css: TD }, [
+        h('div', null, [wikiLink(opt.page || opt.branch, opt.branch)]),
+        h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, ['on ', wikiLink(card.name, card.name)]),
+      ]),
+      h('td', { css: TD + 'text-align:center;' }, [makeBadge(labOptionSpec(opt, card, state), LAB_CLASS)]),
+      h('td', { css: TD + 'color:' + UI.dim + ';font-size:11px;' }, [
+        opt.luck != null ? 'Luck ' + Math.round(opt.luck * 100) + '%' : (opt.ch || '—'),
+        status === 'shut' ? h('div', { css: 'color:#c98a8a;' }, ['not open to you']) : null,
+      ]),
+      h('td', { css: TD + 'color:' + UI.dim + ';font-size:11px;' }, detail.map(function (line) {
+        return h('div', null, [line]);
+      })),
+    ]);
+    row.dataset.labSearch = [opt.branch, card.name, opt.ch || '', opt.gate || '', opt.winAlso || '',
+      opt.rareAlso || '', opt.failAlso || '', opt.consumes || '', opt.note || '', opt.label || '']
+      .join(' ').toLowerCase();
+    return row;
+  }
+
+  function renderLabPanel(ctx) {
+    const state = labState();
+    const q = state.q;
+    let busy = false;
+    if (ctx && autoRefreshEnabled() && (state.stale || state.itemsStale)) {
+      busy = true;
+      refreshBackgroundState().then(function () { ctx.rerender(); });
+    }
+
+    const section = function (title, children) {
+      return h('div', { css: 'margin-top:14px;' }, [
+        h('div', {
+          css: 'font:bold 11px ' + UI.font + ';letter-spacing:.06em;text-transform:uppercase;'
+            + 'color:' + UI.accent + ';margin-bottom:5px;',
+        }, [title]),
+        children,
+      ]);
+    };
+    const table = function (heads, rows) {
+      return h('div', { css: 'overflow-x:auto;' }, [
+        h('table', { css: 'width:100%;border-collapse:collapse;' }, [
+          h('thead', null, [h('tr', null, heads.map(function (head) {
+            return h('th', { css: TH + (head.right ? 'text-align:right;' : ''), title: head.title || '' }, [head.text]);
+          }))]),
+          h('tbody', null, rows),
+        ]),
+      ]);
+    };
+    const dash = function (v) { return v == null ? '–' : String(v); };
+    const stat = function (label, value, title) {
+      return h('div', { title: title || '', css: 'min-width:80px;' }, [
+        h('div', { css: 'color:' + UI.dim + ';font-size:10px;letter-spacing:.05em;text-transform:uppercase;' }, [label]),
+        h('div', { css: 'color:' + UI.text + ';font-size:14px;font-weight:bold;' }, [value]),
+      ]);
+    };
+
+    // --- your laboratory ----------------------------------------------------
+    const students = LAB_STUDENTS.filter(function (s) { return q[s.quality]; })
+      .map(function (s) { return s.name + ' ' + q[s.quality]; });
+    const staff = LAB_STAFF.filter(function (s) { return q[s.quality]; }).map(function (s) { return s.name; });
+    const items = state.items;
+    const refresh = h('button', {
+      type: 'button', textContent: busy ? 'Refreshing…' : 'Refresh', disabled: busy,
+      css: 'padding:2px 8px;background:' + UI.bgAlt + ';color:' + UI.text + ';border:1px solid ' + UI.line
+        + ';border-radius:3px;font:11px ' + UI.font + ';cursor:pointer;',
+      on: {
+        click: function (e) {
+          const button = e.currentTarget;
+          button.textContent = 'Refreshing…';
+          button.disabled = true;
+          refreshBackgroundState().then(function () { if (ctx) ctx.rerender(); });
+        },
+      },
+    });
+    const auto = h('label', { css: 'color:' + UI.dim + ';font-size:11px;' }, [
+      h('input', {
+        type: 'checkbox', checked: autoRefreshEnabled(),
+        on: { change: function (e) { setAutoRefresh(!!e.currentTarget.checked); } },
+      }),
+      ' auto',
+    ]);
+
+    const draft = labDraft(q[LAB_Q.research], q[LAB_Q.required], items.result);
+    const collated = state.itemsRead ? labCollated(items) : null;
+    const toGo = draft != null ? q[LAB_Q.required] - q[LAB_Q.research] - draft : null;
+
+    const labBlock = h('div', {
+      css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent
+        + ';background:' + UI.bgAlt + ';font-size:12px;line-height:1.6;',
+    }, [
+      h('div', { css: 'color:' + UI.accent + ';font-weight:bold;' }, ['Your laboratory']),
+      state.read ? null : h('div', { css: 'color:' + UI.dim + ';' },
+        ['Not read yet. Open the Myself tab once, or press Refresh, and every figure here is your own.']),
+      h('div', { css: 'display:flex;flex-wrap:wrap;gap:8px 16px;margin:4px 0;' }, [
+        stat('Equipment', dash(q[LAB_Q.equipment]), 'Equipment for Scientific Experimentation — what most options scale with'),
+        stat('Workers', dash(q[LAB_Q.workers])),
+        stat('Top level', dash(state.high), 'The highest worker level the team options multiply by'),
+        stat('Prestige', dash(q[LAB_Q.prestige])),
+        stat('Project', dash(q[LAB_Q.eo]), 'Experimental Object'),
+        stat('Research', q[LAB_Q.research] == null ? '–' : q[LAB_Q.research] + ' / ' + dash(q[LAB_Q.required])),
+        stat('Disgruntled', dash(q[LAB_Q.disgruntlement]), 'Disgruntlement among the Students'),
+      ]),
+      h('div', null, ['Students: ', students.length ? students.join(', ') : (state.read ? 'none' : '–')]),
+      h('div', null, ['Staff: ', staff.length ? staff.join(', ') : (state.read ? 'none of the ones transcribed here' : '–')]),
+      h('div', null, [
+        'In hand: ',
+        state.itemsRead
+          ? [dash(items.epiphany) + ' Unavoidable Epiphanies', dash(items.idea) + ' Unwise Ideas',
+            dash(items.result) + ' Unexpected Results', dash(items.connection) + ' Unlikely Connections'].join(', ')
+          : 'Possessions not read yet',
+      ]),
+      h('div', { css: 'margin-top:5px;color:' + UI.text + ';' }, [
+        draft != null
+          ? ['Circulate a draft of your findings would pay about ', h('b', null, [String(draft)]),
+            ' research now', toGo <= 0 ? ' — enough to finish the project.' : ', leaving ' + toGo + ' to go.']
+          : 'Circulate a draft of your findings: needs your research, the project\'s size and your Unexpected Results read.',
+      ]),
+      collated != null && q[LAB_Q.eo]
+        ? h('div', null, ['What you hold now would turn into ', h('b', null, [String(collated)]),
+          ' Volume' + (collated === 1 ? '' : 's') + ' of Collated Research when the project is tidied away.'])
+        : null,
+      h('div', { css: 'display:flex;align-items:center;gap:8px;margin-top:5px;color:' + UI.dim + ';font-size:11px;' }, [
+        refresh, auto,
+        h('span', null, ['Myself ' + (state.read ? (state.live ? 'on screen' : ageText(state.at)) : 'never read')
+          + ' · Possessions ' + (state.itemsRead ? (state.itemsStale ? 'over a minute old' : 'fresh') : 'never read')]),
+      ]),
+    ]);
+
+    // --- cards on screen ---------------------------------------------------
+    const seen = new Map();
+    eachCardName(function (host, name) {
+      const card = labCardFor(name);
+      if (card && !seen.has(card.name)) seen.set(card.name, card);
+    });
+    const hand = Array.from(seen.values());
+    const handBlock = hand.length
+      ? h('div', {
+          css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent
+            + ';background:' + UI.bgAlt + ';font-size:12px;line-height:1.6;',
+        }, [
+          h('div', { css: 'color:' + UI.accent + ';font-weight:bold;' },
+            [hand.length === 1 ? '1 laboratory card on screen' : hand.length + ' laboratory cards on screen']),
+          hand.map(function (card) {
+            return h('div', null, [makeBadge(labCardSpec(card, state), LAB_CLASS),
+              h('span', { css: 'margin-left:6px;' }, [card.name])]);
+          }),
+        ])
+      : null;
+
+    // --- every card --------------------------------------------------------
+    const optionRows = [];
+    for (const group of LAB_GROUPS) {
+      const cards = LAB_CARDS.filter(function (c) { return c.group === group.key; });
+      if (!cards.length) continue;
+      const header = h('tr', null, [h('td', {
+        colSpan: 4,
+        css: 'padding:8px 8px 3px;font:bold 11px ' + UI.font + ';letter-spacing:.05em;'
+          + 'text-transform:uppercase;color:' + UI.dim + ';border-bottom:1px solid ' + UI.line + ';',
+      }, [group.label])]);
+      header.dataset.labGroup = '1';
+      optionRows.push(header);
+      for (const card of cards) {
+        for (const opt of card.opts) optionRows.push(labOptionRow(opt, card, state));
+      }
+    }
+    const search = h('input', {
+      type: 'text',
+      placeholder: 'filter cards, options, rewards…',
+      css: 'flex:1;min-width:140px;box-sizing:border-box;padding:3px 7px;background:' + UI.bgAlt
+        + ';color:' + UI.text + ';border:1px solid ' + UI.line + ';border-radius:3px;font:12px ' + UI.font + ';',
+      on: {
+        input: function (e) {
+          const term = String(e.currentTarget.value || '').trim().toLowerCase();
+          for (const row of optionRows) {
+            if (row.dataset.labGroup) continue;
+            row.hidden = !!term && row.dataset.labSearch.indexOf(term) === -1;
+          }
+          let group = null, shown = 0;
+          for (const row of optionRows) {
+            if (row.dataset.labGroup) {
+              if (group) group.hidden = shown === 0;
+              group = row; shown = 0;
+            } else if (!row.hidden) shown++;
+          }
+          if (group) group.hidden = shown === 0;
+        },
+      },
+    });
+
+    const prose = function (lines) {
+      return h('div', { css: 'color:' + UI.dim + ';font-size:12px;line-height:1.7;' }, lines.map(function (line) {
+        return h('div', null, [].concat(line));
+      }));
+    };
+
+    return h('div', { css: 'padding:0 12px 12px;' }, [
+      labBlock,
+      handBlock,
+
+      section('Every card', h('div', null, [
+        h('div', { css: 'display:flex;align-items:center;gap:8px;margin-bottom:6px;' }, [search]),
+        table([
+          { text: 'Option' },
+          { text: '', title: 'What it pays at your Equipment. Hover or tap for the whole of it.' },
+          { text: 'Challenge' },
+          { text: 'Needs, and what else it does' },
+        ], optionRows),
+      ])),
+
+      section('Getting the most out of a project', prose([
+        ['Fill every worktable. With fewer than 3 people in the lab, ', wikiLink('Washing Up', 'Washing Up'),
+          ', Unpacking crates, Filing a report for the Dean and Work with your Equipment crowd the deck; '
+          + 'with 3 or more, Directing your Team takes their place.'],
+        'Raise your Equipment above all else: nearly every figure here grows with it, and 7 is the most '
+          + 'without Fate.',
+        ['Spend ', wikiLink('Unavoidable Epiphany', 'Unavoidable Epiphanies'), ' on 18 + 3 × Equipment — Eureka! '
+          + 'or a level 5 student\'s Follow up a hunch. ', wikiLink('Unwise Idea', 'Unwise Ideas'),
+          ' pay 20 research each, all at once, for a change point of a menace each. ',
+          wikiLink('Unlikely Connection', 'Unlikely Connections'), ' let an expert work outside their field. ',
+          wikiLink('Research Preparations', 'Research Preparations'), ' lower most Watchful checks for the rest of the project.'],
+        'Anything left over when the project ends becomes Volumes of Collated Research: 0.6 per Epiphany or Unwise '
+          + 'Idea and 0.2 per Unlikely Connection or Unexpected Result, rounded down. Leftover research does not count.',
+        'Write Up Your Findings is best played late: Circulate a draft of your findings pays for the share of '
+          + 'the project already done, plus your Unexpected Results, which it uses up.',
+      ])),
+
+      section('Students', prose([
+        'Levels 1–2, 3–4 and 5 each open a different option on the student\'s card, and a level 5 student is '
+          + 'where the research is. Graduating one raises Teaching Reputation, which opens the better students.',
+        'The guide\'s route: Shifty Students until Meticulous ones open, Meticulous until Gifted, then one of each; '
+          + 'swap the Gifted for a Profound Student when those open.',
+        ['A level 5 student\'s rare successes raise ', wikiLink('Disgruntlement among the Students', 'Disgruntlement'),
+          '. At 4 Student Complaints joins the deck; at 6 Student Fury, which costs 200 research. Graduating any '
+          + 'student clears at least 21 CP of it, and a lone Visionary Student left to their own devices never raises it.'],
+      ])),
+
+      section('Repeatable projects', table([
+        { text: '#', title: 'Experimental Object' },
+        { text: 'Project' },
+        { text: 'Research', right: true, title: 'Laboratory Research, plus Parabolan Research where it needs any' },
+        { text: 'Needs' },
+        { text: 'Gives' },
+      ], LAB_PROJECTS.map(function (p) {
+        return h('tr', null, [
+          h('td', { css: TD + 'color:' + UI.dim + ';' }, [String(p.eo)]),
+          h('td', { css: TD }, [wikiLink(p.name, p.name),
+            h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [p.type])]),
+          h('td', { css: TD + 'text-align:right;white-space:nowrap;' }, [
+            String(p.research), p.pr ? h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, ['+ PR ' + p.pr]) : null,
+          ]),
+          h('td', { css: TD + 'color:' + UI.dim + ';font-size:11px;' }, [p.needs || '—']),
+          h('td', { css: TD + 'font-size:11px;' }, [p.gives,
+            p.value ? h('div', { css: 'color:' + UI.dim + ';' }, ['Expected Lab Reward Value ' + p.value]) : null]),
+        ]);
+      }))),
+
+      section('Equipment', table([
+        { text: 'Level' },
+        { text: 'Needs' },
+        { text: 'Echoes', right: true, title: 'The guide\'s estimate of what it costs' },
+      ], LAB_EQUIPMENT.map(function (e) {
+        return h('tr', null, [
+          h('td', { css: TD }, [String(e.level)]),
+          h('td', { css: TD + 'font-size:11px;' }, [e.needs,
+            e.note ? h('div', { css: 'color:' + UI.dim + ';' }, [e.note]) : null]),
+          h('td', { css: TD + 'text-align:right;' }, [e.echoes == null ? '—' : String(e.echoes)]),
+        ]);
+      }))),
+
+      section('Experts', table([
+        { text: 'Expert' },
+        { text: 'Projects', title: 'Experimental Object ranges they are good for' },
+        { text: 'Works with' },
+        { text: 'Hired' },
+      ], LAB_EXPERTS.map(function (x) {
+        return h('tr', null, [
+          h('td', { css: TD }, [x.name]),
+          h('td', { css: TD + 'font-size:11px;' }, [[x.eo, x.focus].filter(Boolean).join('; ') || '—']),
+          h('td', { css: TD + 'color:' + UI.dim + ';font-size:11px;' }, [x.pairs || '—']),
+          h('td', { css: TD + 'color:' + UI.dim + ';font-size:11px;' }, [x.how]),
+        ]);
+      }))),
+
+      h('div', { css: 'margin-top:12px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+        h('div', null, ['A card\'s badge is the ', h('b', null, ['research']), ' the best option on it pays on a '
+          + 'success, at your Equipment, among the options you can take with nothing special in hand. An option '
+          + 'behind an item is left out and marked ', h('b', null, [LAB_MARK_HIDDEN]), '; the rest of the marks are in every tooltip.']),
+        h('div', null, [LAB_LEGEND]),
+        h('div', null, ['Not transcribed: the ambition and Fate-locked experts\' cards, the Correspondence, '
+          + 'Secret College and Long-Dead Priests cards, and the focus cards of particular projects.']),
+        h('div', { css: 'margin-top:6px;' }, ['Data from each card\'s and option\'s own page on the wiki, and from ',
+          wikiLink('University Laboratory (Guide)', 'University Laboratory (Guide)'),
+          ' and its Tables page for the reference tables. Where the guide and an option page disagree, the page is used.']),
+      ]),
+    ]);
+  }
+
   // === panel: Fruits of the Zee ==========================================
   //
   // The checklist half of the festival work, and the reason the badges can say
@@ -6756,6 +8611,7 @@
       // paying for a third pass over a few hundred quality rows. One reader,
       // three consumers.
       bankPcQualities(scan);
+      bankLabQualities(scan);
     }
     if (owned.length) bankItemCounts(readPossessionCounts());
   }
@@ -8270,6 +10126,10 @@
     // "Time to go", "Tarry a little" and "Cut it fine" are on all three and pay
     // a different research page on each.
     { name: 'scientific-voyages', run: vsdRatings },
+    // The fourth on `.branch__title`, and the first to badge the hand AND the
+    // options of an opened card: a lab option is only badged inside a lab card,
+    // because "Take a break" and "No more of this!" could be anywhere.
+    { name: 'university-laboratory', run: labRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
@@ -8309,6 +10169,14 @@
       hint: 'What the festival still owes you, what your treasures trade for, and '
         + 'what every diving card pays',
       render: renderFotzPanel,
+    },
+    {
+      id: 'university-laboratory',
+      icon: '🧪',
+      label: 'University Laboratory',
+      hint: 'Your Equipment, staff and project, what a draft would pay now, every lab card, '
+        + 'and the projects, equipment and experts',
+      render: renderLabPanel,
     },
   ];
 
@@ -8351,6 +10219,7 @@
       const got = readQualities(doc);
       bankFotzQualities(got);
       bankPcQualities(got);
+      bankLabQualities(got);
     } else if (path === '/possessions') {
       bankItemCounts(readPossessionCounts(doc));
     }

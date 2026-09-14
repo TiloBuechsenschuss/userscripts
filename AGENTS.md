@@ -882,8 +882,8 @@ navigation. Two consequences:
   quality-of-life tweaks — the `launcher`, the **Factions** panel and its "use" button — and
   `choice-helper.js` is **advice on what storylets and cards do**: every rating badge
   (`spite-card-ratings`, `zee-card-ratings`, the `fotz-*` features, `port-carnelian`,
-  `scientific-voyages`) and the reference panel built on each one's table (Zailing, Port
-  Carnelian, Scientific Voyages, Fruits of the Zee). The rule that decided where each thing
+  `scientific-voyages`, `university-laboratory`) and the reference panel built on each one's
+  table (Zailing, Port Carnelian, Scientific Voyages, Fruits of the Zee, University Laboratory). The rule that decided where each thing
   went: **a panel goes where its table's badge goes**, because the two are one transcription. The
   Factions panel's `!` pips stayed in UX Enhancers — they are about your possessions, not about
   a storylet. The in-page dive-depth control went with the badges it exists to feed.
@@ -898,7 +898,10 @@ navigation. Two consequences:
   the table, which of the three gate strengths the evidence entitles you to, the tests, and the
   other suites that break the moment you touch the registry — is a skill:
   `.claude/skills/adding-fallen-london-features/SKILL.md`, with a `check.mjs` beside it that
-  audits `choice-helper.js`'s wiring.
+  audits `choice-helper.js`'s wiring. The step before it — turning a linked wiki guide into
+  choices and a plan — is `.claude/skills/planning-a-fallen-london-guide-feature/SKILL.md`, with
+  batch wiki fetch/extract scripts; its one fixed rule is that **whether a guide gets a panel
+  behind ⚙ UX is always the user's decision**, asked as its own question.
   **What the two share, and how.** A userscript has no imports, so every helper both need — `h`,
   `wikiLink`, `normalizeName`/`itemKey`, `UI`/`TH`/`TD`, the Myself and Possessions scrapes,
   `loadCache`/`saveCache`, `loadInFrame`, the auto-refresh toggle — is **carried in both files,
@@ -1660,6 +1663,63 @@ navigation. Two consequences:
   Fleet of Truth deliberately is not in `VSD_OPTIONS`** — the voyage adds it to your zee deck,
   it is already in `ZEE_CARDS`, and no name may be in two tables.
 
+  `university-laboratory` is the sixth, for your own **University Laboratory**, and the first
+  whose badge is a **formula** rather than a transcribed number: nearly every option pays
+  `k + a × Equipment`, an S-curve on Equipment or an advanced skill, or `(2 + t × Equipment) ×
+  √Workers × highest worker level`. `LAB_CARDS` is one entry per card with its options, taken from
+  the **individual card and option pages** (~160 of them, fetched through the API) rather than
+  *University Laboratory (Guide)/Cards* or */Tables*, which carry a GuideNeedsWork banner and
+  disagree with the pages in nine student figures. The guide's Student Table states each student
+  option at Equipment 7, so every tier option carries that as `guide7`, and `guideOff` names the
+  outcomes where the page disagrees — the stated-versus-derived cross-check, pinned by name in the
+  test and quoted in the tooltip. The inputs (Equipment, workers, Experimental Object, research
+  done and required, Disgruntlement, Prestige, Glass Studies, the four advanced skills, the five
+  student and five staff qualities) are banked off Myself by `bankLabQualities` alongside the
+  festival and Port Carnelian scrapes; Unwise Ideas and Unexpected Results come off the
+  Possessions counts cache. **The badge is the best success figure among options you can take
+  with nothing special in hand** — the Zailing rule. An option with a `gate` (an Epiphany, an
+  Unexpected Result, a Searing Enigma, an item or quality not read) is left out and marked `▾`
+  when it would pay more; `✦` marks an option handing you an Unavoidable Epiphany and `▼` one that
+  uses something up. **No research value is put on an Epiphany, an Idea or a Connection** — the
+  wiki gives what each is spent for, not what it is worth, and a guessed exchange rate would make
+  every ranking wrong together. Luck options are expected values (`≈`), Watchful ones keep the
+  success figure (`?`). **An unread input is a range, never a guess**: Equipment unread spans
+  Equipment 1–9 (every formula grows with it), a student's level unread spans the three tiers,
+  and a range is grey because a ramp colour would claim a figure. `labStatus` returns
+  `open`/`shut`/`unknown`/`gated` and an unread Experimental Object gates an expert's
+  project-specific options rather than guessing the project. Rounding is half to even unless a
+  page says up or down, which is what the wiki's SCurve module does; one exception is recorded:
+  the Shifty expert failure's `4/3 × Equipment` is taken as rounding **up** because the page is
+  silent and the guide's 10 at Equipment 7 is 9⅓ rounded up. "Highest worker level" is 5 whenever
+  anyone not a student works in the lab (the pages' worked examples all say "at least 1 Expert or
+  Expert Student"); whether the Artist or the Urchin count is unknown. **The gate**: the lab's
+  greeting was captured in-game on 2026-09-14 — *"Welcome to The University, delicious friend!"*
+  — so `LAB_AREAS` is an **exact** list, and `labWhere` is three-state: a greeting naming anywhere
+  else clears every lab badge. "The University" cannot say *yes* on its own, since it is also the
+  ordinary London area the lab is a setting of; it is trusted only to confirm the `strict` names,
+  which nothing at the University outside the lab is known to share. The better evidence is the
+  deck — a lab card is only ever in a lab hand — so `labConfirmed` also says yes when any
+  non-`strict` lab card is on screen and the greeting cannot be read. `strict` is on the
+  thirteen ordinary-English card names (*Eureka!*, *Washing Up*, *Directing your Team*, *Student
+  Complaints*…). **Options are badged only inside an opened lab card**, resolved within that card
+  (`labBranchRows` / `labDisambiguate`), never by name alone: *Take a break* and *No more of this!*
+  are on two cards each and could be anywhere in London. Same-named options on one card
+  (*Coordinate a plan of research*, the Numismatrix's three *special expertise* options) are told
+  apart by Disgruntlement or Experimental Object, and answer only if every candidate would say the
+  same thing. This is the **fourth** feature on `.branch__title`. A figure resting on items or
+  research done that is over a minute old is marked `~`, and a lab card on screen with no reading
+  or a stale one books a throttled background refresh, off with the auto toggle.
+  **Scope**: the core deck, all five students, the Numismatrix, Lettice, Gebrandt, the Urchin, the
+  Struggling Artist and The Reflection of Research for those staff. Not transcribed: the ambition
+  and Fate-locked experts' cards, the Correspondence / Secret College / Long-Dead Priests cards and
+  project focus cards — most of those options are "(see page)" logistic formulas on the wiki.
+  The `university-laboratory` panel opens on your lab (Equipment, workers, top worker level,
+  project, research, students, staff, items), what *Circulate a draft of your findings* would pay
+  now (`labDraft`) and what your leftovers would collate into (`labCollated`), then the lab cards
+  on screen, every card's options with the usual `dataset.labSearch` filter, advice, and the
+  guide's repeatable projects (`LAB_PROJECTS`), equipment ladder (`LAB_EQUIPMENT`) and expertise
+  table (`LAB_EXPERTS`).
+
   The `factions` panel's static half is `FACTIONS`, transcribing the *Factions (Guide)*
   Faction-Item table (the item that converts Favours to Renown, its shop, its price) and the
   Renown-item ladder (10/25/40, for 3/5/7 Favours), including the wiki's best-in-slot marks and
@@ -1977,6 +2037,19 @@ Confirmed live by the author:
   a success for Grunting Fen's *Follow the trail of history*, alone in all three carousels,
   and that is transcribed as the page has it rather than as confirmed.
 
+- The **University Laboratory badges and panel** (added 2026-09-14). Nothing about it has been
+  seen in the game beyond the greeting (*"Welcome to The University, delicious friend!"*, captured
+  2026-09-14, which made `LAB_AREAS` exact) and a first look at a hand, reported as "badges look
+  okay" the same day. Worth reporting, in order: whether the Myself tab lists
+  *Equipment for Scientific Experimentation*, *Number of Workers in your Laboratory*,
+  *Experimental Object*, *Laboratory Research*, *Total Lab Research Required* and the *Laboratory
+  Services from …* qualities under exactly those names (a mismatch reads as 0, so the badge would
+  quote Equipment 0 — look for a card badge far below what the option pays); whether an opened lab
+  card's options read as the wiki titles them (*Go for a walk*, not *Go for a walk (Fatigue)*); and
+  a badge against what the game actually paid, especially a student failure — the option pages and
+  the guide's Student Table disagree in nine places and the pages were followed. Also unknown:
+  whether the Struggling Artist and the Urchin count as level 5 for the team options.
+
 - The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
   table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
   looking at the screen can confirm: a wrong number renders exactly as well as a right one. They
@@ -2258,6 +2331,21 @@ Current tests:
   stated-versus-derived cross-check this table supports; and that no name of its is in any of
   the four other tables. It also drives **all three** `.branch__title` features at once, which
   is the only place the sibling-run clearing is exercised three deep, and builds the panel.
+- `FallenLondon/test/choice-university-lab.test.mjs` — asserts `choice-helper.js`'s University
+  Laboratory feature. The centre of it is the **arithmetic**, since the badge is a formula: half-to-even
+  rounding and the up/down exceptions, the brief-project and Unorthodox Methods S-curves, the team
+  formula against all four worked examples on the option pages, `labDraft` and `labCollated`, and that
+  a missing input is `null` rather than 0. Then the **cross-check**: every student tier option's
+  formula at Equipment 7 against the guide's Student Table, with the nine disagreements pinned by
+  name and each one proved to really disagree. Then the ranking rule on real cards — the level 5
+  expert option with `▾` for the hunch, a range over the tiers with the level unread, a range over
+  Equipment 1–9 with nothing read, the Luck expectation, `✦`, `▼`, `~`, PR, labels, and an expert's
+  card saying only `▾` when the project is unread. Colour contrast in both directions, and that the
+  text alone separates a range, PR and a label. Same-named options on one card; the gate in all
+  three greeting states and the deck confirming the lab; `labRatings` end to end on an opened card
+  (options badged only inside a lab card, a strict card silent until confirmed); **four** features
+  on one `.branch__title`; no name in another table; the reference tables; and the whole panel.
+  It passes a `localStorage` stub with auto-refresh off, so no hidden frame or timer is started.
 - `FallenLondon/test/ux-launcher-placement.test.mjs` — asserts `ux-enhancers.js`'s
   `launcherPlacement`, the pure half of where the "⚙ UX" button sits. It is organised around
   the three real travel controls: wide desktop (beside the sidebar button, bottoms level),

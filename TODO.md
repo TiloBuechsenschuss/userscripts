@@ -1,6 +1,186 @@
 # ToDo
 
-Kingdom of Loathing:
+Fallen London:
+  Carousels: https://fallenlondon.wiki/wiki/Guides#Location-Specific
+  Sorted by each guide's {{Audience}} stage, in the order of
+  https://fallenlondon.wiki/wiki/Template:Audience (top is earlier in the game);
+  within a stage by area [in brackets], as the Guides page sorts locations
+  (ignoring "The"); within an area, the original list's order first, then
+  additions from the wiki. A guide the wiki files under two areas is under the
+  first.
+
+  Early MYN:
+    - https://fallenlondon.wiki/wiki/Arbor_(Guide) [Arbor, of the Roses]
+    - https://fallenlondon.wiki/wiki/L._B._Industries_(Guide) [The Blind Helmsman]
+    - https://fallenlondon.wiki/wiki/Department_of_Menace_Eradication_(Guide) [Dept. of Menace Eradication]
+    - https://fallenlondon.wiki/wiki/Vertiginous_Horticulture_(Guide) [The Flit]
+    - https://fallenlondon.wiki/wiki/Forgotten_Quarter_Expeditions_(Guide) [The Forgotten Quarter]
+    - https://fallenlondon.wiki/wiki/Cat_and_Mouse_(Guide) [Ladybones Road, Wolfstack Docks]
+    - https://fallenlondon.wiki/wiki/The_Mind_of_a_Long-Dead_God_(Guide) [The Mind of a Long-Dead God]
+    - https://fallenlondon.wiki/wiki/Engaged_in_a_Case_(Guide) [Moloch Street]
+    - https://fallenlondon.wiki/wiki/The_Sunken_Embassy_(Guide) [Moloch Street]
+    - https://fallenlondon.wiki/wiki/Law-Furnace_(Guide) [Moloch Street]
+    - https://fallenlondon.wiki/wiki/The_Prelapsarian_Museum_(Guide) [The Museum of Prelapsarian History]
+    - https://fallenlondon.wiki/wiki/On_a_Heist_(Guide) [On a Heist]
+    - https://fallenlondon.wiki/wiki/The_Spider_Symposium_(Guide) [The Singing Mandrake]
+    - https://fallenlondon.wiki/wiki/The_Season_in_Soup_(Guide) [Spite]
+    - https://fallenlondon.wiki/wiki/Short_Stories_(Guide) [Your Activities]
+    - https://fallenlondon.wiki/wiki/Flash_Lays_(Guide) [Your Activities]
+    - https://fallenlondon.wiki/wiki/Social_Actions_(Guide) [Your Social Engagements]
+
+  Late MYN:
+    - https://fallenlondon.wiki/wiki/Cave_of_the_Nadir_(Guide) [Cave of the Nadir]
+    - https://fallenlondon.wiki/wiki/Artistry_in_the_Empress%27_Court_(Guide) [The Empress' Court]
+    - https://fallenlondon.wiki/wiki/Breeding_Monsters_(Guide) [The Labyrinth of Tigers]
+    - https://fallenlondon.wiki/wiki/Tales_of_Mahogany_Hall_(Guide) [Mahogany Hall]
+    - https://fallenlondon.wiki/wiki/Master-Classes_in_Etiquette_(Guide) [Mahogany Hall]
+    - https://fallenlondon.wiki/wiki/The_Rat_Market_(Guide) [The Rat Market]
+    - https://fallenlondon.wiki/wiki/Patrolling_The_Sixth_Coil_(Guide) [The Sixth Coil]
+    - https://fallenlondon.wiki/wiki/A_Boxful_of_Intrigue_(Guide) [Spite]
+    - https://fallenlondon.wiki/wiki/Underclay_(Guide) [Spite]
+    - https://fallenlondon.wiki/wiki/Featuring_in_the_Tales_of_the_University_(Guide) [The University]
+    - https://fallenlondon.wiki/wiki/Hunting_Bees_in_Old_Newgate_(Guide) [The University]
+    - https://fallenlondon.wiki/wiki/Term_Passing..._(Guide) [The University]
+
+  Early PoSI:
+    - https://fallenlondon.wiki/wiki/A_Trade_in_Reputations_(Guide) [A Trade in Reputations]
+    - https://fallenlondon.wiki/wiki/Riding_the_Savage_Cobbles_(Guide) [Concord Square]
+    - https://fallenlondon.wiki/wiki/Publishing_a_Newspaper_(Guide) [Doubt Street]
+    - https://fallenlondon.wiki/wiki/Fighting_a_War_of_Assassins_(Guide) [The Flit, The Forgotten Quarter]
+    - https://fallenlondon.wiki/wiki/Embroiled_in_the_Wars_of_Illusion_(Guide) [The Flit, Mahogany Hall]
+    - https://fallenlondon.wiki/wiki/Working_toward_a_Foreign_Posting_(Guide) [The Foreign Office]
+    - https://fallenlondon.wiki/wiki/The_Temple_Club_(Guide) [The Temple Club]
+    - https://fallenlondon.wiki/wiki/Attending_a_Party_(Guide) [Veilgarden]
+    - https://fallenlondon.wiki/wiki/Searching_out_a_Missing_Woman_(Guide) [Wilmot's End]
+    - https://fallenlondon.wiki/wiki/Doing_Business_in_Wilmot%27s_End_(Guide) [Wilmot's End]
+
+  Mid PoSI:
+    - https://fallenlondon.wiki/wiki/Brawling_with_Dockers_(Guide) [The Blind Helmsman]
+    - https://fallenlondon.wiki/wiki/Assembling_a_Skeleton_(Guide) [The Bone Market]
+    - https://fallenlondon.wiki/wiki/Professional_Activities_(Guide) [Your Activities]
+
+  Late PoSI:
+    - https://fallenlondon.wiki/wiki/Hearts%27_Game_(Guide) [Watchmaker's Hill]
+
+  Early Parabola:
+    - https://fallenlondon.wiki/wiki/The_Chessboard_(Guide) [The Chessboard]
+    - https://fallenlondon.wiki/wiki/Parabolan_Hunting_(Guide) [Parabolan Base-Camp]
+    - https://fallenlondon.wiki/wiki/Oneiropomp_(Guide) [Viric Jungle]
+    - https://fallenlondon.wiki/wiki/The_Sacroboscan_Calendar_(Guide) [The Waswood]
+
+  Late Parabola:
+    - https://fallenlondon.wiki/wiki/Parabolan_War_(Guide) [The Dolorous Pavilion]
+    - https://fallenlondon.wiki/wiki/A_Cub%27s_Education_(Guide) [The Dome of Scales]
+
+  Early Zailing:
+
+    - https://fallenlondon.wiki/wiki/Time_Passing_at_Hunter%27s_Keep_(Guide) [Hunter's Keep]
+    - https://fallenlondon.wiki/wiki/Time_Passing_on_Mutton_Island_(Guide) [Mutton Island]
+    - https://fallenlondon.wiki/wiki/Venderbight_(Guide) [The tomb-colony of Venderbight]
+
+
+
+  Mid Zailing:
+    - https://fallenlondon.wiki/wiki/Pilgrimages_in_Godfall_(Guide) [Aeschaven]
+    - https://fallenlondon.wiki/wiki/The_Maze-Garden_(Guide) [The Maze-Garden]
+    - https://fallenlondon.wiki/wiki/Polythremic_Promenade_(Guide) [Polythreme Streets]
+    - https://fallenlondon.wiki/wiki/Port_Cecil_(Guide) [Port Cecil]
+    - https://fallenlondon.wiki/wiki/Hunting_the_Beasts_of_the_Zee_(Guide) [Zailing the Unterzee]
+
+  Late Zailing:
+    - https://fallenlondon.wiki/wiki/Piracy_(Guide) [Gaider's Mourn, Zailing the Unterzee]
+    - https://fallenlondon.wiki/wiki/Irem_(Guide) [Irem]
+    - https://fallenlondon.wiki/wiki/Khaganian_Intrigue_(Guide) [Khan's Heart]
+
+  Early Railway:
+    - https://fallenlondon.wiki/wiki/Helicon_House_(Guide) [Helicon House]
+    - https://fallenlondon.wiki/wiki/Jericho_Library_(Guide) [Jericho Locks]
+    - https://fallenlondon.wiki/wiki/Canal_Cruising_in_Jericho_Locks_(Guide) [Jericho Locks]
+    - https://fallenlondon.wiki/wiki/Barristering_at_Evenlode_(Guide) [The Magistracy of the Evenlode]
+    - https://fallenlondon.wiki/wiki/Diving_in_the_Magistracy_(Guide) [The Magistracy of the Evenlode]
+    - https://fallenlondon.wiki/wiki/Railway_Board_(Guide) [Moloch Street]
+
+  Late Railway:
+    - https://fallenlondon.wiki/wiki/Deciphering_(Guide) [Balmoral]
+    - https://fallenlondon.wiki/wiki/Disappearing_(guide) [Balmoral]
+    - https://fallenlondon.wiki/wiki/Cover_Identities_(Guide) [Balmoral]
+    - https://fallenlondon.wiki/wiki/Moonlit_Woods_(Guide) [Balmoral]
+    - https://fallenlondon.wiki/wiki/Painting_in_Balmoral_(Guide) [Balmoral]
+    - https://fallenlondon.wiki/wiki/A_Church_in_the_Wild_(Guide) [Burrow-Infra-Mump]
+    - https://fallenlondon.wiki/wiki/Law-Hunting_(Guide) [Marigold Station]
+    - https://fallenlondon.wiki/wiki/Moulin_Expeditions_(Guide) [Moulin]
+    - https://fallenlondon.wiki/wiki/Writing_a_Monograph_(Guide) [Moulin]
+    - https://fallenlondon.wiki/wiki/A_Kitchen_for_Artists_(Guide) [Station VIII]
+    - https://fallenlondon.wiki/wiki/Alchemy_at_Station_VIII_(Guide) [Station VIII]
+    - https://fallenlondon.wiki/wiki/Following_up_Rumours_of_Cornelius_(Guide) [no area; a Railway storyline]
+    - https://fallenlondon.wiki/wiki/The_Tale_of_the_Clay_Highwayman_(Guide) [no area; a Railway storyline]
+
+  Post-Railway:
+    - https://fallenlondon.wiki/wiki/Hurling_(Guide) [Adulterine Castle]
+    - https://fallenlondon.wiki/wiki/Chthonic_Communication_(Guide) [The City of the Tracklayers, Your Activities] (no stage tag; placed by area)
+    - https://fallenlondon.wiki/wiki/Digging_in_the_Hurlers_(Guide) [The Hurlers]
+    - https://fallenlondon.wiki/wiki/Marigold_Station_(Guide) [Marigold Station]
+
+  Early Firmament:
+    - https://fallenlondon.wiki/wiki/Ecdysis_(Guide) [Hallow's Throat]
+    - https://fallenlondon.wiki/wiki/The_Midnight_Trade_(Guide) [The Midnight Moon]
+    - https://fallenlondon.wiki/wiki/The_Stacks_(Guide) [The Stacks]
+    - https://fallenlondon.wiki/wiki/The_Kinetoculus_(Guide) [no area]
+
+  Mid Firmament:
+    - https://fallenlondon.wiki/wiki/The_High_Sancta_(Guide) [Zenith]
+    - https://fallenlondon.wiki/wiki/Moon-Miser_Herding_(Guide) [Zenith]
+    - https://fallenlondon.wiki/wiki/The_Sous_Catacombs_(Guide) [no area]
+
+  Late Firmament:
+    - https://fallenlondon.wiki/wiki/Upon_a_Red_Stage_(Guide) [Queeneater's Castle]
+    - https://fallenlondon.wiki/wiki/To_Make_a_Moth_(Guide) [Risen Burgundy] (no stage tag; placed with the Firmament's late content)
+    - https://fallenlondon.wiki/wiki/Scaling_the_Quartz_(Guide) [Stonegift]
+    - https://fallenlondon.wiki/wiki/The_Marrow_Behind_(Guide) [no area]
+
+  Fate-locked (same order: stage, then area):
+    - https://fallenlondon.wiki/wiki/House_of_Chimes_(Guide) (Early MYN) [The House of Chimes]
+    - https://fallenlondon.wiki/wiki/Shroom-Hopping_(Guide) (Early MYN) [Watchmaker's Hill]
+    - https://fallenlondon.wiki/wiki/Flute_Street_(Guide) (Late MYN) [Flute Street]
+    - https://fallenlondon.wiki/wiki/Sinning_Jenny%27s_Finishing_School_(Guide) (Late MYN) [Ladybones Road]
+    - https://fallenlondon.wiki/wiki/Upwards_(Guide) (Mid PoSI) [The Forgotten Quarter]
+    - https://fallenlondon.wiki/wiki/The_Whisker-Ways_(Guide) (Late PoSI) [The Whisker-Ways]
+    - https://fallenlondon.wiki/wiki/Apis_Meet_(Guide) (Early Zailing) [Apis Meet]
+    - https://fallenlondon.wiki/wiki/Tanah-Chook_(Guide) (Early Zailing) [Tanah-Chook]
+    - https://fallenlondon.wiki/wiki/Tending_the_Colossus_(Guide) (Early Zailing) [Zailing the Unterzee]
+    - https://fallenlondon.wiki/wiki/Tales_of_the_Tabernacle_(Guide) (Early Zailing) [Zailing the Unterzee]
+    - https://fallenlondon.wiki/wiki/Philosofruits_(Guide) (Mid Zailing) [Mangrove College]
+
+  Reference (not carousels: overviews, progress qualities, shops; same order):
+    - https://fallenlondon.wiki/wiki/Casing_(Guide) (Early MYN) [progress quality]
+    - https://fallenlondon.wiki/wiki/Fascinating_(Guide) (Early MYN) [progress quality]
+    - https://fallenlondon.wiki/wiki/The_Hunt_is_On!_(Guide) (Early MYN) [progress quality]
+    - https://fallenlondon.wiki/wiki/Inspired_(Guide) (Early MYN) [progress quality]
+    - https://fallenlondon.wiki/wiki/Investigating_(Guide) (Early MYN) [progress quality]
+    - https://fallenlondon.wiki/wiki/Running_Battle_(Guide) (Early MYN) [progress quality]
+    - https://fallenlondon.wiki/wiki/Someone_Is_Coming_(Guide) (Early MYN) [progress quality]
+    - https://fallenlondon.wiki/wiki/Menace_Locations_(Guide) (Early MYN) [Special]
+    - https://fallenlondon.wiki/wiki/Seeking_(Guide) (Late MYN) [progress quality]
+    - https://fallenlondon.wiki/wiki/Dramatic_Tension_(Guide) (Early PoSI) [progress quality]
+    - https://fallenlondon.wiki/wiki/Parabola_(Guide) (Late Parabola) [Parabolan Base-Camp]
+    - https://fallenlondon.wiki/wiki/Iron_Republic_Street_Map (Early Zailing) [Iron Republic Streets]
+    - https://fallenlondon.wiki/wiki/Firmament_(Guide) (Early Railway) [Firmament overview]
+    - https://fallenlondon.wiki/wiki/Railway_(Guide) (Early Railway) [Railway overview]
+    - https://fallenlondon.wiki/wiki/Railway_Beginning_(Guide) (Early Railway) [Railway overview]
+    - https://fallenlondon.wiki/wiki/Bessemer_Steel_Ingot_(Guide) (Early Railway) [Railway overview]
+    - https://fallenlondon.wiki/wiki/Hinterland_Scrip-Making (Early Railway) [Railway overview]
+    - https://fallenlondon.wiki/wiki/Location-specific_cards_in_the_Hinterlands_(Guide) (Early Railway) [Railway overview]
+    - https://fallenlondon.wiki/wiki/Statues_at_the_GHR_Stations_(Guide) (Early Railway) [Railway overview]
+    - https://fallenlondon.wiki/wiki/Railway_Station_Developments_(Guide) (Early Railway) [Railway overview]
+    - https://fallenlondon.wiki/wiki/Hellworm_(Guide) (Early Railway) [Railway overview]
+    - https://fallenlondon.wiki/wiki/The_City_of_the_Tracklayers_(Guide) (Post-Railway) [The City of the Tracklayers]
+    - https://fallenlondon.wiki/wiki/The_Hurlers_(Guide) (Post-Railway) [The Hurlers]
+    - https://fallenlondon.wiki/wiki/Discordant_Studies_-_Costs_and_Rewards_(Guide) (Post-Railway) [The Hurlers]
+    - https://fallenlondon.wiki/wiki/Roof_Economy_(Guide) (Early Firmament) [Firmament overview]
+    - https://fallenlondon.wiki/wiki/Stuiver_Grinding_(Guide) (Early Firmament) [Firmament overview]
+    - https://fallenlondon.wiki/wiki/Deeper_Discordant_Studies_(Guide) (no stage tag) [The Hurlers]
+    - https://fallenlondon.wiki/wiki/Marriage_(Guide) (no stage tag) [Your Social Engagements]
+    - https://fallenlondon.wiki/wiki/Risen_Burgundy_(Guide) (no stage tag) [Risen Burgundy]
 
 # Done
 

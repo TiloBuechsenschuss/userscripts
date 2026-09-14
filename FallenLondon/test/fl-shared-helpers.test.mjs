@@ -201,7 +201,7 @@ const CHOICE_NAMES = ['PANELS', 'registerPanels', 'shareFrame', 'PC_CACHE_KEY', 
 
 // --- the panel registry ----------------------------------------------------
 
-const CHOICE_PANELS = ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee'];
+const CHOICE_PANELS = ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory'];
 
 for (const first of [UX, CHOICE]) {
   const page = makePage(true);
@@ -209,7 +209,7 @@ for (const first of [UX, CHOICE]) {
   const apis = {};
   for (const file of order) apis[file] = load(page, file, file === UX ? UX_NAMES : CHOICE_NAMES);
   const ids = apis[UX].menuPanels().map((p) => p.id);
-  check('loaded ' + order.join(' then ') + ': the menu holds Factions and then Choice Helper\'s four',
+  check('loaded ' + order.join(' then ') + ': the menu holds Factions and then Choice Helper\'s five',
     ids, ['factions', ...CHOICE_PANELS]);
   check('...and neither script threw while loading', page.errors, []);
   apis[CHOICE].registerPanels();

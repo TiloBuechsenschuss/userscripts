@@ -146,7 +146,8 @@ Work in this order. **TRAP** marks the ones that get skipped.
     (`fotz-depth-control` runs *after* `fotz-card-ratings`, which is where `forgetStaleDepth`
     lives). Wrap nothing in try/catch yourself — `scan()` already isolates each feature.
 
-13. **Panel, if the feature has reference material.** Push `{ id, icon, label, hint, render }`
+13. **Panel — only if the user decided on one.** Whether a guide gets a panel behind ⚙ UX is
+    always the user's call (planning-a-fallen-london-guide-feature); no answer, ask. Push `{ id, icon, label, hint, render }`
     onto `choice-helper.js`'s `PANELS` — `registerPanels` hands the list to UX Enhancers'
     launcher at load, in order; `render(ctx)` is called fresh on every open, so nothing needs
     invalidating. The launcher and its `ctx` are the other script's, so a panel that must be
