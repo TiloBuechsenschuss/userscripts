@@ -1,17 +1,19 @@
 # ToDo
 
 Fallen London:
-  Carousels: https://fallenlondon.wiki/wiki/Guides#Location-Specific
-  Sorted by each guide's {{Audience}} stage, in the order of
-  https://fallenlondon.wiki/wiki/Template:Audience (top is earlier in the game);
+  Carousels: https://fallenlondon.wiki/wiki/Guides#Location-Specif  Sorted by each guide's {{Audience}} stage, in the order of
+  h  https://fallenlondon.wiki/wiki/Template:Audience (top is earlier in the game);
   within a stage by area [in brackets], as the Guides page sorts locations
   (ignoring "The"); within an area, the original list's order first, then
   additions from the wiki. A guide the wiki files under two areas is under the
   first.
+  "(implemented)" = already in FallenLondon/choice-helper.js.
+  "(works)" = tested in game and working
 
   Early MYN:
     - https://fallenlondon.wiki/wiki/Arbor_(Guide) [Arbor, of the Roses]
     - https://fallenlondon.wiki/wiki/L._B._Industries_(Guide) [The Blind Helmsman]
+    - https://fallenlondon.wiki/wiki/The_Crowds_of_Spite_(Guide) [The Crowds of Spite] (implemented) (works)
     - https://fallenlondon.wiki/wiki/Department_of_Menace_Eradication_(Guide) [Dept. of Menace Eradication]
     - https://fallenlondon.wiki/wiki/Vertiginous_Horticulture_(Guide) [The Flit]
     - https://fallenlondon.wiki/wiki/Forgotten_Quarter_Expeditions_(Guide) [The Forgotten Quarter]
@@ -57,6 +59,7 @@ Fallen London:
   Mid PoSI:
     - https://fallenlondon.wiki/wiki/Brawling_with_Dockers_(Guide) [The Blind Helmsman]
     - https://fallenlondon.wiki/wiki/Assembling_a_Skeleton_(Guide) [The Bone Market]
+    - https://fallenlondon.wiki/wiki/University_Laboratory_(Guide) [University Laboratory] (implemented) (works)
     - https://fallenlondon.wiki/wiki/Professional_Activities_(Guide) [Your Activities]
 
   Late PoSI:
@@ -73,12 +76,12 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/A_Cub%27s_Education_(Guide) [The Dome of Scales]
 
   Early Zailing:
-
+    - https://fallenlondon.wiki/wiki/Port_Carnelian_(Guide) [Heartscross House] (implemented) (works)
     - https://fallenlondon.wiki/wiki/Time_Passing_at_Hunter%27s_Keep_(Guide) [Hunter's Keep]
     - https://fallenlondon.wiki/wiki/Time_Passing_on_Mutton_Island_(Guide) [Mutton Island]
     - https://fallenlondon.wiki/wiki/Venderbight_(Guide) [The tomb-colony of Venderbight]
-
-
+    - https://fallenlondon.wiki/wiki/Zailing_(Guide) [Zailing the Unterzee] (implemented) (works)
+    - https://fallenlondon.wiki/wiki/Embarking_on_a_Voyage_of_Scientific_Discovery_(Guide) [Zailing the Unterzee] (implemented) (works)
 
   Mid Zailing:
     - https://fallenlondon.wiki/wiki/Pilgrimages_in_Godfall_(Guide) [Aeschaven]
@@ -181,6 +184,7 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Deeper_Discordant_Studies_(Guide) (no stage tag) [The Hurlers]
     - https://fallenlondon.wiki/wiki/Marriage_(Guide) (no stage tag) [Your Social Engagements]
     - https://fallenlondon.wiki/wiki/Risen_Burgundy_(Guide) (no stage tag) [Risen Burgundy]
+ - https://fallenlondon.wiki/wiki/Piracy_(Guide)
 
 # Done
 
