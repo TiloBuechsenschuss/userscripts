@@ -355,7 +355,9 @@ check('the card ratings are registered alongside the other features',
   api.FEATURES.map((f) => f.name),
   ['fotz-capture', 'spite-card-ratings', 'zee-card-ratings',
     'fotz-card-ratings', 'fotz-depth-control', 'fotz-supplication', 'port-carnelian',
-    'scientific-voyages', 'university-laboratory']);
+    'scientific-voyages', 'university-laboratory', 'arbor',
+    'lb-industries', 'menace-eradication', 'vertiginous-horticulture',
+    'forgotten-quarter']);
 
 console.log(failures ? '\n' + failures + ' FAILURE(S)' : '\nAll checks passed.');
 process.exit(failures ? 1 : 0);

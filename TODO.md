@@ -11,12 +11,12 @@ Fallen London:
   "(works)" = tested in game and working
 
   Early MYN:
-    - https://fallenlondon.wiki/wiki/Arbor_(Guide) [Arbor, of the Roses]
-    - https://fallenlondon.wiki/wiki/L._B._Industries_(Guide) [The Blind Helmsman]
+    - https://fallenlondon.wiki/wiki/Arbor_(Guide) [Arbor, of the Roses] (implemented)
+    - https://fallenlondon.wiki/wiki/L._B._Industries_(Guide) [The Blind Helmsman] (implemented)
     - https://fallenlondon.wiki/wiki/The_Crowds_of_Spite_(Guide) [The Crowds of Spite] (implemented) (works)
-    - https://fallenlondon.wiki/wiki/Department_of_Menace_Eradication_(Guide) [Dept. of Menace Eradication]
-    - https://fallenlondon.wiki/wiki/Vertiginous_Horticulture_(Guide) [The Flit]
-    - https://fallenlondon.wiki/wiki/Forgotten_Quarter_Expeditions_(Guide) [The Forgotten Quarter]
+    - https://fallenlondon.wiki/wiki/Department_of_Menace_Eradication_(Guide) [Dept. of Menace Eradication] (implemented)
+    - https://fallenlondon.wiki/wiki/Vertiginous_Horticulture_(Guide) [The Flit] (implemented)
+    - https://fallenlondon.wiki/wiki/Forgotten_Quarter_Expeditions_(Guide) [The Forgotten Quarter] (implemented)
     - https://fallenlondon.wiki/wiki/Cat_and_Mouse_(Guide) [Ladybones Road, Wolfstack Docks]
     - https://fallenlondon.wiki/wiki/The_Mind_of_a_Long-Dead_God_(Guide) [The Mind of a Long-Dead God]
     - https://fallenlondon.wiki/wiki/Engaged_in_a_Case_(Guide) [Moloch Street]

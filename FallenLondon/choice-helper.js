@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.1
-// @description  Advice on what Fallen London's storylets and opportunity cards do for you, badged onto them where you make the choice. Its reference panels open from the "⚙ UX" button of Fallen London UX Enhancers, so install that as well to reach them; every badge works without it. (1) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (2) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. Its panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, every port on the Unterzee -- which region it is in, whether docking there wipes Troubled Waters and the zee-threats, and what it takes to be able to sail there at all, with the hunting grounds and the one-time destinations marked as the different things they are, since a port that resets nothing and a place that is not a dock are two different answers -- the three winds and the dreams they start, and the whole card table, searchable. (3) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: behind the UX button where that is docked beside Fallen London’s own Travel button, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. Its panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. (4) In Port Carnelian, where a governor's term runs 26 actions and Fallen London deals no opportunity cards at all, the badges go on storylets and on their options instead. The whole term is one storylet, Matters of State, so what is rated is the list of options inside it -- and the options of the two of those that open into a storylet of their own. Each shows the net change in resources that option makes, with a mark for what it does to Imperial Legitimacy -- the number that ends a term at once when it reaches 0, sending you back to zee with nothing: a down mark when the net was paid for out of Legitimacy, an up mark when the option buys Legitimacy back instead, and no mark at all when it leaves Legitimacy alone. The colour says the same thing the mark does and nothing else -- red for spending Legitimacy, green for buying it back, light blue for the rows that leave it alone, slate for the endings -- so the marks are enough on their own for anyone who cannot separate the red from the green. Then a Fate label on the one Fate-locked option, and "cash out" on the four endings, which spend a currency rather than gaining any. The four endings carry a figure rather than only a label: each shows what cashing out would pay you RIGHT NOW, in Echoes, worked out from your own Striped Delights and Silver Horseheads. Fallen London states both on the Myself tab and nowhere near the port, so the script reads them where they are shown, remembers them, and refreshes them in a hidden frame -- in the background while an ending is on screen, and again when the panel is opened on a stale reading -- exactly the way the festival reads how deep you are. A faction Favour is marked with an icon and priced at 0: it is a story quality capped at 7 rather than an item, nothing buys one, and pricing it would let a fixed reward out-rank a real cash-out on a number nobody acts on. Tribute, which has no market price either, is listed the same way and left out of the total. A Favour in High Places is not one of those despite the name -- it is an ordinary item the Bazaar buys -- so it is priced like any other. A question mark says the reading behind the figure is over a minute old, since every action of a term moves both currencies, and the plain "cash out" label is what is left when your numbers have never been read. The tooltip carries the whole sum: what you hold, what it turns into, what each piece is worth, what the next rounding step up would cost you -- 105 and 176 are worth waiting for and 140 is not -- and, for the two endings that pay a fixed reward and empty both purses, what taking one gives up. Half the table is worth the same +5, so whether it costs Legitimacy is the only thing separating those rows. The tooltip carries the Time Passing in Office and Airs windows the option is offered in, every currency change with its currency named, the requirement and the note; the two options that pay ten or fifteen of ONE of the two currencies, the game's choice rather than yours, say so in words, since reading them as that much of each would make them the best options in the table by a distance. A storylet the guide splits in two is badged with the better net and keeps both branches in its tooltip, because the losing branch is how Imperial Legitimacy is bought back. Its panel, Port Carnelian, opens on the same calculator -- your purse, and all four endings priced against it with the best one named in words -- and then holds the rest of the guide: how to unlock and reach the posting, the rules a term is played by, every option grouped by the clock and searchable, what the two currencies cash in for, the reward tiers with the two worth aiming at picked out and a letter against the step each of your two currencies is standing on, and the strategy. (5) On a Voyage of Scientific Discovery -- the Dilmun Club's expeditions to Bullbone Island, Corpsecage Island and Grunting Fen, which deal no opportunity cards either -- every action gets a badge for what it pays in research pages, coloured by which of the three kinds it is: Archaeological, Cryptopalaeontological or Theosophistical. You sail to one island for one kind, and at every step of the visit you are choosing between the action that pays it and one that pays goods instead, so an action paying no pages is labelled with what it does pay rather than scored: there is no exchange rate between pages and Echoes, and inventing one would be the badge choosing your voyage for you. The three gambles at the end of a visit carry their EXPECTED value rather than the figure they advertise, since the wiki gives both outcomes and the odds -- taking the safer of the two is worth about six times the greedier one once the failure is priced in. The tooltip carries the step of the visit the action belongs to, its challenge, everything it gives, what it costs, and what a failure costs; where the game picks between two payouts rather than you, that is said in words. The same badges cover the two screens at your Lodgings, where the pages are generated before you sail and spent afterwards, and there the figure is the guide's pence per page, because everything on that screen is priced. Three actions and three storylets have the same names on all three islands and pay a different kind of page on each, so the feature works out which island it is looking at from the greeting or from the storylet you have open, and says nothing at all rather than guess. Its panel, Scientific Voyages, holds the rest: how the voyage is unlocked, what each island pays and costs to reach, every action grouped by island and searchable, and how to squeeze the most preparatory research out of London first. (6) In your University Laboratory every opportunity card gets a badge for the Laboratory Research its best option pays on a success, worked out at your own Equipment for Scientific Experimentation -- nearly every figure in the lab is a formula on it, and on your students' levels and how many people work there, all of which Fallen London states on the Myself tab, so the script reads them there, remembers them, and refreshes them in the background. The badge ranks only the options you can take with nothing special in hand; one behind an Unavoidable Epiphany, an Unexpected Result or an item is kept in the tooltip and marked with a down triangle when it would pay more. A star marks an option that also hands you an Unavoidable Epiphany, a solid down triangle one that uses something up, a question mark a Watchful challenge's success figure, and an approximately-equal sign the expected value of a Luck option. Where something the figure depends on has not been read -- your Equipment, a student's level -- the badge shows the range rather than a guess, in a neutral grey. Colour runs slate, blue, teal, amber, gold by tens of research, with the number always printed; Parabolan Research is marked PR in violet, and an option that pays no research says what it does instead. Open a card and every option on it is badged in its own right, each tooltip carrying the requirement, the challenge, every outcome with its formula and your figure, and where the guide's student table disagrees with the option page, both. Its panel, University Laboratory, shows your Equipment, staff, students, project and what Circulate a draft of your findings would pay right now, every laboratory card searchable, the repeatable projects, the equipment ladder, and which experts suit which projects. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. Built as a feature registry so further advice can be added as entries.
+// @version      1.4
+// @description  Advice on what Fallen London's storylets and opportunity cards do for you, badged onto them where you make the choice. Its reference panels open from the "⚙ UX" button of Fallen London UX Enhancers, so install that as well to reach them; every badge works without it. (1) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (2) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. Its panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, every port on the Unterzee -- which region it is in, whether docking there wipes Troubled Waters and the zee-threats, and what it takes to be able to sail there at all, with the hunting grounds and the one-time destinations marked as the different things they are, since a port that resets nothing and a place that is not a dock are two different answers -- the three winds and the dreams they start, and the whole card table, searchable. (3) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: behind the UX button where that is docked beside Fallen London’s own Travel button, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. Its panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. (4) In Port Carnelian, where a governor's term runs 26 actions and Fallen London deals no opportunity cards at all, the badges go on storylets and on their options instead. The whole term is one storylet, Matters of State, so what is rated is the list of options inside it -- and the options of the two of those that open into a storylet of their own. Each shows the net change in resources that option makes, with a mark for what it does to Imperial Legitimacy -- the number that ends a term at once when it reaches 0, sending you back to zee with nothing: a down mark when the net was paid for out of Legitimacy, an up mark when the option buys Legitimacy back instead, and no mark at all when it leaves Legitimacy alone. The colour says the same thing the mark does and nothing else -- red for spending Legitimacy, green for buying it back, light blue for the rows that leave it alone, slate for the endings -- so the marks are enough on their own for anyone who cannot separate the red from the green. Then a Fate label on the one Fate-locked option, and "cash out" on the four endings, which spend a currency rather than gaining any. The four endings carry a figure rather than only a label: each shows what cashing out would pay you RIGHT NOW, in Echoes, worked out from your own Striped Delights and Silver Horseheads. Fallen London states both on the Myself tab and nowhere near the port, so the script reads them where they are shown, remembers them, and refreshes them in a hidden frame -- in the background while an ending is on screen, and again when the panel is opened on a stale reading -- exactly the way the festival reads how deep you are. A faction Favour is marked with an icon and priced at 0: it is a story quality capped at 7 rather than an item, nothing buys one, and pricing it would let a fixed reward out-rank a real cash-out on a number nobody acts on. Tribute, which has no market price either, is listed the same way and left out of the total. A Favour in High Places is not one of those despite the name -- it is an ordinary item the Bazaar buys -- so it is priced like any other. A question mark says the reading behind the figure is over a minute old, since every action of a term moves both currencies, and the plain "cash out" label is what is left when your numbers have never been read. The tooltip carries the whole sum: what you hold, what it turns into, what each piece is worth, what the next rounding step up would cost you -- 105 and 176 are worth waiting for and 140 is not -- and, for the two endings that pay a fixed reward and empty both purses, what taking one gives up. Half the table is worth the same +5, so whether it costs Legitimacy is the only thing separating those rows. The tooltip carries the Time Passing in Office and Airs windows the option is offered in, every currency change with its currency named, the requirement and the note; the two options that pay ten or fifteen of ONE of the two currencies, the game's choice rather than yours, say so in words, since reading them as that much of each would make them the best options in the table by a distance. A storylet the guide splits in two is badged with the better net and keeps both branches in its tooltip, because the losing branch is how Imperial Legitimacy is bought back. Its panel, Port Carnelian, opens on the same calculator -- your purse, and all four endings priced against it with the best one named in words -- and then holds the rest of the guide: how to unlock and reach the posting, the rules a term is played by, every option grouped by the clock and searchable, what the two currencies cash in for, the reward tiers with the two worth aiming at picked out and a letter against the step each of your two currencies is standing on, and the strategy. (5) On a Voyage of Scientific Discovery -- the Dilmun Club's expeditions to Bullbone Island, Corpsecage Island and Grunting Fen, which deal no opportunity cards either -- every action gets a badge for what it pays in research pages, coloured by which of the three kinds it is: Archaeological, Cryptopalaeontological or Theosophistical. You sail to one island for one kind, and at every step of the visit you are choosing between the action that pays it and one that pays goods instead, so an action paying no pages is labelled with what it does pay rather than scored: there is no exchange rate between pages and Echoes, and inventing one would be the badge choosing your voyage for you. The three gambles at the end of a visit carry their EXPECTED value rather than the figure they advertise, since the wiki gives both outcomes and the odds -- taking the safer of the two is worth about six times the greedier one once the failure is priced in. The tooltip carries the step of the visit the action belongs to, its challenge, everything it gives, what it costs, and what a failure costs; where the game picks between two payouts rather than you, that is said in words. The same badges cover the two screens at your Lodgings, where the pages are generated before you sail and spent afterwards, and there the figure is the guide's pence per page, because everything on that screen is priced. Three actions and three storylets have the same names on all three islands and pay a different kind of page on each, so the feature works out which island it is looking at from the greeting or from the storylet you have open, and says nothing at all rather than guess. Its panel, Scientific Voyages, holds the rest: how the voyage is unlocked, what each island pays and costs to reach, every action grouped by island and searchable, and how to squeeze the most preparatory research out of London first. (6) In your University Laboratory every opportunity card gets a badge for the Laboratory Research its best option pays on a success, worked out at your own Equipment for Scientific Experimentation -- nearly every figure in the lab is a formula on it, and on your students' levels and how many people work there, all of which Fallen London states on the Myself tab, so the script reads them there, remembers them, and refreshes them in the background. The badge ranks only the options you can take with nothing special in hand; one behind an Unavoidable Epiphany, an Unexpected Result or an item is kept in the tooltip and marked with a down triangle when it would pay more. A star marks an option that also hands you an Unavoidable Epiphany, a solid down triangle one that uses something up, a question mark a Watchful challenge's success figure, and an approximately-equal sign the expected value of a Luck option. Where something the figure depends on has not been read -- your Equipment, a student's level -- the badge shows the range rather than a guess, in a neutral grey. Colour runs slate, blue, teal, amber, gold by tens of research, with the number always printed; Parabolan Research is marked PR in violet, and an option that pays no research says what it does instead. Open a card and every option on it is badged in its own right, each tooltip carrying the requirement, the challenge, every outcome with its formula and your figure, and where the guide's student table disagrees with the option page, both. Its panel, University Laboratory, shows your Equipment, staff, students, project and what Circulate a draft of your findings would pay right now, every laboratory card searchable, the repeatable projects, the equipment ladder, and which experts suit which projects. (7) Arbor, of the Roses deals no opportunity cards, so the badges go on the London card that takes you there, A Dream of Roses -- how many actions a trip costs, with your last Possessions reading of Attar saying whether the dream opens on Near or Far Arbor -- on the two storylets a stay happens in, Near Arbor and Far Arbor, whose tooltip is a map of every district's options and the guide's grinds, and on every option inside them. An option's badge is what it changes, "Attar +2" or "Attar −3 EI +3", with the sign carrying the direction and the colour only repeating it: there is no exchange rate between Attar and what it buys, so none is invented. A question mark is a stat challenge's success outcome, with the failure and the stat that makes it certain in the tooltip; ⏏ an option that spends all your Permission to Linger and so ends the stay; a star the tribute's rare success, which cashes in all your Attar; ≈ the expected value of the one even-odds option. The six options that scale with your Permission to Linger or your Attar say so in words rather than invent a figure, and where the guide's table and an option page disagree, the page is followed and the tooltip quotes both. (8) Three early carousels that deal no opportunity cards are badged the same way: the storylet heading gets a summary whose tooltip lists every option, and each option of the carousel storylet you have OPEN gets a badge -- only there, since names like "Make bobbins" or "Treat the soil" could title an option anywhere. A question mark is a stat challenge's success figure, ▼ an option that uses something up, and a figure after the question mark what a failure takes back. At L. B. Industries beneath the Blind Helmsman, a work option shows the Foreman's Favour it pays ("FF +15? −19") and a payout its cost and what it buys ("110 → Reliquary"), with the Bone Fragments your surplus Favour turns into in the tooltip. In the Department of Menace Eradication's hunts, an option shows what it does to Hiding, Wariness or Savagery ("Hiding −10? +1"), with its difficulty -- nearly all of them scale with Savagery -- worked out at each contract's starting Savagery in the tooltip; the poisoned bait's Luck challenge is its expected value; the confrontations and bounties name what they pay, and a contract what it sets. In Vertiginous Horticulture, a nurturing option shows the Nurturing it pays as a range over the Difficulties of the plants it can be used on ("Grow +14–16?"), a plant its Difficulty, and a buyer what the sale gives, with the rare successes, the average success and the scaling reward at 150 in the tooltip. Where the guide and an option page disagree, the page is followed and the tooltip says so. (9) Expeditions from Base-Camp in the Forgotten Quarter get the same treatment across their four storylets, each badge answering the question that screen asks: while preparing, the Crate of Expedition Supplies an option gives ("Sup +3 ▼", with the guide's Echoes per Supply in the tooltip); when choosing, an expedition's length and the Archaeologist or Fate it needs ("30 sup · Arch 3"), with what it pays, its rivals and the guide's worst-case Supplies in the tooltip; on the expedition, the Archaeologist's Progress a success makes ("Prog +3? ▼"), the Rivals' Progress a hindrance takes off, and what a conclusion pays; and in a confrontation, the Progress it makes. A menace an option always raises is named after its figure ("+Wounds", "+Nightmares"), so a cheap line never reads as free; a menace only a failure raises is in the tooltip. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. Built as a feature registry so further advice can be added as entries.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 // @run-at       document-idle
@@ -7085,6 +7085,1754 @@
     if (wantsReading) labMaybeRefresh();
   }
 
+  // === feature: Arbor, of the Roses ======================================
+  //
+  // Arbor is a dream-city on the Elder Continent, reached by playing the London
+  // opportunity card A Dream of Roses. Arbor itself deals no opportunity cards
+  // (the guide says so outright), so this feature badges three things: that
+  // one card, the two storylets a stay happens in (Near Arbor and Far Arbor),
+  // and every option inside them.
+  //
+  // How a stay works, which is what every badge has to be read against:
+  //
+  //   Arbor: Permission to Linger is the clock. Every way in sets it to 7,
+  //     nearly every action costs 1 of it, and at 0 the only option left is
+  //     Leave Arbor, one more action. So a trip is 1 + 7 + 1 = 9 actions.
+  //   The Rose-Red Streets is where you stand: 1 (the Temple, north) to 5 (the
+  //     Palace, south). Each district has options of its own.
+  //   Attar is the item you build, and it also decides WHICH city you see: at
+  //     5+ in Near Arbor, Enter Far Arbor is the only option; below 3 in Far
+  //     Arbor, the city washes away. The card returns you to Near Arbor at
+  //     Attar 0-5 and to Far Arbor at 6+, taking 1 Attar either way.
+  //
+  // **What the badge says, and why.** There is no one currency to rank these
+  // options by. Attar is built in order to be spent, and what it is spent on
+  // (Favours in High Places, Extraordinary Implications, Sworn Statements,
+  // Presbyterate Passphrases, a Direful Reflection) is what a player came for
+  // -- which of those is worth most depends on the grind they are running, and
+  // pricing them all in Echoes would be the badge choosing the grind. So an
+  // option's badge is simply WHAT IT CHANGES, in short tags, with the sign
+  // carrying the direction: "Attar +2", "Attar −3 EI +3". The colour repeats
+  // the Attar direction -- teal-leaning green for gaining it, warm brick for
+  // spending it, slate for trading items and leaving Attar alone, grey for
+  // moving about -- and is never the only carrier: the sign is.
+  //
+  // Marks:
+  //   ?  a stat challenge, and the badge is the SUCCESS outcome. The tooltip
+  //      gives the failure and the stat at which the challenge is certain.
+  //   ⏏  the option spends all your Permission to Linger: the stay ends.
+  //   ★  the tribute's rare success, which cashes in ALL your Attar at three
+  //      to one.
+  //   ≈  an expected value, on the one option whose two outcomes are even odds.
+  //
+  // Six options scale with something the page does not show (your Permission
+  // to Linger, or your Attar). Those say so in words -- "Attar +Linger" --
+  // rather than inventing a figure.
+  //
+  // Transcribed from the individual option pages on fallenlondon.wiki (fetched
+  // through the API, 2026-09-14), with Arbor (Guide)'s Table of Choices as the
+  // cross-check. Where the two disagree the option page is followed and the
+  // guide's figure is kept as `guide`, which the tooltip quotes:
+  //   Witness a trial                  page Watchful 115, guide 100
+  //   Surrender some of your Attar     page Persuasive 100, guide 79
+  //   Leave Arbor early                page Attar +Linger/2, guide Attar +2
+  //   Light your candles (Far Arbor)   page takes only the 77 Foxfire Candle
+  //     Stubs; the guide also takes Attar 7 and all Permission to Linger
+  // The one figure taken from the guide alone is While away your time's 50%:
+  // its page gives both outcomes and no odds. Corrections go in ARBOR_OPTIONS
+  // and nowhere else.
+  //
+  // Left out on purpose: Visit the Queen of Roses, the Heart's Desire and
+  // Marvellous ambition options and the Coilheart Games petition. They are
+  // steps in storylines of their own, not rows of the guide.
+  //
+  // One entry per option:
+  //
+  //   name      the option, as the wiki titles it, without the "(Near Arbor)"
+  //             page suffix the game does not show.
+  //   side      'near' | 'far' | 'both' (the same option in both cities) |
+  //             'dream' (an option on the card itself).
+  //   district  1-5 on The Rose-Red Streets, or null for anywhere.
+  //   ch        { stat, diff } for a broad stat challenge, or null.
+  //   win       what the success (or the only outcome) changes, keyed by
+  //             ARBOR_ITEMS. Permission to Linger is not in here: see `linger`.
+  //   lose      what a failure changes, same shape.
+  //   fail      what a failure does that `lose` cannot say, in words.
+  //   scale     { key, by }: `key` gained per point of `by` -- 'linger',
+  //             'linger/2' or 'attar'.
+  //   empties   'attar' when the row takes all your Attar.
+  //   ends      true when the row takes all your Permission to Linger.
+  //   linger    what the success costs in Permission to Linger when that is
+  //             not 1: 0 for nothing, null for "the page does not say" -- two
+  //             different claims.
+  //   luck      { odds, win, lose } for a pair of outcomes at known odds.
+  //   rare      { odds, text } for a rare success.
+  //   move      'north' | 'south' | 'north2' | 'far' | 'near' | 'home' | 'arbor'.
+  //   label     the badge's word for a row that changes nothing countable.
+  //   needs     what it is gated on, in words.
+  //   guide     { ch } or { win }: the guide's figure where it disagrees.
+  //   note      anything else.
+
+  const ARBOR_ITEMS = {
+    attar: { tag: 'Attar', name: 'Attar' },
+    ei: { tag: 'EI', name: 'Extraordinary Implication' },
+    ss: { tag: 'SS', name: 'Sworn Statement' },
+    pp: { tag: 'PP', name: 'Presbyterate Passphrase' },
+    fihp: { tag: 'FiHP', name: 'Favour in High Places' },
+    dr: { tag: 'DR', name: 'Direful Reflection' },
+    er: { tag: 'ER', name: 'Emetic Revelation' },
+    vial: { tag: 'Vial', name: 'A Vial of Queenly Attar' },
+    foxfire: { tag: 'Foxfire', name: 'Foxfire Candle Stub' },
+  };
+
+  const ARBOR_LINGER = 7;          // every way in sets Permission to Linger to this
+  const ARBOR_TRIP_ACTIONS = 9;    // the guide's "most trips take 9 actions"
+  const ARBOR_FAR_AT = 5;          // Near Arbor: Enter Far Arbor at this much Attar
+  const ARBOR_WASH_BELOW = 3;      // Far Arbor: the city washes away below this
+  const ARBOR_RETURN_FAR_AT = 6;   // the card opens on Far Arbor from this much Attar
+  const ARBOR_DISTRICTS = ['Temple', 'North', 'Centre', 'South', 'Palace'];
+
+  const ARBOR_OPTIONS = [
+    // --- A Dream of Roses, the London card ------------------------------
+    { name: 'Lay down your weary head', side: 'dream', district: null, ch: null,
+      label: 'first visit', move: 'arbor',
+      note: 'Your first visit only: you wake in the centre of Near Arbor with 1 Attar and '
+        + ARBOR_LINGER + ' Permission to Linger.' },
+    { name: 'Return to the City of Roses', side: 'dream', district: null, ch: null,
+      win: { attar: -1 }, move: 'arbor',
+      note: 'Two options share this name and the game shows the one you qualify for: at Attar 0–'
+        + (ARBOR_RETURN_FAR_AT - 1) + ' you return to Near Arbor, at ' + ARBOR_RETURN_FAR_AT
+        + ' or more to Far Arbor. Either way Permission to Linger is set to ' + ARBOR_LINGER + '.' },
+
+    // --- Near Arbor -----------------------------------------------------
+    { name: 'Labour in the temple', side: 'near', district: 1, ch: { stat: 'Dangerous', diff: 75 },
+      scale: { key: 'attar', by: 'linger' }, ends: true,
+      fail: 'Sworn Statement equal to your remaining Permission to Linger instead, and the stay still ends',
+      note: 'The guide’s fastest grind pairs this with Serve as a Serpent-Shepherd in Far Arbor, '
+        + 'and it is BETTER on low Dangerous, since failing pays Sworn Statements.' },
+    { name: 'Offer your Attar to the Temple', side: 'near', district: 1, ch: null,
+      scale: { key: 'pp', by: 'attar' }, empties: 'attar', linger: 0, needs: 'Attar 1–4' },
+    { name: "Visit London's Embassy", side: 'near', district: 2, ch: null,
+      win: { attar: 2, ss: -2 }, needs: 'Sworn Statement 2' },
+    { name: "Spy on London's Embassy", side: 'near', district: 2, ch: { stat: 'Watchful', diff: 75 },
+      win: { ei: 2 }, fail: 'Permission to Linger −2 rather than −1',
+      note: 'The guide’s simplest grind: park here and repeat it.' },
+    { name: 'Explore the Gatehouse Market', side: 'near', district: 3, ch: { stat: 'Watchful', diff: 75 },
+      win: { attar: 2 }, lose: { attar: -1 } },
+    { name: 'Leave Arbor early', side: 'near', district: 3, ch: null,
+      scale: { key: 'attar', by: 'linger/2' }, ends: true, move: 'home',
+      guide: { win: 'Attar +2' } },
+    { name: 'Take a short-cut north', side: 'near', district: 4, ch: { stat: 'Watchful', diff: 79 },
+      move: 'north2', fail: 'you end up in a random district, possibly the one you wanted' },
+    { name: 'Investigate the Near-Arbori', side: 'near', district: 4, ch: null,
+      win: { attar: 3, ei: -3 }, linger: 0, needs: 'Extraordinary Implication 3',
+      note: 'It used to raise Permission to Linger, which made an endless grind; that was changed in July 2020.' },
+    { name: 'Barter your Attar', side: 'near', district: 5, ch: null,
+      scale: { key: 'ss', by: 'attar' }, empties: 'attar', needs: 'Attar 1' },
+    { name: 'Become a serpent-tender in exchange for Attar', side: 'near', district: 5, ch: null,
+      scale: { key: 'attar', by: 'linger' }, ends: true,
+      note: 'No challenge, which makes it the guide’s way into Far Arbor on low stats.' },
+    { name: 'Enter Far Arbor', side: 'near', district: null, ch: null,
+      move: 'far', linger: 0, needs: 'Attar ' + ARBOR_FAR_AT + ', and then it is the only option' },
+    { name: 'Light your candles', side: 'near', district: null, ch: null,
+      label: 'no effect', linger: 0,
+      needs: 'Foxfire Candle Stub 77, below Attar ' + ARBOR_FAR_AT + ', without A Vial of Queenly Attar',
+      note: 'Costs no action and does nothing in Near Arbor. The candles are lit in Far Arbor.' },
+
+    // --- both cities ----------------------------------------------------
+    { name: 'Walk North', side: 'both', district: null, ch: null, move: 'north',
+      needs: 'anywhere but the Temple' },
+    { name: 'Walk South', side: 'both', district: null, ch: null, move: 'south',
+      needs: 'anywhere but the Palace' },
+    { name: 'Leave Arbor', side: 'both', district: null, ch: null, move: 'home', linger: 0,
+      needs: 'Permission to Linger 0, and then it is the only option' },
+
+    // --- Far Arbor ------------------------------------------------------
+    { name: 'While away your time', side: 'far', district: 1, ch: null,
+      luck: { odds: 0.5, win: { attar: 2 }, lose: { attar: -2 } },
+      note: 'The 50% is the guide’s; the option page gives both outcomes and no odds.' },
+    { name: 'Serve as a Serpent-Shepherd', side: 'far', district: 1, ch: null,
+      scale: { key: 'pp', by: 'linger' }, ends: true },
+    { name: 'Browse the Edifice of the Unveiled Lie', side: 'far', district: 2,
+      ch: { stat: 'Watchful', diff: 100 },
+      win: { ei: 3, ss: -3 }, lose: { ei: 1, ss: -1 }, needs: 'Sworn Statement 3' },
+    { name: 'Enter the Forbidden Embassy', side: 'far', district: 2, ch: null,
+      win: { attar: -7, dr: 1 }, needs: 'Attar 7' },
+    { name: 'Walk the walls', side: 'far', district: 3, ch: { stat: 'Watchful', diff: 100 },
+      win: { attar: 2 }, lose: { attar: -2 } },
+    { name: 'Attend a reception at the Copper Fortress', side: 'far', district: 3,
+      ch: { stat: 'Persuasive', diff: 100 },
+      win: { attar: 2, pp: -3 }, lose: { attar: -1, pp: -1 }, needs: 'Presbyterate Passphrase 3' },
+    { name: 'Feed some of your Attar to your squirrel', side: 'far', district: 3, ch: null,
+      win: { attar: -4, er: 1 }, needs: 'a Quizzical Squirrel, and Attar 4' },
+    { name: 'Surrender some of your Attar', side: 'far', district: 4,
+      ch: { stat: 'Persuasive', diff: 100 },
+      win: { attar: -3, ei: 3 }, lose: { attar: 1, ei: 1 }, guide: { ch: 'Persuasive 79' },
+      note: 'On low Persuasive this is a way to GAIN Attar: the failure pays Attar +1. '
+        + 'The guide puts the break-even at Persuasive 33.' },
+    { name: 'Share secrets with the Arbori', side: 'far', district: 4, ch: null,
+      win: { ei: -3, pp: 3 }, needs: 'Extraordinary Implication 3' },
+    { name: 'Gift your Attar in tribute to the Roseate Queen', side: 'far', district: 5, ch: null,
+      win: { attar: -3, fihp: 1 }, needs: 'Attar 5',
+      rare: { odds: '20–25%', text: 'Favour in High Places equal to your Attar ÷ 3, rounded, and ALL your Attar goes' },
+      note: 'Where the guide’s best grinds cash in: build Attar over many trips, then walk to the Palace.' },
+    { name: 'Witness a trial', side: 'far', district: 5, ch: { stat: 'Watchful', diff: 115 },
+      win: { attar: -3, ss: 3 }, lose: { attar: 2, ss: -1 }, needs: 'Sworn Statement 1',
+      guide: { ch: 'Watchful 100' } },
+    { name: 'The city washes away', side: 'far', district: null, ch: null, move: 'near',
+      needs: 'Attar below ' + ARBOR_WASH_BELOW + ', and then it is the only option',
+      note: 'Unlike Enter Far Arbor it costs Permission to Linger and leaves you in the same district.' },
+    { name: 'Light your candles', side: 'far', district: null, ch: null,
+      win: { vial: 1, foxfire: -77 }, linger: null,
+      needs: 'Attar 7 and Foxfire Candle Stub 77, without A Vial of Queenly Attar',
+      guide: { win: 'Attar −7 as well, and all your Permission to Linger' },
+      note: 'The only source of A Vial of Queenly Attar. The guide says to light them once your '
+        + 'Permission to Linger has run out.' },
+  ];
+
+  // The guide's money-making section, figures as it gives them (it took them
+  // from d0sboots' Arbor simulator).
+  const ARBOR_GRINDS = [
+    { name: "Spy on London's Embassy", needs: 'Watchful 125', epa: 3.89, trip: 35,
+      how: 'park in the north of Near Arbor and repeat it' },
+    { name: 'Labour in the temple + Serve as a Serpent-Shepherd', needs: 'Dangerous 125', epa: 5, trip: 15,
+      how: 'walk to the Temple and take whichever is offered; both end the stay, so a trip is 3 '
+        + 'actions -- and it is better on LOW Dangerous, 5.83 EPA at 0' },
+    { name: 'Explore the Gatehouse Market + Walk the walls, cashed in by tribute', needs: 'Watchful 167',
+      epa: 5.5, trip: 49.8,
+      how: 'build Attar across trips and pay tribute at 200 Attar; 6.02 EPA in the limit, 3.92 cashing in at 35' },
+    { name: 'Become a serpent-tender, then fail Surrender some of your Attar', needs: 'Persuasive near 0',
+      epa: 4.72, trip: 42.5, how: 'the failure gains Attar; it breaks even at Persuasive 33' },
+  ];
+
+  const ARBOR_CARD = 'A Dream of Roses';
+  const ARBOR_STORYLET_SIDES = {};
+  ARBOR_STORYLET_SIDES[normalizeName('Near Arbor')] = 'near';
+  ARBOR_STORYLET_SIDES[normalizeName('Far Arbor')] = 'far';
+
+  const ARBOR_CARD_CLASS = 'fl-ux-arbor-card';
+  const ARBOR_CARD_FLAG = 'flUxArborCard';
+  const ARBOR_CLASS = 'fl-ux-arbor';
+  const ARBOR_FLAG = 'flUxArbor';
+  const ARBOR_BRANCH_CLASS = 'fl-ux-arbor-branch';
+  const ARBOR_BRANCH_FLAG = 'flUxArborBranch';
+
+  const ARBOR_MARK_CHALLENGE = '?';
+  const ARBOR_MARK_ENDS = '⏏';
+  const ARBOR_MARK_RARE = '★';
+  const ARBOR_MARK_EXPECTED = '≈';
+
+  // The Attar direction, the one thing the colour says. The green leans teal
+  // and the red leans brick, so the two stay apart for a red-green weak eye --
+  // and the sign on the badge says it regardless. White ink on all five.
+  const ARBOR_COLOR_GAIN = '#1b7d67';
+  const ARBOR_COLOR_SPEND = '#a33520';
+  const ARBOR_COLOR_ITEMS = '#3f5f8a';
+  const ARBOR_COLOR_MOVE = '#5b5b5b';
+  const ARBOR_COLOR_LABEL = '#7d3f5c';  // the card and the two map badges
+
+  const ARBOR_MOVE_TEXT = {
+    north: '↑ north', south: '↓ south', north2: '↑↑ North', far: '→ Far', near: '→ Near', home: 'home',
+  };
+  const ARBOR_MOVE_WORDS = {
+    north: 'one district north',
+    south: 'one district south',
+    north2: 'straight to the North district',
+    far: 'into Far Arbor, in the centre',
+    near: 'back into Near Arbor, in the same district',
+    home: 'home to your Lodgings',
+    arbor: 'to Arbor',
+  };
+  const ARBOR_SCALE_TEXT = { linger: 'Linger', 'linger/2': 'Linger/2' };
+
+  const ARBOR_RULES = 'A stay is ' + ARBOR_LINGER + ' Permission to Linger. Nearly every action '
+    + 'costs 1 and at 0 Leave Arbor is the only option, so a trip is ' + ARBOR_TRIP_ACTIONS
+    + ' actions counting the card. At Attar ' + ARBOR_FAR_AT + '+ Near Arbor gives way to Far Arbor; '
+    + 'below Attar ' + ARBOR_WASH_BELOW + ' Far Arbor washes back.';
+
+  function arborSigned(n) {
+    return (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n);
+  }
+
+  function arborKeys(changes) {
+    // Attar first, always, so the eye finds it in the same place on every badge.
+    return Object.keys(changes || {}).sort(function (a, b) {
+      return (a === 'attar' ? 0 : 1) - (b === 'attar' ? 0 : 1);
+    });
+  }
+
+  function arborChangeText(changes) {
+    return arborKeys(changes).map(function (k) {
+      return ARBOR_ITEMS[k].tag + ' ' + arborSigned(changes[k]);
+    }).join(' ');
+  }
+
+  function arborChangeWords(changes) {
+    return arborKeys(changes).map(function (k) {
+      return ARBOR_ITEMS[k].name + ' ' + arborSigned(changes[k]);
+    }).join(', ');
+  }
+
+  function arborHasChanges(changes) {
+    return !!changes && Object.keys(changes).length > 0;
+  }
+
+  // Expected change in one item over a `luck` pair.
+  function arborLuckValue(luck, key) {
+    return luck.odds * (luck.win[key] || 0) + (1 - luck.odds) * (luck.lose[key] || 0);
+  }
+
+  // A broad challenge succeeds 60% of the stat over the difficulty, so it is
+  // certain at difficulty ÷ 0.6 -- written as × 5 / 3 because 75 / 0.6 is
+  // 125.00000000000001 in floating point and would round up to 126.
+  function arborCertainAt(ch) {
+    return Math.ceil(ch.diff * 5 / 3);
+  }
+
+  function arborBadgeText(entry) {
+    let text;
+    if (entry.label) text = entry.label;
+    else if (entry.scale) {
+      const tag = ARBOR_ITEMS[entry.scale.key].tag;
+      text = entry.scale.by === 'attar' ? tag + ' = Attar' : tag + ' +' + ARBOR_SCALE_TEXT[entry.scale.by];
+    } else if (entry.luck) {
+      text = ARBOR_MARK_EXPECTED + 'Attar ' + arborSigned(arborLuckValue(entry.luck, 'attar'));
+    } else if (arborHasChanges(entry.win)) text = arborChangeText(entry.win);
+    else if (entry.move) text = ARBOR_MOVE_TEXT[entry.move];
+    else text = 'no change';
+    if (entry.ch) text += ARBOR_MARK_CHALLENGE;
+    if (entry.rare) text += ' ' + ARBOR_MARK_RARE;
+    if (entry.ends) text += ' ' + ARBOR_MARK_ENDS;
+    return text;
+  }
+
+  // +1 gains Attar, -1 spends it, 0 leaves it alone.
+  function arborAttarDirection(entry) {
+    if (entry.scale) {
+      if (entry.scale.key === 'attar') return 1;
+      return entry.empties === 'attar' ? -1 : 0;
+    }
+    if (entry.luck) return Math.sign(arborLuckValue(entry.luck, 'attar'));
+    return Math.sign((entry.win && entry.win.attar) || 0);
+  }
+
+  function arborColor(entry) {
+    const dir = arborAttarDirection(entry);
+    if (dir > 0) return ARBOR_COLOR_GAIN;
+    if (dir < 0) return ARBOR_COLOR_SPEND;
+    if (entry.scale || (!entry.label && arborHasChanges(entry.win))) return ARBOR_COLOR_ITEMS;
+    return ARBOR_COLOR_MOVE;
+  }
+
+  function arborWhere(entry) {
+    if (entry.side === 'dream') return ARBOR_CARD + ', the card that takes you to Arbor';
+    const city = entry.side === 'near' ? 'Near Arbor'
+      : entry.side === 'far' ? 'Far Arbor' : 'Near and Far Arbor';
+    return city + ' · ' + (entry.district
+      ? ARBOR_DISTRICTS[entry.district - 1] + ' (The Rose-Red Streets ' + entry.district + ')'
+      : 'any district');
+  }
+
+  function arborScaleWords(entry) {
+    const s = entry.scale;
+    const by = s.by === 'attar' ? 'your Attar'
+      : s.by === 'linger' ? 'your remaining Permission to Linger'
+        : 'half your remaining Permission to Linger';
+    return ARBOR_ITEMS[s.key].name + ' equal to ' + by
+      + (entry.empties === 'attar' ? ', and all your Attar goes' : '');
+  }
+
+  function arborLingerWords(entry) {
+    if (entry.ends) return ARBOR_MARK_ENDS + ' Takes all your Permission to Linger: the stay ends.';
+    if (entry.linger === null) return 'Permission to Linger: the option page does not say.';
+    if (entry.linger === 0) return 'Costs no Permission to Linger.';
+    return 'Costs 1 Permission to Linger.';
+  }
+
+  function arborSpec(entry) {
+    const lines = [entry.name, arborWhere(entry), ''];
+    if (entry.ch) {
+      lines.push('Challenge: ' + entry.ch.stat + ' ' + entry.ch.diff + ', certain at '
+        + entry.ch.stat + ' ' + arborCertainAt(entry.ch) + '.'
+        + (entry.guide && entry.guide.ch
+          ? ' The guide’s table says ' + entry.guide.ch + '; the option page is followed.' : ''));
+    }
+    if (entry.luck) {
+      lines.push(ARBOR_MARK_EXPECTED + ' ' + Math.round(entry.luck.odds * 100) + '% each way, the game’s choice: '
+        + arborChangeWords(entry.luck.win) + ', or ' + arborChangeWords(entry.luck.lose) + '.');
+      lines.push('Expected: Attar ' + arborSigned(arborLuckValue(entry.luck, 'attar')) + ' an action.');
+    }
+    const gives = [];
+    if (entry.scale) gives.push(arborScaleWords(entry));
+    if (arborHasChanges(entry.win)) gives.push(arborChangeWords(entry.win));
+    if (entry.move) gives.push('takes you ' + ARBOR_MOVE_WORDS[entry.move]);
+    if (gives.length) lines.push((entry.ch ? 'Success: ' : 'Gives: ') + gives.join('; ') + '.');
+    if (entry.guide && entry.guide.win) {
+      lines.push('The guide’s table says ' + entry.guide.win + '; the option page is followed.');
+    }
+    if (arborHasChanges(entry.lose)) {
+      lines.push('Failure: ' + arborChangeWords(entry.lose) + (entry.fail ? '; ' + entry.fail : '') + '.');
+    } else if (entry.fail) {
+      lines.push('Failure: ' + entry.fail + '.');
+    }
+    if (entry.rare) {
+      lines.push(ARBOR_MARK_RARE + ' Rare success, about ' + entry.rare.odds + ' of the time: '
+        + entry.rare.text + '.');
+    }
+    if (entry.needs) lines.push('Needs: ' + entry.needs + '.');
+    if (entry.side !== 'dream') lines.push(arborLingerWords(entry));
+    if (entry.note) lines.push(entry.note);
+    lines.push('');
+    lines.push(ARBOR_RULES);
+    return { text: arborBadgeText(entry), color: arborColor(entry), title: lines.join('\n') };
+  }
+
+  function arborGrindLines() {
+    const lines = ['The guide’s grinds:'];
+    for (const g of ARBOR_GRINDS) {
+      lines.push('  • ' + g.name + ' (' + g.needs + '): ' + g.epa + ' EPA, ' + g.trip
+        + ' Echoes a trip -- ' + g.how + '.');
+    }
+    return lines;
+  }
+
+  // The badge on Near Arbor or Far Arbor: a map. It is a label, not a figure,
+  // because which district you stand in is not on the page.
+  function arborStoryletSpec(side) {
+    const city = side === 'near' ? 'Near Arbor' : 'Far Arbor';
+    const here = ARBOR_OPTIONS.filter(function (e) { return e.side === side || e.side === 'both'; });
+    const row = function (e) {
+      return '  • ' + e.name + ' — ' + arborBadgeText(e)
+        + (e.ch ? ' [' + e.ch.stat + ' ' + e.ch.diff + ']' : '')
+        + (e.needs ? ' [needs ' + e.needs + ']' : '');
+    };
+    const lines = [city, ''];
+    for (let d = 1; d <= ARBOR_DISTRICTS.length; d++) {
+      lines.push(ARBOR_DISTRICTS[d - 1] + ' (The Rose-Red Streets ' + d + '):');
+      here.filter(function (e) { return e.district === d; }).forEach(function (e) { lines.push(row(e)); });
+    }
+    lines.push('Anywhere:');
+    here.filter(function (e) { return e.district == null; }).forEach(function (e) { lines.push(row(e)); });
+    lines.push('');
+    lines.push.apply(lines, arborGrindLines());
+    lines.push('');
+    lines.push(ARBOR_RULES);
+    lines.push('');
+    lines.push('Open the storylet and every option is badged in its own right.');
+    return { text: (side === 'near' ? 'Near' : 'Far') + ' map', color: ARBOR_COLOR_LABEL, title: lines.join('\n') };
+  }
+
+  // The card in your London hand. `reading` is { count, at } off the
+  // Possessions counts cache, or null when that has never been read.
+  function arborCardSpec(reading) {
+    const lines = [ARBOR_CARD, 'Takes you to Arbor, of the Roses.', ''];
+    lines.push('A trip is about ' + ARBOR_TRIP_ACTIONS + ' actions: this card, ' + ARBOR_LINGER
+      + ' in Arbor, and Leave Arbor. Arbor deals no opportunity cards and is outside London, so '
+      + 'no social actions or Bazaar while you are there.');
+    lines.push('Returning costs 1 Attar and opens on Near Arbor at Attar 0–' + (ARBOR_RETURN_FAR_AT - 1)
+      + ', on Far Arbor at ' + ARBOR_RETURN_FAR_AT + ' or more.');
+    if (reading) {
+      lines.push('Your last Possessions reading, ' + ageText(reading.at) + ', had Attar ' + reading.count
+        + ', so this dream opens on ' + (reading.count >= ARBOR_RETURN_FAR_AT ? 'Far' : 'Near')
+        + ' Arbor -- unless your Attar has changed since.');
+    } else {
+      lines.push('Your Attar has not been read. Open Possessions once and this says which city the dream opens on.');
+    }
+    lines.push('');
+    lines.push.apply(lines, arborGrindLines());
+    return { text: ARBOR_TRIP_ACTIONS + ' actions', color: ARBOR_COLOR_LABEL, title: lines.join('\n') };
+  }
+
+  // Attar off the Possessions counts cache. A cached list without Attar in it
+  // means none, since Fallen London lists only what you hold. Memoised on
+  // `fotzGen`, which every re-bank of that cache bumps, so a card in hand does
+  // not re-parse localStorage on every DOM mutation.
+  let arborReadingMemo = null;
+  function arborAttarReading() {
+    if (arborReadingMemo && arborReadingMemo.gen === fotzGen) return arborReadingMemo.value;
+    let value = null;
+    const rec = loadCounts();
+    if (rec) {
+      const row = rec.held.get(itemKey('Attar'));
+      value = { count: row ? row.count : 0, at: rec.at };
+    }
+    arborReadingMemo = { gen: fotzGen, value: value };
+    return value;
+  }
+
+  const ARBOR_BY_NAME = new Map();
+  for (const entry of ARBOR_OPTIONS) {
+    const key = normalizeName(entry.name);
+    if (!ARBOR_BY_NAME.has(key)) ARBOR_BY_NAME.set(key, []);
+    ARBOR_BY_NAME.get(key).push(entry);
+  }
+
+  // `side` is the screen we are on: 'near' / 'far' (that storylet is open),
+  // 'dream' (the card is open), 'arbor' (the greeting says Arbor but no
+  // storylet says which city) or null. Options are badged ONLY on one of
+  // those: "Walk North" and "Witness a trial" could title an option anywhere
+  // in London. "Light your candles" is in both cities and does different
+  // things, so on 'arbor' alone it answers nothing.
+  function lookupArborOption(name, side) {
+    const rows = ARBOR_BY_NAME.get(normalizeName(name));
+    if (!rows || !side) return null;
+    const fits = rows.filter(function (r) {
+      if (side === 'dream') return r.side === 'dream';
+      if (r.side === 'dream') return false;
+      return side === 'arbor' || r.side === side || r.side === 'both';
+    });
+    return fits.length === 1 ? fits[0] : null;
+  }
+
+  // --- the area gate -------------------------------------------------------
+  //
+  // Confirm-only, like ZEE_AREAS and VSD_AREAS: no greeting has been captured
+  // in Arbor, so these are a GUESS from the wiki's own names. It may say "yes"
+  // and never "no". The better evidence is the storylet that is open, which is
+  // why it is only the fallback.
+  const ARBOR_AREAS = ['Arbor, of the Roses', 'Arbor', 'Near Arbor', 'Far Arbor'].map(normalizeName);
+
+  function inArbor() {
+    const area = normalizeName(currentArea());
+    return !!area && ARBOR_AREAS.indexOf(area) !== -1;
+  }
+
+  function arborSideHere() {
+    let side = null;
+    const card = normalizeName(ARBOR_CARD);
+    document.querySelectorAll('.storylet-root__heading').forEach(function (head) {
+      const name = normalizeName(headingName(head));
+      if (ARBOR_STORYLET_SIDES[name]) side = ARBOR_STORYLET_SIDES[name];
+      else if (name === card) side = 'dream';
+    });
+    return side || (inArbor() ? 'arbor' : null);
+  }
+
+  function arborRatings() {
+    const card = normalizeName(ARBOR_CARD);
+    eachCardName(function (host, name, place, style) {
+      const mine = normalizeName(name) === card;
+      const reading = mine ? arborAttarReading() : null;
+      attachBadge(host, {
+        cls: ARBOR_CARD_CLASS,
+        flag: ARBOR_CARD_FLAG,
+        // The reading is part of the badge: a Possessions visit that changes
+        // your Attar has to redraw a card already in hand.
+        value: name + '#' + (reading ? reading.count + '@' + reading.at : '-'),
+        spec: mine ? arborCardSpec(reading) : null,
+        place: place,
+        style: style,
+      });
+    });
+
+    document.querySelectorAll('.storylet__heading, .storylet-root__heading').forEach(function (head) {
+      const name = headingName(head);
+      const side = name ? ARBOR_STORYLET_SIDES[normalizeName(name)] : null;
+      attachBadge(head, {
+        cls: ARBOR_CLASS, flag: ARBOR_FLAG, value: name,
+        spec: side ? arborStoryletSpec(side) : null, place: 'after',
+      });
+    });
+
+    const side = arborSideHere();
+    document.querySelectorAll('.branch__title').forEach(function (head) {
+      const name = headingName(head);
+      const entry = name ? lookupArborOption(name, side) : null;
+      attachBadge(head, {
+        cls: ARBOR_BRANCH_CLASS, flag: ARBOR_BRANCH_FLAG,
+        value: name + '@' + (side || '-'),
+        spec: entry ? arborSpec(entry) : null, place: 'after',
+      });
+    });
+  }
+
+  // === shared: storylet carousels ========================================
+  //
+  // A carousel is a storylet you stand in and repeat, with a few storylets
+  // around it: the way in, the payout, the way out. L. B. Industries, the
+  // Department of Menace Eradication and Vertiginous Horticulture all deal no
+  // opportunity cards and badge the same two things -- storylet headings, and
+  // the options of the carousel storylet that is OPEN -- so that plumbing is
+  // here once. (Arbor came first and keeps its own.)
+  //
+  // An option is looked up only inside the storylet the wiki files it under,
+  // and only while that storylet is open: "Make bobbins", "Stalk silently" and
+  // "Treat the soil" are ordinary phrases and could title an option anywhere.
+  //
+  // Some wiki titles carry a placeholder the game fills in -- "Water your
+  // (growth)" reads "Water your mandrakes" in the game, "Bid farewell to (work
+  // leader)" names your team's rat -- so those placeholders match any words.
+  // Only those three: a bracket like "(3 FATE)" is part of a real title.
+  const CAROUSEL_PLACEHOLDER = /\((?:growth|growth type|work leader)\)/;
+
+  function carouselMatcher(title) {
+    const pieces = String(title).split(CAROUSEL_PLACEHOLDER);
+    if (pieces.length === 1) {
+      const key = normalizeName(title);
+      return function (name) { return name === key; };
+    }
+    const parts = [];
+    pieces.forEach(function (piece, i) {
+      if (i > 0) parts.push('.+');
+      const key = normalizeName(piece);
+      if (key) parts.push(key);
+    });
+    const re = new RegExp('^' + parts.join(' ') + '$');
+    return function (name) { return re.test(name); };
+  }
+
+  // An entry may carry `aliases`: other titles the same option goes by, such
+  // as the "(1 FATE)" the wiki appends to a page the game lists without it.
+  function carouselIndex(options) {
+    return options.map(function (entry) {
+      const matchers = [entry.name].concat(entry.aliases || []).map(carouselMatcher);
+      return {
+        entry: entry,
+        storylet: normalizeName(entry.storylet),
+        matches: function (name) { return matchers.some(function (m) { return m(name); }); },
+      };
+    });
+  }
+
+  // `open` is the normalised name of the open storylet. Returns null rather
+  // than pick between two matches.
+  function carouselLookup(index, name, open) {
+    if (!name || !open) return null;
+    const key = normalizeName(name);
+    const hits = index.filter(function (row) { return row.storylet === open && row.matches(key); });
+    return hits.length === 1 ? hits[0].entry : null;
+  }
+
+  // `aliases` maps another name a storylet goes by onto the name its options
+  // are filed under (both normalised) -- the wiki's storylet page and its
+  // option pages do not always agree on the title.
+  function carouselCanonical(key, aliases) {
+    return aliases && aliases[key] ? aliases[key] : key;
+  }
+
+  function carouselOpen(storylets, aliases) {
+    const wanted = storylets.map(normalizeName);
+    let open = null;
+    document.querySelectorAll('.storylet-root__heading').forEach(function (head) {
+      const key = carouselCanonical(normalizeName(headingName(head)), aliases);
+      if (wanted.indexOf(key) !== -1) open = key;
+    });
+    return open;
+  }
+
+  // def: { storylets, index, storyletSpec(key), optionSpec(entry), cls, flag,
+  // branchCls, branchFlag, aliases? }.
+  function carouselRatings(def) {
+    const open = carouselOpen(def.storylets, def.aliases);
+    document.querySelectorAll('.storylet__heading, .storylet-root__heading').forEach(function (head) {
+      const name = headingName(head);
+      attachBadge(head, {
+        cls: def.cls, flag: def.flag, value: name,
+        spec: name ? def.storyletSpec(carouselCanonical(normalizeName(name), def.aliases)) : null, place: 'after',
+      });
+    });
+    document.querySelectorAll('.branch__title').forEach(function (head) {
+      const name = headingName(head);
+      const entry = carouselLookup(def.index, name, open);
+      attachBadge(head, {
+        cls: def.branchCls, flag: def.branchFlag,
+        // The open storylet is part of the identity: the same heading node
+        // under a different storylet is a different option.
+        value: name + '@' + (open || '-'),
+        spec: entry ? def.optionSpec(entry) : null, place: 'after',
+      });
+    });
+  }
+
+  // A broad challenge is certain at difficulty ÷ 0.6, written × 5 / 3 because
+  // 75 / 0.6 is 125.00000000000001 in floating point (see arborCertainAt).
+  function broadCertainAt(diff) {
+    return Math.ceil(diff * 5 / 3);
+  }
+
+  function carouselSigned(n) {
+    return (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n);
+  }
+
+  // A number, or a [lo, hi] range, signed: "+10–12", "−2–5", "−0–2", "+4".
+  // A range is shown smallest magnitude first, whichever way it points.
+  function carouselRange(v) {
+    if (!Array.isArray(v)) return carouselSigned(v);
+    if (v[0] === v[1]) return carouselSigned(v[0]);
+    const neg = v[0] < 0 || v[1] < 0;
+    const a = Math.abs(v[0]);
+    const b = Math.abs(v[1]);
+    return (neg ? '−' : '+') + Math.min(a, b) + '–' + Math.max(a, b);
+  }
+
+  // Colour is a category here, never the only carrier: the sign carries the
+  // direction, "→" a payout, and a word everything else. White ink on all.
+  const CAROUSEL_COLOR_PROGRESS = '#1b7d67';  // moves the carousel's progress quality
+  const CAROUSEL_COLOR_SETUP = '#5f4b8b';     // sets something up: a contract, a plant, a side quality
+  const CAROUSEL_COLOR_PAYOUT = '#8a6420';    // cashes the progress in
+  const CAROUSEL_COLOR_NEUTRAL = '#5b5b5b';   // a way in or out
+  const CAROUSEL_COLOR_LABEL = '#3f5f8a';     // a storylet heading's summary
+
+  const CAROUSEL_MARK_CHALLENGE = '?';
+  const CAROUSEL_MARK_USES = '▼';
+  const CAROUSEL_MARK_EXPECTED = '≈';
+
+  // === feature: L. B. Industries =========================================
+  //
+  // The rats' factory beneath the Blind Helmsman: a variable-length carousel
+  // in one storylet, Your Labour, and its Fruits, whose options either build
+  // Foreman's Favour or spend it on one payout. A payout sends you to Shutting
+  // Down for the Day, whose one option ends the shift and takes away whatever
+  // Favour is left.
+  //
+  // **What the badge says.** On a work option, the Foreman's Favour a success
+  // pays -- the number that varies across the seven -- marked `?` because it
+  // is a stat challenge, then what a failure takes away when it takes anything
+  // ("FF +15? −19"). Rare successes are in the tooltip: two option pages give
+  // their odds (20%) and five do not, so no expected value is claimed. On a
+  // payout, its cost and what it buys ("110 → Reliquary"); every point above
+  // the cost pays 10 Bone Fragments, which the tooltip says.
+  //
+  // Transcribed from the option pages (fetched through the API, 2026-09-14),
+  // with L. B. Industries (Guide) as the cross-check. The guide's "Min for
+  // 100%" column is carried as `guideMin` and equals difficulty × 5/3 on all
+  // seven rows; guide and pages agree on every figure. Corrections go in
+  // LBI_OPTIONS and nowhere else.
+  //
+  //   storylet        the storylet the option is filed under.
+  //   ch              { stat, diff }.
+  //   win/rare/lose   Foreman's Favour on a success, a rare success, a failure.
+  //   rareOdds        the rare chance as the page states it, or null.
+  //   guideMin        the guide's "Min for 100%".
+  //   uses            what the option uses up.
+  //   airs            the Ratterbox window the option is offered in.
+  //   cost/tag/gives/rate  a payout: Favour it costs, the badge's word for
+  //                   what it buys, all of it, and the guide's worth per Favour.
+  //   label           the badge's word for a way in or out.
+
+  const LBI_STORYLET = 'Your Labour, and its Fruits';
+  const LBI_ENTRY = 'Head Far Beneath the Blind Helmsman';
+  const LBI_STORYLETS = [LBI_STORYLET, 'Shutting Down for the Day', LBI_ENTRY];
+  const LBI_SURPLUS_BONE = 10;   // Bone Fragments per Favour above a payout's cost
+  const LBI_EPA = 3.75;          // the guide's, selling the Crackling Device at the Rat Market
+
+  const LBI_OPTIONS = [
+    { storylet: LBI_STORYLET, name: 'Work the bellows to produce steam',
+      ch: { stat: 'Dangerous', diff: 50 }, win: 5, rare: 15, rareOdds: null, lose: 0, guideMin: 84 },
+    { storylet: LBI_STORYLET, name: 'Make bobbins',
+      ch: { stat: 'Persuasive', diff: 50 }, win: 5, rare: 15, rareOdds: null, lose: 0, guideMin: 84 },
+    { storylet: LBI_STORYLET, name: 'Take over from the spinners',
+      ch: { stat: 'Watchful', diff: 125 }, win: 15, rare: 34, rareOdds: 0.2, lose: -19, guideMin: 209 },
+    { storylet: LBI_STORYLET, name: 'Assist with assembly',
+      ch: { stat: 'Shadowy', diff: 178 }, win: 32, rare: 34, rareOdds: 0.2, lose: -2, guideMin: 297 },
+    { storylet: LBI_STORYLET, name: 'Contribute – and install – a hard tip for the driller',
+      ch: { stat: 'Shadowy', diff: 88 }, win: 29, rare: 30, rareOdds: null, lose: 0, guideMin: 147,
+      uses: 'an Ostentatious Diamond, on a failure as well' },
+    { storylet: LBI_STORYLET, name: 'Put out a fire by the smelters',
+      ch: { stat: 'Dangerous', diff: 125 }, win: 15, rare: 34, rareOdds: null, lose: -19, guideMin: 209,
+      airs: '51–75' },
+    { storylet: LBI_STORYLET, name: 'Test the latest batch of weapons',
+      ch: { stat: 'Dangerous', diff: 125 }, win: 15, rare: 34, rareOdds: null, lose: -19, guideMin: 209,
+      airs: '76–100' },
+
+    { storylet: LBI_STORYLET, name: 'Receive your pay in biscuits', cost: 10, tag: 'Biscuits',
+      gives: 'Crate of Incorruptible Biscuits ×1', rate: '0.25 Echoes' },
+    { storylet: LBI_STORYLET, name: 'Request Bessemer Steel Ingots as pay', cost: 60, tag: 'Steel ×8',
+      gives: 'Bessemer Steel Ingot ×8 and Hinterland Scrip ×7', rate: '0.125 Echoes' },
+    { storylet: LBI_STORYLET, name: 'Accept a reverent thanks for your labour', cost: 110, tag: 'Reliquary',
+      gives: 'Ratty Reliquary ×1', rate: '~0.114 Echoes, or 1.5 Rat-Shillings' },
+    { storylet: LBI_STORYLET, name: 'Accept old coins as a reward', cost: 235, tag: '4th-City Echo ×2',
+      gives: 'Fourth-City Echo ×2', rate: 'no Echo price; ~1.06 Rat-Shillings' },
+    { storylet: LBI_STORYLET, name: 'Ask for a Crackling Device as payment', cost: 610, tag: 'Crackling Device',
+      gives: 'Crackling Device ×1', rate: '~0.1 Echoes, or ~1.35 Rat-Shillings' },
+
+    { storylet: 'Shutting Down for the Day', name: 'Bid farewell to (work leader)', label: 'leave',
+      note: 'Ends the shift: your Foreman’s Favour and your Work Team are both gone.' },
+    { storylet: LBI_ENTRY, name: 'Squeeze down the tunnel', label: 'in',
+      note: 'The way into the factory, once you have a Work Team; the page records it as costing no action.' },
+  ];
+
+  const LBI_INDEX = carouselIndex(LBI_OPTIONS);
+
+  const LBI_CLASS = 'fl-ux-lbi';
+  const LBI_FLAG = 'flUxLbi';
+  const LBI_BRANCH_CLASS = 'fl-ux-lbi-branch';
+  const LBI_BRANCH_FLAG = 'flUxLbiBranch';
+
+  const LBI_RULES = 'Work builds Foreman’s Favour; one payout spends it, and every point above that '
+    + 'payout’s cost pays ' + LBI_SURPLUS_BONE + ' Bone Fragments. None of the work raises a menace.';
+
+  function lbiBadgeText(e) {
+    if (e.label) return e.label;
+    if (e.cost != null) return e.cost + ' → ' + e.tag;
+    let text = 'FF ' + carouselSigned(e.win) + CAROUSEL_MARK_CHALLENGE;
+    if (e.lose < 0) text += ' ' + carouselSigned(e.lose);
+    if (e.uses) text += ' ' + CAROUSEL_MARK_USES;
+    return text;
+  }
+
+  function lbiColor(e) {
+    if (e.label) return CAROUSEL_COLOR_NEUTRAL;
+    return e.cost != null ? CAROUSEL_COLOR_PAYOUT : CAROUSEL_COLOR_PROGRESS;
+  }
+
+  function lbiSpec(e) {
+    const lines = [e.name, 'L. B. Industries, beneath the Blind Helmsman · ' + e.storylet, ''];
+    if (e.cost != null) {
+      lines.push('Costs ' + e.cost + ' Foreman’s Favour. Gives: ' + e.gives + '.');
+      lines.push('Every Favour above ' + e.cost + ' pays ' + LBI_SURPLUS_BONE + ' Bone Fragments.');
+      lines.push('The guide’s worth per Favour: ' + e.rate + '.');
+    } else if (e.ch) {
+      lines.push('Challenge: ' + e.ch.stat + ' ' + e.ch.diff + ', certain at ' + e.ch.stat + ' '
+        + broadCertainAt(e.ch.diff) + '.');
+      lines.push('Success: Foreman’s Favour ' + carouselSigned(e.win) + '.');
+      lines.push('Rare success: Foreman’s Favour ' + carouselSigned(e.rare)
+        + (e.rareOdds ? ', ' + Math.round(e.rareOdds * 100) + '% of the time, by the page.'
+          : '. The page gives no odds; the guide’s calculator assumes 20%.'));
+      lines.push(e.lose < 0 ? 'Failure: Foreman’s Favour ' + carouselSigned(e.lose) + '.' : 'Failure: nothing lost.');
+    }
+    if (e.uses) lines.push(CAROUSEL_MARK_USES + ' Uses up ' + e.uses + '.');
+    if (e.airs) lines.push('Offered only at Ratterbox ' + e.airs + '.');
+    if (e.note) lines.push(e.note);
+    lines.push('');
+    lines.push(LBI_RULES);
+    return { text: lbiBadgeText(e), color: lbiColor(e), title: lines.join('\n') };
+  }
+
+  function lbiStoryletSpec(key) {
+    if (key === normalizeName(LBI_ENTRY)) {
+      return {
+        text: 'factory', color: CAROUSEL_COLOR_LABEL,
+        title: LBI_ENTRY + '\n\nThe way down to L. B. Industries. ' + LBI_RULES,
+      };
+    }
+    if (key !== normalizeName(LBI_STORYLET)) return null;
+    const lines = [LBI_STORYLET, 'L. B. Industries, beneath the Blind Helmsman', '', 'Work:'];
+    LBI_OPTIONS.filter(function (e) { return e.ch; }).forEach(function (e) {
+      lines.push('  • ' + e.name + ' — ' + lbiBadgeText(e) + ' [' + e.ch.stat + ' ' + e.ch.diff + ']'
+        + (e.airs ? ' [Ratterbox ' + e.airs + ']' : ''));
+    });
+    lines.push('Payouts:');
+    LBI_OPTIONS.filter(function (e) { return e.cost != null; }).forEach(function (e) {
+      lines.push('  • ' + e.cost + ' Favour — ' + e.gives);
+    });
+    lines.push('');
+    lines.push(LBI_RULES);
+    lines.push('The guide puts it at ' + LBI_EPA + ' EPA, selling the Crackling Device at the Rat Market.');
+    lines.push('');
+    lines.push('Open the storylet and every option is badged in its own right.');
+    return { text: 'FF → pay', color: CAROUSEL_COLOR_LABEL, title: lines.join('\n') };
+  }
+
+  function lbiRatings() {
+    carouselRatings({
+      storylets: LBI_STORYLETS, index: LBI_INDEX, storyletSpec: lbiStoryletSpec, optionSpec: lbiSpec,
+      cls: LBI_CLASS, flag: LBI_FLAG, branchCls: LBI_BRANCH_CLASS, branchFlag: LBI_BRANCH_FLAG,
+    });
+  }
+
+  // === feature: Department of Menace Eradication =========================
+  //
+  // Hunting a quarry across London. A contract at The Department of Menace
+  // Eradication sets Quarry: Confounded Thing is Hiding ("Hiding"), Quarry's
+  // Savagery ("Sav") and sometimes Your Quarry: Wariness ("War"); Hunting
+  // across London is where you bring Hiding to 0; then the quarry's own
+  // storylet is the confrontation, and Returning to the Department pays.
+  //
+  // **What the badge says.** On a hunting option, the change a success makes
+  // -- Hiding for most, Wariness or Savagery for the two that set up -- with
+  // `?` for the challenge and, where a failure hides the quarry again, that
+  // too ("Hiding −10? +1"). Almost every challenge here scales with Savagery,
+  // which the page does not show, so the tooltip gives the formula and the
+  // figure at each contract's starting Savagery. Lay poisoned bait is a Luck
+  // challenge with its odds on the page, so it is its expected value (`≈`).
+  // A confrontation or a payout names what it pays; a contract what it sets.
+  //
+  // Transcribed from the option pages (fetched through the API, 2026-09-14),
+  // with Department of Menace Eradication (Guide) as the cross-check. Where
+  // they disagree the page is followed and `guide` keeps the guide's version:
+  //   Stalk silently              page Shadowy, guide Dangerous
+  //   Shoot it the moment...      page sets Hiding to 2 on a failure, guide +2
+  //   Capture it alive!           guide adds Dangerous +12 CP, page does not
+  // Two figures are the guide's alone: Expose yourself as bait's success
+  // (its page records none) and Search for traces' rare success. The
+  // Fate-locked Miniature Menace is left out: the wiki does not carry its
+  // options. Corrections go in DME_OPTIONS and nowhere else.
+  //
+  //   ch      { stat, per, plus } -- difficulty per × Savagery + plus; `per`
+  //           null where the page gives only an `example` figure --
+  //           { stat, diff } flat, or { luck } for a Luck challenge.
+  //   win     what a success changes: hiding / war / sav, a number or [lo, hi].
+  //   lose    what a failure changes, same shape; `loseSet` for a "set to".
+  //   rare    a rare success, in words.
+  //   contract  the DME_CONTRACTS key a contract option starts.
+  //   payout/tag  what a confrontation or payout gives, and the badge's word.
+  //   uses / needs / actions (when not 1) / label / note / guide.
+
+  const DME_DEPARTMENT = 'The Department of Menace Eradication';
+  const DME_HUNT = 'Hunting across London';
+  const DME_MAZE = 'A Rat in a Sewery Maze';
+  const DME_BELFRY = 'Confrontation in the Belfry';
+  const DME_RETURN = 'Returning to the Department';
+  const DME_STORYLETS = [DME_DEPARTMENT, DME_HUNT, DME_MAZE, DME_BELFRY, DME_RETURN];
+
+  const DME_CONTRACTS = [
+    { key: 'rat', name: 'A Worryingly Large Rat', short: 'Rat', hiding: 10, sav: 15, war: 0 },
+    { key: 'ushabti', name: 'A Malicious Ushabti', short: 'Ushabti', hiding: 30, sav: 30, war: 4 },
+  ];
+
+  const DME_QUALITIES = {
+    hiding: { tag: 'Hiding', name: 'Quarry: Confounded Thing is Hiding' },
+    war: { tag: 'War', name: 'Your Quarry: Wariness' },
+    sav: { tag: 'Sav', name: 'Quarry’s Savagery' },
+  };
+  const DME_KEYS = ['hiding', 'war', 'sav'];
+
+  const DME_OPTIONS = [
+    // --- the Department --------------------------------------------------
+    { storylet: DME_DEPARTMENT, name: 'Contract: a Worryingly Large Rat', contract: 'rat',
+      needs: 'no quarry, and A Name Scrawled in Blood 1',
+      note: 'The Rat is Greedy, so Lay poisoned bait works on it.' },
+    { storylet: DME_DEPARTMENT, name: 'Contract: A Malicious Ushabti', contract: 'ushabti',
+      needs: 'no quarry, Clue Propagation: Ushabti Malice 100, and A Name Scrawled in Blood 3' },
+    { storylet: DME_DEPARTMENT, name: 'Contract: destroy an infestation of sorrow-spiders',
+      label: 'Running Battle', needs: 'A Name Scrawled in Blood 2',
+      note: 'A different mechanic, built on Running Battle... rather than Hiding; see Running Battle (Guide).' },
+    { storylet: DME_DEPARTMENT, name: 'Claim bounty for dead rats', tag: '5 actions: Rostygold',
+      payout: 'Piece of Rostygold equal to 1.1 × your Rats on a String, all of which go, and a Tale of Terror!!',
+      actions: 5, uses: 'every Rat on a String you hold', needs: 'a Rat on a String' },
+    { storylet: DME_DEPARTMENT, name: 'Resume your hunt for a Worryingly Large Rat', label: 'free', actions: 0 },
+    { storylet: DME_DEPARTMENT, name: 'Resume your hunt for a Malicious Ushabti', label: 'free', actions: 0 },
+
+    // --- Hunting across London --------------------------------------------
+    { storylet: DME_HUNT, name: 'Search for traces', ch: { stat: 'Dangerous', per: 1, plus: 0 },
+      win: { hiding: [-5, -2] }, lose: { hiding: -1 }, needs: 'Wariness below 4',
+      rare: 'Hiding −2–5 as well, and Wariness +1 (the guide’s; the page does not list it)' },
+    { storylet: DME_HUNT, name: 'Expose yourself as bait', ch: { stat: 'Dangerous', per: 1.5, plus: 0 },
+      win: { hiding: [-10, -2] }, lose: { hiding: -2 },
+      note: 'The success is the guide’s: the option page records none. The guide’s early-game advice is '
+        + 'to open with Approach it very casually, then repeat this once it is at least an even chance.' },
+    { storylet: DME_HUNT, name: 'Employ the strategies of Mr Inch', ch: { stat: 'Dangerous', per: 2, plus: 0 },
+      win: { hiding: [-7, -5] }, lose: { hiding: 1, war: [0, 1] }, needs: 'Dangerous 30, and Wariness below 4',
+      note: 'The page’s example is difficulty 30 at Savagery 15, so twice Savagery, as the guide has it; '
+        + 'its text says Savagery alone, and its −5–7 carries a question mark.' },
+    { storylet: DME_HUNT, name: 'Stalk silently', ch: { stat: 'Shadowy', per: 1, plus: 0 },
+      win: { war: -1 }, guide: { ch: 'Dangerous' } },
+    { storylet: DME_HUNT, name: 'Lay a shining trail', ch: { stat: 'Dangerous', per: 1, plus: 0 },
+      win: { hiding: [-16, -10], war: [-1, 0] }, uses: 'Moonlight Scales ×30, on a success',
+      needs: 'Dangerous 70, and Moonlight Scales 30',
+      note: 'The guide’s Curator’s Gratitude grind lays this twice and then Exposes itself as bait.' },
+    { storylet: DME_HUNT, name: 'Approach it very casually', ch: { stat: 'Dangerous', per: null, example: '10, at Savagery 15' },
+      win: { hiding: -10, war: 1 }, lose: { hiding: 1 }, needs: 'no Wariness at all' },
+    { storylet: DME_HUNT, name: 'Lay poisoned bait', ch: { luck: 0.6 },
+      win: { sav: -3 }, uses: 'a Flask of Abominable Salts, on a failure as well',
+      needs: 'Savagery 5, a quarry tempted by poisoned bait (the Rat), and a Flask of Abominable Salts',
+      note: 'Once a hunt: a success leaves the quarry untempted.' },
+    { storylet: DME_HUNT, name: 'Abandon the hunt', label: 'abandon', note: 'Ends the hunt with no reward.' },
+    { storylet: DME_HUNT, name: 'You know where the Rat is lairing...', label: '→ lair', actions: 0,
+      needs: 'Hiding 0, hunting the Rat' },
+    { storylet: DME_HUNT, name: 'Lay a trap for the ushabti', label: '→ Belfry', needs: 'Hiding 0, hunting the Ushabti' },
+
+    // --- the confrontations -----------------------------------------------
+    { storylet: DME_MAZE, name: 'Shoot it the moment you see it', ch: { stat: 'Dangerous', per: 1, plus: 0 },
+      tag: 'Rostygold 200', payout: 'Dangerous +10 CP now, and Piece of Rostygold ×200 from The reward for a '
+        + 'Worryingly Large Rat back at the Department',
+      lose: { sav: -1 }, loseSet: 'Hiding set to 2', guide: { lose: 'Hiding +2' } },
+    { storylet: DME_MAZE, name: 'Explore its lair thoroughly before it returns',
+      ch: { stat: 'Dangerous', per: null, example: '24, at a Savagery the page does not give' },
+      tag: 'Rats 50 Scarabs 35', payout: 'Rat on a String ×50, Phosphorescent Scarab ×35 and Dangerous +12 CP, '
+        + 'and the hunt ends with no bounty',
+      lose: { hiding: 4, sav: -1 } },
+    { storylet: DME_BELFRY, name: 'Destroy the d__ned thing!', ch: { stat: 'Dangerous', per: 2, plus: 5 },
+      tag: 'Gratitude 800', payout: 'Curator’s Gratitude ×800 from The bounty for a Malicious Ushabti back at '
+        + 'the Department, and the first time a clue for F.F. Gebrandt',
+      lose: { hiding: 4, sav: -5 } },
+    { storylet: DME_BELFRY, name: 'Capture it alive!', ch: { stat: 'Dangerous', diff: 120 },
+      tag: 'Ushabti', payout: 'Captured Ushabti ×1 and Tale of Terror!! ×15, and the hunt ends',
+      lose: { hiding: 4, sav: -5 }, guide: { win: 'Dangerous +12 CP as well' } },
+
+    // --- the bounties -----------------------------------------------------
+    { storylet: DME_RETURN, name: 'The reward for a Worryingly Large Rat', tag: 'Rostygold 200',
+      payout: 'Piece of Rostygold ×200, and the hunt ends' },
+    { storylet: DME_RETURN, name: 'Make your Name: the reward for a Worryingly Large Rat', tag: 'Rostygold 200',
+      payout: 'Piece of Rostygold ×200, the first time, on the way to making your Name' },
+    { storylet: DME_RETURN, name: 'The bounty for a Malicious Ushabti', tag: 'Gratitude 800',
+      payout: 'Curator’s Gratitude ×800, spent at the Museum of Prelapsarian History' },
+  ];
+
+  const DME_INDEX = carouselIndex(DME_OPTIONS);
+
+  const DME_CLASS = 'fl-ux-dme';
+  const DME_FLAG = 'flUxDme';
+  const DME_BRANCH_CLASS = 'fl-ux-dme-branch';
+  const DME_BRANCH_FLAG = 'flUxDmeBranch';
+
+  const DME_RULES = 'Bring Hiding to 0 to find the quarry. Savagery sets how hard nearly every challenge '
+    + 'is, including the final one; Wariness at 4 shuts Search for traces and Mr Inch.';
+
+  function dmeContract(key) {
+    return DME_CONTRACTS.find(function (c) { return c.key === key; }) || null;
+  }
+
+  function dmeValueTimes(v, k) {
+    const round = function (n) { return Math.round(n * k * 10) / 10; };
+    return Array.isArray(v) ? [round(v[0]), round(v[1])] : round(v);
+  }
+
+  function dmeChangeText(changes) {
+    return DME_KEYS.filter(function (k) { return changes && changes[k] != null; }).map(function (k) {
+      return DME_QUALITIES[k].tag + ' ' + carouselRange(changes[k]);
+    }).join(' ');
+  }
+
+  function dmeChangeWords(changes) {
+    return DME_KEYS.filter(function (k) { return changes && changes[k] != null; }).map(function (k) {
+      return DME_QUALITIES[k].name + ' ' + carouselRange(changes[k]);
+    }).join(', ');
+  }
+
+  // A failure that hides the quarry again -- progress lost.
+  function dmeLosesGround(lose) {
+    const h = lose && lose.hiding;
+    return h != null && (Array.isArray(h) ? Math.max(h[0], h[1]) > 0 : h > 0);
+  }
+
+  function dmeBadgeText(e) {
+    let text;
+    if (e.label) text = e.label;
+    else if (e.contract) {
+      const c = dmeContract(e.contract);
+      text = 'Hiding ' + c.hiding + ' Sav ' + c.sav + (c.war ? ' War ' + c.war : '');
+    } else if (e.tag) text = e.tag;
+    else if (e.ch && e.ch.luck) {
+      const ev = {};
+      DME_KEYS.forEach(function (k) { if (e.win[k] != null) ev[k] = dmeValueTimes(e.win[k], e.ch.luck); });
+      text = CAROUSEL_MARK_EXPECTED + dmeChangeText(ev);
+    } else text = dmeChangeText(e.win);
+    if (e.ch && !e.ch.luck) text += CAROUSEL_MARK_CHALLENGE;
+    if (dmeLosesGround(e.lose)) text += ' ' + carouselRange(e.lose.hiding);
+    if (e.uses) text += ' ' + CAROUSEL_MARK_USES;
+    return text;
+  }
+
+  function dmeColor(e) {
+    if (e.label) return CAROUSEL_COLOR_NEUTRAL;
+    if (e.payout) return CAROUSEL_COLOR_PAYOUT;
+    if (e.win && e.win.hiding != null) return CAROUSEL_COLOR_PROGRESS;
+    return CAROUSEL_COLOR_SETUP;
+  }
+
+  function dmeChallengeLine(ch) {
+    if (ch.luck) return 'A Luck challenge: ' + Math.round(ch.luck * 100) + '% to succeed.';
+    if (ch.diff != null) {
+      return 'Challenge: ' + ch.stat + ' ' + ch.diff + ', certain at ' + ch.stat + ' ' + broadCertainAt(ch.diff) + '.';
+    }
+    if (ch.per == null) {
+      return 'Challenge: ' + ch.stat + ', harder at higher Savagery; the page’s only figure is ' + ch.example + '.';
+    }
+    const formula = (ch.per === 1 ? '' : ch.per + ' × ') + 'Quarry’s Savagery' + (ch.plus ? ' + ' + ch.plus : '');
+    const at = DME_CONTRACTS.map(function (c) {
+      const diff = ch.per * c.sav + (ch.plus || 0);
+      return 'at the ' + c.short + '’s starting Savagery ' + c.sav + ', ' + diff + ', certain at ' + broadCertainAt(diff);
+    });
+    return 'Challenge: ' + ch.stat + ' against ' + formula + ' -- ' + at.join('; ') + '.';
+  }
+
+  function dmeSpec(e) {
+    const lines = [e.name, 'Department of Menace Eradication · ' + e.storylet, ''];
+    if (e.ch) lines.push(dmeChallengeLine(e.ch));
+    if (e.contract) {
+      const c = dmeContract(e.contract);
+      lines.push('Starts a hunt for ' + c.name + ': Hiding ' + c.hiding + ', Savagery ' + c.sav
+        + (c.war ? ', Wariness ' + c.war : '') + '.');
+    }
+    if (e.win) {
+      lines.push((e.ch ? 'Success: ' : 'Gives: ') + dmeChangeWords(e.win) + '.');
+      if (e.ch && e.ch.luck) {
+        const ev = {};
+        DME_KEYS.forEach(function (k) { if (e.win[k] != null) ev[k] = dmeValueTimes(e.win[k], e.ch.luck); });
+        lines.push(CAROUSEL_MARK_EXPECTED + ' Expected, counting the failure: ' + dmeChangeWords(ev) + '.');
+      }
+    }
+    if (e.payout) lines.push((e.ch ? 'Success: ' : 'Gives: ') + e.payout + '.');
+    if (e.rare) lines.push('Rare success: ' + e.rare + '.');
+    const fail = [];
+    if (e.lose) fail.push(dmeChangeWords(e.lose));
+    if (e.loseSet) fail.push(e.loseSet);
+    if (fail.length) lines.push('Failure: ' + fail.join(', ') + '.');
+    else if (e.ch) lines.push('Failure: nothing changes.');
+    if (e.guide && e.guide.ch) lines.push('The guide says ' + e.guide.ch + '; the option page is followed.');
+    if (e.guide && e.guide.lose) lines.push('The guide’s failure is ' + e.guide.lose + '; the option page is followed.');
+    if (e.guide && e.guide.win) lines.push('The guide’s success adds ' + e.guide.win + '; the option page does not.');
+    if (e.uses) lines.push(CAROUSEL_MARK_USES + ' Uses up ' + e.uses + '.');
+    if (e.needs) lines.push('Needs: ' + e.needs + '.');
+    if (e.actions === 0) lines.push('Costs no action.');
+    else if (e.actions > 1) lines.push('Costs ' + e.actions + ' actions.');
+    if (e.note) lines.push(e.note);
+    lines.push('');
+    lines.push(DME_RULES);
+    return { text: dmeBadgeText(e), color: dmeColor(e), title: lines.join('\n') };
+  }
+
+  function dmeStoryletSpec(key) {
+    const row = function (e) { return '  • ' + e.name + ' — ' + dmeBadgeText(e); };
+    const of = function (storylet) {
+      return DME_OPTIONS.filter(function (e) { return e.storylet === storylet; }).map(row);
+    };
+    const footer = ['', DME_RULES, '', 'Open the storylet and every option is badged in its own right.'];
+    if (key === normalizeName(DME_HUNT)) {
+      return {
+        text: 'Hiding → 0', color: CAROUSEL_COLOR_LABEL,
+        title: [DME_HUNT, ''].concat(of(DME_HUNT), ['',
+          'The guide: open with Approach it very casually, then Expose yourself as bait once that is an even '
+          + 'chance -- five actions at the least for the Rat. For Curator’s Gratitude, the Ushabti averages 8 '
+          + 'actions (100 a action), or 6 with two shining trails (133 a action).'], footer).join('\n'),
+      };
+    }
+    if (key === normalizeName(DME_DEPARTMENT)) {
+      return { text: 'contracts', color: CAROUSEL_COLOR_LABEL, title: [DME_DEPARTMENT, ''].concat(of(DME_DEPARTMENT), footer).join('\n') };
+    }
+    if (key === normalizeName(DME_MAZE) || key === normalizeName(DME_BELFRY)) {
+      const storylet = key === normalizeName(DME_MAZE) ? DME_MAZE : DME_BELFRY;
+      return { text: 'confront', color: CAROUSEL_COLOR_LABEL, title: [storylet, ''].concat(of(storylet), footer).join('\n') };
+    }
+    return null;
+  }
+
+  function dmeRatings() {
+    carouselRatings({
+      storylets: DME_STORYLETS, index: DME_INDEX, storyletSpec: dmeStoryletSpec, optionSpec: dmeSpec,
+      cls: DME_CLASS, flag: DME_FLAG, branchCls: DME_BRANCH_CLASS, branchFlag: DME_BRANCH_FLAG,
+    });
+  }
+
+  // === feature: Vertiginous Horticulture =================================
+  //
+  // A rooftop allotment in the Flit. Pick a plant in the Vertiginous
+  // Horticulture storylet, raise Nurturing a Rooftop Growth to 105 over about
+  // seven actions, and sell it to one of three buyers -- by 150 you must.
+  //
+  // **What the badge says.** On a nurturing option, the Nurturing a success
+  // pays, marked `?`, then what a failure takes back when it takes anything
+  // ("Grow +10–12? −0–2"). Every figure is a formula on the growth's
+  // Difficulty (1-3), which the page does not show, so the badge is the
+  // RANGE over the Difficulties that option can actually meet: a Shade-only
+  // option only ever sees Difficulty 2 and so shows one figure. The rare
+  // successes go in the tooltip with their odds and the average success they
+  // make. A plant shows its Difficulty; a buyer what the sale gives.
+  //
+  // Transcribed from the option pages (fetched through the API, 2026-09-14),
+  // with Vertiginous Horticulture (Guide) as the cross-check. The guide's
+  // "Average Gain" column is carried as `guideAvg` and equals the pages'
+  // success, rare success and rare odds combined, on every row -- which is
+  // also what confirms the 30% rare chance on the four Plantae/Fungi options.
+  // The guide's challenge column disagrees with eight pages, and each is kept
+  // as `guide.ch`. The pages write a lost failure as "Loss of (1 − Difficulty)";
+  // it is read, as the guide reads it, as losing Difficulty − 1. Corrections
+  // go in VH_OPTIONS and nowhere else.
+  //
+  //   kind      'grow' | 'nurture' | 'sell'.
+  //   ch        { stat, base, perD }: difficulty base + perD × Difficulty.
+  //   win/rare/fail  { k, d }: Nurturing k + d × Difficulty.
+  //   rareOdds  the chance of `rare`; `alt` when the page calls it an
+  //             alternative success rather than a rare one.
+  //   only      the Classification or Light Preference the option needs.
+  //   airs      The Airs of London window.
+  //   first     offered only before any Nurturing.
+  //   guideAvg  the guide's Average Gain, [lo, hi].
+  //   fixed/tag/scaling/per  a sale: what it always gives, the badge's word,
+  //             the item that scales, and how many per Nurturing above 105.
+
+  const VH_STORYLET = 'Vertiginous Horticulture';
+  const VH_SELL_AT = 105;
+  const VH_MUST_SELL = 150;
+  const VH_EPA = [1.4, 1.57];   // the guide's: selling at 105, and at 150
+
+  const VH_GROWS = [
+    { name: 'Grow a cutting from your Singular Plant', difficulty: 2, cls: 'Plantae', light: 'Shade',
+      needs: 'Attending to the Needs of a Singular Plant 10' },
+    { name: "Grow a crop of 'Dawn-Yodeller' Mandrakes", difficulty: 1, cls: 'Plantae', light: 'Sunlight' },
+    { name: 'Grow Prize-Winning Peppercaps', difficulty: 1, cls: 'Fungi', light: 'Darkness' },
+    { name: 'Grow some Recusant Marigolds', difficulty: 2, cls: 'Plantae', light: 'Shade' },
+    { name: 'Grow a cluster of False-Cantigaster Hybrids', difficulty: 2, cls: 'Fungi', light: 'Shade' },
+    { name: 'Grow a bush of Millennium Roses', difficulty: 3, cls: 'Plantae', light: 'Sunlight' },
+    { name: 'Grow some Tomorrowspore Ortcaps', difficulty: 3, cls: 'Fungi', light: 'Darkness' },
+    { name: 'Grow some Genuine Counterfeit Exceptional Roses', difficulty: 2, cls: 'Plantae', light: 'Shade',
+      needs: 'the Feast of the Exceptional Rose',
+      note: 'Selling these also pays Burgeoning Romance ×900, for Mr Spices during the Feast.' },
+  ];
+
+  const VH_OPTIONS = VH_GROWS.map(function (g) {
+    return Object.assign({ storylet: VH_STORYLET, kind: 'grow' }, g);
+  }).concat([
+    { name: 'Divine the needs of your (growth)', first: true,
+      ch: { stat: 'Shadowy', base: 65, perD: 5 }, win: { k: 9, d: 1 }, rare: { k: 11, d: 1 }, rareOdds: 0.2,
+      fail: { k: 1, d: 0 }, guideAvg: [10.4, 12.4], guide: { ch: 'Shadowy 70–90' } },
+    { name: 'Water your (growth)', airs: '26–75',
+      ch: { stat: 'Shadowy', base: 65, perD: 5 }, win: { k: 9, d: 1 }, rare: { k: 11, d: 1 }, rareOdds: 0.2,
+      fail: { k: 1, d: -1 }, guideAvg: [10.4, 12.4], guide: { ch: 'Shadowy 70–90' } },
+    { name: 'Treat the soil', airs: '1–25 and 76–100',
+      ch: { stat: 'Shadowy', base: 65, perD: 5 }, win: { k: 9, d: 1 }, rare: { k: 11, d: 1 }, rareOdds: 0.2,
+      fail: { k: 1, d: -1 }, guideAvg: [10.4, 12.4], guide: { ch: 'Shadowy 70–90' } },
+    { name: 'Secure vital nutrition for your precious (growth type)', airs: '1–33',
+      ch: { stat: 'Shadowy', base: 80, perD: 5 }, win: { k: 13, d: 1 }, rare: { k: 18, d: 1 }, rareOdds: 0.2,
+      fail: { k: 4, d: 1 }, guideAvg: [15, 17] },
+    { name: 'Sing to your (growth)', airs: '34–66',
+      ch: { stat: 'Persuasive', base: 80, perD: 5 }, win: { k: 13, d: 1 }, rare: { k: 18, d: 1 }, rareOdds: 0.2,
+      fail: { k: 4, d: 1 }, guideAvg: [15, 17] },
+    { name: 'Cajole your (growth) into action', airs: '67–100',
+      ch: { stat: 'Dangerous', base: 80, perD: 5 }, win: { k: 13, d: 1 }, rare: { k: 18, d: 1 }, rareOdds: 0.2,
+      fail: { k: 4, d: 1 }, guideAvg: [15, 17] },
+    { name: 'Prune your (growth)', only: 'Plantae', airs: '1–50',
+      ch: { stat: 'Shadowy', base: 85, perD: 0 }, win: { k: 12, d: 1 }, rare: { k: 14, d: 1 }, rareOdds: 0.3,
+      fail: { k: 1, d: 1 }, guideAvg: [13.6, 15.6], guide: { ch: 'Shadowy 80–90' } },
+    { name: 'Eliminate pests', only: 'Plantae', airs: '51–100',
+      ch: { stat: 'Shadowy', base: 85, perD: 0 }, win: { k: 12, d: 1 }, rare: { k: 14, d: 1 }, rareOdds: 0.3,
+      fail: { k: 1, d: 1 }, guideAvg: [13.6, 15.6], guide: { ch: 'Shadowy 80–90' } },
+    { name: 'Keep a tight rein on the temperature', only: 'Fungi', airs: '1–50',
+      ch: { stat: 'Shadowy', base: 75, perD: 5 }, win: { k: 12, d: 1 }, rare: { k: 14, d: 1 }, rareOdds: 0.3,
+      fail: { k: 1, d: 1 }, guideAvg: [13.6, 15.6] },
+    { name: 'Tend to the mycelia', only: 'Fungi', airs: '51–100',
+      ch: { stat: 'Shadowy', base: 75, perD: 5 }, win: { k: 12, d: 1 }, rare: { k: 14, d: 1 }, rareOdds: 0.3,
+      fail: { k: 1, d: 1 }, guideAvg: [13.6, 15.6] },
+    { name: 'Plunge your (growth) into appropriate darkness', only: 'Darkness', airs: '1–25',
+      ch: { stat: 'Shadowy', base: 85, perD: 5 }, win: { k: 14, d: 1 }, rare: { k: 18, d: 1 }, rareOdds: 0.5, alt: true,
+      fail: { k: 1, d: -1 }, guideAvg: [17, 19], guide: { ch: 'Shadowy 85–95' } },
+    { name: 'Contrive a shaded spot for your (growth)', only: 'Shade', airs: '26–50',
+      ch: { stat: 'Shadowy', base: 95, perD: 0 }, win: { k: 14, d: 1 }, rare: { k: 18, d: 1 }, rareOdds: 0.5, alt: true,
+      fail: { k: 1, d: -1 }, guideAvg: [18, 18], guide: { ch: 'Shadowy 90' } },
+    { name: 'Blast your (growth) with light', only: 'Sunlight', airs: '51–75',
+      ch: { stat: 'Shadowy', base: 75, perD: 0 }, win: { k: 14, d: 1 }, rare: { k: 18, d: 1 }, rareOdds: 0.5, alt: true,
+      fail: { k: 1, d: -1 }, guideAvg: [17, 19], guide: { ch: 'Shadowy 85–95' } },
+
+    { name: 'Offer your (growth type) to the Sneering Horticulturalist', kind: 'sell', tag: 'FiHP',
+      fixed: 'Favour in High Places ×1', scaling: 'Intriguing Snippet', per: 1 / 2, at150: 22 },
+    { name: 'Offer your (growth type) to the Wizened Botanist', kind: 'sell', tag: 'Map',
+      fixed: 'Puzzling Map ×1', scaling: 'Sapphire', per: 5 / 6, at150: 37 },
+    { name: 'Offer your (growth type) to the Dreamy Mycologist', kind: 'sell', tag: 'SBL ×5',
+      fixed: 'Strong-Backed Labour ×5', scaling: 'Cryptic Clue', per: 5, at150: 225 },
+  ].map(function (e) {
+    return Object.assign({ storylet: VH_STORYLET, kind: 'nurture' }, e);
+  }));
+
+  const VH_INDEX = carouselIndex(VH_OPTIONS);
+
+  const VH_CLASS = 'fl-ux-vh';
+  const VH_FLAG = 'flUxVh';
+  const VH_BRANCH_CLASS = 'fl-ux-vh-branch';
+  const VH_BRANCH_FLAG = 'flUxVhBranch';
+
+  const VH_RULES = 'Raise Nurturing a Rooftop Growth to ' + VH_SELL_AT + ' to sell, and at ' + VH_MUST_SELL
+    + ' you must. A harder growth makes most challenges 5 harder per Difficulty and pays 1 more Nurturing per '
+    + 'Difficulty. No failure here raises a menace.';
+
+  // The Difficulties an option can meet: the plants that satisfy its `only`.
+  function vhDifficulties(e) {
+    const ds = VH_GROWS.filter(function (g) {
+      return !e.only || g.cls === e.only || g.light === e.only;
+    }).map(function (g) { return g.difficulty; });
+    return ds.filter(function (d, i) { return ds.indexOf(d) === i; }).sort();
+  }
+
+  function vhValues(f, ds) {
+    return ds.map(function (d) { return f.k + f.d * d; });
+  }
+
+  function vhSpan(values) {
+    return [Math.min.apply(null, values), Math.max.apply(null, values)];
+  }
+
+  function vhAverage(e, d) {
+    const round = function (n) { return Math.round(n * 10) / 10; };
+    return round((1 - e.rareOdds) * (e.win.k + e.win.d * d) + e.rareOdds * (e.rare.k + e.rare.d * d));
+  }
+
+  function vhSale(e, nurturing) {
+    return Math.floor((nurturing - VH_SELL_AT) * e.per);
+  }
+
+  function vhBadgeText(e) {
+    if (e.kind === 'grow') return 'diff ' + e.difficulty;
+    if (e.kind === 'sell') return '→ ' + e.tag;
+    const ds = vhDifficulties(e);
+    let text = 'Grow ' + carouselRange(vhSpan(vhValues(e.win, ds))) + CAROUSEL_MARK_CHALLENGE;
+    const fail = vhValues(e.fail, ds);
+    if (Math.min.apply(null, fail) < 0) text += ' ' + carouselRange(vhSpan(fail));
+    return text;
+  }
+
+  function vhColor(e) {
+    if (e.kind === 'grow') return CAROUSEL_COLOR_SETUP;
+    return e.kind === 'sell' ? CAROUSEL_COLOR_PAYOUT : CAROUSEL_COLOR_PROGRESS;
+  }
+
+  function vhPerDifficulty(f, ds) {
+    return ds.map(function (d) { return carouselSigned(f.k + f.d * d) + ' at ' + d; }).join(', ');
+  }
+
+  function vhSpec(e) {
+    const lines = [e.name, 'Vertiginous Horticulture, in the Flit', ''];
+    if (e.kind === 'grow') {
+      lines.push('Starts a growth: Difficulty ' + e.difficulty + ', ' + e.cls + ', prefers ' + e.light + '.');
+      lines.push('Difficulty makes the challenges harder and pays more Nurturing. The kind and the light it '
+        + 'prefers decide which extra options you are offered; any buyer takes any growth.');
+    } else if (e.kind === 'sell') {
+      lines.push('Needs Nurturing a Rooftop Growth ' + VH_SELL_AT + '. Ends the growth.');
+      lines.push('Gives: ' + e.fixed + ', and ' + e.scaling + ' for Nurturing above ' + VH_SELL_AT
+        + ' -- ' + vhSale(e, VH_MUST_SELL) + ' at ' + VH_MUST_SELL + '.');
+      lines.push('The guide: the fixed part is worth 12.5 Echoes and the scaling part 4.5 at 150.');
+    } else {
+      const ds = vhDifficulties(e);
+      const diffs = ds.map(function (d) { return e.ch.base + e.ch.perD * d; });
+      const span = vhSpan(diffs);
+      lines.push('Challenge: ' + e.ch.stat + ' ' + (span[0] === span[1] ? span[0] : span[0] + '–' + span[1])
+        + (e.ch.perD ? ' (' + e.ch.base + ' + ' + e.ch.perD + ' × Difficulty)' : '')
+        + ', certain at ' + e.ch.stat + ' ' + broadCertainAt(span[0])
+        + (span[0] === span[1] ? '' : '–' + broadCertainAt(span[1])) + '.'
+        + (e.guide && e.guide.ch ? ' The guide says ' + e.guide.ch + '; the option page is followed.' : ''));
+      lines.push('Success: Nurturing ' + vhPerDifficulty(e.win, ds) + ' (Difficulty).');
+      lines.push((e.alt ? 'Half of all successes, by the page' : 'Rare success, ' + Math.round(e.rareOdds * 100) + '% by the page')
+        + ': Nurturing ' + vhPerDifficulty(e.rare, ds) + '. Average success: '
+        + ds.map(function (d) { return '+' + vhAverage(e, d) + ' at ' + d; }).join(', ') + '.');
+      lines.push('Failure: Nurturing ' + vhPerDifficulty(e.fail, ds) + '.');
+      if (e.only) lines.push('Only for a growth that is ' + e.only + '.');
+      if (e.airs) lines.push('Offered at The Airs of London ' + e.airs + '.');
+      if (e.first) lines.push('Offered only before any Nurturing: the first move.');
+    }
+    if (e.needs) lines.push('Needs: ' + e.needs + '.');
+    if (e.note) lines.push(e.note);
+    lines.push('');
+    lines.push(VH_RULES);
+    return { text: vhBadgeText(e), color: vhColor(e), title: lines.join('\n') };
+  }
+
+  function vhStoryletSpec(key) {
+    if (key !== normalizeName(VH_STORYLET)) return null;
+    const lines = [VH_STORYLET, 'In the Flit', ''];
+    for (const kind of ['grow', 'nurture', 'sell']) {
+      lines.push(kind === 'grow' ? 'Plants:' : kind === 'nurture' ? 'Nurturing:' : 'Buyers:');
+      VH_OPTIONS.filter(function (e) { return e.kind === kind; }).forEach(function (e) {
+        lines.push('  • ' + e.name + ' — ' + vhBadgeText(e) + (e.airs ? ' [Airs ' + e.airs + ']' : '')
+          + (e.only ? ' [' + e.only + ']' : ''));
+      });
+    }
+    lines.push('');
+    lines.push(VH_RULES);
+    lines.push('The guide: ' + VH_EPA[0] + ' EPA selling at ' + VH_SELL_AT + ', ' + VH_EPA[1] + ' at ' + VH_MUST_SELL
+      + '. Its draw is the items -- a Favour in High Places, a Puzzling Map or five Strong-Backed Labour a growth -- '
+      + 'and that no failure raises a menace.');
+    lines.push('');
+    lines.push('Open the storylet and every option is badged in its own right.');
+    return { text: 'Grow → ' + VH_SELL_AT, color: CAROUSEL_COLOR_LABEL, title: lines.join('\n') };
+  }
+
+  function vhRatings() {
+    carouselRatings({
+      storylets: [VH_STORYLET], index: VH_INDEX, storyletSpec: vhStoryletSpec, optionSpec: vhSpec,
+      cls: VH_CLASS, flag: VH_FLAG, branchCls: VH_BRANCH_CLASS, branchFlag: VH_BRANCH_FLAG,
+    });
+  }
+
+  // === feature: Forgotten Quarter Expeditions ============================
+  //
+  // Expeditions from Base-Camp in the Forgotten Quarter, on the shared
+  // carousel plumbing. Four storylets:
+  //
+  //   Prepare for an Expedition -- turn items into Crate of Expedition
+  //     Supplies ("Sup"), capped at 100 and kept between expeditions.
+  //   Begin an Expedition in the Forgotten Quarter -- pick one; its length is
+  //     the Archaeologist's Progress ("Prog") it ends at, which is also the
+  //     least Supplies it can be done with.
+  //   Pursuing an Archaeological Expedition -- spend Supplies on Progress with
+  //     three Watchful approaches while Rivals' Progress creeps up, hinder the
+  //     rivals, and take the conclusion.
+  //   A Confrontation with a Rival -- what Rivals' Progress 10 forces.
+  //
+  // **What the badge says**, per storylet, because each asks a different
+  // question. Preparing: the Supplies an option gives ("Sup +3 ▼"). Choosing:
+  // the expedition's length and the Archaeologist it needs, or its Fate price
+  // ("30 sup · Arch 3"). Pursuing: the Progress a success makes ("Prog +3? ▼"),
+  // the Rivals' Progress a hindrance takes off ("Rivals −2? ▼"), and what a
+  // conclusion pays ("Egg + Linen?"). Confronting: the Progress it makes. `?`
+  // is a stat challenge's success, `▼` something used up (nearly always
+  // Supplies), `≈` the one option whose odds the guide gives, and a menace an
+  // option ALWAYS raises is named after the figure ("+Nightmares", "+Wounds")
+  // so a cheap line never reads as free. A menace only a failure raises is in
+  // the tooltip with the rest of the failure.
+  //
+  // Transcribed from the option and storylet pages (fetched through the API,
+  // 2026-09-14), with Forgotten Quarter Expeditions (Guide) as the cross-check.
+  // Its worst-case Supplies table and Echo worths are carried as given. Where
+  // the two disagree the page is followed and `guide` quoted:
+  //   Hire a porter from the docks    page also takes Piece of Rostygold ×50
+  //   The Chalcocite Pagoda (ending)   page Watchful 40, guide 60
+  //   A buccaneering approach         page "Rivals' Progress +0–1"; the guide's
+  //     table implies half of all successes, which is what `rivalOdds` carries
+  // From the guide alone, because the pages record none: Rumours of
+  // treasure's 60:40, and what The Temple of Uttermost Wind! and The Gallery
+  // of Serpents! pay. Left out: The Broken Granary's conclusion (no page for
+  // it), the Observer of Falsehoods, the Workshop of the Khan of Silks, the
+  // Granite Gallery and the Wolf's Reflection (storylines and a season of
+  // their own), and An Ophidian Gentleman. Corrections go in FQ_OPTIONS and
+  // nowhere else.
+  //
+  //   storylet / name / aliases   where the option is filed and what it is called.
+  //   ch        { stat, diff }.
+  //   gain      what a success (or the only outcome) changes: prog / sup /
+  //             rivals, a number or [lo, hi]; `rivalsSet` for "set to".
+  //   luck      { odds, win, lose }: Supplies either way, the game's choice.
+  //   exp       an expedition: { supplies, arch, fate, given, rivals, pays, worst }.
+  //   payout    a conclusion: { tag, gives, alt, rare, failGives, worth }.
+  //   rivalOdds the chance a success adds Rivals' Progress 1.
+  //   menace / failMenace   what it always raises / what only a failure does.
+  //   fail / uses / needs / airs / actions / rate / label / note / guide.
+
+  const FQ_PREPARE = 'Prepare for an Expedition';
+  const FQ_BEGIN = 'Begin an Expedition in the Forgotten Quarter';
+  const FQ_PURSUE = 'Pursuing an Archaeological Expedition';
+  const FQ_CONFRONT = 'A Confrontation with a Rival';
+  const FQ_STORYLETS = [FQ_PREPARE, FQ_BEGIN, FQ_PURSUE, FQ_CONFRONT];
+  const FQ_STORYLET_ALIASES = {};
+  FQ_STORYLET_ALIASES[normalizeName('Prepare for an Expedition in the Forgotten Quarter')] = normalizeName(FQ_PREPARE);
+  const FQ_SUPPLY_CAP = 100;
+  const FQ_EPA = 4.61;   // the guide's end-game Tomb of the Silken Thread figure
+
+  const FQ_OPTIONS = [
+    // --- Prepare for an Expedition --------------------------------------
+    { storylet: FQ_PREPARE, name: 'Rumours of treasure', luck: { odds: 0.6, win: 1, lose: 2 },
+      uses: 'Whispered Hint ×200', rate: 1.39,
+      note: 'The 60% also gives a Map Scrap. The odds are the guide’s; the page gives none.' },
+    { storylet: FQ_PREPARE, name: 'Blood-red tales', gain: { sup: 1 }, menace: 'Nightmares +1 CP',
+      uses: 'Appalling Secret ×10', rate: 1.5 },
+    { storylet: FQ_PREPARE, name: 'Your own expertise', gain: { sup: 1 },
+      uses: 'Page of Prelapsarian Archaeological Notes ×10' },
+    { storylet: FQ_PREPARE, name: 'Show us the money', aliases: ['Show us the money 2'], gain: { sup: 4 },
+      actions: 4, uses: 'Penny ×1000', rate: 2.5 },
+    { storylet: FQ_PREPARE, name: 'Ply your team with drink', gain: { sup: 1 },
+      uses: 'Bottle of Strangling Willow Absinthe ×3', rate: 1.5 },
+    { storylet: FQ_PREPARE, name: 'Thieves and cracksmen', gain: { sup: 1 }, uses: 'Piece of Rostygold ×160', rate: 1.6 },
+    { storylet: FQ_PREPARE, name: "Hire 'local' knowledge", gain: { sup: 1 }, uses: 'Moon-pearl ×160', rate: 1.6 },
+    { storylet: FQ_PREPARE, name: 'Hire a porter from the docks', gain: { sup: 7 },
+      uses: 'Favours: The Docks ×3 and Piece of Rostygold ×50', needs: 'Renown: The Docks 5, and Supplies below 91',
+      guide: { uses: 'Favours: The Docks ×3, and no Rostygold' },
+      note: 'The guide’s pick for most players, with Burly guards and porters.' },
+    { storylet: FQ_PREPARE, name: 'Burly guards and porters', gain: { sup: 3 }, uses: 'Strong-Backed Labour ×1',
+      note: 'The guide’s other pick: Strong-Backed Labour comes from Vertiginous Horticulture, the Underclay or the Bazaar.' },
+    { storylet: FQ_PREPARE, name: 'Begin an Expedition', label: '→ begin', actions: 0, needs: 'Supplies 10' },
+
+    // --- Begin an Expedition in the Forgotten Quarter -------------------
+    { storylet: FQ_BEGIN, name: "Seek a thieves' cache", ch: { stat: 'Watchful', diff: 60 },
+      exp: { supplies: 10, arch: 2, rivals: null, pays: 'an Unpredictable Treasure 1–80 and Shard of Glim ×400, or Soul ×500 instead' },
+      uses: 'Favours: Criminals ×1', note: 'Also gives Cryptic Clue ×100. At Archaeologist exactly 1 a beginner '
+        + 'version with the same name brings its own 10 Supplies. The guide recommends it for training Archaeologist.' },
+    { storylet: FQ_BEGIN, name: 'Seek a shrine of the Deep Blue Heaven', ch: { stat: 'Watchful', diff: 70 },
+      exp: { supplies: 20, arch: 2, rivals: 'Dr Orthos', pays: 'an Unpredictable Treasure 1–160, or rarely an Eyeless Skull', worst: [29, 29, 20] },
+      fail: 'Nightmares +1 CP', note: 'A rare success (25%) starts you at Progress 3. At Archaeologist exactly 2 a '
+        + 'beginner version with the same name needs only 5 Supplies and brings 15.' },
+    { storylet: FQ_BEGIN, name: 'The Chalcocite Pagoda',
+      exp: { supplies: 20, arch: 3, rivals: 'the Heroic Archaeologist', pays: 'a Searing Enigma, or Antique Mystery ×2 and a Magnificent Diamond', worst: [29, 29, 20] } },
+    { storylet: FQ_BEGIN, name: 'Stonefall Copse',
+      exp: { supplies: 20, arch: 3, rivals: 'Dr Orthos', pays: 'Puzzling Map ×2, a Direful Reflection and Nodule of Warm Amber ×250', worst: [29, 29, 20] } },
+    { storylet: FQ_BEGIN, name: 'The Broken Granary',
+      exp: { supplies: 20, arch: 3, rivals: 'the Lugubrious Seamstress', pays: 'the same as Stonefall Copse, by the guide' },
+      needs: 'A Complication in Delivery exactly 2' },
+    { storylet: FQ_BEGIN, name: 'The Tomb of the Silken Thread',
+      exp: { supplies: 30, arch: 3, rivals: 'the Lugubrious Seamstress', pays: 'a Judgements’ Egg and a Parabola-Linen Scrap', worst: [46, 39, 39] },
+      note: 'The guide’s pick for profit.' },
+    { storylet: FQ_BEGIN, name: 'The Sanctuary of the Crimson Petals', menace: 'Nightmares +1 CP',
+      exp: { supplies: 40, arch: 3, rivals: 'the Heroic Archaeologist', pays: 'a Portfolio of Souls and Bright Brass Skull ×2, or Night-Whisper ×3', worst: [76, 56, 49] } },
+    { storylet: FQ_BEGIN, name: 'A Temple of Uttermost Wind', aliases: ['A Temple of Uttermost Wind (7 FATE)'],
+      exp: { supplies: 30, arch: 2, fate: 7, rivals: 'Virginia', pays: 'an Unpredictable Treasure 41–240 and an Extraordinary Implication or a Silent Soul', worst: [46, 39, 39] } },
+    { storylet: FQ_BEGIN, name: 'A Gallery of Serpents', aliases: ['A Gallery of Serpents (7 FATE)'],
+      exp: { supplies: 40, arch: 3, fate: 7, rivals: 'Monsieur Pleat', pays: 'an Unpredictable Treasure and Uncanny Incunabula', worst: [74, 54, 49] },
+      needs: 'Watchful 80' },
+    { storylet: FQ_BEGIN, name: 'The Tomb of the Seven',
+      exp: { supplies: 30, arch: 3, given: 20, rivals: 'Dr Orthos and Virginia', pays: 'a Set of Correspondence Stones, once', worst: [46, 39, 39] },
+      needs: 'A Name in Seven Secret Alphabets exactly 5, and 10 Supplies of your own' },
+    { storylet: FQ_BEGIN, name: 'The Cave of the Nadir',
+      exp: { supplies: 60, arch: 5, rivals: 'February of the Calendar Council', pays: 'the route to the Cave of the Nadir, once', worst: [null, 86, 76] },
+      uses: 'an Eyeless Skull', note: 'The guide: do not attempt it with the cautious approach.' },
+    { storylet: FQ_BEGIN, name: 'The Clay Kidnapper: Seek a Sand-Drowned Stupa',
+      exp: { supplies: 20, arch: 2, given: 3, rivals: null, pays: 'progress in the Candlefinder case' },
+      needs: 'Candlefinder: Case exactly 10, Progress in a Case exactly 70' },
+    { storylet: FQ_BEGIN, name: 'Learn the Traditions of the Forgotten Quarter', label: 'Arch 1',
+      uses: 'Whispered Hint ×1000, Cryptic Clue ×250 and a Tale of Terror!!',
+      note: 'Your first Archaeologist, which unlocks the first expedition. Watchful +20 CP.' },
+    { storylet: FQ_BEGIN, name: 'More supplies!', label: '← prepare', actions: 0 },
+    { storylet: FQ_BEGIN, name: 'Ask a friend to send you an Eyeless Skull', label: 'Eyeless Skull',
+      needs: 'Archaeologist 5, the route to the Cave of the Nadir and 60 Supplies; once' },
+
+    // --- Pursuing an Archaeological Expedition --------------------------
+    { storylet: FQ_PURSUE, name: 'A cautious approach', aliases: ['A cautious approach 2'],
+      ch: { stat: 'Watchful', diff: 50 }, gain: { prog: 1 }, rivalOdds: 0.25,
+      uses: 'Crate of Expedition Supplies ×1, on a failure too', fail: 'no Progress, and Rivals’ Progress +0–1' },
+    { storylet: FQ_PURSUE, name: 'A bold approach', aliases: ['A bold approach 2'],
+      ch: { stat: 'Watchful', diff: 100 }, gain: { prog: 2 }, rivalOdds: 0.5, failMenace: 'Nightmares +1 CP',
+      uses: 'Crate of Expedition Supplies ×2, on a failure too', fail: 'no Progress, and Rivals’ Progress +0–1' },
+    { storylet: FQ_PURSUE, name: 'A buccaneering approach', ch: { stat: 'Watchful', diff: 160 }, gain: { prog: 3 },
+      rivalOdds: 0.5, guide: { rivals: 'the page says only “+0–1”; the 50% is the guide’s table' },
+      failMenace: 'Nightmares +2 CP', uses: 'Crate of Expedition Supplies ×3, on a failure too',
+      fail: 'no Progress, and Rivals’ Progress +1–2', note: 'The guide’s choice once it is certain: the fastest, '
+        + 'and rivals rarely keep up.' },
+    { storylet: FQ_PURSUE, name: 'A sign?', gain: { prog: 4 }, airs: '96+', needs: 'a Supply, which it does not spend',
+      note: 'Free: no Supplies, no rivals, and Watchful +5 CP. The guide: the only really interesting Airs option.' },
+    { storylet: FQ_PURSUE, name: 'A light caught by snow', label: 'Nightmares −1', airs: 'exactly 11' },
+    { storylet: FQ_PURSUE, name: 'The tent-city', label: 'Vision', airs: 'exactly 22',
+      note: 'Gives a Vision of the Surface.' },
+    { storylet: FQ_PURSUE, name: 'White walls in the sun', label: 'Vision', airs: 'exactly 33',
+      note: 'Gives a Vision of the Surface.' },
+    { storylet: FQ_PURSUE, name: 'An afternoon off', aliases: ['An afternoon off (1 FATE)'], label: 'Fate 1', airs: '85–90',
+      note: 'Crate of Expedition Supplies +1, Nightmares −2 CP and Wounds −2 CP, for 1 Fate.' },
+    { storylet: FQ_PURSUE, name: 'A supply cache!', aliases: ['A supply cache! (20 FATE)'], label: 'Fate 20',
+      needs: 'Supplies below 10', note: 'Crate of Expedition Supplies +10, Rivals’ Progress −2 and an '
+        + 'Extraordinary Implication, for 20 Fate.' },
+    { storylet: FQ_PURSUE, name: 'A cautious day', aliases: ['A cautious day 2'], label: 'story', airs: '76+ or 95+',
+      note: 'A story for the Temple of Uttermost Wind (Airs 76+) or the Cave of the Nadir (95+).' },
+    { storylet: FQ_PURSUE, name: 'A chance to hinder Dr Orthos', ch: { stat: 'Watchful', diff: 80 },
+      gain: { rivals: -2 }, airs: '90–100', needs: 'Rivals’ Progress 3–9, rival Dr Orthos',
+      uses: 'an Intriguing Snippet and a Supply, on a failure too' },
+    { storylet: FQ_PURSUE, name: 'A chance to hinder Virginia', ch: { stat: 'Persuasive', diff: 50 },
+      gain: { rivals: -2 }, airs: '80–90', needs: 'Rivals’ Progress 3–9, rival Virginia',
+      uses: 'Stolen Correspondence ×10 and a Touching Love Story, on a failure too, and a Supply on a success',
+      fail: 'an Extraordinary Implication' },
+    { storylet: FQ_PURSUE, name: 'A chance to hinder your rival, February', ch: { stat: 'Watchful', diff: 120 },
+      gain: { rivals: -2 }, airs: '50–60', needs: 'Rivals’ Progress 3–9, rival February',
+      uses: 'a Presbyterate Passphrase, a Bottle of Broken Giant 1844, An Identity Uncovered! and Favours: The Great '
+        + 'Game on a success, and a Supply either way' },
+    { storylet: FQ_PURSUE, name: 'A chance to hinder your rival, Monsieur Pleat', ch: { stat: 'Shadowy', diff: 100 },
+      gain: { rivals: -2 }, airs: '70–80', needs: 'Rivals’ Progress 3–9, rival Monsieur Pleat',
+      uses: 'Compromising Document ×2 and a Supply either way, and Drop of Prisoner’s Honey ×50 on a success' },
+    { storylet: FQ_PURSUE, name: 'A chance to hinder the Heroic Archaeologist', ch: { stat: 'Persuasive', diff: 50 },
+      gain: { rivals: -2 }, airs: '80–90', needs: 'Rivals’ Progress 3–9, rival the Heroic Archaeologist',
+      uses: 'Romantic Notion ×5, a Touching Love Story and a Supply, on a failure too', fail: 'an Extraordinary Implication' },
+    { storylet: FQ_PURSUE, name: 'A chance to hinder the Lugubrious Seamstress', ch: { stat: 'Persuasive', diff: 50 },
+      gain: { rivals: -2 }, airs: '80–90', needs: 'Rivals’ Progress 3–9, rival the Lugubrious Seamstress',
+      uses: 'an Unearthly Fossil, a Zee-Ztory and a Supply, on a failure too', fail: 'an Extraordinary Implication' },
+    { storylet: FQ_PURSUE, name: 'Confront a Rival', label: '→ confront', actions: 0,
+      needs: 'Rivals’ Progress 10, and 10 Supplies' },
+    { storylet: FQ_PURSUE, name: 'Concede', label: 'concede', needs: 'Rivals’ Progress 10',
+      note: 'Ends the expedition with nothing but a Hard-Earned Lesson. Your Progress is gone.' },
+    { storylet: FQ_PURSUE, name: 'Resupply', label: 'give up', needs: 'no Supplies left',
+      note: 'Ends the expedition and resets your Progress: the Supplies spent are wasted.' },
+
+    { storylet: FQ_PURSUE, name: "A thieves' cache!", payout: { tag: 'Treasure + Glim',
+      gives: 'an Unpredictable Treasure 1–80, Shard of Glim ×400 and Archaeologist +2 CP (to level 2)',
+      alt: { odds: 0.5, gives: 'Soul ×500 in place of the Glim, and Archaeologist +1 CP' },
+      worth: 'Echoes 6–66.5, about 32; 12–72.5, about 38, with the Souls' } },
+    { storylet: FQ_PURSUE, name: 'A Shrine of the Deep Blue Heaven', payout: { tag: 'Treasure',
+      gives: 'an Unpredictable Treasure 1–160 and Archaeologist +3 CP (to level 3)',
+      rare: { odds: 0.1, gives: 'an Eyeless Skull, an Extraordinary Implication and Whispered Hint ×100 instead' },
+      worth: 'Echoes 2–125, about 57' } },
+    { storylet: FQ_PURSUE, name: 'The Chalcocite Pagoda', ch: { stat: 'Watchful', diff: 40 }, guide: { ch: 'Watchful 60' },
+      payout: { tag: 'Enigma', gives: 'a Searing Enigma and Archaeologist +1 CP',
+        failGives: 'Antique Mystery ×2, a Magnificent Diamond and Archaeologist +1 CP -- the expedition still ends',
+        worth: '62.5 Echoes, or 37.5 on a failure' } },
+    { storylet: FQ_PURSUE, name: 'The Tomb of the Silken Thread', ch: { stat: 'Watchful', diff: 60 },
+      payout: { tag: 'Egg + Linen', gives: 'a Judgements’ Egg, a Parabola-Linen Scrap and Archaeologist +1 CP',
+        failGives: 'a Parabola-Linen Scrap and Archaeologist +1 CP -- the expedition still ends',
+        worth: '145 Echoes with the Rat Market, or 82.5 on a failure' } },
+    { storylet: FQ_PURSUE, name: 'The Sanctuary of the Crimson Petals', payout: { tag: 'Portfolio + Skulls',
+      gives: 'a Portfolio of Souls, Bright Brass Skull ×2 and Archaeologist +1 CP',
+      rare: { odds: 0.2, gives: 'Night-Whisper ×3 instead' },
+      worth: '132.5 Echoes, or 247.5 for the Night-Whispers with the Rat Market' } },
+    { storylet: FQ_PURSUE, name: 'Stonefall Copse!', payout: { tag: 'Maps + Reflection',
+      gives: 'Puzzling Map ×2, a Direful Reflection, Nodule of Warm Amber ×250 and Archaeologist +1 CP',
+      worth: '62.5 Echoes' } },
+    { storylet: FQ_PURSUE, name: 'The Tomb of the Seven!', ch: { stat: 'Dangerous', diff: 30 }, menace: 'Nightmares +1 CP',
+      payout: { tag: 'Stones', gives: 'a Set of Correspondence Stones, Watchful +45 CP and Archaeologist +1 CP',
+        failGives: 'nothing: Nightmares +2 CP and a Supply, and you may try again' } },
+    { storylet: FQ_PURSUE, name: 'The Gate of the Nadir', payout: { tag: 'route',
+      gives: 'the route to the Cave of the Nadir' } },
+    { storylet: FQ_PURSUE, name: 'The Temple of Uttermost Wind!', ch: { stat: 'Watchful', diff: 100 },
+      payout: { tag: 'Treasure', gives: 'an Unpredictable Treasure 41–240 and an Extraordinary Implication or a '
+        + 'Silent Soul (by the guide; the page records none)', failGives: 'a Supply, and you may try again',
+        worth: 'Echoes 33–638, about 170' } },
+    { storylet: FQ_PURSUE, name: 'The Gallery of Serpents!', payout: { tag: 'Treasure',
+      gives: 'the first time an Unpredictable Treasure 135–240 and Uncanny Incunabulum ×0–3, afterwards 120–191 and '
+        + 'one Incunabulum (by the guide; its pages were not read)', worth: 'about 287 Echoes the first time, 139 after' } },
+    { storylet: FQ_PURSUE, name: 'A Sand-Drowned Stupa', payout: { tag: 'case',
+      gives: 'Candlefinder: Progress in a Case 80' } },
+
+    // --- A Confrontation with a Rival ------------------------------------
+    { storylet: FQ_CONFRONT, name: "Assault Orthos' camp", ch: { stat: 'Dangerous', diff: 80 }, gain: { prog: 5 },
+      rivalsSet: 1, menace: 'Wounds +5 CP', failMenace: 'Wounds +10 CP', actions: 4,
+      uses: 'Bottle of Greyfields 1879 ×200 and Supplies ×10, on a failure too',
+      needs: 'rival Dr Orthos, Bottle of Greyfields 1879 ×100 (the page unlocks at 100 and takes 200)' },
+    { storylet: FQ_CONFRONT, name: 'Bribe Virginia', ch: { stat: 'Watchful', diff: 50 }, gain: { prog: 3 },
+      rivalsSet: 1, menace: 'Nightmares +3 CP', failMenace: 'Nightmares +6 CP', actions: 4,
+      uses: 'Brilliant Soul ×10 and Supplies ×10, on a failure too', fail: 'Rivals’ Progress +1',
+      needs: 'rival Virginia' },
+    { storylet: FQ_CONFRONT, name: 'Challenge February to a competition', ch: { stat: 'Watchful', diff: 120 },
+      gain: { prog: 3 }, rivalsSet: 1, actions: 4,
+      uses: 'Favours: Revolutionaries ×1 and Supplies ×10 on a success, Supplies ×5 on a failure',
+      needs: 'rival February' },
+    { storylet: FQ_CONFRONT, name: 'Rescue the Heroic Archaeologist', ch: { stat: 'Dangerous', diff: 60 },
+      gain: { prog: 3 }, rivalsSet: 1, menace: 'Wounds +3 CP',
+      uses: 'Supplies ×10 on a success, ×5 on a failure', fail: 'Rivals’ Progress +1',
+      needs: 'rival the Heroic Archaeologist, on the Sanctuary of the Crimson Petals' },
+    { storylet: FQ_CONFRONT, name: 'Distract the Lugubrious Seamstress', ch: { stat: 'Persuasive', diff: 72 },
+      gain: { prog: [3, 5] }, rivalsSet: 1, menace: 'Nightmares +5 CP',
+      uses: 'Bottle of Strangling Willow Absinthe ×10 and Supplies ×10, on a failure too',
+      fail: 'Rivals’ Progress +1, and she is gone anyway', needs: 'rival the Lugubrious Seamstress, on the Tomb of the Silken Thread' },
+    { storylet: FQ_CONFRONT, name: 'Challenge Monsieur Pleat', ch: { stat: 'Shadowy', diff: 130 }, gain: { prog: 5 },
+      rivalsSet: 1, menace: 'Nightmares +4 CP', failMenace: 'Nightmares +8 CP',
+      uses: 'Supplies ×10 on a success, ×5 on a failure', needs: 'rival Monsieur Pleat, on the Gallery of Serpents' },
+    { storylet: FQ_CONFRONT, name: 'Other Rivals', ch: { stat: 'Watchful', diff: 50 }, gain: {}, rivalsSet: 1,
+      uses: 'Cryptic Clue ×20 and Supplies ×10, on a failure too', fail: 'Rivals’ Progress +1',
+      needs: 'no named rival left', note: 'Makes no Progress: it only sends the rivals back to 1.' },
+    { storylet: FQ_CONFRONT, name: 'Nothing doing', label: '← back' },
+  ];
+
+  const FQ_INDEX = carouselIndex(FQ_OPTIONS);
+
+  const FQ_CLASS = 'fl-ux-fq';
+  const FQ_FLAG = 'flUxFq';
+  const FQ_BRANCH_CLASS = 'fl-ux-fq-branch';
+  const FQ_BRANCH_FLAG = 'flUxFqBranch';
+
+  const FQ_RULES = 'Build Crate of Expedition Supplies (up to ' + FQ_SUPPLY_CAP + ', kept between expeditions), '
+    + 'then spend them on Archaeologist’s Progress up to the expedition’s length; you start at Progress 1. Running '
+    + 'out of Supplies ends the expedition for nothing, and Rivals’ Progress 10 forces a confrontation or a concession.';
+
+  const FQ_CHANGE = {
+    prog: { tag: 'Prog', name: 'Archaeologist’s Progress' },
+    sup: { tag: 'Sup', name: 'Crate of Expedition Supplies' },
+    rivals: { tag: 'Rivals', name: 'Rivals’ Progress' },
+  };
+  const FQ_CHANGE_KEYS = ['prog', 'sup', 'rivals'];
+
+  function fqLuckValue(luck) {
+    return Math.round((luck.odds * luck.win + (1 - luck.odds) * luck.lose) * 10) / 10;
+  }
+
+  function fqChangeText(gain) {
+    return FQ_CHANGE_KEYS.filter(function (k) { return gain && gain[k] != null; }).map(function (k) {
+      return FQ_CHANGE[k].tag + ' ' + carouselRange(gain[k]);
+    }).join(' ');
+  }
+
+  function fqChangeWords(e) {
+    const words = FQ_CHANGE_KEYS.filter(function (k) { return e.gain && e.gain[k] != null; }).map(function (k) {
+      return FQ_CHANGE[k].name + ' ' + carouselRange(e.gain[k]);
+    });
+    if (e.rivalsSet != null) words.push('Rivals’ Progress back to ' + e.rivalsSet + ', and that rival is gone');
+    return words.join(', ');
+  }
+
+  function fqBadgeText(e) {
+    if (e.label) return e.label;
+    let text;
+    if (e.exp) text = e.exp.supplies + ' sup · ' + (e.exp.fate ? 'Fate ' + e.exp.fate : 'Arch ' + e.exp.arch);
+    else if (e.payout) text = e.payout.tag;
+    else if (e.luck) text = CAROUSEL_MARK_EXPECTED + 'Sup ' + carouselSigned(fqLuckValue(e.luck));
+    else if (e.gain && Object.keys(e.gain).length) text = fqChangeText(e.gain);
+    else text = 'Rivals → ' + e.rivalsSet;
+    if (e.ch) text += CAROUSEL_MARK_CHALLENGE;
+    if (e.menace) text += ' +' + e.menace.split(' ')[0];
+    if (e.uses) text += ' ' + CAROUSEL_MARK_USES;
+    return text;
+  }
+
+  function fqColor(e) {
+    if (e.label) return CAROUSEL_COLOR_NEUTRAL;
+    if (e.payout) return CAROUSEL_COLOR_PAYOUT;
+    if (e.gain && e.gain.prog != null) return CAROUSEL_COLOR_PROGRESS;
+    return CAROUSEL_COLOR_SETUP;
+  }
+
+  function fqSpec(e) {
+    const lines = [e.name, 'Forgotten Quarter expeditions, at Base-Camp · ' + e.storylet, ''];
+    if (e.ch) {
+      lines.push('Challenge: ' + e.ch.stat + ' ' + e.ch.diff + ', certain at ' + e.ch.stat + ' '
+        + broadCertainAt(e.ch.diff) + '.'
+        + (e.guide && e.guide.ch ? ' The guide says ' + e.guide.ch + '; the option page is followed.' : ''));
+    }
+    if (e.exp) {
+      const x = e.exp;
+      lines.push('Ends at Archaeologist’s Progress ' + x.supplies + ', so ' + x.supplies + ' Supplies is the least it '
+        + 'can be done with' + (x.given ? ' -- ' + x.given + ' of them given when it starts' : '') + '.');
+      lines.push('Needs Archaeologist ' + x.arch + (x.fate ? ', and costs ' + x.fate + ' Fate' : '') + '.');
+      lines.push(x.rivals ? 'Rivals: ' + x.rivals + ', and the rest.' : 'No rivals.');
+      lines.push('Pays: ' + x.pays + '.');
+      if (x.worst) {
+        lines.push('The guide’s worst case, if that approach always succeeds: '
+          + ['cautious', 'bold', 'buccaneering'].map(function (a, i) {
+            return a + ' ' + (x.worst[i] == null ? 'not advised' : x.worst[i] + ' Supplies');
+          }).join(', ') + '.');
+      }
+    }
+    if (e.luck) {
+      lines.push(CAROUSEL_MARK_EXPECTED + ' ' + Math.round(e.luck.odds * 100) + '%: Supplies +' + e.luck.win + '; '
+        + Math.round((1 - e.luck.odds) * 100) + '%: Supplies +' + e.luck.lose + '. Expected: Supplies +'
+        + fqLuckValue(e.luck) + '.');
+    }
+    if (e.gain && (Object.keys(e.gain).length || e.rivalsSet != null)) {
+      lines.push((e.ch ? 'Success: ' : 'Gives: ') + fqChangeWords(e) + '.');
+    } else if (e.rivalsSet != null) {
+      lines.push((e.ch ? 'Success: ' : 'Gives: ') + fqChangeWords(e) + '.');
+    }
+    if (e.payout) {
+      const p = e.payout;
+      lines.push((e.ch ? 'Success: ' : 'Gives: ') + p.gives + '. The expedition ends.');
+      if (p.alt) lines.push('Half the time instead, by the page: ' + p.alt.gives + '.');
+      if (p.rare) lines.push('Rare success, ' + Math.round(p.rare.odds * 100) + '% by the page: ' + p.rare.gives + '.');
+      if (p.failGives) lines.push('Failure: ' + p.failGives + '.');
+      if (p.worth) lines.push('The guide’s worth: ' + p.worth + '.');
+    }
+    if (e.rivalOdds != null) {
+      lines.push('Rivals’ Progress +1 on ' + Math.round(e.rivalOdds * 100) + '% of successes'
+        + (e.guide && e.guide.rivals ? ' -- ' + e.guide.rivals : ', by the page') + '.');
+    }
+    if (e.fail) lines.push('Failure: ' + e.fail + '.');
+    if (e.menace) lines.push('Always: ' + e.menace + '.');
+    if (e.failMenace) lines.push('On a failure: ' + e.failMenace + '.');
+    if (e.uses) lines.push(CAROUSEL_MARK_USES + ' Uses up ' + e.uses + '.');
+    if (e.needs) lines.push('Needs: ' + e.needs + '.');
+    if (e.airs) lines.push('Offered at The Airs of the Forgotten Quarter ' + e.airs + '.');
+    if (e.actions === 0) lines.push('Costs no action.');
+    else if (e.actions > 1) lines.push('Costs ' + e.actions + ' actions.');
+    if (e.rate) lines.push('The guide: about ' + e.rate + ' Echoes a Supply.');
+    if (e.guide && e.guide.uses) lines.push('The guide says ' + e.guide.uses + '; the option page is followed.');
+    if (e.note) lines.push(e.note);
+    lines.push('');
+    lines.push(FQ_RULES);
+    return { text: fqBadgeText(e), color: fqColor(e), title: lines.join('\n') };
+  }
+
+  function fqStoryletSpec(key) {
+    const summary = {};
+    summary[normalizeName(FQ_PREPARE)] = { storylet: FQ_PREPARE, text: 'supplies',
+      extra: 'The guide: Favours: The Docks through the porter, or Strong-Backed Labour through the guards, for most '
+        + 'players; cap Supplies at ' + FQ_SUPPLY_CAP + ' before you set out.' };
+    summary[normalizeName(FQ_BEGIN)] = { storylet: FQ_BEGIN, text: 'expeditions',
+      extra: 'The guide: the thieves’ cache and the shrine to train Archaeologist, the Tomb of the Silken Thread for '
+        + 'profit -- ' + FQ_EPA + ' EPA at the end-game. Once you have chosen you cannot go back for more Supplies.' };
+    summary[normalizeName(FQ_PURSUE)] = { storylet: FQ_PURSUE, text: 'Prog → goal',
+      extra: 'Supplies per Progress depend only on your chance of success, so take the biggest approach you can pass.' };
+    summary[normalizeName(FQ_CONFRONT)] = { storylet: FQ_CONFRONT, text: 'rivals',
+      extra: 'A named rival can be confronted once; after that only Other Rivals is left.' };
+    const s = summary[key];
+    if (!s) return null;
+    const lines = [s.storylet, 'Forgotten Quarter expeditions, at Base-Camp', ''];
+    FQ_OPTIONS.filter(function (e) { return e.storylet === s.storylet; }).forEach(function (e) {
+      lines.push('  • ' + e.name + ' — ' + fqBadgeText(e));
+    });
+    lines.push('');
+    lines.push(s.extra);
+    lines.push(FQ_RULES);
+    lines.push('');
+    lines.push('Open the storylet and every option is badged in its own right.');
+    return { text: s.text, color: CAROUSEL_COLOR_LABEL, title: lines.join('\n') };
+  }
+
+  function fqRatings() {
+    carouselRatings({
+      storylets: FQ_STORYLETS, index: FQ_INDEX, storyletSpec: fqStoryletSpec, optionSpec: fqSpec,
+      aliases: FQ_STORYLET_ALIASES,
+      cls: FQ_CLASS, flag: FQ_FLAG, branchCls: FQ_BRANCH_CLASS, branchFlag: FQ_BRANCH_FLAG,
+    });
+  }
+
   // === panel: zailing ====================================================
   //
   // The reference half of the zailing work: the numbers that decide a voyage
@@ -10130,6 +11878,19 @@
     // options of an opened card: a lab option is only badged inside a lab card,
     // because "Take a break" and "No more of this!" could be anywhere.
     { name: 'university-laboratory', run: labRatings },
+    // The fifth on `.branch__title`. Arbor deals no cards, so it badges the
+    // London card that takes you there, the two storylets a stay happens in,
+    // and their options -- the options only while one of those is open.
+    { name: 'arbor', run: arborRatings },
+    // Three carousels on the shared storylet-carousel plumbing: each badges its
+    // storylet headings and the options of its own open storylet only, so they
+    // are the sixth to eighth on `.branch__title` without ever answering for
+    // the same option.
+    { name: 'lb-industries', run: lbiRatings },
+    { name: 'menace-eradication', run: dmeRatings },
+    { name: 'vertiginous-horticulture', run: vhRatings },
+    // The fourth on the carousel plumbing, and the first with four storylets.
+    { name: 'forgotten-quarter', run: fqRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a

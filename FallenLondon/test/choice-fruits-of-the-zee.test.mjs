@@ -1847,7 +1847,9 @@ check('the feature list, in order',
   api.FEATURES.map((f) => f.name),
   ['fotz-capture', 'spite-card-ratings', 'zee-card-ratings',
     'fotz-card-ratings', 'fotz-depth-control', 'fotz-supplication', 'port-carnelian',
-    'scientific-voyages', 'university-laboratory']);
+    'scientific-voyages', 'university-laboratory', 'arbor',
+    'lb-industries', 'menace-eradication', 'vertiginous-horticulture',
+    'forgotten-quarter']);
 
 check('the panel list, in order',
   api.PANELS.map((p) => p.id),

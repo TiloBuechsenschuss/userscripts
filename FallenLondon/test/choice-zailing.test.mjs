@@ -505,7 +505,9 @@ check('the zee ratings are registered alongside the other features',
   api.FEATURES.map((f) => f.name),
   ['fotz-capture', 'spite-card-ratings', 'zee-card-ratings',
     'fotz-card-ratings', 'fotz-depth-control', 'fotz-supplication', 'port-carnelian',
-    'scientific-voyages', 'university-laboratory']);
+    'scientific-voyages', 'university-laboratory', 'arbor',
+    'lb-industries', 'menace-eradication', 'vertiginous-horticulture',
+    'forgotten-quarter']);
 
 check('the Zailing panel is in the launcher menu',
   api.PANELS.map((p) => p.id), ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory']);

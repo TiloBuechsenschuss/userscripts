@@ -882,8 +882,10 @@ navigation. Two consequences:
   quality-of-life tweaks — the `launcher`, the **Factions** panel and its "use" button — and
   `choice-helper.js` is **advice on what storylets and cards do**: every rating badge
   (`spite-card-ratings`, `zee-card-ratings`, the `fotz-*` features, `port-carnelian`,
-  `scientific-voyages`, `university-laboratory`) and the reference panel built on each one's
-  table (Zailing, Port Carnelian, Scientific Voyages, Fruits of the Zee, University Laboratory). The rule that decided where each thing
+  `scientific-voyages`, `university-laboratory`, `arbor`, `lb-industries`, `menace-eradication`,
+  `vertiginous-horticulture`, `forgotten-quarter`) and the reference panel built on each one's
+  table (Zailing, Port Carnelian, Scientific Voyages, Fruits of the Zee, University Laboratory;
+  `arbor` and the four carousels have none, by request). The rule that decided where each thing
   went: **a panel goes where its table's badge goes**, because the two are one transcription. The
   Factions panel's `!` pips stayed in UX Enhancers — they are about your possessions, not about
   a storylet. The in-page dive-depth control went with the badges it exists to feed.
@@ -1720,6 +1722,93 @@ navigation. Two consequences:
   guide's repeatable projects (`LAB_PROJECTS`), equipment ladder (`LAB_EQUIPMENT`) and expertise
   table (`LAB_EXPERTS`).
 
+  `arbor` is the seventh, for **Arbor, of the Roses**, and has **no panel** (the user asked for
+  badges only, 2026-09-14). Arbor deals no opportunity cards, so it badges three things: the
+  London card **A Dream of Roses** (`ARBOR_CARD_CLASS`: "9 actions", and in the tooltip whether the
+  dream opens on Near or Far Arbor, from the Possessions counts cache's Attar and its age), the two
+  storylets a stay happens in, **Near Arbor** and **Far Arbor** (`ARBOR_CLASS`: a "Near map" /
+  "Far map" label whose tooltip lists each district's options and the guide's four grinds), and
+  every option inside them (`ARBOR_BRANCH_CLASS`). `ARBOR_OPTIONS` is taken from the **individual
+  option pages** with the guide's Table of Choices as cross-check; the four rows where they disagree
+  (Witness a trial's Watchful 115 vs 100, Surrender some of your Attar's Persuasive 100 vs 79,
+  Leave Arbor early's Attar +Linger/2 vs +2, and what Light your candles in Far Arbor costs) follow
+  the page and keep the guide's figure as `guide`, quoted in the tooltip. **The badge is what an
+  option changes** ("Attar +2", "Attar −3 EI +3"), not a ranking: Attar is built to be spent, and
+  what it buys is worth what the player's chosen grind says, so an Echo price would be the badge
+  choosing the grind. The **sign** carries the Attar direction and the colour only repeats it
+  (teal-leaning gain, brick spend, slate item trades, grey movement). `?` is a stat challenge's
+  success outcome (the tooltip has the failure and `arborCertainAt`, which reproduces the guide's
+  own Watchful 125 and 167 and is written `× 5 / 3` because `75 / 0.6` is not 125 in floating
+  point), `⏏` spends all Permission to Linger, `★` the tribute's rare all-Attar success, `≈` the one
+  even-odds option (While away your time, whose 50% is the guide's — the page gives no odds). The
+  six options that scale with Permission to Linger or Attar say so in words ("Attar +Linger"),
+  never a number, and `linger: null` ("the page does not say") is kept apart from `linger: 0`.
+  **The gate is the open storylet**: options are looked up only when a `.storylet-root__heading`
+  reads Near Arbor, Far Arbor or A Dream of Roses, since *Walk North* and *Witness a trial* could be
+  anywhere; failing that, a greeting in `ARBOR_AREAS` (confirm-only, a guess — no greeting has been
+  captured) allows the names that are unambiguous. *Light your candles* is in both cities and does
+  different things, so it needs the storylet. This is the **fifth** feature on `.branch__title`.
+  Left out: Visit the Queen of Roses, the ambition options and the Coilheart Games petition, which
+  are steps in other storylines rather than rows of the guide.
+
+  `lb-industries`, `menace-eradication` and `vertiginous-horticulture` (2026-09-14, no panels, by
+  request) are three early carousels that deal no opportunity cards, and they stand on one shared
+  piece of plumbing, **`carouselRatings`**: each feature hands it its storylet names, a
+  `carouselIndex` of its option table and two pure spec functions, and it badges every storylet
+  heading the feature has a summary for, plus the options of the feature's storylet that is **open**
+  (`.storylet-root__heading`) — looked up only within that storylet (`carouselLookup`), never by name
+  alone, since *Make bobbins*, *Stalk silently* and *Treat the soil* could be anywhere. Wiki titles
+  with the placeholders `(growth)`, `(growth type)` or `(work leader)` match any words in that place
+  (`carouselMatcher`), because the game fills them in ("Water your mandrakes"); no other bracket
+  does. A figure after `?` is what a **failure takes back**, shown only when it takes progress away;
+  `▼` uses something up. Arbor predates the plumbing and keeps its own.
+  **L. B. Industries** (`LBI_OPTIONS`): a work option shows the Foreman's Favour its success pays
+  (`FF +15? −19`); a payout its cost and item (`110 → Reliquary`), with the 10 Bone Fragments per
+  surplus Favour in the tooltip. Rare odds are carried only where the page states them (two rows);
+  the rest say the page gives none. Cross-check: the guide's "Min for 100%" is `broadCertainAt` on
+  all seven. Leaving the shift (*Bid farewell to …*) takes the remaining Favour and the Work Team.
+  **Department of Menace Eradication** (`DME_OPTIONS`, `DME_CONTRACTS`): a hunting option shows what a
+  success does to Hiding, Wariness or Savagery (`Hiding −5–7? +1`); nearly every challenge is
+  `per × Savagery + plus`, which the page cannot show, so the tooltip works it out at both contracts'
+  starting Savagery (Rat 15, Ushabti 30). Cross-check: the formulas reproduce each page's example
+  difficulty. *Approach it very casually* and *Explore its lair* give only an example, so they say so
+  instead of carrying a guessed multiplier. *Lay poisoned bait* is a Luck challenge at 60% and is its
+  expected value. Confrontations and bounties name what they pay, contracts what they set, and the
+  rat bounty says it costs 5 actions. Page-versus-guide disagreements (Stalk silently's stat, Shoot
+  it's failure, Capture it alive!'s CP) follow the page with `guide` quoted; *Expose yourself as
+  bait*'s success and *Search for traces*' rare success are the guide's alone because their pages
+  record none. The Fate-locked Miniature Menace is left out: the wiki does not carry its options.
+  **Vertiginous Horticulture** (`VH_OPTIONS`, `VH_GROWS`): every figure is `k + d × Difficulty` of the
+  growth, which is not read, so a nurturing option shows the **range over the Difficulties of the
+  plants it can be used on** (`vhDifficulties`: a Shade-only option only meets Difficulty 2 and shows
+  one figure). Cross-checks: the guide's Average Gain equals the pages' success, rare success and rare
+  odds combined on every row (which is what confirms the 30% on the four class options), and the
+  scaling sale reward reproduces the guide's 22 / 37 / 225 at Nurturing 150 with `Math.floor`. The
+  guide's challenge column disagrees with eight pages; each is kept as `guide.ch`. The pages write a
+  lost failure as "Loss of (1 − Difficulty)", read as the guide reads it: losing Difficulty − 1.
+  **Forgotten Quarter Expeditions** (`forgotten-quarter`, `FQ_OPTIONS`, 2026-09-14, no panel) is the
+  fourth on the plumbing and the first with four storylets, each badge answering its own screen:
+  *Prepare for an Expedition* the Supplies an option gives (`Sup +3 ▼`, the guide's Echoes per
+  Supply in the tooltip), *Begin an Expedition in the Forgotten Quarter* an expedition's length and
+  Archaeologist or Fate (`30 sup · Arch 3`, with pay, rivals and the guide's worst-case Supplies),
+  *Pursuing an Archaeological Expedition* the Progress an approach makes (`Prog +3? ▼`), the Rivals'
+  Progress a hindrance removes and what a conclusion pays, and *A Confrontation with a Rival* the
+  Progress a confrontation makes. **A menace an option always raises goes on the badge** (`+Wounds`,
+  `+Nightmares`); one only a failure raises stays in the tooltip. It added two aliases to the
+  plumbing, both backwards-compatible: an entry's **`aliases`** (the game lists *An afternoon off*
+  for the page *An afternoon off (1 FATE)*; whether it drops "(7 FATE)" from an expedition is
+  unknown, so both are matched), and `carouselRatings`' **`aliases`** map for a storylet (the
+  option pages file preparation under *Prepare for an Expedition in the Forgotten Quarter*, the
+  storylet page is titled without it). Titles shared by two storylets (*The Chalcocite Pagoda*
+  begins and ends an expedition) resolve by the open storylet. Cross-checks: `broadCertainAt`
+  gives the guide's 84 / 167 / 267 for the approaches, `rivalOdds ÷ Progress` its 0.25 / 0.25 /
+  0.17, and Rumours of treasure's expectation its 1.4. Disagreements (page followed, `guide`
+  quoted): the porter also takes 50 Rostygold, the Pagoda's ending is Watchful 40 not 60, and the
+  buccaneering approach's rival chance is only "+0–1" on the page — the 50% is from the guide's
+  table. Rumours of treasure's odds and the Temple and Gallery conclusions are the guide's alone.
+  Left out: the Broken Granary's conclusion (no wiki page), and the Observer, Khan's Workshop,
+  Granite Gallery, Wolf's Reflection and Ophidian Gentleman storylines.
+
   The `factions` panel's static half is `FACTIONS`, transcribing the *Factions (Guide)*
   Faction-Item table (the item that converts Favours to Renown, its shop, its price) and the
   Renown-item ladder (10/25/40, for 3/5/7 Favours), including the wiki's best-in-slot marks and
@@ -2050,6 +2139,29 @@ Confirmed live by the author:
   the guide's Student Table disagree in nine places and the pages were followed. Also unknown:
   whether the Struggling Artist and the Urchin count as level 5 for the team options.
 
+- The **Arbor badges** (added 2026-09-14). Nothing about them has been seen in the game. Worth
+  reporting, in order: whether a stay really shows **Near Arbor** / **Far Arbor** as an opened
+  storylet (a `.storylet-root__heading`) with the options beneath it — the whole option gate rests
+  on that, and if Arbor renders its options some other way no option badge will appear; what the
+  greeting says in Arbor (`ARBOR_AREAS` is a guess); whether the options read as the wiki titles
+  them; and, on the four rows where guide and option page disagree, which one the game agrees with
+  (a Witness a trial at Watchful 115 or 100 is the easiest to see on the challenge line).
+
+- The **L. B. Industries, Menace Eradication and Vertiginous Horticulture badges** (added
+  2026-09-14). Nothing seen in the game. Report first whether option badges appear at all: they rest
+  on the carousel storylet (*Your Labour, and its Fruits*, *Hunting across London*, *Vertiginous
+  Horticulture*, the confrontations) showing as an opened `.storylet-root__heading` above its
+  options. Then whether the placeholder titles really read as "Water your mandrakes" / "Bid farewell
+  to the Grizzled Gaffer" (a badge missing on exactly those options is that); whether *Destroy the
+  d__ned thing!* is spelled that way in the game; and a Horticulture failure's Nurturing against
+  the badge, since the "Loss of (1 − Difficulty)" reading is the guide's interpretation.
+- The **Forgotten Quarter Expeditions badges** (added 2026-09-14). Nothing seen in the game. Report
+  first whether option badges appear on all four Base-Camp storylets, and what the preparation
+  storylet's heading actually reads (both *Prepare for an Expedition* and *… in the Forgotten
+  Quarter* are accepted); then whether the Fate expeditions show "(7 FATE)" in their titles, a
+  buccaneering success's Rivals' Progress rate against the 50% the tooltip claims, and whether the
+  Chalcocite Pagoda's ending challenge is Watchful 40 or 60.
+
 - The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
   table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
   looking at the screen can confirm: a wrong number renders exactly as well as a right one. They
@@ -2346,6 +2458,35 @@ Current tests:
   (options badged only inside a lab card, a strict card silent until confirmed); **four** features
   on one `.branch__title`; no name in another table; the reference tables; and the whole panel.
   It passes a `localStorage` stub with auto-refresh off, so no hidden frame or timer is started.
+- `FallenLondon/test/choice-arbor.test.mjs` — asserts `choice-helper.js`'s Arbor feature. The
+  transcription row by row (challenges, flat outcomes, the six scaling rows, the options costing no
+  Permission to Linger, the guide's option count per district) and the four guide disagreements
+  pinned by name; the cross-checks (a trip is 1 + 7 + 1 actions, `arborCertainAt` reproducing the
+  guide's Watchful 125 and 167, and the floating-point case); the badge text for every kind of
+  row, including that no scaling row shows a digit; colour following the Attar direction and the
+  **text alone** separating a gain from a spend; `null` against `0` Permission to Linger in the
+  tooltip; the lookup (nothing off an Arbor screen, *Light your candles* only with the city known,
+  the card's options only on the card); the gate in all three greeting states and the open
+  storylet beating it; `arborRatings` end to end on an opened storylet, a city change redrawing the
+  same heading, and the storylet list; no name in any other table; three features on one
+  `.branch__title`.
+- `FallenLondon/test/choice-myn-carousels.test.mjs` — asserts `lb-industries`,
+  `menace-eradication` and `vertiginous-horticulture` and the shared carousel plumbing, in one suite
+  because they share it. The plumbing: placeholder titles matching the game's filled-in titles and no
+  other bracket, ranges, `broadCertainAt`, and no option found outside its own open storylet. Per
+  feature, the transcription and its cross-check — the guide's Min for 100% (L. B. Industries), each
+  page's example difficulty at a stated Savagery (Menace Eradication), the guide's Average Gain and
+  sale figures at 150 (Horticulture) — every guide disagreement by name, the badge text of each kind
+  of row, and Horticulture's Difficulty ranges per `only`. Then no name in another table or another
+  carousel, the three registered passes end to end on switching open storylets, and a listed
+  storylet's summary.
+- `FallenLondon/test/choice-forgotten-quarter.test.mjs` — asserts `forgotten-quarter`. The guide's
+  cross-checks (approach Watchful for 100%, Rivals per Progress, Rumours of treasure's 1.4),
+  every expedition's length, Archaeologist, Fate and worst-case Supplies, badge text for each kind of
+  row including menaces always raised on the badge and failure-only ones kept to the tooltip, the
+  three guide disagreements by name, both alias kinds, a title shared by two storylets resolving by
+  the open one, every storylet summary listing all its options, the registered pass end to end
+  across three storylets, and no name in another table.
 - `FallenLondon/test/ux-launcher-placement.test.mjs` — asserts `ux-enhancers.js`'s
   `launcherPlacement`, the pure half of where the "⚙ UX" button sits. It is organised around
   the three real travel controls: wide desktop (beside the sidebar button, bottoms level),
