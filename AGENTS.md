@@ -883,9 +883,12 @@ navigation. Two consequences:
   `choice-helper.js` is **advice on what storylets and cards do**: every rating badge
   (`spite-card-ratings`, `zee-card-ratings`, the `fotz-*` features, `port-carnelian`,
   `scientific-voyages`, `university-laboratory`, `arbor`, `lb-industries`, `menace-eradication`,
-  `vertiginous-horticulture`, `forgotten-quarter`) and the reference panel built on each one's
-  table (Zailing, Port Carnelian, Scientific Voyages, Fruits of the Zee, University Laboratory;
-  `arbor` and the four carousels have none, by request). The rule that decided where each thing
+  `vertiginous-horticulture`, `forgotten-quarter`, `cat-and-mouse`, `season-in-soup`,
+  `long-dead-god`, `engaged-in-a-case`, `sunken-embassy`, `law-furnace`, `prelapsarian-museum`,
+  `on-a-heist`, `spider-symposium`, `short-stories`, `flash-lays`, `social-actions`,
+  `cave-of-the-nadir`, `empress-court`, `breeding-monsters`) and the reference panel built on each
+  one's table (Zailing, Port Carnelian, Scientific Voyages, Fruits of the Zee, University Laboratory;
+  `arbor` and the nineteen carousels have none, by request). The rule that decided where each thing
   went: **a panel goes where its table's badge goes**, because the two are one transcription. The
   Factions panel's `!` pips stayed in UX Enhancers — they are about your possessions, not about
   a storylet. The in-page dive-depth control went with the badges it exists to feed.
@@ -1808,6 +1811,112 @@ navigation. Two consequences:
   table. Rumours of treasure's odds and the Temple and Gallery conclusions are the guide's alone.
   Left out: the Broken Granary's conclusion (no wiki page), and the Observer, Khan's Workshop,
   Granite Gallery, Wolf's Reflection and Ophidian Gentleman storylines.
+  **Cat and Mouse** (`cat-and-mouse`, `CM_OPTIONS`, 2026-09-15, no panel) covers all six cases:
+  the Business Card's *A meeting with the Implacable Detective* and *Finding the Screaming Map:
+  beginning the search* (what a case pays and the guide's EPA, `Plaques · 1.19 EPA ▼`), the two
+  pursuit storylets *Cat and Mouse: an Elusive Target* and *Cat and Mouse: the Screaming Map*, the
+  Medium's *Look at the ivory frame* in *The mirror-frames*, and the six ending storylets (`60+
+  Journals + Jade`). **A pursuit badge is the Cat an option makes**, because nearly every option
+  spends exactly one Mouse — the clock — so Cat is what varies; the four options spending two
+  Mouse name it (`Cat +10 Mouse −2 ▼`), and the 70% Luck lines carry `≈` and their expected Cat,
+  since a failure spends the Mouse too. The two pursuit storylets share most titles (resolved by
+  the open storylet); the wiki's disambiguating " 1" / " 2" suffixes are aliases. Cross-checks: the
+  guide's maximum Cat of 63 (67 for the Medium) is rebuilt from the table band by band, and its
+  Echo cost per item column is carried as `echoes`. Disagreements (page followed, `guide` quoted):
+  *Time is passing: play it safe* costs 2 actions in the guide and 1 on both pages; the three
+  map-half searches are one narrow difficulty higher in the guide; the ivory frame is Luck 90% on
+  the page and certain in the guide's plan. *Take the fee* is on the page only.
+  **The Season in Soup** (`season-in-soup`, `SOUP_OPTIONS`, `SOUP_ITEMS`, 2026-09-15, no panel)
+  badges *Mrs Chapman's Boarding House…*, *An Array of Soups* and *Horatia's Parlour*. Every item
+  option pays `y_offset + height / (1 + e^(−0.037 (Persuasive − 150)))` on base Persuasive capped
+  at 230, rounded half to even (`Module:SCurve`), on one of three curves by the item's price; base
+  Persuasive is **not read**, so the badge is the range 0–230 (`Zee-Ztory ×1–5`) and the tooltip the
+  figure at each fifty. The value barely differs between options, so the item is the badge; **★**
+  marks the three noise-in-the-walls options. Cross-check: the curve gives the guide's 240 Hints at
+  the cap, and the per-week table matches the guide's. **Promenade is one title in all four
+  weeks**, so `soupWeek` reads the week off the week-unique options on screen and `SOUP_INDEX[week]`
+  picks that week's row; with no week, a generic row says only `item ×1–5`. The week is passed to
+  `carouselRatings` as its new, optional `salt`, so a Promenade badge redraws when the week becomes
+  readable on the same heading node.
+  Five more on the plumbing, 2026-09-15, no panels, each transcribed from its option and storylet
+  pages with the guide as the cross-check, and two small shared helpers (`carouselTooltip`,
+  `carouselSummary`) for their tooltips. **The Mind of a Long-Dead God** (`long-dead-god`,
+  `MIND_OPTIONS`): every payout is Stormy-Eyed −5 CP plus one reward, and a challenge pays **only on
+  a failure**, so the badge is the reward with **✗** for "a failed challenge pays it" (`Shadowy +10
+  ✗`); Stormy-Eyed is not read, so the tooltip gives `mindFailChance` around the difficulty (narrow:
+  60% success at the difficulty, 10 points a level, 10%–100%). Pages that state odds instead of a
+  difficulty are read as difficulty = their 50% level + 1, as the pages stating both have it. It is
+  the only carousel that also badges **cards in the hand** (`MIND_CARD_CLASS`, skipping the opened
+  card's `.storylet-root__heading`, which the plumbing already summarises), and *Rain* and
+  *Geology* are **confirm-only strict**: badged only while `currentArea()` reads *The Mind of a
+  Long-Dead God*, a greeting nobody has captured. Cross-check: Stormy-Eyed 19 is 190 CP, 38
+  payouts, the guide's 380 CP or 38 Screams. **Engaged in a Case** (`engaged-in-a-case`,
+  `CASE_OPTIONS`): Detective's Progress on success/failure, actions over one, ▼, and ≈ expectation
+  for Luck; faction-card headings are not summarised. The Pursue pages state difficulties at Case
+  Difficulty 10 and the guide's formulas reproduce all but *Seek truth in gossip* (35 vs 45; the
+  guide's formula is kept, the page quoted). Other disagreements: *Follow a lead*'s actions, the
+  Docks' and Criminals' Luck (60% page, 70% guide), the Bohemians' failure Watchful. **The Sunken
+  Embassy** (`sunken-embassy`, `EMB_OPTIONS`): Fragments on success/failure and each reward's cost;
+  the guide's Min for 100% is `broadCertainAt` of every broad difficulty, and *Peel fact from
+  falsehood* is narrow 5, certain at 9, where the guide says 10. **Law-Furnace** (`law-furnace`,
+  `LAW_OPTIONS`, `lawBase`): base Actus Reus is the guide's piecewise formula on the rounded stat
+  average (continuous at 100/150/190, 480 at 230 as its example says); the advanced-skill checks are
+  narrow 4 on the pages and 8 in the guide; *Persona Non Grata* is aliased to *Pro Rata*. **The
+  Prelapsarian Museum** (`prelapsarian-museum`, `MUS_OPTIONS`): `CAROUSEL_PLACEHOLDER` gained
+  `(first option)` / `(second option)` so the Assert titles, which name a taxon in the game, match;
+  the Toxicology Exhibit's 2.4 CP Wounds and the Neathoscope's 1.57 CP Nightmares are the pages' odds
+  worked out, as the guide has them; a failed *Request help* gives Scandal and no Identifying... on
+  the page, +1 in the guide.
+  Five more, 2026-09-15, no panels, with three new shared helpers: `carouselChallenge` (the
+  challenge line, narrow certain at difficulty + 4), `carouselEv` (an expectation to one decimal) and
+  **`carouselHandRatings`** for a carousel that deals its **own undiscardable deck**: a card in the
+  hand is badged with its best option needing nothing special (no `needs`, no `uses`) by the
+  feature's `rank` array, and `▾` (`CAROUSEL_MARK_HIDDEN`) when a gated option ranks higher; it skips
+  the opened card's `.storylet-root__heading`. `CAROUSEL_COLOR_RISK` (warm brick) is new, for a line
+  whose text already names the risk. **On a Heist** (`on-a-heist`, `HEIST_OPTIONS`): Progress and
+  Cat-Like Tread; Luck options at their expectation, stat checks at success with the failure's Tread
+  (`Prog +1? fail Tread −1`); the hand ranks **Tread before Progress**, because three Tread is the
+  whole margin and nearly every card has a safe Progress line. Outcomes the game picks with no odds
+  (*Poke through the possibilities*, *Speak to her*, *Abstract the papers*) are labels. Prizes carry
+  the guide's Echo values. The Countess's and Envoy's prize storylets were not read. Disagreements:
+  the three narrow checks are certain at difficulty + 4 on the pages and one more in the guide.
+  **The Spider Symposium** (`spider-symposium`, `SPIDER_OPTIONS`): Applause on success/failure;
+  cross-checks are the guide's Min for 100% and its Average Gain at a 25% rare success; no
+  disagreements. **Short Stories** (`short-stories`, `STORY_OPTIONS`): pages and actions while
+  writing, Potential and cap while reworking, Echoes on success/failure when publishing; the guide's
+  Echo-difference column is each tier's success less failure. Disagreements: A Cautious Edit's cap,
+  A Daring Edit's difficulty, and Add a touch of darkness's cap of 62 against its own instructions'
+  70. **Flash Lays** (`flash-lays`, `FLASH_OPTIONS`) is the **one transcribed from a guide
+  subpage** (*Flash Lays (Guide)/Cards*) rather than option pages, and says so; the case and Make your
+  Move pages were read. Both marks' difficulties are carried (`{ lo, hi }`); the Auditor's is 2.5×
+  the Spirifer's on every row but *If you can't trade on your reputation...*. Two same-titled options
+  on one card are one labelled row. It also badges the hand. **Social Actions** (`social-actions`,
+  `SOCIAL_OPTIONS`): letters, sends, correspondence rewards and the four assassin cards (☠ on the
+  deadly option, one row per title covering both Horsehead Amulet versions); the recipient effects
+  are the guide's table; cross-check: the reward thresholds 4 / 5 / 9 are the 10 / 15 / 45 CP spent.
+  Three more, 2026-09-15, no panels. `carouselHandRatings` gained two optional, backwards-compatible
+  fields: `allowed(storylet)`, a gate for card names too ordinary to badge anywhere, and `salt()`,
+  what that gate depends on (so a hand badge redraws when the greeting changes). **Cave of the
+  Nadir** (`cave-of-the-nadir`, `NADIR_OPTIONS`) is transcribed from *Cave of the Nadir
+  (Guide)/Cards* and the guide's value analysis — the card option pages were not read — plus *Enter
+  the Cave of the Nadir*'s pages. Badge: what it gives, the guide's Echo value, the Irrigo
+  (`Enigma · 62.5 · Irrigo +2 ▼`); the hand ranks by value then least Irrigo. Ten ordinary card
+  names (*Losing*, *The Web*, *Old Bones*…) are **confirm-only strict** on the greeting *Cave of the
+  Nadir*, never captured. *The Sound of Wings* is also in `ZEE_CARDS` — the one card name two tables
+  share — and is safe only because the zee gate and the Cave gate need different greetings; the
+  Nadir suite pins that. Cross-check: `nadirLeaveLoss` reproduces the guide's penalty table.
+  Disagreements (table followed): the Rubbery Man's Irrigo, the black ribbon casket's 312.5 vs
+  312.65, and the Radical Factotum's missing Favour. Same-titled options on one card are one row; the
+  option titled "-" is left out (no letters to match). **Artistry in the Empress' Court**
+  (`empress-court`, `COURT_OPTIONS`): Inspired... on success/failure while working, a finished
+  work's goods (every minor 17 Echoes, every major 30, which the tests pin, so the item is the
+  choice); cross-check 153 / 300 CP = Inspired 17 / 24. Disagreements: the organ recital's narrow
+  Austere 6 vs 7, and eleven works' Making Waves or menaces. *Seek out the music of stars* is not in
+  the guide's tables. **Breeding Monsters** (`breeding-monsters`, `BREED_TABLE`, `BREED_OPTIONS`):
+  the three progress storylets (CP a success makes) and the seven breeding storylets, each with the
+  same four `Breed the …` titles resolved by the open storylet; badge both payouts and the expected
+  Echoes; cross-check: every guide expectation is 70% / 30% of its two Echo values, and 21 CP at +3
+  is the guide's seven actions.
 
   The `factions` panel's static half is `FACTIONS`, transcribing the *Factions (Guide)*
   Faction-Item table (the item that converts Favours to Renown, its shop, its price) and the
@@ -2161,6 +2270,38 @@ Confirmed live by the author:
   Quarter* are accepted); then whether the Fate expeditions show "(7 FATE)" in their titles, a
   buccaneering success's Rivals' Progress rate against the 50% the tooltip claims, and whether the
   Chalcocite Pagoda's ending challenge is Watchful 40 or 60.
+- The **Cat and Mouse badges** (added 2026-09-15). Nothing seen in the game. Report first whether
+  the Business Card's storylet (*A meeting with the Implacable Detective*, opened from Possessions)
+  shows as an opened `.storylet-root__heading` so its options get badges; then what the pursuit
+  options' titles actually read (the wiki writes "Last chance! – follow your nose" on one storylet
+  and "Last chance! Follow your nose" on the other, and "Fate is on your side." with a full stop on
+  one), whether *Time is passing: play it safe* costs 1 action or the guide's 2, and whether the
+  map-half searches are at the page's narrow difficulty or the guide's one higher.
+- The **Season in Soup badges** (added 2026-09-15). Nothing seen in the game. Report whether the
+  house storylet's heading reads the full *Mrs Chapman's Boarding House for Those Who Temporarily
+  Have Nowhere Else To Go*, whether the parlour's Promenade gets a week-specific badge (it should
+  read e.g. `Vision ×1–5` in week 4, and `item ×1–5` only if the parlour option beside it is not
+  recognised), and one soup's actual payout against the tooltip's figure at your base Persuasive.
+- The **Long-Dead God, Engaged in a Case, Sunken Embassy, Law-Furnace and Prelapsarian Museum
+  badges** (added 2026-09-15). Nothing seen in the game. Report: the greeting while inside the Mind
+  of a Long-Dead God, verbatim (the *Rain* and *Geology* cards stay unbadged until it reads *The
+  Mind of a Long-Dead God*), whether its card titles read *What the Thunder Said* and *Bat's-Eye
+  View* without the wiki's disambiguation, and whether a challenge there fails as often as the
+  tooltip says; whether a faction card's "Solving a case" option gets a badge once the card is
+  opened; the Sunken Embassy's two storylet headings; whether *Persona Non Grata* shows at Void Ab
+  Initio 9; and the Assert options' real titles in the Osteology Lab.
+- The **Heist, Spider Symposium, Short Stories, Flash Lays and Social Actions badges** (added
+  2026-09-15). Nothing seen in the game. Report first whether heist and Flash Lay cards in the hand
+  get badges at all (the hand badge rests on `eachCardName` finding the special decks the same way
+  as the ordinary one); then the heist options' real titles where the wiki disambiguates ("Play it
+  safe 3", "Dash past 2", "Escape! (On a Heist)"); whether *Establish a false identity with your
+  Informant's help* really appears twice on one card; whether the assassin cards' deadly option shows
+  one title or two; and one Short Story publish against the Echoes the badge claims.
+- The **Cave of the Nadir, Empress' Court and Breeding Monsters badges** (added 2026-09-15). Nothing
+  seen in the game. Report the greeting inside the Cave verbatim (ten card names stay unbadged until
+  it reads *Cave of the Nadir*); whether the Cave's same-titled options ("Run", "Sleep's fortress",
+  "Look into the water") appear under those plain titles; the Court's *What's your next work?*
+  heading as it really reads; and one breeding's payout against the badge.
 
 - The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
   table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
@@ -2487,6 +2628,39 @@ Current tests:
   three guide disagreements by name, both alias kinds, a title shared by two storylets resolving by
   the open one, every storylet summary listing all its options, the registered pass end to end
   across three storylets, and no name in another table.
+- `FallenLondon/test/choice-cat-and-mouse.test.mjs` — asserts `cat-and-mouse`. The guide's maximum
+  Cat per case (63, 67 for the Medium) rebuilt from the table, its Echo costs, the Luck lines'
+  expected Cat, the two-Mouse badges, what each case start pays, every ending storylet having a
+  60+, a 50+ and a <50 option, the guide disagreements by name, titles shared by the two pursuit
+  storylets resolving by the open one, the wiki-suffix aliases, the registered pass across both
+  pursuit storylets, and no name in another table.
+- `FallenLondon/test/choice-season-in-soup.test.mjs` — asserts `season-in-soup`. The S-curve against
+  the guide's 240 Hints at the cap, the three ranges, the cap, half-to-even rounding, the week table
+  against the guide's, the three noises, badge text, `soupWeek`, no duplicate title in any week's
+  index, the registered pass redrawing Promenade when its week stops being readable, and no name in
+  another table.
+- `FallenLondon/test/choice-long-dead-god.test.mjs`, `choice-engaged-in-a-case.test.mjs`,
+  `choice-sunken-embassy.test.mjs`, `choice-law-furnace.test.mjs`,
+  `choice-prelapsarian-museum.test.mjs` — one per feature. Each pins its table's shape, the guide
+  cross-check (38 escape payouts; the pages' Case Difficulty 10 figures; Min for 100%; `lawBase` at
+  the guide's example; the museum's certain-at stats and expected menaces), badge text for each kind
+  of row, the guide disagreements by name, the registered pass end to end, and no name in another
+  table. The Long-Dead God suite also runs the Rain/Geology gate in all three greeting states and
+  the hand-card badge; the museum suite the Assert placeholder titles; the Law-Furnace suite the
+  *Persona Non Grata* alias.
+- `FallenLondon/test/choice-on-a-heist.test.mjs`, `choice-spider-symposium.test.mjs`,
+  `choice-short-stories.test.mjs`, `choice-flash-lays.test.mjs`, `choice-social-actions.test.mjs` —
+  one per feature: the table's shape, the cross-check (heist expectations and the hand's Tread-first
+  ranking with `▾`; the symposium's Min for 100% and Average Gain; the stories' Echo differences;
+  the Flash Lay 2.5× difficulty rule and its one exception; the correspondence thresholds), badge text
+  per kind of row, the guide disagreements by name, the registered pass (including a hand card for
+  the heist and the Flash Lay), and no name in another table.
+- `FallenLondon/test/choice-cave-of-the-nadir.test.mjs`, `choice-empress-court.test.mjs`,
+  `choice-breeding-monsters.test.mjs` — one per feature: the leaving-penalty table, the hand ranking
+  and ▾, and the strict gate in all three greeting states (Nadir); Inspired 17 / 24 as 153 / 300 CP
+  and every work's 17 / 30 Echoes (Court); every beast's expected Echoes against the guide and the
+  same breeding title resolving by storylet (Breeding); badge text, guide disagreements by name, the
+  registered pass, and no name in another table.
 - `FallenLondon/test/ux-launcher-placement.test.mjs` — asserts `ux-enhancers.js`'s
   `launcherPlacement`, the pure half of where the "⚙ UX" button sits. It is organised around
   the three real travel controls: wide desktop (beside the sidebar button, bottoms level),

@@ -17,23 +17,23 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Department_of_Menace_Eradication_(Guide) [Dept. of Menace Eradication] (implemented)
     - https://fallenlondon.wiki/wiki/Vertiginous_Horticulture_(Guide) [The Flit] (implemented)
     - https://fallenlondon.wiki/wiki/Forgotten_Quarter_Expeditions_(Guide) [The Forgotten Quarter] (implemented)
-    - https://fallenlondon.wiki/wiki/Cat_and_Mouse_(Guide) [Ladybones Road, Wolfstack Docks]
-    - https://fallenlondon.wiki/wiki/The_Mind_of_a_Long-Dead_God_(Guide) [The Mind of a Long-Dead God]
-    - https://fallenlondon.wiki/wiki/Engaged_in_a_Case_(Guide) [Moloch Street]
-    - https://fallenlondon.wiki/wiki/The_Sunken_Embassy_(Guide) [Moloch Street]
-    - https://fallenlondon.wiki/wiki/Law-Furnace_(Guide) [Moloch Street]
-    - https://fallenlondon.wiki/wiki/The_Prelapsarian_Museum_(Guide) [The Museum of Prelapsarian History]
-    - https://fallenlondon.wiki/wiki/On_a_Heist_(Guide) [On a Heist]
-    - https://fallenlondon.wiki/wiki/The_Spider_Symposium_(Guide) [The Singing Mandrake]
-    - https://fallenlondon.wiki/wiki/The_Season_in_Soup_(Guide) [Spite]
-    - https://fallenlondon.wiki/wiki/Short_Stories_(Guide) [Your Activities]
-    - https://fallenlondon.wiki/wiki/Flash_Lays_(Guide) [Your Activities]
-    - https://fallenlondon.wiki/wiki/Social_Actions_(Guide) [Your Social Engagements]
+    - https://fallenlondon.wiki/wiki/Cat_and_Mouse_(Guide) [Ladybones Road, Wolfstack Docks] (implemented)
+    - https://fallenlondon.wiki/wiki/The_Mind_of_a_Long-Dead_God_(Guide) [The Mind of a Long-Dead God] (implemented)
+    - https://fallenlondon.wiki/wiki/Engaged_in_a_Case_(Guide) [Moloch Street] (implemented)
+    - https://fallenlondon.wiki/wiki/The_Sunken_Embassy_(Guide) [Moloch Street] (implemented)
+    - https://fallenlondon.wiki/wiki/Law-Furnace_(Guide) [Moloch Street] (implemented)
+    - https://fallenlondon.wiki/wiki/The_Prelapsarian_Museum_(Guide) [The Museum of Prelapsarian History] (implemented)
+    - https://fallenlondon.wiki/wiki/On_a_Heist_(Guide) [On a Heist] (implemented)
+    - https://fallenlondon.wiki/wiki/The_Spider_Symposium_(Guide) [The Singing Mandrake] (implemented)
+    - https://fallenlondon.wiki/wiki/The_Season_in_Soup_(Guide) [Spite] (implemented)
+    - https://fallenlondon.wiki/wiki/Short_Stories_(Guide) [Your Activities] (implemented)
+    - https://fallenlondon.wiki/wiki/Flash_Lays_(Guide) [Your Activities] (implemented)
+    - https://fallenlondon.wiki/wiki/Social_Actions_(Guide) [Your Social Engagements] (implemented)
 
   Late MYN:
-    - https://fallenlondon.wiki/wiki/Cave_of_the_Nadir_(Guide) [Cave of the Nadir]
-    - https://fallenlondon.wiki/wiki/Artistry_in_the_Empress%27_Court_(Guide) [The Empress' Court]
-    - https://fallenlondon.wiki/wiki/Breeding_Monsters_(Guide) [The Labyrinth of Tigers]
+    - https://fallenlondon.wiki/wiki/Cave_of_the_Nadir_(Guide) [Cave of the Nadir] (implemented)
+    - https://fallenlondon.wiki/wiki/Artistry_in_the_Empress%27_Court_(Guide) [The Empress' Court] (implemented)
+    - https://fallenlondon.wiki/wiki/Breeding_Monsters_(Guide) [The Labyrinth of Tigers] (implemented)
     - https://fallenlondon.wiki/wiki/Tales_of_Mahogany_Hall_(Guide) [Mahogany Hall]
     - https://fallenlondon.wiki/wiki/Master-Classes_in_Etiquette_(Guide) [Mahogany Hall]
     - https://fallenlondon.wiki/wiki/The_Rat_Market_(Guide) [The Rat Market]
