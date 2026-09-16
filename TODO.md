@@ -155,7 +155,6 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Philosofruits_(Guide) (Mid Zailing) [Mangrove College]
 
   Reference (not carousels: overviews, progress qualities, shops; same order):
-    - https://fallenlondon.wiki/wiki/Working_for_the_Widow (Early MYN) [airs storylets]
     - https://fallenlondon.wiki/wiki/Casing_(Guide) (Early MYN) [progress quality]
     - https://fallenlondon.wiki/wiki/Fascinating_(Guide) (Early MYN) [progress quality]
     - https://fallenlondon.wiki/wiki/The_Hunt_is_On!_(Guide) (Early MYN) [progress quality]
@@ -185,7 +184,12 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Deeper_Discordant_Studies_(Guide) (no stage tag) [The Hurlers]
     - https://fallenlondon.wiki/wiki/Marriage_(Guide) (no stage tag) [Your Social Engagements]
     - https://fallenlondon.wiki/wiki/Risen_Burgundy_(Guide) (no stage tag) [Risen Burgundy]
- - https://fallenlondon.wiki/wiki/Piracy_(Guide)
+
+  Custom stuff without a guide:
+    - https://fallenlondon.wiki/wiki/Working_for_the_Widow [airs storylets]
+    - https://fallenlondon.wiki/wiki/Opportunism_in_Spite [airs storylets]
+    - https://fallenlondon.wiki/wiki/The_Alleys_of_Spite [airs storylets]
+    - https://fallenlondon.wiki/wiki/Rob_a_drunk [airs storylets]
 
 # Done
 

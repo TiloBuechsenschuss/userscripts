@@ -5,20 +5,16 @@
 // Node script: it reads the userscript, evaluates its IIFE against a stub DOM
 // (empty, so the initial scan() finds nothing) and pulls out the internals.
 //
-// The thing worth pinning hardest is the MERGE. Three carousels share storylet
-// and option titles -- the third renames the first's into Title Case, which
-// normalising folds away -- and `carouselLookup` answers nothing when two rows
-// match, so an unmerged table would leave three dozen options with no badge at
-// all and nothing would say so. So: every title resolves to exactly one row,
-// merged rows carry one variant per carousel, and the badge quotes both
-// readings rather than guessing which carousel is open (nothing on the screen
-// says, and Featuring in the Tales of the University lives on the Myself tab).
+// The feature carries ONE of the guide's three carousels, A Respectable
+// Academic, by request: the other two lock behind you once the story is done.
+// So what is pinned here is the badge's three parts in their order -- the Term
+// Passing... CP, the guide's Echoes, and LAST any Connected the option builds
+// -- and in particular that the Connected is READ OUT of the payout rather than
+// stored beside it, which is what keeps the badge and the tooltip from ever
+// disagreeing. Only a gain is shown; a Connected an option spends stays in the
+// tooltip, as a cost does everywhere else in this file.
 //
-// Then: the first carousel carrying goods where the other two carry the guide's
-// Echoes, the three research swaps being the outliers the guide's 4.90 EPA line
-// rests on, and the badges.
-//
-// Numbers come from Term Passing... (Guide) -- its three "every option" tables
+// Numbers come from Term Passing... (Guide) -- its third "every option" table
 // -- on fallenlondon.wiki, fetched through the API on 2026-09-16.
 //
 //   node FallenLondon/test/choice-term-passing.test.mjs
@@ -104,8 +100,9 @@ const TABLES = ['ARBOR_OPTIONS', 'LBI_OPTIONS', 'DME_OPTIONS', 'VH_OPTIONS', 'FQ
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { TP_FIRST, TP_SECOND, TP_THIRD, TP_SHARED, TP_CAROUSELS, TP_STORYLETS, TP_INDEX, TP_CLASS,'
-    + ' TP_BRANCH_CLASS, tpBadgeText, tpSpec, tpStoryletSpec, tpRatings, carouselLookup, '
+    'return { TP_ROWS, TP_OPTIONS, TP_CAROUSEL, TP_STORYLETS, TP_INDEX, TP_CLASS,'
+    + ' TP_BRANCH_CLASS, tpBadgeText, tpSpec, tpStoryletSpec, tpRatings, tpConnected, tpWorth,'
+    + ' carouselLookup, '
     + TABLES.join(', ')
     + ', ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS, LAB_CARDS, PC_OPTIONS, VSD_OPTIONS, normalizeName,'
     + ' BADGE_CLASS, FEATURES }; })();');
@@ -140,105 +137,124 @@ function otherNames(own) {
   ].map(key).filter(Boolean);
 }
 
-check('three carousels, and the merge loses nothing',
-  [api.TP_CAROUSELS.length,
-    api.TP_FIRST.length + api.TP_SECOND.length + api.TP_THIRD.length,
-    rows.reduce((n, e) => n + e.variants.length, 0)],
-  [3, 111 + api.TP_SHARED.length, 111 + api.TP_SHARED.length]);
+check('one carousel, the last one, and every row belongs to it',
+  [api.TP_CAROUSEL.name, api.TP_CAROUSEL.ftu, api.TP_CAROUSEL.cap, api.TP_CAROUSEL.actions,
+    rows.length === api.TP_ROWS.length],
+  ['A Respectable Academic', '30+', 8, 10, true]);
 
-// The merge is the whole point. Every storylet-and-option pair must resolve to
-// exactly ONE row: `carouselLookup` returns null when two match, and the
-// symptom is an option with no badge rather than an error.
+// Nothing on the screen says which carousel you are in, and with one carried
+// there is nothing to say: the badge is one reading, never a pair.
+check('no badge quotes two carousels',
+  rows.filter((e) => api.tpBadgeText(e).includes('|')).map((e) => e.name), []);
+
 check('every option resolves to exactly one row under its own storylet',
+  rows.filter((e) => !api.carouselLookup(api.TP_INDEX, e.name, key(e.storylet)))
+    .map((e) => e.storylet + ' | ' + e.name), []);
+
+// --- the badge's three parts, in order -------------------------------------
+//
+// Term Passing... CP, then the guide's Echoes, then the Connected the option
+// BUILDS. The Connected comes last because it is the reason to run the
+// carousel, not the reason to pick one option over another.
+
+check('badges',
+  ['Learn everything you can', 'Demonstrate your cricketing knowledge', 'Get involved',
+    'Perhaps you might read a book today', 'Blackmail', 'Swap research with archaeologists',
+    'Make your peace with Dr Orthos']
+    .map((n) => api.tpBadgeText(row(n))),
+  ['TP +4 · 1.60 E',
+    'TP +4? · 1.24 E · Benthic +12',
+    'TP +4? · 1.44 E · Benthic +2 Summerset +2',
+    'TP +4? · 2.00 E · Benthic +2 Summerset +2',
+    'reset · 5.20 E',
+    'TP +4? · 14.00 E',
+    'reset? · 2.50 E · Benthic +10 Summerset +10']);
+
+// The Connected figures are read out of the payout rather than stored beside
+// it, so a mistyped one cannot make the badge and the tooltip disagree.
+check('the Connected on a badge is exactly what its payout says',
+  rows.filter((e) => api.tpConnected(e.gives)
+    .some((c) => !e.gives.includes('+' + c.cp + ' CP'))).map((e) => e.name), []);
+
+check('the parser reads a gain, skips a cost, and never runs two clauses together',
+  [api.tpConnected('Connected: Benthic +30 CP and Connected: Summerset +30 CP'),
+    api.tpConnected('Cryptic Clue ×62, Connected: Benthic +12 CP'),
+    api.tpConnected('Hedonist +3 CP, Connected: Summerset −5 CP'),
+    api.tpConnected('Connected: The Masters of the Bazaar +1 CP (to 5), an Extraordinary Implication'),
+    api.tpConnected('Whispered Hint ×150, Connected: Summerset −2 CP, Wounds −1 CP')],
+  [[{ name: 'Benthic', cp: 30 }, { name: 'Summerset', cp: 30 }],
+    [{ name: 'Benthic', cp: 12 }],
+    [],
+    [{ name: 'Masters of the Bazaar', cp: 1 }],
+    []]);
+
+// A Connected an option SPENDS belongs in the tooltip, the way a menace on a
+// failure does everywhere else in this file.
+check('an option that spends Connected says so in the tooltip and not on the badge',
+  [api.tpBadgeText(row('Attend a feast')).includes('Summerset'),
+    api.tpSpec(row('Attend a feast')).title.includes('Connected: Summerset −2 CP'),
+    api.tpBadgeText(row('Nobble the Benthic team')).includes('Benthic'),
+    api.tpSpec(row('Nobble the Benthic team')).title.includes('Connected: Benthic −10 CP')],
+  [false, true, false, true]);
+
+check('the eight options that build Connected are the ones the guide credits',
+  rows.filter((e) => api.tpConnected(e.gives).length).map((e) => e.name).sort(),
+  ['"Our mutual friend would not appreciate the impediment to my work..."',
+    'Demonstrate your cricketing knowledge', 'Display admirable sportsmanship', 'Get involved',
+    'Make your peace with Dr Orthos', 'Perhaps you might read a book today',
+    'Report them to the college authorities', 'The twelfth man'].sort());
+
+// --- what an unpriced row shows instead ------------------------------------
+//
+// The guide prices all but three rows. Those fall back to the first clause of
+// the payout, skipping a Connected clause -- the Connected is already the last
+// thing on the badge, and saying it twice reads as two separate payments.
+
+check('the three unpriced rows, and what each shows instead of Echoes',
+  rows.filter((e) => e.echoes == null).map((e) => [e.name, api.tpBadgeText(e)]),
+  [['Fourteen courses of sheer indulgence', 'TP +4 · Hedonist +3 CP'],
+    ['Advise them to stick to their principles', 'reset · research pages ×50'],
+    ['Report them to the college authorities', 'reset · Benthic +30 Summerset +30']]);
+
+check('an unpriced row never prints its Connected twice',
+  api.tpWorth(row('Report them to the college authorities')), null);
+
+// --- the rest ---------------------------------------------------------------
+
+check('the three research swaps are still the outliers the guide\'s 4.90 line rests on',
   (() => {
-    const bad = [];
-    for (const e of rows) {
-      if (!api.carouselLookup(api.TP_INDEX, e.name, key(e.storylet))) bad.push(e.storylet + ' | ' + e.name);
-    }
-    return bad;
-  })(), []);
-
-check('a merged row carries one variant per carousel, never two of the same',
-  api.TP_SHARED.filter((e) => {
-    const ids = e.variants.map((v) => v.carousel);
-    return ids.length !== new Set(ids).size;
-  }).map((e) => e.name), []);
-
-check('the one merged row whose two readings are identical, and which collapses on the badge',
-  (() => {
-    const same = api.TP_SHARED.filter((e) => {
-      const readings = e.variants.map((v) => JSON.stringify([v.cp, v.echoes, v.gives]));
-      return readings.length !== new Set(readings).size;
-    });
-    return [same.map((e) => e.storylet + ' | ' + e.name), same.map((e) => api.tpBadgeText(e))];
-  })(),
-  [['The library roof | Report them to the college authorities'],
-    ['reset · Benthic +30 CP']]);
-
-// The split the feature is built on: the guide prices the second and third
-// carousels per option and does not price the first at all, so the first
-// carries goods and the others carry Echoes. Inventing figures for the first
-// would rank it against the others on a number the guide never made.
-check('the first carousel is unpriced and the other two are priced',
-  [api.TP_FIRST.every((e) => e.echoes === undefined),
-    api.TP_SECOND.filter((e) => e.echoes == null).length,
-    api.TP_THIRD.filter((e) => e.echoes == null).map((e) => e.name)],
-  [true, 0, ['Fourteen courses of sheer indulgence', 'Advise them to stick to their principles',
-    'Report them to the college authorities']]);
-
-// The research swaps are the outliers the guide's 4.90-Echo line is built on:
-// ten times anything else in the carousel.
-check('the three research swaps are the best-paying rows in the file, by a factor of five',
-  (() => {
-    const priced = api.TP_THIRD.filter((e) => e.echoes != null).slice().sort((a, b) => b.echoes - a.echoes);
+    const priced = rows.filter((e) => e.echoes != null).slice().sort((a, b) => b.echoes - a.echoes);
     return [priced.slice(0, 3).map((e) => e.name), priced[0].echoes / priced[3].echoes > 2];
   })(),
   [['Swap research with archaeologists', 'Swap research with zoologists',
     'Swap research with theologians'], true]);
 
-check('each carousel runs to its own cap in its own number of actions',
-  api.TP_CAROUSELS.map((c) => [c.id, c.cap, c.actions]), [[1, 12, 32], [2, 7, 14], [3, 8, 10]]);
+check('every finisher is at Term Passing... ' + api.TP_CAROUSEL.cap + ', and resets',
+  [...new Set(rows.filter((e) => e.cp === 'reset').map((e) => e.window))], ['8']);
 
-check('badges', ['Attend a feast', 'Blackmail', 'Talk to the Porters',
-  'Swap research with archaeologists', 'Court the Duchess’ patronage']
-  .map((n) => api.tpBadgeText(row(n))),
-  ['1st TP +2? · Whispered Hint ×90 | 3rd TP +4? · 1.50 E',
-    '1st reset · Proscribed Material ×50 | 3rd reset · 5.20 E',
-    'no TP? · 0.58 E', 'TP +4? · 14.00 E', 'reset? · 2.25 E']);
-
-check('a merged row\'s tooltip says why both readings are there',
-  api.tpSpec(row('Attend a feast')).title.includes('which one is Featuring in the Tales of the '
-    + 'University — which is on the Myself tab'), true);
-
-check('storylet headings name the carousels and the windows',
-  ['Feasting at Summerset', 'Off to the library', 'Off to the Library', 'The Library Roof',
-    'Making Your Name: Investigations in the university', 'Interdisciplinary Research']
+check('storylet headings carry the window and nothing else',
+  ['Off to the Library', 'The Library Roof', 'Interdisciplinary Research', 'Visitors in the Quad']
     .map((s) => api.tpStoryletSpec(key(s)).text),
-  ['1st/3rd · T0-7/0-3', '1st/3rd · T0-7/0-3', '1st/3rd · T0-7/0-3',
-    '1st/3rd · T12/8', '2nd · T–', '3rd · T0-7']);
-
-check('the two spellings of one storylet reach the same summary',
-  api.tpStoryletSpec(key('Off to the library')).title
-    === api.tpStoryletSpec(key('Off to the Library')).title, true);
+  ['T0-3', 'T8', 'T0-7', 'T0-7']);
 
 check('the registered pass',
   (() => {
-    const feast = makeHeading('Attend a feast');
-    const porters = makeHeading('Talk to the Porters');
-    branches = [feast, porters];
-    roots = [makeHeading('Feasting at Summerset')];
+    const cricket = makeHeading('Demonstrate your cricketing knowledge');
+    const blackmail = makeHeading('Blackmail');
+    branches = [cricket, blackmail];
+    roots = [makeHeading('Cricket at Benthic')];
     api.tpRatings();
-    const out = [text(roots[0], api.TP_CLASS), text(feast, api.TP_BRANCH_CLASS),
-      text(porters, api.TP_BRANCH_CLASS)];
-    roots = [makeHeading('Making Your Name: Investigations in the university')];
+    const out = [text(roots[0], api.TP_CLASS), text(cricket, api.TP_BRANCH_CLASS),
+      text(blackmail, api.TP_BRANCH_CLASS)];
+    roots = [makeHeading('The Library Roof')];
     api.tpRatings();
-    out.push(text(roots[0], api.TP_CLASS), text(feast, api.TP_BRANCH_CLASS),
-      text(porters, api.TP_BRANCH_CLASS));
+    out.push(text(roots[0], api.TP_CLASS), text(cricket, api.TP_BRANCH_CLASS),
+      text(blackmail, api.TP_BRANCH_CLASS));
     roots = []; branches = [];
     return out;
   })(),
-  ['1st/3rd · T0-7/0-3', '1st TP +2? · Whispered Hint ×90 | 3rd TP +4? · 1.50 E', null,
-    '2nd · T–', null, 'no TP? · 0.58 E']);
+  ['T0-3', 'TP +4? · 1.24 E · Benthic +12', null,
+    'T8', null, 'reset · 5.20 E']);
 
 check('no Term Passing name is in another feature\'s table',
   (() => { const others = otherNames('TP_OPTIONS');

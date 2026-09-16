@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.7
-// @description  Advice on what Fallen London's storylets and opportunity cards do for you, badged onto them where you make the choice. Its reference panels open from the "⚙ UX" button of Fallen London UX Enhancers, so install that as well to reach them; every badge works without it. (1) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (2) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. Its panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, every port on the Unterzee -- which region it is in, whether docking there wipes Troubled Waters and the zee-threats, and what it takes to be able to sail there at all, with the hunting grounds and the one-time destinations marked as the different things they are, since a port that resets nothing and a place that is not a dock are two different answers -- the three winds and the dreams they start, and the whole card table, searchable. (3) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: behind the UX button where that is docked beside Fallen London’s own Travel button, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. Its panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. (4) In Port Carnelian, where a governor's term runs 26 actions and Fallen London deals no opportunity cards at all, the badges go on storylets and on their options instead. The whole term is one storylet, Matters of State, so what is rated is the list of options inside it -- and the options of the two of those that open into a storylet of their own. Each shows the net change in resources that option makes, with a mark for what it does to Imperial Legitimacy -- the number that ends a term at once when it reaches 0, sending you back to zee with nothing: a down mark when the net was paid for out of Legitimacy, an up mark when the option buys Legitimacy back instead, and no mark at all when it leaves Legitimacy alone. The colour says the same thing the mark does and nothing else -- red for spending Legitimacy, green for buying it back, light blue for the rows that leave it alone, slate for the endings -- so the marks are enough on their own for anyone who cannot separate the red from the green. Then a Fate label on the one Fate-locked option, and "cash out" on the four endings, which spend a currency rather than gaining any. The four endings carry a figure rather than only a label: each shows what cashing out would pay you RIGHT NOW, in Echoes, worked out from your own Striped Delights and Silver Horseheads. Fallen London states both on the Myself tab and nowhere near the port, so the script reads them where they are shown, remembers them, and refreshes them in a hidden frame -- in the background while an ending is on screen, and again when the panel is opened on a stale reading -- exactly the way the festival reads how deep you are. A faction Favour is marked with an icon and priced at 0: it is a story quality capped at 7 rather than an item, nothing buys one, and pricing it would let a fixed reward out-rank a real cash-out on a number nobody acts on. Tribute, which has no market price either, is listed the same way and left out of the total. A Favour in High Places is not one of those despite the name -- it is an ordinary item the Bazaar buys -- so it is priced like any other. A question mark says the reading behind the figure is over a minute old, since every action of a term moves both currencies, and the plain "cash out" label is what is left when your numbers have never been read. The tooltip carries the whole sum: what you hold, what it turns into, what each piece is worth, what the next rounding step up would cost you -- 105 and 176 are worth waiting for and 140 is not -- and, for the two endings that pay a fixed reward and empty both purses, what taking one gives up. Half the table is worth the same +5, so whether it costs Legitimacy is the only thing separating those rows. The tooltip carries the Time Passing in Office and Airs windows the option is offered in, every currency change with its currency named, the requirement and the note; the two options that pay ten or fifteen of ONE of the two currencies, the game's choice rather than yours, say so in words, since reading them as that much of each would make them the best options in the table by a distance. A storylet the guide splits in two is badged with the better net and keeps both branches in its tooltip, because the losing branch is how Imperial Legitimacy is bought back. Its panel, Port Carnelian, opens on the same calculator -- your purse, and all four endings priced against it with the best one named in words -- and then holds the rest of the guide: how to unlock and reach the posting, the rules a term is played by, every option grouped by the clock and searchable, what the two currencies cash in for, the reward tiers with the two worth aiming at picked out and a letter against the step each of your two currencies is standing on, and the strategy. (5) On a Voyage of Scientific Discovery -- the Dilmun Club's expeditions to Bullbone Island, Corpsecage Island and Grunting Fen, which deal no opportunity cards either -- every action gets a badge for what it pays in research pages, coloured by which of the three kinds it is: Archaeological, Cryptopalaeontological or Theosophistical. You sail to one island for one kind, and at every step of the visit you are choosing between the action that pays it and one that pays goods instead, so an action paying no pages is labelled with what it does pay rather than scored: there is no exchange rate between pages and Echoes, and inventing one would be the badge choosing your voyage for you. The three gambles at the end of a visit carry their EXPECTED value rather than the figure they advertise, since the wiki gives both outcomes and the odds -- taking the safer of the two is worth about six times the greedier one once the failure is priced in. The tooltip carries the step of the visit the action belongs to, its challenge, everything it gives, what it costs, and what a failure costs; where the game picks between two payouts rather than you, that is said in words. The same badges cover the two screens at your Lodgings, where the pages are generated before you sail and spent afterwards, and there the figure is the guide's pence per page, because everything on that screen is priced. Three actions and three storylets have the same names on all three islands and pay a different kind of page on each, so the feature works out which island it is looking at from the greeting or from the storylet you have open, and says nothing at all rather than guess. Its panel, Scientific Voyages, holds the rest: how the voyage is unlocked, what each island pays and costs to reach, every action grouped by island and searchable, and how to squeeze the most preparatory research out of London first. (6) In your University Laboratory every opportunity card gets a badge for the Laboratory Research its best option pays on a success, worked out at your own Equipment for Scientific Experimentation -- nearly every figure in the lab is a formula on it, and on your students' levels and how many people work there, all of which Fallen London states on the Myself tab, so the script reads them there, remembers them, and refreshes them in the background. The badge ranks only the options you can take with nothing special in hand; one behind an Unavoidable Epiphany, an Unexpected Result or an item is kept in the tooltip and marked with a down triangle when it would pay more. A star marks an option that also hands you an Unavoidable Epiphany, a solid down triangle one that uses something up, a question mark a Watchful challenge's success figure, and an approximately-equal sign the expected value of a Luck option. Where something the figure depends on has not been read -- your Equipment, a student's level -- the badge shows the range rather than a guess, in a neutral grey. Colour runs slate, blue, teal, amber, gold by tens of research, with the number always printed; Parabolan Research is marked PR in violet, and an option that pays no research says what it does instead. Open a card and every option on it is badged in its own right, each tooltip carrying the requirement, the challenge, every outcome with its formula and your figure, and where the guide's student table disagrees with the option page, both. Its panel, University Laboratory, shows your Equipment, staff, students, project and what Circulate a draft of your findings would pay right now, every laboratory card searchable, the repeatable projects, the equipment ladder, and which experts suit which projects. (7) Arbor, of the Roses deals no opportunity cards, so the badges go on the London card that takes you there, A Dream of Roses -- how many actions a trip costs, with your last Possessions reading of Attar saying whether the dream opens on Near or Far Arbor -- on the two storylets a stay happens in, Near Arbor and Far Arbor, whose tooltip is a map of every district's options and the guide's grinds, and on every option inside them. An option's badge is what it changes, "Attar +2" or "Attar −3 EI +3", with the sign carrying the direction and the colour only repeating it: there is no exchange rate between Attar and what it buys, so none is invented. A question mark is a stat challenge's success outcome, with the failure and the stat that makes it certain in the tooltip; ⏏ an option that spends all your Permission to Linger and so ends the stay; a star the tribute's rare success, which cashes in all your Attar; ≈ the expected value of the one even-odds option. The six options that scale with your Permission to Linger or your Attar say so in words rather than invent a figure, and where the guide's table and an option page disagree, the page is followed and the tooltip quotes both. (8) Three early carousels that deal no opportunity cards are badged the same way: the storylet heading gets a summary whose tooltip lists every option, and each option of the carousel storylet you have OPEN gets a badge -- only there, since names like "Make bobbins" or "Treat the soil" could title an option anywhere. A question mark is a stat challenge's success figure, ▼ an option that uses something up, and a figure after the question mark what a failure takes back. At L. B. Industries beneath the Blind Helmsman, a work option shows the Foreman's Favour it pays ("FF +15? −19") and a payout its cost and what it buys ("110 → Reliquary"), with the Bone Fragments your surplus Favour turns into in the tooltip. In the Department of Menace Eradication's hunts, an option shows what it does to Hiding, Wariness or Savagery ("Hiding −10? +1"), with its difficulty -- nearly all of them scale with Savagery -- worked out at each contract's starting Savagery in the tooltip; the poisoned bait's Luck challenge is its expected value; the confrontations and bounties name what they pay, and a contract what it sets. In Vertiginous Horticulture, a nurturing option shows the Nurturing it pays as a range over the Difficulties of the plants it can be used on ("Grow +14–16?"), a plant its Difficulty, and a buyer what the sale gives, with the rare successes, the average success and the scaling reward at 150 in the tooltip. Where the guide and an option page disagree, the page is followed and the tooltip says so. (9) Expeditions from Base-Camp in the Forgotten Quarter get the same treatment across their four storylets, each badge answering the question that screen asks: while preparing, the Crate of Expedition Supplies an option gives ("Sup +3 ▼", with the guide's Echoes per Supply in the tooltip); when choosing, an expedition's length and the Archaeologist or Fate it needs ("30 sup · Arch 3"), with what it pays, its rivals and the guide's worst-case Supplies in the tooltip; on the expedition, the Archaeologist's Progress a success makes ("Prog +3? ▼"), the Rivals' Progress a hindrance takes off, and what a conclusion pays; and in a confrontation, the Progress it makes. A menace an option always raises is named after its figure ("+Wounds", "+Nightmares"), so a cheap line never reads as free; a menace only a failure raises is in the tooltip. (10) Cat and Mouse -- the Implacable Detective's three cases and the three hunts for a half of the Screaming Map -- gets the same treatment: in a pursuit, the Cat an option makes ("Cat +8 ▼"), with the Mouse it spends named when that is two ("Cat +10 Mouse −2 ▼") and the 70% Luck lines carrying their expected Cat ("≈Cat +3.5"); on the screens that start a case, what the case pays and the guide's Echoes per action ("Plaques · 1.19 EPA ▼"); and on an ending, the Cat it needs and what it pays ("60+ Journals + Jade"). The tooltip carries the Mouse band an option is offered at, what it uses up and the guide's Echo cost of that, and where the guide and an option page disagree, both. (11) At Mrs Chapman's Boarding House in Spite, every soup and parlour option of The Season in Soup is badged with the item it pays and how many, from Persuasive 0 to the cap of 230 ("Zee-Ztory ×1–5"), with the figure at each fifty in the tooltip -- every option pays about the same Echoes, so the item is the choice -- and a star on the three that also give a noise in the walls. Promenade pays a different item each week, so its week is read off the parlour option beside it. (12) Five more early activities get the same storylet and option markup. In the Mind of a Long-Dead God, where every payout costs Stormy-Eyed and a challenge pays only when you FAIL it, each option shows its reward -- Dangerous or Shadowy +10 CP, or an Aeolian Scream -- with a cross when a failed challenge is what pays ("Shadowy +10 ✗"); the cards are badged in your hand with their options' rewards too, the one-word "Rain" and "Geology" only while the greeting says you are in the Mind. Engaged in a Case shows the Detective's Progress a success and a failure make ("Prog +6/+3?"), the actions when more than one, and the expected Progress of the Luck options on the faction cards, with every Case Difficulty formula worked out at the Starving Poet's 5 and the Heiress's 8 in the tooltip. The Sunken Embassy shows the Fragments of Infernal Affairs a success and a failure make ("Frag +25/−15?") and each reward's cost ("100 → Verse"). The Law-Furnace shows "AR base?" on its checks, the bonus Actus Reus of its item trades and what each payout pays in, with the base worked out at four stat averages. The Prelapsarian Museum shows Identifying... on the lab's options, the odds of an Assert, the Gratitude of a bone, a donation or the sphinxstone, and every cash-in's cost and payout. (13) Five more. On a Heist badges every heist card's options with what they do to The Burglar's Progress and Cat-Like Tread -- the expected change for a Luck option ("≈Prog +1 Tread −1"), the success and the Tread a failure costs for a stat check -- and each card in your hand with the best option needing nothing special, ranked by the Tread you can expect to lose before the Progress, with a down triangle when Inside Information, a Key or a stat would do better; every prize shows what it pays and the guide's Echo value. The Spider Symposium shows the Applause a success and a failure make and each reward's cost. Short Stories shows the pages a writing option makes and the actions it takes, the Potential a rework option adds and where it stops working, and the Echoes of a published story on a success and a failure. Flash Lays shows the Progress or Up your Sleeve a success makes, with the difficulty for both marks in the tooltip, and badges the cards in your hand the same way the heist does. Social Actions shows a letter's effect on its recipient and the Corresponding... sending it earns, each correspondence reward's cost, and the assassin cards' payouts, with a skull on the option that kills you. (14) In the Cave of the Nadir every Cave card's options show what they give, the guide's Echo value where it has one, and the Irrigo they cost; the undiscardable cards in your hand show their best option needing nothing special, with a down triangle when an item would do better, and ten cards with ordinary names are badged only while the greeting says you are in the Cave. The ways to a Ray-Drenched Cinder are badged too. At the Empress' Court every option shows the Inspired... a success and a failure make, a Luck option its expectation, and a finished work the goods it pays -- 17 Echoes for every minor work and 30 for every major one, so the item is the choice. Breeding Monsters shows the CP a progress option makes and, for each beast, both payouts of its 70% breeding and the guide's expected Echoes. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. (15) Five more, all storylet-and-option markup with no panel. Tales of Mahogany Hall has two halves that pull against each other -- six storylets that BUILD the Tales of Mahogany Hall quality and a weekly bill that spends it on a day’s show -- so a building option is badged with the CP it makes and what it pays (“Tales +2? · Brass ×102”), a show option with the CP it costs and what it pays (“−8 CP? · Jade ×200”), and a day on the bill with the Tales it needs and the show’s own reward, which is paid whichever option you take there. The CP is the number because every line pays about the same Echoes and the whole of the guide’s advice is about the CP: a failed show costs 14 rather than 8, and cashing out never takes you below 10. Four rows that raise four or five menaces whatever happens are labelled in words instead of scored. Master-Classes in Etiquette, in the same hall, is the reverse: take one of four pupils, raise their Pygmalion to 12 and graduate them. A lesson shows the Pygmalion CP it makes and its pay, the graduation shows the reset and the lump, and a pupil shows what the whole course pays with the guide’s Echoes per action -- which is the only decision that changes the rate. The Pygmalion challenges, whose failures push you BACK, carry “▼ Pyg −2” so a line that can cost you ground never reads like one that cannot. The two Fate-locked pupils are left out of the lesson table on purpose: the guide records their option titles only as “Choice 1” and “Storylet 2”, and a badge cannot be hung on a title nobody knows. In the Sixth Coil, under the Labyrinth of Tigers, both the room names and the option titles are randomised by four qualities, so the table carries all 35 room names the wiki records and spells every option’s verbs out rather than wildcarding them -- a wildcard verb would make two different options the same pattern and neither would be badged. Each action shows what it does to the two progress qualities and the stat it is checked on (“Patrol +1 Coil +1 · Watchful 250?”), because the guide’s rule is to leave when the two together reach 39, which makes the sealed door -- two Patrolling and no Coiling, and no challenge -- worth twice any other line. A Burden shows what it gives and the three levels of Unburdened it costs, worth 60 points of every attribute; the payouts on the way out show what each Burden pays per point of Patrolling. The Rat Market is a shop rather than a carousel: getting in costs three actions once a weekend and nothing after, selling costs no action at all, and a sale is badged with what it is worth in Echoes as a RANGE from a fresh market to a saturated one, since your Rat Market Saturation is stated nowhere the script can read it. Every one of those prices is worked out from the single figure each option page states, the item’s Nominal Sale Value, and reproduces every Rat-Shilling price the guide prints. What the market SELLS is deliberately not priced -- the stock turns with the Rat-Wind, the Rat-Moon and two seasons -- and those two stalls say so instead. And A Boxful of Intrigue, the fourteen-action carousel left behind in Spite, is badged with the SIDE each option takes, in words: every option is the same Shadowy 130 for the same one point, so what separates them is which power they serve, and serving the wrong one is not a smaller reward but a Turncoat. The two Salon options, which suit either side and pay no Kingmaker, say so; the payouts carry the guide’s Echoes for the whole run, with a tooltip saying that the six Correspondence Plaques inside that figure come from Intercept the messages and not from the payout. (16) Four more, all storylet and option markup with no panel. Underclay, beneath Spite, runs on TWO progress qualities instead of one -- Stone Confessions and Convincing Falsehoods, each raised on a storylet of its own and both spent on the hub, which the two are entered from for nothing -- so an option shows the points a success makes and what a failure takes BACK (“Confessions +30? −13”), while a failure that only raises a menace stays in the tooltip, as everywhere else. A reward shows what it costs, what it pays and the guide’s Echoes per point, which runs the opposite way to intuition: the cheap rewards are the efficient ones, and every point you hold over a reward’s cost comes back as Shards of Glim, so nothing is lost by overshooting. Hunting Bees in Old Newgate, in the University, puts the ATTRIBUTE on the badge as well as the Bees (“Bees +25? −6 · Watchful 88”), because which attribute a line is checked on is set by Dagger or Flint and almost every option shifts that by a random ten either way: the same option is not the same option two actions later, and a long run changes sides under you. An Airs option carries the window it appears in, and where the guide and the option pages disagree about that window by a point the pages are followed and the badge says so. Featuring in the Tales of the University is the one feature here that badges storylet headings and NOTHING else: the guide records no option tables for it, so rather than invent figures each storylet shows the level it sits at and what it does, and an eject mark -- not the mark used for spending something, since nothing is spent -- on the two steps that shut a door for good, the one that locks the whole first Term Passing carousel and the one that ends the story. And Term Passing itself covers three carousels of the same shape, which are never open at once and are picked between by how far along that story you are. Each option shows the progress it makes and then what it is worth: the guide’s Echoes for the second and third carousels, which it prices per option, and the GOODS for the first, which it does not price and which is not played for money anyway -- it is played for the two Colleges, for the two options that heal a change point of Wounds or Nightmares, and for the stories. The three carousels share storylet and option titles, and nothing on the screen says which one you are standing in, so a shared row is badged with BOTH readings rather than a guess -- and where the two readings are the same, with one. Built as a feature registry so further advice can be added as entries.
+// @version      1.9
+// @description  Advice on what Fallen London's storylets and opportunity cards do for you, badged onto them where you make the choice. Its reference panels open from the "⚙ UX" button of Fallen London UX Enhancers, so install that as well to reach them; every badge works without it. (1) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (2) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. Its panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, every port on the Unterzee -- which region it is in, whether docking there wipes Troubled Waters and the zee-threats, and what it takes to be able to sail there at all, with the hunting grounds and the one-time destinations marked as the different things they are, since a port that resets nothing and a place that is not a dock are two different answers -- the three winds and the dreams they start, and the whole card table, searchable. (3) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: behind the UX button where that is docked beside Fallen London’s own Travel button, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. Its panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. (4) In Port Carnelian, where a governor's term runs 26 actions and Fallen London deals no opportunity cards at all, the badges go on storylets and on their options instead. The whole term is one storylet, Matters of State, so what is rated is the list of options inside it -- and the options of the two of those that open into a storylet of their own. Each shows the net change in resources that option makes, with a mark for what it does to Imperial Legitimacy -- the number that ends a term at once when it reaches 0, sending you back to zee with nothing: a down mark when the net was paid for out of Legitimacy, an up mark when the option buys Legitimacy back instead, and no mark at all when it leaves Legitimacy alone. The colour says the same thing the mark does and nothing else -- red for spending Legitimacy, green for buying it back, light blue for the rows that leave it alone, slate for the endings -- so the marks are enough on their own for anyone who cannot separate the red from the green. Then a Fate label on the one Fate-locked option, and "cash out" on the four endings, which spend a currency rather than gaining any. The four endings carry a figure rather than only a label: each shows what cashing out would pay you RIGHT NOW, in Echoes, worked out from your own Striped Delights and Silver Horseheads. Fallen London states both on the Myself tab and nowhere near the port, so the script reads them where they are shown, remembers them, and refreshes them in a hidden frame -- in the background while an ending is on screen, and again when the panel is opened on a stale reading -- exactly the way the festival reads how deep you are. A faction Favour is marked with an icon and priced at 0: it is a story quality capped at 7 rather than an item, nothing buys one, and pricing it would let a fixed reward out-rank a real cash-out on a number nobody acts on. Tribute, which has no market price either, is listed the same way and left out of the total. A Favour in High Places is not one of those despite the name -- it is an ordinary item the Bazaar buys -- so it is priced like any other. A question mark says the reading behind the figure is over a minute old, since every action of a term moves both currencies, and the plain "cash out" label is what is left when your numbers have never been read. The tooltip carries the whole sum: what you hold, what it turns into, what each piece is worth, what the next rounding step up would cost you -- 105 and 176 are worth waiting for and 140 is not -- and, for the two endings that pay a fixed reward and empty both purses, what taking one gives up. Half the table is worth the same +5, so whether it costs Legitimacy is the only thing separating those rows. The tooltip carries the Time Passing in Office and Airs windows the option is offered in, every currency change with its currency named, the requirement and the note; the two options that pay ten or fifteen of ONE of the two currencies, the game's choice rather than yours, say so in words, since reading them as that much of each would make them the best options in the table by a distance. A storylet the guide splits in two is badged with the better net and keeps both branches in its tooltip, because the losing branch is how Imperial Legitimacy is bought back. Its panel, Port Carnelian, opens on the same calculator -- your purse, and all four endings priced against it with the best one named in words -- and then holds the rest of the guide: how to unlock and reach the posting, the rules a term is played by, every option grouped by the clock and searchable, what the two currencies cash in for, the reward tiers with the two worth aiming at picked out and a letter against the step each of your two currencies is standing on, and the strategy. (5) On a Voyage of Scientific Discovery -- the Dilmun Club's expeditions to Bullbone Island, Corpsecage Island and Grunting Fen, which deal no opportunity cards either -- every action gets a badge for what it pays in research pages, coloured by which of the three kinds it is: Archaeological, Cryptopalaeontological or Theosophistical. You sail to one island for one kind, and at every step of the visit you are choosing between the action that pays it and one that pays goods instead, so an action paying no pages is labelled with what it does pay rather than scored: there is no exchange rate between pages and Echoes, and inventing one would be the badge choosing your voyage for you. The three gambles at the end of a visit carry their EXPECTED value rather than the figure they advertise, since the wiki gives both outcomes and the odds -- taking the safer of the two is worth about six times the greedier one once the failure is priced in. The tooltip carries the step of the visit the action belongs to, its challenge, everything it gives, what it costs, and what a failure costs; where the game picks between two payouts rather than you, that is said in words. The same badges cover the two screens at your Lodgings, where the pages are generated before you sail and spent afterwards, and there the figure is the guide's pence per page, because everything on that screen is priced. Three actions and three storylets have the same names on all three islands and pay a different kind of page on each, so the feature works out which island it is looking at from the greeting or from the storylet you have open, and says nothing at all rather than guess. Its panel, Scientific Voyages, holds the rest: how the voyage is unlocked, what each island pays and costs to reach, every action grouped by island and searchable, and how to squeeze the most preparatory research out of London first. (6) In your University Laboratory every opportunity card gets a badge for the Laboratory Research its best option pays on a success, worked out at your own Equipment for Scientific Experimentation -- nearly every figure in the lab is a formula on it, and on your students' levels and how many people work there, all of which Fallen London states on the Myself tab, so the script reads them there, remembers them, and refreshes them in the background. The badge ranks only the options you can take with nothing special in hand; one behind an Unavoidable Epiphany, an Unexpected Result or an item is kept in the tooltip and marked with a down triangle when it would pay more. A star marks an option that also hands you an Unavoidable Epiphany, a solid down triangle one that uses something up, a question mark a Watchful challenge's success figure, and an approximately-equal sign the expected value of a Luck option. Where something the figure depends on has not been read -- your Equipment, a student's level -- the badge shows the range rather than a guess, in a neutral grey. Colour runs slate, blue, teal, amber, gold by tens of research, with the number always printed; Parabolan Research is marked PR in violet, and an option that pays no research says what it does instead. Open a card and every option on it is badged in its own right, each tooltip carrying the requirement, the challenge, every outcome with its formula and your figure, and where the guide's student table disagrees with the option page, both. Its panel, University Laboratory, shows your Equipment, staff, students, project and what Circulate a draft of your findings would pay right now, every laboratory card searchable, the repeatable projects, the equipment ladder, and which experts suit which projects. (7) Arbor, of the Roses deals no opportunity cards, so the badges go on the London card that takes you there, A Dream of Roses -- how many actions a trip costs, with your last Possessions reading of Attar saying whether the dream opens on Near or Far Arbor -- on the two storylets a stay happens in, Near Arbor and Far Arbor, whose tooltip is a map of every district's options and the guide's grinds, and on every option inside them. An option's badge is what it changes, "Attar +2" or "Attar −3 EI +3", with the sign carrying the direction and the colour only repeating it: there is no exchange rate between Attar and what it buys, so none is invented. A question mark is a stat challenge's success outcome, with the failure and the stat that makes it certain in the tooltip; ⏏ an option that spends all your Permission to Linger and so ends the stay; a star the tribute's rare success, which cashes in all your Attar; ≈ the expected value of the one even-odds option. The six options that scale with your Permission to Linger or your Attar say so in words rather than invent a figure, and where the guide's table and an option page disagree, the page is followed and the tooltip quotes both. (8) Three early carousels that deal no opportunity cards are badged the same way: the storylet heading gets a summary whose tooltip lists every option, and each option of the carousel storylet you have OPEN gets a badge -- only there, since names like "Make bobbins" or "Treat the soil" could title an option anywhere. A question mark is a stat challenge's success figure, ▼ an option that uses something up, and a figure after the question mark what a failure takes back. At L. B. Industries beneath the Blind Helmsman, a work option shows the Foreman's Favour it pays ("FF +15? −19") and a payout its cost and what it buys ("110 → Reliquary"), with the Bone Fragments your surplus Favour turns into in the tooltip. In the Department of Menace Eradication's hunts, an option shows what it does to Hiding, Wariness or Savagery ("Hiding −10? +1"), with its difficulty -- nearly all of them scale with Savagery -- worked out at each contract's starting Savagery in the tooltip; the poisoned bait's Luck challenge is its expected value; the confrontations and bounties name what they pay, and a contract what it sets. In Vertiginous Horticulture, a nurturing option shows the Nurturing it pays as a range over the Difficulties of the plants it can be used on ("Grow +14–16?"), a plant its Difficulty, and a buyer what the sale gives, with the rare successes, the average success and the scaling reward at 150 in the tooltip. Where the guide and an option page disagree, the page is followed and the tooltip says so. (9) Expeditions from Base-Camp in the Forgotten Quarter get the same treatment across their four storylets, each badge answering the question that screen asks: while preparing, the Crate of Expedition Supplies an option gives ("Sup +3 ▼", with the guide's Echoes per Supply in the tooltip); when choosing, an expedition's length and the Archaeologist or Fate it needs ("30 sup · Arch 3"), with what it pays, its rivals and the guide's worst-case Supplies in the tooltip; on the expedition, the Archaeologist's Progress a success makes ("Prog +3? ▼"), the Rivals' Progress a hindrance takes off, and what a conclusion pays; and in a confrontation, the Progress it makes. A menace an option always raises is named after its figure ("+Wounds", "+Nightmares"), so a cheap line never reads as free; a menace only a failure raises is in the tooltip. (10) Cat and Mouse -- the Implacable Detective's three cases and the three hunts for a half of the Screaming Map -- gets the same treatment: in a pursuit, the Cat an option makes ("Cat +8 ▼"), with the Mouse it spends named when that is two ("Cat +10 Mouse −2 ▼") and the 70% Luck lines carrying their expected Cat ("≈Cat +3.5"); on the screens that start a case, what the case pays and the guide's Echoes per action ("Plaques · 1.19 EPA ▼"); and on an ending, the Cat it needs and what it pays ("60+ Journals + Jade"). The tooltip carries the Mouse band an option is offered at, what it uses up and the guide's Echo cost of that, and where the guide and an option page disagree, both. (11) At Mrs Chapman's Boarding House in Spite, every soup and parlour option of The Season in Soup is badged with the item it pays and how many, from Persuasive 0 to the cap of 230 ("Zee-Ztory ×1–5"), with the figure at each fifty in the tooltip -- every option pays about the same Echoes, so the item is the choice -- and a star on the three that also give a noise in the walls. Promenade pays a different item each week, so its week is read off the parlour option beside it. (12) Five more early activities get the same storylet and option markup. In the Mind of a Long-Dead God, where every payout costs Stormy-Eyed and a challenge pays only when you FAIL it, each option shows its reward -- Dangerous or Shadowy +10 CP, or an Aeolian Scream -- with a cross when a failed challenge is what pays ("Shadowy +10 ✗"); the cards are badged in your hand with their options' rewards too, the one-word "Rain" and "Geology" only while the greeting says you are in the Mind. Engaged in a Case shows the Detective's Progress a success and a failure make ("Prog +6/+3?"), the actions when more than one, and the expected Progress of the Luck options on the faction cards, with every Case Difficulty formula worked out at the Starving Poet's 5 and the Heiress's 8 in the tooltip. The Sunken Embassy shows the Fragments of Infernal Affairs a success and a failure make ("Frag +25/−15?") and each reward's cost ("100 → Verse"). The Law-Furnace shows "AR base?" on its checks, the bonus Actus Reus of its item trades and what each payout pays in, with the base worked out at four stat averages. The Prelapsarian Museum shows Identifying... on the lab's options, the odds of an Assert, the Gratitude of a bone, a donation or the sphinxstone, and every cash-in's cost and payout. (13) Five more. On a Heist badges every heist card's options with what they do to The Burglar's Progress and Cat-Like Tread -- the expected change for a Luck option ("≈Prog +1 Tread −1"), the success and the Tread a failure costs for a stat check -- and each card in your hand with the best option needing nothing special, ranked by the Tread you can expect to lose before the Progress, with a down triangle when Inside Information, a Key or a stat would do better; every prize shows what it pays and the guide's Echo value. The Spider Symposium shows the Applause a success and a failure make and each reward's cost. Short Stories shows the pages a writing option makes and the actions it takes, the Potential a rework option adds and where it stops working, and the Echoes of a published story on a success and a failure. Flash Lays shows the Progress or Up your Sleeve a success makes, with the difficulty for both marks in the tooltip, and badges the cards in your hand the same way the heist does. Social Actions shows a letter's effect on its recipient and the Corresponding... sending it earns, each correspondence reward's cost, and the assassin cards' payouts, with a skull on the option that kills you. (14) In the Cave of the Nadir every Cave card's options show what they give, the guide's Echo value where it has one, and the Irrigo they cost; the undiscardable cards in your hand show their best option needing nothing special, with a down triangle when an item would do better, and ten cards with ordinary names are badged only while the greeting says you are in the Cave. The ways to a Ray-Drenched Cinder are badged too. At the Empress' Court every option shows the Inspired... a success and a failure make, a Luck option its expectation, and a finished work the goods it pays -- 17 Echoes for every minor work and 30 for every major one, so the item is the choice. Breeding Monsters shows the CP a progress option makes and, for each beast, both payouts of its 70% breeding and the guide's expected Echoes. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. (15) Five more, all storylet-and-option markup with no panel. Tales of Mahogany Hall has two halves that pull against each other -- six storylets that BUILD the Tales of Mahogany Hall quality and a weekly bill that spends it on a day’s show -- so a building option is badged with the CP it makes and what it pays (“Tales +2? · Brass ×102”), a show option with the CP it costs and what it pays (“−8 CP? · Jade ×200”), and a day on the bill with the Tales it needs and the show’s own reward, which is paid whichever option you take there. The CP is the number because every line pays about the same Echoes and the whole of the guide’s advice is about the CP: a failed show costs 14 rather than 8, and cashing out never takes you below 10. Four rows that raise four or five menaces whatever happens are labelled in words instead of scored. Master-Classes in Etiquette, in the same hall, is the reverse: take one of four pupils, raise their Pygmalion to 12 and graduate them. A lesson shows the Pygmalion CP it makes and its pay, the graduation shows the reset and the lump, and a pupil shows what the whole course pays with the guide’s Echoes per action -- which is the only decision that changes the rate. The Pygmalion challenges, whose failures push you BACK, carry “▼ Pyg −2” so a line that can cost you ground never reads like one that cannot. The two Fate-locked pupils are left out of the lesson table on purpose: the guide records their option titles only as “Choice 1” and “Storylet 2”, and a badge cannot be hung on a title nobody knows. In the Sixth Coil, under the Labyrinth of Tigers, both the room names and the option titles are randomised by four qualities, so the table carries all 35 room names the wiki records and spells every option’s verbs out rather than wildcarding them -- a wildcard verb would make two different options the same pattern and neither would be badged. Each action shows what it does to the two progress qualities and the stat it is checked on (“Patrol +1 Coil +1 · Watchful 250?”), because the guide’s rule is to leave when the two together reach 39, which makes the sealed door -- two Patrolling and no Coiling, and no challenge -- worth twice any other line. A Burden shows what it gives and the three levels of Unburdened it costs, worth 60 points of every attribute; the payouts on the way out show what each Burden pays per point of Patrolling. The Rat Market is a shop rather than a carousel: getting in costs three actions once a weekend and nothing after, selling costs no action at all, and a sale is badged with what it is worth in Echoes as a RANGE from a fresh market to a saturated one, since your Rat Market Saturation is stated nowhere the script can read it. Every one of those prices is worked out from the single figure each option page states, the item’s Nominal Sale Value, and reproduces every Rat-Shilling price the guide prints. What the market SELLS is deliberately not priced -- the stock turns with the Rat-Wind, the Rat-Moon and two seasons -- and those two stalls say so instead. And A Boxful of Intrigue, the fourteen-action carousel left behind in Spite, is badged with the SIDE each option takes, in words: every option is the same Shadowy 130 for the same one point, so what separates them is which power they serve, and serving the wrong one is not a smaller reward but a Turncoat. The two Salon options, which suit either side and pay no Kingmaker, say so; the payouts carry the guide’s Echoes for the whole run, with a tooltip saying that the six Correspondence Plaques inside that figure come from Intercept the messages and not from the payout. (16) Four more, all storylet and option markup with no panel. Underclay, beneath Spite, runs on TWO progress qualities instead of one -- Stone Confessions and Convincing Falsehoods, each raised on a storylet of its own and both spent on the hub, which the two are entered from for nothing -- so an option shows the points a success makes and what a failure takes BACK (“Confessions +30? −13”), while a failure that only raises a menace stays in the tooltip, as everywhere else. A reward shows what it costs, what it pays and the guide’s Echoes per point, which runs the opposite way to intuition: the cheap rewards are the efficient ones, and every point you hold over a reward’s cost comes back as Shards of Glim, so nothing is lost by overshooting. Hunting Bees in Old Newgate, in the University, puts the ATTRIBUTE on the badge as well as the Bees (“Bees +25? −6 · Watchful 88”), because which attribute a line is checked on is set by Dagger or Flint and almost every option shifts that by a random ten either way: the same option is not the same option two actions later, and a long run changes sides under you. An Airs option carries the window it appears in, and where the guide and the option pages disagree about that window by a point the pages are followed and the badge says so. Featuring in the Tales of the University is the one feature here that badges storylet headings and NOTHING else: the guide records no option tables for it, so rather than invent figures each storylet shows the level it sits at and what it does, and an eject mark -- not the mark used for spending something, since nothing is spent -- on the two steps that shut a door for good, the one that locks the whole first Term Passing carousel and the one that ends the story. And Term Passing itself covers the University’s carousel. The guide describes three of them, never open at once and picked between by how far along that story you are; only the LAST, which is the one still open once the story is finished, is carried here, since the other two lock behind you for good. Each option shows three things in that order: the progress it makes, what it is worth in the guide’s Echoes, and last of all any Connected it BUILDS -- “TP +4? · 1.24 E · Benthic +12”. The Connected is last because it is the reason to run the carousel at all rather than the reason to pick one option over another: the Echoes rank the options, and the two Colleges are what you are there for. Only gains are shown; a Connected an option spends stays in the tooltip, the way a menace on a failure does everywhere else. Those figures are read out of each option’s payout rather than written down a second time beside it, so the badge and the tooltip can never come to disagree. Built as a feature registry so further advice can be added as entries.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 // @run-at       document-idle
@@ -176,6 +176,16 @@
     if (tipAnchor && tipAnchor.isConnected === false) hideTip();
   }
 
+  // An event raised by the panel itself, or by anything inside it. Both
+  // dismissal handlers below have to ignore those: the panel is `overflow:auto`
+  // under a 60vh cap, so a tooltip longer than that MUST be scrolled to be
+  // read -- and a handler that closes on the panel's own clicks and its own
+  // scrolling makes every one of those unreadable past the cap.
+  function fromTip(e) {
+    const t = e && e.target;
+    return !!(t && t.closest && t.closest('#' + TIP_ID));
+  }
+
   function bindTipDismissal() {
     if (tipBound) return;
     tipBound = true;
@@ -186,16 +196,22 @@
     document.addEventListener('click', function (e) {
       const t = e.target;
       if (t && t.closest && t.closest('.' + BADGE_CLASS)) return;
+      if (fromTip(e)) return;
       hideTip();
     }, true);
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' || e.key === 'Esc') hideTip();
     });
-    // The panel is fixed to the viewport and the badge is not, so any scroll
-    // parts them. Closing is the honest answer; chasing the anchor is not
-    // worth the frames.
+    // The panel is fixed to the viewport and the badge is not, so any scroll of
+    // the PAGE parts them. Closing is the honest answer; chasing the anchor is
+    // not worth the frames. Capture is what makes this see a scroll in any
+    // container, which is also why it has to tell the panel's own scrolling
+    // apart -- that moves nothing the panel is anchored to.
     if (typeof window !== 'undefined' && window.addEventListener) {
-      window.addEventListener('scroll', hideTip, true);
+      window.addEventListener('scroll', function (e) {
+        if (fromTip(e)) return;
+        hideTip();
+      }, true);
       window.addEventListener('resize', hideTip);
     }
   }
@@ -210,7 +226,10 @@
     // which is what makes them readable as a panel at all.
     box.style.cssText =
       'position:fixed;z-index:2147483646;max-width:min(320px,calc(100vw - 12px));'
-      + 'max-height:60vh;overflow:auto;box-sizing:border-box;'
+      // `overscroll-behavior:contain` stops a wheel or a drag that reaches the
+      // END of the panel from chaining into the page behind it: that would
+      // scroll the page, and a page scroll closes the panel.
+      + 'max-height:60vh;overflow:auto;overscroll-behavior:contain;box-sizing:border-box;'
       + 'padding:8px 10px;border:1px solid ' + UI.line + ';border-radius:4px;'
       + 'background:' + UI.bg + ';color:' + UI.text + ';'
       + 'font-family:' + UI.font + ';font-size:12px;line-height:1.5;'
@@ -13876,8 +13895,9 @@
   // notable academic*, which closes the whole Term Passing... 0-12 carousel and
   // every storylet in it, and *Reveal the murderer*, which ends the story and
   // picks between two endings. This feature deliberately quotes NO figures: the
-  // guide gives none, and the numbers for the storylets you play while getting
-  // here belong to Term Passing... , which has its own table.
+  // guide gives none. The storylets you play while getting here belong to the
+  // first two Term Passing... carousels, which are not badged either -- that
+  // feature carries only the last one, since the first two lock behind you.
   //
   // Transcribed from the guide (fetched through the API, 2026-09-16) and
   // checked against the Featuring in the Tales of the University category for
@@ -13980,7 +14000,8 @@
     if (step.warning) body.push(FTU_MARK_LOCKS + ' ' + step.warning);
     if (step.note) body.push(step.note);
     if (step.step >= 10 && step.step <= 26) body.push('Needs Investigating... 5, which the second Term '
-      + 'Passing... carousel is there to build.');
+      + 'Passing... carousel is there to build. That carousel is not badged — only the last of the '
+      + 'three is.');
     return {
       text: 'FTU ' + step.step + ' · ' + step.summary + (step.warning ? ' ' + FTU_MARK_LOCKS : ''),
       color: step.warning ? CAROUSEL_COLOR_RISK : CAROUSEL_COLOR_LABEL,
@@ -14001,317 +14022,49 @@
 
   // === feature: Term Passing... ==========================================
   //
-  // Term Passing... (Guide): THREE carousels in the University, which are the
-  // same shape and are never open at once. Which one you are standing in is set
-  // by Featuring in the Tales of the University -- 5-8 for the first, 9-24 for
-  // the second, 30 and up for the third -- and every option raises Term
-  // Passing... until a finisher resets it.
+  // Term Passing... (Guide): the University's carousel. The guide covers three
+  // of them -- Visiting University at Featuring in the Tales of the University
+  // 5-8, As an Adjunct Professor at 9-24, and A Respectable Academic at 30 and
+  // up -- and they are never open at once. **Only the last one is carried
+  // here** (by request, 2026-09-16): it is the only one still open once the
+  // story is finished, and the earlier two lock behind you for good.
   //
-  //   1st  Visiting University      T0-12, 32 actions, +2 CP (+3 at T11)
-  //   2nd  As an Adjunct Professor  T0-7,  14 actions, +2 CP
-  //   3rd  A Respectable Academic   T0-8,  10 actions, +4 CP (+2 on a failure)
+  //   A Respectable Academic   T0-8, 10 actions, +4 CP a success (+2 a failure)
   //
-  // **What the badge says.** The Term Passing... CP the option makes, and then
-  // what it is worth: the guide's Echoes for the second and third carousels,
-  // which it states per option, and the GOODS for the first, which it does not
-  // price. That split is deliberate. Inventing Echo figures for the first
-  // carousel would put its rows in a ranking with the other two that the guide
-  // never made, and the first carousel is not played for money anyway -- it is
-  // played for Connected: Benthic and Connected: Summerset, for the Wounds and
-  // Nightmares two of its options take off, and for the stories. A finisher
-  // shows "reset" in place of the CP, since that is what it does.
+  // Dropping the other two also drops the reason the badges used to be long.
+  // The three carousels share storylet and option titles -- the third renames
+  // the first's into Title Case, which `normalizeName` folds away -- so a row
+  // had to carry both readings and say both, since nothing on the screen tells
+  // you which carousel you are standing in. With one carousel there is nothing
+  // to tell apart.
   //
-  // The CP matters more here than in most carousels because the three run at
-  // different rates: a T11 option in the first is worth 3 CP and one in the
-  // third is worth 4, so the same-looking screen is a different number of
-  // actions from the payout depending on which carousel you are in.
+  // **What the badge says**, in this order: the Term Passing... CP the option
+  // makes, what it is worth in the guide's Echoes, and LAST any Connected the
+  // option BUILDS ("TP +4? · 1.24 E · Benthic +12"). The Connected comes last
+  // because it is the reason to run this carousel rather than the reason to
+  // pick one option over another: the Echoes are what rank the options, and
+  // the Colleges are what you are actually here for. Only increases are shown
+  // -- a Connected a failure costs you, or one an option spends, is in the
+  // tooltip, the same way a menace on a failure is everywhere else in this
+  // file. A finisher shows "reset" in place of the CP.
   //
-  // Transcribed from the guide's three "every option" tables (fetched through
-  // the API, 2026-09-16), which carry the Echo figures, the challenges and the
-  // requirements. The storylet names come from the same tables and from the
-  // Featuring in the Tales of the University category. The third carousel
-  // renames most of the first's storylets in Title Case (*Off to the Library*
-  // against *Off to the library*) and several of its options too, and since
-  // normalising folds case away those pairs would collide -- so the two are
-  // kept apart where they can be and MERGED where they cannot -- see tpMerge.
+  // The Connected figures are READ OUT of each row's payout rather than stored
+  // beside it, so the badge and the tooltip can never come to disagree.
   //
-  // Not carried: the rows the wiki marks "(Source page WIP)", which are left
-  // with their requirement and no figures rather than guessed at, and the
-  // Watchful gains written "+? CP" on the wiki, which are quoted as unknown.
-  // The wiki flags this guide INCOMPLETE after the July 2026 rework.
-  // Corrections go in TP_FIRST, TP_SECOND and TP_THIRD and nowhere else.
+  // Transcribed from the guide's third "every option" table (fetched through
+  // the API, 2026-09-16), which carries the Echo figures, the challenges and
+  // the requirements. Not carried: the rows the wiki marks "(Source page WIP)",
+  // which keep their requirement and no figures rather than a guess, and the
+  // Watchful gains written "+? CP", which are quoted as unknown. The wiki flags
+  // this guide INCOMPLETE after the July 2026 rework. Corrections go in TP_ROWS
+  // and nowhere else.
 
-  const TP_CAROUSELS = [
-    { id: 1, name: 'Visiting University', ftu: '5–8', cap: 12, actions: 32 },
-    { id: 2, name: 'As an Adjunct Professor', ftu: '9–24', cap: 7, actions: 14 },
-    { id: 3, name: 'A Respectable Academic', ftu: '30+', cap: 8, actions: 10 },
-  ];
+  const TP_CAROUSEL = { name: 'A Respectable Academic', ftu: '30+', cap: 8, actions: 10 };
 
   // [storylet, option, the Term Passing window, CP on a success ('reset' for a
-  // finisher), challenge, what it pays, what a failure does, what it needs].
-  // The first carousel's rows carry goods rather than Echoes: the guide prices
-  // neither, and this is not the carousel you play for money.
-  const TP_FIRST = [
-    ['Feasting at Summerset', 'Attend a feast', '0-7', 2, { stat: 'Watchful', diff: 85 },
-      'Whispered Hint ×90, Wounds −1 CP, Connected: Summerset −2 CP',
-      'Connected: Summerset −2 CP',
-      'Connected: Summerset 5, an Academic Gown, and your soul still your own',
-      'One of two options in the carousel that heal: Wounds −1 CP, or −2 on a rare success.'],
-    ['Feasting at Summerset', 'Lurk disconsolately around the margins.', '0-7', 2,
-      { stat: 'Persuasive', diff: 50 },
-      'Whispered Hint ×60, Connected: Summerset −2 CP',
-      'Connected: Summerset −2 CP and Scandal +1 CP', 'your very own Infernal Contract', null],
-    ['Wine-tasting at Summerset', 'An evening of Oenology', '8-10', 2, { stat: 'Watchful', diff: 87 },
-      'Bottle of Greyfields 1882 ×44, Hedonist +1 CP (to 5); rare: a First Sporing',
-      'Connected: Summerset −5 CP',
-      'Connected: Summerset 10, an Academic Gown, and your soul still your own', null],
-    ['Wine-tasting at Summerset', 'Hold your own wine tasting', '8-10', 2, { stat: 'Watchful', diff: 87 },
-      'Whispered Hint ×87', 'the Greyfields are spent either way',
-      'your very own Infernal Contract, and Bottle of Greyfields 1882 ×100', null],
-    ['The Feast of the World', 'Fourteen courses of sheer indulgence', '11', 3, null,
-      'Hedonist +3 CP (to 10)', null,
-      'Connected: Summerset 15, an Academic Gown, and your soul still your own',
-      'No challenge. One of the few places to reach Hedonist 10 without giving up Austere.'],
-    ['The Feast of the World', 'Business and pleasure', '11', 3, { stat: 'Watchful', diff: 89 },
-      'London Street Sign ×1 (2.50 Echoes)', 'Connected: Summerset −20 CP',
-      'Connected: Summerset 15, an Academic Gown, and your soul still your own',
-      'The guide’s money option in this carousel: it can be played three or four times a term.'],
-    ['The Feast of the World', 'Disguise yourself and cause mischief', '11', 3,
-      { stat: 'Shadowy', diff: 70 }, 'Stolen Correspondence ×40', 'Scandal +1 CP',
-      'your very own Infernal Contract', null],
-    ['The World, devoured', 'Propose the final toast of the evening', '12', 'reset',
-      { stat: 'Watchful', diff: 89 }, 'Sworn Statement ×2, Making Waves +3 CP',
-      'Connected: Summerset −20 CP', 'Connected: Summerset 15', null],
-    ['The World, devoured', 'The Provost? The Provost...', '12', 'reset', null,
-      'a First Sporing, a Bottle of Black Wings Absinthe, Connected: Summerset +20 CP, '
-        + 'Hedonist +3 CP (to 15), Scandal +5 CP',
-      'Connected: Summerset −50 CP and Scandal +10 CP', 'Connected: Summerset 16', null],
-    ['The World, devoured', 'Just desserts', '12', 'reset', { stat: 'Watchful', diff: 89 },
-      'Sapphire ×2, Stolen Correspondence ×20, Flawed Diamond ×2',
-      'Connected: Summerset −10 CP', 'your very own Infernal Contract', null],
-    ['The Stoats', 'Get involved', '0-7', 2, { stat: 'Persuasive', diff: 85 },
-      'Proscribed Material ×21, Connected: Benthic +2 CP, Connected: Summerset +2 CP', null, null, null],
-    ['Fun with the Stoats', 'Take the bravery challenge', '8-10', 2, { stat: 'Dangerous', diff: 87 },
-      'a Bottle of Morelways 1872 and a Bottle of Strangling Willow Absinthe', 'Wounds +1 CP', null,
-      'The only Dangerous challenge in the first carousel.'],
-    ['More fun with the Stoats', 'Join in this week’s caper', '11', 3,
-      { stat: 'Watchful', diff: 89 }, 'Bottle of Greyfields 1882 ×45, Dangerous +2 CP',
-      'Dangerous +1–2 CP, Connected: Benthic −5 CP, Scandal +1 CP', null, null],
-    ['Stoats’ Honour', 'A matter of honour', '12', 'reset', { stat: 'Shadowy', diff: 85 },
-      'Piece of Rostygold ×80, Bottle of Greyfields 1882 ×60, Making Waves +2 CP',
-      'Scandal +2 CP', null, null],
-    ['Cricket at Benthic', 'Demonstrate your cricketing knowledge', '0-7', 2,
-      { stat: 'Watchful', diff: 85 }, 'Cryptic Clue ×42, Connected: Benthic +2 CP',
-      'Connected: Benthic −5 CP', 'Connected: Benthic 5', null],
-    ['Picking the team', 'Involve yourself', '8-10', 2, { stat: 'Watchful', diff: 87 },
-      'Proscribed Material ×22; rare: another ×22 and an Appalling Secret',
-      'Connected: Benthic −5 CP', 'Connected: Benthic 10', null],
-    ['Match day', 'A serious business', '11', 3, { stat: 'Watchful', diff: 89 },
-      'Drop of Prisoner’s Honey ×75', 'Connected: Benthic −25 CP', 'Connected: Benthic 15',
-      null],
-    ['Match day', 'The twelfth woman', '11', 3, { luck: 50 },
-      'Appalling Secret ×11, Connected: Benthic +15 CP', 'Connected: Benthic −5 CP',
-      'Connected: Benthic 15', null],
-    ['The end of the match', 'A merry wager', '12', 'reset', { luck: 50 },
-      'A Scholar of the Correspondence +1 CP, and an Unaccountably Peckish',
-      'a Church favour gone, Connected: Benthic −30 CP and Connected: Summerset −50 CP',
-      'Connected: Benthic 15',
-      'An even-odds gamble whose failure costs more Connected than several terms of building it.'],
-    ['The end of the match', 'Nobble the Benthic team', '12', 'reset', { stat: 'Shadowy', diff: 85 },
-      'Infernal Contract ×11, Appalling Secret ×11, Soul ×11, Connected: Benthic −10 CP',
-      'Connected: Benthic is RESET', 'Connected: Benthic 10', null],
-    ['The end of the match', 'Display admirable sportsmanship', '12', 'reset', null,
-      'Flawed Diamond ×30, Ostentatious Diamond ×2, Connected: Benthic +10 CP, '
-        + 'Steadfast +1 CP (to 5)', null, 'Connected: Benthic 15', 'No challenge.'],
-    ['Off to the library', 'A day at the library', '0-7', 2, { stat: 'Watchful', diff: 85 },
-      'Proscribed Material ×21', 'Nightmares +1 CP', null, null],
-    ['Back to the library', 'In the high stacks', '8-10', 2, { stat: 'Watchful', diff: 87 },
-      'Cryptic Clue ×44', 'Connected: Benthic −2 CP', null, null],
-    ['Once more to the library', 'Bribe a librarian', '11', 3, null,
-      'Proscribed Material ×50', 'the Greyfields are spent either way',
-      'Bottle of Greyfields 1879 ×120', 'No challenge.'],
-    ['Once more to the library', 'Hunt for the book yourself', '11', 3, { stat: 'Watchful', diff: 89 },
-      'Proscribed Material ×40', 'Nightmares +1 CP', null, null],
-    ['The library roof', 'Report them to the college authorities', '12', 'reset', null,
-      'Connected: Benthic +30 CP and Connected: Summerset +30 CP', null, null,
-      'No challenge, and the guide’s reason to run this carousel at all: 30 CP of BOTH Connected '
-        + 'qualities in one action. Three or four terms of it take each College to about 15.'],
-    ['The library roof', 'Report them to the Constables', '12', 'reset', null,
-      'Proscribed Material ×55, and Favours: Revolutionaries is RESET', null, null, 'No challenge.'],
-    ['The library roof', 'Comrades', '12', 'reset', null,
-      'Proscribed Material ×50, Advancing the Liberation of Night: +1 CP', null, null,
-      'No challenge.'],
-    ['The library roof', 'Blackmail', '12', 'reset', null,
-      'Proscribed Material ×50, Piece of Rostygold ×90, Rat on a String ×5, '
-        + 'Favours: Revolutionaries ×−3', null, null, 'No challenge.'],
-    ['Take tutorials for a little extra cash', 'Sign up for a few tutorials', '0-7', 2,
-      { stat: 'Watchful', diff: 85 }, 'Primordial Shriek ×42', null, null, null],
-    ['Enjoying the pace of academic life', 'Perhaps you might read a book today', '0-11', 2,
-      { stat: 'Watchful', diff: 85 },
-      'Primordial Shriek ×20, Connected: Benthic +1 CP, Connected: Summerset +1 CP, '
-        + 'Nightmares −1 CP',
-      'Nightmares +1 CP', null,
-      'The other healing option: Nightmares −1 CP, and it is offered across almost the whole '
-        + 'carousel.'],
-    ['Enjoying the pace of academic life', 'A stroll around the quad', '0-11', 2,
-      { stat: 'Watchful', diff: 95 }, 'Whispered Hint ×95', null, null, null],
-    ['Summerset days', 'Getting to know Summerset', '0-10', 2, { stat: 'Watchful', diff: 85 },
-      'Bottle of Greyfields 1882 ×30, Connected: Summerset +3 CP', 'Nightmares +2 CP', null, null],
-    ['Summerset days', 'Mixing in Summerset Society', '0-10', 1, null,
-      'Connected: Summerset +3 CP, Making Waves +2 CP', null, null,
-      'No challenge and no cost — but it pays only 1 CP of Term Passing... , not the usual 2.'],
-    ['Out and about at Benthic College', 'Getting to know Benthic', '0-10', 2,
-      { stat: 'Watchful', diff: 85 }, 'Whispered Hint ×60, Connected: Benthic +3 CP',
-      'Nightmares +2 CP', null, null],
-    ['Out and about at Benthic College', 'A feather in Benthic’s mortar board', '0-10', 1, null,
-      'Connected: Benthic +3 CP, Making Waves +2 CP', null, null,
-      'No challenge and no cost — but it pays only 1 CP of Term Passing... , not the usual 2.'],
-    ['Prepare your lectures', 'Set to work', '2-10', 2, { stat: 'Watchful', diff: 86 },
-      'Cryptic Clue ×43; rare: Appalling Secret ×2', 'Nightmares +2 CP', null, null],
-    ['Prepare your lectures', 'Start on a publication', '2-10', 2, { stat: 'Watchful', diff: 95 },
-      'Cryptic Clue ×48', 'Nightmares +1 CP', null, null],
-    ['Do some teaching', 'Introductory lecturing', '5-10', 2, { stat: 'Watchful', diff: 86 },
-      'Primordial Shriek ×42', 'Nightmares +2 CP', null, null],
-    ['Do some teaching', 'Intermediary Correspondence, for the more advanced student', '5-10', 2,
-      { stat: 'Watchful', diff: 90 }, 'Cryptic Clue ×45', 'Nightmares +2 CP', null, null],
-    ['The golden path', 'Write an essay for money', '8-11', 2, { stat: 'Watchful', diff: 95 },
-      'Piece of Rostygold ×95', 'Scandal +1 CP', 'Connected: Summerset 10', null],
-    ['Do some actual research', 'Learned discourse', '8-11', 2, { stat: 'Watchful', diff: 87 },
-      'Cryptic Clue ×44; rare: another ×44 and A Scholar of the Correspondence +1 CP (to 7)',
-      'Nightmares +2 CP', null,
-      'The only way in this carousel to raise A Scholar of the Correspondence, and only on a rare '
-        + 'success.'],
-    ['A public debate', 'Encourage a debate on souls', '8-10', 2, { stat: 'Watchful', diff: 87 },
-      'Stolen Correspondence ×17', 'Connected: Summerset −1 CP and Scandal +1 CP',
-      'Connected: Summerset 5 and Connected: Benthic 5', null],
-    ['The day of the debate', 'Listen to the argument for', '11', 3, null, 'Watchful +5 CP', null, null,
-      'No challenge. Every option on this storylet pays 5 CP of Watchful for nothing.'],
-    ['The day of the debate', 'Listen to the argument against', '11', 3, null, 'Watchful +5 CP', null, null,
-      'No challenge. Every option on this storylet pays 5 CP of Watchful for nothing.'],
-    ['The day of the debate', 'Be vigilant', '11', 3, null, 'Soul ×6, Infernal Contract ×5',
-      null, 'a Shepherd’s Timepiece (Fate-locked)', null],
-    ['The day of the debate', 'Watch for opportunities', '11', 3, null, 'Soul ×75', null,
-      'a Spirifer’s Fork (Fate-locked)', null],
-    ['The debate closes', 'Speak for the proposition', '12', 'reset', { stat: 'Watchful', diff: 89 },
-      'Moon-Pearl ×160, a Tale of Terror!!',
-      'a Tale of Terror!!, Connected: Benthic −10 CP, Scandal +1 CP', null, null],
-    ['The debate closes', 'Speak against the proposition', '12', 'reset', { stat: 'Watchful', diff: 89 },
-      'Foxfire Candle Stub ×210',
-      'a Tale of Terror!!, Connected: Summerset −10 CP, Scandal +1 CP', null, null],
-    ['The body in the library', 'Inspect the body', '6-7', 2, { stat: 'Watchful', diff: 85 },
-      'Piece of Rostygold ×85', null, null,
-      'The Murder is the one storyline that starts at Term Passing... 6 rather than 0.'],
-    ['Begin your investigation', 'Interrogate his colleagues', '8-10', 2, { stat: 'Watchful', diff: 87 },
-      'Piece of Rostygold ×95', null, null, null],
-    ['Begin your investigation', 'Interrogate the library staff', '8-10', 2,
-      { stat: 'Watchful', diff: 87 }, 'Piece of Rostygold ×95', null, null, null],
-    ['Talk to the deceased', 'Interrogate the victim', '11', 3, { stat: 'Watchful', diff: 90 },
-      'Piece of Rostygold ×108', null, null, null],
-    ['Name the murderer!', 'Accuse the Assistant Deputy Librarian of seeking revenge', '12', 'reset', null,
-      'Piece of Rostygold ×250, Watchful +5 CP', null, null,
-      'No challenge, and the only one of the four accusations that pays anything.'],
-    ['Name the murderer!', 'Accuse the Professor of academic jealousy', '12', 'reset', null,
-      'Watchful +1 CP', null, null, 'No challenge.'],
-    ['Name the murderer!', 'Accuse the Assistant Deputy Librarian of romantic jealousy', '12', 'reset', null,
-      'Watchful +1 CP', null, null, 'No challenge.'],
-    ['Name the murderer!', 'Accuse the Professor of romantic intrigue', '12', 'reset', null,
-      'Watchful +1 CP', null, null, 'No challenge.'],
-  ].map(function (r) {
-    return { carousel: 1, storylet: r[0], name: r[1], window: r[2], cp: r[3], ch: r[4], gives: r[5],
-      fail: r[6], needs: r[7], note: r[8] };
-  });
-
-  // The second and third carousels: the guide prices every row, so the badge
-  // carries the Echoes. [storylet, option, window, CP, challenge, Echoes, pay,
-  // failure, needs, note].
-  const TP_SECOND = [
-    ['Assistants wanted', 'Advertise', '0-4', 2, { stat: 'Watchful', diff: 106 }, 1.06,
-      'Bottle of Greyfields 1882 ×53', 'Term Passing... +1 CP and Scandal +1 CP', null, null],
-    ['Assistants wanted', 'Ask around', '0-4', 2, { stat: 'Watchful', diff: 108 }, 1.07,
-      'Foxfire Candle Stub ×50, Shard of Glim ×57', 'Term Passing... +1 CP', null, null],
-    ['Seek out some influential help', 'Use your Society connections', '0-4', 2,
-      { stat: 'Watchful', diff: 103 }, 1.50,
-      'Jade Fragment ×100, a Bottle of Strangling Willow Absinthe',
-      'Term Passing... +1 CP and Scandal +1 CP', 'Persuasive 90', null],
-    ['Seek out some influential help', 'Use your less savoury connections', '0-4', 2,
-      { stat: 'Watchful', diff: 104 }, 1.55,
-      'Bottle of Greyfields 1882 ×25, Moon-Pearl ×105',
-      'Term Passing... +1 CP and Suspicion +1 CP', 'Shadowy 90 and The Flit 1',
-      'The best-paying option in the second carousel by the guide’s own figures.'],
-    ['Seek out some influential help', 'Try to gain patronage on your own', '0-4', 2,
-      { stat: 'Watchful', diff: 105 }, 1.06,
-      'Bottle of Greyfields 1882 ×50, Cryptic Clue ×53',
-      'Term Passing... +1 CP, Scandal +1 CP, and the Plaques are spent either way',
-      'Correspondence Plaque ×2', null],
-    ['Those meddling men from the Ministry', 'Deal with the evaluators', '0-4', 2,
-      { stat: 'Watchful', diff: 101 }, 0.50, 'Foxfire Candle Stub ×50',
-      'Term Passing... +1 CP and Suspicion +1 CP', null,
-      'The worst-paying row of the second carousel, at half an Echo.'],
-    ['The student body', 'Pick out some likely candidates', '0-4', 2, { stat: 'Watchful', diff: 98 }, 1.5,
-      'a Bundle of Oddities (1–195)', 'Term Passing... +1 CP and Nightmares +1 CP', null,
-      'The guide’s ~1.5 Echoes is an average over the Bundle’s range.'],
-    ['Making Your Name: Investigations in the university', 'Head to the library', null, null,
-      { stat: 'Watchful', diff: 98 }, 0.98, 'Investigating... +3, Cryptic Clue ×49',
-      'Nightmares +2 CP', null, null],
-    ['Making Your Name: Investigations in the university', 'Interview the suspects', null, null,
-      { stat: 'Watchful', diff: 100 }, 1.00, 'Investigating... +3, Cryptic Clue ×50',
-      'Nightmares +1 CP', null, null],
-    ['Making Your Name: Investigations in the university', 'Conduct forensic analyses', null, null,
-      { stat: 'Watchful', diff: 102 }, 1.10, 'Investigating... +3, Cryptic Clue ×55',
-      'Investigating... −5 and Nightmares +1 CP', null,
-      'The only investigation option whose failure takes Investigating... back.'],
-    ['Making Your Name: Investigations in the university', 'Interview students and staff', null, null,
-      { stat: 'Watchful', diff: 104 }, 1.04, 'Investigating... +4, Cryptic Clue ×52',
-      'Nightmares +2 CP', null, null],
-    ['Making Your Name: Investigations in the university',
-      'Interview the Department of _______ staff', null, null,
-      { stat: 'Watchful', diff: 106 }, 1.06, 'Investigating... +4, Cryptic Clue ×53',
-      'Nightmares +1 CP', null,
-      'Since the July 2026 rework, the guide’s pick: 4 of Investigating... and a full Echo for only '
-        + 'a change point of Nightmares on a failure.'],
-    ['Making Your Name: Investigations in the university', 'Talk to the Porters', null, null,
-      { stat: 'Watchful', diff: 108 }, 0.58,
-      'Investigating... +4, Whispered Hint ×108, and Cryptic Clue ×25 spent',
-      'the Clues are spent anyway, and Nightmares +1 CP', 'Cryptic Clue ×25',
-      'It used to be the reason to linger here — Sudden Insights traded for Watchful — and the '
-        + 'July 2026 rework took that away. What is left costs 25 Clues for the worst rate on the '
-        + 'storylet.'],
-    ['Find allies at the Department of', 'Get the Semi-semiotic Fellow on your side', '5-6', 2,
-      { stat: 'Watchful', diff: 98 }, 0.98, 'Cryptic Clue ×49',
-      'Term Passing... +1 CP and Nightmares +1 CP', null, null],
-    ['Getting into the journals', 'Publish and be... well, yes', '5-6', 2,
-      { stat: 'Watchful', diff: 101 }, 1.00, 'Proscribed Material ×25',
-      'Term Passing... +1 CP and Nightmares +1 CP', null, null],
-    ['Secure your funding', 'Take the equitable approach', '5-6', 2, { stat: 'Watchful', diff: 104 }, 1.04,
-      'Jade Fragment ×104', 'Term Passing... +1 CP and Scandal +1 CP', null, null],
-    ['Secure your funding', 'Institute a hierarchy of donors', '5-6', 2,
-      { stat: 'Watchful', diff: 106 }, 1.06, 'Shard of Glim ×106',
-      'Term Passing... +1 CP and Scandal +1 CP', null, null],
-    ['Interview prospective assistants', 'Select on the basis of qualifications', '5-6', 2,
-      { stat: 'Watchful', diff: 106 }, 1.06, 'Foxfire Candle Stub ×53, Nodule of Deep Amber ×53',
-      'Term Passing... +1 CP and Nightmares +1 CP', null, null],
-    ['Interview prospective assistants', 'Select on the basis of... personal qualities', '5-6', 2,
-      { stat: 'Watchful', diff: 108 }, 1.07, 'Jade Fragment ×107',
-      'Term Passing... +1 CP and Nightmares +1 CP', null, null],
-    ['Where is Dr Orthos?', 'Make your peace with Dr Orthos', '7', 'reset',
-      { stat: 'Persuasive', diff: 90 }, 2.00,
-      'Connected: Benthic +10, Connected: Summerset +10, Memory of Distant Shores ×4, '
-        + 'Making Waves +2 CP',
-      'Scandal +1 CP, Connected: Benthic −5 and Connected: Summerset −5, and it resets anyway',
-      null, null],
-    ['The patronage of the Duchess', 'Court the Duchess’ patronage', '7', 'reset',
-      { stat: 'Watchful', diff: 98 }, 2.25,
-      'Relic of the Second City ×15, Connected: The Duchess +20',
-      'Connected: The Duchess −20 and Nightmares +1 CP, and it resets anyway', null,
-      'The best-paying finisher of the second carousel.'],
-    ['Dealing with Virginia', 'A word at the Embassy', '7', 'reset', { stat: 'Watchful', diff: 106 }, 2.20,
-      'Proscribed Material ×55', 'it resets anyway', 'Renown: Hell 5', null],
-  ].map(function (r) {
-    return { carousel: 2, storylet: r[0], name: r[1], window: r[2], cp: r[3], ch: r[4], echoes: r[5],
-      gives: r[6], fail: r[7], needs: r[8], note: r[9] };
-  });
-
-  const TP_THIRD = [
+  // finisher), challenge, the guide's Echoes, what it pays, what a failure
+  // does, what it needs, a note].
+  const TP_ROWS = [
     ['Thefts from the Private Collections', 'Learn everything you can', '0-3', 4, null, 1.60,
       'Intriguing Snippet ×8', null, null, 'No challenge.'],
     ['The Reward for Good Works', 'Cast an eye over your correspondence', '0-3', 2, null, 1.50,
@@ -14513,8 +14266,11 @@
     ['Invigilate a Final Exam', 'An interpretative exam', '8', 'reset', null, 5.00,
       'Queer Soul ×2', null,
       'The Rose Giveth Its Verses to Devils and Also to You (Fate-locked)', 'No challenge.'],
+    // Led with the short clause so the badge has something to quote: the
+    // fallback takes the first clause of the payout, and this row has no Echo
+    // figure to show instead.
     ['A Student in Hot Water', 'Advise them to stick to their principles', '8', 'reset', null, null,
-      'one of the three kinds of research page ×50 — the game picks which',
+      'research pages ×50, one of the three kinds — the game picks which',
       null, 'Voyage of Scientific Discovery 2',
       'No challenge, and no Echo figure: the guide gives none, and the three page types have no '
         + 'exchange rate between them.'],
@@ -14569,41 +14325,11 @@
       'Proscribed Material ×80, Piece of Rostygold ×100, Rat on a String ×100', null, null,
       'No challenge, and the guide’s finisher of choice for the third carousel.'],
   ].map(function (r) {
-    return { carousel: 3, storylet: r[0], name: r[1], window: r[2], cp: r[3], ch: r[4], echoes: r[5],
+    return { storylet: r[0], name: r[1], window: r[2], cp: r[3], ch: r[4], echoes: r[5],
       gives: r[6], fail: r[7], needs: r[8], note: r[9] };
   });
 
-
-  // **The three carousels share titles, and that is the whole difficulty here.**
-  // The third renames most of the first's storylets into Title Case (*Off to
-  // the Library* against *Off to the library*) and keeps the option titles, and
-  // normalising folds case away -- so "Attend a feast" under "Feasting at
-  // Summerset" is TWO rows, and `carouselLookup` answers nothing when two rows
-  // match, which would leave those options with no badge at all. Nothing on
-  // screen says which carousel you are in either: that is Featuring in the
-  // Tales of the University, which is on the Myself tab and not here.
-  //
-  // So the duplicates are MERGED into one row carrying both readings, and the
-  // badge says both ("1st TP +2? Whispered Hint ×90 | 3rd TP +4? 1.50 E").
-  // Quoting one of them would be a guess about which carousel you are standing
-  // in, and the two disagree by twice the progress and often by the challenge.
-  function tpMerge(rows) {
-    const byKey = new Map();
-    for (const row of rows) {
-      const key = normalizeName(row.storylet) + '|' + normalizeName(row.name);
-      const variant = { carousel: row.carousel, window: row.window, cp: row.cp, ch: row.ch,
-        echoes: row.echoes, gives: row.gives, fail: row.fail, needs: row.needs, note: row.note };
-      if (byKey.has(key)) byKey.get(key).variants.push(variant);
-      else byKey.set(key, { storylet: row.storylet, name: row.name, variants: [variant] });
-    }
-    return [...byKey.values()];
-  }
-
-  const TP_OPTIONS = tpMerge(TP_FIRST.concat(TP_SECOND, TP_THIRD));
-
-  // The rows one heading has to answer for twice. Derived, not listed: a hand
-  // list would go stale the moment a row moved between the tables.
-  const TP_SHARED = TP_OPTIONS.filter(function (e) { return e.variants.length > 1; });
+  const TP_OPTIONS = TP_ROWS;
 
   const TP_STORYLETS = TP_OPTIONS.map(function (e) { return e.storylet; })
     .filter(function (s, i, all) { return all.indexOf(s) === i; });
@@ -14614,118 +14340,85 @@
   const TP_BRANCH_CLASS = 'fl-ux-term-passing-branch';
   const TP_BRANCH_FLAG = 'flUxTermPassingBranch';
 
-  const TP_ORDINALS = ['1st', '2nd', '3rd'];
+  const TP_RULES = TP_CAROUSEL.name + ', the University’s carousel once your academic reputation is '
+    + 're-established (Featuring in the Tales of the University ' + TP_CAROUSEL.ftu + '): raise Term '
+    + 'Passing... to ' + TP_CAROUSEL.cap + ' and take one finisher, ' + TP_CAROUSEL.actions + ' actions '
+    + 'in all. Only ONE finisher can be played per go-round, so pick before you get there. The two '
+    + 'earlier carousels the guide covers lock behind you and are not badged. The guide’s best '
+    + 'line without leaving the University runs at 2.551 Echoes an action; with research pages carried '
+    + 'in from a voyage it reaches 4.90.';
 
-  const TP_RULES = 'Three carousels of the same shape, and which one you are in is set by Featuring in '
-    + 'the Tales of the University: ' + TP_CAROUSELS.map(function (c) {
-      return c.name + ' at FTU ' + c.ftu + ' (to Term Passing... ' + c.cap + ', ' + c.actions + ' actions)';
-    }).join('; ') + '. The first is played for the two Colleges’ Connected and for the stories, not '
-    + 'for money — which is why its rows carry goods here and the other two carry the guide’s '
-    + 'Echoes. Only ONE finisher can be played per go-round, so pick before you get there.';
-
-  function tpCarousel(id) {
-    return TP_CAROUSELS.find(function (c) { return c.id === id; });
+  // Connected: Benthic and Connected: Summerset are what this carousel is
+  // actually run for, so an option that BUILDS either is worth saying on the
+  // badge. Read out of the row's payout rather than stored a second time
+  // beside it -- two copies of one figure is two chances to mistype it.
+  //
+  // Only a gain matches: a Connected an option SPENDS is written with a minus
+  // sign (U+2212) and stays in the tooltip, where a cost belongs. The name is
+  // cut at a comma so a run of clauses can never be swallowed into one.
+  function tpConnected(gives) {
+    const re = /Connected:\s*([^,;]+?)\s*\+(\d+)\s*CP/g;
+    const out = [];
+    let m;
+    while ((m = re.exec(String(gives || '')))) {
+      out.push({ name: m[1].replace(/^The /, ''), cp: Number(m[2]) });
+    }
+    return out;
   }
 
-  function tpCheck(v) {
-    if (!v.ch) return 'No challenge.';
-    if (v.ch.luck) return 'Luck, ' + v.ch.luck + '%.';
-    return carouselChallenge(v.ch);
+  function tpConnectedText(e) {
+    return tpConnected(e.gives).map(function (c) { return c.name + ' +' + c.cp; }).join(' ');
   }
 
-  // The first carousel is not priced by the guide, so its rows show the goods
-  // instead of an Echo figure. The first clause of the payout is enough for a
-  // badge; the tooltip carries all of it.
-  function tpWorth(v) {
-    if (v.echoes != null) return v.echoes.toFixed(2) + ' E';
-    return String(v.gives).split(/, | and /)[0].replace(/^an? /, '').replace(/^Connected: /, '');
+  function tpCheck(e) {
+    if (!e.ch) return 'No challenge.';
+    if (e.ch.luck) return 'Luck, ' + e.ch.luck + '%.';
+    return carouselChallenge(e.ch);
   }
 
-  function tpVariantText(v) {
-    const head = v.cp === 'reset' ? 'reset' : v.cp == null ? 'no TP' : 'TP +' + v.cp;
-    const mark = v.ch ? CAROUSEL_MARK_CHALLENGE : '';
-    return head + mark + ' · ' + tpWorth(v);
+  // What the option is worth. The guide prices nearly every row; the four it
+  // does not fall back to the first clause of the payout -- and a Connected
+  // clause is skipped there, because the Connected is already the last thing
+  // on the badge and saying it twice reads as two different payments.
+  function tpWorth(e) {
+    if (e.echoes != null) return e.echoes.toFixed(2) + ' E';
+    const clause = String(e.gives || '').split(/, | and /)
+      .find(function (part) { return !/^Connected:/.test(part.trim()); });
+    return clause ? clause.trim().replace(/^an? /, '') : null;
   }
 
   function tpBadgeText(e) {
-    const readings = e.variants.map(tpVariantText);
-    // Where the carousels read the same there is nothing to tell apart, so the
-    // badge says it once -- *Report them to the college authorities* pays the
-    // same 30 change points of both Connected qualities in the first carousel
-    // and the third, and differs only in what it asks for first. The tooltip
-    // still carries both, requirements and all.
-    if (readings.every(function (r) { return r === readings[0]; })) return readings[0];
-    return e.variants.map(function (v, i) {
-      return TP_ORDINALS[v.carousel - 1] + ' ' + readings[i];
-    }).join(' | ');
+    const head = e.cp === 'reset' ? 'reset' : e.cp == null ? 'no TP' : 'TP +' + e.cp;
+    const parts = [head + (e.ch ? CAROUSEL_MARK_CHALLENGE : '')];
+    const worth = tpWorth(e);
+    if (worth) parts.push(worth);
+    const connected = tpConnectedText(e);
+    if (connected) parts.push(connected);
+    return parts.join(' · ');
   }
 
   function tpSpec(e) {
-    const body = [];
-    e.variants.forEach(function (v) {
-      const carousel = tpCarousel(v.carousel);
-      if (e.variants.length > 1) {
-        body.push(TP_ORDINALS[v.carousel - 1] + ' carousel — ' + carousel.name + ', at Featuring in '
-          + 'the Tales of the University ' + carousel.ftu + ':');
-      } else {
-        body.push(carousel.name + ' — the ' + ['first', 'second', 'third'][v.carousel - 1]
-          + ' carousel, at Featuring in the Tales of the University ' + carousel.ftu + '.');
-      }
-      body.push('  ' + tpCheck(v));
-      body.push('  Success: ' + (v.cp === 'reset' ? 'Term Passing... resets'
-        : v.cp == null ? 'no Term Passing...' : 'Term Passing... +' + v.cp + ' CP')
-        + ', and ' + v.gives + '.');
-      if (v.echoes != null) body.push('  The guide’s figure: ' + v.echoes.toFixed(2) + ' Echoes.');
-      if (v.fail) body.push('  Failure: ' + v.fail + '.');
-      if (v.needs) body.push('  Needs: ' + v.needs + '.');
-      if (v.window) body.push('  Offered at Term Passing... ' + v.window + '.');
-      if (v.note) body.push('  ' + v.note);
-    });
-    if (e.variants.length > 1) {
-      body.push('This option is on ' + e.variants.length + ' of the three carousels and they pay '
-        + 'differently. Only one is ever open, and which one is Featuring in the Tales of the '
-        + 'University — which is on the Myself tab, not on this screen, so both are quoted.');
-    }
-    const best = e.variants.reduce(function (a, b) {
-      return (b.echoes || 0) > (a.echoes || 0) ? b : a;
-    });
-    const color = best.cp === 'reset' ? CAROUSEL_COLOR_PAYOUT
-      : (best.echoes != null && best.echoes >= 5) ? CAROUSEL_COLOR_PAYOUT : CAROUSEL_COLOR_PROGRESS;
+    const body = [tpCheck(e)];
+    body.push('Success: ' + (e.cp === 'reset' ? 'Term Passing... resets'
+      : e.cp == null ? 'no Term Passing...' : 'Term Passing... +' + e.cp + ' CP')
+      + ', and ' + e.gives + '.');
+    if (e.echoes != null) body.push('The guide’s figure: ' + e.echoes.toFixed(2) + ' Echoes.');
+    if (e.fail) body.push('Failure: ' + e.fail + '.');
+    if (e.needs) body.push('Needs: ' + e.needs + '.');
+    if (e.window) body.push('Offered at Term Passing... ' + e.window + '.');
+    const color = e.cp === 'reset' ? CAROUSEL_COLOR_PAYOUT
+      : (e.echoes != null && e.echoes >= 5) ? CAROUSEL_COLOR_PAYOUT : CAROUSEL_COLOR_PROGRESS;
     return { text: tpBadgeText(e), color: color,
       title: carouselTooltip('Term Passing...', e, body, TP_RULES) };
   }
 
-  // Its own summary rather than `carouselSummary`, which matches a storylet by
-  // its exact string: the merged rows keep one spelling of a title the three
-  // carousels spell differently, so the match has to be the normalised one.
-  function tpSummary(storylet, own) {
-    const ids = [...new Set(own.reduce(function (all, e) {
-      return all.concat(e.variants.map(function (v) { return v.carousel; }));
-    }, []))].sort();
-    const lines = [storylet, 'Term Passing...', ''];
-    own.forEach(function (e) { lines.push('  • ' + e.name + ' — ' + tpBadgeText(e)); });
-    lines.push('');
-    if (ids.length > 1) {
-      lines.push('This title is on ' + ids.length + ' of the three carousels, and only one of them is '
-        + 'ever open; both readings are above.');
-    }
-    lines.push(TP_RULES);
-    lines.push('Open the storylet and every option is badged in its own right.');
-    return lines.join('\n');
-  }
-
   function tpStoryletSpec(key) {
-    const own = TP_OPTIONS.filter(function (e) { return normalizeName(e.storylet) === key; });
-    if (!own.length) return null;
-    const ids = [...new Set(own.reduce(function (all, e) {
-      return all.concat(e.variants.map(function (v) { return v.carousel; }));
-    }, []))].sort();
-    const windows = [...new Set(own.reduce(function (all, e) {
-      return all.concat(e.variants.map(function (v) { return v.window; }));
-    }, []).filter(Boolean))];
-    const text = ids.map(function (id) { return TP_ORDINALS[id - 1]; }).join('/')
-      + ' · T' + (windows.length ? windows.join('/') : '–');
-    return { text: text, color: CAROUSEL_COLOR_LABEL, title: tpSummary(own[0].storylet, own) };
+    const storylet = TP_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet) return null;
+    const windows = [...new Set(TP_OPTIONS.filter(function (e) { return e.storylet === storylet; })
+      .map(function (e) { return e.window; }).filter(Boolean))];
+    return { text: 'T' + (windows.length ? windows.join('/') : '–'), color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('Term Passing...', storylet, TP_OPTIONS, tpBadgeText, TP_RULES) };
   }
 
   function tpRatings() {

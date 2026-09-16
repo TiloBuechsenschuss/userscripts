@@ -976,7 +976,17 @@ navigation. Two consequences:
   why the launcher's outside-click handler is capture-phase**: on the bubble it never saw a
   badge tap at all, so the menu stayed open behind one. `pruneTip` runs at the top of `scan` so
   a panel whose badge React has since re-rendered away goes with it rather than hanging over an
-  unrelated card, and a scroll or resize closes it rather than chasing the anchor. **Confirmed
+  unrelated card, and a scroll or resize closes it rather than chasing the anchor.
+  **Both dismissal handlers must also ignore events from inside the panel itself** (fixed
+  2026-09-16, on a report that the panel closed the moment it was clicked or scrolled). The
+  panel is `overflow:auto` under a 60vh cap, so any tooltip longer than that has to be scrolled
+  to be read — and the capture-phase `click` exempted only badges while the `scroll` listener
+  was capture-phase on `window`, which sees a scroll in *any* container. So the panel's own
+  scrollbar click and its own scrolling both closed it, and every long tooltip was unreadable
+  past the cap. `fromTip(e)` — `e.target.closest('#' + TIP_ID)` — now guards both; page scroll,
+  resize, Escape and an outside click still dismiss. `overscroll-behavior:contain` on the panel
+  stops a wheel or drag that reaches the END of it from chaining into the page, since that
+  would scroll the page and close it. `fl-badge-tip.test.mjs` is the regression test. **Confirmed
   in-game by the author on 2026-09-04**, phone included — so, unusually for this repo, the
   placement and the swallowed tap are known to work rather than merely reasoned about.
   A feature that wants a screen rather than a decoration registers a **panel** instead: the
@@ -1997,23 +2007,29 @@ navigation. Two consequences:
   file that badges storylet **headings and nothing else**, because the guide records no option tables
   for the storyline. Badge is the level and what the step does (`FTU 6 · locks the first carousel ⏏`);
   `⏏` marks the two irreversible steps and is deliberately NOT the `▼` used for "uses something up",
-  since nothing is consumed — a door closes. It quotes no figures at all: the numbers for what you
-  play alongside these belong to `term-passing`. Two titles end in a blank the game fills in, so each
-  matches bare and wildcarded (a new `(department)` entry in `CAROUSEL_PLACEHOLDER`). **Term
-  Passing...** (`term-passing`, `TP_FIRST`, `TP_SECOND`, `TP_THIRD`): three carousels of the same
-  shape, never open at once, picked by Featuring in the Tales of the University. The badge is the Term
-  Passing... CP and then what it is worth — the guide's Echoes for the second and third, the **goods**
-  for the first, which the guide does not price and which is not played for money anyway.
-  **The merge is the load-bearing part.** The third carousel renames the first's storylets into Title
-  Case (*Off to the Library* against *Off to the library*) and keeps the option titles, and
-  `normalizeName` folds case away — so *Attend a feast* under *Feasting at Summerset* is two rows, and
-  `carouselLookup` answers nothing when two match, which would have left three dozen options with no
-  badge and no error. `tpMerge` folds them into one row per storylet-and-option with a variant per
-  carousel, and the badge quotes both (`1st TP +2? · Whispered Hint ×90 | 3rd TP +4? · 1.50 E`);
-  quoting one would be a guess about which carousel is open, and nothing on the screen says. Where the
-  two readings are identical the badge collapses to one — exactly one row does that, *Report them to
-  the college authorities*, which differs only in what it asks for first. It also needs its own
-  `tpSummary` rather than `carouselSummary`, which matches a storylet by its exact string.
+  since nothing is consumed — a door closes. It quotes no figures at all: the guide gives none, and
+  the storylets you play alongside these belong to the first two Term Passing... carousels, which are
+  not badged either. Two titles end in a blank the game fills in, so each matches bare and wildcarded
+  (a new `(department)` entry in `CAROUSEL_PLACEHOLDER`). **Term Passing...** (`term-passing`,
+  `TP_ROWS`): the guide covers three carousels of the same shape, never open at once, picked by
+  Featuring in the Tales of the University — and **only the last, *A Respectable Academic* (FTU 30+),
+  is carried** (by request, 2026-09-16). It is the only one still open once the story is done; the
+  first two lock behind you. The badge has three parts in this order: the Term Passing... CP, the
+  guide's Echoes, and **last any Connected the option builds** (`TP +4? · 1.24 E · Benthic +12`). The
+  Connected is last because it is the reason to run the carousel rather than the reason to pick one
+  option over another — the Echoes rank the options, the Colleges are what you are there for. Only
+  **gains** show; a Connected an option spends is written with a minus sign and stays in the tooltip,
+  the way a menace on a failure does everywhere else. `tpConnected` **reads those figures out of the
+  row's payout** rather than storing them a second time beside it, so the badge and the tooltip cannot
+  come to disagree; the name is cut at a comma so a run of clauses can never be swallowed into one.
+  Three rows the guide does not price fall back to the first clause of the payout, **skipping a
+  Connected clause** — it is already the last thing on the badge, and twice reads as two payments.
+  *Historical:* while all three carousels were carried, the badges had to quote two readings at once
+  (`1st … | 3rd …`), because the third renames the first's storylets into Title Case (*Off to the
+  Library* against *Off to the library*), `normalizeName` folds case away, and `carouselLookup`
+  answers nothing when two rows match — which would have left three dozen options silently unbadged.
+  Dropping the other two carousels dropped that whole mechanism (`tpMerge`, `TP_SHARED`,
+  `TP_ORDINALS`, the bespoke `tpSummary`) with it. If they are ever restored, restore the merge too.
 
   The `factions` panel's static half is `FACTIONS`, transcribing the *Factions (Guide)*
   Faction-Item table (the item that converts Favours to Renown, its shop, its price) and the
@@ -2424,13 +2440,11 @@ Confirmed live by the author:
 
 - The **Underclay, Hunting Bees, Featuring in the Tales of the University and Term Passing badges**
   (added 2026-09-16). Nothing seen in the game. Report first, in order:
-  **(1) Term Passing's storylet titles, and their case.** The whole merge exists because the third
-  carousel spells the first's storylets differently (*Off to the Library* against *Off to the
-  library*) — if the game in fact uses one spelling throughout, the merged badges are right but
-  noisier than they need to be; if it uses a third spelling, those storylets go unbadged. Say what a
-  heading actually reads, and which carousel you were in. Also whether an option really does pay what
-  the guide's table says on the carousel you are standing in, since a merged badge quotes two figures
-  and only one of them applies to you.
+  **(1) Term Passing's storylet titles, and their case.** Only the third carousel is carried, and it
+  spells several storylets differently from the first (*Off to the Library* against *Off to the
+  library*). The table follows the third. If a heading in *A Respectable Academic* goes unbadged, its
+  spelling is why — say what it actually reads. Also whether an option pays what the guide's table
+  says, and whether the Connected figures on the badges match what the game hands over.
   **(2) Featuring in the Tales of the University's two blanked titles.** Whether the game renders
   *Making Your Name: Meet the Department of _______* with the blank filled in, with literal
   underscores, or some third way. If those two storylets never badge, that is why. The guide is also
@@ -2814,6 +2828,12 @@ Current tests:
   them — and asserts each resolves to exactly one row, because a wildcard collision shows up as no
   badge at all and nothing else would catch it. Then badge text, the rows that refuse to be a figure,
   the registered pass, and no name in another table.
+- `FallenLondon/test/fl-badge-tip.test.mjs` — the tap-to-read panel, and the only suite that
+  RECORDS what the script binds to `document` and `window` and fires those handlers by hand;
+  nothing else reaches that code. It pins the bug it was written for — a click or a scroll from
+  inside the panel must not dismiss it, or a tooltip longer than the 60vh cap cannot be read —
+  alongside everything that still must dismiss (page scroll, resize, Escape, an outside click),
+  the badge exemption that makes a second tap on the same badge a toggle, and `pruneTip`.
 - `FallenLondon/test/choice-underclay.test.mjs`, `choice-hunting-bees.test.mjs`,
   `choice-featuring-tales-university.test.mjs`, `choice-term-passing.test.mjs` — one per feature.
   Underclay and Hunting Bees both pin the guides' "Min for 100%" against the difficulty × 5 ÷ 3, plus
@@ -2821,10 +2841,12 @@ Current tests:
   and its two sides mirroring each other option for option. The Featuring suite is the odd one: it
   pins the line running in order with no gaps, that exactly two steps are marked irreversible and
   that the mark is not `▼`, and that both blanked titles are found bare and filled in — the failure
-  there is silence, not an error. The Term Passing suite pins the **merge**: every option resolving to
-  exactly one row, one variant per carousel, the merged badge quoting both readings, the one row whose
-  readings are identical collapsing to one, and the first carousel being unpriced where the other two
-  are priced. Then badge text, the registered pass, and no name in another table.
+  there is silence, not an error. The Term Passing suite pins the **badge's three parts in order** —
+  CP, Echoes, then any Connected the option *builds* — and specifically that no badge quotes two
+  carousels any more, that the Connected on a badge is exactly what its payout string says (it is read
+  out of it, never stored twice), that the parser takes a gain, skips a cost and never swallows two
+  clauses into one, and that an unpriced row does not print its Connected twice. Then badge text, the
+  registered pass, and no name in another table.
 - `FallenLondon/test/ux-launcher-placement.test.mjs` — asserts `ux-enhancers.js`'s
   `launcherPlacement`, the pure half of where the "⚙ UX" button sits. It is organised around
   the three real travel controls: wide desktop (beside the sidebar button, bottoms level),
