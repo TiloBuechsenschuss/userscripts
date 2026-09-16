@@ -34,15 +34,15 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Cave_of_the_Nadir_(Guide) [Cave of the Nadir] (implemented)
     - https://fallenlondon.wiki/wiki/Artistry_in_the_Empress%27_Court_(Guide) [The Empress' Court] (implemented)
     - https://fallenlondon.wiki/wiki/Breeding_Monsters_(Guide) [The Labyrinth of Tigers] (implemented)
-    - https://fallenlondon.wiki/wiki/Tales_of_Mahogany_Hall_(Guide) [Mahogany Hall]
-    - https://fallenlondon.wiki/wiki/Master-Classes_in_Etiquette_(Guide) [Mahogany Hall]
-    - https://fallenlondon.wiki/wiki/The_Rat_Market_(Guide) [The Rat Market]
-    - https://fallenlondon.wiki/wiki/Patrolling_The_Sixth_Coil_(Guide) [The Sixth Coil]
-    - https://fallenlondon.wiki/wiki/A_Boxful_of_Intrigue_(Guide) [Spite]
-    - https://fallenlondon.wiki/wiki/Underclay_(Guide) [Spite]
-    - https://fallenlondon.wiki/wiki/Featuring_in_the_Tales_of_the_University_(Guide) [The University]
-    - https://fallenlondon.wiki/wiki/Hunting_Bees_in_Old_Newgate_(Guide) [The University]
-    - https://fallenlondon.wiki/wiki/Term_Passing..._(Guide) [The University]
+    - https://fallenlondon.wiki/wiki/Tales_of_Mahogany_Hall_(Guide) [Mahogany Hall] (implemented)
+    - https://fallenlondon.wiki/wiki/Master-Classes_in_Etiquette_(Guide) [Mahogany Hall] (implemented)
+    - https://fallenlondon.wiki/wiki/The_Rat_Market_(Guide) [The Rat Market] (implemented)
+    - https://fallenlondon.wiki/wiki/Patrolling_The_Sixth_Coil_(Guide) [The Sixth Coil] (implemented)
+    - https://fallenlondon.wiki/wiki/A_Boxful_of_Intrigue_(Guide) [Spite] (implemented)
+    - https://fallenlondon.wiki/wiki/Underclay_(Guide) [Spite] (implemented)
+    - https://fallenlondon.wiki/wiki/Featuring_in_the_Tales_of_the_University_(Guide) [The University] (implemented)
+    - https://fallenlondon.wiki/wiki/Hunting_Bees_in_Old_Newgate_(Guide) [The University] (implemented)
+    - https://fallenlondon.wiki/wiki/Term_Passing..._(Guide) [The University] (implemented)
 
   Early PoSI:
     - https://fallenlondon.wiki/wiki/A_Trade_in_Reputations_(Guide) [A Trade in Reputations]
@@ -155,6 +155,7 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Philosofruits_(Guide) (Mid Zailing) [Mangrove College]
 
   Reference (not carousels: overviews, progress qualities, shops; same order):
+    - https://fallenlondon.wiki/wiki/Working_for_the_Widow (Early MYN) [airs storylets]
     - https://fallenlondon.wiki/wiki/Casing_(Guide) (Early MYN) [progress quality]
     - https://fallenlondon.wiki/wiki/Fascinating_(Guide) (Early MYN) [progress quality]
     - https://fallenlondon.wiki/wiki/The_Hunt_is_On!_(Guide) (Early MYN) [progress quality]

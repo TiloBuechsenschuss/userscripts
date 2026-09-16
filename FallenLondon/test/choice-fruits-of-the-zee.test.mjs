@@ -1851,7 +1851,9 @@ check('the feature list, in order',
     'lb-industries', 'menace-eradication', 'vertiginous-horticulture',
     'forgotten-quarter', 'cat-and-mouse', 'season-in-soup', 'long-dead-god', 'engaged-in-a-case',
     'sunken-embassy', 'law-furnace', 'prelapsarian-museum', 'on-a-heist', 'spider-symposium', 'short-stories',
-    'flash-lays', 'social-actions', 'cave-of-the-nadir', 'empress-court', 'breeding-monsters']);
+    'flash-lays', 'social-actions', 'cave-of-the-nadir', 'empress-court', 'breeding-monsters', 'mahogany-hall', 'master-classes',
+    'sixth-coil', 'rat-market', 'boxful-of-intrigue', 'underclay', 'hunting-bees',
+    'featuring-tales-university', 'term-passing']);
 
 check('the panel list, in order',
   api.PANELS.map((p) => p.id),

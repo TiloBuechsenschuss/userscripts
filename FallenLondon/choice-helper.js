@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.5
-// @description  Advice on what Fallen London's storylets and opportunity cards do for you, badged onto them where you make the choice. Its reference panels open from the "⚙ UX" button of Fallen London UX Enhancers, so install that as well to reach them; every badge works without it. (1) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (2) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. Its panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, every port on the Unterzee -- which region it is in, whether docking there wipes Troubled Waters and the zee-threats, and what it takes to be able to sail there at all, with the hunting grounds and the one-time destinations marked as the different things they are, since a port that resets nothing and a place that is not a dock are two different answers -- the three winds and the dreams they start, and the whole card table, searchable. (3) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: behind the UX button where that is docked beside Fallen London’s own Travel button, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. Its panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. (4) In Port Carnelian, where a governor's term runs 26 actions and Fallen London deals no opportunity cards at all, the badges go on storylets and on their options instead. The whole term is one storylet, Matters of State, so what is rated is the list of options inside it -- and the options of the two of those that open into a storylet of their own. Each shows the net change in resources that option makes, with a mark for what it does to Imperial Legitimacy -- the number that ends a term at once when it reaches 0, sending you back to zee with nothing: a down mark when the net was paid for out of Legitimacy, an up mark when the option buys Legitimacy back instead, and no mark at all when it leaves Legitimacy alone. The colour says the same thing the mark does and nothing else -- red for spending Legitimacy, green for buying it back, light blue for the rows that leave it alone, slate for the endings -- so the marks are enough on their own for anyone who cannot separate the red from the green. Then a Fate label on the one Fate-locked option, and "cash out" on the four endings, which spend a currency rather than gaining any. The four endings carry a figure rather than only a label: each shows what cashing out would pay you RIGHT NOW, in Echoes, worked out from your own Striped Delights and Silver Horseheads. Fallen London states both on the Myself tab and nowhere near the port, so the script reads them where they are shown, remembers them, and refreshes them in a hidden frame -- in the background while an ending is on screen, and again when the panel is opened on a stale reading -- exactly the way the festival reads how deep you are. A faction Favour is marked with an icon and priced at 0: it is a story quality capped at 7 rather than an item, nothing buys one, and pricing it would let a fixed reward out-rank a real cash-out on a number nobody acts on. Tribute, which has no market price either, is listed the same way and left out of the total. A Favour in High Places is not one of those despite the name -- it is an ordinary item the Bazaar buys -- so it is priced like any other. A question mark says the reading behind the figure is over a minute old, since every action of a term moves both currencies, and the plain "cash out" label is what is left when your numbers have never been read. The tooltip carries the whole sum: what you hold, what it turns into, what each piece is worth, what the next rounding step up would cost you -- 105 and 176 are worth waiting for and 140 is not -- and, for the two endings that pay a fixed reward and empty both purses, what taking one gives up. Half the table is worth the same +5, so whether it costs Legitimacy is the only thing separating those rows. The tooltip carries the Time Passing in Office and Airs windows the option is offered in, every currency change with its currency named, the requirement and the note; the two options that pay ten or fifteen of ONE of the two currencies, the game's choice rather than yours, say so in words, since reading them as that much of each would make them the best options in the table by a distance. A storylet the guide splits in two is badged with the better net and keeps both branches in its tooltip, because the losing branch is how Imperial Legitimacy is bought back. Its panel, Port Carnelian, opens on the same calculator -- your purse, and all four endings priced against it with the best one named in words -- and then holds the rest of the guide: how to unlock and reach the posting, the rules a term is played by, every option grouped by the clock and searchable, what the two currencies cash in for, the reward tiers with the two worth aiming at picked out and a letter against the step each of your two currencies is standing on, and the strategy. (5) On a Voyage of Scientific Discovery -- the Dilmun Club's expeditions to Bullbone Island, Corpsecage Island and Grunting Fen, which deal no opportunity cards either -- every action gets a badge for what it pays in research pages, coloured by which of the three kinds it is: Archaeological, Cryptopalaeontological or Theosophistical. You sail to one island for one kind, and at every step of the visit you are choosing between the action that pays it and one that pays goods instead, so an action paying no pages is labelled with what it does pay rather than scored: there is no exchange rate between pages and Echoes, and inventing one would be the badge choosing your voyage for you. The three gambles at the end of a visit carry their EXPECTED value rather than the figure they advertise, since the wiki gives both outcomes and the odds -- taking the safer of the two is worth about six times the greedier one once the failure is priced in. The tooltip carries the step of the visit the action belongs to, its challenge, everything it gives, what it costs, and what a failure costs; where the game picks between two payouts rather than you, that is said in words. The same badges cover the two screens at your Lodgings, where the pages are generated before you sail and spent afterwards, and there the figure is the guide's pence per page, because everything on that screen is priced. Three actions and three storylets have the same names on all three islands and pay a different kind of page on each, so the feature works out which island it is looking at from the greeting or from the storylet you have open, and says nothing at all rather than guess. Its panel, Scientific Voyages, holds the rest: how the voyage is unlocked, what each island pays and costs to reach, every action grouped by island and searchable, and how to squeeze the most preparatory research out of London first. (6) In your University Laboratory every opportunity card gets a badge for the Laboratory Research its best option pays on a success, worked out at your own Equipment for Scientific Experimentation -- nearly every figure in the lab is a formula on it, and on your students' levels and how many people work there, all of which Fallen London states on the Myself tab, so the script reads them there, remembers them, and refreshes them in the background. The badge ranks only the options you can take with nothing special in hand; one behind an Unavoidable Epiphany, an Unexpected Result or an item is kept in the tooltip and marked with a down triangle when it would pay more. A star marks an option that also hands you an Unavoidable Epiphany, a solid down triangle one that uses something up, a question mark a Watchful challenge's success figure, and an approximately-equal sign the expected value of a Luck option. Where something the figure depends on has not been read -- your Equipment, a student's level -- the badge shows the range rather than a guess, in a neutral grey. Colour runs slate, blue, teal, amber, gold by tens of research, with the number always printed; Parabolan Research is marked PR in violet, and an option that pays no research says what it does instead. Open a card and every option on it is badged in its own right, each tooltip carrying the requirement, the challenge, every outcome with its formula and your figure, and where the guide's student table disagrees with the option page, both. Its panel, University Laboratory, shows your Equipment, staff, students, project and what Circulate a draft of your findings would pay right now, every laboratory card searchable, the repeatable projects, the equipment ladder, and which experts suit which projects. (7) Arbor, of the Roses deals no opportunity cards, so the badges go on the London card that takes you there, A Dream of Roses -- how many actions a trip costs, with your last Possessions reading of Attar saying whether the dream opens on Near or Far Arbor -- on the two storylets a stay happens in, Near Arbor and Far Arbor, whose tooltip is a map of every district's options and the guide's grinds, and on every option inside them. An option's badge is what it changes, "Attar +2" or "Attar −3 EI +3", with the sign carrying the direction and the colour only repeating it: there is no exchange rate between Attar and what it buys, so none is invented. A question mark is a stat challenge's success outcome, with the failure and the stat that makes it certain in the tooltip; ⏏ an option that spends all your Permission to Linger and so ends the stay; a star the tribute's rare success, which cashes in all your Attar; ≈ the expected value of the one even-odds option. The six options that scale with your Permission to Linger or your Attar say so in words rather than invent a figure, and where the guide's table and an option page disagree, the page is followed and the tooltip quotes both. (8) Three early carousels that deal no opportunity cards are badged the same way: the storylet heading gets a summary whose tooltip lists every option, and each option of the carousel storylet you have OPEN gets a badge -- only there, since names like "Make bobbins" or "Treat the soil" could title an option anywhere. A question mark is a stat challenge's success figure, ▼ an option that uses something up, and a figure after the question mark what a failure takes back. At L. B. Industries beneath the Blind Helmsman, a work option shows the Foreman's Favour it pays ("FF +15? −19") and a payout its cost and what it buys ("110 → Reliquary"), with the Bone Fragments your surplus Favour turns into in the tooltip. In the Department of Menace Eradication's hunts, an option shows what it does to Hiding, Wariness or Savagery ("Hiding −10? +1"), with its difficulty -- nearly all of them scale with Savagery -- worked out at each contract's starting Savagery in the tooltip; the poisoned bait's Luck challenge is its expected value; the confrontations and bounties name what they pay, and a contract what it sets. In Vertiginous Horticulture, a nurturing option shows the Nurturing it pays as a range over the Difficulties of the plants it can be used on ("Grow +14–16?"), a plant its Difficulty, and a buyer what the sale gives, with the rare successes, the average success and the scaling reward at 150 in the tooltip. Where the guide and an option page disagree, the page is followed and the tooltip says so. (9) Expeditions from Base-Camp in the Forgotten Quarter get the same treatment across their four storylets, each badge answering the question that screen asks: while preparing, the Crate of Expedition Supplies an option gives ("Sup +3 ▼", with the guide's Echoes per Supply in the tooltip); when choosing, an expedition's length and the Archaeologist or Fate it needs ("30 sup · Arch 3"), with what it pays, its rivals and the guide's worst-case Supplies in the tooltip; on the expedition, the Archaeologist's Progress a success makes ("Prog +3? ▼"), the Rivals' Progress a hindrance takes off, and what a conclusion pays; and in a confrontation, the Progress it makes. A menace an option always raises is named after its figure ("+Wounds", "+Nightmares"), so a cheap line never reads as free; a menace only a failure raises is in the tooltip. (10) Cat and Mouse -- the Implacable Detective's three cases and the three hunts for a half of the Screaming Map -- gets the same treatment: in a pursuit, the Cat an option makes ("Cat +8 ▼"), with the Mouse it spends named when that is two ("Cat +10 Mouse −2 ▼") and the 70% Luck lines carrying their expected Cat ("≈Cat +3.5"); on the screens that start a case, what the case pays and the guide's Echoes per action ("Plaques · 1.19 EPA ▼"); and on an ending, the Cat it needs and what it pays ("60+ Journals + Jade"). The tooltip carries the Mouse band an option is offered at, what it uses up and the guide's Echo cost of that, and where the guide and an option page disagree, both. (11) At Mrs Chapman's Boarding House in Spite, every soup and parlour option of The Season in Soup is badged with the item it pays and how many, from Persuasive 0 to the cap of 230 ("Zee-Ztory ×1–5"), with the figure at each fifty in the tooltip -- every option pays about the same Echoes, so the item is the choice -- and a star on the three that also give a noise in the walls. Promenade pays a different item each week, so its week is read off the parlour option beside it. (12) Five more early activities get the same storylet and option markup. In the Mind of a Long-Dead God, where every payout costs Stormy-Eyed and a challenge pays only when you FAIL it, each option shows its reward -- Dangerous or Shadowy +10 CP, or an Aeolian Scream -- with a cross when a failed challenge is what pays ("Shadowy +10 ✗"); the cards are badged in your hand with their options' rewards too, the one-word "Rain" and "Geology" only while the greeting says you are in the Mind. Engaged in a Case shows the Detective's Progress a success and a failure make ("Prog +6/+3?"), the actions when more than one, and the expected Progress of the Luck options on the faction cards, with every Case Difficulty formula worked out at the Starving Poet's 5 and the Heiress's 8 in the tooltip. The Sunken Embassy shows the Fragments of Infernal Affairs a success and a failure make ("Frag +25/−15?") and each reward's cost ("100 → Verse"). The Law-Furnace shows "AR base?" on its checks, the bonus Actus Reus of its item trades and what each payout pays in, with the base worked out at four stat averages. The Prelapsarian Museum shows Identifying... on the lab's options, the odds of an Assert, the Gratitude of a bone, a donation or the sphinxstone, and every cash-in's cost and payout. (13) Five more. On a Heist badges every heist card's options with what they do to The Burglar's Progress and Cat-Like Tread -- the expected change for a Luck option ("≈Prog +1 Tread −1"), the success and the Tread a failure costs for a stat check -- and each card in your hand with the best option needing nothing special, ranked by the Tread you can expect to lose before the Progress, with a down triangle when Inside Information, a Key or a stat would do better; every prize shows what it pays and the guide's Echo value. The Spider Symposium shows the Applause a success and a failure make and each reward's cost. Short Stories shows the pages a writing option makes and the actions it takes, the Potential a rework option adds and where it stops working, and the Echoes of a published story on a success and a failure. Flash Lays shows the Progress or Up your Sleeve a success makes, with the difficulty for both marks in the tooltip, and badges the cards in your hand the same way the heist does. Social Actions shows a letter's effect on its recipient and the Corresponding... sending it earns, each correspondence reward's cost, and the assassin cards' payouts, with a skull on the option that kills you. (14) In the Cave of the Nadir every Cave card's options show what they give, the guide's Echo value where it has one, and the Irrigo they cost; the undiscardable cards in your hand show their best option needing nothing special, with a down triangle when an item would do better, and ten cards with ordinary names are badged only while the greeting says you are in the Cave. The ways to a Ray-Drenched Cinder are badged too. At the Empress' Court every option shows the Inspired... a success and a failure make, a Luck option its expectation, and a finished work the goods it pays -- 17 Echoes for every minor work and 30 for every major one, so the item is the choice. Breeding Monsters shows the CP a progress option makes and, for each beast, both payouts of its 70% breeding and the guide's expected Echoes. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. Built as a feature registry so further advice can be added as entries.
+// @version      1.7
+// @description  Advice on what Fallen London's storylets and opportunity cards do for you, badged onto them where you make the choice. Its reference panels open from the "⚙ UX" button of Fallen London UX Enhancers, so install that as well to reach them; every badge works without it. (1) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (2) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. Its panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, every port on the Unterzee -- which region it is in, whether docking there wipes Troubled Waters and the zee-threats, and what it takes to be able to sail there at all, with the hunting grounds and the one-time destinations marked as the different things they are, since a port that resets nothing and a place that is not a dock are two different answers -- the three winds and the dreams they start, and the whole card table, searchable. (3) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: behind the UX button where that is docked beside Fallen London’s own Travel button, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. Its panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. (4) In Port Carnelian, where a governor's term runs 26 actions and Fallen London deals no opportunity cards at all, the badges go on storylets and on their options instead. The whole term is one storylet, Matters of State, so what is rated is the list of options inside it -- and the options of the two of those that open into a storylet of their own. Each shows the net change in resources that option makes, with a mark for what it does to Imperial Legitimacy -- the number that ends a term at once when it reaches 0, sending you back to zee with nothing: a down mark when the net was paid for out of Legitimacy, an up mark when the option buys Legitimacy back instead, and no mark at all when it leaves Legitimacy alone. The colour says the same thing the mark does and nothing else -- red for spending Legitimacy, green for buying it back, light blue for the rows that leave it alone, slate for the endings -- so the marks are enough on their own for anyone who cannot separate the red from the green. Then a Fate label on the one Fate-locked option, and "cash out" on the four endings, which spend a currency rather than gaining any. The four endings carry a figure rather than only a label: each shows what cashing out would pay you RIGHT NOW, in Echoes, worked out from your own Striped Delights and Silver Horseheads. Fallen London states both on the Myself tab and nowhere near the port, so the script reads them where they are shown, remembers them, and refreshes them in a hidden frame -- in the background while an ending is on screen, and again when the panel is opened on a stale reading -- exactly the way the festival reads how deep you are. A faction Favour is marked with an icon and priced at 0: it is a story quality capped at 7 rather than an item, nothing buys one, and pricing it would let a fixed reward out-rank a real cash-out on a number nobody acts on. Tribute, which has no market price either, is listed the same way and left out of the total. A Favour in High Places is not one of those despite the name -- it is an ordinary item the Bazaar buys -- so it is priced like any other. A question mark says the reading behind the figure is over a minute old, since every action of a term moves both currencies, and the plain "cash out" label is what is left when your numbers have never been read. The tooltip carries the whole sum: what you hold, what it turns into, what each piece is worth, what the next rounding step up would cost you -- 105 and 176 are worth waiting for and 140 is not -- and, for the two endings that pay a fixed reward and empty both purses, what taking one gives up. Half the table is worth the same +5, so whether it costs Legitimacy is the only thing separating those rows. The tooltip carries the Time Passing in Office and Airs windows the option is offered in, every currency change with its currency named, the requirement and the note; the two options that pay ten or fifteen of ONE of the two currencies, the game's choice rather than yours, say so in words, since reading them as that much of each would make them the best options in the table by a distance. A storylet the guide splits in two is badged with the better net and keeps both branches in its tooltip, because the losing branch is how Imperial Legitimacy is bought back. Its panel, Port Carnelian, opens on the same calculator -- your purse, and all four endings priced against it with the best one named in words -- and then holds the rest of the guide: how to unlock and reach the posting, the rules a term is played by, every option grouped by the clock and searchable, what the two currencies cash in for, the reward tiers with the two worth aiming at picked out and a letter against the step each of your two currencies is standing on, and the strategy. (5) On a Voyage of Scientific Discovery -- the Dilmun Club's expeditions to Bullbone Island, Corpsecage Island and Grunting Fen, which deal no opportunity cards either -- every action gets a badge for what it pays in research pages, coloured by which of the three kinds it is: Archaeological, Cryptopalaeontological or Theosophistical. You sail to one island for one kind, and at every step of the visit you are choosing between the action that pays it and one that pays goods instead, so an action paying no pages is labelled with what it does pay rather than scored: there is no exchange rate between pages and Echoes, and inventing one would be the badge choosing your voyage for you. The three gambles at the end of a visit carry their EXPECTED value rather than the figure they advertise, since the wiki gives both outcomes and the odds -- taking the safer of the two is worth about six times the greedier one once the failure is priced in. The tooltip carries the step of the visit the action belongs to, its challenge, everything it gives, what it costs, and what a failure costs; where the game picks between two payouts rather than you, that is said in words. The same badges cover the two screens at your Lodgings, where the pages are generated before you sail and spent afterwards, and there the figure is the guide's pence per page, because everything on that screen is priced. Three actions and three storylets have the same names on all three islands and pay a different kind of page on each, so the feature works out which island it is looking at from the greeting or from the storylet you have open, and says nothing at all rather than guess. Its panel, Scientific Voyages, holds the rest: how the voyage is unlocked, what each island pays and costs to reach, every action grouped by island and searchable, and how to squeeze the most preparatory research out of London first. (6) In your University Laboratory every opportunity card gets a badge for the Laboratory Research its best option pays on a success, worked out at your own Equipment for Scientific Experimentation -- nearly every figure in the lab is a formula on it, and on your students' levels and how many people work there, all of which Fallen London states on the Myself tab, so the script reads them there, remembers them, and refreshes them in the background. The badge ranks only the options you can take with nothing special in hand; one behind an Unavoidable Epiphany, an Unexpected Result or an item is kept in the tooltip and marked with a down triangle when it would pay more. A star marks an option that also hands you an Unavoidable Epiphany, a solid down triangle one that uses something up, a question mark a Watchful challenge's success figure, and an approximately-equal sign the expected value of a Luck option. Where something the figure depends on has not been read -- your Equipment, a student's level -- the badge shows the range rather than a guess, in a neutral grey. Colour runs slate, blue, teal, amber, gold by tens of research, with the number always printed; Parabolan Research is marked PR in violet, and an option that pays no research says what it does instead. Open a card and every option on it is badged in its own right, each tooltip carrying the requirement, the challenge, every outcome with its formula and your figure, and where the guide's student table disagrees with the option page, both. Its panel, University Laboratory, shows your Equipment, staff, students, project and what Circulate a draft of your findings would pay right now, every laboratory card searchable, the repeatable projects, the equipment ladder, and which experts suit which projects. (7) Arbor, of the Roses deals no opportunity cards, so the badges go on the London card that takes you there, A Dream of Roses -- how many actions a trip costs, with your last Possessions reading of Attar saying whether the dream opens on Near or Far Arbor -- on the two storylets a stay happens in, Near Arbor and Far Arbor, whose tooltip is a map of every district's options and the guide's grinds, and on every option inside them. An option's badge is what it changes, "Attar +2" or "Attar −3 EI +3", with the sign carrying the direction and the colour only repeating it: there is no exchange rate between Attar and what it buys, so none is invented. A question mark is a stat challenge's success outcome, with the failure and the stat that makes it certain in the tooltip; ⏏ an option that spends all your Permission to Linger and so ends the stay; a star the tribute's rare success, which cashes in all your Attar; ≈ the expected value of the one even-odds option. The six options that scale with your Permission to Linger or your Attar say so in words rather than invent a figure, and where the guide's table and an option page disagree, the page is followed and the tooltip quotes both. (8) Three early carousels that deal no opportunity cards are badged the same way: the storylet heading gets a summary whose tooltip lists every option, and each option of the carousel storylet you have OPEN gets a badge -- only there, since names like "Make bobbins" or "Treat the soil" could title an option anywhere. A question mark is a stat challenge's success figure, ▼ an option that uses something up, and a figure after the question mark what a failure takes back. At L. B. Industries beneath the Blind Helmsman, a work option shows the Foreman's Favour it pays ("FF +15? −19") and a payout its cost and what it buys ("110 → Reliquary"), with the Bone Fragments your surplus Favour turns into in the tooltip. In the Department of Menace Eradication's hunts, an option shows what it does to Hiding, Wariness or Savagery ("Hiding −10? +1"), with its difficulty -- nearly all of them scale with Savagery -- worked out at each contract's starting Savagery in the tooltip; the poisoned bait's Luck challenge is its expected value; the confrontations and bounties name what they pay, and a contract what it sets. In Vertiginous Horticulture, a nurturing option shows the Nurturing it pays as a range over the Difficulties of the plants it can be used on ("Grow +14–16?"), a plant its Difficulty, and a buyer what the sale gives, with the rare successes, the average success and the scaling reward at 150 in the tooltip. Where the guide and an option page disagree, the page is followed and the tooltip says so. (9) Expeditions from Base-Camp in the Forgotten Quarter get the same treatment across their four storylets, each badge answering the question that screen asks: while preparing, the Crate of Expedition Supplies an option gives ("Sup +3 ▼", with the guide's Echoes per Supply in the tooltip); when choosing, an expedition's length and the Archaeologist or Fate it needs ("30 sup · Arch 3"), with what it pays, its rivals and the guide's worst-case Supplies in the tooltip; on the expedition, the Archaeologist's Progress a success makes ("Prog +3? ▼"), the Rivals' Progress a hindrance takes off, and what a conclusion pays; and in a confrontation, the Progress it makes. A menace an option always raises is named after its figure ("+Wounds", "+Nightmares"), so a cheap line never reads as free; a menace only a failure raises is in the tooltip. (10) Cat and Mouse -- the Implacable Detective's three cases and the three hunts for a half of the Screaming Map -- gets the same treatment: in a pursuit, the Cat an option makes ("Cat +8 ▼"), with the Mouse it spends named when that is two ("Cat +10 Mouse −2 ▼") and the 70% Luck lines carrying their expected Cat ("≈Cat +3.5"); on the screens that start a case, what the case pays and the guide's Echoes per action ("Plaques · 1.19 EPA ▼"); and on an ending, the Cat it needs and what it pays ("60+ Journals + Jade"). The tooltip carries the Mouse band an option is offered at, what it uses up and the guide's Echo cost of that, and where the guide and an option page disagree, both. (11) At Mrs Chapman's Boarding House in Spite, every soup and parlour option of The Season in Soup is badged with the item it pays and how many, from Persuasive 0 to the cap of 230 ("Zee-Ztory ×1–5"), with the figure at each fifty in the tooltip -- every option pays about the same Echoes, so the item is the choice -- and a star on the three that also give a noise in the walls. Promenade pays a different item each week, so its week is read off the parlour option beside it. (12) Five more early activities get the same storylet and option markup. In the Mind of a Long-Dead God, where every payout costs Stormy-Eyed and a challenge pays only when you FAIL it, each option shows its reward -- Dangerous or Shadowy +10 CP, or an Aeolian Scream -- with a cross when a failed challenge is what pays ("Shadowy +10 ✗"); the cards are badged in your hand with their options' rewards too, the one-word "Rain" and "Geology" only while the greeting says you are in the Mind. Engaged in a Case shows the Detective's Progress a success and a failure make ("Prog +6/+3?"), the actions when more than one, and the expected Progress of the Luck options on the faction cards, with every Case Difficulty formula worked out at the Starving Poet's 5 and the Heiress's 8 in the tooltip. The Sunken Embassy shows the Fragments of Infernal Affairs a success and a failure make ("Frag +25/−15?") and each reward's cost ("100 → Verse"). The Law-Furnace shows "AR base?" on its checks, the bonus Actus Reus of its item trades and what each payout pays in, with the base worked out at four stat averages. The Prelapsarian Museum shows Identifying... on the lab's options, the odds of an Assert, the Gratitude of a bone, a donation or the sphinxstone, and every cash-in's cost and payout. (13) Five more. On a Heist badges every heist card's options with what they do to The Burglar's Progress and Cat-Like Tread -- the expected change for a Luck option ("≈Prog +1 Tread −1"), the success and the Tread a failure costs for a stat check -- and each card in your hand with the best option needing nothing special, ranked by the Tread you can expect to lose before the Progress, with a down triangle when Inside Information, a Key or a stat would do better; every prize shows what it pays and the guide's Echo value. The Spider Symposium shows the Applause a success and a failure make and each reward's cost. Short Stories shows the pages a writing option makes and the actions it takes, the Potential a rework option adds and where it stops working, and the Echoes of a published story on a success and a failure. Flash Lays shows the Progress or Up your Sleeve a success makes, with the difficulty for both marks in the tooltip, and badges the cards in your hand the same way the heist does. Social Actions shows a letter's effect on its recipient and the Corresponding... sending it earns, each correspondence reward's cost, and the assassin cards' payouts, with a skull on the option that kills you. (14) In the Cave of the Nadir every Cave card's options show what they give, the guide's Echo value where it has one, and the Irrigo they cost; the undiscardable cards in your hand show their best option needing nothing special, with a down triangle when an item would do better, and ten cards with ordinary names are badged only while the greeting says you are in the Cave. The ways to a Ray-Drenched Cinder are badged too. At the Empress' Court every option shows the Inspired... a success and a failure make, a Luck option its expectation, and a finished work the goods it pays -- 17 Echoes for every minor work and 30 for every major one, so the item is the choice. Breeding Monsters shows the CP a progress option makes and, for each beast, both payouts of its 70% breeding and the guide's expected Echoes. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. (15) Five more, all storylet-and-option markup with no panel. Tales of Mahogany Hall has two halves that pull against each other -- six storylets that BUILD the Tales of Mahogany Hall quality and a weekly bill that spends it on a day’s show -- so a building option is badged with the CP it makes and what it pays (“Tales +2? · Brass ×102”), a show option with the CP it costs and what it pays (“−8 CP? · Jade ×200”), and a day on the bill with the Tales it needs and the show’s own reward, which is paid whichever option you take there. The CP is the number because every line pays about the same Echoes and the whole of the guide’s advice is about the CP: a failed show costs 14 rather than 8, and cashing out never takes you below 10. Four rows that raise four or five menaces whatever happens are labelled in words instead of scored. Master-Classes in Etiquette, in the same hall, is the reverse: take one of four pupils, raise their Pygmalion to 12 and graduate them. A lesson shows the Pygmalion CP it makes and its pay, the graduation shows the reset and the lump, and a pupil shows what the whole course pays with the guide’s Echoes per action -- which is the only decision that changes the rate. The Pygmalion challenges, whose failures push you BACK, carry “▼ Pyg −2” so a line that can cost you ground never reads like one that cannot. The two Fate-locked pupils are left out of the lesson table on purpose: the guide records their option titles only as “Choice 1” and “Storylet 2”, and a badge cannot be hung on a title nobody knows. In the Sixth Coil, under the Labyrinth of Tigers, both the room names and the option titles are randomised by four qualities, so the table carries all 35 room names the wiki records and spells every option’s verbs out rather than wildcarding them -- a wildcard verb would make two different options the same pattern and neither would be badged. Each action shows what it does to the two progress qualities and the stat it is checked on (“Patrol +1 Coil +1 · Watchful 250?”), because the guide’s rule is to leave when the two together reach 39, which makes the sealed door -- two Patrolling and no Coiling, and no challenge -- worth twice any other line. A Burden shows what it gives and the three levels of Unburdened it costs, worth 60 points of every attribute; the payouts on the way out show what each Burden pays per point of Patrolling. The Rat Market is a shop rather than a carousel: getting in costs three actions once a weekend and nothing after, selling costs no action at all, and a sale is badged with what it is worth in Echoes as a RANGE from a fresh market to a saturated one, since your Rat Market Saturation is stated nowhere the script can read it. Every one of those prices is worked out from the single figure each option page states, the item’s Nominal Sale Value, and reproduces every Rat-Shilling price the guide prints. What the market SELLS is deliberately not priced -- the stock turns with the Rat-Wind, the Rat-Moon and two seasons -- and those two stalls say so instead. And A Boxful of Intrigue, the fourteen-action carousel left behind in Spite, is badged with the SIDE each option takes, in words: every option is the same Shadowy 130 for the same one point, so what separates them is which power they serve, and serving the wrong one is not a smaller reward but a Turncoat. The two Salon options, which suit either side and pay no Kingmaker, say so; the payouts carry the guide’s Echoes for the whole run, with a tooltip saying that the six Correspondence Plaques inside that figure come from Intercept the messages and not from the payout. (16) Four more, all storylet and option markup with no panel. Underclay, beneath Spite, runs on TWO progress qualities instead of one -- Stone Confessions and Convincing Falsehoods, each raised on a storylet of its own and both spent on the hub, which the two are entered from for nothing -- so an option shows the points a success makes and what a failure takes BACK (“Confessions +30? −13”), while a failure that only raises a menace stays in the tooltip, as everywhere else. A reward shows what it costs, what it pays and the guide’s Echoes per point, which runs the opposite way to intuition: the cheap rewards are the efficient ones, and every point you hold over a reward’s cost comes back as Shards of Glim, so nothing is lost by overshooting. Hunting Bees in Old Newgate, in the University, puts the ATTRIBUTE on the badge as well as the Bees (“Bees +25? −6 · Watchful 88”), because which attribute a line is checked on is set by Dagger or Flint and almost every option shifts that by a random ten either way: the same option is not the same option two actions later, and a long run changes sides under you. An Airs option carries the window it appears in, and where the guide and the option pages disagree about that window by a point the pages are followed and the badge says so. Featuring in the Tales of the University is the one feature here that badges storylet headings and NOTHING else: the guide records no option tables for it, so rather than invent figures each storylet shows the level it sits at and what it does, and an eject mark -- not the mark used for spending something, since nothing is spent -- on the two steps that shut a door for good, the one that locks the whole first Term Passing carousel and the one that ends the story. And Term Passing itself covers three carousels of the same shape, which are never open at once and are picked between by how far along that story you are. Each option shows the progress it makes and then what it is worth: the guide’s Echoes for the second and third carousels, which it prices per option, and the GOODS for the first, which it does not price and which is not played for money anyway -- it is played for the two Colleges, for the two options that heal a change point of Wounds or Nightmares, and for the stories. The three carousels share storylet and option titles, and nothing on the screen says which one you are standing in, so a shared row is badged with BOTH readings rather than a guess -- and where the two readings are the same, with one. Built as a feature registry so further advice can be added as entries.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 // @run-at       document-idle
@@ -7663,8 +7663,15 @@
   // (growth)" reads "Water your mandrakes" in the game, "Bid farewell to (work
   // leader)" names your team's rat, and the museum's "Assert that the specimen
   // is (first option)" names a taxon -- so those placeholders match any words.
-  // Only those five: a bracket like "(3 FATE)" is part of a real title.
-  const CAROUSEL_PLACEHOLDER = /\((?:growth|growth type|work leader|first option|second option)\)/;
+  // The Sixth Coil adds nine more of its own, because four randomiser
+  // qualities rewrite every title on every floor: "(a level)", "(a hole)",
+  // "(a mirror)", "(direction)", "(somewhere)" and the four "(the <floor>)"
+  // passages. Its VERBS are randomised too, but those are enumerated as
+  // aliases rather than wildcarded -- see SIXTH_VERBS -- so that two options
+  // on one floor can never match the same title and cancel each other out.
+  // Only these fourteen: a bracket like "(3 FATE)" is part of a real title.
+  const CAROUSEL_PLACEHOLDER =
+    /\((?:growth|growth type|work leader|first option|second option|a level|a hole|a mirror|direction|somewhere|the workshop|the warzone|the mansion|the jungle|department)\)/;
 
   function carouselMatcher(title) {
     const pieces = String(title).split(CAROUSEL_PLACEHOLDER);
@@ -12145,6 +12152,2589 @@
     });
   }
 
+  // === feature: Tales of Mahogany Hall ===================================
+  //
+  // Tales of Mahogany Hall (Guide). A carousel in Mahogany Hall with two
+  // halves that pull in opposite directions: six grinding storylets that BUILD
+  // Tales of Mahogany Hall a point or two at a time, and a weekly bill that
+  // SPENDS it -- pick a Day of the Week on The weekly variety bill!, then play
+  // that day's show, which costs 8 to 40 CP and takes two actions.
+  //
+  // **What the badge says.** A building option shows the Tales CP it makes and
+  // what it pays ("Tales +2? · Brass ×102"); a show option shows the Tales CP
+  // it costs on a success and what it pays ("−8 CP? · Jade ×200"); a day on the
+  // bill shows the Tales it needs and the show's own reward ("Tales 9 ·
+  // Diamonds ×2"). The CP is the number, because at 1.125 Echoes per action
+  // every line here pays about the same and the guide's advice turns entirely
+  // on it: you may cash out as often as you like as long as Tales stays above
+  // 10, and a failed show costs 14 CP rather than 8. "?" is a stat challenge's
+  // success figure and "▼" an option that uses something up.
+  //
+  // Transcribed from the guide's two tables (fetched through the API,
+  // 2026-09-16), with the storylet and option pages as the cross-check: every
+  // storylet name, its Tales window and its option list came from the pages,
+  // which is where Friday's show turns out to be titled *Fallen London's
+  // Best-loved Entertainers* and the weekly bill's seven options turn out to
+  // be the days themselves. One DISAGREEMENT, carried both ways in the
+  // tooltip: the guide lists *Smoke and mirrors* twice, once paying Moon-Pearl
+  // ×113 and once ×226. Left out: the one-time Affair of the Box and Wars of
+  // Illusion storylets, which belong to their own storylines. Corrections go
+  // in MH_OPTIONS and nowhere else.
+
+  // Badge tags for the goods. The tooltip always says the full name; this is
+  // only what fits on a badge.
+  const MH_SHORT = {
+    'Moon-Pearl': 'Pearls', 'Nevercold Brass Sliver': 'Brass', 'Shard of Glim': 'Glim',
+    'Jade Fragment': 'Jade', 'Silk Scrap': 'Silk', 'Nodule of Deep Amber': 'Amber',
+    'Cryptic Clue': 'Clues', 'Inkling of Identity': 'Inklings', 'Appalling Secret': 'Secrets',
+    'Flawed Diamond': 'Diamonds', 'Venom-Ruby': 'Rubies', 'Sapphire': 'Sapphires', 'Soul': 'Souls',
+    'Proscribed Material': 'Proscribed', 'Ridiculous Hat': 'Hats',
+    'F.F. Gebrandt’s Tincture of Vigour': 'Tinctures',
+    'Favours: Tomb-Colonies': 'Tomb-Colonies', 'Favours: Bohemians': 'Bohemians',
+    'Plagued by a Popular Song': 'Song',
+  };
+
+  function mhTag(item) {
+    return MH_SHORT[item] || item;
+  }
+
+  // [item, count] pairs -> "Pearls ×200 Glim ×40" on a badge, full names in the
+  // tooltip. One transcription, two readings, so the two can never disagree.
+  // A STRING count is a change-point figure rather than a number of items, and
+  // is printed as it stands -- Friday's "reward" is Plagued by a Popular Song
+  // +1 CP, and "Song ×+1 CP" would read as a heap of them.
+  function mhPay(gives, full) {
+    if (!gives || !gives.length) return '';
+    return gives.map(function (g) {
+      const name = full ? g[0] : mhTag(g[0]);
+      if (g[1] == null) return name;
+      return name + (typeof g[1] === 'string' ? ' ' + g[1] : ' ×' + g[1]);
+    }).join(full ? ', ' : ' ');
+  }
+
+  const MH_BUILD = [
+    ['Variety is the spice of life!', '‘Obtain’ licences from the Ministry of Public Decency', 2,
+      { stat: 'Persuasive', diff: 98 }, [['Inkling of Identity', 30]], 'Moon-Pearl ×200',
+      'Plagued by a Popular Song +1 CP, and the Moon-Pearl are spent anyway', null, 'Moon-Pearl ×200'],
+    ['Variety is the spice of life!', 'Steal ideas from other theatres', 2,
+      { stat: 'Shadowy', diff: 100 }, [['Cryptic Clue', 50]], null, 'Plagued by a Popular Song +1 CP', null, null],
+    ['Variety is the spice of life!', 'Steal props and goods from other theatres', 2,
+      { stat: 'Shadowy', diff: 102 }, [['Nevercold Brass Sliver', 102]], null,
+      'Plagued by a Popular Song +1 CP',
+      'The guide’s favour grind: seven of these, then cash out on Wednesday or Thursday.', null],
+    ['Variety is the spice of life!', 'Bribe an orchestra to play for your show', 2,
+      { stat: 'Persuasive', diff: 104 }, [['Moon-Pearl', 300]], 'Nevercold Brass Sliver ×200',
+      'Plagued by a Popular Song +1 CP, Suspicion +2 CP, and the Slivers are spent anyway', null,
+      'Nevercold Brass Sliver ×200'],
+    ['The cutthroat world of advertising', 'Fly-post your bills over the Antimacassar’s', 1,
+      { stat: 'Persuasive', diff: 104 }, [['Shard of Glim', 104]], null,
+      'Plagued by a Popular Song +1 CP', null, null],
+    ['The cutthroat world of advertising', 'Sabotage the Imperial Opera’s bills', 1,
+      { stat: 'Shadowy', diff: 108 }, [['Shard of Glim', 108]], null, 'Suspicion +1 CP', null, null],
+    ['Ticket touting', 'Sell stolen tickets', 1, { stat: 'Shadowy', diff: 102 },
+      [['Moon-Pearl', 82], ['Soul', 15]], null, 'Suspicion +1 CP', null, 'Renown: Urchins 10'],
+    ['Ticket touting', 'Sell forged tickets', 1, { stat: 'Shadowy', diff: 106 },
+      [['Nevercold Brass Sliver', 116]], 'Acquaintance: the Repentant Forger −1 CP', 'Suspicion +1 CP',
+      null, 'Acquaintance: the Repentant Forger'],
+    ['Box Office Burglary', 'Don’t be greedy', 1, { stat: 'Shadowy', diff: 97 },
+      [['Moon-Pearl', 97]], null, 'Plagued by a Popular Song +1 CP', null, 'Shadowy 97'],
+    ['Box Office Burglary', 'Be daring!', 1, { stat: 'Shadowy', diff: 107 },
+      [['Moon-Pearl', 107]], null, 'Suspicion +1 CP', null, 'Shadowy 97'],
+    ['The magic of the theatre', 'Assist in a Mentalist’s act', 1, { stat: 'Shadowy', diff: 102 },
+      [['Moon-Pearl', 30], ['Silk Scrap', 50], ['Nodule of Deep Amber', 25]], null, 'Nightmares +1 CP',
+      'Connected: Glass +2 CP as well.',
+      'Embroiled in the Wars of Illusion exactly 20, Connected: Glass 2–5'],
+    ['The magic of the theatre', 'Take part in a conjuring act', 1, { stat: 'Shadowy', diff: 103 },
+      [['Silk Scrap', 50], ['Nodule of Deep Amber', 53]], null, 'Scandal +1 CP',
+      'Connected: Glass +2 CP as well.',
+      'Embroiled in the Wars of Illusion exactly 20, Connected: Glass 3–5'],
+    ['The magic of the theatre', 'Assist a hypnotist', 1, { stat: 'Shadowy', diff: 105 },
+      [['Moon-Pearl', 105]], null, 'Scandal +1 CP and Connected: Glass −1 CP',
+      'Connected: Glass +2 CP as well.',
+      'Embroiled in the Wars of Illusion exactly 20, Connected: Glass 4–5'],
+    ['The mystic arts', 'Tell fortunes', 1, { stat: 'Shadowy', diff: 102 },
+      [['Moon-Pearl', 51], ['Cryptic Clue', 25]], null, 'Scandal +1 CP',
+      'Connected: Shroud +2 CP as well.',
+      'Embroiled in the Wars of Illusion exactly 20, Connected: Shroud 2–5'],
+    ['The mystic arts', 'A Spiritualist evening', 1, { stat: 'Persuasive', diff: 103 },
+      [['Jade Fragment', 103]], null, 'Scandal +1 CP', 'Connected: Shroud +2 CP as well.',
+      'Embroiled in the Wars of Illusion exactly 20, Connected: Shroud 3–5'],
+    ['The mystic arts', 'Assist a hypnotist', 1, { stat: 'Shadowy', diff: 105 },
+      [['Flawed Diamond', 1], ['Moon-Pearl', 91]], null,
+      'Scandal +1 CP and Connected: Shroud −1 CP', 'Connected: Shroud +2 CP as well.',
+      'Embroiled in the Wars of Illusion exactly 20, Connected: Shroud 4–5'],
+  ].map(function (r) {
+    return { storylet: r[0], name: r[1], kind: 'build', tales: r[2], ch: r[3], gives: r[4],
+      spends: r[5], fail: r[6], note: r[7], needs: r[8] };
+  });
+
+  // day -> [the storylets the show is played on, the Tales it needs, the show's
+  // own reward]. That reward is the DAY's, not the option's: it is paid
+  // whichever option you take, so it belongs on the day and on the storylet
+  // heading rather than on any one branch.
+  const MH_DAYS = [
+    ['Monday', ['Light Entertainment!'], 8, [['Inkling of Identity', 3]]],
+    ['Tuesday', ['Feats of Daring and Grace!'], 9, [['Flawed Diamond', 2]]],
+    ['Wednesday', ['The comedy of the absurd!'], 10, [['Appalling Secret', 2]]],
+    ['Thursday', ['An evening of refined entertainment'], 11, [['Sapphire', 1], ['Flawed Diamond', 1]]],
+    // Friday's "reward" is a menace, and the word says so: it is the one day
+    // whose show pays you nothing and leaves a song in your head.
+    ['Friday', ['Fallen London’s Best-loved Entertainers'], 12,
+      [['Plagued by a Popular Song', '+1 CP']]],
+    ['Saturday', ['Peppercorn’s illusion', 'Watching the Grand Illusion',
+      'The Most Daring Feat of Illusion and Escapology!', 'Find a way to watch the Grand Illusion',
+      'Another Night of Magic'], 13, [['F.F. Gebrandt’s Tincture of Vigour', 3]]],
+    ['Sunday', ['The EXOTIC and DELIGHTFUL Kashmiri Princess', 'The CHARMING and EXOTIC Kashmiri Princess'],
+      14, [['Appalling Secret', 4]]],
+  ];
+
+  const MH_SHOWS = [
+    ['Light Entertainment!', 'Take a backstage role', 8, 14, { stat: 'Shadowy', diff: 102 },
+      [['Jade Fragment', 200]], 'Plagued by a Popular Song +1 CP'],
+    ['Light Entertainment!', 'Stage-manage the show', 8, 14, { stat: 'Persuasive', diff: 98 },
+      [['Moon-Pearl', 200]], 'Plagued by a Popular Song +1 CP'],
+    ['Feats of Daring and Grace!', 'Try your hand on the trapeze', 8, 14, { stat: 'Shadowy', diff: 100 },
+      [['Appalling Secret', 6], ['Moon-Pearl', 110]], 'Wounds +1 CP and Scandal +1 CP'],
+    ['Feats of Daring and Grace!', 'Help the stagehands', 8, 14, { stat: 'Shadowy', diff: 106 },
+      [['Silk Scrap', 30], ['Shard of Glim', 40], ['Moon-Pearl', 36]], 'Suspicion +1 CP'],
+    ['The comedy of the absurd!', 'Take charge of props and wardrobe', 8, 14, { stat: 'Shadowy', diff: 106 },
+      [['Moon-Pearl', 53], ['Nevercold Brass Sliver', 53]], 'Plagued by a Popular Song +1 CP'],
+    ['The comedy of the absurd!', 'Take part with your own act', 8, 14, { stat: 'Persuasive', diff: 103 },
+      [['Nodule of Deep Amber', 103]], 'Plagued by a Popular Song +1 CP'],
+    ['The comedy of the absurd!', 'Book a Decaying Humorist', 14, null, null,
+      [['Favours: Tomb-Colonies', 1]], null],
+    ['An evening of refined entertainment', 'Enjoy the show', 8, 14, { stat: 'Shadowy', diff: 108 },
+      [['Shard of Glim', 54], ['Nodule of Deep Amber', 54]], 'Plagued by a Popular Song +1 CP'],
+    ['An evening of refined entertainment', 'Conduct the orchestra', 8, 14, { stat: 'Persuasive', diff: 105 },
+      [['Shard of Glim', 55], ['Moon-Pearl', 55]],
+      'Sapphire ×1 and Flawed Diamond ×1 — the one show option a failure still pays'],
+    ['An evening of refined entertainment', 'Book a reading from an Unsavoury Poet', 14, null, null,
+      [['Favours: Bohemians', 1]], null],
+    ['Fallen London’s Best-loved Entertainers', 'Take charge of the front of house', 8, 14,
+      { stat: 'Shadowy', diff: 112 }, [['Silk Scrap', 64], ['Flawed Diamond', 2], ['Venom-Ruby', 2]],
+      'Plagued by a Popular Song +1 CP'],
+    ['Fallen London’s Best-loved Entertainers',
+      'Sing your own version of ‘Pop Goes The Weasel’', 8, 14,
+      { stat: 'Persuasive', diff: 102 }, [['Moon-Pearl', 102]], 'Plagued by a Popular Song +3 CP'],
+    ['Peppercorn’s illusion', 'Help the prop-urchin', 20, 30, { stat: 'Shadowy', diff: 110 },
+      [['Ridiculous Hat', 50], ['Silk Scrap', 60]], 'Plagued by a Popular Song +3 CP and Scandal +1 CP'],
+    ['Peppercorn’s illusion', 'Help the scenery-urchins', 20, 30, { stat: 'Watchful', diff: 110 },
+      [['Silk Scrap', 110]], 'Plagued by a Popular Song +2 CP and Suspicion +1 CP'],
+    ['Peppercorn’s illusion', 'Help tie the knots', 14, 20, { stat: 'Shadowy', diff: 112 },
+      [['Silk Scrap', 110]], 'Plagued by a Popular Song +2 CP and Scandal +1 CP'],
+    ['Watching the Grand Illusion', 'Watch from the wings', 20, 30, { stat: 'Watchful', diff: 102 },
+      [['Cryptic Clue', 50]], 'Plagued by a Popular Song +3 CP'],
+    ['Watching the Grand Illusion', 'Watch from the audience', 20, 30, { stat: 'Shadowy', diff: 114 },
+      [['Cryptic Clue', 57]], 'Plagued by a Popular Song +3 CP and Wounds +2 CP'],
+    ['Find a way to watch the Grand Illusion', '‘Research’ disguises', 14, 20,
+      { stat: 'Shadowy', diff: 110 }, [['Cryptic Clue', 40], ['Appalling Secret', 8]],
+      'Suspicion +2 CP and Plagued by a Popular Song +3 CP'],
+    ['Another Night of Magic', 'Compare Peppercorn’s illusion to yours', 20, 30,
+      { stat: 'Shadowy', diff: 114 }, [['Cryptic Clue', 50], ['Appalling Secret', 1]],
+      'Plagued by a Popular Song +4 CP and Nightmares +3 CP'],
+    ['Another Night of Magic', 'Steal Peppercorn’s ideas', 14, 20, { stat: 'Shadowy', diff: 115 },
+      [['Cryptic Clue', 60], ['Appalling Secret', 4], ['Proscribed Material', 14]],
+      'Plagued by a Popular Song +4 CP and Nightmares +3 CP'],
+    ['The EXOTIC and DELIGHTFUL Kashmiri Princess', 'Help the costume department', 14, 20,
+      { stat: 'Shadowy', diff: 110 }, [['Venom-Ruby', 1], ['Sapphire', 1], ['Flawed Diamond', 2],
+        ['Nodule of Deep Amber', 30], ['Jade Fragment', 30], ['Moon-Pearl', 30], ['Shard of Glim', 30]],
+      'Plagued by a Popular Song +2 CP and Wounds +1–2 CP'],
+    ['The EXOTIC and DELIGHTFUL Kashmiri Princess', 'Join the choir', 14, 20,
+      { stat: 'Persuasive', diff: 110 }, [['Silk Scrap', 100], ['Moon-Pearl', 120]],
+      'Plagued by a Popular Song +2 CP and Scandal +2 CP'],
+    ['The CHARMING and EXOTIC Kashmiri Princess', 'Watch from the audience', 20, 30,
+      { stat: 'Watchful', diff: 112 }, [['Cryptic Clue', 112]], 'Plagued by a Popular Song +3 CP'],
+  ].map(function (r) {
+    return { storylet: r[0], name: r[1], kind: 'show', cost: r[2], costFail: r[3], ch: r[4],
+      gives: r[5], fail: r[6] };
+  });
+
+  // The rows a badge must not reduce to a figure: they raise four or five
+  // menaces whatever happens, or they pay Tales where the rest of the show
+  // spends it. Each carries its own words instead.
+  const MH_ODD = [
+    { storylet: 'The comedy of the absurd!', name: 'Take to the stage, a strange hunger in your belly',
+      kind: 'show', cost: 20, label: '−20 CP · 3 menaces, 2 factions ▼',
+      needs: 'A Connoisseur of Neathy Delights 3',
+      note: 'Favours: Bohemians −1 to −3, Favours: Society −3 to −4, and Suspicion, '
+        + 'Scandal and Nightmares +4 CP each. No challenge, and it pays no goods.' },
+    { storylet: 'The comedy of the absurd!', name: 'Spread the seeds', kind: 'show', cost: 20,
+      label: '−20 CP · 3 menaces, 2 factions ▼',
+      needs: 'Footsteps of the False Saints 6, Seeking Mr Eaten’s Name 21, and no Stench of Betrayal',
+      note: 'The Stench of Betrayal 1, Favours: Bohemians −3, Favours: Society −5, and Suspicion, '
+        + 'Scandal and Nightmares +4 CP each. No challenge, and it pays no goods.' },
+    { storylet: 'Another Night of Magic', name: 'Indulge your hunger. Sabotage Peppercorn', kind: 'show',
+      cost: 30, label: '−30 CP · 5 menaces ▼', needs: 'Unaccountably Peckish 3',
+      note: 'Plagued by a Popular Song, Nightmares, Suspicion, Scandal and Wounds +4 CP each, and '
+        + 'Unaccountably Peckish +4. No challenge, and it pays no goods.' },
+    { storylet: 'The CHARMING and EXOTIC Kashmiri Princess', name: 'Ask her to sing Pop Goes The Weasel',
+      kind: 'show', cost: 30, costFail: 40, label: '−30 CP · a weasel · 5 menaces ▼',
+      needs: 'Plagued by a Popular Song 2',
+      note: 'Challenge: Plagued by a Popular Song 6. A success pops an Araby Fighting-Weasel, or a Lucky '
+        + 'Weasel if you have none, and raises Plagued by a Popular Song +5 CP, Unaccountably Peckish +5 '
+        + 'and Nightmares, Suspicion, Scandal and Wounds +5 CP each. A failure clears Plagued by a Popular '
+        + 'Song −5 CP and raises those four menaces +10 CP each instead.' },
+    { storylet: 'The Most Daring Feat of Illusion and Escapology!', name: 'Smoke and mirrors', kind: 'build',
+      tales: 2, ch: { stat: 'Shadowy', diff: 113 }, gives: [['Moon-Pearl', 226]],
+      fail: 'Plagued by a Popular Song +3 CP and Wounds +1 CP',
+      needs: 'Tales of Mahogany Hall 20, Embroiled in the Wars of Illusion 25, Connected: Glass 16–19',
+      note: 'The only Saturday option that ADDS Tales. The guide lists it twice and the two disagree: the '
+        + 'spending table pays Moon-Pearl ×226, the gain table ×113 and takes Tales −10 CP on '
+        + 'a failure. The badge follows the spending table, which is the one that records the +2 CP.' },
+    { storylet: 'A most vexing melody', name: 'Ask for help', kind: 'way',
+      label: 'clears the song, 50%',
+      note: 'An even-odds Luck challenge to be rid of Plagued by a Popular Song, offered at Song 3 or more. '
+        + 'The song also falls −7 CP by itself when it reaches 5, popping an Araby Fighting-Weasel or a '
+        + 'Lucky Weasel, and −1 with Time, the Healer.' },
+    { storylet: 'Start your career at Mahogany Hall', name: 'A silver tongue', kind: 'way',
+      label: 'way in · Persuasive 95', note: 'The first of the two storylets that open the carousel.' },
+    { storylet: 'Start your career at Mahogany Hall', name: 'A silver touch', kind: 'way',
+      label: 'way in · Shadowy 95', note: 'The first of the two storylets that open the carousel.' },
+    { storylet: 'The rhythm of life at Mahogany Hall', name: 'Get down to specifics', kind: 'way',
+      label: 'opens the carousel', note: 'The second of the two storylets that open the carousel.' },
+  ];
+
+  const MH_DAY_OPTIONS = MH_DAYS.map(function (d) {
+    return { storylet: 'The weekly variety bill!', name: d[0], kind: 'day', day: d[0], talesNeeded: d[2],
+      gives: d[3], note: 'Sets Day of the Week; the show itself is then played on '
+        + d[1].map(function (s) { return '“' + s + '”'; }).join(' or ')
+        + '. Two actions in all.' };
+  });
+
+  const MH_OPTIONS = MH_BUILD.concat(MH_SHOWS, MH_ODD, MH_DAY_OPTIONS);
+
+  const MH_SHOW_STORYLETS = MH_DAYS.reduce(function (all, d) { return all.concat(d[1]); }, []);
+  const MH_STORYLETS = MH_OPTIONS.map(function (e) { return e.storylet; })
+    .concat(MH_SHOW_STORYLETS, ['Off to Mahogany Hall'])
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const MH_INDEX = carouselIndex(MH_OPTIONS);
+
+  const MH_CLASS = 'fl-ux-mahogany';
+  const MH_FLAG = 'flUxMahogany';
+  const MH_BRANCH_CLASS = 'fl-ux-mahogany-branch';
+  const MH_BRANCH_FLAG = 'flUxMahoganyBranch';
+
+  const MH_RULES = 'Build Tales of Mahogany Hall to 8–14, pick a day on The weekly variety bill!, then '
+    + 'play that day’s show: it spends 8–40 CP and takes two actions. Cashing out never takes you '
+    + 'below 10, so you can do it again and again; a failure costs more CP than a success. Tales caps at 14 '
+    + '(105 CP). The guide’s best rate is 1.125 Echoes per action.';
+
+  function mhBadgeText(e) {
+    if (e.label) return e.label;
+    const pay = mhPay(e.gives, false);
+    if (e.kind === 'day') return 'Tales ' + e.talesNeeded + ' · ' + pay;
+    if (e.kind === 'show') {
+      return '−' + e.cost + ' CP' + (e.ch ? CAROUSEL_MARK_CHALLENGE : '') + (pay ? ' · ' + pay : '');
+    }
+    return 'Tales +' + e.tales + (e.ch ? CAROUSEL_MARK_CHALLENGE : '') + (pay ? ' · ' + pay : '')
+      + (e.spends ? ' ' + CAROUSEL_MARK_USES : '');
+  }
+
+  function mhSpec(e) {
+    const body = [];
+    if (e.ch) body.push(carouselChallenge(e.ch));
+    if (e.kind === 'day') {
+      body.push('Needs Tales of Mahogany Hall ' + e.talesNeeded + '. The show pays ' + mhPay(e.gives, true)
+        + ' whichever option you take there.');
+    } else if (e.kind === 'show') {
+      body.push('Spends Tales of Mahogany Hall −' + e.cost + ' CP on a success'
+        + (e.costFail ? ', −' + e.costFail + ' CP on a failure' : '') + '.');
+      if (e.gives) body.push('Gives: ' + mhPay(e.gives, true) + '.');
+    } else if (e.kind === 'build') {
+      body.push('Success: Tales of Mahogany Hall +' + e.tales + ' CP'
+        + (e.gives ? ', ' + mhPay(e.gives, true) : '') + '.');
+    }
+    if (e.spends) body.push(CAROUSEL_MARK_USES + ' Uses up ' + e.spends + '.');
+    if (e.fail) body.push('Failure: ' + e.fail + '.');
+    if (e.needs) body.push('Needs: ' + e.needs + '.');
+    const color = e.kind === 'show' ? CAROUSEL_COLOR_PAYOUT
+      : e.kind === 'day' ? CAROUSEL_COLOR_SETUP
+        : e.kind === 'way' ? CAROUSEL_COLOR_NEUTRAL : CAROUSEL_COLOR_PROGRESS;
+    return { text: mhBadgeText(e), color: color,
+      title: carouselTooltip('Tales of Mahogany Hall', e, body, MH_RULES) };
+  }
+
+  function mhDayOf(storylet) {
+    return MH_DAYS.find(function (d) { return d[1].indexOf(storylet) !== -1; }) || null;
+  }
+
+  function mhStoryletSpec(key) {
+    const storylet = MH_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet) return null;
+    const day = mhDayOf(storylet);
+    let text;
+    if (day) text = day[0] + ' · Tales ' + day[2] + ' · ' + mhPay(day[3], false);
+    else if (storylet === 'The weekly variety bill!') text = 'cash out';
+    else if (storylet === 'Off to Mahogany Hall') text = 'the way there';
+    else if (MH_OPTIONS.some(function (e) { return e.storylet === storylet && e.kind === 'build'; })) {
+      text = 'build';
+    } else text = 'Mahogany Hall';
+    const extra = day
+      ? day[0] + '’s show. Needs Tales of Mahogany Hall ' + day[2] + ', pays ' + mhPay(day[3], true)
+        + ' whichever option you take, and takes two actions in all.\n' + MH_RULES
+      : MH_RULES;
+    return { text: text, color: day ? CAROUSEL_COLOR_PAYOUT : CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('Tales of Mahogany Hall', storylet, MH_OPTIONS, mhBadgeText, extra) };
+  }
+
+  function mhRatings() {
+    carouselRatings({
+      storylets: MH_STORYLETS, index: MH_INDEX, storyletSpec: mhStoryletSpec, optionSpec: mhSpec,
+      cls: MH_CLASS, flag: MH_FLAG, branchCls: MH_BRANCH_CLASS, branchFlag: MH_BRANCH_FLAG,
+    });
+  }
+
+  // === feature: Master-Classes in Etiquette ==============================
+  //
+  // Master-Classes in Etiquette (Guide). Also in Mahogany Hall, and the
+  // companion to the carousel above: take on one of four pupils on *Provide
+  // Master-Classes in Etiquette*, raise their Pygmalion to 12, then graduate
+  // them for a lump sum and a reset. Each pupil pays in a different good, and
+  // choosing the pupil is the only decision that changes the rate.
+  //
+  // **What the badge says.** On a lesson, the Pygmalion CP it makes and what
+  // it pays ("Pyg +3? · Brass ×105"); on the graduation, the reset and the
+  // lump ("reset? · Glim ×700"); on a pupil, what the whole course pays and
+  // the guide's rate ("Brass ×4780 · 1.28 EPA"). Pygmalion CP is the number
+  // because every option here pays about its own difficulty in goods, so the
+  // options differ almost entirely in how fast they carry you to 12 -- and
+  // "▼ Pyg −2" marks the Pygmalion challenges, whose failures push you BACK
+  // and which the guide says not to take unless they are certain.
+  //
+  // Transcribed from the guide's four per-pupil tables (fetched through the
+  // API, 2026-09-16), with the storylet and option pages as the cross-check:
+  // the storylet names, their Pygmalion windows and their option lists come
+  // from the pages, which is where the Clay pupil's lesson storylet turns out
+  // to be *Educating Lyme* (the wiki disambiguates it "Educating Lyme 1") and
+  // *Can the Louche Devil Negotiate a Tea Shop?* keeps its capitals.
+  //
+  // The cross-check that earns its keep: every Pygmalion challenge is narrow,
+  // so the level that makes it certain is the level it starts at plus 4, and
+  // the guide states BOTH. Twelve of the thirteen rows agree. The thirteenth,
+  // the Scullery's *Take supper with him*, says Pygmalion 9 certain at 14
+  // where the rule gives 13 -- carried as the guide has it, and the tooltip
+  // says both figures rather than pick one.
+  //
+  // LEFT OUT, and this is the honest part: the two Fate-locked pupils. The
+  // guide covers their mechanics but records their option and storylet titles
+  // as "Choice 1", "Storylet 2" and so on, so there is nothing to match on --
+  // badging them would mean inventing titles. The two Fate pupils' own rows on
+  // *Provide Master-Classes in Etiquette* ARE badged, because those titles are
+  // known and their rates are what you pick a pupil on. Corrections go in
+  // MC_OPTIONS and nowhere else.
+
+  const MC_SHORT = {
+    'Nevercold Brass Sliver': 'Brass', 'Shard of Glim': 'Glim', 'Nodule of Deep Amber': 'Amber',
+    'Nodule of Trembling Amber': 'Trembling Amber', 'Jade Fragment': 'Jade', 'Silk Scrap': 'Silk',
+    'Bottle of Broken Giant 1844': 'Broken Giant', 'Favours: Rubbery Men': 'Rubbery Favour',
+    'Favours: The Docks': 'Docks Favour', 'Bottle of Greyfields 1868 First Sporing': 'First Sporing',
+    'Bottle of Strangling Willow Absinthe': 'Absinthe', 'Cryptic Clue': 'Clues', 'Whispered Hint': 'Hints',
+    'Moon-Pearl': 'Pearls',
+  };
+
+  function mcPay(gives, full) {
+    if (!gives || !gives.length) return '';
+    return gives.map(function (g) {
+      const name = full ? g[0] : (MC_SHORT[g[0]] || g[0]);
+      return name + (g[1] == null ? '' : ' ×' + g[1]);
+    }).join(full ? ', ' : ' ');
+  }
+
+  // The four pupils, from the guide's own comparison table: what a whole
+  // course pays, how many actions it averages, and the guide's Echoes per
+  // action. `note` carries what the guide says beyond the rate.
+  const MC_PUPILS = [
+    { name: 'Take on a Louche Devil', pays: [['Nevercold Brass Sliver', 4780]], actions: 37.4, epa: 1.28,
+      note: 'Lessons are given on Instructing a Louche Devil.' },
+    { name: 'Take on a Clay Pupil', pays: [['Shard of Glim', 3982]], actions: 31.7, epa: 1.261,
+      note: 'Lessons are given on Educating Lyme. Worth one action even if you go no further: it also '
+        + 'gives Educating Lyme 1, which saves a Strong-Backed Labour when you start a newspaper.' },
+    { name: 'Take on a Rubbery Pupil (5 FATE)',
+      pays: [['Nodule of Deep Amber', 4854], ['Nodule of Trembling Amber', 1], ['Favours: Rubbery Men', 1]],
+      actions: 45, epa: 1.45, fate: true,
+      note: 'The guide’s best rate, at ≈65.23 Echoes, valuing the Rubbery favour at 4.2 and '
+        + 'counting one action to cash it in. Its lessons are not in this table — the guide records '
+        + 'their titles only as “Choice 1”, “Storylet 2” and so on, so there is nothing '
+        + 'to badge them by.' },
+    { name: 'Take on an Elegant Lady (5 FATE)',
+      pays: [['Jade Fragment', 4106], ['Silk Scrap', 315], ['Nevercold Brass Sliver', 432],
+        ['Bottle of Broken Giant 1844', 5]],
+      actions: 44, epa: 1.39, fate: true,
+      note: '≈61.03 Echoes in all, and Making Waves +10 CP at the end. Its lessons are not in this '
+        + 'table, for the same reason as the Rubbery pupil’s.' },
+  ];
+
+  // [storylet, option, Pygmalion CP, challenge, what it pays, what a failure
+  // costs, the Pygmalion it takes back on a failure, what it uses up, needs].
+  // A `pygDiff` challenge is against Pygmalion itself; the guide states both
+  // the level it starts at and the level that makes it certain, and both are
+  // carried so a transcription slip in either shows up.
+  const MC_LESSONS = [
+    ['Instructing a Louche Devil', 'Elocution', 2, { stat: 'Persuasive', diff: 97 },
+      [['Nevercold Brass Sliver', 97]], 'Scandal +1 CP', 0],
+    ['Instructing a Louche Devil', 'Deportment', 2, { stat: 'Persuasive', diff: 99 },
+      [['Nevercold Brass Sliver', 99]], 'Wounds +1 CP', 0],
+    ['Instructing a Louche Devil', 'Camouflage', 2, { stat: 'Persuasive', diff: 102 },
+      [['Nevercold Brass Sliver', 102]], 'Scandal +1 CP', 0],
+    ['Instructing a Louche Devil', 'Morality', 3, { stat: 'Persuasive', diff: 105 },
+      [['Nevercold Brass Sliver', 105]], 'Nightmares +1 CP', 0],
+    ['Instructing a Louche Devil', 'History and politics', 3, { stat: 'Persuasive', diff: 108 },
+      [['Nevercold Brass Sliver', 108]], 'Scandal +1 CP', 0],
+    ['Instructing a Louche Devil', 'Philosophy', 3, { stat: 'Persuasive', diff: 111 },
+      [['Nevercold Brass Sliver', 111]], 'Nightmares +1 CP', 0],
+    ['Educating Lyme', 'Dexterity', 2, { stat: 'Persuasive', diff: 97 },
+      [['Shard of Glim', 97]], 'Wounds +1 CP', 0],
+    ['Educating Lyme', 'Social hierarchies', 2, { stat: 'Persuasive', diff: 99 },
+      [['Shard of Glim', 99]], 'Scandal +1 CP', 0],
+    ['Educating Lyme', 'Bazaar politics', 2, { stat: 'Persuasive', diff: 102 },
+      [['Shard of Glim', 102]], 'Nightmares +1 CP', 0],
+    ['Educating Lyme', 'Reading and writing', 3, { stat: 'Persuasive', diff: 105 },
+      [['Shard of Glim', 105]], 'Nightmares +2 CP', 0],
+    ['Educating Lyme', 'Leisure', 3, { stat: 'Persuasive', diff: 108 },
+      [['Shard of Glim', 108]], 'Scandal +1 CP', 0],
+    ['Educating Lyme', 'Independent thought', 3, { stat: 'Persuasive', diff: 111 },
+      [['Shard of Glim', 111]], 'Nightmares +2 CP', 0],
+  ].map(function (r) {
+    return { storylet: r[0], name: r[1], kind: 'lesson', pyg: r[2], ch: r[3], gives: r[4], fail: r[5],
+      pygFail: r[6] };
+  });
+
+  const MC_TRIALS = [
+    ['Take the Louche Devil to the shroom-hopping', 'Encourage him to keep to the shadows', 2, 6, 10,
+      [['Nevercold Brass Sliver', 106]], 'Suspicion +1 CP', 2, null, 'Pygmalion 5–12'],
+    ['Take the Louche Devil to the shroom-hopping', 'Encourage him to be confident', 3, 9, 13,
+      [['Nevercold Brass Sliver', 109]], 'Suspicion +2 CP', 2, null, 'Pygmalion 5–12'],
+    ['Take the Louche Devil to the Doubt Street Scullery', 'Take supper with him', 3, 9, 14,
+      [['Nevercold Brass Sliver', 108]], 'Scandal +2 CP', 2, 'Unaccountably Peckish −3',
+      'Pygmalion 8–14'],
+    ['Can the Louche Devil Negotiate a Tea Shop?', 'A robust young lady', 3, 12, 16,
+      [['Nevercold Brass Sliver', 80]], 'Scandal +2 CP', 3, null, 'Pygmalion 10–16'],
+    ['A Society dinner with the Louche Devil', 'Concentrate on the etiquette', 3, 14, 18,
+      [['Nevercold Brass Sliver', 90]], 'Scandal +3 CP', 5, null, 'Pygmalion 12'],
+    ['Introduce Lyme to a Child', 'Help him communicate with the young person', 2, 8, 12,
+      [['Shard of Glim', 102]], 'Suspicion +1 CP', 1, null, 'Educating Lyme 1, Pygmalion 5–11'],
+    ['Send Lyme to the market', 'A basket but no list', 3, 9, 13,
+      [['Shard of Glim', 108]], 'Suspicion +1 CP', 2, 'Unaccountably Peckish −3',
+      'Educating Lyme 1, Pygmalion 7–13'],
+    ['A Business Errand for Lyme', 'Something not too difficult', 3, 11, 15,
+      [['Shard of Glim', 50]], 'Suspicion +2 CP', 2, null, 'Educating Lyme 1, Pygmalion 9–16'],
+    ['A Business Errand for Lyme', 'Try challenging him', 3, 12, 16,
+      [['Shard of Glim', 80]], 'Suspicion +2 CP', 3, null, 'Educating Lyme 1, Pygmalion 9–16'],
+    ['Set Lyme to writing', 'Encourage him to write a factual essay', 3, 12, 16,
+      [['Shard of Glim', 112]], 'Suspicion +3 CP', 5, null, 'Educating Lyme 1, Pygmalion 12'],
+  ].map(function (r) {
+    return { storylet: r[0], name: r[1], kind: 'trial', pyg: r[2], pygCh: { at: r[3], sure: r[4] },
+      gives: r[5], fail: r[6], pygFail: r[7], spends: r[8], needs: r[9] };
+  });
+
+  const MC_GRADUATIONS = [
+    { storylet: 'A Society dinner with the Louche Devil', name: 'Concentrate on conversation', kind: 'graduate',
+      pygCh: { at: 15, sure: 19 }, gives: [['Nevercold Brass Sliver', 1000]], fail: 'Scandal +3 CP',
+      pygFail: 10, needs: 'Pygmalion 12' },
+    { storylet: 'Set Lyme to writing', name: 'Ask him to write a story', kind: 'graduate',
+      pygCh: { at: 13, sure: 17 }, gives: [['Shard of Glim', 700]], fail: 'Suspicion +3 CP',
+      pygFail: 10, needs: 'Educating Lyme 1, Pygmalion 12' },
+  ];
+
+  const MC_FATE = [
+    { storylet: 'A Business Errand for Lyme',
+      name: 'Make absolutely sure Jasper and Frank won’t be disappointed (3 FATE)', kind: 'fate',
+      pyg: 3, pygCh: { at: 12, sure: 16 },
+      gives: [['Bottle of Greyfields 1868 First Sporing', 1], ['Favours: The Docks', 1]],
+      needs: 'Educating Lyme 1, Pygmalion 9–16',
+      note: 'Fate-locked, 3 Fate. The guide records no failure outcome for it.' },
+  ];
+
+  const MC_PUPIL_OPTIONS = MC_PUPILS.map(function (p) {
+    return { storylet: 'Provide Master-Classes in Etiquette', name: p.name, kind: 'pupil', pupil: p };
+  });
+
+  const MC_OPTIONS = MC_LESSONS.concat(MC_TRIALS, MC_GRADUATIONS, MC_FATE, MC_PUPIL_OPTIONS);
+
+  const MC_STORYLETS = MC_OPTIONS.map(function (e) { return e.storylet; })
+    .concat(['Giving Lessons at Mahogany Hall'])
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  // The wiki disambiguates the Clay pupil's lesson storylet "Educating Lyme 1";
+  // the game calls it "Educating Lyme", so the alias points the wiki's title at
+  // the one the options are filed under.
+  const MC_ALIASES = { 'educating lyme 1': normalizeName('Educating Lyme') };
+  const MC_INDEX = carouselIndex(MC_OPTIONS);
+
+  const MC_CLASS = 'fl-ux-pygmalion';
+  const MC_FLAG = 'flUxPygmalion';
+  const MC_BRANCH_CLASS = 'fl-ux-pygmalion-branch';
+  const MC_BRANCH_FLAG = 'flUxPygmalionBranch';
+
+  const MC_LEVEL = 12;
+  const MC_RULES = 'Take one pupil on Provide Master-Classes in Etiquette, raise their Pygmalion to '
+    + MC_LEVEL + ' on the lessons, then graduate them: the lump sum is paid and Pygmalion resets. The '
+    + 'guide’s rule for the two open pupils is to take the highest lesson you can pass — the '
+    + 'fourth is the first to pay +3 CP — and to leave a Pygmalion challenge alone unless it is '
+    + 'certain, since its failure pushes you back.';
+
+  // The guide states the level the Pygmalion challenge starts at and the level
+  // that makes it certain; the second is always the first plus 4, which is a
+  // narrow challenge's own rule, so the two cross-check each other.
+  function mcPygSure(ch) {
+    return ch.at + 4;
+  }
+
+  function mcBadgeText(e) {
+    if (e.kind === 'pupil') {
+      return mcPay(e.pupil.pays, false) + ' · ' + e.pupil.epa + ' EPA' + (e.pupil.fate ? ' · Fate' : '');
+    }
+    const pay = mcPay(e.gives, false);
+    if (e.kind === 'graduate') {
+      return 'reset' + CAROUSEL_MARK_CHALLENGE + ' · ' + pay + ' ' + CAROUSEL_MARK_USES;
+    }
+    const head = 'Pyg +' + e.pyg + CAROUSEL_MARK_CHALLENGE;
+    const back = e.pygFail ? ' ' + CAROUSEL_MARK_USES + ' Pyg −' + e.pygFail : '';
+    return head + (pay ? ' · ' + pay : '') + back + (e.kind === 'fate' ? ' · Fate' : '');
+  }
+
+  function mcSpec(e) {
+    const body = [];
+    if (e.kind === 'pupil') {
+      const p = e.pupil;
+      body.push('The whole course: ' + mcPay(p.pays, true) + ' over about ' + p.actions
+        + ' actions — ' + p.epa + ' Echoes per action by the guide.');
+    } else {
+      if (e.ch) body.push(carouselChallenge(e.ch));
+      if (e.pygCh) {
+        const sure = mcPygSure(e.pygCh);
+        body.push('Challenge: Pygmalion ' + e.pygCh.at + ', certain at Pygmalion ' + sure
+          + (sure === e.pygCh.sure ? '' : ' — though the guide says ' + e.pygCh.sure + ' for this one')
+          + '.');
+      }
+      if (e.kind === 'graduate') {
+        body.push('Success: ' + mcPay(e.gives, true) + ', and Pygmalion resets — this is the payout.');
+      } else {
+        body.push('Success: Pygmalion +' + e.pyg + ' CP' + (e.gives ? ', ' + mcPay(e.gives, true) : '') + '.');
+      }
+      if (e.pygFail) {
+        body.push('Failure: Pygmalion −' + e.pygFail + ' CP' + (e.fail ? ' and ' + e.fail : '')
+          + '. ' + CAROUSEL_MARK_USES + ' A Pygmalion challenge you are not certain of costs you ground.');
+      } else if (e.fail) {
+        body.push('Failure: ' + e.fail + '.');
+      }
+      if (e.spends) body.push('Also: ' + e.spends + '.');
+    }
+    if (e.needs) body.push('Needs: ' + e.needs + '.');
+    const color = e.kind === 'pupil' ? CAROUSEL_COLOR_SETUP
+      : e.kind === 'graduate' ? CAROUSEL_COLOR_PAYOUT
+        : e.pygFail ? CAROUSEL_COLOR_RISK : CAROUSEL_COLOR_PROGRESS;
+    return { text: mcBadgeText(e), color: color,
+      title: carouselTooltip('Master-Classes in Etiquette', e, body, MC_RULES) };
+  }
+
+  function mcStoryletSpec(key) {
+    const storylet = MC_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet) return null;
+    let text = 'lessons';
+    if (storylet === 'Provide Master-Classes in Etiquette') text = 'pick a pupil';
+    else if (storylet === 'Giving Lessons at Mahogany Hall') text = 'the way in';
+    else if (MC_OPTIONS.some(function (e) { return e.storylet === storylet && e.kind === 'graduate'; })) {
+      text = 'graduate';
+    } else if (MC_OPTIONS.some(function (e) { return e.storylet === storylet && e.kind === 'trial'; })) {
+      text = 'Pygmalion test';
+    }
+    return { text: text, color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('Master-Classes in Etiquette', storylet, MC_OPTIONS, mcBadgeText, MC_RULES) };
+  }
+
+  function mcRatings() {
+    carouselRatings({
+      storylets: MC_STORYLETS, index: MC_INDEX, storyletSpec: mcStoryletSpec, optionSpec: mcSpec,
+      cls: MC_CLASS, flag: MC_FLAG, branchCls: MC_BRANCH_CLASS, branchFlag: MC_BRANCH_FLAG,
+      aliases: MC_ALIASES,
+    });
+  }
+
+  // === feature: Patrolling the Sixth Coil ================================
+  //
+  // Patrolling The Sixth Coil (Guide), in the Labyrinth of Tigers. A
+  // variable-length maze of four floors -- a Workshop, a Warzone, a Mansion and
+  // a Jungle, each tied to one attribute and offering one Burden. Every action
+  // adds 1 to Coiling Ever Deeper (how far in you are) and 1 to Patrolling the
+  // Labyrinth (what you get paid, capped at 40). You leave by passing *Resolve
+  // to leave this place*, walking Coiling back down to 0, and then taking
+  // *Escape the labyrinth*.
+  //
+  // **What the badge says.** On an action inside the maze: what it does to the
+  // two progress qualities and the stat it is checked on ("Patrol +1 Coil +1 ·
+  // Watchful 250?"). Both numbers, because they are the whole shape of a run:
+  // the guide's rule is to leave when Patrolling and Coiling together reach 39,
+  // so an action that adds to only one of them is worth twice one that adds to
+  // both -- which is exactly what *Examine a sealed door* does, and why it is
+  // the one line the guide says never to pass up. A Burden shows what it gives
+  // and what it costs you in checks ("+Heavy Iron · Unburdened −3"), since
+  // Unburdened is worth 20 points of every attribute per level. On the way out,
+  // the payout options show what they pay per point of Patrolling.
+  //
+  // **Every title here is randomised**, which is the whole difficulty. Four
+  // randomiser qualities rewrite the floor's name (Sixth Coil: Locales), the
+  // verb of its wandering option (Verbs), the way out of the room (Passages)
+  // and the direction (Directions). So the table lists all 35 room names the
+  // wiki records -- those are the storylet headings you will actually see --
+  // and spells each option's VERBS out as aliases, wildcarding only the
+  // direction and the passage. Spelling the verbs out is not fussiness: a
+  // wildcard verb would make "Sneak north through a bent trail" and "Slip
+  // through a cracked mirror" the same pattern, and `carouselLookup` answers
+  // nothing when two rows match.
+  //
+  // Transcribed from the guide and from the four floor storylets and their
+  // option pages (fetched through the API, 2026-09-16). One DISAGREEMENT worth
+  // knowing: the guide calls the payout quality *Patrolling the Labyrinth*
+  // throughout, while the option pages use *Mapping the Labyrinth* for the same
+  // thing in seven places -- including every exit payout's formula. They are
+  // treated as one quality and the badges use the guide's name. Left out: the
+  // Coilheart Games storylets around the entrance, which are a festival rather
+  // than the carousel. Corrections go in SIXTH_ROOMS and SIXTH_OPTIONS and
+  // nowhere else.
+
+  const SIXTH_CAP = 40;
+  const SIXTH_UNBURDENED_START = 12;
+  const SIXTH_UNBURDENED_PER_ATTRIBUTE = 20;
+  const SIXTH_BURDEN_COST = 3;
+
+  // floor -> [attribute, its Burden, the verbs its wandering option takes, the
+  // shape of that option's title, the Burden's own option, the room names the
+  // Locales quality gives it].
+  const SIXTH_FLOORS = [
+    { floor: 'Workshop', attribute: 'Watchful', burden: 'Predatory Clarity',
+      verbs: ['Gaze', 'Scry', 'Stare', 'Look'], shape: '(somewhere) into (the workshop)',
+      pickUp: 'Pick up the ornate magnifying glass',
+      rooms: ['Leatherbound Study', 'Ink Repository', 'Door Storage', 'Optical Gallery',
+        'Glim-Mosaic Library', 'Tattooed Office', 'Circular Observatory'] },
+    { floor: 'Warzone', attribute: 'Dangerous', burden: 'Heavy Iron',
+      verbs: ['Rush', 'March', 'Sprint', 'Crash', 'Advance'], shape: '(somewhere) through (the warzone)',
+      pickUp: 'Pick up an ornate revolver',
+      rooms: ['Concrete Bunker', 'Cramped Arsenal', 'Crumbling Battlement', 'Windowless War-Room',
+        'Field of Spears', 'Muddy Trench', 'Bloody Sewer', 'Fortified Position', 'Deserted Emplacement',
+        'Cracked Foundation'] },
+    { floor: 'Mansion', attribute: 'Persuasive', burden: 'Velvet Countenance',
+      verbs: ['Slide', 'Slither', 'Discreetly pass', 'Excuse yourself', 'Insinuate yourself', 'Detach'],
+      shape: '(somewhere) through (the mansion)', pickUp: 'Take the ornate mask',
+      rooms: ['Plush Drawing-Room', 'Servants’ Quarters', 'Reflecting Washroom', 'Portrait Gallery',
+        'Hedge Maze', 'Overflowing Dining Room', 'Sculpture Garden', 'Feathered Bedchamber',
+        'Marble Corridor', 'Carpeted Boudoir'] },
+    { floor: 'Jungle', attribute: 'Shadowy', burden: 'Clinging Shadow',
+      verbs: ['Slither', 'Skulk', 'Stalk', 'Crawl', 'Sneak'], shape: '(somewhere) through (the jungle)',
+      pickUp: 'Pick up a beautiful cloak',
+      rooms: ['Dark Clearing', 'Termite Mound', 'Rose Thicket', 'Cycad Bend', 'Scale Tree Stand',
+        'Orchid Grove', 'Shedding-place', 'Predator’s Den'] },
+  ];
+
+  // The verbs the mirror option takes, which no floor's wandering option uses,
+  // so the two can never match one title.
+  const SIXTH_MIRROR_VERBS = ['Shimmer', 'Disappear', 'Refract', 'Escape', 'Vanish', 'Slip', 'Evanesce'];
+
+  const SIXTH_ROOMS = SIXTH_FLOORS.reduce(function (all, f) { return all.concat(f.rooms); }, []);
+
+  // Badge tags for the goods the Burdens pay. The tooltip always says the full
+  // name.
+  const SIXTH_SHORT = {
+    'Tale of Terror!!': 'Terrors', 'Cryptic Clue': 'Clues', 'Final Breath': 'Breaths',
+    'Journal of Infamy': 'Journals', 'Primordial Shriek': 'Shrieks',
+    'Scrap of Incendiary Gossip': 'Gossip',
+  };
+
+  function sixthTag(item) {
+    return SIXTH_SHORT[item] || item;
+  }
+
+  function sixthAliases(verbs, shape) {
+    return verbs.map(function (v) { return v + ' ' + shape; });
+  }
+
+  // Every option a floor offers, in the order the storylet lists them. The
+  // exit payouts are on a storylet of their own, Exiting the Sixth Coil.
+  const SIXTH_OPTIONS = SIXTH_FLOORS.reduce(function (all, f) {
+    const wander = {
+      storylet: f.floor, name: f.verbs[0] + ' ' + f.shape,
+      aliases: sixthAliases(f.verbs.slice(1), f.shape), kind: 'wander',
+      patrol: 1, coil: 1, ch: { stat: f.attribute, diff: 250 },
+      note: 'The floor’s own wandering action: the title reads “'
+        + f.verbs.join('/') + ' <direction> ' + (f.floor === 'Workshop' ? 'into' : 'through')
+        + ' <a way out>”, all of it randomised.' };
+    const burden = {
+      storylet: f.floor, name: f.pickUp, kind: 'burden', burden: f.burden, patrol: 1,
+      note: 'Offered while Temptation’s Presence is on you and you are not already carrying this '
+        + 'Burden. It adds no Coiling Ever Deeper.' };
+    return all.concat([wander, burden,
+      { storylet: f.floor, name: 'Climb up (a level)', kind: 'move', patrol: 1, coil: 1,
+        ch: { stat: f.attribute, diff: 250 }, airs: 'Airs of the Labyrinth 0–20',
+        note: 'Moves you up one floor. The guide says to pick Climb or Descend once and stick to it.' },
+      { storylet: f.floor, name: 'Descend into (a hole)', kind: 'move', patrol: 1, coil: 1,
+        ch: { stat: f.attribute, diff: 250 }, airs: 'Airs of the Labyrinth 80–100',
+        note: 'Moves you down one floor. The guide says to pick Climb or Descend once and stick to it.' },
+      { storylet: f.floor, name: 'Pass (direction) through a gaping maw', kind: 'move', patrol: 1, coil: 1,
+        ch: { stat: f.attribute, diff: 250 }, airs: 'Airs of the Labyrinth: a band of its own per floor',
+        note: 'Drops you one or two floors at random — the guide says to leave it alone, since it '
+          + 'breaks the loop you are walking.' },
+      { storylet: f.floor, name: 'Remember a passage (somewhere)', kind: 'move', patrol: 1, coil: 1,
+        ch: { stat: 'Watchful', diff: 200 }, airs: 'Airs of the Labyrinth 0–50',
+        spends: 'Memory of Light ×4', needs: 'Memory of Light ×4',
+        note: 'The easiest check in the maze — Watchful 200 rather than 250 — and the guide says '
+          + 'to take it whenever it beats your other odds. Also gives Sighting of a Parabolan Landmark '
+          + '×21.' },
+      { storylet: f.floor, name: SIXTH_MIRROR_VERBS[0] + ' through (a mirror)',
+        aliases: sixthAliases(SIXTH_MIRROR_VERBS.slice(1), 'through (a mirror)'), kind: 'move',
+        patrol: 1, coil: 1, narrow: { stat: 'Glasswork', diff: 18, per: 1.5 },
+        airs: 'Airs of the Labyrinth 40–80',
+        note: 'The one option checked on Glasswork rather than an attribute; each point of Unburdened is '
+          + 'worth 1.5 of it.' },
+      { storylet: f.floor, name: 'Examine a sealed door to the (direction)', kind: 'door', patrol: 2, coil: 0,
+        airs: 'Airs of the Labyrinth 100', needs: 'Coiling Ever Deeper 3',
+        note: 'Two points of Patrolling and NO Coiling: worth twice any other action by the guide’s '
+          + 'own arithmetic, and it has no challenge. Take it whenever it appears.' },
+      { storylet: f.floor, name: 'Resolve to leave this place', kind: 'leave',
+        check: 'Challenge: narrow, against Unburdened at difficulty 0 and eased by Growing Resolve. '
+          + 'The page records no odds, and the guide asks for 70% on the way out.',
+        needs: 'Coiling Ever Deeper 5',
+        note: 'Starts the way out: sets Fleeing the Heart, drops Coiling Ever Deeper to 30 if it is higher, '
+          + 'and every action after this takes 1 off it instead of adding one. A failure raises Growing '
+          + 'Resolve, which makes the next attempt easier. Carrying all four Burdens also pays an Antique '
+          + 'Mystery here.' },
+      { storylet: f.floor, name: 'Shed your burdens', kind: 'shed',
+        needs: 'Coiling Ever Deeper, and Fleeing the Heart',
+        note: 'Throws away every Burden you are carrying, which makes the remaining checks easier and the '
+          + 'payout smaller. Offered only once you are on the way out.' },
+      { storylet: f.floor, name: 'Escape the labyrinth', kind: 'out',
+        needs: 'Coiling Ever Deeper gone',
+        note: 'Costs no action. Opens Exiting the Sixth Coil, where the Burdens are cashed in.' },
+    ]);
+  }, []);
+
+  // The exit. Each Burden you carried pays two items, both multiplied by your
+  // Patrolling the Labyrinth, and each raises one menace by a change point.
+  const SIXTH_EXITS = [
+    ['Recall lost facts', 'Predatory Clarity', 'Tale of Terror!!', 2, 'Cryptic Clue', 10, 'Nightmares'],
+    ['Recall lost secrets', 'Clinging Shadow', 'Final Breath', 2, 'Cryptic Clue', 10, 'Suspicion'],
+    ['Remember your scars', 'Heavy Iron', 'Journal of Infamy', 2, 'Primordial Shriek', 10, 'Wounds'],
+    ['Remember forgotten whispers', 'Velvet Countenance', 'Scrap of Incendiary Gossip', 2, 'Cryptic Clue',
+      10, 'Scandal'],
+  ].map(function (r) {
+    return { storylet: 'Exiting the Sixth Coil', name: r[0], kind: 'payout', burden: r[1],
+      pays: [[r[2], r[3]], [r[4], r[5]]], menace: r[6],
+      note: 'Also pays Coilheart Renown ×40 per point of Patrolling. Offered only if you are still '
+        + 'carrying ' + r[1] + '.' };
+  }).concat([
+    { storylet: 'Exiting the Sixth Coil', name: 'Depart', kind: 'out',
+      note: 'Leaves the Sixth Coil. The basic payout — Memory of Light ×2 and Cryptic Clue '
+        + '×10 per point of Patrolling — is paid whether or not you carried a Burden.' },
+  ]);
+
+  const SIXTH_ALL = SIXTH_OPTIONS.concat(SIXTH_EXITS);
+
+  // Each of the 35 room names is a storylet in its own right: the floor is one
+  // storylet whose heading the Locales quality rewrites. Every room of a floor
+  // offers that floor's options, so the table is expanded room by room.
+  const SIXTH_ROOM_OPTIONS = SIXTH_ALL.reduce(function (all, e) {
+    const floor = SIXTH_FLOORS.find(function (f) { return f.floor === e.storylet; });
+    if (!floor) return all.concat([e]);
+    return all.concat(floor.rooms.map(function (room) {
+      return Object.assign({}, e, { storylet: room, floor: floor.floor });
+    }));
+  }, []);
+
+  const SIXTH_STORYLETS = SIXTH_ROOMS.concat(['Exiting the Sixth Coil', 'Entering the Sixth Coil']);
+  const SIXTH_INDEX = carouselIndex(SIXTH_ROOM_OPTIONS);
+
+  const SIXTH_CLASS = 'fl-ux-sixth-coil';
+  const SIXTH_FLAG = 'flUxSixthCoil';
+  const SIXTH_BRANCH_CLASS = 'fl-ux-sixth-coil-branch';
+  const SIXTH_BRANCH_FLAG = 'flUxSixthCoilBranch';
+
+  const SIXTH_RULES = 'Every action adds 1 to Coiling Ever Deeper and 1 to Patrolling the Labyrinth, which '
+    + 'caps at ' + SIXTH_CAP + ' and is what you are paid on. Entering gives Unburdened '
+    + SIXTH_UNBURDENED_START + ', worth ' + SIXTH_UNBURDENED_PER_ATTRIBUTE + ' points of every attribute a '
+    + 'level; each Burden takes ' + SIXTH_BURDEN_COST + ' of it and adds a payout. The guide: collect what '
+    + 'Burdens you can pass the checks with, then leave when Patrolling and Coiling together reach 39 '
+    + '— past that an extra point of Patrolling costs two actions. Aim for 70% on the way out.';
+
+  function sixthCheck(e) {
+    if (e.check) return e.check;
+    if (e.narrow) {
+      return 'Challenge: ' + e.narrow.stat + ' ' + e.narrow.diff + ' (narrow). Each point of Unburdened is '
+        + 'worth ' + e.narrow.per + ' of it.';
+    }
+    if (!e.ch) return null;
+    return carouselChallenge(e.ch) + ' Each point of Unburdened is worth '
+      + SIXTH_UNBURDENED_PER_ATTRIBUTE + ' points of ' + e.ch.stat + '.';
+  }
+
+  function sixthBadgeText(e) {
+    if (e.kind === 'burden') return '+' + e.burden + ' · Unburdened −' + SIXTH_BURDEN_COST;
+    if (e.kind === 'payout') {
+      return e.pays.map(function (p) { return sixthTag(p[0]) + ' ×' + p[1]; }).join(' ')
+        + ' per Patrol · ' + e.menace + ' +1';
+    }
+    if (e.kind === 'leave') return 'start leaving' + CAROUSEL_MARK_CHALLENGE;
+    if (e.kind === 'shed') return 'drops every Burden ' + CAROUSEL_MARK_USES;
+    if (e.kind === 'out') return 'the way out';
+    const parts = ['Patrol +' + e.patrol];
+    if (e.coil) parts.push('Coil +' + e.coil);
+    let text = parts.join(' ');
+    if (e.ch) text += ' · ' + e.ch.stat + ' ' + e.ch.diff + CAROUSEL_MARK_CHALLENGE;
+    else if (e.narrow) text += ' · ' + e.narrow.stat + ' ' + e.narrow.diff + CAROUSEL_MARK_CHALLENGE;
+    if (e.spends) text += ' ' + CAROUSEL_MARK_USES;
+    return text;
+  }
+
+  function sixthSpec(e) {
+    const body = [];
+    const check = sixthCheck(e);
+    if (check) body.push(check);
+    if (e.kind === 'burden') {
+      body.push('Gives the Burden ' + e.burden + ': Unburdened −' + SIXTH_BURDEN_COST + ', so every '
+        + 'check after it is ' + (SIXTH_BURDEN_COST * SIXTH_UNBURDENED_PER_ATTRIBUTE) + ' points harder '
+        + '— and one more payout on the way out. Patrolling the Labyrinth +1.');
+    } else if (e.kind === 'payout') {
+      body.push('Pays ' + e.pays.map(function (p) {
+        return p[0] + ' ×' + p[1] + ' per point of Patrolling (×' + p[1] * SIXTH_CAP + ' at the '
+          + 'cap of ' + SIXTH_CAP + ')';
+      }).join(', and ') + '. ' + e.menace + ' +1 CP. Uses up ' + e.burden + '.');
+    } else if (e.patrol != null) {
+      body.push('Success: Patrolling the Labyrinth +' + e.patrol
+        + (e.coil ? ', Coiling Ever Deeper +' + e.coil : ', and no Coiling Ever Deeper')
+        + '. While Fleeing the Heart is on you, Coiling goes DOWN by the same 1 instead.');
+    }
+    if (e.spends) body.push(CAROUSEL_MARK_USES + ' Uses up ' + e.spends + '.');
+    if (e.airs) body.push('Offered at: ' + e.airs + '.');
+    if (e.needs) body.push('Needs: ' + e.needs + '.');
+    const color = e.kind === 'payout' ? CAROUSEL_COLOR_PAYOUT
+      : e.kind === 'burden' ? CAROUSEL_COLOR_SETUP
+        : e.kind === 'door' ? CAROUSEL_COLOR_PAYOUT
+          : e.kind === 'leave' || e.kind === 'out' || e.kind === 'shed' ? CAROUSEL_COLOR_NEUTRAL
+            : CAROUSEL_COLOR_PROGRESS;
+    return { text: sixthBadgeText(e), color: color,
+      title: carouselTooltip('Patrolling the Sixth Coil', e, body, SIXTH_RULES) };
+  }
+
+  function sixthFloorOf(room) {
+    return SIXTH_FLOORS.find(function (f) { return f.rooms.indexOf(room) !== -1; }) || null;
+  }
+
+  function sixthStoryletSpec(key) {
+    const storylet = SIXTH_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet) return null;
+    const floor = sixthFloorOf(storylet);
+    let text;
+    if (floor) text = floor.floor + ' · ' + floor.attribute + ' · ' + floor.burden;
+    else if (storylet === 'Exiting the Sixth Coil') text = 'cash in the Burdens';
+    else text = 'the way in';
+    const extra = floor
+      ? 'A ' + floor.floor + ' room: its wandering action is checked on ' + floor.attribute
+        + ' 250, and its Burden is ' + floor.burden + '.\n' + SIXTH_RULES
+      : SIXTH_RULES;
+    return { text: text, color: floor ? CAROUSEL_COLOR_LABEL : CAROUSEL_COLOR_NEUTRAL,
+      title: carouselSummary('Patrolling the Sixth Coil', storylet, SIXTH_ROOM_OPTIONS,
+        sixthBadgeText, extra) };
+  }
+
+  function sixthRatings() {
+    carouselRatings({
+      storylets: SIXTH_STORYLETS, index: SIXTH_INDEX, storyletSpec: sixthStoryletSpec, optionSpec: sixthSpec,
+      cls: SIXTH_CLASS, flag: SIXTH_FLAG, branchCls: SIXTH_BRANCH_CLASS, branchFlag: SIXTH_BRANCH_FLAG,
+    });
+  }
+
+  // === feature: The Rat Market ===========================================
+  //
+  // The Rat Market (Guide). A weekend market on the rooftops, reached from a
+  // storylet in the Flit and open from 11:00 UTC Friday to 11:00 UTC Monday.
+  // It is not a carousel: it is a shop, and the only actions it costs are the
+  // three to get in the first time each week. What it BUYS rotates with eight
+  // "Ratly Demand" world qualities, one stall each.
+  //
+  // **What the badge says.** On a sale, what the sale is worth in Echoes, as
+  // the range from a fresh market to a saturated one ("×5 → 82.5–62.5 ▼"). The
+  // Echoes are the number rather than the Rat-Shillings because a shilling is
+  // only worth what you spend it on -- unspent ones turn back into Rostygold
+  // at ten pence each three days after you enter -- and because every other
+  // badge in this script is priced in Echoes. The RANGE is the honest figure:
+  // a sale's price depends on your Rat Market Saturation, which nothing in the
+  // page states, so the badge shows the whole span and the tooltip gives the
+  // three bands with the shillings for each.
+  //
+  // Every price here is DERIVED from one number per option: the item's Nominal
+  // Sale Value, which the option page states. Saturation rises by exactly that
+  // figure, and the payment is the nominal value times 1.32, 1.12 or 1.00
+  // depending on the band -- which reproduces every shilling price the guide
+  // prints, and the test pins that.
+  //
+  // Transcribed from the guide and its Selling table, with all 37 stall option
+  // pages as the source for the quantities and nominal values (fetched through
+  // the API, 2026-09-16). LEFT OUT, deliberately: what the market SELLS. The
+  // Tatterdemalion Tent's and the Maundering Rat's Stall's stock rotates with
+  // the Rat-Wind, the Rat-Moon and two seasons, and a price that depends on a
+  // world quality nobody has read is a price this script cannot quote; those
+  // two storylets are badged with what they are and the tooltip says to check
+  // the Gazette. Corrections go in RM_SELLS and nowhere else.
+
+  // Pence per Rat-Shilling, by the guide.
+  const RM_PENCE_PER_SHILLING = 10;
+  // saturation band -> [the floor of the band, the multiplier on the nominal
+  // sale value]. The guide states the markups as 32% / 12% / none.
+  const RM_BANDS = [[0, 1.32], [65000, 1.12], [180000, 1]];
+  const RM_SATURATION_CAP = 800000;
+
+  // A Nominal Sale Value is stated in PENNIES, so the shillings paid are the
+  // marked-up value divided by the ten pence a shilling is worth, and the
+  // Echoes are those shillings divided by ten again. Deriving the Echoes from
+  // the shillings rather than from the nominal value keeps the badge and the
+  // tooltip on one figure.
+  function rmShillings(nominal, band) {
+    return Math.round(nominal * RM_BANDS[band][1] / RM_PENCE_PER_SHILLING);
+  }
+
+  function rmEchoes(nominal, band) {
+    return Math.round(rmShillings(nominal, band) * RM_PENCE_PER_SHILLING) / 100;
+  }
+
+  // [stall, option, what it takes, its Nominal Sale Value]. The demand each
+  // stall belongs to is on the stall, not the option.
+  const RM_SELLS = [
+    ['The Whiskery Bibliophile', 'Sell an Uncanny Incunabulum', 'Uncanny Incunabulum ×1', 1250],
+    ['The Whiskery Bibliophile', 'Sell a collection of incunabula', 'Uncanny Incunabulum ×5', 6250],
+    ['The Whiskery Bibliophile', 'Sell a small library of the uncanny', 'Uncanny Incunabulum ×25', 31250],
+    ['The Whiskery Bibliophile', 'Sell a Chimerical Archive', 'Chimerical Archive ×1', 6250],
+    ['The Whiskery Bibliophile', 'Offer a miscellany of miscellanies', 'Chimerical Archive ×5', 31250],
+    ['The Whiskery Bibliophile', 'Sell a Cartographer’s Hoard', 'Cartographer’s Hoard ×1', 31250],
+    ['The Belligerent Bombardier', 'Sell an Unlawful Device', 'Unlawful Device ×1', 1250],
+    ['The Belligerent Bombardier', 'Sell a small pile of Unlawful Devices', 'Unlawful Device ×5', 6250],
+    ['The Belligerent Bombardier', 'Sell quite a few Unlawful Devices', 'Unlawful Device ×25', 31250],
+    ['The Belligerent Bombardier', 'Sell a Crackling Device', 'Crackling Device ×1', 6250],
+    ['The Belligerent Bombardier', 'Sell a box of Crackling Devices', 'Crackling Device ×5', 31250],
+    ['The Sinistral Poet', 'Share a Captivating Ballad', 'Captivating Ballad ×1', 6250],
+    ['The Sinistral Poet', 'Share several Captivating Ballads', 'Captivating Ballad ×5', 31250],
+    ['The Sinistral Poet', 'Offer a Parabolan Parable', 'Parabolan Parable ×1', 31250],
+    ['The Diminutive Vicar', 'Offer a Ratty Reliquary', 'Ratty Reliquary ×1', 1250],
+    ['The Diminutive Vicar', 'Offer multiple reliquaries', 'Ratty Reliquary ×5', 6250],
+    ['The Diminutive Vicar', 'Offer a trove of reliquaries', 'Ratty Reliquary ×25', 31250],
+    ['The Diminutive Vicar', 'Offer a False Hagiotoponym', 'False Hagiotoponym ×1', 6250],
+    ['The Diminutive Vicar', 'Offer an apocryphal atlas’ worth of Hagiotoponyms',
+      'False Hagiotoponym ×5', 31250],
+    ['The Feathered Dressmaker', 'Sell a scrap of parabola-linen', 'Parabola-Linen Scrap ×1', 6250],
+    ['The Feathered Dressmaker', 'Sell a whole bolt of parabola-linen', 'Parabola-Linen Scrap ×5', 31250],
+    ['The Feathered Dressmaker', 'Sell a scrap of ivory organza', 'Scrap of Ivory Organza ×1', 31250],
+    ['The Shrivelled Celebrant', 'Sell her a Storm-Threnody', 'Storm-Threnody ×1', 1250],
+    ['The Shrivelled Celebrant', 'Sell her a few Storm-Threnodies', 'Storm-Threnody ×5', 6250],
+    ['The Shrivelled Celebrant', 'Sell her many Storm-Threnodies', 'Storm-Threnody ×25', 31250],
+    ['The Shrivelled Celebrant', 'Sell her a Night-Whisper', 'Night-Whisper ×1', 6250],
+    ['The Shrivelled Celebrant', 'Sell several Night-Whispers', 'Night-Whisper ×5', 31250],
+    ['The Grey Tipster', 'Sell Vital Intelligence', 'Vital Intelligence ×1', 1250],
+    ['The Grey Tipster', 'Sell a complex web of critical information', 'Vital Intelligence ×5', 6250],
+    ['The Grey Tipster', 'Upend the Tipster’s view of the status quo', 'Vital Intelligence ×25', 31250],
+    ['The Grey Tipster', 'Sell a Corresponding Sounder', 'Corresponding Sounder ×1', 31250],
+    ['The Grey Tipster', 'Sell a Queen Mate and an Epaulette Mate',
+      'Queen Mate ×1 and Epaulette Mate ×1', 5000],
+    ['The Grey Tipster', 'Sell a bevy of Queen Mates and Epaulette Mates',
+      'Queen Mate ×5 and Epaulette Mate ×5', 25000],
+    ['The Scabrous Sibyl', 'Sell a Dreadful Surmise', 'Dreadful Surmise ×1', 31250],
+    ['The Scabrous Sibyl', 'Sell a Distillation of Retribution', 'Distillation of Retribution ×1', 31250],
+    ['The Scabrous Sibyl', 'Sell a Mortification of a Great Power',
+      'Mortification of a Great Power ×1', 6250],
+    ['The Scabrous Sibyl', 'Sell an opprobrium’s worth of Mortifications',
+      'Mortification of a Great Power ×5', 31250],
+    ['The Rat Market, Eclipsed', 'Offer the Broken Triplet a Memory of Discordance',
+      'Memory of Discordance ×1', 1250],
+    ['The Rat Market, Eclipsed', 'Offer the Broken Triplet several Memories of Discordance',
+      'Memory of Discordance ×5', 6250],
+    ['The Rat Market, Eclipsed', 'Offer the Broken Triplet a Discordant Soul',
+      'Discordant Soul ×1', 6250],
+    ['The Rat Market, Eclipsed', 'Offer the Broken Triplet several Discordant Souls',
+      'Discordant Soul ×5', 31250],
+  ].map(function (r) {
+    return { storylet: r[0], name: r[1], kind: 'sell', spends: r[2], nominal: r[3] };
+  });
+
+  // stall -> the Ratly Demand that brings it to the market.
+  const RM_STALLS = [
+    ['The Whiskery Bibliophile', 'Inscrutable Demand'],
+    ['The Belligerent Bombardier', 'Intricate Demand'],
+    ['The Sinistral Poet', 'Maudlin Demand'],
+    ['The Diminutive Vicar', 'Saintly Demand'],
+    ['The Feathered Dressmaker', 'Soft Demand'],
+    ['The Shrivelled Celebrant', 'Tempestuous Demand'],
+    ['The Grey Tipster', 'Calculating Demand'],
+    ['The Scabrous Sibyl', 'Ruinous Demand'],
+    ['The Rat Market, Eclipsed', 'The Rat Market, in Eclipse'],
+  ];
+
+  const RM_WAYS = [
+    { storylet: 'The Rat Market', name: 'Enter the Rat Market', kind: 'way', actions: 3,
+      label: '3 actions, once a weekend',
+      note: 'The only action the market costs. It also wipes your Rat Market Saturation and starts the '
+        + 'three-day clock: whatever Rat-Shillings are left when it runs out come back as Rostygold and '
+        + 'other currency, at ten pence a shilling.' },
+    { storylet: 'The Rat Market', name: 'Enter the Rat Market again', kind: 'way', actions: 0,
+      label: 'free, once you are a rat',
+      note: 'Free for the rest of the weekend, and it leaves your Saturation where it was.' },
+    { storylet: 'The Rat Market', name: 'Take a walk around the market’s perimeter', kind: 'way',
+      actions: 0, label: 'free · look before entering',
+      note: 'Costs no action and does not make you a rat, so it does not start the three-day clock. '
+        + 'The way to see this week’s stalls before spending the three actions.' },
+    { storylet: 'Leave the Rat Market', name: 'Back to the Flit', kind: 'way', actions: 0,
+      label: 'free', note: 'You may come and go all weekend once you are in.' },
+    { storylet: 'The Rat Market, Eclipsed', name: 'Beg for the Broken Triplet’s wisdom', kind: 'way',
+      actions: 0, label: 'free · Tempestuous Tale ×1',
+      note: 'The only thing in the market that is given rather than sold. An eclipse happens once or '
+        + 'twice a year.' },
+  ];
+
+  const RM_OPTIONS = RM_SELLS.concat(RM_WAYS);
+
+  const RM_STORYLETS = ['The Rat Market', 'The Maundering Rat’s Stall', 'The Tatterdemalion Tent',
+    'Peruse the Perennial Purchasables', 'Leave the Rat Market']
+    .concat(RM_STALLS.map(function (s) { return s[0]; }));
+  const RM_INDEX = carouselIndex(RM_OPTIONS);
+
+  const RM_CLASS = 'fl-ux-rat-market';
+  const RM_FLAG = 'flUxRatMarket';
+  const RM_BRANCH_CLASS = 'fl-ux-rat-market-branch';
+  const RM_BRANCH_FLAG = 'flUxRatMarketBranch';
+
+  const RM_RULES = 'Open 11:00 UTC Friday to 11:00 UTC Monday. Entering costs 3 actions the first time each '
+    + 'weekend and nothing after that; selling costs no action at all. What the stalls buy is set by eight '
+    + 'Ratly Demands, each active for two weekends in a row, and next week’s is spelled out in the '
+    + 'Gazette in your Lodgings. Rat-Shillings cannot be saved: three days after you enter, whatever is '
+    + 'left turns into Rostygold and other currency at ten pence each. Saturation caps at '
+    + RM_SATURATION_CAP.toLocaleString('en-GB') + ' a week.';
+
+  function rmRange(nominal) {
+    const top = rmEchoes(nominal, 0);
+    const bottom = rmEchoes(nominal, RM_BANDS.length - 1);
+    return top + '–' + bottom;
+  }
+
+  function rmBadgeText(e) {
+    if (e.label) return e.label;
+    return '→ ' + rmRange(e.nominal) + ' ' + CAROUSEL_MARK_USES;
+  }
+
+  function rmSpec(e) {
+    const body = [];
+    if (e.kind === 'sell') {
+      body.push('Uses up ' + e.spends + '. Nominal Sale Value ' + e.nominal.toLocaleString('en-GB')
+        + ', which is also what it adds to your Rat Market Saturation.');
+      body.push(RM_BANDS.map(function (band, i) {
+        const floor = band[0];
+        const next = RM_BANDS[i + 1];
+        const where = next ? floor.toLocaleString('en-GB') + '–' + next[0].toLocaleString('en-GB')
+          : 'over ' + floor.toLocaleString('en-GB');
+        return '  • Saturation ' + where + ': ' + rmShillings(e.nominal, i).toLocaleString('en-GB')
+          + ' Rat-Shillings (' + rmEchoes(e.nominal, i) + ' Echoes)';
+      }).join('\n'));
+      body.push('A sale that crosses a band is paid proportionally between the two, and the order you '
+        + 'sell in changes nothing.');
+    }
+    if (e.actions === 0) body.push('Costs no action.');
+    else if (e.actions) body.push('Costs ' + e.actions + ' actions.');
+    return { text: rmBadgeText(e), color: e.kind === 'sell' ? CAROUSEL_COLOR_PAYOUT : CAROUSEL_COLOR_NEUTRAL,
+      title: carouselTooltip('The Rat Market', e, body, RM_RULES) };
+  }
+
+  function rmStoryletSpec(key) {
+    const storylet = RM_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet) return null;
+    const stall = RM_STALLS.find(function (s) { return s[0] === storylet; });
+    let text;
+    let extra = RM_RULES;
+    if (stall) {
+      text = 'buys · ' + stall[1];
+      extra = 'This stall is here because ' + stall[1] + ' is active, which lasts two weekends.\n' + RM_RULES;
+    } else if (storylet === 'The Rat Market') {
+      text = '3 actions in, then free';
+    } else if (storylet === 'Leave the Rat Market') {
+      text = 'free';
+    } else {
+      text = 'sells · rotates weekly';
+      extra = 'What this stall has in stock turns with the Rat-Wind, the Rat-Moon and the two seasons, and '
+        + 'this script does not price it: the Gazette in your Lodgings hints at next week’s. Buying '
+        + 'costs no action.\n' + RM_RULES;
+    }
+    return { text: text, color: stall ? CAROUSEL_COLOR_PAYOUT : CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('The Rat Market', storylet, RM_OPTIONS, rmBadgeText, extra) };
+  }
+
+  function rmRatings() {
+    carouselRatings({
+      storylets: RM_STORYLETS, index: RM_INDEX, storyletSpec: rmStoryletSpec, optionSpec: rmSpec,
+      cls: RM_CLASS, flag: RM_FLAG, branchCls: RM_BRANCH_CLASS, branchFlag: RM_BRANCH_FLAG,
+    });
+  }
+
+  // === feature: A Boxful of Intrigue =====================================
+  //
+  // A Boxful of Intrigue (Guide). A fourteen-action carousel in Spite, left
+  // behind by the Affair of the Box. Four bands of A Boxful of Intrigue (0-3,
+  // 4-6, 7-9, 10-12), two storylets to a band, two options to a storylet --
+  // and every option takes a SIDE. Side with the one you are already on and
+  // you gain Empire's Kingmaker; side against it and you swap sides and take A
+  // Turncoat, a menace that starts closing options at 4.
+  //
+  // **What the badge says.** Which side the option takes, in words, and what
+  // it gives ("Conscience · Box +1?"). The side is the number here: every
+  // option is the same broad Shadowy 130 and the same Box +1, so what
+  // separates them is which of the two powers they serve -- and taking the
+  // wrong one is not a smaller reward but a menace. The two Salon options,
+  // which are on both sides and pay no Kingmaker, say "either side". "?" is
+  // the challenge's success figure, and the menace a failure raises is in the
+  // tooltip.
+  //
+  // Colour follows the side, but only after the words already have: teal for
+  // the Conscience of Empire, warm brick for a Guardian of the Realm -- two
+  // hues apart along blue-yellow rather than red against green -- and the
+  // badge says which in full either way.
+  //
+  // Transcribed from the guide's progress and rewards tables (fetched through
+  // the API, 2026-09-16), with the ten storylet pages and a sample of the
+  // option pages as the cross-check: every storylet's Boxful band and its two
+  // options match, and the option pages supply the Kingmaker +10 CP, the
+  // Turncoat and the side-swap that the guide describes only in prose. One
+  // thing the option pages CORRECT: the guide's rewards table prints
+  // Correspondence Plaque ×6 against all six payouts, but the payout pages
+  // give none -- the six are the three Intercept the messages plays inside the
+  // carousel, as the guide's own footnote says. They are left off the payout
+  // rows and named in the tooltip instead. Corrections go in BOX_OPTIONS and
+  // nowhere else.
+
+  const BOX_TARGET = 13;
+  const BOX_ACTIONS = 14;
+  const BOX_CHALLENGE = { stat: 'Shadowy', diff: 130 };
+  const BOX_KINGMAKER = 10;
+
+  const BOX_CONSCIENCE = 'The Conscience of Empire';
+  const BOX_GUARDIAN = 'A Guardian of the Realm';
+  // Words first, colour second. Both are far enough apart on the blue-yellow
+  // axis to stay distinct without any red-green judgement.
+  const BOX_COLOR_CONSCIENCE = '#1b6b7d';
+  const BOX_COLOR_GUARDIAN = '#8a5a2b';
+
+  // [band, storylet, option, side, the menace a failure raises, extra].
+  const BOX_ROUNDS = [
+    [[0, 3], 'An Agent of the Masters', 'Expose him to the newspapers', 'Conscience', 'Suspicion'],
+    [[0, 3], 'An Agent of the Masters', 'Help cover up the sordid business', 'Guardian', 'Scandal'],
+    [[0, 3], 'The Unionist', 'Help her escape', 'Conscience', 'Suspicion'],
+    [[0, 3], 'The Unionist', 'Join the hunt', 'Guardian', 'Suspicion'],
+    [[4, 6], 'Doing the Rounds', 'Tell them the truth', 'Guardian', 'Suspicion'],
+    [[4, 6], 'Doing the Rounds', 'Lie to them', 'Conscience', 'Suspicion'],
+    [[4, 6], 'The Course of Love', 'Keep its agents at bay', 'Conscience', 'Suspicion'],
+    [[4, 6], 'The Course of Love', 'Help keep them together', 'Guardian', 'Suspicion'],
+    [[7, 9], 'A Night of Desperate Ambushes', 'Wade in with the neddy men', 'Guardian', 'Suspicion'],
+    [[7, 9], 'A Night of Desperate Ambushes', 'Defend Spite from the neddy men', 'Conscience', 'Suspicion'],
+    [[7, 9], 'Encryption of a Sort', 'Intercept the messages', 'Conscience', 'Nightmares',
+      { plaques: 2, note: 'The only option in the carousel that pays goods on the way through, and it pays '
+        + 'them whether you pass or fail. Three plays of it are where the guide’s six Correspondence '
+        + 'Plaques come from.' }],
+    [[7, 9], 'Encryption of a Sort', 'See that the messages arrive safely', 'Guardian', 'Wounds'],
+    [[10, 12], 'A Salon of a Sort', 'Steer the conversation to Mr Stones', 'Both', 'Suspicion'],
+    [[10, 12], 'A Salon of a Sort', 'Steer the conversation to Mr Fires', 'Both', 'Scandal'],
+    [[10, 12], 'A Strong Box', 'Tell your larcenous colleagues when the strong-box will be moved',
+      'Conscience', 'Scandal'],
+    [[10, 12], 'A Strong Box', 'Tell the gentlemen in blue about any plans for robbery you hear about',
+      'Guardian', 'Suspicion'],
+  ].map(function (r) {
+    const extra = r[5] || {};
+    return { storylet: r[1], name: r[2], kind: 'round', band: r[0], side: r[3], failMenace: r[4],
+      plaques: extra.plaques || 0, note: extra.note || null };
+  });
+
+  // The payouts. `echoes` is the guide's figure for the WHOLE carousel, siding
+  // with the Conscience of Empire with no failures -- it is what the six rows
+  // differ on, and the tooltip says what is inside it.
+  const BOX_REWARDS = [
+    { name: 'Accept a gift for your efforts', pays: [['Bottle of Strangling Willow Absinthe', 35]],
+      echoes: 20.5, epa: 1.46 },
+    { name: 'Write it all down', pays: [['Compromising Document', 35]], echoes: 20.5, epa: 1.46 },
+    { name: 'Speak of your work in intimate company', pays: [['Stolen Kiss', 7]], echoes: 20.5, epa: 1.46 },
+    { name: 'Send your report to certain bandaged gentlemen', pays: [['Mourning Candle', 8]],
+      echoes: 23, epa: 1.64, needs: 'Empire’s Kingmaker 40',
+      note: 'The guide’s best payout, and the reason to keep siding with one power.' },
+    { name: 'Share what you’ve learned with a Second-Storey Man',
+      pays: [['Stolen Correspondence', 300], ['Favours: Criminals', 1]], echoes: 22, epa: 1.57,
+      note: 'The guide values the favour at 4 Echoes. A repeatable Criminal favour that needs no '
+        + 'opportunity card.' },
+    { name: 'Share what you’ve learned with (an Urchin)',
+      aliases: ['Share what you’ve learned with a Cross', 'Share what you’ve learned with a Nought'],
+      pays: [['Aeolian Scream', 6], ['Favours: Urchins', 1]], echoes: 22, epa: 1.57,
+      note: 'Titled for a Cross or a Nought depending on The Airs of London. The guide values the favour '
+        + 'at 4 Echoes. A repeatable Urchin favour that needs no opportunity card.' },
+  ].map(function (r) {
+    return Object.assign({ storylet: 'The Rewards of Intrigue', kind: 'reward' }, r);
+  });
+
+  const BOX_SIDES = [
+    { storylet: 'The Troubles So Far', name: 'Those who govern', kind: 'side', side: 'Conscience',
+      note: 'Sets A Power in Waiting to ' + BOX_CONSCIENCE + ' — opposed to the Masters. The guide '
+        + 'recommends this side: it is the one the six extra Correspondence Plaques are counted on.' },
+    { storylet: 'The Troubles So Far', name: 'Those who are governed', kind: 'side', side: 'Guardian',
+      note: 'Sets A Power in Waiting to ' + BOX_GUARDIAN + '.' },
+    { storylet: 'The Rewards of Intrigue', name: 'Memory is a strange old thing (10 FATE)', kind: 'fate',
+      needs: 'A Survivor of the Affair of the Box 60',
+      note: 'Fate-locked, 10 Fate. Puts the whole Affair of the Box back to 14 so it can be played again. '
+        + 'It is not a payout.' },
+  ];
+
+  const BOX_OPTIONS = BOX_ROUNDS.concat(BOX_REWARDS, BOX_SIDES);
+
+  const BOX_STORYLETS = BOX_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const BOX_INDEX = carouselIndex(BOX_OPTIONS);
+
+  const BOX_CLASS = 'fl-ux-boxful';
+  const BOX_FLAG = 'flUxBoxful';
+  const BOX_BRANCH_CLASS = 'fl-ux-boxful-branch';
+  const BOX_BRANCH_FLAG = 'flUxBoxfulBranch';
+
+  const BOX_RULES = 'Raise A Boxful of Intrigue to ' + BOX_TARGET + ' — ' + BOX_ACTIONS + ' actions in '
+    + 'all — then cash out on The Rewards of Intrigue. Every round is broad Shadowy '
+    + BOX_CHALLENGE.diff + ', so ' + broadCertainAt(BOX_CHALLENGE.diff) + ' is certain. An option on YOUR '
+    + 'side pays Empire’s Kingmaker +' + BOX_KINGMAKER + ' CP; an option on the other side swaps your '
+    + 'side and gives A Turncoat, which closes options at 4. Pick a side on The Troubles So Far and stay on '
+    + 'it.';
+
+  function boxSideWords(side) {
+    if (side === 'Conscience') return 'Conscience';
+    if (side === 'Guardian') return 'Guardian';
+    return 'either side';
+  }
+
+  function boxSideFull(side) {
+    if (side === 'Conscience') return BOX_CONSCIENCE;
+    if (side === 'Guardian') return BOX_GUARDIAN;
+    return 'either side';
+  }
+
+  function boxPay(pays) {
+    return pays.map(function (p) { return p[0] + ' ×' + p[1]; }).join(', ');
+  }
+
+  function boxBadgeText(e) {
+    if (e.kind === 'round') {
+      return boxSideWords(e.side) + ' · Box +1' + CAROUSEL_MARK_CHALLENGE
+        + (e.plaques ? ' · Plaques ×' + e.plaques : '');
+    }
+    if (e.kind === 'reward') {
+      // The goods first, then the guide's Echoes for the run. A second entry is
+      // always a faction Favour, and it is named rather than priced: the guide
+      // values one at 4 Echoes and that is already inside the figure.
+      const rest = e.pays.slice(1).map(function (p) { return p[0].replace(/^Favours: /, ''); });
+      return e.pays[0][0] + ' ×' + e.pays[0][1]
+        + (rest.length ? ' + ' + rest.join(' + ') + ' favour' : '') + ' · ' + e.echoes + ' E';
+    }
+    if (e.kind === 'side') return 'side: ' + boxSideWords(e.side);
+    return 'Fate · play it again';
+  }
+
+  function boxSpec(e) {
+    const body = [];
+    if (e.kind === 'round') {
+      body.push(carouselChallenge(BOX_CHALLENGE));
+      body.push('Success: A Boxful of Intrigue +1'
+        + (e.plaques ? ', Correspondence Plaque ×' + e.plaques : '') + '.');
+      body.push('Side: ' + boxSideFull(e.side) + '. '
+        + (e.side === 'Both'
+          ? 'Offered whichever side you are on, and it pays no Empire’s Kingmaker.'
+          : 'On that side it pays Empire’s Kingmaker +' + BOX_KINGMAKER + ' CP; on the other it gives '
+            + 'A Turncoat and swaps you over.'));
+      body.push('Failure: ' + e.failMenace + ' +1 CP'
+        + (e.plaques ? ', but the Correspondence Plaque ×' + e.plaques + ' are paid anyway' : '') + '.');
+      body.push('Offered at A Boxful of Intrigue ' + e.band[0] + '–' + e.band[1] + '.');
+    } else if (e.kind === 'reward') {
+      body.push('Pays ' + boxPay(e.pays) + ', and empties A Boxful of Intrigue.');
+      body.push(e.echoes + ' Echoes for the whole ' + BOX_ACTIONS + '-action carousel by the guide (' + e.epa
+        + ' per action), siding with the Conscience of Empire and failing nothing. That figure counts the '
+        + 'six Correspondence Plaques from three plays of Intercept the messages — this option pays '
+        + 'none of its own.');
+    }
+    if (e.needs) body.push('Needs: ' + e.needs + '.');
+    const color = e.kind === 'reward' ? CAROUSEL_COLOR_PAYOUT
+      : e.side === 'Conscience' ? BOX_COLOR_CONSCIENCE
+        : e.side === 'Guardian' ? BOX_COLOR_GUARDIAN
+          : e.kind === 'fate' ? CAROUSEL_COLOR_NEUTRAL : CAROUSEL_COLOR_SETUP;
+    return { text: boxBadgeText(e), color: color,
+      title: carouselTooltip('A Boxful of Intrigue', e, body, BOX_RULES) };
+  }
+
+  function boxStoryletSpec(key) {
+    const storylet = BOX_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet) return null;
+    const round = BOX_ROUNDS.find(function (e) { return e.storylet === storylet; });
+    let text;
+    if (round) text = 'Box ' + round.band[0] + '–' + round.band[1] + ' · pick a side';
+    else if (storylet === 'The Rewards of Intrigue') text = 'cash out';
+    else text = 'pick a side';
+    return { text: text, color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('A Boxful of Intrigue', storylet, BOX_OPTIONS, boxBadgeText, BOX_RULES) };
+  }
+
+  function boxRatings() {
+    carouselRatings({
+      storylets: BOX_STORYLETS, index: BOX_INDEX, storyletSpec: boxStoryletSpec, optionSpec: boxSpec,
+      cls: BOX_CLASS, flag: BOX_FLAG, branchCls: BOX_BRANCH_CLASS, branchFlag: BOX_BRANCH_FLAG,
+    });
+  }
+
+  // === feature: Underclay ================================================
+  //
+  // Underclay (Guide): a variable-length carousel under Spite with TWO progress
+  // qualities rather than one -- Stone Confessions, raised by talking to the
+  // Calcified Men, and Convincing Falsehoods, raised by inventing histories for
+  // the Unfinished Men. Both are spent on the hub storylet, Escape from
+  // Underclay, which is also where the two halves are entered from (for free).
+  //
+  // **What the badge says.** On a progress option, the points it makes and what
+  // a failure takes back ("Confessions +30? −13"); the two halves never compete
+  // with each other, so the points are the whole comparison inside one of them.
+  // On a reward, what it costs, what it pays, and the guide's Echoes PER POINT
+  // ("Falsehoods 50 → Labour ×3 · 0.15/pt"). That last figure is the one that
+  // ranks the nine rewards against each other, and it runs the opposite way to
+  // intuition: the CHEAP rewards are the efficient ones (0.15 an Echo a point
+  // at 50, 0.104 at 600), so the expensive rows are worth taking only for the
+  // item itself. Every surplus point over a reward's cost is paid out as Shard
+  // of Glim ×10, which is why a reward is never worth saving up past.
+  //
+  // Transcribed from the guide's two tables (fetched through the API,
+  // 2026-09-16), with the storylet and option pages for the names and the
+  // structure -- which is where the hub turns out to be *Escape from Underclay*
+  // and the two halves *Confessions from the Stone* and *Lies for Clay Men to
+  // Tell*, and where a TENTH reward the guide's table does not carry turns up:
+  // *Send an Unfinished Man to fight for the Admiralty*, gated on a world
+  // quality. Cross-check: every broad challenge's "Min for 100%" is the
+  // difficulty × 5 ÷ 3, which the suite pins. Corrections go in UC_PROGRESS and
+  // UC_REWARDS and nowhere else.
+
+  const UC_SHORT = {
+    'Strong-Backed Labour': 'Labour', 'Blackmail Material': 'Blackmail', 'Captivating Ballad': 'Ballad',
+    'Unearthly Fossil': 'Fossils', 'Cave-Aged Code of Honour': 'Code of Honour',
+    'Mountain-sherd': 'Sherd', 'An Identity Uncovered!': 'Identity', 'Storm-Threnody': 'Threnody',
+    'Searing Enigma': 'Enigma', 'Favour in High Places': 'Favour in High Places',
+  };
+
+  // [storylet, option, quality, points on a success, challenge, the guide's
+  // "Min for 100%", what a failure costs, what it needs].
+  const UC_PROGRESS = [
+    ['Confessions from the Stone', 'Extract confessions from the Calcified Men', 'Confessions', 30,
+      { stat: 'Persuasive', diff: 125 }, 209, 'Stone Confessions −13', null],
+    ['Confessions from the Stone', 'Console the Calcified Man', 'Confessions', 38,
+      { stat: 'Persuasive', diff: 230 }, 384, 'Nightmares +5 CP', null],
+    ['Confessions from the Stone', 'Listen to the silence', 'Confessions', 38,
+      { stat: 'Steward of the Discordance', diff: 8, narrow: true }, 13, 'Nightmares +5 CP', null],
+    ['Confessions from the Stone', 'Convince the Calcified Man that you are of Polythreme', 'Confessions', 33,
+      { stat: 'Mithridacy', diff: 5, narrow: true }, 10, 'Nightmares +3 CP', 'a Clay Arm (Fate-locked)'],
+    ['Lies for Clay Men to Tell', 'Establish a false Curriculum Vitae', 'Falsehoods', 5,
+      { stat: 'Shadowy', diff: 50 }, 84, 'Suspicion +3 CP', null],
+    ['Lies for Clay Men to Tell', 'Invent fabricated histories', 'Falsehoods', 25,
+      { stat: 'Shadowy', diff: 88 }, 147, 'Convincing Falsehoods −5', null],
+    ['Lies for Clay Men to Tell', 'Commingle fact and falsehood', 'Falsehoods', 33,
+      { stat: 'Mithridacy', diff: 10, narrow: true }, 15, 'Convincing Falsehoods −5', null],
+    ['Lies for Clay Men to Tell', 'Provide a reference', 'Falsehoods', 36,
+      { stat: 'Shadowy', diff: 88 }, 147, 'the Dubious Testimony, which is spent either way',
+      'a Dubious Testimony'],
+    ['Lies for Clay Men to Tell', 'Stage an introduction', 'Falsehoods', 30,
+      { stat: 'Shadowy', diff: 125 }, 209, 'Convincing Falsehoods −13', null],
+  ].map(function (r) {
+    return { storylet: r[0], name: r[1], kind: 'progress', quality: r[2], points: r[3], ch: r[4],
+      sure: r[5], fail: r[6], needs: r[7],
+      spends: r[1] === 'Provide a reference' ? 'a Dubious Testimony' : null };
+  });
+
+  // [option, what it costs (Confessions, Falsehoods), what it pays, the guide's
+  // Echoes per point spent]. All nine are on the hub storylet.
+  const UC_REWARDS = [
+    ['Send an Unfinished Man to Spite', 0, 50, [['Strong-Backed Labour', 3]], 0.15],
+    ['Send an Unfinished Man to Wolfstack Docks', 0, 100, [['Blackmail Material', 1]], 0.125],
+    ['Send an Unfinished Man to Mahogany Hall', 0, 600, [['Captivating Ballad', 1]], 0.104],
+    ['Send an Unfinished Man to the Tomb-Colonies', 50, 0, [['Unearthly Fossil', 3]], 0.15],
+    ['Send the Unfinished Man to the Duchess', 100, 0, [['Cave-Aged Code of Honour', 1]], 0.125],
+    ['Send the Unfinished Man to the Khanate', 600, 0, [['Mountain-sherd', 1]], 0.104],
+    ['Send the Unfinished Man to teach Fourth City History', 25, 25, [['An Identity Uncovered!', 3]], 0.15],
+    ['Send the Unfinished Man to teach Third City history', 50, 50, [['Storm-Threnody', 1]], 0.125],
+    ['Send the Unfinished Man to teach Second City History', 300, 300, [['Searing Enigma', 1]], 0.104],
+  ].map(function (r) {
+    return { storylet: 'Escape from Underclay', name: r[0], kind: 'reward', costConfessions: r[1],
+      costFalsehoods: r[2], gives: r[3], perPoint: r[4] };
+  });
+
+  const UC_WAYS = [
+    { storylet: 'Escape from Underclay', name: 'Speak to the Calcified Men', kind: 'way', actions: 0,
+      label: 'free · to Stone Confessions',
+      note: 'Costs no action. Opens Confessions from the Stone.' },
+    { storylet: 'Escape from Underclay', name: 'Work with the Unfinished Men', kind: 'way', actions: 0,
+      label: 'free · to Convincing Falsehoods',
+      note: 'Costs no action. Opens Lies for Clay Men to Tell.' },
+    { storylet: 'Escape from Underclay', name: 'Send an Unfinished Man to fight for the Admiralty',
+      kind: 'reward', costConfessions: 0, costFalsehoods: 100,
+      gives: [['Favour in High Places', 1]], needs: 'The State of the Emergency 3, London, Falling 12–49',
+      note: 'Not in the guide’s reward table; taken from the option page. It also pays Piece of '
+        + 'Rostygold ×10 for every Convincing Falsehood over 100, and gives Knowledge: A Supply of '
+        + 'Soldiers and Bearing Admiralty Intelligence. Convincing Falsehoods is reset, not reduced, so '
+        + 'nothing is carried over.' },
+    { storylet: 'Escape from Underclay', name: 'Leave Underclay', kind: 'way', actions: 0, label: 'free',
+      note: 'Costs no action. Leaving WITHOUT cashing out is free both ways — you can come back in '
+        + 'and pick the grind up where you left it.' },
+    { storylet: 'Confessions from the Stone', name: 'Leave the Calcified Men', kind: 'way', actions: 0,
+      label: 'free · back to the hub', note: 'Costs no action.' },
+    { storylet: 'Lies for Clay Men to Tell', name: 'Consider other avenues', kind: 'way', actions: 0,
+      label: 'free · back to the hub', note: 'Costs no action.' },
+    { storylet: 'Descend to the Underclay Quarter', name: 'Descend', kind: 'way', actions: 0,
+      label: 'free · the way in', note: 'Costs no action, and needs Assisting an Unfinished Man.' },
+  ];
+
+  const UC_OPTIONS = UC_PROGRESS.concat(UC_REWARDS, UC_WAYS);
+
+  const UC_STORYLETS = UC_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const UC_INDEX = carouselIndex(UC_OPTIONS);
+
+  const UC_CLASS = 'fl-ux-underclay';
+  const UC_FLAG = 'flUxUnderclay';
+  const UC_BRANCH_CLASS = 'fl-ux-underclay-branch';
+  const UC_BRANCH_FLAG = 'flUxUnderclayBranch';
+
+  // Every surplus point over a reward's cost pays this many Shard of Glim.
+  const UC_SURPLUS_GLIM = 10;
+
+  const UC_RULES = 'Two progress qualities, raised on two storylets of their own and spent on the hub, '
+    + 'Escape from Underclay. Moving between them costs no action, and so does leaving without cashing '
+    + 'out. Every point you hold OVER a reward’s cost is paid as Shard of Glim ×'
+    + UC_SURPLUS_GLIM + ', so nothing is wasted by overshooting — but the cheap rewards are the '
+    + 'efficient ones (0.15 Echoes a point at 50, 0.104 at 600), so an expensive row is worth taking for '
+    + 'the item and not for the rate. The guide’s best is about 3.58 Echoes an action.';
+
+  function ucPay(gives, full) {
+    return gives.map(function (g) {
+      const name = full ? g[0] : (UC_SHORT[g[0]] || g[0]);
+      return name + ' ×' + g[1];
+    }).join(full ? ', ' : ' ');
+  }
+
+  function ucCost(e, full) {
+    const parts = [];
+    if (e.costConfessions) parts.push((full ? 'Stone Confessions ' : 'Conf ') + e.costConfessions);
+    if (e.costFalsehoods) parts.push((full ? 'Convincing Falsehoods ' : 'Fal ') + e.costFalsehoods);
+    return parts.join(full ? ' and ' : ' ');
+  }
+
+  function ucBadgeText(e) {
+    if (e.label) return e.label;
+    if (e.kind === 'reward') {
+      return ucCost(e, false) + ' → ' + ucPay(e.gives, false)
+        + (e.perPoint ? ' · ' + e.perPoint + '/pt' : '');
+    }
+    // A failure that takes progress BACK is on the badge, because it is what
+    // separates two options with the same points; a failure that raises a
+    // menace instead is in the tooltip, as everywhere else in this file.
+    const back = /^(Stone Confessions|Convincing Falsehoods) /.test(e.fail || '')
+      ? ' ' + e.fail.replace(/^(Stone Confessions|Convincing Falsehoods) /, '') : '';
+    return e.quality + ' +' + e.points + CAROUSEL_MARK_CHALLENGE + back
+      + (e.spends ? ' ' + CAROUSEL_MARK_USES : '');
+  }
+
+  function ucSpec(e) {
+    const body = [];
+    if (e.ch) {
+      body.push('Challenge: ' + e.ch.stat + ' ' + e.ch.diff + (e.ch.narrow ? ' (narrow)' : '')
+        + ', and the guide puts 100% at ' + e.ch.stat + ' ' + e.sure
+        + (e.ch.narrow ? '.' : ' — the difficulty × 5 ÷ 3.'));
+      body.push('Success: ' + (e.quality === 'Confessions' ? 'Stone Confessions' : 'Convincing Falsehoods')
+        + ' +' + e.points + '. Failure: ' + e.fail + '.');
+    }
+    if (e.kind === 'reward') {
+      body.push('Costs ' + ucCost(e, true) + '. Pays ' + ucPay(e.gives, true) + '.');
+      if (e.perPoint) {
+        body.push('The guide’s rate: ' + e.perPoint + ' Echoes a point. Every point over the cost '
+          + 'is paid as Shard of Glim ×' + UC_SURPLUS_GLIM + ' instead.');
+      }
+    }
+    if (e.spends) body.push(CAROUSEL_MARK_USES + ' Uses up ' + e.spends + '.');
+    if (e.needs) body.push('Needs: ' + e.needs + '.');
+    const color = e.kind === 'reward' ? CAROUSEL_COLOR_PAYOUT
+      : e.kind === 'way' ? CAROUSEL_COLOR_NEUTRAL : CAROUSEL_COLOR_PROGRESS;
+    return { text: ucBadgeText(e), color: color, title: carouselTooltip('Underclay', e, body, UC_RULES) };
+  }
+
+  function ucStoryletSpec(key) {
+    const storylet = UC_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet) return null;
+    let text = 'the way in';
+    if (storylet === 'Escape from Underclay') text = 'the hub · cash out';
+    else if (storylet === 'Confessions from the Stone') text = 'Stone Confessions';
+    else if (storylet === 'Lies for Clay Men to Tell') text = 'Convincing Falsehoods';
+    return { text: text, color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('Underclay', storylet, UC_OPTIONS, ucBadgeText, UC_RULES) };
+  }
+
+  function ucRatings() {
+    carouselRatings({
+      storylets: UC_STORYLETS, index: UC_INDEX, storyletSpec: ucStoryletSpec, optionSpec: ucSpec,
+      cls: UC_CLASS, flag: UC_FLAG, branchCls: UC_BRANCH_CLASS, branchFlag: UC_BRANCH_FLAG,
+    });
+  }
+
+  // === feature: Hunting Bees in Old Newgate ==============================
+  //
+  // Hunting Bees in Old Newgate (Guide): a variable-length carousel in the
+  // University. You pick a side on the way in -- FLINT or DAGGER -- and every
+  // action raises Bees Caught, which is cashed in on The Caging of Bees. The
+  // side is not a preference: it is WHICH ATTRIBUTE the storylet checks. Below
+  // Dagger or Flint 50 you are Flint and the checks are Watchful; above it you
+  // are Dagger and they are Dangerous. Almost every option then moves Dagger or
+  // Flint by a random −10 to +10, so a long run drifts across the line by
+  // itself.
+  //
+  // **What the badge says.** The Bees a success makes, what a failure takes
+  // back, and the check ("Bees +25? −6 · Watchful 88"). The stat is on the
+  // badge because it is the thing that changes under you: the same screen
+  // offers Watchful lines to one player and Dangerous lines to another, and an
+  // option you could pass last action may not be the one in front of you now.
+  // An Airs option also carries the Airs of Old Newgate band it appears in.
+  // A reward shows what it costs in Bees and what it pays.
+  //
+  // Transcribed from the guide's three tables (fetched through the API,
+  // 2026-09-16), with the storylet and option pages for the structure: the
+  // grind storylet is *Flint or Dagger*, the payout *The Caging of Bees*, and
+  // the way in *Hunt Bees in Old Newgate*, whose two options set Dagger or
+  // Flint to 30 or 70 rather than to the halves' boundaries. The guide's
+  // Airs windows and the option pages' disagree by a point in three places
+  // (the guide's 25-75 against the page's 26-75, 50-100 against 51-100,
+  // 75-100 against 76-100); the PAGES are followed and the tooltip says so.
+  // Corrections go in HB_OPTIONS and HB_REWARDS and nowhere else.
+
+  const HB_SHORT = {
+    'Muscaria Brandy': 'Brandy', 'Vital Intelligence': 'Intelligence', 'Discordant Soul': 'Discordant Soul',
+    'Memory of a Much Lesser Self': 'Lesser Selves', 'Cave-Aged Code of Honour': 'Code of Honour',
+    'Oneiromantic Revelation': 'Revelation', 'Whispered Hint': 'Hints', 'Foxfire Candle Stub': 'Candles',
+  };
+
+  const HB_FLINT_MAX = 50;
+  const HB_SURPLUS = 10;
+
+  // [side, option, Bees on a success, challenge, the guide's "Min for 100%",
+  // what a failure costs, the Airs band the page gives, a note].
+  const HB_OPTIONS_RAW = [
+    ['Flint', 'Set an ambush', 25, { stat: 'Watchful', diff: 88 }, 147, 'Bees Caught −6', null, null],
+    ['Flint', 'Become leader of the Flint', 38, { stat: 'Watchful', diff: 230 }, 384, 'Wounds +3 CP', null,
+      'The guide’s pick when no Airs option is up: about 30.4 Bees an action at 80% success, for '
+        + 'well under a change point of Wounds.'],
+    ['Flint', 'Defect to the Dagger', 25, { stat: 'Dangerous', diff: 125 }, 209, 'Bees Caught −13', null,
+      'Sets Dagger or Flint to 80, so every check after it is Dangerous.'],
+    ['Dagger', 'Sow carnage', 25, { stat: 'Dangerous', diff: 88 }, 147, 'Bees Caught −6', null, null],
+    ['Dagger', 'Become leader of the Dagger', 38, { stat: 'Dangerous', diff: 230 }, 384, 'Wounds +3 CP', null,
+      'The guide’s pick when no Airs option is up: about 30.4 Bees an action at 80% success, for '
+        + 'well under a change point of Wounds.'],
+    ['Dagger', 'Defect to the Flint', 25, { stat: 'Watchful', diff: 125 }, 209, 'Bees Caught −13', null,
+      'Sets Dagger or Flint to 40, so every check after it is Watchful.'],
+    ['Airs', 'Betray both sides', 31, { stat: 'Dangerous', diff: 125 }, 209, 'Wounds +3 CP', '0–25',
+      'One of the two the guide says to take whenever it is up and certain.'],
+    ['Airs', 'Spring an ambush', 5, { stat: 'Dangerous', diff: 50 }, 84, 'Wounds +2 CP', '0–50', null],
+    ['Airs', 'Hunt a swarm of drones', 25, { stat: 'Monstrous Anatomy', diff: 2, narrow: true }, 7,
+      'Bees Caught −6', '26–75', 'The guide says 25–75; the option page says 26–75.'],
+    ['Airs', 'Keep to the shadows', 5, { stat: 'Watchful', diff: 50 }, 84, 'Wounds +2 CP', '51–100',
+      'The guide says 50–100; the option page says 51–100.'],
+    ['Airs', 'Commune with the bees', 33, { stat: 'Mithridacy', diff: 5, narrow: true }, 10,
+      'Nightmares +3 CP', '76–100',
+      'The other one the guide says to take whenever it is up and certain. The guide says 75–100; '
+        + 'the option page says 76–100.'],
+  ].map(function (r) {
+    return { storylet: 'Flint or Dagger', name: r[1], kind: 'hunt', side: r[0], bees: r[2], ch: r[3],
+      sure: r[4], fail: r[5], airs: r[6], note: r[7] };
+  });
+
+  // [option, the Bees it costs, what it pays, the surplus it pays out in].
+  const HB_REWARDS = [
+    ['Let the bees free', null, [], 'Whispered Hint'],
+    ['Send a small amount of Bees to Hell', 50, [['Muscaria Brandy', 3]], 'Foxfire Candle Stub'],
+    ['Send a moderate amount of Bees to Hell', 100, [['Vital Intelligence', 1]], 'Foxfire Candle Stub'],
+    ['Send an inordinate amount of Bees to Hell', 600, [['Discordant Soul', 1]], 'Foxfire Candle Stub'],
+    ['Taste a small amount of honey', 50, [['Memory of a Much Lesser Self', 3]], 'Whispered Hint'],
+    ['Taste honey from a moderate amount of bees', 100, [['Cave-Aged Code of Honour', 1]], 'Whispered Hint'],
+    ['Taste honey from an inordinate amount of bees', 600, [['Oneiromantic Revelation', 1]], 'Whispered Hint'],
+  ].map(function (r) {
+    return { storylet: 'The Caging of Bees', name: r[0], kind: 'reward', bees: r[1], gives: r[2],
+      surplus: r[3],
+      note: r[1] == null
+        ? 'The row for a run that ended early: offered under Bees Caught 50, it pays nothing but the '
+          + 'surplus, so every Bee you have becomes Whispered Hint ×' + HB_SURPLUS + '.' : null };
+  });
+
+  const HB_WAYS = [
+    { storylet: 'Hunt Bees in Old Newgate', name: 'Choose FLINT', kind: 'side', side: 'Flint',
+      label: 'side: Flint · Watchful',
+      note: 'Sets Dagger or Flint to 30, so the checks are Watchful. It drifts ±10 an action, and at '
+        + HB_FLINT_MAX + ' you become Dagger and the checks turn Dangerous.' },
+    { storylet: 'Hunt Bees in Old Newgate', name: 'Choose DAGGER', kind: 'side', side: 'Dagger',
+      label: 'side: Dagger · Dangerous',
+      note: 'Sets Dagger or Flint to 70, so the checks are Dangerous. It drifts ±10 an action, and '
+        + 'below ' + HB_FLINT_MAX + ' you become Flint and the checks turn Watchful.' },
+    // The game titles this plainly "Escape", which On a Heist already has a row
+    // for; the wiki disambiguates it "Escape (Flint or Dagger)", so the row is
+    // filed under that and matches the plain title through an alias. Two rows
+    // sharing a name would make the tables ambiguous even though the open
+    // storylet keeps them apart in practice.
+    { storylet: 'Flint or Dagger', name: 'Escape (Flint or Dagger)', aliases: ['Escape'], kind: 'way',
+      actions: 0, label: 'free · cash out', note: 'Costs no action. Opens The Caging of Bees.' },
+    { storylet: 'The Caging of Bees', name: 'Return to Old Newgate', kind: 'way', actions: 0, label: 'free',
+      note: 'Costs no action.' },
+  ];
+
+  const HB_ALL = HB_OPTIONS_RAW.concat(HB_REWARDS, HB_WAYS);
+
+  const HB_STORYLETS = HB_ALL.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const HB_INDEX = carouselIndex(HB_ALL);
+
+  const HB_CLASS = 'fl-ux-newgate';
+  const HB_FLAG = 'flUxNewgate';
+  const HB_BRANCH_CLASS = 'fl-ux-newgate-branch';
+  const HB_BRANCH_FLAG = 'flUxNewgateBranch';
+
+  const HB_RULES = 'Pick a side on the way in, grind Bees Caught on Flint or Dagger, then cash out on The '
+    + 'Caging of Bees; leaving and coming back costs no action. Dagger or Flint decides which attribute '
+    + 'the checks use — Watchful below ' + HB_FLINT_MAX + ', Dangerous above — and almost every '
+    + 'option shifts it by a random −10 to +10, so a long run can change sides under you. Every Bee '
+    + 'over a reward’s cost pays Whispered Hint or Foxfire Candle Stub ×' + HB_SURPLUS
+    + '. The guide: take Betray both sides or Commune with the bees whenever they are up and certain, '
+    + 'and Become the leader otherwise.';
+
+  function hbPay(gives, full) {
+    if (!gives || !gives.length) return '';
+    return gives.map(function (g) {
+      const name = full ? g[0] : (HB_SHORT[g[0]] || g[0]);
+      return name + ' ×' + g[1];
+    }).join(full ? ', ' : ' ');
+  }
+
+  function hbBadgeText(e) {
+    if (e.label) return e.label;
+    if (e.kind === 'reward') {
+      if (e.bees == null) return 'under 50 Bees · Hints only';
+      return 'Bees ' + e.bees + ' → ' + hbPay(e.gives, false);
+    }
+    const fallBack = /^Bees Caught/.test(e.fail) ? ' ' + e.fail.replace('Bees Caught ', '') : '';
+    return 'Bees +' + e.bees + CAROUSEL_MARK_CHALLENGE + fallBack + ' · ' + e.ch.stat + ' ' + e.ch.diff;
+  }
+
+  function hbSpec(e) {
+    const body = [];
+    if (e.ch) {
+      body.push('Challenge: ' + e.ch.stat + ' ' + e.ch.diff + (e.ch.narrow ? ' (narrow)' : '')
+        + ', and the guide puts 100% at ' + e.sure + '.');
+      body.push('Success: Bees Caught +' + e.bees + '. Failure: ' + e.fail + '.');
+      body.push(e.side === 'Airs' ? 'An Airs of Old Newgate option, offered at ' + e.airs + '.'
+        : 'Offered while you are ' + e.side + ' (Dagger or Flint '
+          + (e.side === 'Flint' ? '0–' + HB_FLINT_MAX : (HB_FLINT_MAX + 1) + '–100') + ').');
+    }
+    if (e.kind === 'reward') {
+      if (e.bees == null) {
+        body.push('Offered under Bees Caught ' + HB_FLINT_MAX + '.');
+      } else {
+        body.push('Costs Bees Caught ' + e.bees + '. Pays ' + hbPay(e.gives, true) + '.');
+      }
+      body.push('Every Bee over the cost is paid as ' + e.surplus + ' ×' + HB_SURPLUS + '.');
+    }
+    const color = e.kind === 'reward' ? CAROUSEL_COLOR_PAYOUT
+      : e.kind === 'side' ? CAROUSEL_COLOR_SETUP
+        : e.kind === 'way' ? CAROUSEL_COLOR_NEUTRAL
+          : /Wounds|Nightmares/.test(e.fail) ? CAROUSEL_COLOR_RISK : CAROUSEL_COLOR_PROGRESS;
+    return { text: hbBadgeText(e), color: color,
+      title: carouselTooltip('Hunting Bees in Old Newgate', e, body, HB_RULES) };
+  }
+
+  function hbStoryletSpec(key) {
+    const storylet = HB_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet) return null;
+    let text = 'the way in · pick a side';
+    if (storylet === 'Flint or Dagger') text = 'grind Bees Caught';
+    else if (storylet === 'The Caging of Bees') text = 'cash out';
+    return { text: text, color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('Hunting Bees in Old Newgate', storylet, HB_ALL, hbBadgeText, HB_RULES) };
+  }
+
+  function hbRatings() {
+    carouselRatings({
+      storylets: HB_STORYLETS, index: HB_INDEX, storyletSpec: hbStoryletSpec, optionSpec: hbSpec,
+      cls: HB_CLASS, flag: HB_FLAG, branchCls: HB_BRANCH_CLASS, branchFlag: HB_BRANCH_FLAG,
+    });
+  }
+
+  // === feature: Featuring in the Tales of the University ==================
+  //
+  // Featuring in the Tales of the University (Guide): the last leg of the
+  // Watchful Making your Name, played out as a line of one-time storylets in
+  // the University rather than as a carousel. What it needs from a badge is not
+  // arithmetic -- the guide records no option tables for it at all -- but WHERE
+  // ON THE LINE a storylet sits and, twice, that taking it shuts something for
+  // good.
+  //
+  // **What the badge says.** The Featuring level the storylet belongs to and
+  // what it does ("FTU 6 · locks the first carousel"). Two rows carry a warning
+  // rather than a level, because they are the irreversible ones: *A most
+  // notable academic*, which closes the whole Term Passing... 0-12 carousel and
+  // every storylet in it, and *Reveal the murderer*, which ends the story and
+  // picks between two endings. This feature deliberately quotes NO figures: the
+  // guide gives none, and the numbers for the storylets you play while getting
+  // here belong to Term Passing... , which has its own table.
+  //
+  // Transcribed from the guide (fetched through the API, 2026-09-16) and
+  // checked against the Featuring in the Tales of the University category for
+  // the titles. Two of those titles end in a blank the game fills in -- "Meet
+  // the Department of _______" and "Reveal the murderer of the Senior Reader in
+  // _______" -- so each carries both the bare title and a wildcarded one as
+  // aliases, since nothing has captured which the game renders.
+  //
+  // The guide is flagged INCOMPLETE on the wiki: the University was reworked in
+  // July 2026 and the guide has not caught up everywhere. What that costs here
+  // is small -- this is a list of storylets and their order -- but a storylet
+  // that has moved or gone is the failure to expect. Corrections go in
+  // FTU_STEPS and nowhere else.
+
+  // [level, storylet, what it does, a warning where there is one].
+  const FTU_STEPS = [
+    [1, 'Making your Name: Invitations from the University', 'the way in', null],
+    [1, 'The University 1', 'the other way in', null],
+    [2, 'A walk around the University', 'a tour of the place', null],
+    [3, 'Omnes adsint, quamvis dementi, quamvis nefasti', 'meet Benthic’s Principal', null],
+    [4, 'Superbe et sophistice', 'meet Summerset’s Principal', null],
+    [5, 'A new vocation', 'opens the Term Passing... carousel', null],
+    [6, 'Making your Name: A most notable academic', 'locks the first carousel',
+      'This is the point of no return for the whole Term Passing... 0–12 carousel: every storylet in '
+        + 'it goes for good. The guide says to finish everything you want there first — both '
+        + 'Colleges’ Connected to about 15, your Wounds and Nightmares cleared, and A Scholar of the '
+        + 'Correspondence raised — before taking it.'],
+    [7, 'Making Your Name: First steps for your new department', 'who studied the Correspondence before you',
+      null],
+    [8, 'Making Your Name: Meet the Department of', 'tea with the Department', null],
+    // Not a warning: nothing closes here, so it takes the note slot and no mark.
+    [9, 'Making Your Name: Horrors in the chamber!', 'the murder, and the second carousel opens', null,
+      'From here the second Term Passing... carousel runs to 7 rather than 12, and its point is '
+        + 'Investigating... , which is what every step below needs 5 of.'],
+    [10, 'Making Your Name: Consider your initial suspects', 'two suspects', null],
+    [11, 'Making Your Name: The next step of the investigation', 'a locked room', null],
+    [12, 'Making Your Name: A spidery hypothesis', 'consult a suspect', null],
+    [13, 'Making Your Name: A note from the Consumptive Cryptozoologist', 'spiders do travel by mirror', null],
+    [14, 'Making Your Name: On the matter of spiders', 'whose spider was it?', null],
+    [15, 'Making Your Name: The Fellow in Venomous Rarefaction', 'one suspect struck off', null],
+    [16, 'Making Your Name: The Poison and the Palace', 'where the venom came from', null],
+    [17, 'Making Your Name: The Duchess and the Cantigaster', 'the third wine cellar', null],
+    [18, 'Making Your Name: The note you were half-expecting', 'look into love', null],
+    [19, 'Making Your Name: Look into love', 'a motive at last', null],
+    [20, 'Making Your Name: What were they up to?', 'they were calling the sun', null],
+    [21, 'Making Your Name: Dig up some dirt on the Provost', 'a picnic with a devil', null],
+    [22, 'Making Your Name: The Provost and the devil', 'a confession, overheard', null],
+    [23, 'Making Your Name: What connects the Bazaar and love stories?', 'the loose thread', null],
+    [24, 'Making Your Name: A note from the Masters', 'summoned', null],
+    [25, 'Making Your Name: Consider what to do next', 'keeps the case as Notes', null],
+    [26, 'Making Your Name: Reveal the murderer of the Senior Reader in', 'ends it · two endings',
+      'The truth leads to The wreckage of your career, which banishes you from the University until you '
+        + 'Re-establish your academic reputation; the convenient answer leads to Survival, at a price, and '
+        + 'you keep working there. Either way A Name in Seven Secret Alphabets finishes at 7 and Watchful '
+        + '+500 CP, and the second carousel locks.'],
+    [27, 'Making Your Name: The wreckage of your career', 'the honest ending', null],
+    [28, 'Making Your Name: Survival, at a price', 'the convenient ending', null],
+    [29, 'What is it all for?', 'Watchful +500 CP', null],
+  ].map(function (r) {
+    return { step: r[0], storylet: r[1], summary: r[2], warning: r[3], note: r[4] || null };
+  });
+
+  // Two titles end in a blank the game fills in. Both the bare wiki title and a
+  // filled-in one have to match, and nothing has captured which is rendered.
+  const FTU_BLANKS = {
+    'Making Your Name: Meet the Department of': 'Making Your Name: Meet the Department of (department)',
+    'Making Your Name: Reveal the murderer of the Senior Reader in':
+      'Making Your Name: Reveal the murderer of the Senior Reader in (department)',
+  };
+
+  const FTU_STORYLETS = FTU_STEPS.map(function (e) { return e.storylet; });
+  const FTU_MATCHERS = FTU_STEPS.map(function (e) {
+    const titles = [e.storylet].concat(FTU_BLANKS[e.storylet] ? [FTU_BLANKS[e.storylet]] : []);
+    return { step: e, matchers: titles.map(carouselMatcher) };
+  });
+
+  // The two irreversible steps. An eject mark rather than the ▼ the rest of
+  // the file uses for 'uses something up': nothing is consumed here, a door
+  // closes, and the two should not read alike.
+  const FTU_MARK_LOCKS = '⏏';
+
+  const FTU_CLASS = 'fl-ux-ftu';
+  const FTU_FLAG = 'flUxFtu';
+
+  const FTU_RULES = 'A line of one-time storylets, not a carousel: what matters is which of them shuts '
+    + 'something. Two do. The numbers for the storylets you play alongside these are in the Term '
+    + 'Passing... table, which is where the guide puts them. The wiki flags this guide incomplete after '
+    + 'the July 2026 rework of the University.';
+
+  function ftuFind(name) {
+    const key = normalizeName(name);
+    const hits = FTU_MATCHERS.filter(function (row) {
+      return row.matchers.some(function (m) { return m(key); });
+    });
+    return hits.length === 1 ? hits[0].step : null;
+  }
+
+  function ftuSpec(step) {
+    const body = ['Featuring in the Tales of the University ' + step.step + ': ' + step.summary + '.'];
+    if (step.warning) body.push(FTU_MARK_LOCKS + ' ' + step.warning);
+    if (step.note) body.push(step.note);
+    if (step.step >= 10 && step.step <= 26) body.push('Needs Investigating... 5, which the second Term '
+      + 'Passing... carousel is there to build.');
+    return {
+      text: 'FTU ' + step.step + ' · ' + step.summary + (step.warning ? ' ' + FTU_MARK_LOCKS : ''),
+      color: step.warning ? CAROUSEL_COLOR_RISK : CAROUSEL_COLOR_LABEL,
+      title: [step.storylet, 'Featuring in the Tales of the University', ''].concat(body, ['', FTU_RULES])
+        .join('\n'),
+    };
+  }
+
+  function ftuRatings() {
+    document.querySelectorAll('.storylet__heading, .storylet-root__heading').forEach(function (head) {
+      const name = headingName(head);
+      const step = name ? ftuFind(name) : null;
+      attachBadge(head, {
+        cls: FTU_CLASS, flag: FTU_FLAG, value: name, spec: step ? ftuSpec(step) : null, place: 'after',
+      });
+    });
+  }
+
+  // === feature: Term Passing... ==========================================
+  //
+  // Term Passing... (Guide): THREE carousels in the University, which are the
+  // same shape and are never open at once. Which one you are standing in is set
+  // by Featuring in the Tales of the University -- 5-8 for the first, 9-24 for
+  // the second, 30 and up for the third -- and every option raises Term
+  // Passing... until a finisher resets it.
+  //
+  //   1st  Visiting University      T0-12, 32 actions, +2 CP (+3 at T11)
+  //   2nd  As an Adjunct Professor  T0-7,  14 actions, +2 CP
+  //   3rd  A Respectable Academic   T0-8,  10 actions, +4 CP (+2 on a failure)
+  //
+  // **What the badge says.** The Term Passing... CP the option makes, and then
+  // what it is worth: the guide's Echoes for the second and third carousels,
+  // which it states per option, and the GOODS for the first, which it does not
+  // price. That split is deliberate. Inventing Echo figures for the first
+  // carousel would put its rows in a ranking with the other two that the guide
+  // never made, and the first carousel is not played for money anyway -- it is
+  // played for Connected: Benthic and Connected: Summerset, for the Wounds and
+  // Nightmares two of its options take off, and for the stories. A finisher
+  // shows "reset" in place of the CP, since that is what it does.
+  //
+  // The CP matters more here than in most carousels because the three run at
+  // different rates: a T11 option in the first is worth 3 CP and one in the
+  // third is worth 4, so the same-looking screen is a different number of
+  // actions from the payout depending on which carousel you are in.
+  //
+  // Transcribed from the guide's three "every option" tables (fetched through
+  // the API, 2026-09-16), which carry the Echo figures, the challenges and the
+  // requirements. The storylet names come from the same tables and from the
+  // Featuring in the Tales of the University category. The third carousel
+  // renames most of the first's storylets in Title Case (*Off to the Library*
+  // against *Off to the library*) and several of its options too, and since
+  // normalising folds case away those pairs would collide -- so the two are
+  // kept apart where they can be and MERGED where they cannot -- see tpMerge.
+  //
+  // Not carried: the rows the wiki marks "(Source page WIP)", which are left
+  // with their requirement and no figures rather than guessed at, and the
+  // Watchful gains written "+? CP" on the wiki, which are quoted as unknown.
+  // The wiki flags this guide INCOMPLETE after the July 2026 rework.
+  // Corrections go in TP_FIRST, TP_SECOND and TP_THIRD and nowhere else.
+
+  const TP_CAROUSELS = [
+    { id: 1, name: 'Visiting University', ftu: '5–8', cap: 12, actions: 32 },
+    { id: 2, name: 'As an Adjunct Professor', ftu: '9–24', cap: 7, actions: 14 },
+    { id: 3, name: 'A Respectable Academic', ftu: '30+', cap: 8, actions: 10 },
+  ];
+
+  // [storylet, option, the Term Passing window, CP on a success ('reset' for a
+  // finisher), challenge, what it pays, what a failure does, what it needs].
+  // The first carousel's rows carry goods rather than Echoes: the guide prices
+  // neither, and this is not the carousel you play for money.
+  const TP_FIRST = [
+    ['Feasting at Summerset', 'Attend a feast', '0-7', 2, { stat: 'Watchful', diff: 85 },
+      'Whispered Hint ×90, Wounds −1 CP, Connected: Summerset −2 CP',
+      'Connected: Summerset −2 CP',
+      'Connected: Summerset 5, an Academic Gown, and your soul still your own',
+      'One of two options in the carousel that heal: Wounds −1 CP, or −2 on a rare success.'],
+    ['Feasting at Summerset', 'Lurk disconsolately around the margins.', '0-7', 2,
+      { stat: 'Persuasive', diff: 50 },
+      'Whispered Hint ×60, Connected: Summerset −2 CP',
+      'Connected: Summerset −2 CP and Scandal +1 CP', 'your very own Infernal Contract', null],
+    ['Wine-tasting at Summerset', 'An evening of Oenology', '8-10', 2, { stat: 'Watchful', diff: 87 },
+      'Bottle of Greyfields 1882 ×44, Hedonist +1 CP (to 5); rare: a First Sporing',
+      'Connected: Summerset −5 CP',
+      'Connected: Summerset 10, an Academic Gown, and your soul still your own', null],
+    ['Wine-tasting at Summerset', 'Hold your own wine tasting', '8-10', 2, { stat: 'Watchful', diff: 87 },
+      'Whispered Hint ×87', 'the Greyfields are spent either way',
+      'your very own Infernal Contract, and Bottle of Greyfields 1882 ×100', null],
+    ['The Feast of the World', 'Fourteen courses of sheer indulgence', '11', 3, null,
+      'Hedonist +3 CP (to 10)', null,
+      'Connected: Summerset 15, an Academic Gown, and your soul still your own',
+      'No challenge. One of the few places to reach Hedonist 10 without giving up Austere.'],
+    ['The Feast of the World', 'Business and pleasure', '11', 3, { stat: 'Watchful', diff: 89 },
+      'London Street Sign ×1 (2.50 Echoes)', 'Connected: Summerset −20 CP',
+      'Connected: Summerset 15, an Academic Gown, and your soul still your own',
+      'The guide’s money option in this carousel: it can be played three or four times a term.'],
+    ['The Feast of the World', 'Disguise yourself and cause mischief', '11', 3,
+      { stat: 'Shadowy', diff: 70 }, 'Stolen Correspondence ×40', 'Scandal +1 CP',
+      'your very own Infernal Contract', null],
+    ['The World, devoured', 'Propose the final toast of the evening', '12', 'reset',
+      { stat: 'Watchful', diff: 89 }, 'Sworn Statement ×2, Making Waves +3 CP',
+      'Connected: Summerset −20 CP', 'Connected: Summerset 15', null],
+    ['The World, devoured', 'The Provost? The Provost...', '12', 'reset', null,
+      'a First Sporing, a Bottle of Black Wings Absinthe, Connected: Summerset +20 CP, '
+        + 'Hedonist +3 CP (to 15), Scandal +5 CP',
+      'Connected: Summerset −50 CP and Scandal +10 CP', 'Connected: Summerset 16', null],
+    ['The World, devoured', 'Just desserts', '12', 'reset', { stat: 'Watchful', diff: 89 },
+      'Sapphire ×2, Stolen Correspondence ×20, Flawed Diamond ×2',
+      'Connected: Summerset −10 CP', 'your very own Infernal Contract', null],
+    ['The Stoats', 'Get involved', '0-7', 2, { stat: 'Persuasive', diff: 85 },
+      'Proscribed Material ×21, Connected: Benthic +2 CP, Connected: Summerset +2 CP', null, null, null],
+    ['Fun with the Stoats', 'Take the bravery challenge', '8-10', 2, { stat: 'Dangerous', diff: 87 },
+      'a Bottle of Morelways 1872 and a Bottle of Strangling Willow Absinthe', 'Wounds +1 CP', null,
+      'The only Dangerous challenge in the first carousel.'],
+    ['More fun with the Stoats', 'Join in this week’s caper', '11', 3,
+      { stat: 'Watchful', diff: 89 }, 'Bottle of Greyfields 1882 ×45, Dangerous +2 CP',
+      'Dangerous +1–2 CP, Connected: Benthic −5 CP, Scandal +1 CP', null, null],
+    ['Stoats’ Honour', 'A matter of honour', '12', 'reset', { stat: 'Shadowy', diff: 85 },
+      'Piece of Rostygold ×80, Bottle of Greyfields 1882 ×60, Making Waves +2 CP',
+      'Scandal +2 CP', null, null],
+    ['Cricket at Benthic', 'Demonstrate your cricketing knowledge', '0-7', 2,
+      { stat: 'Watchful', diff: 85 }, 'Cryptic Clue ×42, Connected: Benthic +2 CP',
+      'Connected: Benthic −5 CP', 'Connected: Benthic 5', null],
+    ['Picking the team', 'Involve yourself', '8-10', 2, { stat: 'Watchful', diff: 87 },
+      'Proscribed Material ×22; rare: another ×22 and an Appalling Secret',
+      'Connected: Benthic −5 CP', 'Connected: Benthic 10', null],
+    ['Match day', 'A serious business', '11', 3, { stat: 'Watchful', diff: 89 },
+      'Drop of Prisoner’s Honey ×75', 'Connected: Benthic −25 CP', 'Connected: Benthic 15',
+      null],
+    ['Match day', 'The twelfth woman', '11', 3, { luck: 50 },
+      'Appalling Secret ×11, Connected: Benthic +15 CP', 'Connected: Benthic −5 CP',
+      'Connected: Benthic 15', null],
+    ['The end of the match', 'A merry wager', '12', 'reset', { luck: 50 },
+      'A Scholar of the Correspondence +1 CP, and an Unaccountably Peckish',
+      'a Church favour gone, Connected: Benthic −30 CP and Connected: Summerset −50 CP',
+      'Connected: Benthic 15',
+      'An even-odds gamble whose failure costs more Connected than several terms of building it.'],
+    ['The end of the match', 'Nobble the Benthic team', '12', 'reset', { stat: 'Shadowy', diff: 85 },
+      'Infernal Contract ×11, Appalling Secret ×11, Soul ×11, Connected: Benthic −10 CP',
+      'Connected: Benthic is RESET', 'Connected: Benthic 10', null],
+    ['The end of the match', 'Display admirable sportsmanship', '12', 'reset', null,
+      'Flawed Diamond ×30, Ostentatious Diamond ×2, Connected: Benthic +10 CP, '
+        + 'Steadfast +1 CP (to 5)', null, 'Connected: Benthic 15', 'No challenge.'],
+    ['Off to the library', 'A day at the library', '0-7', 2, { stat: 'Watchful', diff: 85 },
+      'Proscribed Material ×21', 'Nightmares +1 CP', null, null],
+    ['Back to the library', 'In the high stacks', '8-10', 2, { stat: 'Watchful', diff: 87 },
+      'Cryptic Clue ×44', 'Connected: Benthic −2 CP', null, null],
+    ['Once more to the library', 'Bribe a librarian', '11', 3, null,
+      'Proscribed Material ×50', 'the Greyfields are spent either way',
+      'Bottle of Greyfields 1879 ×120', 'No challenge.'],
+    ['Once more to the library', 'Hunt for the book yourself', '11', 3, { stat: 'Watchful', diff: 89 },
+      'Proscribed Material ×40', 'Nightmares +1 CP', null, null],
+    ['The library roof', 'Report them to the college authorities', '12', 'reset', null,
+      'Connected: Benthic +30 CP and Connected: Summerset +30 CP', null, null,
+      'No challenge, and the guide’s reason to run this carousel at all: 30 CP of BOTH Connected '
+        + 'qualities in one action. Three or four terms of it take each College to about 15.'],
+    ['The library roof', 'Report them to the Constables', '12', 'reset', null,
+      'Proscribed Material ×55, and Favours: Revolutionaries is RESET', null, null, 'No challenge.'],
+    ['The library roof', 'Comrades', '12', 'reset', null,
+      'Proscribed Material ×50, Advancing the Liberation of Night: +1 CP', null, null,
+      'No challenge.'],
+    ['The library roof', 'Blackmail', '12', 'reset', null,
+      'Proscribed Material ×50, Piece of Rostygold ×90, Rat on a String ×5, '
+        + 'Favours: Revolutionaries ×−3', null, null, 'No challenge.'],
+    ['Take tutorials for a little extra cash', 'Sign up for a few tutorials', '0-7', 2,
+      { stat: 'Watchful', diff: 85 }, 'Primordial Shriek ×42', null, null, null],
+    ['Enjoying the pace of academic life', 'Perhaps you might read a book today', '0-11', 2,
+      { stat: 'Watchful', diff: 85 },
+      'Primordial Shriek ×20, Connected: Benthic +1 CP, Connected: Summerset +1 CP, '
+        + 'Nightmares −1 CP',
+      'Nightmares +1 CP', null,
+      'The other healing option: Nightmares −1 CP, and it is offered across almost the whole '
+        + 'carousel.'],
+    ['Enjoying the pace of academic life', 'A stroll around the quad', '0-11', 2,
+      { stat: 'Watchful', diff: 95 }, 'Whispered Hint ×95', null, null, null],
+    ['Summerset days', 'Getting to know Summerset', '0-10', 2, { stat: 'Watchful', diff: 85 },
+      'Bottle of Greyfields 1882 ×30, Connected: Summerset +3 CP', 'Nightmares +2 CP', null, null],
+    ['Summerset days', 'Mixing in Summerset Society', '0-10', 1, null,
+      'Connected: Summerset +3 CP, Making Waves +2 CP', null, null,
+      'No challenge and no cost — but it pays only 1 CP of Term Passing... , not the usual 2.'],
+    ['Out and about at Benthic College', 'Getting to know Benthic', '0-10', 2,
+      { stat: 'Watchful', diff: 85 }, 'Whispered Hint ×60, Connected: Benthic +3 CP',
+      'Nightmares +2 CP', null, null],
+    ['Out and about at Benthic College', 'A feather in Benthic’s mortar board', '0-10', 1, null,
+      'Connected: Benthic +3 CP, Making Waves +2 CP', null, null,
+      'No challenge and no cost — but it pays only 1 CP of Term Passing... , not the usual 2.'],
+    ['Prepare your lectures', 'Set to work', '2-10', 2, { stat: 'Watchful', diff: 86 },
+      'Cryptic Clue ×43; rare: Appalling Secret ×2', 'Nightmares +2 CP', null, null],
+    ['Prepare your lectures', 'Start on a publication', '2-10', 2, { stat: 'Watchful', diff: 95 },
+      'Cryptic Clue ×48', 'Nightmares +1 CP', null, null],
+    ['Do some teaching', 'Introductory lecturing', '5-10', 2, { stat: 'Watchful', diff: 86 },
+      'Primordial Shriek ×42', 'Nightmares +2 CP', null, null],
+    ['Do some teaching', 'Intermediary Correspondence, for the more advanced student', '5-10', 2,
+      { stat: 'Watchful', diff: 90 }, 'Cryptic Clue ×45', 'Nightmares +2 CP', null, null],
+    ['The golden path', 'Write an essay for money', '8-11', 2, { stat: 'Watchful', diff: 95 },
+      'Piece of Rostygold ×95', 'Scandal +1 CP', 'Connected: Summerset 10', null],
+    ['Do some actual research', 'Learned discourse', '8-11', 2, { stat: 'Watchful', diff: 87 },
+      'Cryptic Clue ×44; rare: another ×44 and A Scholar of the Correspondence +1 CP (to 7)',
+      'Nightmares +2 CP', null,
+      'The only way in this carousel to raise A Scholar of the Correspondence, and only on a rare '
+        + 'success.'],
+    ['A public debate', 'Encourage a debate on souls', '8-10', 2, { stat: 'Watchful', diff: 87 },
+      'Stolen Correspondence ×17', 'Connected: Summerset −1 CP and Scandal +1 CP',
+      'Connected: Summerset 5 and Connected: Benthic 5', null],
+    ['The day of the debate', 'Listen to the argument for', '11', 3, null, 'Watchful +5 CP', null, null,
+      'No challenge. Every option on this storylet pays 5 CP of Watchful for nothing.'],
+    ['The day of the debate', 'Listen to the argument against', '11', 3, null, 'Watchful +5 CP', null, null,
+      'No challenge. Every option on this storylet pays 5 CP of Watchful for nothing.'],
+    ['The day of the debate', 'Be vigilant', '11', 3, null, 'Soul ×6, Infernal Contract ×5',
+      null, 'a Shepherd’s Timepiece (Fate-locked)', null],
+    ['The day of the debate', 'Watch for opportunities', '11', 3, null, 'Soul ×75', null,
+      'a Spirifer’s Fork (Fate-locked)', null],
+    ['The debate closes', 'Speak for the proposition', '12', 'reset', { stat: 'Watchful', diff: 89 },
+      'Moon-Pearl ×160, a Tale of Terror!!',
+      'a Tale of Terror!!, Connected: Benthic −10 CP, Scandal +1 CP', null, null],
+    ['The debate closes', 'Speak against the proposition', '12', 'reset', { stat: 'Watchful', diff: 89 },
+      'Foxfire Candle Stub ×210',
+      'a Tale of Terror!!, Connected: Summerset −10 CP, Scandal +1 CP', null, null],
+    ['The body in the library', 'Inspect the body', '6-7', 2, { stat: 'Watchful', diff: 85 },
+      'Piece of Rostygold ×85', null, null,
+      'The Murder is the one storyline that starts at Term Passing... 6 rather than 0.'],
+    ['Begin your investigation', 'Interrogate his colleagues', '8-10', 2, { stat: 'Watchful', diff: 87 },
+      'Piece of Rostygold ×95', null, null, null],
+    ['Begin your investigation', 'Interrogate the library staff', '8-10', 2,
+      { stat: 'Watchful', diff: 87 }, 'Piece of Rostygold ×95', null, null, null],
+    ['Talk to the deceased', 'Interrogate the victim', '11', 3, { stat: 'Watchful', diff: 90 },
+      'Piece of Rostygold ×108', null, null, null],
+    ['Name the murderer!', 'Accuse the Assistant Deputy Librarian of seeking revenge', '12', 'reset', null,
+      'Piece of Rostygold ×250, Watchful +5 CP', null, null,
+      'No challenge, and the only one of the four accusations that pays anything.'],
+    ['Name the murderer!', 'Accuse the Professor of academic jealousy', '12', 'reset', null,
+      'Watchful +1 CP', null, null, 'No challenge.'],
+    ['Name the murderer!', 'Accuse the Assistant Deputy Librarian of romantic jealousy', '12', 'reset', null,
+      'Watchful +1 CP', null, null, 'No challenge.'],
+    ['Name the murderer!', 'Accuse the Professor of romantic intrigue', '12', 'reset', null,
+      'Watchful +1 CP', null, null, 'No challenge.'],
+  ].map(function (r) {
+    return { carousel: 1, storylet: r[0], name: r[1], window: r[2], cp: r[3], ch: r[4], gives: r[5],
+      fail: r[6], needs: r[7], note: r[8] };
+  });
+
+  // The second and third carousels: the guide prices every row, so the badge
+  // carries the Echoes. [storylet, option, window, CP, challenge, Echoes, pay,
+  // failure, needs, note].
+  const TP_SECOND = [
+    ['Assistants wanted', 'Advertise', '0-4', 2, { stat: 'Watchful', diff: 106 }, 1.06,
+      'Bottle of Greyfields 1882 ×53', 'Term Passing... +1 CP and Scandal +1 CP', null, null],
+    ['Assistants wanted', 'Ask around', '0-4', 2, { stat: 'Watchful', diff: 108 }, 1.07,
+      'Foxfire Candle Stub ×50, Shard of Glim ×57', 'Term Passing... +1 CP', null, null],
+    ['Seek out some influential help', 'Use your Society connections', '0-4', 2,
+      { stat: 'Watchful', diff: 103 }, 1.50,
+      'Jade Fragment ×100, a Bottle of Strangling Willow Absinthe',
+      'Term Passing... +1 CP and Scandal +1 CP', 'Persuasive 90', null],
+    ['Seek out some influential help', 'Use your less savoury connections', '0-4', 2,
+      { stat: 'Watchful', diff: 104 }, 1.55,
+      'Bottle of Greyfields 1882 ×25, Moon-Pearl ×105',
+      'Term Passing... +1 CP and Suspicion +1 CP', 'Shadowy 90 and The Flit 1',
+      'The best-paying option in the second carousel by the guide’s own figures.'],
+    ['Seek out some influential help', 'Try to gain patronage on your own', '0-4', 2,
+      { stat: 'Watchful', diff: 105 }, 1.06,
+      'Bottle of Greyfields 1882 ×50, Cryptic Clue ×53',
+      'Term Passing... +1 CP, Scandal +1 CP, and the Plaques are spent either way',
+      'Correspondence Plaque ×2', null],
+    ['Those meddling men from the Ministry', 'Deal with the evaluators', '0-4', 2,
+      { stat: 'Watchful', diff: 101 }, 0.50, 'Foxfire Candle Stub ×50',
+      'Term Passing... +1 CP and Suspicion +1 CP', null,
+      'The worst-paying row of the second carousel, at half an Echo.'],
+    ['The student body', 'Pick out some likely candidates', '0-4', 2, { stat: 'Watchful', diff: 98 }, 1.5,
+      'a Bundle of Oddities (1–195)', 'Term Passing... +1 CP and Nightmares +1 CP', null,
+      'The guide’s ~1.5 Echoes is an average over the Bundle’s range.'],
+    ['Making Your Name: Investigations in the university', 'Head to the library', null, null,
+      { stat: 'Watchful', diff: 98 }, 0.98, 'Investigating... +3, Cryptic Clue ×49',
+      'Nightmares +2 CP', null, null],
+    ['Making Your Name: Investigations in the university', 'Interview the suspects', null, null,
+      { stat: 'Watchful', diff: 100 }, 1.00, 'Investigating... +3, Cryptic Clue ×50',
+      'Nightmares +1 CP', null, null],
+    ['Making Your Name: Investigations in the university', 'Conduct forensic analyses', null, null,
+      { stat: 'Watchful', diff: 102 }, 1.10, 'Investigating... +3, Cryptic Clue ×55',
+      'Investigating... −5 and Nightmares +1 CP', null,
+      'The only investigation option whose failure takes Investigating... back.'],
+    ['Making Your Name: Investigations in the university', 'Interview students and staff', null, null,
+      { stat: 'Watchful', diff: 104 }, 1.04, 'Investigating... +4, Cryptic Clue ×52',
+      'Nightmares +2 CP', null, null],
+    ['Making Your Name: Investigations in the university',
+      'Interview the Department of _______ staff', null, null,
+      { stat: 'Watchful', diff: 106 }, 1.06, 'Investigating... +4, Cryptic Clue ×53',
+      'Nightmares +1 CP', null,
+      'Since the July 2026 rework, the guide’s pick: 4 of Investigating... and a full Echo for only '
+        + 'a change point of Nightmares on a failure.'],
+    ['Making Your Name: Investigations in the university', 'Talk to the Porters', null, null,
+      { stat: 'Watchful', diff: 108 }, 0.58,
+      'Investigating... +4, Whispered Hint ×108, and Cryptic Clue ×25 spent',
+      'the Clues are spent anyway, and Nightmares +1 CP', 'Cryptic Clue ×25',
+      'It used to be the reason to linger here — Sudden Insights traded for Watchful — and the '
+        + 'July 2026 rework took that away. What is left costs 25 Clues for the worst rate on the '
+        + 'storylet.'],
+    ['Find allies at the Department of', 'Get the Semi-semiotic Fellow on your side', '5-6', 2,
+      { stat: 'Watchful', diff: 98 }, 0.98, 'Cryptic Clue ×49',
+      'Term Passing... +1 CP and Nightmares +1 CP', null, null],
+    ['Getting into the journals', 'Publish and be... well, yes', '5-6', 2,
+      { stat: 'Watchful', diff: 101 }, 1.00, 'Proscribed Material ×25',
+      'Term Passing... +1 CP and Nightmares +1 CP', null, null],
+    ['Secure your funding', 'Take the equitable approach', '5-6', 2, { stat: 'Watchful', diff: 104 }, 1.04,
+      'Jade Fragment ×104', 'Term Passing... +1 CP and Scandal +1 CP', null, null],
+    ['Secure your funding', 'Institute a hierarchy of donors', '5-6', 2,
+      { stat: 'Watchful', diff: 106 }, 1.06, 'Shard of Glim ×106',
+      'Term Passing... +1 CP and Scandal +1 CP', null, null],
+    ['Interview prospective assistants', 'Select on the basis of qualifications', '5-6', 2,
+      { stat: 'Watchful', diff: 106 }, 1.06, 'Foxfire Candle Stub ×53, Nodule of Deep Amber ×53',
+      'Term Passing... +1 CP and Nightmares +1 CP', null, null],
+    ['Interview prospective assistants', 'Select on the basis of... personal qualities', '5-6', 2,
+      { stat: 'Watchful', diff: 108 }, 1.07, 'Jade Fragment ×107',
+      'Term Passing... +1 CP and Nightmares +1 CP', null, null],
+    ['Where is Dr Orthos?', 'Make your peace with Dr Orthos', '7', 'reset',
+      { stat: 'Persuasive', diff: 90 }, 2.00,
+      'Connected: Benthic +10, Connected: Summerset +10, Memory of Distant Shores ×4, '
+        + 'Making Waves +2 CP',
+      'Scandal +1 CP, Connected: Benthic −5 and Connected: Summerset −5, and it resets anyway',
+      null, null],
+    ['The patronage of the Duchess', 'Court the Duchess’ patronage', '7', 'reset',
+      { stat: 'Watchful', diff: 98 }, 2.25,
+      'Relic of the Second City ×15, Connected: The Duchess +20',
+      'Connected: The Duchess −20 and Nightmares +1 CP, and it resets anyway', null,
+      'The best-paying finisher of the second carousel.'],
+    ['Dealing with Virginia', 'A word at the Embassy', '7', 'reset', { stat: 'Watchful', diff: 106 }, 2.20,
+      'Proscribed Material ×55', 'it resets anyway', 'Renown: Hell 5', null],
+  ].map(function (r) {
+    return { carousel: 2, storylet: r[0], name: r[1], window: r[2], cp: r[3], ch: r[4], echoes: r[5],
+      gives: r[6], fail: r[7], needs: r[8], note: r[9] };
+  });
+
+  const TP_THIRD = [
+    ['Thefts from the Private Collections', 'Learn everything you can', '0-3', 4, null, 1.60,
+      'Intriguing Snippet ×8', null, null, 'No challenge.'],
+    ['The Reward for Good Works', 'Cast an eye over your correspondence', '0-3', 2, null, 1.50,
+      'Tale of Terror!! ×3', null, 'a University Laboratory',
+      'No challenge, and the one row of the third carousel that pays only 2 CP.'],
+    ['Fireproofing Your Classroom', 'Make the necessary precautions', '0-3', 4, null, 1.50,
+      'Scrap of Incendiary Gossip ×3', null, null, 'No challenge.'],
+    ['Feasting at Summerset', 'Attend a feast', '0-3', 4, { stat: 'Watchful', diff: 120 }, 1.50,
+      'Whispered Hint ×150, Connected: Summerset −2 CP, Wounds −1 CP',
+      'Whispered Hint ×75 and Connected: Summerset −2 CP, for 0.75 Echoes',
+      'Connected: Summerset 5, an Academic Gown, and your soul still your own', null],
+    ['The Stoats', 'Get involved', '0-3', 4, { stat: 'Persuasive', diff: 127 }, 1.44,
+      'Proscribed Material ×36, Connected: Benthic +2 CP, Connected: Summerset +2 CP',
+      'Proscribed Material ×18, for 0.72 Echoes', null, null],
+    ['Cricket at Benthic', 'Demonstrate your cricketing knowledge', '0-3', 4,
+      { stat: 'Watchful', diff: 123 }, 1.24,
+      'Cryptic Clue ×62, Connected: Benthic +12 CP',
+      'Cryptic Clue ×37, Connected: Benthic −5 CP, Scandal +1 CP, for 0.74 Echoes',
+      'Connected: Benthic 5', null],
+    ['Off to the Library', 'A day at the library', '0-3', 4, { stat: 'Watchful', diff: 120 }, 1.48,
+      'Proscribed Material ×37',
+      'Memory of Light ×2 and Nightmares +2 CP, for 1.00 Echoes', null, null],
+    ['A Survey of Missing Items', 'Investigate the Natural Science Collection', '4-5', 4,
+      { stat: 'Watchful', diff: 135 }, 2.00, 'an Ambiguous Eolith, Inkling of Identity ×15',
+      'Map Scrap ×10 and Nightmares +2 CP, for 1.00 Echoes', null, null],
+    ['A Survey of Missing Items', 'Nose around in the Collection for Linguistic Antiquities', '4-5', 4,
+      { stat: 'Watchful', diff: 135 }, 2.00, 'Journal of Infamy ×4',
+      'Inkling of Identity ×10 and Scandal +2 CP, for 1.00 Echoes', null, null],
+    ['Fighting Fire with Fire', 'File a flurry of counter-complaints', '4-5', 4,
+      { stat: 'Watchful', diff: 134 }, 2.00, 'Dubious Testimony ×4',
+      'Dubious Testimony ×2 and Scandal +1 CP, for 1.00 Echoes', 'a University Laboratory', null],
+    ['Do Some Teaching', 'Introductory lecturing', '4-5', 4, { stat: 'Watchful', diff: 130 }, 1.90,
+      'Primordial Shriek ×95',
+      'the same Primordial Shriek ×95 and Nightmares +2 CP — a failure pays the full 1.90',
+      null, 'The one row in the carousel whose failure pays as well as its success.'],
+    ['Do Some Teaching', 'Intermediary Correspondence, for the more advanced student', '4-5', 4,
+      { stat: 'Watchful', diff: 138 }, 2.00, 'Cryptic Clue ×100',
+      'Cryptic Clue ×50 and Nightmares +2 CP, for 1.00 Echoes', null, null],
+    ['Wine-Tasting at Summerset', 'An evening of Oenology', '4-5', 4, { stat: 'Watchful', diff: 133 }, 2.00,
+      'Bottle of Greyfields 1882 ×100, Hedonist +1 CP (to 5); rare: First Sporing ×5',
+      'Bottle of Greyfields 1882 ×50 and Connected: Summerset −5 CP, for 1.00 Echoes',
+      'Connected: Summerset 10, and your soul still your own', null],
+    ['Fun with the Stoats', 'Take the bravery challenge', '4-5', 4, { stat: 'Dangerous', diff: 133 }, 1.90,
+      'a Bottle of Morelways 1872, Bottle of Strangling Willow Absinthe ×3, '
+        + 'Bottle of Greyfields 1882 ×15',
+      'Bottle of Strangling Willow Absinthe ×2 and Wounds +2 CP, for 1.00 Echoes', null, null],
+    ['Picking the Team', 'Involve yourself', '4-5', 4, { stat: 'Watchful', diff: 133 }, 2.00,
+      'Proscribed Material ×50',
+      'Appalling Secret ×6, Connected: Benthic −5 CP, Scandal +2 CP, for 0.90 Echoes',
+      'Connected: Benthic 10', null],
+    ['A Public Debate', 'Encourage a debate on souls', '4-5', 4, { stat: 'Watchful', diff: 128 }, 1.50,
+      'Stolen Correspondence ×30',
+      'Whispered Hint ×75, Connected: Summerset −1 CP, Scandal +1 CP, for 0.75 Echoes',
+      'Connected: Benthic 5 and Connected: Summerset 5', null],
+    ['Back to the Library', 'In the high stacks', '4-5', 4, { stat: 'Watchful', diff: 135 }, 2.02,
+      'Cryptic Clue ×51, Dubious Testimony ×2',
+      'Dubious Testimony ×2 and Connected: Benthic −2 CP, for 1.00 Echoes', null,
+      'The guide’s pick for Term Passing... 4–5.'],
+    ['Preventing Future Thefts', 'Search for other similar objects', '6-7', 4,
+      { stat: 'Watchful', diff: 147 }, 2.75,
+      'Relic of the Second City ×15, Whispered Hint ×50',
+      'Relic of the Second City ×2 and Whispered Hint ×25, for 0.55 Echoes', null,
+      'One of the guide’s three picks for Term Passing... 6–7.'],
+    ['Sourcing Some Recommendations', 'Track down your previous students', '6-7', 4,
+      { stat: 'Watchful', diff: 146 }, 2.75, 'Journal of Infamy ×5, Whispered Hint ×25',
+      'Journal of Infamy ×2, Whispered Hint ×37, Scandal +1 CP, for 1.37 Echoes',
+      'a University Laboratory with a Teaching Reputation',
+      'One of the guide’s three picks for Term Passing... 6–7.'],
+    ['Do Some Actual Research', 'Engage in learned discourse', '6-7', 4,
+      { stat: 'Watchful', diff: 144 }, 1.44, 'Cryptic Clue ×72',
+      'the same Cryptic Clue ×72 and Nightmares +2 CP, and NO Term Passing...', null,
+      'The one row whose failure makes no progress at all.'],
+    ['Do Some Actual Research', 'Do a little cross-referencing', '6-7', 4,
+      { stat: 'Watchful', diff: 140 }, 2.60,
+      'Scrap of Incendiary Gossip ×5, Whispered Hint ×10',
+      'Whispered Hint ×125 and Wounds +2 CP, for 1.25 Echoes', null, null],
+    ['The Feast of the World', 'Fourteen courses of sheer indulgence', '6-7', 4, null, null,
+      'Hedonist +3 CP, Connected: Summerset −5 CP', null,
+      'Connected: Summerset 15, and your soul still your own', 'No challenge, and no Echoes.'],
+    ['The Feast of the World', 'Business and pleasure', '6-7', 4, { stat: 'Watchful', diff: 142 }, 2.70,
+      'a London Street Sign, Proscribed Material ×5',
+      'Tale of Terror!! ×3, Connected: Summerset −13 CP, Scandal +1 CP, for 1.50 Echoes',
+      'Connected: Summerset 15, and your soul still your own', null],
+    ['More Fun with the Stoats', 'Join in this week’s caper', '6-7', 4,
+      { stat: 'Watchful', diff: 141 }, 2.68, 'Bottle of Greyfields 1882 ×134, Dangerous +? CP',
+      'Tale of Terror!! ×2, Scandal +2 CP, Connected: Benthic −5 CP, for 1.00 Echoes', null,
+      'The wiki records the Dangerous gain only as "+? CP".'],
+    ['Match Day', 'A serious business', '6-7', 4, { stat: 'Watchful', diff: 142 }, 2.74,
+      'Drop of Prisoner’s Honey ×137',
+      'Tale of Terror!! ×3, Connected: Benthic −20 CP, Scandal +2 CP, for 1.00 Echoes',
+      'Connected: Benthic 15', null],
+    ['Match Day', 'The twelfth man', '6-7', 4, { luck: 50 }, 2.70,
+      'Connected: Benthic +15 CP, Appalling Secret ×18',
+      'Connected: Benthic −5 CP and Solacefruit ×2, for 1.00 Echoes',
+      'Connected: Benthic 15, and under Cricket, Anyone? 150', null],
+    ['The Day of the Debate', 'Listen to the argument for', '6-7', 4, null, 1.50,
+      'Watchful +? CP, Dubious Testimony ×3', null, null, 'No challenge.'],
+    ['The Day of the Debate', 'Listen to the argument against', '6-7', 4, null, 1.50,
+      'Watchful +? CP, Dubious Testimony ×3', null, null, 'No challenge.'],
+    ['Once More to the Library', 'Hunt for the book yourself', '6-7', 4,
+      { stat: 'Watchful', diff: 141 }, 2.72, 'Proscribed Material ×43, Journal of Infamy ×2',
+      'Proscribed Material ×32 and Scandal +1 CP, for 1.28 Echoes', null, null],
+    ['Once More to the Library', 'Bribe a librarian', '6-7', 4, null, 2.60,
+      'Proscribed Material ×70, Journal of Infamy ×2', null,
+      'Bottle of Greyfields 1879 ×120, which is spent', 'No challenge.'],
+    ['Interdisciplinary Research', 'Swap research with archaeologists', '0-7', 4,
+      { stat: 'Watchful', diff: 122 }, 14.00,
+      'an Antique Mystery and Whispered Hint ×150/200/275 by band',
+      'Whispered Hint ×75/100/138 and Scandal +2 CP, for 0.75–1.38 Echoes',
+      'Voyage of Scientific Discovery 2, Page of Prelapsarian Archaeological Notes ×125, '
+        + 'and The Airs of London 0–33',
+      'The three research swaps are worth ten times anything else here — 14.00 to 15.25 Echoes '
+        + 'depending on the band — and they are the whole reason the guide’s best line runs '
+        + 'at 4.90 Echoes an action. The Watchful check falls 5 points per level of Term Passing... '],
+    ['Interdisciplinary Research', 'Swap research with zoologists', '0-7', 4,
+      { stat: 'Watchful', diff: 122 }, 14.00,
+      'a Puzzling Map and Bone Fragments ×150/200/275 by band',
+      'Bone Fragments ×75/100/138 and Nightmares +2 CP, for 0.75–1.38 Echoes',
+      'Voyage of Scientific Discovery 2, Page of Cryptopalaeontological Notes ×125, '
+        + 'and The Airs of London 34–66',
+      'The Watchful check falls 5 points per level of Term Passing... '],
+    ['Interdisciplinary Research', 'Swap research with theologians', '0-7', 4,
+      { stat: 'Watchful', diff: 122 }, 14.00,
+      'a Verse of Counter-Creed and Whispered Hint ×150/200/275 by band',
+      'Whispered Hint ×75/100/138 and Nightmares +2 CP, for 0.75–1.38 Echoes',
+      'Voyage of Scientific Discovery 2, Page of Theosophistical Notes ×125, '
+        + 'and The Airs of London 67+',
+      'The guide values the Verse of Counter-Creed at 12.50. The Watchful check falls 5 points per '
+        + 'level of Term Passing... '],
+    ['Enjoying the Pace of Academic Life', 'Perhaps you might read a book today', '0-7', 4,
+      { stat: 'Watchful', diff: 120 }, 2.00,
+      'Connected: Benthic +2 CP, Connected: Summerset +2 CP, Primordial Shriek ×100, '
+        + 'Nightmares −1 CP',
+      'Primordial Shriek ×50 and Nightmares +1 CP, for 1.00 Echoes', null,
+      'The guide’s pick for Term Passing... 0–3, and it still heals a change point of '
+        + 'Nightmares.'],
+    ['Enjoying the Pace of Academic Life', 'Take a stroll around the quad', '0-7', 4,
+      { stat: 'Watchful', diff: 125 }, 1.50, 'Whispered Hint ×150',
+      'Whispered Hint ×75 and Nightmares +1 CP, for 0.75 Echoes', null, null],
+    ['Enjoying the Pace of Academic Life', 'Exchange some gossip with the Porters', '0-7', null,
+      { stat: 'Watchful', diff: 125 }, 1.50, 'Whispered Hint ×150, and a Watchful gain',
+      'the wiki records no failure for it', 'Cryptic Clue ×25, and unmodified Watchful under 151',
+      'What is left of the old Watchful grind after the July 2026 rework: no second chances, and it '
+        + 'locks once your unmodified Watchful passes 150.'],
+    ['Visitors in the Quad', 'Greet the Bishop of St Fiacre’s', '0-7', 4,
+      { stat: 'Watchful', diff: 122 }, 1.50,
+      'Mystery of the Elder Continent ×3, and Whispered Hint ×50/125 in the upper bands',
+      'Appalling Secret ×5, Whispered Hint by band, Scandal +2 CP, for 0.75–1.37 Echoes',
+      'The Airs of London 0–25',
+      'One of the guide’s three picks for Term Passing... 6–7, where it pays 2.75. The '
+        + 'Watchful check falls 5 points per level of Term Passing... '],
+    ['Visitors in the Quad', 'Mr Pages', '0-7', 4, { stat: 'Watchful', diff: 122 }, 1.50,
+      'Compromising Document ×3, and Whispered Hint ×50/125 in the upper bands',
+      'Proscribed Material ×18, Whispered Hint by band, Scandal +2 CP, for 0.72–1.34 Echoes',
+      'The Airs of London 26–50',
+      'Pays 2.75 at Term Passing... 6–7. The Watchful check falls 5 points per level of Term '
+        + 'Passing... '],
+    ['Visitors in the Quad', 'Virginia', '0-7', 4, { stat: 'Watchful', diff: 122 }, 1.50,
+      'Tale of Terror!! ×3, and Whispered Hint ×50/125 in the upper bands',
+      'Appalling Secret ×5, Whispered Hint by band, Nightmares +2 CP, for 0.75–1.37 Echoes',
+      'The Airs of London 51–75',
+      'Pays 2.75 at Term Passing... 6–7. The Watchful check falls 5 points per level of Term '
+        + 'Passing... '],
+    ['Visitors in the Quad', 'Sinning Jenny', '0-7', 4, { stat: 'Watchful', diff: 122 }, 1.50,
+      'Romantic Notion ×15, and Whispered Hint ×50/125 in the upper bands',
+      'Intriguing Snippet ×4, Whispered Hint by band, Scandal +2 CP, for 0.80–1.42 Echoes',
+      'The Airs of London 76–100',
+      'Pays 2.75 at Term Passing... 6–7. The Watchful check falls 5 points per level of Term '
+        + 'Passing... '],
+    ['Resolving the Matter of the Stolen Artefacts', 'The Senior Fellow in Secondary Ordinals', '8',
+      'reset', null, 5.00, 'an Identity Uncovered! and an Extraordinary Implication', null,
+      'The Airs of London 0–33', 'No challenge.'],
+    ['Resolving the Matter of the Stolen Artefacts', 'The Duchess', '8', 'reset', null, 5.50,
+      'an Aeolian Scream and a Femur of a Jurassic Beast', null, 'The Airs of London 34–66',
+      'No challenge. The guide values the Femur at 3 Echoes through the Bone Market.'],
+    ['Resolving the Matter of the Stolen Artefacts', 'One of the Masters', '8', 'reset', null, 5.00,
+      'a Bottle of Broken Giant 1844 and a Volume of Collated Research', null,
+      'The Airs of London 67+', 'No challenge.'],
+    ['Clearing Things up with the Dean', '"Of course, my findings speak for themselves..."', '8', 'reset',
+      null, 5.00, 'Volume of Collated Research ×2', null,
+      'a University Laboratory at Prestige 10', 'No challenge.'],
+    ['Clearing Things up with the Dean', '"One must make sacrifices in the name of teaching..."', '8',
+      'reset', null, 5.00, 'Strong-Backed Labour ×2', null,
+      'a University Laboratory at Teaching Reputation 10', 'No challenge.'],
+    ['Clearing Things up with the Dean',
+      '"Our mutual friend would not appreciate the impediment to my work..."', '8', 'reset', null, 2.50,
+      'Connected: The Masters of the Bazaar +1 CP (to 5), an Extraordinary Implication', null,
+      'a University Laboratory and Watchful Gains 3',
+      'No challenge, and the carousel’s only repeatable source of Connected: The Masters of the '
+        + 'Bazaar.'],
+    ['Invigilate a Final Exam', 'A practical exam', '8', 'reset', null, 5.00,
+      'Extraordinary Implication ×2', null, 'Artisan of the Red Science 7', 'No challenge.'],
+    ['Invigilate a Final Exam', 'A written exam', '8', 'reset', null, 5.00,
+      'a Lost Research Assistant, for Correspondence Plaque ×15 spent', null,
+      'Correspondence Plaque ×15', 'No challenge. The guide values the Assistant at 12.50 and '
+        + 'takes 7.50 off for the Plaques.'],
+    ['Invigilate a Final Exam', 'An oral exam', '8', 'reset', null, 5.00,
+      'Correspondence Plaque ×10', null, 'A Scholar of the Correspondence 12', 'No challenge.'],
+    ['Invigilate a Final Exam', 'An interpretative exam', '8', 'reset', null, 5.00,
+      'Queer Soul ×2', null,
+      'The Rose Giveth Its Verses to Devils and Also to You (Fate-locked)', 'No challenge.'],
+    ['A Student in Hot Water', 'Advise them to stick to their principles', '8', 'reset', null, null,
+      'one of the three kinds of research page ×50 — the game picks which',
+      null, 'Voyage of Scientific Discovery 2',
+      'No challenge, and no Echo figure: the guide gives none, and the three page types have no '
+        + 'exchange rate between them.'],
+    ['A Student in Hot Water', 'Counsel them to quiet', '8', 'reset', null, 5.00,
+      'Sworn Statement ×2', null, 'Voyage of Scientific Discovery 2', 'No challenge.'],
+    ['Where is Dr Orthos?', 'Make your peace with Dr Orthos', '8', 'reset',
+      { stat: 'Persuasive', diff: 150 }, 2.50,
+      'Memory of Distant Shores ×5, Connected: Benthic +10 CP, Connected: Summerset +10 CP, '
+        + 'Making Waves +5 CP',
+      'Memory of Distant Shores ×3, both Connected −12 CP, Scandal +1 CP, for 1.50 Echoes',
+      null, null],
+    ['The World, Devoured', 'Propose the final toast of the evening', '8', 'reset',
+      { stat: 'Watchful', diff: 150 }, 5.00, 'Sworn Statement ×2, Making Waves +3 CP',
+      'a Sworn Statement, Connected: Summerset −20 CP, Scandal +2 CP, for 2.50 Echoes',
+      'Connected: Benthic 15, and your soul still your own', null],
+    ['Stoats’ Honour', 'A matter of honour', '8', 'reset', { stat: 'Shadowy', diff: 150 }, 5.00,
+      'Piece of Rostygold ×100, Bottle of Greyfields 1882 ×200, Making Waves +10 CP',
+      'Bottle of Greyfields 1882 ×100 and Scandal +2 CP, for 2.00 Echoes', null, null],
+    ['The End of the Match', 'A merry wager', '8', 'reset', { luck: 50 }, 3.00,
+      'A Scholar of the Correspondence +1 CP (to 10), an Unaccountably Peckish, '
+        + 'Correspondence Plaque ×6',
+      'both Connected −30 CP and an Extraordinary Implication, for 2.50 Echoes',
+      'Connected: Benthic 15', null],
+    ['The End of the Match', 'Nobble the Benthic team', '8', 'reset', { stat: 'Shadowy', diff: 148 }, 5.17,
+      'Infernal Contract ×11, Appalling Secret ×11, Soul ×11, Well-Placed Pawn ×11, '
+        + 'Connected: Benthic −10 CP',
+      'Connected: Benthic is RESET', 'Connected: Benthic 10',
+      'The guide counts the Well-Placed Pawns at 1.10, though they cannot be sold.'],
+    ['The End of the Match', 'Display admirable sportsmanship', '8', 'reset', null, 4.98,
+      'Flawed Diamond ×29, Ostentatious Diamond ×3, Connected: Benthic +10 CP, '
+        + 'Steadfast +1 CP (to 4)', null, 'Connected: Benthic 15', 'No challenge.'],
+    ['The Debate Closes', 'Speak for the proposition', '8', 'reset', { stat: 'Watchful', diff: 150 }, 5.00,
+      'Moon-Pearl ×300, Tale of Terror!! ×4',
+      'Tale of Terror!! ×4, Connected: Benthic −10 CP, Scandal +1 CP, for 2.00 Echoes',
+      null, null],
+    ['The Debate Closes', 'Speak against the proposition', '8', 'reset',
+      { stat: 'Watchful', diff: 150 }, 5.00, 'Foxfire Candle Stub ×500',
+      'Tale of Terror!! ×5, Connected: Summerset −10 CP, Scandal +1 CP, for 2.50 Echoes',
+      null, null],
+    ['The Library Roof', 'Report them to the college authorities', '8', 'reset', null, null,
+      'Connected: Benthic +30 CP and Connected: Summerset +30 CP', null,
+      'Connected: Benthic 10 and Connected: Summerset 10',
+      'No challenge, and no Echoes — 60 change points of Connected instead.'],
+    ['The Library Roof', 'Report them to the Constables', '8', 'reset', null, 0.80,
+      'a Constables favour, Proscribed Material ×20', null, 'under Favours: Constables 7',
+      'No challenge.'],
+    ['The Library Roof', 'Comrades', '8', 'reset', null, 0.80,
+      'a Revolutionaries favour, Proscribed Material ×20, '
+        + 'Advancing the Liberation of Night: +1 CP', null, 'under Favours: Revolutionaries 7',
+      'No challenge.'],
+    ['The Library Roof', 'Blackmail', '8', 'reset', null, 5.20,
+      'Proscribed Material ×80, Piece of Rostygold ×100, Rat on a String ×100', null, null,
+      'No challenge, and the guide’s finisher of choice for the third carousel.'],
+  ].map(function (r) {
+    return { carousel: 3, storylet: r[0], name: r[1], window: r[2], cp: r[3], ch: r[4], echoes: r[5],
+      gives: r[6], fail: r[7], needs: r[8], note: r[9] };
+  });
+
+
+  // **The three carousels share titles, and that is the whole difficulty here.**
+  // The third renames most of the first's storylets into Title Case (*Off to
+  // the Library* against *Off to the library*) and keeps the option titles, and
+  // normalising folds case away -- so "Attend a feast" under "Feasting at
+  // Summerset" is TWO rows, and `carouselLookup` answers nothing when two rows
+  // match, which would leave those options with no badge at all. Nothing on
+  // screen says which carousel you are in either: that is Featuring in the
+  // Tales of the University, which is on the Myself tab and not here.
+  //
+  // So the duplicates are MERGED into one row carrying both readings, and the
+  // badge says both ("1st TP +2? Whispered Hint ×90 | 3rd TP +4? 1.50 E").
+  // Quoting one of them would be a guess about which carousel you are standing
+  // in, and the two disagree by twice the progress and often by the challenge.
+  function tpMerge(rows) {
+    const byKey = new Map();
+    for (const row of rows) {
+      const key = normalizeName(row.storylet) + '|' + normalizeName(row.name);
+      const variant = { carousel: row.carousel, window: row.window, cp: row.cp, ch: row.ch,
+        echoes: row.echoes, gives: row.gives, fail: row.fail, needs: row.needs, note: row.note };
+      if (byKey.has(key)) byKey.get(key).variants.push(variant);
+      else byKey.set(key, { storylet: row.storylet, name: row.name, variants: [variant] });
+    }
+    return [...byKey.values()];
+  }
+
+  const TP_OPTIONS = tpMerge(TP_FIRST.concat(TP_SECOND, TP_THIRD));
+
+  // The rows one heading has to answer for twice. Derived, not listed: a hand
+  // list would go stale the moment a row moved between the tables.
+  const TP_SHARED = TP_OPTIONS.filter(function (e) { return e.variants.length > 1; });
+
+  const TP_STORYLETS = TP_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const TP_INDEX = carouselIndex(TP_OPTIONS);
+
+  const TP_CLASS = 'fl-ux-term-passing';
+  const TP_FLAG = 'flUxTermPassing';
+  const TP_BRANCH_CLASS = 'fl-ux-term-passing-branch';
+  const TP_BRANCH_FLAG = 'flUxTermPassingBranch';
+
+  const TP_ORDINALS = ['1st', '2nd', '3rd'];
+
+  const TP_RULES = 'Three carousels of the same shape, and which one you are in is set by Featuring in '
+    + 'the Tales of the University: ' + TP_CAROUSELS.map(function (c) {
+      return c.name + ' at FTU ' + c.ftu + ' (to Term Passing... ' + c.cap + ', ' + c.actions + ' actions)';
+    }).join('; ') + '. The first is played for the two Colleges’ Connected and for the stories, not '
+    + 'for money — which is why its rows carry goods here and the other two carry the guide’s '
+    + 'Echoes. Only ONE finisher can be played per go-round, so pick before you get there.';
+
+  function tpCarousel(id) {
+    return TP_CAROUSELS.find(function (c) { return c.id === id; });
+  }
+
+  function tpCheck(v) {
+    if (!v.ch) return 'No challenge.';
+    if (v.ch.luck) return 'Luck, ' + v.ch.luck + '%.';
+    return carouselChallenge(v.ch);
+  }
+
+  // The first carousel is not priced by the guide, so its rows show the goods
+  // instead of an Echo figure. The first clause of the payout is enough for a
+  // badge; the tooltip carries all of it.
+  function tpWorth(v) {
+    if (v.echoes != null) return v.echoes.toFixed(2) + ' E';
+    return String(v.gives).split(/, | and /)[0].replace(/^an? /, '').replace(/^Connected: /, '');
+  }
+
+  function tpVariantText(v) {
+    const head = v.cp === 'reset' ? 'reset' : v.cp == null ? 'no TP' : 'TP +' + v.cp;
+    const mark = v.ch ? CAROUSEL_MARK_CHALLENGE : '';
+    return head + mark + ' · ' + tpWorth(v);
+  }
+
+  function tpBadgeText(e) {
+    const readings = e.variants.map(tpVariantText);
+    // Where the carousels read the same there is nothing to tell apart, so the
+    // badge says it once -- *Report them to the college authorities* pays the
+    // same 30 change points of both Connected qualities in the first carousel
+    // and the third, and differs only in what it asks for first. The tooltip
+    // still carries both, requirements and all.
+    if (readings.every(function (r) { return r === readings[0]; })) return readings[0];
+    return e.variants.map(function (v, i) {
+      return TP_ORDINALS[v.carousel - 1] + ' ' + readings[i];
+    }).join(' | ');
+  }
+
+  function tpSpec(e) {
+    const body = [];
+    e.variants.forEach(function (v) {
+      const carousel = tpCarousel(v.carousel);
+      if (e.variants.length > 1) {
+        body.push(TP_ORDINALS[v.carousel - 1] + ' carousel — ' + carousel.name + ', at Featuring in '
+          + 'the Tales of the University ' + carousel.ftu + ':');
+      } else {
+        body.push(carousel.name + ' — the ' + ['first', 'second', 'third'][v.carousel - 1]
+          + ' carousel, at Featuring in the Tales of the University ' + carousel.ftu + '.');
+      }
+      body.push('  ' + tpCheck(v));
+      body.push('  Success: ' + (v.cp === 'reset' ? 'Term Passing... resets'
+        : v.cp == null ? 'no Term Passing...' : 'Term Passing... +' + v.cp + ' CP')
+        + ', and ' + v.gives + '.');
+      if (v.echoes != null) body.push('  The guide’s figure: ' + v.echoes.toFixed(2) + ' Echoes.');
+      if (v.fail) body.push('  Failure: ' + v.fail + '.');
+      if (v.needs) body.push('  Needs: ' + v.needs + '.');
+      if (v.window) body.push('  Offered at Term Passing... ' + v.window + '.');
+      if (v.note) body.push('  ' + v.note);
+    });
+    if (e.variants.length > 1) {
+      body.push('This option is on ' + e.variants.length + ' of the three carousels and they pay '
+        + 'differently. Only one is ever open, and which one is Featuring in the Tales of the '
+        + 'University — which is on the Myself tab, not on this screen, so both are quoted.');
+    }
+    const best = e.variants.reduce(function (a, b) {
+      return (b.echoes || 0) > (a.echoes || 0) ? b : a;
+    });
+    const color = best.cp === 'reset' ? CAROUSEL_COLOR_PAYOUT
+      : (best.echoes != null && best.echoes >= 5) ? CAROUSEL_COLOR_PAYOUT : CAROUSEL_COLOR_PROGRESS;
+    return { text: tpBadgeText(e), color: color,
+      title: carouselTooltip('Term Passing...', e, body, TP_RULES) };
+  }
+
+  // Its own summary rather than `carouselSummary`, which matches a storylet by
+  // its exact string: the merged rows keep one spelling of a title the three
+  // carousels spell differently, so the match has to be the normalised one.
+  function tpSummary(storylet, own) {
+    const ids = [...new Set(own.reduce(function (all, e) {
+      return all.concat(e.variants.map(function (v) { return v.carousel; }));
+    }, []))].sort();
+    const lines = [storylet, 'Term Passing...', ''];
+    own.forEach(function (e) { lines.push('  • ' + e.name + ' — ' + tpBadgeText(e)); });
+    lines.push('');
+    if (ids.length > 1) {
+      lines.push('This title is on ' + ids.length + ' of the three carousels, and only one of them is '
+        + 'ever open; both readings are above.');
+    }
+    lines.push(TP_RULES);
+    lines.push('Open the storylet and every option is badged in its own right.');
+    return lines.join('\n');
+  }
+
+  function tpStoryletSpec(key) {
+    const own = TP_OPTIONS.filter(function (e) { return normalizeName(e.storylet) === key; });
+    if (!own.length) return null;
+    const ids = [...new Set(own.reduce(function (all, e) {
+      return all.concat(e.variants.map(function (v) { return v.carousel; }));
+    }, []))].sort();
+    const windows = [...new Set(own.reduce(function (all, e) {
+      return all.concat(e.variants.map(function (v) { return v.window; }));
+    }, []).filter(Boolean))];
+    const text = ids.map(function (id) { return TP_ORDINALS[id - 1]; }).join('/')
+      + ' · T' + (windows.length ? windows.join('/') : '–');
+    return { text: text, color: CAROUSEL_COLOR_LABEL, title: tpSummary(own[0].storylet, own) };
+  }
+
+  function tpRatings() {
+    carouselRatings({
+      storylets: TP_STORYLETS, index: TP_INDEX, storyletSpec: tpStoryletSpec, optionSpec: tpSpec,
+      cls: TP_CLASS, flag: TP_FLAG, branchCls: TP_BRANCH_CLASS, branchFlag: TP_BRANCH_FLAG,
+    });
+  }
+
   // === panel: zailing ====================================================
   //
   // The reference half of the zailing work: the numbers that decide a voyage
@@ -15227,6 +17817,29 @@
     { name: 'cave-of-the-nadir', run: nadirRatings },
     { name: 'empress-court', run: courtRatings },
     { name: 'breeding-monsters', run: breedRatings },
+    // Five more on the carousel plumbing. Two of them stand in the same room:
+    // Mahogany Hall carries both the Tales carousel and the etiquette
+    // master-classes, and they share no storylet, so each answers only for its
+    // own. The Sixth Coil is the first whose STORYLET HEADINGS are randomised
+    // too -- 35 room names for four floors -- and the Rat Market is the first
+    // that is a shop rather than a carousel, so it rates what you can sell and
+    // says in words that it does not price what the stalls have in stock.
+    { name: 'mahogany-hall', run: mhRatings },
+    { name: 'master-classes', run: mcRatings },
+    { name: 'sixth-coil', run: sixthRatings },
+    { name: 'rat-market', run: rmRatings },
+    { name: 'boxful-of-intrigue', run: boxRatings },
+    // Four more. Underclay and Hunting Bees are ordinary carousels with a hub
+    // storylet each. The last two are the University's, and they overlap on
+    // purpose: `featuring-tales-university` badges the one-time story steps
+    // with the level they sit at and nothing else, because the guide records no
+    // figures for them, and `term-passing` owns every option of the three
+    // carousels, which is where the guide puts the numbers. Neither answers for
+    // the other's storylets.
+    { name: 'underclay', run: ucRatings },
+    { name: 'hunting-bees', run: hbRatings },
+    { name: 'featuring-tales-university', run: ftuRatings },
+    { name: 'term-passing', run: tpRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a

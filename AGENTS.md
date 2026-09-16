@@ -886,7 +886,9 @@ navigation. Two consequences:
   `vertiginous-horticulture`, `forgotten-quarter`, `cat-and-mouse`, `season-in-soup`,
   `long-dead-god`, `engaged-in-a-case`, `sunken-embassy`, `law-furnace`, `prelapsarian-museum`,
   `on-a-heist`, `spider-symposium`, `short-stories`, `flash-lays`, `social-actions`,
-  `cave-of-the-nadir`, `empress-court`, `breeding-monsters`) and the reference panel built on each
+  `cave-of-the-nadir`, `empress-court`, `breeding-monsters`, `mahogany-hall`, `master-classes`,
+  `sixth-coil`, `rat-market`, `boxful-of-intrigue`, `underclay`, `hunting-bees`,
+  `featuring-tales-university`, `term-passing`) and the reference panel built on each
   one's table (Zailing, Port Carnelian, Scientific Voyages, Fruits of the Zee, University Laboratory;
   `arbor` and the nineteen carousels have none, by request). The rule that decided where each thing
   went: **a panel goes where its table's badge goes**, because the two are one transcription. The
@@ -1918,6 +1920,101 @@ navigation. Two consequences:
   Echoes; cross-check: every guide expectation is 70% / 30% of its two Echo values, and 21 CP at +3
   is the guide's seven actions.
 
+  Five more, added 2026-09-16, all storylet-and-option markup with **no panel** (asked for that way).
+  **Tales of Mahogany Hall** (`mahogany-hall`, `MH_BUILD`, `MH_SHOWS`, `MH_ODD`, `MH_DAYS`): the CP is
+  the badge's number in both directions — a building option's Tales gain (`Tales +2? · Brass ×102`), a
+  show option's Tales cost (`−8 CP? · Jade ×200`), and a day on *The weekly variety bill!* with the
+  Tales it needs and the show's own reward, which is paid whichever option you take there and so sits
+  on the day and the storylet rather than on a branch. Cross-checks: the seven days need Tales 8…14 in
+  order, and no show's failure costs less CP than its success. The storylet pages supplied the names
+  the guide's table hides behind day links — Friday's show is *Fallen London's Best-loved
+  Entertainers* — and *Assist a hypnotist* and *Watch from the audience* each sit on two storylets and
+  resolve by the open one. Four rows that raise four or five menaces whatever happens carry words
+  rather than a figure. Disagreement (carried both ways in the tooltip): the guide prints *Smoke and
+  mirrors* twice, at Moon-Pearl ×226 and ×113. **Master-Classes in Etiquette** (`master-classes`,
+  `MC_PUPILS`, `MC_LESSONS`, `MC_TRIALS`): Pygmalion CP and the pay (`Pyg +2? · Brass ×97`), the
+  graduation as a reset plus a lump, and a pupil as the whole course's pay and the guide's EPA — the
+  only choice that changes the rate. `▼ Pyg −2` marks the Pygmalion challenges, whose failures push
+  you back. Two cross-checks: a basic lesson pays its own difficulty in goods (97 at Persuasive 97),
+  and a narrow Pygmalion challenge is certain 4 levels above where it starts — twelve of the thirteen
+  rows agree, and the Scullery's *Take supper with him* (9, "100% at 14") is the one that does not, so
+  its tooltip prints both. The two Fate pupils' lessons are **left out**: the guide records their
+  titles only as "Choice 1" / "Storylet 2", and there is nothing to match on; their rows on *Provide
+  Master-Classes in Etiquette* are badged, since those titles are known. `MC_ALIASES` points the
+  wiki's disambiguated *Educating Lyme 1* at the game's *Educating Lyme*. **Patrolling the Sixth
+  Coil** (`sixth-coil`, `SIXTH_FLOORS`, `SIXTH_ROOM_OPTIONS`): the first feature whose **storylet
+  headings are randomised too**. Four qualities rewrite the room name (Locales), the option's verb
+  (Verbs), the way out (Passages) and the direction (Directions), so the table carries all **35** room
+  names across the four floors and enumerates each option's VERBS as aliases, wildcarding only the
+  direction and the passage — nine new `CAROUSEL_PLACEHOLDER` entries cover the rest. Enumerating the
+  verbs is load-bearing: a wildcard verb makes "Sneak north through a bent trail" and "Slip through a
+  cracked mirror" the same pattern, `carouselLookup` answers nothing for both, and neither is badged.
+  Badge: what the action does to the two progress qualities and the stat it is checked on (`Patrol +1
+  Coil +1 · Watchful 250?`), since the guide's rule is to leave at Patrolling + Coiling = 39, which is
+  what makes *Examine a sealed door* — `Patrol +2`, no Coiling, no challenge — worth two of anything
+  else. A Burden shows its three levels of Unburdened (60 points of every attribute); the exit
+  payouts show what each pays per point of Patrolling, with the figure at the cap of 40 in the
+  tooltip. Disagreement: the guide calls the payout quality *Patrolling the Labyrinth* and the option
+  pages call it *Mapping the Labyrinth* in seven places; treated as one quality, badged with the
+  guide's name. **The Rat Market** (`rat-market`, `RM_SELLS`, `RM_BANDS`): a shop, not a carousel.
+  Entry costs 3 actions once a weekend and 0 after; selling costs none. A sale badges what it is worth
+  in **Echoes as a range** — fresh market to saturated — because Rat Market Saturation is stated
+  nowhere this script can read, and every price is **derived** from the one figure each option page
+  gives, the item's Nominal Sale Value: nominal × 1.32 / 1.12 / 1.00, ÷ 10 pence a shilling. That
+  reproduces every Rat-Shilling price the guide prints (165/140/125, 660/560/500, 825/700/625,
+  4125/3500/3125), which the suite pins. What the market **sells** is deliberately not priced — the
+  stock turns with the Rat-Wind, the Rat-Moon and two seasons — and the Maundering Rat's Stall and the
+  Tatterdemalion Tent say so instead. **A Boxful of Intrigue** (`boxful-of-intrigue`, `BOX_ROUNDS`,
+  `BOX_REWARDS`): the badge's one claim is the **side**, in words (`Conscience · Box +1?`), because
+  every round is the same broad Shadowy 130 for the same one point and what separates them is which
+  power they serve — serving the wrong one is not a smaller reward but A Turncoat. Colour follows the
+  side only after the words have, teal against warm brick rather than red against green. The two Salon
+  options suit either side and pay no Kingmaker, and say so. Correction from the option pages: the
+  guide's rewards table prints Correspondence Plaque ×6 against all six payouts and the payout pages
+  give none — the six come from three plays of *Intercept the messages*, so they are off the payout
+  rows and named in every payout's tooltip instead.
+
+  Four more, added 2026-09-16, again storylet-and-option markup with **no panel**. **Underclay**
+  (`underclay`, `UC_PROGRESS`, `UC_REWARDS`): two progress qualities rather than one, each on its own
+  storylet, spent on the hub *Escape from Underclay* — badge is the points a success makes and what a
+  failure takes BACK (`Confessions +30? −13`), and for a reward its cost, its pay and the guide's
+  Echoes **per point** (`Fal 50 → Labour ×3 · 0.15/pt`), which runs the opposite way to intuition:
+  the cheap rewards are the efficient ones. A failure that only raises a menace stays in the tooltip,
+  as everywhere else. Two cross-checks: every broad "Min for 100%" is the difficulty × 5 ÷ 3, and the
+  Echoes per point fall into three bands by the **total** points a reward costs, which is what checks
+  the three two-currency rows against the six single-currency ones. The option pages add a tenth
+  reward the guide's table has not got (*…fight for the Admiralty*). Note: this guide puts a narrow
+  challenge's 100% five levels above its difficulty where the Master-Classes guide uses four; both are
+  carried as stated. **Hunting Bees in Old Newgate** (`hunting-bees`, `HB_OPTIONS_RAW`, `HB_REWARDS`):
+  the badge names the **attribute** (`Bees +25? −6 · Watchful 88`) because *Dagger or Flint* decides
+  whether the checks are Watchful or Dangerous and almost every option shifts it by a random ±10, so
+  the same option is not the same option two actions later. Airs rows carry their window. Three of
+  those windows differ between the guide and the option pages by a point; the **pages** are followed
+  and each says so. The way out is titled plainly *Escape*, which `HEIST_OPTIONS` already owns, so the
+  row is filed under the wiki's *Escape (Flint or Dagger)* with the plain title as an alias — the
+  first time a name collision has been resolved that way rather than by dropping a row. **Featuring in
+  the Tales of the University** (`featuring-tales-university`, `FTU_STEPS`): the only feature in the
+  file that badges storylet **headings and nothing else**, because the guide records no option tables
+  for the storyline. Badge is the level and what the step does (`FTU 6 · locks the first carousel ⏏`);
+  `⏏` marks the two irreversible steps and is deliberately NOT the `▼` used for "uses something up",
+  since nothing is consumed — a door closes. It quotes no figures at all: the numbers for what you
+  play alongside these belong to `term-passing`. Two titles end in a blank the game fills in, so each
+  matches bare and wildcarded (a new `(department)` entry in `CAROUSEL_PLACEHOLDER`). **Term
+  Passing...** (`term-passing`, `TP_FIRST`, `TP_SECOND`, `TP_THIRD`): three carousels of the same
+  shape, never open at once, picked by Featuring in the Tales of the University. The badge is the Term
+  Passing... CP and then what it is worth — the guide's Echoes for the second and third, the **goods**
+  for the first, which the guide does not price and which is not played for money anyway.
+  **The merge is the load-bearing part.** The third carousel renames the first's storylets into Title
+  Case (*Off to the Library* against *Off to the library*) and keeps the option titles, and
+  `normalizeName` folds case away — so *Attend a feast* under *Feasting at Summerset* is two rows, and
+  `carouselLookup` answers nothing when two match, which would have left three dozen options with no
+  badge and no error. `tpMerge` folds them into one row per storylet-and-option with a variant per
+  carousel, and the badge quotes both (`1st TP +2? · Whispered Hint ×90 | 3rd TP +4? · 1.50 E`);
+  quoting one would be a guess about which carousel is open, and nothing on the screen says. Where the
+  two readings are identical the badge collapses to one — exactly one row does that, *Report them to
+  the college authorities*, which differs only in what it asks for first. It also needs its own
+  `tpSummary` rather than `carouselSummary`, which matches a storylet by its exact string.
+
   The `factions` panel's static half is `FACTIONS`, transcribing the *Factions (Guide)*
   Faction-Item table (the item that converts Favours to Renown, its shop, its price) and the
   Renown-item ladder (10/25/40, for 3/5/7 Favours), including the wiki's best-in-slot marks and
@@ -2303,6 +2400,50 @@ Confirmed live by the author:
   "Look into the water") appear under those plain titles; the Court's *What's your next work?*
   heading as it really reads; and one breeding's payout against the badge.
 
+- The **Mahogany Hall, Master-Classes, Sixth Coil, Rat Market and Boxful of Intrigue badges**
+  (added 2026-09-16). Nothing seen in the game. Report first, in order:
+  **(1) The Sixth Coil's room headings.** The whole feature rests on the claim that the storylet
+  heading in the game is the room name the Locales quality picks — *Leatherbound Study*, *Muddy
+  Trench*, *Hedge Maze* — and not a fixed "A Workshop, in the Sixth Coil". If no badge appears
+  anywhere in the Coil, that is the claim that failed, and the answer is what the heading actually
+  said. Then whether the wandering option reads "&lt;verb&gt; &lt;direction&gt; through &lt;a way
+  out&gt;" as the wiki's variant tables have it, and whether the payout screen calls the quality
+  *Patrolling* or *Mapping the Labyrinth* (the pages use both; the badge says Patrolling).
+  **(2) The Rat Market's prices.** Sell one item on a fresh market and say what it actually paid in
+  Rat-Shillings — everything else is derived from that one multiplier. Also whether the entry
+  storylet in the Flit is titled plainly *The Rat Market*.
+  **(3) Mahogany Hall's day shows.** Whether picking a day on *The weekly variety bill!* opens a
+  storylet titled as the wiki has it (*Light Entertainment!*, *Feats of Daring and Grace!*, *The
+  comedy of the absurd!*, *An evening of refined entertainment*, *Fallen London's Best-loved
+  Entertainers*), and what *Smoke and mirrors* really pays — the guide says both ×226 and ×113.
+  **(4) Master-Classes.** Whether the Clay pupil's lesson storylet reads *Educating Lyme* (the alias
+  assumes the wiki's "Educating Lyme 1" is a disambiguation), and whether the Scullery's *Take supper
+  with him* is certain at Pygmalion 13 or 14.
+  **(5) A Boxful of Intrigue.** Whether a payout hands over any Correspondence Plaques — the guide's
+  table says six, the option pages say none, and the badge follows the pages.
+
+- The **Underclay, Hunting Bees, Featuring in the Tales of the University and Term Passing badges**
+  (added 2026-09-16). Nothing seen in the game. Report first, in order:
+  **(1) Term Passing's storylet titles, and their case.** The whole merge exists because the third
+  carousel spells the first's storylets differently (*Off to the Library* against *Off to the
+  library*) — if the game in fact uses one spelling throughout, the merged badges are right but
+  noisier than they need to be; if it uses a third spelling, those storylets go unbadged. Say what a
+  heading actually reads, and which carousel you were in. Also whether an option really does pay what
+  the guide's table says on the carousel you are standing in, since a merged badge quotes two figures
+  and only one of them applies to you.
+  **(2) Featuring in the Tales of the University's two blanked titles.** Whether the game renders
+  *Making Your Name: Meet the Department of _______* with the blank filled in, with literal
+  underscores, or some third way. If those two storylets never badge, that is why. The guide is also
+  flagged incomplete after the July 2026 rework, so a storylet that has moved or gone is worth
+  reporting on its own.
+  **(3) Hunting Bees.** Whether *Dagger or Flint* really does decide the attribute at 50, and whether
+  the way out is titled plainly *Escape* (the row is filed under *Escape (Flint or Dagger)* with
+  *Escape* as an alias). Also which of the guide's and the pages' Airs windows is right on the three
+  that differ by a point.
+  **(4) Underclay.** Whether the hub reads *Escape from Underclay* and the two halves *Confessions
+  from the Stone* and *Lies for Clay Men to Tell*, and whether moving between them really costs no
+  action. Also whether the tenth reward, *…fight for the Admiralty*, appears at all.
+
 - The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
   table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
   looking at the screen can confirm: a wrong number renders exactly as well as a right one. They
@@ -2661,6 +2802,29 @@ Current tests:
   and every work's 17 / 30 Echoes (Court); every beast's expected Echoes against the guide and the
   same breeding title resolving by storylet (Breeding); badge text, guide disagreements by name, the
   registered pass, and no name in another table.
+- `FallenLondon/test/choice-mahogany-hall.test.mjs`, `choice-master-classes.test.mjs`,
+  `choice-sixth-coil.test.mjs`, `choice-rat-market.test.mjs`, `choice-boxful-of-intrigue.test.mjs` —
+  one per feature. Each pins the cross-check its transcription rests on: the seven days needing Tales
+  8…14 in order and no show's failure costing less CP than its success (Mahogany); a lesson paying its
+  own difficulty in goods, and the narrow +4 rule with its **one** stated exception (Master-Classes);
+  the three saturation bands reproducing every Rat-Shilling price the guide prints, from the nominal
+  value alone (Rat Market); four bands × two storylets × two options with one per side, and
+  `broadCertainAt(130) = 217` (Boxful). The Sixth Coil's is the odd one: it **rebuilds every title the
+  four randomiser qualities can produce** — verb × direction × passage, on all 35 rooms, over 3,000 of
+  them — and asserts each resolves to exactly one row, because a wildcard collision shows up as no
+  badge at all and nothing else would catch it. Then badge text, the rows that refuse to be a figure,
+  the registered pass, and no name in another table.
+- `FallenLondon/test/choice-underclay.test.mjs`, `choice-hunting-bees.test.mjs`,
+  `choice-featuring-tales-university.test.mjs`, `choice-term-passing.test.mjs` — one per feature.
+  Underclay and Hunting Bees both pin the guides' "Min for 100%" against the difficulty × 5 ÷ 3, plus
+  Underclay's Echoes-per-point banding by **total** cost and Hunting Bees' three disputed Airs windows
+  and its two sides mirroring each other option for option. The Featuring suite is the odd one: it
+  pins the line running in order with no gaps, that exactly two steps are marked irreversible and
+  that the mark is not `▼`, and that both blanked titles are found bare and filled in — the failure
+  there is silence, not an error. The Term Passing suite pins the **merge**: every option resolving to
+  exactly one row, one variant per carousel, the merged badge quoting both readings, the one row whose
+  readings are identical collapsing to one, and the first carousel being unpriced where the other two
+  are priced. Then badge text, the registered pass, and no name in another table.
 - `FallenLondon/test/ux-launcher-placement.test.mjs` — asserts `ux-enhancers.js`'s
   `launcherPlacement`, the pure half of where the "⚙ UX" button sits. It is organised around
   the three real travel controls: wide desktop (beside the sidebar button, bottoms level),
