@@ -1855,7 +1855,10 @@ check('the feature list, in order',
     'sixth-coil', 'rat-market', 'boxful-of-intrigue', 'underclay', 'hunting-bees',
     'featuring-tales-university', 'term-passing', 'trade-in-reputations', 'savage-cobbles', 'publishing-newspaper',
     'war-of-assassins', 'wars-of-illusion', 'foreign-posting', 'temple-club', 'attending-party', 'missing-woman',
-    'wilmots-business', 'brawling-dockers', 'assembling-skeleton', 'professional-activities', 'hearts-game']);
+    'wilmots-business', 'brawling-dockers', 'assembling-skeleton', 'professional-activities', 'hearts-game',
+    'hunters-keep', 'mutton-island', 'venderbight',
+    'godfall', 'maze-garden', 'promenade', 'port-cecil', 'zee-beasts',
+    'chessboard', 'parabolan-hunting', 'oneiropomp', 'sacroboscan', 'parabolan-war', 'cubs-education']);
 
 check('the panel list, in order',
   api.PANELS.map((p) => p.id),

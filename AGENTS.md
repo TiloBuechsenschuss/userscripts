@@ -2108,6 +2108,127 @@ navigation. Two consequences:
   values. *Set an ambush* is filed under the wiki's *Set an ambush (Page of Inversions)* with the plain
   title an alias, because Hunting Bees owns it.
 
+  Three more, added 2026-09-17, card-and-storylet markup with **no panel**, and the first features
+  filed under a zee port rather than London. **Time Passing at Hunter's Keep** (`hunters-keep`,
+  `HK_OPTIONS`, `HK_WINDOWS`) and **Time Passing on Mutton Island** (`mutton-island`, `MI_OPTIONS`,
+  `MI_WINDOWS`) are two carousels on ONE progress quality, *Time Passing in the Southern
+  Archipelago*, and they share no storylet, so each answers only for its own. On both, progress is
+  the one thing that does NOT vary — every option is +2 CP on a success and +1 on a failure — so the
+  badge is the option's **payout**, `?` for the challenge in the way and the menace a failure costs,
+  and the flat progress is stated once in the rules line. Hunter's Keep marks with `★` the fifteen
+  options that need *Hunter's Insight*, which only a finished cycle gives; Mutton Island says
+  `reset` in words on the seven lines that end the cycle, since Time Passing is the island's whole
+  clock. A storylet heading carries the window it opens in (`Time Passing 7–9`). Both tables came
+  from the guides with every storylet and option page parsed as the cross-check, and the pages win
+  where they disagree: the guide files *The voice of the wind* as a storylet and its page makes it an
+  option of *The Mutton Island Wind*, and *Follow the Ecstatic Venge-Rat* is on the storylet page and
+  in no guide table at all — both carry `guide`. The plain *Prepare yourself* is Hearts' Game's, so
+  Hunter's Keep files its own under the wiki's *Prepare yourself 1* with the plain title an alias.
+  **Venderbight** (`venderbight`, `VB_OPTIONS`, `VB_WINDOWS`) badges the tomb-colony's own deck at
+  *Ambition: Nemesis* 11–14 — the hand, the opened card and its options — with the Nemesis change
+  points a success pays, the hand ranked by that and then by the stat CP a progress-free line gives
+  (the whole difference between *Not quite silence*'s two options). The two options that pay one of
+  two things at the game's choice with no odds stated (*Carouse with the dead*, *Snatch a bat out of
+  the air!*) are written out as that choice and ranked at what they **guarantee**, never at the
+  better half. *A woman of sinister repute* is a storylet, not a card, so it is badged where it
+  stands and kept out of the hand; *Far from home*, the autofire card that replaces the deck at
+  Nemesis 15, is left out. Each of the three gates the handful of its names that are ordinary
+  English (`HK_STRICT`, `MI_STRICT`, `VB_STRICT`) on its own area's greeting, confirm-only — and
+  Mutton Island's is the one greeting of the three already captured in game, the same string
+  `FOTZ_AREAS` rests on, which a suite pins.
+
+  Five more, added 2026-09-17, the Mid Zailing shelf, card-and-storylet markup with **no panel**.
+  **Pilgrimages in Godfall** (`godfall`, `GF_OPTIONS`, `GF_PROGRESS`): the 16-action pilgrimage through
+  the Shattered Citadel. One currency runs it, St Stalactite's Favour, so a Pilgrim's Path option shows
+  the Favour a success pays and an Oblation shows the goods AND whether they are bought with Favour or
+  taken free — the pair on each Oblation is worth the same by the guide's own finding, so the badge's
+  job there is to say which side of the trade you are on. `▼` is what is spent, `▾` what is only
+  required (the bats and the bagpipes come home). The ending's arithmetic lives in four constants
+  (`GF_FAVOUR_ECHOES` 3.5, `GF_OBLATION_ECHOES` 2, `GF_ABSINTHE_ECHOES` 0.5, `GF_TITHE_BOTTLES` 28) and
+  the suite pins that they agree: 7 bottles a Favour, 4 an Oblation, and the 28 held back are the
+  guide's "tithe of 14 Echoes". The Evolution option on each Oblation is left out.
+  **The Maze-Garden** (`maze-garden`, `MZ_OPTIONS`): the labyrinth deals its own undiscardable deck, so
+  this badges the hand too. Two qualities at once: Awakening..., which is the pay, and Perambulating...,
+  which is the clock — and the badge carries the Perambulating **only when it is not the usual +4**
+  (`MZ_PER_DEFAULT`), because the exceptions are the whole point. The hand ranks by Awakening, then by
+  the least Perambulating, which puts DISCERN's *Select a head from the pile* (+7 for +2 of the clock)
+  above every other +7, as the guide says it should be. The six trades at the end carry cost, count,
+  the item's own price and the Echoes per change point, and the suite recomputes the rate from the parts.
+  `(garment)` is a new `CAROUSEL_PLACEHOLDER` entry. PARTAKE's *Allow your (garment) to join in* is
+  **one row labelled with both readings**, because two different options share that title and only
+  Awakening tells them apart; HARVEST's Fate option and TRANSFIGURE's ushabtiu line are labelled
+  `unrecorded` rather than scored.
+  **Polythremic Promenade** (`promenade`, `PP_OPTIONS`): the Polythreme Streets deck plus its storylets.
+  Every badge carries BOTH ALLURE and COGNISANCE, since nearly every card raises one and lowers the
+  other and a lone `+12` reads as twice the progress it is; the hand is ranked on the two added
+  together. Payouts carry the guide's value and Echoes per action, and the suite pins that the second is
+  the first over the promenade's twelve actions. The two exchanges pay 22 **or** 12 on a Sartorial
+  Cooperation check, so both halves are written out. One row follows the guide over the page and says so
+  (`So that's who he is`, whose page lists only the +12); the storyline conclusions are left out.
+  **Port Cecil** (`port-cecil`, `PC2_OPTIONS`, `PC2_WINDOWS`): the 14-action tide carousel. High Tide's
+  six options all give a flat +3 CP to their faction, so the badge prices the goods at the guide's three
+  tiers (2.00 / 3.00 / 3.20) instead. Low Tide is left as a **formula** — `Miners +1+Prep`, `Cats
+  +Recep` — because your Receptivity and Preparations are on no page this script reads, and the tooltip
+  says so. The four Perigee endings are labelled by the standing they need, never ranked: all four pay
+  one item worth 12.50 and three worth 2.50. *Check the lay of the land*, a free action the guide's
+  table has not got, comes off the storylet page and carries `guide`.
+  **Hunting the Beasts of the Zee** (`zee-beasts`, `ZB_OPTIONS`, `ZB_APPROACH_NAMES`): the first feature
+  whose STORYLET is named for the quarry, so the seven headings the game can show (plus the wiki's
+  placeholder title) are aliased onto one canonical `Approaching the Zee-Beast` through
+  `ZB_STORYLET_ALIASES`, and `(Zee-Beast)` and `(Zee-Beast Location)` join `CAROUSEL_PLACEHOLDER` — the
+  only two entries there with capitals, which the pattern needs. A hunting action shows the Pursuit a
+  success and a failure make (*Take a risk* is the only one that goes backwards); the two Elusiveness
+  lines show what they take off and why that is worth an action. **No difficulty is ever claimed**: the
+  checks scale with Elusiveness of your Quarry and Zee Peril, neither of which is readable, so the
+  tooltip gives the rule (Zee Peril, Zee Peril + 75, or the guide's logistic 4-to-14) and the badge a
+  plain `?`. The Lifeberg's three regions are one hunt row and one kill row naming all three.
+
+  Six more, added 2026-09-17, the Early and Late Parabola shelves, card-and-storylet markup with **no
+  panel**. Nothing in Parabola deals a deck of its own, so none of them badges a hand.
+  **The Chessboard** (`chessboard`, `CB_OPTIONS`): a match is two opening moves, five middle-game moves
+  and an endgame, and every badge leads with the **score** — Positional Advantages minus Strategic
+  Weaknesses, *derived* by `cbScore` and never stored, so the parts and the total cannot drift. The
+  Weaknesses follow it whenever a move touches them, because the two A Player's Studies endings are
+  gated on Weaknesses (7 for Studies 1, at most 6 for Studies 2) rather than on score. `no move` marks
+  the six options that cost an action without advancing Progress on the Board. The suite pins the
+  guide's own "Can I Still Win?" score table against the two columns.
+  **Parabolan Hunting** (`parabolan-hunting`, `PH_OPTIONS`): Ferocity leads, because every check is
+  `180 + 20 × (Parabolan Ferocity − Parabolan Scouting)` — so **no difficulty is ever claimed**, your
+  Scouting being unreadable, and the badge instead shows the two levers: `Scouting +8 ▼` and
+  `Ferocity −5 ▼`. Two of its storylets are named for the quarry, and the quarry list is open-ended, so
+  this is the first feature to pass **a FUNCTION** as `aliases`: `carouselCanonical` now accepts one,
+  and `phCanonical` maps any *Pursuing the …* or *Embattled with the …* heading onto the canonical name.
+  `(Parabolan Quarry)`, `(Quarry Home)` and `(its lair)` join `CAROUSEL_PLACEHOLDER` — the last two
+  being the first title to carry two placeholders at once.
+  **Oneiropomp** (`oneiropomp`, `ON_OPTIONS`): both progress qualities on every badge (Intensity is the
+  reward at 2 Echoes a level, Duration pays 15 Sightings a level), and each cash-out's **three modulo
+  tiers in order**, best first, since those pay the top tier as often as your Intensity covers it and
+  the remainder downwards. Every row carries whether Parabola must be relaxed or strained, which is what
+  the two storylets are. The free Persuasive lines say their check *climbs with the Intensity you have
+  built* rather than naming a difficulty.
+  **The Sacroboscan Calendar** (`sacroboscan`, `SC_OPTIONS`): twelve weekly events, six under Whim and
+  six under Fancy, badged with their cycle and slot and how many rewards exist **only** there — the
+  guide is plain that none of it is profitable, so counting the uniques is the honest badge. Seven
+  events have a different title for a return visit, carried as aliases. One source disagreement is
+  recorded rather than resolved: the wiki's *Reconstruct the Museum of Prelapsarian History* page says
+  Whim 3 while the guide and the Fancy quality page say Fancy 3, and the row carries `guide`.
+  **Parabolan War** (`parabolan-war`, `PW_OPTIONS`, `PW_STRICT`): the Dolorous Pavilion. A cause shows
+  its stages, both endings and what it does to Parabolan Dominance; a piece of the Company shows which
+  way it leans (Oneironaut or Cultivator, which is all those choices do); and each of the eighteen
+  Ravages options shows what it clears, in how many actions, at how many Echoes a Ravage — with the
+  item's own price carried so the suite can recompute the rate. **The campaign trail itself is
+  deliberately not badged**: the guide describes it by action TYPE (safe 1 Advance! an action, morale
+  1.67, fast 3, Airs 4, skills 2) and never names the options, so those rates live in the rules line.
+  *A Visitor* is two ordinary words, so it is `strict` on a greeting saying the Dolorous Pavilion.
+  **A Cub's Education** (`cubs-education`, `CE_OPTIONS`, `CE_NOT_CATS`): the four rewards by band of
+  cats introduced, and 22 introductions each marked as counting once and whether it costs Fate. The
+  guide's list of felines that do NOT count — Ministers, tigresses, the Panther — is kept in
+  `CE_NOT_CATS` and shown on the heading's tooltip, because "why is my cat not here" is the question
+  this content raises.
+  Three storylets in Parabola offer a *Return to your Base-Camp*, so two of them are filed under the
+  wiki's disambiguated titles with the plain one as an alias, the same rule Hunter's Keep follows for
+  *Prepare yourself*.
+
   **Faction results are always on the badge, after it** (2026-09-17, on request, and step 5 of the
   adding-fallen-london-features skill). Any `Renown:` or `Favours:` an option gives or takes is a
   row field `factions: [[quality, change], ...]`, and every feature's badge text is
@@ -2589,6 +2710,48 @@ Confirmed live by the author:
   **(4) Professional Activities.** Which of page and guide is right on the fourteen jobs that disagree,
   and whether the Licentiate's quoted titles match.
 
+- The **Hunter's Keep, Mutton Island and Venderbight badges** (added 2026-09-17). Nothing seen in the
+  game. Report first, in order:
+  **(1) The two greetings that have never been read.** What the game says on Hunter's Keep and in the
+  tomb-colony (*"Welcome to …, delicious friend!"*). Until those are known, `Exploring the island`,
+  `Investigate the gardens`, `Examine the books`, `A game of charades` and `A Game of Chess` stay
+  unbadged, and a report is all it takes to turn them on — and to move either gate up to an exact list.
+  **(2) The storylet titles the wiki disambiguates.** Whether the books storylet reads *Examine the
+  books*, the jetty one *Put to Zee!* and the chess card *A Game of Chess* on screen, without the
+  bracketed place the wiki adds.
+  **(3) Whether the Venderbight cards are dealt as the table says.** In particular whether *A Game of
+  Chess* really wants Having Recurring Dreams: A Game of Chess 3, and whether anything is dealt at
+  Nemesis 14 that the table has down for 11–13.
+  **(4) The two either-or payouts.** What *Carouse with the dead* and *Snatch a bat out of the air!*
+  actually give, and whether either has odds the pages do not state.
+
+- The **Godfall, Maze-Garden, Polythremic Promenade, Port Cecil and zee-beast badges** (added
+  2026-09-17). Nothing seen in the game. Report first, in order:
+  **(1) The approach storylet's real headings.** Whether *Approaching the …* reads as the seven names in
+  `ZB_APPROACH_NAMES` — they come off the kill pages, not from a screen. A hunt with no badge anywhere
+  means the heading is an eighth name, and one line in that list fixes it.
+  **(2) The placeholders.** Whether the game writes *Pursue the Angler Crab* and *Fight on behalf of
+  your Prisoner's Mask* the way the wildcards expect, and what it puts in place of `(garment)` for each
+  of the six garments.
+  **(3) The two titles that cover two options.** PARTAKE's *Allow your (garment) to join in* and the
+  Lifeberg hunts: whether the game really shows one title in each case, or disambiguates them somehow.
+  **(4) The figures nothing can read.** Whether a Low Tide push at Port Cecil really is 1 + the other
+  faction's preparation, and whether the Maze-Garden's trades at Disposition 60 are about two thirds of
+  the table, as the guide says.
+
+- The **six Parabola badges** (added 2026-09-17). Nothing seen in the game. Report first, in order:
+  **(1) The two storylets named for the quarry.** What *Pursuing …* and *Embattled with …* actually read
+  as on screen, and what the game puts in place of `(its lair)` and `(Quarry Home)`. `phCanonical`
+  matches the shape rather than a list, so a different wording is the one thing that would blank the
+  whole second half of a hunt.
+  **(2) The Calendar's option titles.** Whether the twelve events read as the Whim and Fancy quality
+  pages have them, and whether a return visit really is a differently titled option. And whether the
+  museum sits at Fancy 3, as the guide says, or Whim 3, as one wiki page says.
+  **(3) The ten *Move out!* options.** Whether the game shows them all by that one title, as the wiki's
+  numbering implies.
+  **(4) The Cub's cats.** Whether all 22 introductions are on the storylet at once, and whether the
+  Midnight Matriarch of the Menagerie of Roses is a separate introduction from the plain Matriarch.
+
 - The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
   table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
   looking at the screen can confirm: a wrong number renders exactly as well as a right one. They
@@ -2995,6 +3158,32 @@ Current tests:
   the hand badge as a label. The two Wilmot's End suites check that every gating level a choice can set
   leaves a storylet open at 2 and at 4, and that the shared titles (*Millicent Clathermont*, *An exchange
   of favours*) resolve only by the open storylet.
+- `FallenLondon/test/choice-chessboard.test.mjs`, `choice-parabolan-hunting.test.mjs`,
+  `choice-oneiropomp.test.mjs`, `choice-sacroboscan.test.mjs`, `choice-parabolan-war.test.mjs`,
+  `choice-cubs-education.test.mjs` — one per feature. The Chessboard suite recomputes the guide's score
+  table from the two columns. The hunting suite pins every quarry's Ferocity, that no badge states a
+  difficulty, and that any *Pursuing the …* / *Embattled with the …* heading — including a quarry no
+  guide has heard of — lands on its storylet. Oneiropomp pins the three modulo tiers in order and the
+  state of Parabola on every row. The Calendar suite pins the two cycles filling 1–6 exactly once and
+  the seven return-visit aliases. The war suite recomputes all eighteen Ravages rates from their parts
+  and pins that the trail is not badged. The Cub's suite pins the reward bands tiling without a gap.
+- `FallenLondon/test/choice-godfall.test.mjs`, `choice-maze-garden.test.mjs`, `choice-promenade.test.mjs`,
+  `choice-port-cecil.test.mjs`, `choice-zee-beasts.test.mjs` — one per feature. Godfall pins that its
+  three Echo figures agree with the ending's formula and that every Oblation is a paid option and a free
+  one. The Maze-Garden recomputes every trade's rate from count × price ÷ cost, pins *Select a head from
+  the pile* above every other +7, and that Perambulating shows only when it is not +4. The Promenade
+  derives each payout's Echoes per action from its value over twelve actions. Port Cecil pins the flat
+  +3 CP across High Tide and that no Low Tide badge states a total. The zee-beast suite pins all seven
+  approach headings resolving to one storylet, the quarry wildcard, and *Take a risk* as the only action
+  whose failure loses Pursuit.
+- `FallenLondon/test/choice-hunters-keep.test.mjs`, `choice-mutton-island.test.mjs`,
+  `choice-venderbight.test.mjs` — one per feature. Hunter's Keep pins that every row carries a payout
+  (the badge is not the flat progress), `★` on exactly the fifteen Hunter's Insight rows, and *Talk to
+  her* resolving under each of its two storylets. Mutton Island pins `reset` on exactly the lines that
+  end the cycle, the two rows where the pages beat the guide, and that its gate and `inFotzArea` read
+  the one captured greeting the same way. Venderbight pins the two either-or options ranked at what
+  they guarantee, the Luck expectation, the hand's stat tie-break, and that *A woman of sinister
+  repute* never enters the hand.
 - `FallenLondon/test/choice-brawling-dockers.test.mjs`, `choice-assembling-skeleton.test.mjs`,
   `choice-professional-activities.test.mjs`, `choice-hearts-game.test.mjs` — one per feature. Brawling
   pins every cap against its threshold and the Brawl it is reached at, the guide's "no harder than the

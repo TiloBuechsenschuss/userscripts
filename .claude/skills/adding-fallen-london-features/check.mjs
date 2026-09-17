@@ -221,8 +221,11 @@ if (!url || !url.endsWith('/FallenLondon/' + SCRIPT_NAME)) {
 // userscript manager updates on the version number and on nothing else.
 let head = null;
 try {
+  // maxBuffer, because the script is past a megabyte and execFileSync's
+  // default is exactly that: without it this threw ENOBUFS and the catch below
+  // quietly skipped the @version and AGENTS.md checks altogether.
   head = execFileSync('git', ['show', 'HEAD:FallenLondon/' + SCRIPT_NAME],
-    { cwd: repo, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+    { cwd: repo, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 64 * 1024 * 1024 });
 } catch { /* not a checkout, or a new file: skip the comparison */ }
 
 if (head != null) {
@@ -236,7 +239,7 @@ if (head != null) {
     let loaderHead = null;
     try {
       loaderHead = execFileSync('git', ['show', 'HEAD:all-in-one/fallen-london.js'],
-        { cwd: repo, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+        { cwd: repo, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 64 * 1024 * 1024 });
     } catch { /* ignore */ }
     const loaderWas = loaderHead && (loaderHead.match(/^\/\/ @version\s+(.+)$/m) || [])[1];
     if (loaderWas && loaderWas.trim() === meta(LOADER, 'version')) {

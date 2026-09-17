@@ -66,29 +66,29 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Hearts%27_Game_(Guide) [Watchmaker's Hill] (implemented)
 
   Early Parabola:
-    - https://fallenlondon.wiki/wiki/The_Chessboard_(Guide) [The Chessboard]
-    - https://fallenlondon.wiki/wiki/Parabolan_Hunting_(Guide) [Parabolan Base-Camp]
-    - https://fallenlondon.wiki/wiki/Oneiropomp_(Guide) [Viric Jungle]
-    - https://fallenlondon.wiki/wiki/The_Sacroboscan_Calendar_(Guide) [The Waswood]
+    - https://fallenlondon.wiki/wiki/The_Chessboard_(Guide) [The Chessboard] (implemented)
+    - https://fallenlondon.wiki/wiki/Parabolan_Hunting_(Guide) [Parabolan Base-Camp] (implemented)
+    - https://fallenlondon.wiki/wiki/Oneiropomp_(Guide) [Viric Jungle] (implemented)
+    - https://fallenlondon.wiki/wiki/The_Sacroboscan_Calendar_(Guide) [The Waswood] (implemented)
 
   Late Parabola:
-    - https://fallenlondon.wiki/wiki/Parabolan_War_(Guide) [The Dolorous Pavilion]
-    - https://fallenlondon.wiki/wiki/A_Cub%27s_Education_(Guide) [The Dome of Scales]
+    - https://fallenlondon.wiki/wiki/Parabolan_War_(Guide) [The Dolorous Pavilion] (implemented)
+    - https://fallenlondon.wiki/wiki/A_Cub%27s_Education_(Guide) [The Dome of Scales] (implemented)
 
   Early Zailing:
     - https://fallenlondon.wiki/wiki/Port_Carnelian_(Guide) [Heartscross House] (implemented) (works)
-    - https://fallenlondon.wiki/wiki/Time_Passing_at_Hunter%27s_Keep_(Guide) [Hunter's Keep]
-    - https://fallenlondon.wiki/wiki/Time_Passing_on_Mutton_Island_(Guide) [Mutton Island]
-    - https://fallenlondon.wiki/wiki/Venderbight_(Guide) [The tomb-colony of Venderbight]
+    - https://fallenlondon.wiki/wiki/Time_Passing_at_Hunter%27s_Keep_(Guide) [Hunter's Keep] (implemented)
+    - https://fallenlondon.wiki/wiki/Time_Passing_on_Mutton_Island_(Guide) [Mutton Island] (implemented)
+    - https://fallenlondon.wiki/wiki/Venderbight_(Guide) [The tomb-colony of Venderbight] (implemented)
     - https://fallenlondon.wiki/wiki/Zailing_(Guide) [Zailing the Unterzee] (implemented) (works)
     - https://fallenlondon.wiki/wiki/Embarking_on_a_Voyage_of_Scientific_Discovery_(Guide) [Zailing the Unterzee] (implemented) (works)
 
   Mid Zailing:
-    - https://fallenlondon.wiki/wiki/Pilgrimages_in_Godfall_(Guide) [Aeschaven]
-    - https://fallenlondon.wiki/wiki/The_Maze-Garden_(Guide) [The Maze-Garden]
-    - https://fallenlondon.wiki/wiki/Polythremic_Promenade_(Guide) [Polythreme Streets]
-    - https://fallenlondon.wiki/wiki/Port_Cecil_(Guide) [Port Cecil]
-    - https://fallenlondon.wiki/wiki/Hunting_the_Beasts_of_the_Zee_(Guide) [Zailing the Unterzee]
+    - https://fallenlondon.wiki/wiki/Pilgrimages_in_Godfall_(Guide) [Aeschaven] (implemented)
+    - https://fallenlondon.wiki/wiki/The_Maze-Garden_(Guide) [The Maze-Garden] (implemented)
+    - https://fallenlondon.wiki/wiki/Polythremic_Promenade_(Guide) [Polythreme Streets] (implemented)
+    - https://fallenlondon.wiki/wiki/Port_Cecil_(Guide) [Port Cecil] (implemented)
+    - https://fallenlondon.wiki/wiki/Hunting_the_Beasts_of_the_Zee_(Guide) [Zailing the Unterzee] (implemented)
 
   Late Zailing:
     - https://fallenlondon.wiki/wiki/Piracy_(Guide) [Gaider's Mourn, Zailing the Unterzee]

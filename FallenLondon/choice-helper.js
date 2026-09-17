@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.11
-// @description  Advice on what Fallen London's storylets and opportunity cards do for you, badged onto them where you make the choice. Its reference panels open from the "⚙ UX" button of Fallen London UX Enhancers, so install that as well to reach them; every badge works without it. (1) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (2) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. Its panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, every port on the Unterzee -- which region it is in, whether docking there wipes Troubled Waters and the zee-threats, and what it takes to be able to sail there at all, with the hunting grounds and the one-time destinations marked as the different things they are, since a port that resets nothing and a place that is not a dock are two different answers -- the three winds and the dreams they start, and the whole card table, searchable. (3) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: behind the UX button where that is docked beside Fallen London’s own Travel button, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. Its panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. (4) In Port Carnelian, where a governor's term runs 26 actions and Fallen London deals no opportunity cards at all, the badges go on storylets and on their options instead. The whole term is one storylet, Matters of State, so what is rated is the list of options inside it -- and the options of the two of those that open into a storylet of their own. Each shows the net change in resources that option makes, with a mark for what it does to Imperial Legitimacy -- the number that ends a term at once when it reaches 0, sending you back to zee with nothing: a down mark when the net was paid for out of Legitimacy, an up mark when the option buys Legitimacy back instead, and no mark at all when it leaves Legitimacy alone. The colour says the same thing the mark does and nothing else -- red for spending Legitimacy, green for buying it back, light blue for the rows that leave it alone, slate for the endings -- so the marks are enough on their own for anyone who cannot separate the red from the green. Then a Fate label on the one Fate-locked option, and "cash out" on the four endings, which spend a currency rather than gaining any. The four endings carry a figure rather than only a label: each shows what cashing out would pay you RIGHT NOW, in Echoes, worked out from your own Striped Delights and Silver Horseheads. Fallen London states both on the Myself tab and nowhere near the port, so the script reads them where they are shown, remembers them, and refreshes them in a hidden frame -- in the background while an ending is on screen, and again when the panel is opened on a stale reading -- exactly the way the festival reads how deep you are. A faction Favour is marked with an icon and priced at 0: it is a story quality capped at 7 rather than an item, nothing buys one, and pricing it would let a fixed reward out-rank a real cash-out on a number nobody acts on. Tribute, which has no market price either, is listed the same way and left out of the total. A Favour in High Places is not one of those despite the name -- it is an ordinary item the Bazaar buys -- so it is priced like any other. A question mark says the reading behind the figure is over a minute old, since every action of a term moves both currencies, and the plain "cash out" label is what is left when your numbers have never been read. The tooltip carries the whole sum: what you hold, what it turns into, what each piece is worth, what the next rounding step up would cost you -- 105 and 176 are worth waiting for and 140 is not -- and, for the two endings that pay a fixed reward and empty both purses, what taking one gives up. Half the table is worth the same +5, so whether it costs Legitimacy is the only thing separating those rows. The tooltip carries the Time Passing in Office and Airs windows the option is offered in, every currency change with its currency named, the requirement and the note; the two options that pay ten or fifteen of ONE of the two currencies, the game's choice rather than yours, say so in words, since reading them as that much of each would make them the best options in the table by a distance. A storylet the guide splits in two is badged with the better net and keeps both branches in its tooltip, because the losing branch is how Imperial Legitimacy is bought back. Its panel, Port Carnelian, opens on the same calculator -- your purse, and all four endings priced against it with the best one named in words -- and then holds the rest of the guide: how to unlock and reach the posting, the rules a term is played by, every option grouped by the clock and searchable, what the two currencies cash in for, the reward tiers with the two worth aiming at picked out and a letter against the step each of your two currencies is standing on, and the strategy. (5) On a Voyage of Scientific Discovery -- the Dilmun Club's expeditions to Bullbone Island, Corpsecage Island and Grunting Fen, which deal no opportunity cards either -- every action gets a badge for what it pays in research pages, coloured by which of the three kinds it is: Archaeological, Cryptopalaeontological or Theosophistical. You sail to one island for one kind, and at every step of the visit you are choosing between the action that pays it and one that pays goods instead, so an action paying no pages is labelled with what it does pay rather than scored: there is no exchange rate between pages and Echoes, and inventing one would be the badge choosing your voyage for you. The three gambles at the end of a visit carry their EXPECTED value rather than the figure they advertise, since the wiki gives both outcomes and the odds -- taking the safer of the two is worth about six times the greedier one once the failure is priced in. The tooltip carries the step of the visit the action belongs to, its challenge, everything it gives, what it costs, and what a failure costs; where the game picks between two payouts rather than you, that is said in words. The same badges cover the two screens at your Lodgings, where the pages are generated before you sail and spent afterwards, and there the figure is the guide's pence per page, because everything on that screen is priced. Three actions and three storylets have the same names on all three islands and pay a different kind of page on each, so the feature works out which island it is looking at from the greeting or from the storylet you have open, and says nothing at all rather than guess. Its panel, Scientific Voyages, holds the rest: how the voyage is unlocked, what each island pays and costs to reach, every action grouped by island and searchable, and how to squeeze the most preparatory research out of London first. (6) In your University Laboratory every opportunity card gets a badge for the Laboratory Research its best option pays on a success, worked out at your own Equipment for Scientific Experimentation -- nearly every figure in the lab is a formula on it, and on your students' levels and how many people work there, all of which Fallen London states on the Myself tab, so the script reads them there, remembers them, and refreshes them in the background. The badge ranks only the options you can take with nothing special in hand; one behind an Unavoidable Epiphany, an Unexpected Result or an item is kept in the tooltip and marked with a down triangle when it would pay more. A star marks an option that also hands you an Unavoidable Epiphany, a solid down triangle one that uses something up, a question mark a Watchful challenge's success figure, and an approximately-equal sign the expected value of a Luck option. Where something the figure depends on has not been read -- your Equipment, a student's level -- the badge shows the range rather than a guess, in a neutral grey. Colour runs slate, blue, teal, amber, gold by tens of research, with the number always printed; Parabolan Research is marked PR in violet, and an option that pays no research says what it does instead. Open a card and every option on it is badged in its own right, each tooltip carrying the requirement, the challenge, every outcome with its formula and your figure, and where the guide's student table disagrees with the option page, both. Its panel, University Laboratory, shows your Equipment, staff, students, project and what Circulate a draft of your findings would pay right now, every laboratory card searchable, the repeatable projects, the equipment ladder, and which experts suit which projects. (7) Arbor, of the Roses deals no opportunity cards, so the badges go on the London card that takes you there, A Dream of Roses -- how many actions a trip costs, with your last Possessions reading of Attar saying whether the dream opens on Near or Far Arbor -- on the two storylets a stay happens in, Near Arbor and Far Arbor, whose tooltip is a map of every district's options and the guide's grinds, and on every option inside them. An option's badge is what it changes, "Attar +2" or "Attar −3 EI +3", with the sign carrying the direction and the colour only repeating it: there is no exchange rate between Attar and what it buys, so none is invented. A question mark is a stat challenge's success outcome, with the failure and the stat that makes it certain in the tooltip; ⏏ an option that spends all your Permission to Linger and so ends the stay; a star the tribute's rare success, which cashes in all your Attar; ≈ the expected value of the one even-odds option. The six options that scale with your Permission to Linger or your Attar say so in words rather than invent a figure, and where the guide's table and an option page disagree, the page is followed and the tooltip quotes both. (8) Three early carousels that deal no opportunity cards are badged the same way: the storylet heading gets a summary whose tooltip lists every option, and each option of the carousel storylet you have OPEN gets a badge -- only there, since names like "Make bobbins" or "Treat the soil" could title an option anywhere. A question mark is a stat challenge's success figure, ▼ an option that uses something up, and a figure after the question mark what a failure takes back. At L. B. Industries beneath the Blind Helmsman, a work option shows the Foreman's Favour it pays ("FF +15? −19") and a payout its cost and what it buys ("110 → Reliquary"), with the Bone Fragments your surplus Favour turns into in the tooltip. In the Department of Menace Eradication's hunts, an option shows what it does to Hiding, Wariness or Savagery ("Hiding −10? +1"), with its difficulty -- nearly all of them scale with Savagery -- worked out at each contract's starting Savagery in the tooltip; the poisoned bait's Luck challenge is its expected value; the confrontations and bounties name what they pay, and a contract what it sets. In Vertiginous Horticulture, a nurturing option shows the Nurturing it pays as a range over the Difficulties of the plants it can be used on ("Grow +14–16?"), a plant its Difficulty, and a buyer what the sale gives, with the rare successes, the average success and the scaling reward at 150 in the tooltip. Where the guide and an option page disagree, the page is followed and the tooltip says so. (9) Expeditions from Base-Camp in the Forgotten Quarter get the same treatment across their four storylets, each badge answering the question that screen asks: while preparing, the Crate of Expedition Supplies an option gives ("Sup +3 ▼", with the guide's Echoes per Supply in the tooltip); when choosing, an expedition's length and the Archaeologist or Fate it needs ("30 sup · Arch 3"), with what it pays, its rivals and the guide's worst-case Supplies in the tooltip; on the expedition, the Archaeologist's Progress a success makes ("Prog +3? ▼"), the Rivals' Progress a hindrance takes off, and what a conclusion pays; and in a confrontation, the Progress it makes. A menace an option always raises is named after its figure ("+Wounds", "+Nightmares"), so a cheap line never reads as free; a menace only a failure raises is in the tooltip. (10) Cat and Mouse -- the Implacable Detective's three cases and the three hunts for a half of the Screaming Map -- gets the same treatment: in a pursuit, the Cat an option makes ("Cat +8 ▼"), with the Mouse it spends named when that is two ("Cat +10 Mouse −2 ▼") and the 70% Luck lines carrying their expected Cat ("≈Cat +3.5"); on the screens that start a case, what the case pays and the guide's Echoes per action ("Plaques · 1.19 EPA ▼"); and on an ending, the Cat it needs and what it pays ("60+ Journals + Jade"). The tooltip carries the Mouse band an option is offered at, what it uses up and the guide's Echo cost of that, and where the guide and an option page disagree, both. (11) At Mrs Chapman's Boarding House in Spite, every soup and parlour option of The Season in Soup is badged with the item it pays and how many, from Persuasive 0 to the cap of 230 ("Zee-Ztory ×1–5"), with the figure at each fifty in the tooltip -- every option pays about the same Echoes, so the item is the choice -- and a star on the three that also give a noise in the walls. Promenade pays a different item each week, so its week is read off the parlour option beside it. (12) Five more early activities get the same storylet and option markup. In the Mind of a Long-Dead God, where every payout costs Stormy-Eyed and a challenge pays only when you FAIL it, each option shows its reward -- Dangerous or Shadowy +10 CP, or an Aeolian Scream -- with a cross when a failed challenge is what pays ("Shadowy +10 ✗"); the cards are badged in your hand with their options' rewards too, the one-word "Rain" and "Geology" only while the greeting says you are in the Mind. Engaged in a Case shows the Detective's Progress a success and a failure make ("Prog +6/+3?"), the actions when more than one, and the expected Progress of the Luck options on the faction cards, with every Case Difficulty formula worked out at the Starving Poet's 5 and the Heiress's 8 in the tooltip. The Sunken Embassy shows the Fragments of Infernal Affairs a success and a failure make ("Frag +25/−15?") and each reward's cost ("100 → Verse"). The Law-Furnace shows "AR base?" on its checks, the bonus Actus Reus of its item trades and what each payout pays in, with the base worked out at four stat averages. The Prelapsarian Museum shows Identifying... on the lab's options, the odds of an Assert, the Gratitude of a bone, a donation or the sphinxstone, and every cash-in's cost and payout. (13) Five more. On a Heist badges every heist card's options with what they do to The Burglar's Progress and Cat-Like Tread -- the expected change for a Luck option ("≈Prog +1 Tread −1"), the success and the Tread a failure costs for a stat check -- and each card in your hand with the best option needing nothing special, ranked by the Tread you can expect to lose before the Progress, with a down triangle when Inside Information, a Key or a stat would do better; every prize shows what it pays and the guide's Echo value. The Spider Symposium shows the Applause a success and a failure make and each reward's cost. Short Stories shows the pages a writing option makes and the actions it takes, the Potential a rework option adds and where it stops working, and the Echoes of a published story on a success and a failure. Flash Lays shows the Progress or Up your Sleeve a success makes, with the difficulty for both marks in the tooltip, and badges the cards in your hand the same way the heist does. Social Actions shows a letter's effect on its recipient and the Corresponding... sending it earns, each correspondence reward's cost, and the assassin cards' payouts, with a skull on the option that kills you. (14) In the Cave of the Nadir every Cave card's options show what they give, the guide's Echo value where it has one, and the Irrigo they cost; the undiscardable cards in your hand show their best option needing nothing special, with a down triangle when an item would do better, and ten cards with ordinary names are badged only while the greeting says you are in the Cave. The ways to a Ray-Drenched Cinder are badged too. At the Empress' Court every option shows the Inspired... a success and a failure make, a Luck option its expectation, and a finished work the goods it pays -- 17 Echoes for every minor work and 30 for every major one, so the item is the choice. Breeding Monsters shows the CP a progress option makes and, for each beast, both payouts of its 70% breeding and the guide's expected Echoes. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. (15) Five more, all storylet-and-option markup with no panel. Tales of Mahogany Hall has two halves that pull against each other -- six storylets that BUILD the Tales of Mahogany Hall quality and a weekly bill that spends it on a day’s show -- so a building option is badged with the CP it makes and what it pays (“Tales +2? · Brass ×102”), a show option with the CP it costs and what it pays (“−8 CP? · Jade ×200”), and a day on the bill with the Tales it needs and the show’s own reward, which is paid whichever option you take there. The CP is the number because every line pays about the same Echoes and the whole of the guide’s advice is about the CP: a failed show costs 14 rather than 8, and cashing out never takes you below 10. Four rows that raise four or five menaces whatever happens are labelled in words instead of scored. Master-Classes in Etiquette, in the same hall, is the reverse: take one of four pupils, raise their Pygmalion to 12 and graduate them. A lesson shows the Pygmalion CP it makes and its pay, the graduation shows the reset and the lump, and a pupil shows what the whole course pays with the guide’s Echoes per action -- which is the only decision that changes the rate. The Pygmalion challenges, whose failures push you BACK, carry “▼ Pyg −2” so a line that can cost you ground never reads like one that cannot. The two Fate-locked pupils are left out of the lesson table on purpose: the guide records their option titles only as “Choice 1” and “Storylet 2”, and a badge cannot be hung on a title nobody knows. In the Sixth Coil, under the Labyrinth of Tigers, both the room names and the option titles are randomised by four qualities, so the table carries all 35 room names the wiki records and spells every option’s verbs out rather than wildcarding them -- a wildcard verb would make two different options the same pattern and neither would be badged. Each action shows what it does to the two progress qualities and the stat it is checked on (“Patrol +1 Coil +1 · Watchful 250?”), because the guide’s rule is to leave when the two together reach 39, which makes the sealed door -- two Patrolling and no Coiling, and no challenge -- worth twice any other line. A Burden shows what it gives and the three levels of Unburdened it costs, worth 60 points of every attribute; the payouts on the way out show what each Burden pays per point of Patrolling. The Rat Market is a shop rather than a carousel: getting in costs three actions once a weekend and nothing after, selling costs no action at all, and a sale is badged with what it is worth in Echoes as a RANGE from a fresh market to a saturated one, since your Rat Market Saturation is stated nowhere the script can read it. Every one of those prices is worked out from the single figure each option page states, the item’s Nominal Sale Value, and reproduces every Rat-Shilling price the guide prints. What the market SELLS is deliberately not priced -- the stock turns with the Rat-Wind, the Rat-Moon and two seasons -- and those two stalls say so instead. And A Boxful of Intrigue, the fourteen-action carousel left behind in Spite, is badged with the SIDE each option takes, in words: every option is the same Shadowy 130 for the same one point, so what separates them is which power they serve, and serving the wrong one is not a smaller reward but a Turncoat. The two Salon options, which suit either side and pay no Kingmaker, say so; the payouts carry the guide’s Echoes for the whole run, with a tooltip saying that the six Correspondence Plaques inside that figure come from Intercept the messages and not from the payout. (16) Four more, all storylet and option markup with no panel. Underclay, beneath Spite, runs on TWO progress qualities instead of one -- Stone Confessions and Convincing Falsehoods, each raised on a storylet of its own and both spent on the hub, which the two are entered from for nothing -- so an option shows the points a success makes and what a failure takes BACK (“Confessions +30? −13”), while a failure that only raises a menace stays in the tooltip, as everywhere else. A reward shows what it costs, what it pays and the guide’s Echoes per point, which runs the opposite way to intuition: the cheap rewards are the efficient ones, and every point you hold over a reward’s cost comes back as Shards of Glim, so nothing is lost by overshooting. Hunting Bees in Old Newgate, in the University, puts the ATTRIBUTE on the badge as well as the Bees (“Bees +25? −6 · Watchful 88”), because which attribute a line is checked on is set by Dagger or Flint and almost every option shifts that by a random ten either way: the same option is not the same option two actions later, and a long run changes sides under you. An Airs option carries the window it appears in, and where the guide and the option pages disagree about that window by a point the pages are followed and the badge says so. Featuring in the Tales of the University is the one feature here that badges storylet headings and NOTHING else: the guide records no option tables for it, so rather than invent figures each storylet shows the level it sits at and what it does, and an eject mark -- not the mark used for spending something, since nothing is spent -- on the two steps that shut a door for good, the one that locks the whole first Term Passing carousel and the one that ends the story. And Term Passing itself covers the University’s carousel. The guide describes three of them, never open at once and picked between by how far along that story you are; only the LAST, which is the one still open once the story is finished, is carried here, since the other two lock behind you for good. Each option shows three things in that order: the progress it makes, what it is worth in the guide’s Echoes, and last of all any Connected it BUILDS -- “TP +4? · 1.24 E · Benthic +12”. The Connected is last because it is the reason to run the carousel at all rather than the reason to pick one option over another: the Echoes rank the options, and the two Colleges are what you are there for. Only gains are shown; a Connected an option spends stays in the tooltip, the way a menace on a failure does everywhere else. Those figures are read out of each option’s payout rather than written down a second time beside it, so the badge and the tooltip can never come to disagree. Seven more come from the early Person of Some Importance guides, and read alike: a line that moves a progress quality shows the change points a success and a failure make (“Posting +2 CP? / +1”), a Luck line its expected value, and a payout what it pays with the guide’s Echoes for a success and a failure (“Rifles · 17.5? / 7.5”). A Trade in Reputations badges the advertising campaign’s own cards in the hand and every option on them with the Name Recognition it pays, and because every figure there depends on Enterprise, which cannot be read mid-campaign, the badge quotes it at Enterprise 25 -- the free maximum the guide tells you to raise it to -- and the tooltip gives it at 0, 10, 15 and 20 too; a finishing card’s 500 then sits plainly above an ordinary card’s 312. Riding the Savage Cobbles in Concord Square, Working toward a Foreign Posting at the Foreign Office and Fighting a War of Assassins in the Forgotten Quarter and the Flit badge every step and every conclusion, and label each storylet with the level it belongs to. Publishing a Newspaper labels each of the twelve Hours’ storylets and badges the copy each option writes, and every edition with what it needs and the guide’s Echo range. The Wars of Illusion covers the Investigating and Seeking carousel on the Heights of Chicanery, the Bats and Cats one after it, and the Theosophistical cards, in the hand as well; where the guide and the option pages disagree the pages are followed and the tooltip says what the guide has. And the Temple Club shows each exchange as what it takes and what it gives, with a star on the four the guide names as the reasons to come. A party in Veilgarden badges every option with the Talk of the Town it makes, a Time cost other than one, any Making Waves and the Favours it pays; its cards offer a different option at each Time Remaining, which cannot be read, so a card in the hand is labelled with the Times it plays at rather than rated, and the option it shows when opened is badged. The two carousels of Wilmot’s End, Searching out a Missing Woman and Doing Business, show what each opening choice sets -- the storylets you will see follow from it -- the change points each step makes, their Luck cards at the expected value, and what each payout pays. A brawl outside the Blind Helmsman shows what each attack adds and a failure takes back, for a group and for a lone fighter until a reward on screen tells which you are, and every reward with its threshold and its capped extra. In the Bone Market every bone shows the pennies and attributes it adds, from a failure to a success, and every buyer what they pay, what it scales with, and whether they fall to Bone Market Exhaustion. Every professional job shows the Invoices it pays and the Services Rendered it earns, every payout what it costs; and every Hearts’ Game accomplice card shows the Progress or Preparation each action makes and the Preparation the advanced one needs, with the rewards from the Page priced in Exploits. Built as a feature registry so further advice can be added as entries.
+// @version      1.14
+// @description  Advice on what Fallen London's storylets and opportunity cards do for you, badged onto them where you make the choice. Its reference panels open from the "⚙ UX" button of Fallen London UX Enhancers, so install that as well to reach them; every badge works without it. (1) In The Crowds of Spite (the Pickpocket's Promenade) every opportunity card gets a rating badge showing the bonus Pickpocket's Trophies it pays on a successful pickpocket (+0 to +9), colour-coded from grey to gold, with a dagger when the card draws from the inferior skill table, and a tooltip carrying the Shadowy challenge, the pass-by option and what a failed pickpocket costs. Watchful Eyes and the Rat-Catcher, which give no trophies at all, are labelled instead of scored. (2) While zailing the Unterzee every opportunity card gets a badge showing what the best line you can take with nothing special in hand costs you in Troubled Waters, in change points, and whether it makes full progress, half, or none -- with a tooltip carrying every option on the card: its challenge, what it is gated on, what it gives, and what a failure costs. Black (urgent) cards are marked as the blockages they are. Its panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled Waters does at 7 and at 8 and which zee-threat turns it into which black card, every port on the Unterzee -- which region it is in, whether docking there wipes Troubled Waters and the zee-threats, and what it takes to be able to sail there at all, with the hunting grounds and the one-time destinations marked as the different things they are, since a port that resets nothing and a place that is not a dock are two different answers -- the three winds and the dreams they start, and the whole card table, searchable. (3) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for each of the eight figures the festival pays -- a light ramp running from aquamarine through blue, violet and rose to gold, so no two payouts look alike and none of them disappears into the card art underneath, with a star when the card also offers a rare item you have not got yet, a tick when you already hold everything it offers, and a question mark when your Possessions have not been read so neither can be claimed. Every value at this festival depends on how deep you are, so the badge quotes the figure for your depth wherever that can be established and otherwise shows the range across the depths rather than a number it cannot justify. Fallen London states Full Fathom Five on the Myself tab and never on the diving screen, so opening the panel loads Myself in the background and reads the depth off it the same way it reads which items you hold -- used only while that reading is a minute old at most, because every successful dive changes it. Over the top of that, while you are in the Royal Approach the script puts a depth control in the page itself -- a light blue card, so it reads as a control of yours rather than as one more dark box in a dark page: behind the UX button where that is docked beside Fallen London’s own Travel button, and again above your diving hand, so going a level deeper is one tap and every badge is exact again without opening anything. On a phone that control is a single light blue chip in the banner showing the depth, which cycles through the five and back to automatic. A depth you set by hand is forgotten the moment you surface, so it can never quietly go wrong. A coral pays no Favour and is labelled instead, gold until you hold one of the three items it turns into -- the three are mechanically identical, differing only in name, so any one of them finishes that coral for good and a second is a change of outfit rather than a reward -- with how many of that coral you are already carrying in brackets so two coral cards never read alike. A card offering a named piece of unique equipment adds the same label after its figure -- "400 - item (3)" -- since one of those is worth more than the Favour it trades for and every one beyond the first is trade-in stock, priced in the tooltip. The tooltip carries every claim the card offers at that depth, what it gives, and -- for a coral -- which band of Sights at the Festival yields which of the three. Its panel, Fruits of the Zee, is the checklist: how much Favour, Devotion, depth and Sights you have, how many actions it takes to reach each Devotion level and -- following a comment on the guide -- which Devotion to stop at and which depth to dive to, staged by what you still have left to collect rather than by the corals alone, which of the nineteen collectable items you are still missing (one per coral, the six that only turn up while diving, the six sold at the stalls and the Bride’s Litter-Cyst) and how to get each one, a depth-by-depth list of the unique rewards you have not got yet -- currency-only cards left out of it -- marking the ones a deeper dive would throw away, since a dive commits you to a depth and some rewards are only in the shallows, what your treasures and spare equipment would fetch if you traded them in, the whole card-by-depth table, and the stall price list marked with what you can afford. Anything you could collect right now -- a coral in hand while Sights sits in the right band, or an item you have the Favour for -- is called out at the top. On Supplication on the Shore itself, each option is badged in the game with the attribute its reward scales off -- every option pays the same Devotion, so that is the only thing separating them, and since which options you are offered depends on Airs of a Barren Zee (re-rolled every time you act) the useful question is which of the two or three in front of you right now matches your best stat. The two branches that raise no Devotion are labelled instead: the Custodial Chef as free, and the Fathomking’s servant as 7 Fate for a jump straight to Devotion 11. (4) In Port Carnelian, where a governor's term runs 26 actions and Fallen London deals no opportunity cards at all, the badges go on storylets and on their options instead. The whole term is one storylet, Matters of State, so what is rated is the list of options inside it -- and the options of the two of those that open into a storylet of their own. Each shows the net change in resources that option makes, with a mark for what it does to Imperial Legitimacy -- the number that ends a term at once when it reaches 0, sending you back to zee with nothing: a down mark when the net was paid for out of Legitimacy, an up mark when the option buys Legitimacy back instead, and no mark at all when it leaves Legitimacy alone. The colour says the same thing the mark does and nothing else -- red for spending Legitimacy, green for buying it back, light blue for the rows that leave it alone, slate for the endings -- so the marks are enough on their own for anyone who cannot separate the red from the green. Then a Fate label on the one Fate-locked option, and "cash out" on the four endings, which spend a currency rather than gaining any. The four endings carry a figure rather than only a label: each shows what cashing out would pay you RIGHT NOW, in Echoes, worked out from your own Striped Delights and Silver Horseheads. Fallen London states both on the Myself tab and nowhere near the port, so the script reads them where they are shown, remembers them, and refreshes them in a hidden frame -- in the background while an ending is on screen, and again when the panel is opened on a stale reading -- exactly the way the festival reads how deep you are. A faction Favour is marked with an icon and priced at 0: it is a story quality capped at 7 rather than an item, nothing buys one, and pricing it would let a fixed reward out-rank a real cash-out on a number nobody acts on. Tribute, which has no market price either, is listed the same way and left out of the total. A Favour in High Places is not one of those despite the name -- it is an ordinary item the Bazaar buys -- so it is priced like any other. A question mark says the reading behind the figure is over a minute old, since every action of a term moves both currencies, and the plain "cash out" label is what is left when your numbers have never been read. The tooltip carries the whole sum: what you hold, what it turns into, what each piece is worth, what the next rounding step up would cost you -- 105 and 176 are worth waiting for and 140 is not -- and, for the two endings that pay a fixed reward and empty both purses, what taking one gives up. Half the table is worth the same +5, so whether it costs Legitimacy is the only thing separating those rows. The tooltip carries the Time Passing in Office and Airs windows the option is offered in, every currency change with its currency named, the requirement and the note; the two options that pay ten or fifteen of ONE of the two currencies, the game's choice rather than yours, say so in words, since reading them as that much of each would make them the best options in the table by a distance. A storylet the guide splits in two is badged with the better net and keeps both branches in its tooltip, because the losing branch is how Imperial Legitimacy is bought back. Its panel, Port Carnelian, opens on the same calculator -- your purse, and all four endings priced against it with the best one named in words -- and then holds the rest of the guide: how to unlock and reach the posting, the rules a term is played by, every option grouped by the clock and searchable, what the two currencies cash in for, the reward tiers with the two worth aiming at picked out and a letter against the step each of your two currencies is standing on, and the strategy. (5) On a Voyage of Scientific Discovery -- the Dilmun Club's expeditions to Bullbone Island, Corpsecage Island and Grunting Fen, which deal no opportunity cards either -- every action gets a badge for what it pays in research pages, coloured by which of the three kinds it is: Archaeological, Cryptopalaeontological or Theosophistical. You sail to one island for one kind, and at every step of the visit you are choosing between the action that pays it and one that pays goods instead, so an action paying no pages is labelled with what it does pay rather than scored: there is no exchange rate between pages and Echoes, and inventing one would be the badge choosing your voyage for you. The three gambles at the end of a visit carry their EXPECTED value rather than the figure they advertise, since the wiki gives both outcomes and the odds -- taking the safer of the two is worth about six times the greedier one once the failure is priced in. The tooltip carries the step of the visit the action belongs to, its challenge, everything it gives, what it costs, and what a failure costs; where the game picks between two payouts rather than you, that is said in words. The same badges cover the two screens at your Lodgings, where the pages are generated before you sail and spent afterwards, and there the figure is the guide's pence per page, because everything on that screen is priced. Three actions and three storylets have the same names on all three islands and pay a different kind of page on each, so the feature works out which island it is looking at from the greeting or from the storylet you have open, and says nothing at all rather than guess. Its panel, Scientific Voyages, holds the rest: how the voyage is unlocked, what each island pays and costs to reach, every action grouped by island and searchable, and how to squeeze the most preparatory research out of London first. (6) In your University Laboratory every opportunity card gets a badge for the Laboratory Research its best option pays on a success, worked out at your own Equipment for Scientific Experimentation -- nearly every figure in the lab is a formula on it, and on your students' levels and how many people work there, all of which Fallen London states on the Myself tab, so the script reads them there, remembers them, and refreshes them in the background. The badge ranks only the options you can take with nothing special in hand; one behind an Unavoidable Epiphany, an Unexpected Result or an item is kept in the tooltip and marked with a down triangle when it would pay more. A star marks an option that also hands you an Unavoidable Epiphany, a solid down triangle one that uses something up, a question mark a Watchful challenge's success figure, and an approximately-equal sign the expected value of a Luck option. Where something the figure depends on has not been read -- your Equipment, a student's level -- the badge shows the range rather than a guess, in a neutral grey. Colour runs slate, blue, teal, amber, gold by tens of research, with the number always printed; Parabolan Research is marked PR in violet, and an option that pays no research says what it does instead. Open a card and every option on it is badged in its own right, each tooltip carrying the requirement, the challenge, every outcome with its formula and your figure, and where the guide's student table disagrees with the option page, both. Its panel, University Laboratory, shows your Equipment, staff, students, project and what Circulate a draft of your findings would pay right now, every laboratory card searchable, the repeatable projects, the equipment ladder, and which experts suit which projects. (7) Arbor, of the Roses deals no opportunity cards, so the badges go on the London card that takes you there, A Dream of Roses -- how many actions a trip costs, with your last Possessions reading of Attar saying whether the dream opens on Near or Far Arbor -- on the two storylets a stay happens in, Near Arbor and Far Arbor, whose tooltip is a map of every district's options and the guide's grinds, and on every option inside them. An option's badge is what it changes, "Attar +2" or "Attar −3 EI +3", with the sign carrying the direction and the colour only repeating it: there is no exchange rate between Attar and what it buys, so none is invented. A question mark is a stat challenge's success outcome, with the failure and the stat that makes it certain in the tooltip; ⏏ an option that spends all your Permission to Linger and so ends the stay; a star the tribute's rare success, which cashes in all your Attar; ≈ the expected value of the one even-odds option. The six options that scale with your Permission to Linger or your Attar say so in words rather than invent a figure, and where the guide's table and an option page disagree, the page is followed and the tooltip quotes both. (8) Three early carousels that deal no opportunity cards are badged the same way: the storylet heading gets a summary whose tooltip lists every option, and each option of the carousel storylet you have OPEN gets a badge -- only there, since names like "Make bobbins" or "Treat the soil" could title an option anywhere. A question mark is a stat challenge's success figure, ▼ an option that uses something up, and a figure after the question mark what a failure takes back. At L. B. Industries beneath the Blind Helmsman, a work option shows the Foreman's Favour it pays ("FF +15? −19") and a payout its cost and what it buys ("110 → Reliquary"), with the Bone Fragments your surplus Favour turns into in the tooltip. In the Department of Menace Eradication's hunts, an option shows what it does to Hiding, Wariness or Savagery ("Hiding −10? +1"), with its difficulty -- nearly all of them scale with Savagery -- worked out at each contract's starting Savagery in the tooltip; the poisoned bait's Luck challenge is its expected value; the confrontations and bounties name what they pay, and a contract what it sets. In Vertiginous Horticulture, a nurturing option shows the Nurturing it pays as a range over the Difficulties of the plants it can be used on ("Grow +14–16?"), a plant its Difficulty, and a buyer what the sale gives, with the rare successes, the average success and the scaling reward at 150 in the tooltip. Where the guide and an option page disagree, the page is followed and the tooltip says so. (9) Expeditions from Base-Camp in the Forgotten Quarter get the same treatment across their four storylets, each badge answering the question that screen asks: while preparing, the Crate of Expedition Supplies an option gives ("Sup +3 ▼", with the guide's Echoes per Supply in the tooltip); when choosing, an expedition's length and the Archaeologist or Fate it needs ("30 sup · Arch 3"), with what it pays, its rivals and the guide's worst-case Supplies in the tooltip; on the expedition, the Archaeologist's Progress a success makes ("Prog +3? ▼"), the Rivals' Progress a hindrance takes off, and what a conclusion pays; and in a confrontation, the Progress it makes. A menace an option always raises is named after its figure ("+Wounds", "+Nightmares"), so a cheap line never reads as free; a menace only a failure raises is in the tooltip. (10) Cat and Mouse -- the Implacable Detective's three cases and the three hunts for a half of the Screaming Map -- gets the same treatment: in a pursuit, the Cat an option makes ("Cat +8 ▼"), with the Mouse it spends named when that is two ("Cat +10 Mouse −2 ▼") and the 70% Luck lines carrying their expected Cat ("≈Cat +3.5"); on the screens that start a case, what the case pays and the guide's Echoes per action ("Plaques · 1.19 EPA ▼"); and on an ending, the Cat it needs and what it pays ("60+ Journals + Jade"). The tooltip carries the Mouse band an option is offered at, what it uses up and the guide's Echo cost of that, and where the guide and an option page disagree, both. (11) At Mrs Chapman's Boarding House in Spite, every soup and parlour option of The Season in Soup is badged with the item it pays and how many, from Persuasive 0 to the cap of 230 ("Zee-Ztory ×1–5"), with the figure at each fifty in the tooltip -- every option pays about the same Echoes, so the item is the choice -- and a star on the three that also give a noise in the walls. Promenade pays a different item each week, so its week is read off the parlour option beside it. (12) Five more early activities get the same storylet and option markup. In the Mind of a Long-Dead God, where every payout costs Stormy-Eyed and a challenge pays only when you FAIL it, each option shows its reward -- Dangerous or Shadowy +10 CP, or an Aeolian Scream -- with a cross when a failed challenge is what pays ("Shadowy +10 ✗"); the cards are badged in your hand with their options' rewards too, the one-word "Rain" and "Geology" only while the greeting says you are in the Mind. Engaged in a Case shows the Detective's Progress a success and a failure make ("Prog +6/+3?"), the actions when more than one, and the expected Progress of the Luck options on the faction cards, with every Case Difficulty formula worked out at the Starving Poet's 5 and the Heiress's 8 in the tooltip. The Sunken Embassy shows the Fragments of Infernal Affairs a success and a failure make ("Frag +25/−15?") and each reward's cost ("100 → Verse"). The Law-Furnace shows "AR base?" on its checks, the bonus Actus Reus of its item trades and what each payout pays in, with the base worked out at four stat averages. The Prelapsarian Museum shows Identifying... on the lab's options, the odds of an Assert, the Gratitude of a bone, a donation or the sphinxstone, and every cash-in's cost and payout. (13) Five more. On a Heist badges every heist card's options with what they do to The Burglar's Progress and Cat-Like Tread -- the expected change for a Luck option ("≈Prog +1 Tread −1"), the success and the Tread a failure costs for a stat check -- and each card in your hand with the best option needing nothing special, ranked by the Tread you can expect to lose before the Progress, with a down triangle when Inside Information, a Key or a stat would do better; every prize shows what it pays and the guide's Echo value. The Spider Symposium shows the Applause a success and a failure make and each reward's cost. Short Stories shows the pages a writing option makes and the actions it takes, the Potential a rework option adds and where it stops working, and the Echoes of a published story on a success and a failure. Flash Lays shows the Progress or Up your Sleeve a success makes, with the difficulty for both marks in the tooltip, and badges the cards in your hand the same way the heist does. Social Actions shows a letter's effect on its recipient and the Corresponding... sending it earns, each correspondence reward's cost, and the assassin cards' payouts, with a skull on the option that kills you. (14) In the Cave of the Nadir every Cave card's options show what they give, the guide's Echo value where it has one, and the Irrigo they cost; the undiscardable cards in your hand show their best option needing nothing special, with a down triangle when an item would do better, and ten cards with ordinary names are badged only while the greeting says you are in the Cave. The ways to a Ray-Drenched Cinder are badged too. At the Empress' Court every option shows the Inspired... a success and a failure make, a Luck option its expectation, and a finished work the goods it pays -- 17 Echoes for every minor work and 30 for every major one, so the item is the choice. Breeding Monsters shows the CP a progress option makes and, for each beast, both payouts of its 70% breeding and the guide's expected Echoes. Every badge these features draw carries its reasoning in a hover tooltip, and because a hover tooltip does not exist on a phone the same text also opens as a panel when you TAP the badge -- a tap that is kept off the card underneath, so reading one can never play it. (15) Five more, all storylet-and-option markup with no panel. Tales of Mahogany Hall has two halves that pull against each other -- six storylets that BUILD the Tales of Mahogany Hall quality and a weekly bill that spends it on a day’s show -- so a building option is badged with the CP it makes and what it pays (“Tales +2? · Brass ×102”), a show option with the CP it costs and what it pays (“−8 CP? · Jade ×200”), and a day on the bill with the Tales it needs and the show’s own reward, which is paid whichever option you take there. The CP is the number because every line pays about the same Echoes and the whole of the guide’s advice is about the CP: a failed show costs 14 rather than 8, and cashing out never takes you below 10. Four rows that raise four or five menaces whatever happens are labelled in words instead of scored. Master-Classes in Etiquette, in the same hall, is the reverse: take one of four pupils, raise their Pygmalion to 12 and graduate them. A lesson shows the Pygmalion CP it makes and its pay, the graduation shows the reset and the lump, and a pupil shows what the whole course pays with the guide’s Echoes per action -- which is the only decision that changes the rate. The Pygmalion challenges, whose failures push you BACK, carry “▼ Pyg −2” so a line that can cost you ground never reads like one that cannot. The two Fate-locked pupils are left out of the lesson table on purpose: the guide records their option titles only as “Choice 1” and “Storylet 2”, and a badge cannot be hung on a title nobody knows. In the Sixth Coil, under the Labyrinth of Tigers, both the room names and the option titles are randomised by four qualities, so the table carries all 35 room names the wiki records and spells every option’s verbs out rather than wildcarding them -- a wildcard verb would make two different options the same pattern and neither would be badged. Each action shows what it does to the two progress qualities and the stat it is checked on (“Patrol +1 Coil +1 · Watchful 250?”), because the guide’s rule is to leave when the two together reach 39, which makes the sealed door -- two Patrolling and no Coiling, and no challenge -- worth twice any other line. A Burden shows what it gives and the three levels of Unburdened it costs, worth 60 points of every attribute; the payouts on the way out show what each Burden pays per point of Patrolling. The Rat Market is a shop rather than a carousel: getting in costs three actions once a weekend and nothing after, selling costs no action at all, and a sale is badged with what it is worth in Echoes as a RANGE from a fresh market to a saturated one, since your Rat Market Saturation is stated nowhere the script can read it. Every one of those prices is worked out from the single figure each option page states, the item’s Nominal Sale Value, and reproduces every Rat-Shilling price the guide prints. What the market SELLS is deliberately not priced -- the stock turns with the Rat-Wind, the Rat-Moon and two seasons -- and those two stalls say so instead. And A Boxful of Intrigue, the fourteen-action carousel left behind in Spite, is badged with the SIDE each option takes, in words: every option is the same Shadowy 130 for the same one point, so what separates them is which power they serve, and serving the wrong one is not a smaller reward but a Turncoat. The two Salon options, which suit either side and pay no Kingmaker, say so; the payouts carry the guide’s Echoes for the whole run, with a tooltip saying that the six Correspondence Plaques inside that figure come from Intercept the messages and not from the payout. (16) Four more, all storylet and option markup with no panel. Underclay, beneath Spite, runs on TWO progress qualities instead of one -- Stone Confessions and Convincing Falsehoods, each raised on a storylet of its own and both spent on the hub, which the two are entered from for nothing -- so an option shows the points a success makes and what a failure takes BACK (“Confessions +30? −13”), while a failure that only raises a menace stays in the tooltip, as everywhere else. A reward shows what it costs, what it pays and the guide’s Echoes per point, which runs the opposite way to intuition: the cheap rewards are the efficient ones, and every point you hold over a reward’s cost comes back as Shards of Glim, so nothing is lost by overshooting. Hunting Bees in Old Newgate, in the University, puts the ATTRIBUTE on the badge as well as the Bees (“Bees +25? −6 · Watchful 88”), because which attribute a line is checked on is set by Dagger or Flint and almost every option shifts that by a random ten either way: the same option is not the same option two actions later, and a long run changes sides under you. An Airs option carries the window it appears in, and where the guide and the option pages disagree about that window by a point the pages are followed and the badge says so. Featuring in the Tales of the University is the one feature here that badges storylet headings and NOTHING else: the guide records no option tables for it, so rather than invent figures each storylet shows the level it sits at and what it does, and an eject mark -- not the mark used for spending something, since nothing is spent -- on the two steps that shut a door for good, the one that locks the whole first Term Passing carousel and the one that ends the story. And Term Passing itself covers the University’s carousel. The guide describes three of them, never open at once and picked between by how far along that story you are; only the LAST, which is the one still open once the story is finished, is carried here, since the other two lock behind you for good. Each option shows three things in that order: the progress it makes, what it is worth in the guide’s Echoes, and last of all any Connected it BUILDS -- “TP +4? · 1.24 E · Benthic +12”. The Connected is last because it is the reason to run the carousel at all rather than the reason to pick one option over another: the Echoes rank the options, and the two Colleges are what you are there for. Only gains are shown; a Connected an option spends stays in the tooltip, the way a menace on a failure does everywhere else. Those figures are read out of each option’s payout rather than written down a second time beside it, so the badge and the tooltip can never come to disagree. Seven more come from the early Person of Some Importance guides, and read alike: a line that moves a progress quality shows the change points a success and a failure make (“Posting +2 CP? / +1”), a Luck line its expected value, and a payout what it pays with the guide’s Echoes for a success and a failure (“Rifles · 17.5? / 7.5”). A Trade in Reputations badges the advertising campaign’s own cards in the hand and every option on them with the Name Recognition it pays, and because every figure there depends on Enterprise, which cannot be read mid-campaign, the badge quotes it at Enterprise 25 -- the free maximum the guide tells you to raise it to -- and the tooltip gives it at 0, 10, 15 and 20 too; a finishing card’s 500 then sits plainly above an ordinary card’s 312. Riding the Savage Cobbles in Concord Square, Working toward a Foreign Posting at the Foreign Office and Fighting a War of Assassins in the Forgotten Quarter and the Flit badge every step and every conclusion, and label each storylet with the level it belongs to. Publishing a Newspaper labels each of the twelve Hours’ storylets and badges the copy each option writes, and every edition with what it needs and the guide’s Echo range. The Wars of Illusion covers the Investigating and Seeking carousel on the Heights of Chicanery, the Bats and Cats one after it, and the Theosophistical cards, in the hand as well; where the guide and the option pages disagree the pages are followed and the tooltip says what the guide has. And the Temple Club shows each exchange as what it takes and what it gives, with a star on the four the guide names as the reasons to come. A party in Veilgarden badges every option with the Talk of the Town it makes, a Time cost other than one, any Making Waves and the Favours it pays; its cards offer a different option at each Time Remaining, which cannot be read, so a card in the hand is labelled with the Times it plays at rather than rated, and the option it shows when opened is badged. The two carousels of Wilmot’s End, Searching out a Missing Woman and Doing Business, show what each opening choice sets -- the storylets you will see follow from it -- the change points each step makes, their Luck cards at the expected value, and what each payout pays. A brawl outside the Blind Helmsman shows what each attack adds and a failure takes back, for a group and for a lone fighter until a reward on screen tells which you are, and every reward with its threshold and its capped extra. In the Bone Market every bone shows the pennies and attributes it adds, from a failure to a success, and every buyer what they pay, what it scales with, and whether they fall to Bone Market Exhaustion. Every professional job shows the Invoices it pays and the Services Rendered it earns, every payout what it costs; and every Hearts’ Game accomplice card shows the Progress or Preparation each action makes and the Preparation the advanced one needs, with the rewards from the Page priced in Exploits. Three ports of the early Unterzee follow: at Hunter's Keep and on Mutton Island every option shows what it pays and what a failure costs rather than the progress, since Time Passing in the Southern Archipelago moves the same +2 or +1 on every one of them -- with a star on the fifteen options at Hunter's Keep that only a cycle carrying Hunter's Insight can reach, and the word "reset" on the Mutton Island lines that end the cycle. In Venderbight every card of the tomb-colony's own deck, and every option on it, shows the Ambition: Nemesis it pays, with the two options whose reward is the game's choice between two written out as the choice they are and ranked at what they guarantee. Five ports of the middle Unterzee follow. A pilgrimage in Godfall shows the St Stalactite's Favour each step of the path pays and, at each of the seven Oblations, whether the goods are bought with Favour or taken for nothing. In the Maze-Garden every card of the labyrinth's own deck shows the Awakening it pays AND the Perambulating it spends whenever that is not the usual +4, since the cheap ones buy another card, and the trades at the end are priced per change point so the three wasteful ones are visible as such. The Polythremic Promenade shows what each card does to ALLURE and COGNISANCE together, because almost every one of them raises one and lowers the other, with the guide's Echoes on each way of cashing them in. Port Cecil shows which faction an action helps, the goods it pays and the guide's value for its tier, with the Low Tide pushes left as the formulas they are rather than totals nothing on screen can support. And the zee-beast hunts show the In Pursuit of a Zee-Beast each action makes on a success and a failure, what each kill pays and the Pursuit it is gated on, and what a quarry's waters and challenge level are before you set out. Parabola follows, in six pieces. On the moonlit Chessboard every move shows what it does to the one number a match is decided by -- Positional Advantages minus Strategic Weaknesses -- with the Weaknesses beside it, since two endings are gated on those rather than on the score, and the three colours show the opening each of them buys. On a Parabolan hunt the quarry's Ferocity leads, because every check on the way is 180 + 20 × (Ferocity − Scouting), and the options that buy Scouting or take Ferocity off the beast are the only levers there are; no difficulty is quoted, since your Scouting cannot be read. Oneiropomping in the Viric Jungle shows the Intensity and the Duration each action adds, and each cash-out's three modulo tiers in order, best first. The Sacroboscan Calendar shows which of the two weekly cycles an event belongs to and how many rewards exist only there, because one event a week is all you may take. The Parabolan War shows a campaign's length, both its endings and whether it moves Parabolan Dominance, which way each piece of your Company leans, and what clearing the Ravages afterwards costs in actions and in Echoes a Ravage. And at the Dome of Scales the Cub's Education shows which band of introduced cats each reward is offered in, and which cats count at all. Built as a feature registry so further advice can be added as entries.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 // @run-at       document-idle
@@ -7746,10 +7746,16 @@
   // on one floor can never match the same title and cancel each other out.
   // A Trade in Reputations adds "(campaign focus)", the product a campaign
   // advertises, and Assembling a Skeleton "(skeleton type)", the description of
-  // the skeleton in progress. Only these seventeen: a bracket like "(3 FATE)" is
-  // part of a real title.
+  // the skeleton in progress. The Maze-Garden adds "(garment)", the piece of
+  // clothing you brought into the labyrinth, and Hunting the Beasts of the Zee
+  // "(Zee-Beast)" and "(Zee-Beast Location)", the quarry and its waters. Parabola
+  // adds three more of the same kind -- "(Parabolan Quarry)", "(Quarry Home)"
+  // and "(its lair)", from the hunt, and "(your saint)" from a dream. The
+  // capitalised ones need their capitals: this is not a case-insensitive
+  // pattern. Only these twenty-four: a bracket like "(3 FATE)" is part of a
+  // real title.
   const CAROUSEL_PLACEHOLDER =
-    /\((?:growth|growth type|work leader|first option|second option|a level|a hole|a mirror|direction|somewhere|the workshop|the warzone|the mansion|the jungle|department|campaign focus|skeleton type)\)/;
+    /\((?:growth|growth type|work leader|first option|second option|a level|a hole|a mirror|direction|somewhere|the workshop|the warzone|the mansion|the jungle|department|campaign focus|skeleton type|garment|Zee-Beast Location|Zee-Beast|Parabolan Quarry|Quarry Home|its lair|your saint)\)/;
 
   function carouselMatcher(title) {
     const pieces = String(title).split(CAROUSEL_PLACEHOLDER);
@@ -7791,8 +7797,13 @@
 
   // `aliases` maps another name a storylet goes by onto the name its options
   // are filed under (both normalised) -- the wiki's storylet page and its
-  // option pages do not always agree on the title.
+  // option pages do not always agree on the title. It may also be a FUNCTION
+  // from key to canonical key, for the storylets whose heading is named after
+  // whatever you are doing there: "Pursuing the Storm-bird" and "Embattled with
+  // the Carnivorous Aurochs" are one storylet each, and the list of quarries is
+  // open-ended, so Parabolan Hunting matches their shape instead of listing them.
   function carouselCanonical(key, aliases) {
+    if (typeof aliases === 'function') return aliases(key) || key;
     return aliases && aliases[key] ? aliases[key] : key;
   }
 
@@ -17472,6 +17483,3298 @@
     });
   }
 
+  // === feature: Time Passing at Hunter's Keep ============================
+  //
+  // Time Passing at Hunter's Keep (Guide): an island in Home Waters with one
+  // house, three sisters and a well. Everything there is one carousel on Time
+  // Passing in the Southern Archipelago -- Landing sets it to 1, the carousel
+  // proper runs from 3 and resets to 3, and the object of the whole thing is
+  // the Stone Tentacle-Key at Time Passing 9, which only a cycle carrying
+  // Hunter's Insight can reach. The island deals no opportunity cards of its
+  // own, so this badges storylet headings and the options of the open
+  // storylet, like the other carousels on the shared plumbing.
+  //
+  // **What the badge says.** Not the progress: every option advances Time
+  // Passing the same way -- +2 CP on a success, +1 on a failure -- so progress
+  // is the one thing that does NOT vary, and it is stated once in the rules
+  // line instead. What varies is what the option PAYS and what a failure
+  // costs, so the badge is the payout, `?` where a stat challenge stands
+  // between you and it, then the menace a failure costs ("Silk ×110? fail
+  // Wounds +2"). `★` marks the fifteen options that need Hunter's Insight,
+  // which only a finished cycle gives -- half the table is invisible on a
+  // first visit, and that is the biggest single fact about a row here. `▼`
+  // uses something up. A storylet heading shows the Time Passing window it
+  // opens in, which is the other thing a player is choosing between.
+  //
+  // Transcribed from the guide's five tables, with every storylet page fetched
+  // through the API (2026-09-17) as the cross-check on the OPTION TITLES: the
+  // guide links several of them by disambiguated wiki titles ("Investigate 1",
+  // "Talk to her 2", "Prepare yourself 1") and the storylet pages carry the
+  // plain titles the game shows, which are the ones here, with the wiki's own
+  // as aliases. Five option pages were read for the rows the guide summarises
+  // loosely (Knock at the door, Fish in the well, Trust Cynthia's advice,
+  // Disembark, Find your ship); the Time Passing a success SETS rather than
+  // adds, and the 5% on the net's rare success, come from those. Left out: the
+  // two autofire menace storylets (What happened?, Where are you?), which are
+  // not choices. Corrections go in HK_OPTIONS and nowhere else.
+  //
+  //   tag       what the option pays, short; `gives` the same in words.
+  //   ch        { stat, diff } a broad stat challenge.
+  //   failTag / fail   what a failure costs, short and in words.
+  //   insight   needs Hunter's Insight (a second or later cycle).
+  //   payout    cashes the carousel in: the key, or an ending.
+  //   rare / menace / uses / needs / progress / label / note.
+
+  const HK_AREA = 'Hunter’s Keep';
+  const HK_MARK_INSIGHT = '★';
+
+  // Four headings whose titles are ordinary enough to belong to another
+  // storylet somewhere in the game -- "Exploring the island" and "Investigate
+  // the gardens" could head a stay anywhere, "Examine the books" is the wiki's
+  // "Examine the books (Hunter's Keep)" with the place disambiguated away, and
+  // a game of charades is a parlour game, not a place. Those four are badged
+  // only on a greeting that says Hunter's Keep. The gate is confirm-only: that
+  // greeting has NOT been captured in game, so it may say yes and must never
+  // say no, and the other twenty headings are badged on the table alone.
+  const HK_STRICT = ['Exploring the island', 'Investigate the gardens', 'Examine the books', 'A game of charades'];
+
+  // The Time Passing window each storylet opens in, off its page's "Unlocked
+  // with" line -- what a heading's badge shows.
+  const HK_WINDOWS = {
+    'Landing at Hunter’s Keep': 'no Time Passing',
+    'Leaving Hunter’s Keep': 'Time Passing 1+',
+    'Go up to the house': 'Time Passing 1',
+    'Investigate the gardens': 'Time Passing 2–6',
+    'Exploring the island': 'Time Passing 2–6',
+    'Take high tea with the ladies': 'Time Passing 3–6',
+    'Talk to Phoebe': 'Time Passing 3–6',
+    'Talk to Lucy': 'Time Passing 3–6',
+    'Talk to Cynthia': 'Time Passing 3–6',
+    'Look Around the House': 'Time Passing 3–6',
+    'Dine with the ladies': 'Time Passing 7–9',
+    'Examine the books': 'Time Passing 7–9',
+    'Look more closely at the well': 'Time Passing 7–9',
+    'Find out more of Cynthia’s story': 'Time Passing 7–9',
+    'Find out more of Phoebe’s story': 'Time Passing 7–9',
+    'Find out more of Lucy’s story': 'Time Passing 7–9',
+    'Prepare to look down the well': 'Time Passing 9, no key',
+    'Go to the well': 'Time Passing 9, no key',
+    'Prepare to find out what the well has to offer': 'Time Passing 9, with the key',
+    'Take your net to the well': 'Time Passing 9, with the key',
+    'A game of charades': 'Time Passing 10',
+    'Lucy finishes her story': 'Time Passing 11',
+    'Cynthia finishes her story': 'Time Passing 12',
+    'Phoebe finishes her story': 'Time Passing 13',
+  };
+
+  const HK_OPTIONS = [
+    { storylet: 'Landing at Hunter’s Keep', name: 'Disembark', label: 'start · Time Passing 1',
+      gives: 'Time Passing set to 1, and Nightmares −1 CP' },
+    { storylet: 'Leaving Hunter’s Keep', name: 'Find your ship', label: 'leave · clears both',
+      gives: 'your cabin, Home Waters, and both Time Passing and Hunter’s Insight gone',
+      note: 'Available from Time Passing 1. Leaving throws the cycle away.' },
+
+    { storylet: 'Go up to the house', name: 'Knock at the door', ch: { stat: 'Persuasive', diff: 111 },
+      tag: 'Inkling ×11', gives: 'Inkling of Identity ×11, and Time Passing set to 2',
+      failTag: 'Wounds +1', fail: 'Wounds +1 CP' },
+
+    { storylet: 'Investigate the gardens', name: 'Explore that mysterious hollow', ch: { stat: 'Watchful', diff: 115 },
+      tag: 'Beeswax ×50 + Shores',
+      gives: 'Lump of Lamplighter Beeswax ×50, a Memory of Distant Shores and Walking the Falling Cities +1 CP',
+      failTag: 'Wounds +1', fail: 'Wounds +1 CP' },
+    { storylet: 'Investigate the gardens', name: 'Walk along the beach', ch: { stat: 'Watchful', diff: 117 },
+      tag: 'Mystery ×2', gives: 'Mystery of the Elder Continent ×2 and Walking the Falling Cities +1 CP',
+      failTag: 'Wounds +1', fail: 'Wounds +1 CP' },
+
+    { storylet: 'Exploring the island', name: 'Walk around the garden for a while', ch: { stat: 'Watchful', diff: 110 },
+      tag: 'Shores ×2', gives: 'Memory of Distant Shores ×2', failTag: 'Nightmares +1', fail: 'Nightmares +1 CP' },
+    { storylet: 'Exploring the island', name: 'Have a look in the boathouse', ch: { stat: 'Watchful', diff: 112 },
+      tag: 'Silk ×110', gives: 'Silk Scrap ×110', failTag: 'Wounds +2', fail: 'Wounds +2 CP' },
+
+    { storylet: 'Take high tea with the ladies', name: 'Tell them about yourself', ch: { stat: 'Persuasive', diff: 114 },
+      tag: 'Clue ×70', gives: 'Cryptic Clue ×70', uses: 'Whispered Hint ×50', needs: 'Whispered Hint ×50',
+      note: 'The guide records nothing for a failure.' },
+
+    { storylet: 'Talk to Phoebe', name: 'Listen to her play the violin', ch: { stat: 'Persuasive', diff: 115 },
+      tag: 'Vision ×2 · Nightmares −1',
+      gives: 'Vision of the Surface ×2, Walking the Falling Cities +1 CP and Nightmares −1 CP',
+      note: 'The guide records nothing for a failure.' },
+    { storylet: 'Talk to Phoebe', name: 'Listen to her sing', insight: true, ch: { stat: 'Persuasive', diff: 117 },
+      tag: 'Clue ×50 · Nightmares −2',
+      gives: 'Cryptic Clue ×50, Approaching the Gates of the Garden +1 CP and Nightmares −2 CP',
+      failTag: 'a Popular Song', fail: 'Plagued by a Popular Song +1' },
+
+    { storylet: 'Talk to Lucy', name: 'Talk to her', aliases: ['Talk to her 1'], ch: { stat: 'Watchful', diff: 114 },
+      tag: 'Gossip ×2 + Clue ×7',
+      gives: 'Scrap of Incendiary Gossip ×2, Cryptic Clue ×7 and Seeing through the Eyes of Icarus +1 CP',
+      note: 'The guide records nothing for a failure.' },
+    { storylet: 'Talk to Lucy', name: 'Ask her to take a stroll with you', insight: true, ch: { stat: 'Watchful', diff: 116 },
+      tag: 'Hint ×116', gives: 'Whispered Hint ×116', note: 'The guide records nothing for a failure.' },
+
+    { storylet: 'Talk to Cynthia', name: 'Charm her', ch: { stat: 'Persuasive', diff: 114 },
+      tag: 'Clue ×57', gives: 'Cryptic Clue ×57 and Approaching the Gates of the Garden +1 CP',
+      note: 'The guide records nothing for a failure.' },
+    { storylet: 'Talk to Cynthia', name: 'Swap stories with her', insight: true, ch: { stat: 'Persuasive', diff: 116 },
+      tag: 'Clue ×58', gives: 'Cryptic Clue ×58', needs: 'Melancholy 4',
+      note: 'The guide records nothing for a failure.' },
+
+    { storylet: 'Look Around the House', name: 'What’s on the ground floor?', ch: { stat: 'Watchful', diff: 112 },
+      tag: 'Document ×2', gives: 'Compromising Document ×2', note: 'The guide records nothing for a failure.' },
+    { storylet: 'Look Around the House', name: 'What’s on the first floor?', insight: true, ch: { stat: 'Watchful', diff: 113 },
+      tag: 'Journal ×2', gives: 'Journal of Infamy ×2 and Approaching the Gates of the Garden +1 CP',
+      failTag: 'Scandal +1', fail: 'Scandal +1 CP' },
+    { storylet: 'Look Around the House', name: 'What’s in the attic?', ch: { stat: 'Watchful', diff: 114 },
+      tag: 'Gossip ×2 + Secret', gives: 'Scrap of Incendiary Gossip ×2 and an Appalling Secret',
+      failTag: 'Wounds +1', fail: 'Wounds +1 CP' },
+
+    { storylet: 'Dine with the ladies', name: 'Charm the ladies', ch: { stat: 'Persuasive', diff: 122 },
+      tag: 'Absinthe ×2', gives: 'Bottle of Strangling Willow Absinthe ×2',
+      failTag: 'Nightmares +2', fail: 'Nightmares +2 CP' },
+    { storylet: 'Dine with the ladies', name: 'Try all the dishes', insight: true, ch: { stat: 'Watchful', diff: 120 },
+      tag: 'Terror ×2 · Wounds −2', gives: 'Tale of Terror!! ×2 and Wounds −2 CP',
+      failTag: 'Wounds +2 · Nightmares +1', fail: 'Wounds +2 CP and Nightmares +1 CP' },
+
+    { storylet: 'Examine the books', name: 'Look for something significant', ch: { stat: 'Watchful', diff: 121 },
+      tag: 'Love Story ×2 + Proscribed ×2', gives: 'Unusual Love Story ×2 and Proscribed Material ×2',
+      rare: 'Memory of Distant Shores ×5', failTag: 'Wounds +1', fail: 'Wounds +1 CP' },
+    { storylet: 'Examine the books', name: 'Search for a diary', insight: true, ch: { stat: 'Watchful', diff: 122 },
+      tag: 'Document ×2', gives: 'Compromising Document ×2', failTag: 'Scandal +1', fail: 'Scandal +1 CP' },
+    { storylet: 'Examine the books', name: 'Look for something cartographic', insight: true, ch: { stat: 'Watchful', diff: 121 },
+      tag: 'Map Scrap ×11', gives: 'Map Scrap ×11', rare: 'an Implacable Detective’s Business Card',
+      needs: 'Associating with a Youthful Naturalist 38', failTag: 'Nightmares +1', fail: 'Nightmares +1 CP' },
+
+    { storylet: 'Look more closely at the well', name: 'Investigate', aliases: ['Investigate 1'],
+      ch: { stat: 'Watchful', diff: 121 }, tag: 'Clue ×60', gives: 'Cryptic Clue ×60',
+      note: 'The guide records nothing for a failure.' },
+    { storylet: 'Look more closely at the well', name: 'Look directly into the well', tag: 'Peckish +2',
+      gives: 'Unaccountably Peckish +2 (to 6)', menace: 'Wounds +2 CP and Nightmares +2 CP',
+      needs: 'Unaccountably Peckish 3' },
+
+    { storylet: 'Find out more of Cynthia’s story', name: 'Try to cheer her up', ch: { stat: 'Persuasive', diff: 119 },
+      tag: 'Terror ×2', gives: 'Tale of Terror!! ×2 and Walking the Falling Cities +1 CP',
+      failTag: 'Nightmares +1', fail: 'Nightmares +1 CP' },
+    { storylet: 'Find out more of Cynthia’s story', name: 'Talk to her seriously', insight: true,
+      ch: { stat: 'Persuasive', diff: 121 }, tag: 'Terror ×2 + Clue ×10',
+      gives: 'Tale of Terror!! ×2 and Cryptic Clue ×10', failTag: 'Nightmares +1', fail: 'Nightmares +1 CP' },
+
+    { storylet: 'Find out more of Phoebe’s story', name: 'Look for her in the parlour', ch: { stat: 'Watchful', diff: 118 },
+      tag: 'Clue ×59', gives: 'Cryptic Clue ×59', failTag: 'Nightmares +2', fail: 'Nightmares +2 CP' },
+    { storylet: 'Find out more of Phoebe’s story', name: 'Look for her in the garden', insight: true,
+      ch: { stat: 'Watchful', diff: 120 }, tag: 'Shores ×2 + Hint ×10',
+      gives: 'Memory of Distant Shores ×2 and Whispered Hint ×10',
+      note: 'The guide records nothing for a failure.' },
+
+    { storylet: 'Find out more of Lucy’s story', name: 'Talk to her', aliases: ['Talk to her 2'],
+      ch: { stat: 'Persuasive', diff: 118 }, tag: 'Gossip ×2 · Wounds −1',
+      gives: 'Scrap of Incendiary Gossip ×2 and Wounds −1 CP', note: 'The guide records nothing for a failure.' },
+    { storylet: 'Find out more of Lucy’s story', name: 'Bring her a little gift', insight: true,
+      ch: { stat: 'Persuasive', diff: 120 }, tag: 'Gossip + Hint ×70',
+      gives: 'a Scrap of Incendiary Gossip and Whispered Hint ×70', failTag: 'Nightmares +1', fail: 'Nightmares +1 CP' },
+
+    { storylet: 'Prepare to look down the well', name: 'Equip yourself for a fishing expedition', insight: true,
+      ch: { stat: 'Watchful', diff: 123 }, tag: 'Jade ×70 + Brass ×30',
+      gives: 'Jade Fragment ×70 and Nevercold Brass Sliver ×30', failTag: 'Nightmares +1', fail: 'Nightmares +1 CP' },
+    { storylet: 'Go to the well', name: 'Fish in the well', insight: true, payout: true,
+      ch: { stat: 'Dangerous', diff: 120 }, tag: 'Tentacle-Key',
+      gives: 'the Stone Tentacle-Key, and Hunter’s Insight reset', failTag: 'Wounds +1', fail: 'Wounds +1 CP',
+      progress: 'a success adds none; a failure +1 CP',
+      note: 'Taking the key resets Hunter’s Insight, which closes the other Time Passing 9 options until you reach 10.' },
+    { storylet: 'Go to the well', name: 'What falls down the well?', insight: true, payout: true,
+      ch: { stat: 'Watchful', diff: 120 }, tag: 'Tentacle-Key + Glim ×100',
+      gives: 'Shard of Glim ×100, the Stone Tentacle-Key, and Hunter’s Insight reset',
+      failTag: 'Wounds +2', fail: 'Wounds +2 CP',
+      note: 'Taking the key resets Hunter’s Insight, which closes the other Time Passing 9 options until you reach 10.' },
+
+    // Filed under the wiki's numbered title, with the plain one the game shows
+    // as the alias, because Hearts' Game owns "Prepare yourself" as a name --
+    // the same rule that put its own "Set an ambush" under a longer title.
+    { storylet: 'Prepare to find out what the well has to offer', name: 'Prepare yourself 1',
+      aliases: ['Prepare yourself'], insight: true, ch: { stat: 'Persuasive', diff: 123 }, tag: 'Terror ×2',
+      gives: 'Tale of Terror!! ×2', needs: 'a Stone Tentacle-Key', note: 'The guide records nothing for a failure.' },
+    { storylet: 'Take your net to the well', name: 'Trust Cynthia’s advice', insight: true, payout: true,
+      ch: { stat: 'Watchful', diff: 125 }, tag: 'Glim ×1000', gives: 'Shard of Glim ×1000, and Hunter’s Insight reset',
+      rare: 'a Searing Enigma, Seeing through the Eyes of Icarus +5 CP and Wounds +2 CP (5%, by the option page)',
+      needs: 'a Stone Tentacle-Key', failTag: 'Wounds +2', fail: 'Wounds +2 CP' },
+
+    { storylet: 'A game of charades', name: 'The three Graces?', label: 'Lucy’s ending · Persuasive +5 CP',
+      gives: 'Time Passing set to 11, Persuasive +5 CP and Hedonist +3 CP (to 10)' },
+    { storylet: 'A game of charades', name: 'The Furies?', label: 'Cynthia’s ending · Dangerous +5 CP',
+      gives: 'Time Passing set to 12, Dangerous +5 CP, Daring +3 CP (to 10) and Nightmares +1 CP' },
+    { storylet: 'A game of charades', name: 'The faces of Hecate?', label: 'Phoebe’s ending · Shadowy +5 CP',
+      gives: 'Time Passing set to 13, Shadowy +5 CP and Melancholy +3 CP (to 10)' },
+
+    { storylet: 'Lucy finishes her story', name: 'Gather round the piano', payout: true,
+      ch: { stat: 'Persuasive', diff: 123 }, tag: 'Insight + Implication',
+      gives: 'a Sudden Insight (to 21), an Extraordinary Implication, Time Passing set to 3 and Hunter’s Insight set to 1',
+      failTag: 'Clue ×2', fail: 'Cryptic Clue ×2' },
+    { storylet: 'Cynthia finishes her story', name: 'Take part in the chorus', payout: true,
+      tag: 'Insight + Implication',
+      gives: 'a Sudden Insight (to 21), an Extraordinary Implication, Time Passing set to 3 and Hunter’s Insight set to 1' },
+    { storylet: 'Phoebe finishes her story', name: 'Join the sisters in the herb-garden', payout: true,
+      ch: { stat: 'Persuasive', diff: 123 }, tag: 'Insight + Implication',
+      gives: 'a Sudden Insight (to 21), an Extraordinary Implication, Seeing through the Eyes of Icarus +1 CP, '
+        + 'Time Passing set to 3 and Hunter’s Insight set to 1',
+      failTag: 'Wounds +1', fail: 'Wounds +1 CP' },
+  ];
+
+  const HK_STORYLETS = HK_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const HK_INDEX = carouselIndex(HK_OPTIONS);
+
+  const HK_CLASS = 'fl-ux-hunters-keep';
+  const HK_FLAG = 'flUxHuntersKeep';
+  const HK_BRANCH_CLASS = 'fl-ux-hunters-keep-branch';
+  const HK_BRANCH_FLAG = 'flUxHuntersKeepBranch';
+
+  const HK_RULES = 'Every option moves Time Passing in the Southern Archipelago the same way -- +2 CP on a success, '
+    + '+1 on a failure -- so the badge says what it PAYS instead. The carousel runs from 3 to 10 and resets to 3; '
+    + HK_MARK_INSIGHT + ' options need Hunter’s Insight, which a finished cycle gives. Leaving the island clears Time '
+    + 'Passing and Hunter’s Insight both. At Wounds 8 or Nightmares 8 the island fires a storylet of its own.';
+
+  function hkOnIsland() {
+    return normalizeName(currentArea() || '') === normalizeName(HK_AREA);
+  }
+
+  function hkAllowed(storylet) {
+    return HK_STRICT.indexOf(storylet) === -1 || hkOnIsland();
+  }
+
+  // Brick for a line that costs menace whatever happens, or where a failure
+  // costs 2 CP or more -- and the badge names the menace either way, so the
+  // colour is never the only thing saying so.
+  function hkRisky(e) {
+    if (e.menace) return true;
+    const m = String(e.failTag || '').match(/\+(\d+)/);
+    return !!m && Number(m[1]) >= 2;
+  }
+
+  function hkBadgeCore(e) {
+    if (e.label) return e.label + (e.insight ? ' ' + HK_MARK_INSIGHT : '');
+    let text = e.tag + (e.ch ? CAROUSEL_MARK_CHALLENGE : '');
+    if (e.failTag) text += ' fail ' + e.failTag;
+    if (e.menace) text += ' · ' + e.menace.replace(/ CP/g, '').replace(' and ', ' · ');
+    if (e.uses) text += ' ' + CAROUSEL_MARK_USES;
+    if (e.insight) text += ' ' + HK_MARK_INSIGHT;
+    return text;
+  }
+
+  function hkBadgeText(e) {
+    return withFactions(hkBadgeCore(e), e);
+  }
+
+  function hkColor(e) {
+    if (e.label) return CAROUSEL_COLOR_NEUTRAL;
+    if (e.payout) return CAROUSEL_COLOR_PAYOUT;
+    if (hkRisky(e)) return CAROUSEL_COLOR_RISK;
+    return CAROUSEL_COLOR_PROGRESS;
+  }
+
+  function hkSpec(e) {
+    if (!hkAllowed(e.storylet)) return null;
+    const body = [];
+    if (e.ch) body.push(carouselChallenge(e.ch));
+    if (e.gives) body.push((e.ch ? 'Success: ' : 'Gives: ') + e.gives + '.');
+    if (e.rare) body.push('A rare success: ' + e.rare + '.');
+    if (e.fail) body.push('Failure: ' + e.fail + '.');
+    if (e.menace) body.push('Always: ' + e.menace + '.');
+    if (e.progress) body.push('Time Passing: ' + e.progress + '.');
+    if (e.uses) body.push(CAROUSEL_MARK_USES + ' Uses up ' + e.uses + '.');
+    if (e.needs) body.push('Needs: ' + e.needs + '.');
+    if (e.insight) body.push(HK_MARK_INSIGHT + ' Needs Hunter’s Insight: a second or later cycle only.');
+    body.push(factionLine(e));
+    body.push(carouselActionsLine(e));
+    return { text: hkBadgeText(e), color: hkColor(e), title: carouselTooltip('Hunter’s Keep', e, body, HK_RULES) };
+  }
+
+  function hkStoryletSpec(key) {
+    const storylet = HK_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet || !hkAllowed(storylet)) return null;
+    return { text: HK_WINDOWS[storylet] || 'Hunter’s Keep', color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('Hunter’s Keep', storylet, HK_OPTIONS, hkBadgeText, HK_RULES) };
+  }
+
+  function hkRatings() {
+    carouselRatings({
+      storylets: HK_STORYLETS, index: HK_INDEX, storyletSpec: hkStoryletSpec, optionSpec: hkSpec,
+      cls: HK_CLASS, flag: HK_FLAG, branchCls: HK_BRANCH_CLASS, branchFlag: HK_BRANCH_FLAG,
+      salt: '#' + (hkOnIsland() ? 'in' : '-'),
+    });
+  }
+
+  // === feature: Time Passing on Mutton Island ============================
+  //
+  // Time Passing on Mutton Island (Guide): the same progress quality as
+  // Hunter's Keep -- Time Passing in the Southern Archipelago -- driving a
+  // very different carousel. Below 7 you may leave; 7 and 8 are where the
+  // island pays in Whispered Hints; at 9 one option ends the cycle and resets
+  // the quality. The island deals no opportunity cards of its own, so this
+  // badges storylet headings and the options of the open storylet. (The Fruits
+  // of the Zee half of Mutton Island is a feature of its own, and shares no
+  // storylet with this one.)
+  //
+  // **What the badge says.** As at Hunter's Keep, progress is flat -- +2 CP on
+  // a success, +1 on a failure -- so the badge is what the option PAYS, `?`
+  // for the stat challenge in the way, and the menace a failure costs ("Hint
+  // ×145? fail Scandal +1"). Two things are added because they are what a
+  // player is actually choosing between here: a line that ends the cycle says
+  // `reset` in words, and the Stormy-Eyed line says the Stormy-Eyed, which is
+  // the reason most visitors come. `▼` uses something up.
+  //
+  // Transcribed from the guide's three Time Passing tables and its
+  // Extraordinary Implication table, with every storylet page AND every option
+  // page fetched through the API (2026-09-17) as the cross-check. Where they
+  // disagree the pages are followed and `guide` quoted: the guide files "The
+  // voice of the wind" as a storylet of its own, and its page is Option 2 of
+  // The Mutton Island Wind; and Dinner in the Fallen Columns has a second,
+  // Fate-gated option the guide's table does not carry at all. Left out: Put
+  // to Zee!'s destination list, which is the zailing feature's business.
+  // Corrections go in MI_OPTIONS and nowhere else.
+  //
+  //   tag / gives      what it pays, short and in words.
+  //   ch { stat, diff } / failTag / fail / rare / menace / uses / needs.
+  //   reset     ends the cycle: Time Passing back to nothing.
+  //   label / note / guide.
+
+  const MI_AREA = 'Mutton Island';
+
+  // Four headings that are ordinary English and could title a storylet
+  // anywhere: a crash, a feast, the start of a day, watching a well. Those are
+  // badged only on a greeting that says Mutton Island. Unlike Hunter's Keep,
+  // this greeting IS captured verbatim in game (2026-09-03, see FOTZ_AREAS),
+  // so the gate rests on read markup rather than a guess -- it is still
+  // confirm-only, and the other fifteen headings are badged on the table
+  // alone.
+  const MI_STRICT = ['Crash!', 'A Great Feast', 'The Start of the Day', 'Well Watching'];
+
+  // The Time Passing window each storylet opens in, off its page.
+  const MI_WINDOWS = {
+    'Welcome to Mutton Island': 'Time Passing under 7',
+    'The Start of the Day': 'Time Passing under 7',
+    'An Island with Secrets?': 'Time Passing under 7',
+    'The Home of Rubbery Lumps': 'Time Passing under 7',
+    'The Mutton Island Wind': 'Time Passing under 7',
+    'Put to Zee!': 'Time Passing under 7',
+    'Dinner in the Fallen Columns': 'Time Passing 7–8',
+    'A night for... what exactly?': 'Time Passing 7–8',
+    'Well Watching': 'Time Passing 7–8',
+    'Inside the Cock and Magpie': 'Time Passing 7–8',
+    'The Eyes of Children': 'Time Passing 7–8',
+    'The Mouths of Children': 'Time Passing 7–8',
+    'Crash!': 'Time Passing 9 · ends it',
+    'A Great Feast': 'Time Passing 9 · ends it',
+    'A Procession to the Cliff-top': 'Time Passing 9 · ends it',
+    'A Wind to Chill the Heart': 'Time Passing 9 · ends it',
+    'A scrap of a Diary': 'Time Passing 9 · ends it',
+    'Discuss these Extraordinary Implications with the Custodial Chef': 'any Implication',
+  };
+
+  const MI_OPTIONS = [
+    { storylet: 'Welcome to Mutton Island', name: 'Take a walk around the island', ch: { stat: 'Shadowy', diff: 110 },
+      tag: 'progress only', gives: 'nothing but the Time Passing', failTag: 'Suspicion +1', fail: 'Suspicion +1 CP' },
+    { storylet: 'The Start of the Day', name: 'What are these three up to?', ch: { stat: 'Shadowy', diff: 110 },
+      tag: 'progress only', gives: 'nothing but the Time Passing' },
+    { storylet: 'An Island with Secrets?', name: 'Take a quiet look around', ch: { stat: 'Shadowy', diff: 110 },
+      tag: 'progress only', gives: 'nothing but the Time Passing', rare: 'Appalling Secret ×2' },
+    { storylet: 'The Home of Rubbery Lumps', name: 'Try the Rubbery Lumps',
+      tag: 'Dangerous +1 · Persuasive +1 · Wounds −1',
+      gives: 'Dangerous +1 CP, Persuasive +1 CP and Wounds −1 CP', uses: 'Maniac’s Prayer ×4',
+      needs: 'Maniac’s Prayer ×4', note: 'Wild Words in your inventory turn into Maniac’s Prayers.' },
+
+    { storylet: 'The Mutton Island Wind', name: 'I bid the wind speak', tag: 'Stormy-Eyed +1 CP',
+      gives: 'Stormy-Eyed +1 CP', needs: 'Stormy-Eyed 1',
+      note: 'The one line on the island that raises Stormy-Eyed, and the reason the guide’s grind exists.' },
+    { storylet: 'The Mutton Island Wind', name: 'The voice of the wind', ch: { stat: 'Watchful', diff: 110 },
+      tag: 'progress only', gives: 'nothing but the Time Passing', menace: 'Nightmares +1 CP',
+      rare: 'the same without the Nightmares', guide: 'this is a storylet of its own; its page files it as an option of '
+        + 'The Mutton Island Wind' },
+
+    { storylet: 'Put to Zee!', name: 'Head to your ship at the jetty', label: 'leave · resets', reset: true,
+      gives: 'your cabin, Home Waters, and Time Passing gone', needs: 'a ship',
+      note: 'Only below Time Passing 7. Any Strange Catch and the festival’s Sights go too.' },
+
+    { storylet: 'Dinner in the Fallen Columns', name: 'Join them for supper', ch: { stat: 'Persuasive', diff: 115 },
+      tag: 'Hint ×100 · Wounds −2 · Nightmares +1',
+      gives: 'Whispered Hint ×100, Wounds −2 CP and Nightmares +1 CP', failTag: 'Scandal +1', fail: 'Scandal +1 CP' },
+    { storylet: 'Dinner in the Fallen Columns', name: 'Follow the Ecstatic Venge-Rat', label: 'Fate story',
+      uses: 'a Map Scrap', needs: 'Word of the Tender Mercy exactly 8, and a Map Scrap',
+      gives: 'the end of the Cult of St Eligius story, and Time Passing +1 CP',
+      guide: 'nothing at all: this option is on the storylet page and not in the guide’s table' },
+
+    { storylet: 'A night for... what exactly?', name: 'What are they up to?', aliases: ['What are they up to? 2'],
+      ch: { stat: 'Shadowy', diff: 115 }, tag: 'Hint ×145', gives: 'Whispered Hint ×145',
+      rare: 'Appalling Secret ×5 and a Memory of Distant Shores', failTag: 'Suspicion +1', fail: 'Suspicion +1 CP' },
+    { storylet: 'Well Watching', name: 'Talk to the fellow', ch: { stat: 'Persuasive', diff: 115 },
+      tag: 'Hint ×145', gives: 'Whispered Hint ×145', rare: 'Memory of Distant Shores ×3',
+      failTag: 'Scandal +1', fail: 'Scandal +1 CP',
+      note: 'The guide’s pick for the cycle: about 13 Echoes over a full run.' },
+    { storylet: 'Inside the Cock and Magpie', name: 'Take a good look around', ch: { stat: 'Watchful', diff: 115 },
+      tag: 'Hint ×145 · Miriam +1', gives: 'Whispered Hint ×145 and Acquainted with Miriam Plenty’s Past +1 CP (to 3)',
+      rare: 'Inkling of Identity ×2 and Scrap of Incendiary Gossip ×2, with the same Miriam Plenty’s Past',
+      failTag: 'Nightmares +1', fail: 'Nightmares +1 CP',
+      note: 'Miriam Plenty’s Past at 3 opens options in Mrs Plenty’s Carnival.' },
+    { storylet: 'The Eyes of Children', name: 'Stop and listen to the song', tag: 'Hint ×100 · Nightmares +1',
+      gives: 'Whispered Hint ×100 and Nightmares +1 CP', needs: 'no Seeking Mr Eaten’s Name' },
+    { storylet: 'The Mouths of Children', name: 'Hear the words', tag: 'nothing', gives: 'nothing but the Time Passing',
+      menace: 'Nightmares +3 CP', needs: 'Seeking Mr Eaten’s Name 1' },
+
+    { storylet: 'Crash!', name: 'Rescue the crew', reset: true, tag: 'quirks',
+      gives: 'Magnanimous +3 CP and Steadfast +3 CP (to 10), Heartless −3 CP and Ruthless −3 CP',
+      factions: [['Favours: The Docks', 1]] },
+    { storylet: 'Crash!', name: 'Help yourself to ‘salvage’', reset: true, tag: 'Glim ×600',
+      gives: 'Shard of Glim ×600, Ruthless +3 CP and Heartless +3 CP (to 10), and Magnanimous −6 CP' },
+    { storylet: 'A Great Feast', name: 'Attend the Feast', reset: true, tag: 'four stats +2 · Nightmares −3 · Wounds −3',
+      gives: 'Dangerous, Persuasive, Shadowy and Watchful +2 CP each, Nightmares −3 CP and Wounds −3 CP' },
+    { storylet: 'A Procession to the Cliff-top', name: 'Follow them up the path', reset: true,
+      ch: { stat: 'Shadowy', diff: 116 }, tag: 'Implication ×2 + Secret ×7',
+      gives: 'Extraordinary Implication ×2 and Appalling Secret ×7', failTag: 'Suspicion +1',
+      fail: 'Suspicion +1 CP -- and Time Passing resets either way' },
+    { storylet: 'A Wind to Chill the Heart', name: 'What does it portend?', reset: true,
+      ch: { stat: 'Watchful', diff: 120 }, tag: 'Implication ×2 + Secret ×7 · Nightmares +3',
+      gives: 'Extraordinary Implication ×2, Appalling Secret ×7 and Nightmares +3 CP',
+      failTag: 'Nightmares +2', fail: 'Nightmares +2 CP and Whispered Hint ×100, and Time Passing does NOT reset',
+      note: 'The one Time Passing 9 line whose failure leaves the cycle standing.' },
+    { storylet: 'A scrap of a Diary', name: 'It would be criminal not to', reset: true,
+      ch: { stat: 'Shadowy', diff: 115 }, tag: 'Implication ×2 + Clue ×60 · Miriam +1',
+      gives: 'Extraordinary Implication ×2, Cryptic Clue ×60 and Acquainted with Miriam Plenty’s Past +1 CP',
+      failTag: 'Suspicion +3', fail: 'Suspicion +3 CP -- and Time Passing resets either way' },
+
+    { storylet: 'Discuss these Extraordinary Implications with the Custodial Chef', name: '“Do you know anything of...”',
+      tag: 'Hint ×1000 + Shores', gives: 'Whispered Hint ×1000 and a Memory of Distant Shores',
+      uses: 'Extraordinary Implication ×4', needs: 'Extraordinary Implication ×4, and Watchful 100' },
+    { storylet: 'Discuss these Extraordinary Implications with the Custodial Chef', name: '“I have long puzzled over...”',
+      tag: 'Clue ×1000 + Mystery ×2', gives: 'Cryptic Clue ×1000 and Mystery of the Elder Continent ×2',
+      uses: 'Extraordinary Implication ×8', needs: 'Extraordinary Implication ×8, and Watchful 120' },
+    { storylet: 'Discuss these Extraordinary Implications with the Custodial Chef', name: '“These books you’ve spoken of...”',
+      tag: 'Incunabulum ×2 + Terror · Nightmares +2',
+      gives: 'Uncanny Incunabulum ×2, a Tale of Terror!! and Nightmares +2 CP',
+      uses: 'Extraordinary Implication ×10', needs: 'Extraordinary Implication ×10, and Watchful 140' },
+  ];
+
+  const MI_STORYLETS = MI_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const MI_INDEX = carouselIndex(MI_OPTIONS);
+
+  const MI_CLASS = 'fl-ux-mutton-island';
+  const MI_FLAG = 'flUxMuttonIsland';
+  const MI_BRANCH_CLASS = 'fl-ux-mutton-island-branch';
+  const MI_BRANCH_FLAG = 'flUxMuttonIslandBranch';
+
+  const MI_RULES = 'Every option moves Time Passing in the Southern Archipelago the same way -- +2 CP on a success, '
+    + '+1 on a failure -- so the badge says what it PAYS instead. You may only leave below 7; the lines at 9 end the '
+    + 'cycle, marked "reset". The guide’s Stormy-Eyed grind: leave at 6 with 5 CP or more and zail back, 3 actions for '
+    + 'about 0.81 CP of Stormy-Eyed an action, against 0.61 CP and roughly 13 Echoes for running the cycle out.';
+
+  function miOnIsland() {
+    return normalizeName(currentArea() || '') === normalizeName(MI_AREA);
+  }
+
+  function miAllowed(storylet) {
+    return MI_STRICT.indexOf(storylet) === -1 || miOnIsland();
+  }
+
+  function miRisky(e) {
+    if (e.menace) return true;
+    const m = String(e.failTag || '').match(/\+(\d+)/);
+    return !!m && Number(m[1]) >= 2;
+  }
+
+  function miBadgeCore(e) {
+    if (e.label) return e.label;
+    let text = e.tag + (e.ch ? CAROUSEL_MARK_CHALLENGE : '');
+    if (e.menace) text += ' · ' + e.menace.replace(/ CP/g, '');
+    if (e.failTag) text += ' fail ' + e.failTag;
+    if (e.uses) text += ' ' + CAROUSEL_MARK_USES;
+    if (e.reset) text += ' · reset';
+    return text;
+  }
+
+  function miBadgeText(e) {
+    return withFactions(miBadgeCore(e), e);
+  }
+
+  function miColor(e) {
+    if (e.label) return CAROUSEL_COLOR_NEUTRAL;
+    if (e.reset) return CAROUSEL_COLOR_PAYOUT;
+    if (miRisky(e)) return CAROUSEL_COLOR_RISK;
+    return CAROUSEL_COLOR_PROGRESS;
+  }
+
+  function miSpec(e) {
+    if (!miAllowed(e.storylet)) return null;
+    const body = [];
+    if (e.ch) body.push(carouselChallenge(e.ch));
+    if (e.gives) body.push((e.ch ? 'Success: ' : 'Gives: ') + e.gives + '.');
+    if (e.rare) body.push('A rare success: ' + e.rare + '.');
+    if (e.fail) body.push('Failure: ' + e.fail + '.');
+    if (e.menace) body.push('Always: ' + e.menace + '.');
+    if (e.reset) body.push('Ends the cycle: Time Passing resets.');
+    if (e.uses) body.push(CAROUSEL_MARK_USES + ' Uses up ' + e.uses + '.');
+    if (e.needs) body.push('Needs: ' + e.needs + '.');
+    body.push(factionLine(e));
+    body.push(carouselActionsLine(e));
+    if (e.guide) body.push('The guide says ' + e.guide + '; the page is followed.');
+    return { text: miBadgeText(e), color: miColor(e), title: carouselTooltip('Mutton Island', e, body, MI_RULES) };
+  }
+
+  function miStoryletSpec(key) {
+    const storylet = MI_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet || !miAllowed(storylet)) return null;
+    return { text: MI_WINDOWS[storylet] || 'Mutton Island', color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('Mutton Island', storylet, MI_OPTIONS, miBadgeText, MI_RULES) };
+  }
+
+  function miRatings() {
+    carouselRatings({
+      storylets: MI_STORYLETS, index: MI_INDEX, storyletSpec: miStoryletSpec, optionSpec: miSpec,
+      cls: MI_CLASS, flag: MI_FLAG, branchCls: MI_BRANCH_CLASS, branchFlag: MI_BRANCH_FLAG,
+      salt: '#' + (miOnIsland() ? 'in' : '-'),
+    });
+  }
+
+  // === feature: Venderbight ==============================================
+  //
+  // Venderbight (Guide): at Ambition: Nemesis 11-14 the tomb-colony deals a
+  // deck of its own, and the whole visit is one number -- Ambition: Nemesis,
+  // raised a few change points at a time until 15, when only Far from home is
+  // dealt any more. A woman of sinister repute is always there and always pays
+  // 1 CP, so every card is really being compared against that floor.
+  //
+  // **What the badge says.** The Ambition: Nemesis a success pays, which is
+  // the only number that varies (1 to 25), with `?` for a stat challenge, `≈`
+  // and the expected value for the one Luck option, `▼` where it is bought
+  // with items, and the menace a failure costs ("Nemesis +3? fail Suspicion
+  // +1"). A card in the hand shows the best option you can take with nothing
+  // special in hand, and `▾` when an option behind items would do better --
+  // which on this deck is most of them. Two options pay one of two things at
+  // the game's choice with no odds given; those are written out as the choice
+  // they are ("Clue ×30 or Nemesis +4?") and ranked at the progress they
+  // GUARANTEE, never at the better half.
+  //
+  // Transcribed from the guide's card table, with every card page fetched
+  // through the API (2026-09-17) as the cross-check on the card names, the
+  // option titles and the Nemesis window each card is dealt in: the guide
+  // writes the chess card by its disambiguated wiki title (A Game of Chess -
+  // Venderbight) and its page gives the plain name the game shows, and the
+  // guide's "Listen" links are the wiki's "Listen 1" and "Listen 2". A woman
+  // of sinister repute is a storylet, not a card, so it is kept out of the
+  // hand. Left out: Far from home, the autofire card that replaces the deck at
+  // Nemesis 15, which offers no choice. Corrections go in VB_OPTIONS and
+  // nowhere else.
+  //
+  //   cp        the Ambition: Nemesis a success pays, in change points.
+  //   ch { stat, diff } / luck   the challenge in the way; `failCp` a Luck
+  //             failure's progress. `stat` other stat CP, for the tie-break.
+  //   tag       written out instead, where "Nemesis +n" would be a lie.
+  //   uses / gives / menace / failTag / fail / note.
+
+  const VB_AREA = 'The tomb-colony of Venderbight';
+  const VB_REPUTE = 'A woman of sinister repute';
+
+  // "A Game of Chess" is the wiki's "A Game of Chess - Venderbight" with the
+  // place disambiguated away, and a game of chess turns up all over Fallen
+  // London -- there is a Having Recurring Dreams quality by that very name.
+  // So it is badged only on a greeting that says the tomb-colony. The gate is
+  // confirm-only: that greeting has NOT been captured in game, so it may say
+  // yes and must never say no.
+  const VB_STRICT = ['A Game of Chess'];
+
+  // The Ambition: Nemesis window each card is dealt in, off its page.
+  const VB_WINDOWS = {
+    '‘Permanent Surgeon?’': 'Nemesis 11–14',
+    'A Game of Chess': 'Nemesis 12–13',
+    'A glass of oblivion': 'Nemesis 11–14',
+    'A limping fellow': 'Nemesis 11–13',
+    'A pugilistic interlude': 'Nemesis 11–14',
+    'An aerial hazard': 'Nemesis 11–14',
+    'An illuminate frenzy': 'Nemesis 13',
+    'An improbable fashion': 'Nemesis 11–13',
+    'Dicing with the dead': 'Nemesis 11–13',
+    'Honey for the dead': 'Nemesis 11–14',
+    'Honey Tales': 'Nemesis 12–14',
+    'Marble?': 'Nemesis 11–12',
+    'Not quite silence': 'Nemesis 11–14',
+    'The society pages?': 'Nemesis 11–14',
+    'A woman of sinister repute': 'Nemesis 11–14 · always there',
+  };
+
+  const VB_OPTIONS = [
+    { storylet: VB_REPUTE, name: 'Listen and wait', cp: 1, ch: { stat: 'Watchful', diff: 77 },
+      gives: 'Ambition: Nemesis +1 CP and Cryptic Clue ×10', failTag: 'Nightmares +1', fail: 'Nightmares +1 CP',
+      note: 'The floor: the slowest but surest way to find Carrywell, and always available.' },
+
+    { storylet: '‘Permanent Surgeon?’', name: 'Listen carefully', cp: 2, ch: { stat: 'Watchful', diff: 79 },
+      gives: 'Ambition: Nemesis +2 CP', failTag: 'Suspicion +1', fail: 'Suspicion +1 CP' },
+    { storylet: 'A Game of Chess', name: 'Go over when he beckons?', cp: 4, ch: { stat: 'Watchful', diff: 77 },
+      gives: 'Ambition: Nemesis +4 CP', failTag: 'Nightmares +1', fail: 'Nightmares +1 CP',
+      note: 'The card is only dealt with Having Recurring Dreams: A Game of Chess 3.' },
+    { storylet: 'A glass of oblivion', name: 'Carouse with the dead', cp: 2, ch: { stat: 'Dangerous', diff: 80 },
+      tag: 'Nemesis +2 or +5', gives: 'Ambition: Nemesis +2 CP and Wounds +1 CP, OR +5 CP with Nightmares +1 CP and '
+        + 'an Appalling Secret -- the game’s choice, and the page gives no odds between them',
+      failTag: 'Suspicion +1 · Wounds +1', fail: 'Suspicion +1 CP and Wounds +1 CP',
+      note: 'Ranked at the +2 it always pays, never at the +5 it might.' },
+    { storylet: 'A limping fellow', name: 'Give him his weasels', cp: 2, gives: 'Ambition: Nemesis +2 CP',
+      uses: 'Lucky Weasel ×3' },
+    { storylet: 'A pugilistic interlude', name: 'Fight for secrets', cp: 3, ch: { stat: 'Dangerous', diff: 85 },
+      gives: 'Ambition: Nemesis +3 CP', menace: 'Wounds +1 CP on a success',
+      failTag: 'Suspicion +2 · Wounds +2', fail: 'Suspicion +2 CP and Wounds +2 CP' },
+    { storylet: 'An aerial hazard', name: 'Snatch a bat out of the air!', cp: 0, ch: { stat: 'Dangerous', diff: 77 },
+      tag: 'Clue ×30 or Nemesis +4',
+      gives: 'Cryptic Clue ×30, OR Ambition: Nemesis +4 CP -- the game’s choice, and the page gives no odds',
+      failTag: 'Wounds +1', fail: 'Wounds +1 CP',
+      note: 'Ranked at 0 progress, because a success may pay clues instead.' },
+    { storylet: 'An illuminate frenzy', name: 'Give her the light she craves', cp: 3,
+      gives: 'Ambition: Nemesis +3 CP', uses: 'Foxfire Candle Stub ×100' },
+    { storylet: 'An improbable fashion', name: 'Bring him Ridiculous Hats', cp: 3,
+      gives: 'Ambition: Nemesis +3 CP', uses: 'Ridiculous Hat ×5' },
+    { storylet: 'An improbable fashion', name: 'Bring him an Exceptional Hat', cp: 25,
+      gives: 'Ambition: Nemesis +25 CP, Appalling Secret ×10 and Cryptic Clue ×500', uses: 'an Exceptional Hat',
+      note: 'The best line in the tomb-colony by a distance: a quarter of the way from 11 to 12 in one action.' },
+    { storylet: 'Dicing with the dead', name: 'Join them', aliases: ['Join them (Nemesis)'], luck: 0.4, cp: 3, failCp: 0,
+      gives: 'Ambition: Nemesis +3 CP', fail: 'nothing, and the clues are gone', uses: 'Cryptic Clue ×100' },
+    { storylet: 'Honey for the dead', name: 'Here: taste, and dream.', cp: 3, gives: 'Ambition: Nemesis +3 CP',
+      uses: 'Drop of Prisoner’s Honey ×200' },
+    { storylet: 'Honey for the dead', name: 'A more traditional solution', cp: 3, gives: 'Ambition: Nemesis +3 CP',
+      uses: 'Bottle of Greyfields 1882 ×300' },
+    { storylet: 'Honey Tales', name: 'Listen', aliases: ['Listen 2'], cp: 3, ch: { stat: 'Watchful', diff: 78 },
+      gives: 'Ambition: Nemesis +3 CP', failTag: 'Suspicion +1', fail: 'Suspicion +1 CP' },
+    { storylet: 'Marble?', name: 'Learn about the destination of the crates', cp: 2,
+      gives: 'Ambition: Nemesis +2 CP', uses: 'Silk Scrap ×100' },
+    { storylet: 'Not quite silence', name: 'Listen', aliases: ['Listen 1'], cp: 0, stat: 1,
+      tag: 'Dangerous +1 · Melancholy +1', gives: 'Dangerous +1 CP and Melancholy +1 CP, and no progress' },
+    { storylet: 'Not quite silence', name: 'Pass on', cp: 0, stat: 2, tag: 'Dangerous +2',
+      gives: 'Dangerous +2 CP, and no progress' },
+    { storylet: 'The society pages?', name: 'Assist them – in exchange for information', cp: 3,
+      gives: 'Ambition: Nemesis +3 CP', uses: 'Favours: Society ×1', factions: [['Favours: Society', -1]] },
+  ];
+
+  const VB_STORYLETS = VB_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const VB_CARDS = VB_STORYLETS.filter(function (s) { return s !== VB_REPUTE; });
+  const VB_INDEX = carouselIndex(VB_OPTIONS);
+
+  const VB_CLASS = 'fl-ux-venderbight';
+  const VB_FLAG = 'flUxVenderbight';
+  const VB_BRANCH_CLASS = 'fl-ux-venderbight-branch';
+  const VB_BRANCH_FLAG = 'flUxVenderbightBranch';
+  const VB_CARD_CLASS = 'fl-ux-venderbight-card';
+  const VB_CARD_FLAG = 'flUxVenderbightCard';
+
+  const VB_RULES = 'The visit is one number: Ambition: Nemesis, from 11 to 15. A woman of sinister repute pays 1 CP and '
+    + 'is always there, so a card is worth playing only against that. At 15 the deck stops and only Far from home is '
+    + 'dealt. The guide: bring Silk Scraps, Foxfire Candle Stubs, Lucky Weasels and low Suspicion, and remember the '
+    + 'tomb-colony locks your outfit, so wear your best Watchful and Dangerous together.';
+
+  function vbInColony() {
+    return normalizeName(currentArea() || '') === normalizeName(VB_AREA);
+  }
+
+  function vbAllowed(storylet) {
+    return VB_STRICT.indexOf(storylet) === -1 || vbInColony();
+  }
+
+  function vbEv(e) {
+    if (e.luck != null) return carouselEv(e.luck, e.cp || 0, e.failCp || 0);
+    return e.cp || 0;
+  }
+
+  // Progress first, then the stat change points a progress-free line pays --
+  // which is the whole difference between the two options on Not quite
+  // silence.
+  function vbRank(e) {
+    return [vbEv(e), e.stat || 0];
+  }
+
+  function vbBadgeCore(e) {
+    let text;
+    if (e.tag) text = e.tag + (e.ch ? CAROUSEL_MARK_CHALLENGE : '');
+    else if (e.luck != null) text = CAROUSEL_MARK_EXPECTED + 'Nemesis +' + vbEv(e);
+    else text = 'Nemesis +' + (e.cp || 0) + (e.ch ? CAROUSEL_MARK_CHALLENGE : '');
+    if (e.menace) text += ' · ' + e.menace.replace(/ CP.*$/, '');
+    if (e.failTag) text += ' fail ' + e.failTag;
+    if (e.uses) text += ' ' + CAROUSEL_MARK_USES;
+    return text;
+  }
+
+  function vbBadgeText(e) {
+    return withFactions(vbBadgeCore(e), e);
+  }
+
+  function vbColor(e) {
+    if (vbEv(e) >= 4) return CAROUSEL_COLOR_PAYOUT;
+    if (e.menace || /\+[2-9]/.test(String(e.failTag || ''))) return CAROUSEL_COLOR_RISK;
+    return vbEv(e) > 0 ? CAROUSEL_COLOR_PROGRESS : CAROUSEL_COLOR_SETUP;
+  }
+
+  function vbSpec(e) {
+    if (!vbAllowed(e.storylet)) return null;
+    const body = [];
+    if (e.ch) body.push(carouselChallenge(e.ch));
+    if (e.luck != null) body.push(CAROUSEL_MARK_EXPECTED + ' Luck, ' + Math.round(e.luck * 100) + '%: expected Ambition: '
+      + 'Nemesis +' + vbEv(e) + ' CP.');
+    if (e.gives) body.push((e.ch || e.luck != null ? 'Success: ' : 'Gives: ') + e.gives + '.');
+    if (e.fail) body.push('Failure: ' + e.fail + '.');
+    if (e.menace) body.push('Always: ' + e.menace + '.');
+    if (e.uses) body.push(CAROUSEL_MARK_USES + ' Uses up ' + e.uses + '.');
+    if (e.needs) body.push('Needs: ' + e.needs + '.');
+    body.push(factionLine(e));
+    body.push(carouselActionsLine(e));
+    return { text: vbBadgeText(e), color: vbColor(e), title: carouselTooltip('Venderbight', e, body, VB_RULES) };
+  }
+
+  function vbStoryletSpec(key) {
+    const storylet = VB_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet || !vbAllowed(storylet)) return null;
+    return { text: VB_WINDOWS[storylet] || 'Venderbight', color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('Venderbight', storylet, VB_OPTIONS, vbBadgeText, VB_RULES) };
+  }
+
+  const VB_HAND = {
+    storylets: VB_CARDS, rows: VB_OPTIONS, rank: vbRank, badgeText: vbBadgeText, head: 'Venderbight',
+    rules: 'Ranked by the Ambition: Nemesis a success pays, then by the stat change points a progress-free line gives. '
+      + VB_RULES,
+    cls: VB_CARD_CLASS, flag: VB_CARD_FLAG, allowed: vbAllowed,
+    salt: function () { return '#' + (vbInColony() ? 'in' : '-'); },
+  };
+
+  function vbRatings() {
+    carouselHandRatings(VB_HAND);
+    carouselRatings({
+      storylets: VB_STORYLETS, index: VB_INDEX, storyletSpec: vbStoryletSpec, optionSpec: vbSpec,
+      cls: VB_CLASS, flag: VB_FLAG, branchCls: VB_BRANCH_CLASS, branchFlag: VB_BRANCH_FLAG,
+      salt: VB_HAND.salt(),
+    });
+  }
+
+  // === feature: Pilgrimages in Godfall ===================================
+  //
+  // Pilgrimages in Godfall (Guide): from Aeschaven you walk the Shattered
+  // Citadel in a fixed 16-action pilgrimage. It alternates between The
+  // Pilgrim's Path, whose options are drawn from a window of Airs of Godfall
+  // that widens as you go, and the seven Oblations, one every other level of
+  // Progress of a Pilgrimage. Godfall deals no opportunity cards, so this
+  // badges storylet headings and the options of the open storylet.
+  //
+  // **What the badge says.** One currency runs the whole pilgrimage: St
+  // Stalactite's Favour. A Path option shows the Favour a success pays and `?`
+  // because every one of them is a challenge ("Favour +3?"); an Oblation shows
+  // the goods AND whether they are bought with Favour or free ("Clue ×175 ·
+  // Favour −1" against "Hint ×200 · free"). The pair on each Oblation is worth
+  // the same in the end -- the guide's own finding -- so the badge's job there
+  // is to say which side of the trade you are on, not to rank them. `▼` needs
+  // or uses something up. A storylet heading carries the Progress the Oblation
+  // fires at, and the Path the fact that its options are an Airs window.
+  //
+  // The arithmetic behind the ending is carried in three constants and
+  // cross-checked in the suite: a Favour is 3.5 Echoes, an Oblation 2.0, and
+  // Return to Aeschaven pays (7 × Favour + 4 × Oblations − 28) bottles of
+  // Strangling Willow Absinthe -- which only agrees with those two figures if a
+  // bottle is 0.5 Echoes, and makes the guide's "tithe of 14 Echoes" exactly
+  // the 28 bottles held back. At 22 Favour the bottles are replaced by one
+  // Bottle of Fourth City Airag.
+  //
+  // Transcribed from the guide's two tables, with every storylet page and the
+  // two ending option pages fetched through the API (2026-09-17). The Airs
+  // windows are the guide's. Left out: the third option on each Oblation,
+  // *Follow the Youthful Naturalist's pilgrimage*, which belongs to Evolution
+  // and whose figures no guide here records; and the ways to unlock Godfall,
+  // which are a zailing matter. Corrections go in GF_OPTIONS and nowhere else.
+  //
+  //   favour   the Favour a success pays; `spend` the Favour an Oblation costs.
+  //   tag      the goods, short; `gives` in words. ch { stat, diff, narrow }.
+  //   airs     the Airs of Godfall window the option is offered in.
+  //   uses / needs / label / note / actions.
+
+  const GF_PATH = 'The Pilgrim’s Path';
+  const GF_FAVOUR_ECHOES = 3.5;
+  const GF_OBLATION_ECHOES = 2;
+  const GF_ABSINTHE_ECHOES = 0.5;
+  const GF_TITHE_BOTTLES = 28;
+
+  // The Progress of a Pilgrimage each Oblation fires at, off its page.
+  const GF_PROGRESS = {
+    'St Stalactite of the Lesser Waterfall': 1,
+    'St Stalactite the Albatross-Eaten': 3,
+    'St Stalactite of the Riven Way': 5,
+    'St Stalactite of the Broken Jaw': 7,
+    'St Stalactite of the Halocline': 9,
+    'St Stalactite the Hendiadic': 11,
+    'St Stalactite of the Utmost Aven': 13,
+  };
+
+  const GF_OPTIONS = [
+    { storylet: GF_PATH, name: 'Weather the swarm', airs: '0–40', ch: { stat: 'Dangerous', diff: 100 }, favour: 2 },
+    { storylet: GF_PATH, name: 'Loose your Sulky Bat', airs: '0–40', favour: 1, needs: 'a Sulky Bat' },
+    { storylet: GF_PATH, name: 'Loose your Bat with Attitude', airs: '0–40', favour: 2, needs: 'a Bat with Attitude' },
+    { storylet: GF_PATH, name: 'Loose your Violant-Winged Bat', airs: '0–40', favour: 3, needs: 'a Violant-Winged Bat' },
+    { storylet: GF_PATH, name: 'Find another way', airs: '41–80', ch: { stat: 'Watchful', diff: 100 }, favour: 2 },
+    { storylet: GF_PATH, name: 'Pass through the gap', airs: '41–80', ch: { stat: 'Shapeling Arts', diff: 1, narrow: true },
+      favour: 3 },
+    { storylet: GF_PATH, name: 'Search for meaning', airs: '81–100', ch: { stat: 'Watchful', diff: 100 }, favour: 2 },
+    { storylet: GF_PATH, name: 'Serenade the Saint', airs: '81–100', favour: 3, needs: 'a set of Iron-Lung Bagpipes' },
+    { storylet: GF_PATH, name: 'Slip past the spiders', airs: '101–140', ch: { stat: 'Watchful', diff: 125 }, favour: 3 },
+    { storylet: GF_PATH, name: 'Make yourself unappetising', airs: '101–140',
+      ch: { stat: 'Shapeling Arts', diff: 5, narrow: true }, favour: 3 },
+    { storylet: GF_PATH, name: 'Cross the room', airs: '141–180', ch: { stat: 'Dangerous', diff: 125 }, favour: 3 },
+    { storylet: GF_PATH, name: 'Finish an aborted batch', airs: '141–180', favour: 3, uses: 'Nodule of Deep Amber ×50' },
+    { storylet: GF_PATH, name: 'Lead the monks in a lesson', airs: '181–200',
+      ch: { stat: 'Shapeling Arts', diff: 5, narrow: true }, favour: 3 },
+    { storylet: GF_PATH, name: 'Observe the rites', airs: '181–200', ch: { stat: 'Watchful', diff: 125 }, favour: 3 },
+    { storylet: GF_PATH, name: 'Comb through the trove', airs: '201–240', ch: { stat: 'Watchful', diff: 150 }, favour: 3 },
+    { storylet: GF_PATH, name: 'Confront the monk', airs: '201–240', ch: { stat: 'Persuasive', diff: 150 }, favour: 3 },
+    { storylet: GF_PATH, name: 'Free the monk', airs: '241–280', ch: { stat: 'Dangerous', diff: 150 }, favour: 3 },
+    { storylet: GF_PATH, name: 'Study the walls', airs: '281–300', ch: { stat: 'Shapeling Arts', diff: 5, narrow: true },
+      favour: 3 },
+    { storylet: GF_PATH, name: 'Hold on to your self', airs: '301–366',
+      ch: { stat: 'Shapeling Arts', diff: 15, narrow: true }, favour: 4 },
+    { storylet: GF_PATH, name: 'Negotiate the questing hands', airs: '367–400', ch: { stat: 'Watchful', diff: 220 },
+      favour: 4 },
+    { storylet: GF_PATH, name: 'Return to Aeschaven', aliases: ['Return to Aeschaven (The Pilgrim’s Path outside of Evolution)'],
+      airs: '500', label: 'end · cash out',
+      gives: 'Strangling Willow Absinthe ×(7 × Favour + 4 × Oblations − 28), or, at Favour 22, one Bottle of Fourth City '
+        + 'Airag and one bottle of absinthe; Progress, Favour and Oblations all go' },
+    { storylet: GF_PATH, name: 'Cross the bridge of hands', airs: '500', label: 'Pulsating Amber', actions: 0,
+      needs: 'The Oblations of St Stalactite 7, and Invitation to a Pilgrimage 100',
+      gives: 'a Nodule of Pulsating Amber and a Memory of a Much Lesser Self, in place of the absinthe',
+      note: 'The guide: worse Echoes per action than the ordinary ending, and worth it only for the amber.' },
+
+    { storylet: 'St Stalactite of the Lesser Waterfall', name: 'Perform the oblation of water', spend: 1,
+      tag: 'Clue ×175', gives: 'Cryptic Clue ×175' },
+    { storylet: 'St Stalactite of the Lesser Waterfall', name: 'Wait for the monks', tag: 'Hint ×200',
+      gives: 'Whispered Hint ×200' },
+    { storylet: 'St Stalactite the Albatross-Eaten', name: 'Perform the oblation of fish', spend: 1, tag: 'Terror ×7',
+      gives: 'Tale of Terror!! ×7' },
+    { storylet: 'St Stalactite the Albatross-Eaten', name: 'Let the monks make obeisance', tag: 'Terror ×4',
+      gives: 'Tale of Terror!! ×4' },
+    { storylet: 'St Stalactite of the Riven Way', name: 'Perform the oblation of wine', spend: 2, tag: 'Morelways ×70',
+      gives: 'Bottle of Morelways 1872 ×70' },
+    { storylet: 'St Stalactite of the Riven Way', name: 'Hear the saint speak', tag: 'Eolith ×4',
+      gives: 'Ambiguous Eolith ×4' },
+    { storylet: 'St Stalactite of the Broken Jaw', name: 'Perform the oblation of amber', spend: 2, tag: 'Prayer ×70',
+      gives: 'Maniac’s Prayer ×70' },
+    { storylet: 'St Stalactite of the Broken Jaw', name: 'Divine prophecy from pain', tag: 'Prayer ×20',
+      gives: 'Maniac’s Prayer ×20' },
+    { storylet: 'St Stalactite of the Halocline', name: 'Perform the oblation of salt', spend: 3,
+      tag: 'Diamond ×10 + Salts ×55', gives: 'Ostentatious Diamond ×10 and Flask of Abominable Salts ×55' },
+    { storylet: 'St Stalactite of the Halocline', name: 'Scour the leavings of the zee', tag: 'Deep-zee Catch ×4',
+      gives: 'Deep-zee Catch ×4' },
+    { storylet: 'St Stalactite the Hendiadic', name: 'Perform the oblation of mirrors', spend: 3, tag: 'Light ×21',
+      gives: 'Memory of Light ×21' },
+    { storylet: 'St Stalactite the Hendiadic', name: 'Receive the contradictory lessons of St Stalactite',
+      tag: 'Shriek ×100', gives: 'Primordial Shriek ×100' },
+    { storylet: 'St Stalactite of the Utmost Aven', name: 'Perform the oblation of shells', spend: 4,
+      tag: 'Threnody + Shores ×3', gives: 'a Storm-Threnody and Memory of Distant Shores ×3' },
+    { storylet: 'St Stalactite of the Utmost Aven', name: 'Hear a wind-snatched sermon', tag: 'Shores ×4',
+      gives: 'Memory of Distant Shores ×4' },
+  ];
+
+  const GF_STORYLETS = GF_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const GF_INDEX = carouselIndex(GF_OPTIONS);
+
+  const GF_CLASS = 'fl-ux-godfall';
+  const GF_FLAG = 'flUxGodfall';
+  const GF_BRANCH_CLASS = 'fl-ux-godfall-branch';
+  const GF_BRANCH_FLAG = 'flUxGodfallBranch';
+
+  const GF_RULES = 'A pilgrimage is 16 fixed actions: The Pilgrim’s Path and the seven Oblations in turn, then Return to '
+    + 'Aeschaven. The Path pays St Stalactite’s Favour (' + GF_FAVOUR_ECHOES + ' Echoes each) and its options are drawn '
+    + 'from an Airs of Godfall window that widens as you go; an Oblation spends Favour for goods and a level of The '
+    + 'Oblations of St Stalactite (' + GF_OBLATION_ECHOES + ' Echoes each), and the guide finds both sides of each pair '
+    + 'worth the same. The ending pays 7 × Favour + 4 × Oblations − ' + GF_TITHE_BOTTLES + ' bottles of absinthe, so the '
+    + 'monks keep ' + (GF_TITHE_BOTTLES * GF_ABSINTHE_ECHOES) + ' Echoes of it; at Favour 22 you get a Bottle of Fourth '
+    + 'City Airag instead.';
+
+  function gfBadgeCore(e) {
+    if (e.label) return e.label;
+    const parts = [];
+    if (e.tag) parts.push(e.tag);
+    // "free" and "Favour −0" are different claims: one Oblation option pays
+    // nothing for its goods, the other buys them.
+    if (e.favour != null) parts.push('Favour +' + e.favour + (e.ch ? CAROUSEL_MARK_CHALLENGE : ''));
+    else if (e.spend != null) parts.push('Favour −' + e.spend);
+    else if (e.tag) parts.push('free');
+    let text = parts.join(' · ');
+    // ▼ is spent, ▾ is only required: the amber really goes, the bats and the
+    // bagpipes come home with you.
+    if (e.uses) text += ' ' + CAROUSEL_MARK_USES;
+    else if (e.needs) text += ' ' + CAROUSEL_MARK_HIDDEN;
+    return text;
+  }
+
+  function gfBadgeText(e) {
+    return withFactions(gfBadgeCore(e), e);
+  }
+
+  function gfColor(e) {
+    if (e.label) return CAROUSEL_COLOR_NEUTRAL;
+    if (e.spend != null) return CAROUSEL_COLOR_PAYOUT;
+    if (e.favour != null) return CAROUSEL_COLOR_PROGRESS;
+    return CAROUSEL_COLOR_SETUP;
+  }
+
+  function gfSpec(e) {
+    const body = [];
+    if (e.ch) body.push(carouselChallenge(e.ch));
+    if (e.favour != null) {
+      body.push('Success: St Stalactite’s Favour +' + e.favour + ' ('
+        + Math.round(e.favour * GF_FAVOUR_ECHOES * 100) / 100 + ' Echoes).');
+    }
+    if (e.spend != null) {
+      body.push('Spends St Stalactite’s Favour ×' + e.spend + ', and gives The Oblations of St Stalactite +1 ('
+        + GF_OBLATION_ECHOES + ' Echoes).');
+    } else if (e.tag) {
+      body.push('Costs no Favour, and no Oblation.');
+    }
+    if (e.gives) body.push('Gives: ' + e.gives + '.');
+    if (e.uses) body.push(CAROUSEL_MARK_USES + ' Uses up ' + e.uses + '.');
+    if (e.needs) body.push('Needs: ' + e.needs + '.');
+    if (e.airs) body.push('Offered at Airs of Godfall ' + e.airs + '.');
+    body.push(carouselActionsLine(e));
+    return { text: gfBadgeText(e), color: gfColor(e), title: carouselTooltip('Godfall', e, body, GF_RULES) };
+  }
+
+  function gfStoryletSpec(key) {
+    const storylet = GF_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet) return null;
+    const text = storylet === GF_PATH ? 'an Airs of Godfall window' : 'Oblation · Progress ' + GF_PROGRESS[storylet];
+    return { text: text, color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('Godfall', storylet, GF_OPTIONS, gfBadgeText, GF_RULES) };
+  }
+
+  function gfRatings() {
+    carouselRatings({
+      storylets: GF_STORYLETS, index: GF_INDEX, storyletSpec: gfStoryletSpec, optionSpec: gfSpec,
+      cls: GF_CLASS, flag: GF_FLAG, branchCls: GF_BRANCH_CLASS, branchFlag: GF_BRANCH_FLAG,
+    });
+  }
+
+  // === feature: The Maze-Garden ==========================================
+  //
+  // The Maze-Garden (Guide): in the Polythreme Docks you pick a garment at The
+  // Gateway to the Gardens, walk it through a labyrinth that deals its own
+  // undiscardable deck, and trade what it has become for cloth at the end. Two
+  // qualities run at once: Awakening..., which is the reward and is worth about
+  // one Echo a change point, and Perambulating..., which is the clock -- at 11
+  // the last gate throws you out.
+  //
+  // **What the badge says.** The Awakening a success pays, then the
+  // Perambulating it costs WHENEVER THAT IS NOT THE USUAL +4, then the IPSEITY
+  // or COMMUNION it builds, `?` for the challenge in the way, and what a
+  // failure gives instead ("Awak +7 · Per +2", "Awak +7 · IPSEITY +4? fail Awak
+  // +2 · IPSEITY +2"). The Perambulating is on the badge because it is the
+  // whole of the guide's central point: DISCERN's *Select a head from the pile*
+  // pays a full +7 Awakening for only +2 of the clock, which buys another card
+  // -- so a hand is ranked by Awakening first and then by the least
+  // Perambulating, and that option comes top wherever it is dealt.
+  //
+  // The trades at the end carry the Awakening they cost, what they pay and the
+  // Echoes per change point, so the three the guide says to avoid are visible
+  // as the worse rates they are. Those figures are the guide's at Polythremean
+  // Disposition 120–200; at 60 they are about two thirds, which the tooltip
+  // says. Each row also carries the item's own Echo price, and the suite
+  // recomputes the rate from count × price ÷ cost rather than trusting the
+  // column.
+  //
+  // Transcribed from the guide's card and reward tables, with every card and
+  // storylet page fetched through the API (2026-09-17) as the cross-check on
+  // the titles. Two options are on the pages and in no guide table -- HARVEST's
+  // Fate option and TRANSFIGURE's *Ask for advice on the matter of the
+  // ushabtiu* -- and are labelled rather than scored, since nothing records
+  // what they give. The Watchful Gate has two options by one title; that is one
+  // row, and the tooltip says so. Corrections go in MZ_OPTIONS and nowhere
+  // else.
+  //
+  //   awak / per      what a success gives; `per` defaults to MZ_PER_DEFAULT.
+  //   failAwak / failPer / failIps / failCom   what a failure gives instead.
+  //   ips / com       IPSEITY or COMMUNION a success builds.
+  //   ch { stat, diff, narrow } / dispo (a challenge AT your Disposition) / luck.
+  //   window          the Awakening the option is offered in.
+  //   cost / count / item / unit / rate   a trade at the end.
+  //   label / needs / note.
+
+  const MZ_GATEWAY = 'The Gateway to the Gardens';
+  const MZ_OFFERING = 'An Offering';
+  const MZ_PER_DEFAULT = 4;
+
+  const MZ_OPTIONS = [
+    { storylet: MZ_GATEWAY, name: 'A leftover stocking', label: 'Disposition 70', note: 'Needs no item of your own.' },
+    { storylet: MZ_GATEWAY, name: 'A scarlet stocking', label: 'Disposition 90', chiral: true,
+      uses: 'a Pair of Scarlet Stockings of Dubious Origin' },
+    { storylet: MZ_GATEWAY, name: 'A Magician’s Glove', label: 'Disposition 100', chiral: true,
+      uses: 'a Pair of Magician’s Gloves' },
+    { storylet: MZ_GATEWAY, name: 'A Prisoner’s Mask', label: 'Disposition 120', uses: 'a Prisoner’s Mask',
+      note: 'The guide’s pick: rewards stop climbing at Disposition 120, so this is the cheapest way to the top of them.' },
+    { storylet: MZ_GATEWAY, name: 'A Shabby Opera Cloak', label: 'Disposition 160', uses: 'a Shabby Opera Cloak' },
+    { storylet: MZ_GATEWAY, name: 'A Horrendous Cravat', label: 'Disposition 200', note: 'Needs no item of your own.' },
+
+    { storylet: 'ADORN', name: 'Place it on the thin Clay Man in Regency clothes', awak: 7, com: 4 },
+    { storylet: 'ADORN', name: 'Place it on a heavyset, conservatively-dressed Clay Man', awak: 7, ips: 2, com: 2 },
+    { storylet: 'ADORN', name: 'Place it on the nearly nude Clay Man', awak: 7, ips: 4 },
+
+    { storylet: 'DISCERN', name: 'Select a head from the pile', awak: 7, per: 2,
+      note: 'The guide: almost always the best action in the maze, because the +2 buys you another card.' },
+    { storylet: 'DISCERN', name: 'Leave the pile of heads to its own devices', ch: { stat: 'COMMUNION', diff: 3, narrow: true },
+      awak: 1, com: 4, failAwak: 6, failIps: 2,
+      note: 'The one check in the maze worth failing: a failure pays more Awakening and the IPSEITY the other cards want.' },
+
+    { storylet: 'DUEL', name: 'Fight on behalf of your (garment)', window: 'Awakening under 5', dispo: 'Dangerous',
+      awak: 7, failAwak: 2, failPer: 2 },
+    { storylet: 'DUEL', name: 'Allow your (garment) to participate', window: 'Awakening 5+',
+      ch: { stat: 'IPSEITY', diff: 3, narrow: true }, awak: 7, ips: 4, failAwak: 2, failIps: 2 },
+
+    { storylet: 'HARVEST', name: 'Pick out the sweetest words', window: 'Awakening under 8', awak: 7, com: 4 },
+    { storylet: 'HARVEST', name: 'Pick out venomous words', window: 'Awakening under 8', awak: 6, ips: 4 },
+    { storylet: 'HARVEST', name: 'Allow your paisley suit to pick out words', window: 'Awakening under 8',
+      label: 'Fate suit · unrecorded', needs: 'an Ostentatious Paisley Suit',
+      note: 'On the card page only. The guide records neither the Awakening nor the IPSEITY it pays, so nothing is claimed here.' },
+    { storylet: 'HARVEST', name: 'Let your (garment) choose its own food', window: 'Awakening 5+',
+      ch: { stat: 'IPSEITY', diff: 3, narrow: true }, awak: 7, failAwak: 2, failIps: 4 },
+
+    // Two options by ONE title, told apart only by the Awakening you are at --
+    // which nothing here can read. So this is one row saying both, in the shape
+    // the Nadir's "Examine the site" uses, rather than a number that is right
+    // half the time.
+    { storylet: 'PARTAKE', name: 'Allow your (garment) to join in',
+      label: 'Awak +7 · COMMUNION +4–5, or Awak +3 · COMMUNION +7',
+      note: 'Under Awakening 6 it pays Awakening +7 CP and COMMUNION +4–5 CP; at 6–9 (the wiki’s "Allow your '
+        + '(garment) to join in 2") it pays Awakening +3 CP and COMMUNION +7 CP. Only one of the two is ever offered.' },
+    { storylet: 'PARTAKE', name: 'Permit it only to observe', window: 'Awakening under 6', awak: 7, ips: 3 },
+    { storylet: 'PARTAKE', name: 'Let your (garment) choose to join, or not', window: 'Awakening 7+',
+      ch: { stat: 'COMMUNION', diff: 3, narrow: true }, awak: 7, failAwak: 3, failCom: 3 },
+
+    { storylet: 'SCAVENGE', name: 'Walk softly', dispo: 'Shadowy', awak: 7, failAwak: 0, failPer: 2 },
+    { storylet: 'SCAVENGE', name: 'Allow your (garment) to dig through the pile', window: 'Awakening 5+',
+      ch: { stat: 'COMMUNION', diff: 3, narrow: true }, awak: 7, com: 4, failAwak: 3, failCom: 4 },
+
+    { storylet: 'TRANSFIGURE', name: 'Have your (garment) inspected for damage', window: 'Awakening under 5', luck: 0.5,
+      awak: 6, com: 4, failAwak: 2, failIps: 4 },
+    { storylet: 'TRANSFIGURE', name: 'Bid it to ask for an alteration', window: 'Awakening 5+',
+      ch: { stat: 'IPSEITY', diff: 3, narrow: true }, awak: 6, ips: 4, failAwak: 2, failCom: 4 },
+    { storylet: 'TRANSFIGURE', name: 'Ask for advice on the matter of the ushabtiu', label: 'unrecorded',
+      note: 'On the card page only; no guide records what it gives, so nothing is claimed here.' },
+
+    { storylet: 'TRAVERSE', name: 'Carry your (garment) across', dispo: 'Shadowy', awak: 3, failAwak: 0, failPer: 2,
+      note: 'The guide: usually leave TRAVERSE in hand -- keeping it there stops it being dealt again.' },
+    { storylet: 'TRAVERSE', name: 'Wade through the rushing water', dispo: 'Watchful', awak: 4, failAwak: 0, failPer: 6 },
+
+    { storylet: 'The Silent Gate', name: 'Walk through the gate', label: 'gate · Perambulating → 6',
+      note: 'Autofires at Perambulating 5 and costs an action.' },
+    { storylet: 'The Heart of the Labyrinth', name: 'Submit to the stones’ judgement', label: 'gate · Perambulating → 10',
+      note: 'Autofires at Perambulating 9 and costs an action.' },
+    { storylet: 'The Watchful Gate', name: 'Pass under its gazes', label: 'gate · to the offering',
+      note: 'Autofires at Perambulating 11. The page carries two options by this title; both lead to An Offering.' },
+
+    { storylet: MZ_OFFERING, name: 'Take some silk scraps', cost: 1, count: 50, item: 'Silk Scrap', unit: 0.01, rate: 0.5,
+      note: 'The guide: avoid -- it throws away half an Echo a change point.' },
+    { storylet: MZ_OFFERING, name: 'Take some surface-silk', cost: 6, count: 60, item: 'Surface-Silk Scrap', unit: 0.1, rate: 1 },
+    { storylet: MZ_OFFERING, name: 'Take some whisper-satin', cost: 15, count: 30, item: 'Whisper-Satin Scrap', unit: 0.5, rate: 1 },
+    { storylet: MZ_OFFERING, name: 'Take some Correspondence plaques', cost: 28, count: 56, item: 'Correspondence Plaque',
+      unit: 0.5, rate: 1, note: 'The guide cashes out in these, whisper-satin and surface-silk and nothing else.' },
+    { storylet: MZ_OFFERING, name: 'Take some Thirsty Bombazine', cost: 66, count: 26, item: 'Thirsty Bombazine Scrap',
+      unit: 2.5, rate: 0.98, needs: 'COMMUNION 7', note: 'The guide: avoid for Echoes; take it only if you want the bombazine.' },
+    { storylet: MZ_OFFERING, name: 'Take some Glass Gazettes', cost: 66, count: 26, item: 'Glass Gazette', unit: 2.5,
+      rate: 0.98, needs: 'IPSEITY 7',
+      note: 'A Gazette is worth 2.5 Echoes only at Helicon House, which is Railway content; before that it is hard to cash.' },
+    { storylet: MZ_OFFERING, name: 'Depart', aliases: ['Depart (Polythreme)'], label: 'leave · resets the maze',
+      note: 'Unplayed cards stay in your hand for the next walk.' },
+  ];
+
+  const MZ_STORYLETS = MZ_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const MZ_GATES = ['The Silent Gate', 'The Heart of the Labyrinth', 'The Watchful Gate'];
+  const MZ_CARDS = MZ_STORYLETS.filter(function (s) {
+    return s !== MZ_GATEWAY && s !== MZ_OFFERING && MZ_GATES.indexOf(s) === -1;
+  });
+  const MZ_INDEX = carouselIndex(MZ_OPTIONS);
+
+  const MZ_CLASS = 'fl-ux-maze-garden';
+  const MZ_FLAG = 'flUxMazeGarden';
+  const MZ_BRANCH_CLASS = 'fl-ux-maze-garden-branch';
+  const MZ_BRANCH_FLAG = 'flUxMazeGardenBranch';
+  const MZ_CARD_CLASS = 'fl-ux-maze-garden-card';
+  const MZ_CARD_FLAG = 'flUxMazeGardenCard';
+
+  const MZ_RULES = 'Awakening... is the reward -- about one Echo a change point -- and Perambulating... is the clock: every '
+    + 'card costs +' + MZ_PER_DEFAULT + ' of it unless the badge says otherwise, gates fire at 5 and 9, and at 11 the last '
+    + 'gate takes you to the offering. A garment is chosen at the gateway and its Polythremean Disposition sets both the '
+    + 'difficulty and the size of the reward, which stops climbing at 120. Maze cards cannot be discarded, and whatever you '
+    + 'do not play stays in hand for the next walk.';
+
+  function mzChallengeLine(e) {
+    if (e.dispo) return 'Challenge: ' + e.dispo + ' at your Polythremean Disposition -- the garment you brought sets it.';
+    if (e.ch) return carouselChallenge(e.ch);
+    if (e.luck != null) return 'Challenge: Luck, ' + Math.round(e.luck * 100) + '%.';
+    return null;
+  }
+
+  function mzHasChallenge(e) {
+    return !!(e.ch || e.dispo || e.luck != null);
+  }
+
+  function mzGains(awak, per, ips, com) {
+    const parts = [];
+    if (awak != null) parts.push('Awak +' + awak);
+    if (per != null && per !== MZ_PER_DEFAULT) parts.push('Per +' + per);
+    if (ips != null) parts.push('IPSEITY +' + carouselRange(ips).replace(/^\+/, ''));
+    if (com != null) parts.push('COMMUNION +' + carouselRange(com).replace(/^\+/, ''));
+    return parts.join(' · ');
+  }
+
+  function mzWords(awak, per, ips, com) {
+    const parts = [];
+    if (awak != null) parts.push('Awakening... +' + awak + ' CP');
+    parts.push('Perambulating... +' + (per == null ? MZ_PER_DEFAULT : per) + ' CP');
+    if (ips != null) parts.push('IPSEITY +' + carouselRange(ips).replace(/^\+/, '') + ' CP');
+    if (com != null) parts.push('COMMUNION +' + carouselRange(com).replace(/^\+/, '') + ' CP');
+    return parts.join(', ');
+  }
+
+  function mzBadgeCore(e) {
+    // The garment you walk in with is gone at the end of the maze, so a gateway
+    // label carries ▼ like any other line that spends something.
+    if (e.label) return e.label + (e.uses ? ' ' + CAROUSEL_MARK_USES : '');
+    if (e.cost != null) {
+      return 'Awak ' + e.cost + ' CP → ' + e.item + ' ×' + e.count + ' · ' + e.rate.toFixed(2) + ' per CP';
+    }
+    let text = mzGains(e.awak, e.per, e.ips, e.com) + (mzHasChallenge(e) ? CAROUSEL_MARK_CHALLENGE : '');
+    if (e.failAwak != null) text += ' fail ' + mzGains(e.failAwak, e.failPer, e.failIps, e.failCom);
+    return text;
+  }
+
+  function mzBadgeText(e) {
+    return withFactions(mzBadgeCore(e), e);
+  }
+
+  function mzColor(e) {
+    if (e.cost != null) return CAROUSEL_COLOR_PAYOUT;
+    if (e.label) return CAROUSEL_COLOR_NEUTRAL;
+    return e.ips != null || e.com != null ? CAROUSEL_COLOR_SETUP : CAROUSEL_COLOR_PROGRESS;
+  }
+
+  function mzSpec(e) {
+    const body = [];
+    body.push(mzChallengeLine(e));
+    if (e.awak != null) body.push((mzHasChallenge(e) ? 'Success: ' : 'Gives: ') + mzWords(e.awak, e.per, e.ips, e.com) + '.');
+    if (e.failAwak != null) body.push('Failure: ' + mzWords(e.failAwak, e.failPer, e.failIps, e.failCom) + '.');
+    if (e.cost != null) {
+      body.push('Spends Awakening... ×' + e.cost + ' CP for ' + e.item + ' ×' + e.count + ' (' + e.unit
+        + ' Echoes each, so ' + Math.round(e.count * e.unit * 100) / 100 + ' Echoes, ' + e.rate.toFixed(2)
+        + ' a change point).');
+      body.push('The guide’s figures are for Polythremean Disposition 120–200; at 60 expect about two thirds.');
+    }
+    if (e.window) body.push('Offered at ' + e.window + '.');
+    if (e.needs) body.push('Needs: ' + e.needs + '.');
+    if (e.chiral) body.push('Chiral: the left and the right differ, so this Disposition can come out up to 30 either way.');
+    body.push(carouselActionsLine(e));
+    return { text: mzBadgeText(e), color: mzColor(e), title: carouselTooltip('The Maze-Garden', e, body, MZ_RULES) };
+  }
+
+  function mzStoryletSpec(key) {
+    const storylet = MZ_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet) return null;
+    const text = storylet === MZ_GATEWAY ? 'pick a garment' : storylet === MZ_OFFERING ? 'cash out the Awakening'
+      : MZ_GATES.indexOf(storylet) !== -1 ? 'gate · costs an action' : 'maze card';
+    return { text: text, color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('The Maze-Garden', storylet, MZ_OPTIONS, mzBadgeText, MZ_RULES) };
+  }
+
+  // Awakening first, then the least Perambulating: an option that pays the same
+  // and costs less of the clock leaves room for another card, which is the
+  // guide's whole argument for Select a head from the pile.
+  function mzRank(e) {
+    if (e.label || e.cost != null || e.awak == null) return null;
+    return [e.awak, -(e.per == null ? MZ_PER_DEFAULT : e.per)];
+  }
+
+  const MZ_HAND = {
+    storylets: MZ_CARDS, rows: MZ_OPTIONS, rank: mzRank, badgeText: mzBadgeText, head: 'The Maze-Garden',
+    rules: 'Ranked by the Awakening a success pays, then by the least Perambulating. ' + MZ_RULES,
+    cls: MZ_CARD_CLASS, flag: MZ_CARD_FLAG,
+  };
+
+  function mzRatings() {
+    carouselHandRatings(MZ_HAND);
+    carouselRatings({
+      storylets: MZ_STORYLETS, index: MZ_INDEX, storyletSpec: mzStoryletSpec, optionSpec: mzSpec,
+      cls: MZ_CLASS, flag: MZ_FLAG, branchCls: MZ_BRANCH_CLASS, branchFlag: MZ_BRANCH_FLAG,
+    });
+  }
+
+  // === feature: Polythremic Promenade ====================================
+  //
+  // Polythremic Promenade (Guide): in the Polythreme Streets you begin a
+  // promenade, which sets Unnatural Exuberance to 11, and every action there
+  // spends one of it. Ten actions raise ALLURE and COGNISANCE -- from the
+  // street's own opportunity deck, or bought at Paying Your Way -- and the last
+  // one cashes them in at Spending your Time or advances a story. Whatever is
+  // left of both qualities goes with the last Exuberance, every time.
+  //
+  // **What the badge says.** What the option does to the two qualities, in
+  // change points and signed, with `?` for the challenge in the way and what a
+  // failure gives instead ("ALLURE +12 · COGNISANCE −5? fail ALLURE +5 ·
+  // COGNISANCE −5"). Nearly every card raises one and lowers the other, which
+  // is exactly why both belong on the badge: a card that reads as +12 alone
+  // reads as twice the progress it is. A payout carries the goods and the
+  // guide's Echoes ("Permit ×2 + Snippet ×25 · 30 E"), and Paying Your Way what
+  // it costs as well ("Silk ×25 → ALLURE +20? fail +10 ▼").
+  //
+  // The thresholds are the point of the whole carousel: 8 of each, or 13 of
+  // one, and the guide's CP figures for those (36, 78, 91) are in the rules
+  // line, because a badge saying +12 means nothing without the number it is
+  // climbing to.
+  //
+  // Transcribed from the guide's four tables, with every card and storylet page
+  // fetched through the API (2026-09-17) as the cross-check on the titles and
+  // the two exchanges. One disagreement is carried with `guide`: the wiki's
+  // page for *So that's who he is* lists only the +12 half, and the guide gives
+  // both halves (22 or 12, evenly), which is what the badge says -- the
+  // matching *Pull off a mask* page does list both, the same way round. Left
+  // out: the storyline conclusions (the guide's own /Story Table), which need
+  // ALLURE or COGNISANCE 12 and pay by story rather than by table.
+  // Corrections go in PP_OPTIONS and nowhere else.
+  //
+  //   allure / cog             change points a success gives; may be 'reset'.
+  //   failAllure / failCog     what a failure gives instead.
+  //   ch { stat, diff } / luck / sartorial (a Sartorial Cooperation check).
+  //   tag / gives / value / epa   a payout. uses / needs / label / note / guide.
+
+  const PP_SPEND = 'Spending your Time';
+  const PP_PAYING = 'Paying Your Way';
+  const PP_PROFIT = 'One Might Profit Even in Such a Place';
+
+  const PP_OPTIONS = [
+    { storylet: 'Begin your Polythremic Promenade', name: 'Set forth into the stone-flagged street',
+      label: 'start · Exuberance 11', gives: 'Unnatural Exuberance 11, and a promenade of 12 actions' },
+
+    { storylet: 'At the Market', name: 'Attract attention at the market', ch: { stat: 'Persuasive', diff: 120 },
+      allure: 12, cog: -5, failAllure: 5, failCog: -5 },
+    { storylet: 'At the Market', name: 'Wander around the market', allure: -10, tag: 'Silk ×25',
+      gives: 'Surface-Silk Scrap ×25', needs: 'ALLURE 4' },
+    { storylet: 'The Temple', name: 'Have a look around the temple', ch: { stat: 'Shadowy', diff: 120 },
+      cog: 12, allure: -5, failCog: 5, failAllure: -5 },
+    { storylet: 'The Temple', name: 'Poke around the grounds', cog: -10, tag: 'Silk ×20–30',
+      gives: 'Surface-Silk Scrap ×20–30', needs: 'COGNISANCE 4' },
+    { storylet: 'The Priest at the Temple', name: 'Speak of his spiritual work', sartorial: 0.5, allure: 15,
+      failAllure: 2, failCog: -10 },
+    { storylet: 'The Priest at the Temple', name: 'Speak to the Clay priest of matters romantic', allure: 'reset',
+      tag: 'Notion ×60', gives: 'Romantic Notion ×60', needs: 'ALLURE 8' },
+    { storylet: 'The Ruin', name: 'The walls are rattling', sartorial: 0.5, cog: 15, failCog: 2, failAllure: -10 },
+    { storylet: 'The Ruin', name: 'What’s that fluttering?', cog: 'reset', tag: 'Notion ×60',
+      gives: 'Romantic Notion ×60', needs: 'COGNISANCE 8' },
+    { storylet: 'Fractious Furniture', name: 'Examine the carvings', ch: { stat: 'Shadowy', diff: 120 },
+      cog: 12, allure: -5, failAllure: -5, needs: 'Spying on Polythreme 1',
+      note: 'A Little Spy Work puts this card in the deck, which is 6 to 8 cards thick -- so adding it matters.' },
+    { storylet: 'The Zailors at Polythreme’s Harbour', name: 'Speak with the zailors',
+      ch: { stat: 'Persuasive', diff: 120 }, allure: 12, cog: -5, failCog: -5,
+      needs: 'Writing of your Polythreme Travels 1',
+      note: 'A Guided Tour of Polythreme puts this card in the deck, which is 6 to 8 cards thick.' },
+    { storylet: 'The Masked Man', name: 'Bid him a good morning', sartorial: 0.7, allure: 6, cog: 6,
+      note: 'The guide records nothing for a failure.' },
+    { storylet: 'The Wax Wind Comes', name: 'Crouching in a low stone building', luck: 0.5, allure: 12, failCog: 12,
+      note: 'Either way you get 12 CP; the wind picks which quality. Swap it at the exchanges if it went the wrong way.' },
+
+    { storylet: PP_PAYING, name: 'Give surface-silk to Clay Men', window: 'Exuberance 8–11', sartorial: 0.5,
+      uses: 'Surface-Silk Scrap ×25 (2.50 Echoes)', allure: 20, failAllure: 10 },
+    { storylet: PP_PAYING, name: 'Offer silks to a clothes-colony', window: 'Exuberance 8–11', sartorial: 0.5,
+      uses: 'Surface-Silk Scrap ×25 (2.50 Echoes)', cog: 20, failCog: 10 },
+    { storylet: PP_PAYING, name: 'Spread tales of love and glamour', window: 'Exuberance 5–7', sartorial: 0.6,
+      uses: 'Romantic Notion ×50 (5.00 Echoes)', allure: 20, cog: 10, failAllure: 10 },
+    { storylet: PP_PAYING, name: 'Speak of romance to an empty garden', window: 'Exuberance 5–7', sartorial: 0.6,
+      uses: 'Romantic Notion ×50 (5.00 Echoes)', cog: 20, allure: 10, failCog: 10 },
+    { storylet: PP_PAYING, name: 'Speak of the Elder Continent at Arcimboldo’s', window: 'Exuberance 2–4',
+      sartorial: 0.7, uses: 'Mystery of the Elder Continent ×25 (12.50 Echoes)', allure: 40, cog: 10, failAllure: 10 },
+    { storylet: PP_PAYING, name: 'Present your findings to an academic gone native', window: 'Exuberance 2–4',
+      sartorial: 0.7, uses: 'Volume of Collated Research ×5 (12.50 Echoes)', cog: 40, allure: 10, failCog: 10 },
+
+    { storylet: 'A Clay Man of Wealth and Influence', name: 'So that’s who he is',
+      cog: 'between', allure: -10, tag: 'COGNISANCE +22 or +12', gives: 'COGNISANCE +22 CP on a success, +12 on a failure, '
+        + 'and ALLURE −10 CP either way', needs: 'ALLURE 4',
+      guide: 'both halves; the option page lists only the +12',
+      note: 'A Sartorial Cooperation check, which climbs 10% for every promenade you fail and resets when one goes well.' },
+    { storylet: 'Robes and Belts and Masks And Mantles', name: 'Pull off a mask',
+      allure: 'between', cog: -10, tag: 'ALLURE +22 or +12', gives: 'ALLURE +22 CP on a success, +12 on a failure, '
+        + 'and COGNISANCE −10 CP either way', needs: 'COGNISANCE 4' },
+
+    { storylet: PP_PROFIT, name: 'Make off with a box of silks', ch: { stat: 'Dangerous', diff: 80 }, tag: 'Silk ×8',
+      gives: 'Surface-Silk Scrap ×8', fail: 'Suspicion +1 CP', free: true },
+    { storylet: PP_PROFIT, name: 'Observe the camaraderie of objects', ch: { stat: 'Watchful', diff: 80 },
+      tag: 'Notion ×8', gives: 'Romantic Notion ×8', fail: 'Nightmares +1 CP', free: true },
+    { storylet: PP_PROFIT, name: 'Soft to the touch', ch: { stat: 'Persuasive', diff: 120 }, tag: 'Silk ×12',
+      gives: 'Surface-Silk Scrap ×12', fail: 'Scandal +1 CP', free: true },
+    { storylet: PP_PROFIT, name: 'Lurk in the eaves', ch: { stat: 'Shadowy', diff: 120 }, tag: 'Notion ×12',
+      gives: 'Romantic Notion ×12', free: true, note: 'The guide records nothing for a failure.' },
+
+    { storylet: PP_SPEND, name: 'A Distressing Lack of Progress', tag: 'Prayer ×200', gives: 'Maniac’s Prayer ×200',
+      value: 20, epa: 1.67,
+      note: 'Always available, however low your two qualities are -- and it still builds Sartorial Cooperation for the next run.' },
+    { storylet: PP_SPEND, name: 'The Voice in the Fog', tag: 'Threnody ×2 + Snippet ×25',
+      gives: 'Storm-Threnody ×2 and Intriguing Snippet ×25', value: 30, epa: 2.5, needs: 'ALLURE 13' },
+    { storylet: PP_SPEND, name: 'There’s someone in there', tag: 'Permit ×2 + Snippet ×25',
+      gives: 'Bazaar Permit ×2 and Intriguing Snippet ×25', value: 30, epa: 2.5,
+      needs: 'ALLURE 13, and A Person of Some Importance' },
+    { storylet: PP_SPEND, name: 'What’s going on in the bay?', tag: 'Implication ×12',
+      gives: 'Extraordinary Implication ×12', value: 30, epa: 2.5, needs: 'COGNISANCE 13' },
+    { storylet: PP_SPEND, name: 'Speak to a matched pair', tag: 'Stolen Kiss ×12', gives: 'Stolen Kiss ×12',
+      value: 30, epa: 2.5, needs: 'COGNISANCE 13' },
+    { storylet: PP_SPEND, name: 'What’s going on here?', aliases: ['What’s going on here? (Spending your Time)'],
+      tag: 'Prayer ×100 + Shores ×40', gives: 'Maniac’s Prayer ×100 and Memory of Distant Shores ×40', value: 30,
+      epa: 2.5, needs: 'ALLURE 8 and COGNISANCE 8' },
+    { storylet: PP_SPEND, name: 'A walk in the villa gardens', tag: 'Love Story ×12', gives: 'Touching Love Story ×12',
+      value: 30, epa: 2.5, needs: 'ALLURE 8 and COGNISANCE 8' },
+  ];
+
+  const PP_STORYLETS = PP_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const PP_CARDS = ['At the Market', 'The Temple', 'The Priest at the Temple', 'The Ruin', 'Fractious Furniture',
+    'The Zailors at Polythreme’s Harbour', 'The Masked Man', 'The Wax Wind Comes'];
+  const PP_INDEX = carouselIndex(PP_OPTIONS);
+
+  const PP_CLASS = 'fl-ux-promenade';
+  const PP_FLAG = 'flUxPromenade';
+  const PP_BRANCH_CLASS = 'fl-ux-promenade-branch';
+  const PP_BRANCH_FLAG = 'flUxPromenadeBranch';
+  const PP_CARD_CLASS = 'fl-ux-promenade-card';
+  const PP_CARD_FLAG = 'flUxPromenadeCard';
+
+  const PP_RULES = 'A promenade is 12 actions: one to begin (Unnatural Exuberance 11), ten that spend Exuberance raising '
+    + 'ALLURE and COGNISANCE, and one to cash them in. The targets are ALLURE 8 AND COGNISANCE 8, or 13 of one -- 36 change '
+    + 'points for a level 8, 78 for 12 and 91 for 13 -- and every card that raises one lowers the other, which is why 8 and '
+    + '8 is not the easy pair it looks. Whatever you have left goes with the last Exuberance, so spend it: even A '
+    + 'Distressing Lack of Progress pays, and builds Sartorial Cooperation for the next run.';
+
+  function ppQuality(name, v) {
+    if (v == null) return null;
+    if (v === 'reset') return name + ' reset';
+    if (v === 'between') return null;
+    return name + ' ' + carouselSigned(v);
+  }
+
+  function ppChange(allure, cog) {
+    return [ppQuality('ALLURE', allure), ppQuality('COGNISANCE', cog)].filter(Boolean).join(' · ');
+  }
+
+  function ppHasChallenge(e) {
+    return !!(e.ch || e.luck != null || e.sartorial != null);
+  }
+
+  function ppBadgeCore(e) {
+    if (e.label) return e.label;
+    const parts = [];
+    if (e.tag) parts.push(e.tag);
+    const change = ppChange(e.allure, e.cog);
+    if (change) parts.push(change);
+    let text = parts.join(' · ') + (ppHasChallenge(e) ? CAROUSEL_MARK_CHALLENGE : '');
+    const fail = ppChange(e.failAllure, e.failCog);
+    if (fail) text += ' fail ' + fail;
+    if (e.value != null) text += ' · ' + e.value + ' E';
+    if (e.uses) text += ' ' + CAROUSEL_MARK_USES;
+    return text;
+  }
+
+  function ppBadgeText(e) {
+    return withFactions(ppBadgeCore(e), e);
+  }
+
+  function ppColor(e) {
+    if (e.label) return CAROUSEL_COLOR_NEUTRAL;
+    if (e.value != null) return CAROUSEL_COLOR_PAYOUT;
+    if (e.tag) return CAROUSEL_COLOR_SETUP;
+    return CAROUSEL_COLOR_PROGRESS;
+  }
+
+  function ppSpec(e) {
+    const body = [];
+    if (e.ch) body.push(carouselChallenge(e.ch));
+    if (e.luck != null) body.push('Challenge: Luck, ' + Math.round(e.luck * 100) + '%.');
+    if (e.sartorial != null) {
+      body.push('Challenge: Sartorial Cooperation, ' + Math.round(e.sartorial * 100) + '% to begin with -- it climbs 10% '
+        + 'for every promenade you fail and resets when one goes well.');
+    }
+    const change = ppChange(e.allure, e.cog);
+    if (change) body.push((ppHasChallenge(e) ? 'Success: ' : 'Gives: ') + change + '.');
+    const fail = ppChange(e.failAllure, e.failCog);
+    if (fail) body.push('Failure: ' + fail + '.');
+    if (e.gives) body.push('Gives: ' + e.gives + '.');
+    if (e.fail) body.push('Failure: ' + e.fail + '.');
+    if (e.value != null) body.push('The guide’s value: ' + e.value + ' Echoes, ' + e.epa + ' an action over the promenade.');
+    if (e.free) body.push('Costs no Unnatural Exuberance: this storylet is outside the promenade’s ten actions.');
+    if (e.uses) body.push(CAROUSEL_MARK_USES + ' Uses up ' + e.uses + '.');
+    if (e.needs) body.push('Needs: ' + e.needs + '.');
+    if (e.window) body.push('Offered at ' + e.window + '; Paying Your Way costs more as Exuberance falls.');
+    body.push(carouselActionsLine(e));
+    if (e.guide) body.push('The guide gives ' + e.guide + '; the guide is followed.');
+    return { text: ppBadgeText(e), color: ppColor(e), title: carouselTooltip('Polythremic Promenade', e, body, PP_RULES) };
+  }
+
+  function ppStoryletSpec(key) {
+    const storylet = PP_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet) return null;
+    const text = storylet === PP_SPEND ? 'cash in ALLURE and COGNISANCE' : storylet === PP_PAYING ? 'buy progress'
+      : storylet === PP_PROFIT ? 'no Exuberance spent' : PP_CARDS.indexOf(storylet) !== -1 ? 'promenade card'
+        : 'promenade';
+    return { text: text, color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('Polythremic Promenade', storylet, PP_OPTIONS, ppBadgeText, PP_RULES) };
+  }
+
+  // The hand is ranked by the change points a success adds ACROSS both
+  // qualities, since a card that gives 12 of one and takes 5 of the other is
+  // worth 7, not 12 -- and the two thresholds want both.
+  function ppRank(e) {
+    if (e.label || e.tag) return null;
+    const total = (typeof e.allure === 'number' ? e.allure : 0) + (typeof e.cog === 'number' ? e.cog : 0);
+    return [total];
+  }
+
+  const PP_HAND = {
+    storylets: PP_CARDS, rows: PP_OPTIONS, rank: ppRank, badgeText: ppBadgeText, head: 'Polythremic Promenade',
+    rules: 'Ranked by the change points a success adds across both qualities together. ' + PP_RULES,
+    cls: PP_CARD_CLASS, flag: PP_CARD_FLAG,
+  };
+
+  function ppRatings() {
+    carouselHandRatings(PP_HAND);
+    carouselRatings({
+      storylets: PP_STORYLETS, index: PP_INDEX, storyletSpec: ppStoryletSpec, optionSpec: ppSpec,
+      cls: PP_CLASS, flag: PP_FLAG, branchCls: PP_BRANCH_CLASS, branchFlag: PP_BRANCH_FLAG,
+    });
+  }
+
+  // === feature: Port Cecil ===============================================
+  //
+  // Port Cecil (Guide): with a Deed to a Port Cecil Business, the town runs a
+  // fixed 14-action carousel on Tides of Port Cecil:. Six actions of High Tide
+  // prepare one of the two factions, seven of Low Tide push one of them ahead
+  // of the other, and the Perigee of Silver pays out on WHICH of the two is
+  // ahead -- never on by how much. Port Cecil deals no opportunity cards, so
+  // this badges storylet headings and the options of the open storylet.
+  //
+  // **What the badge says.** Which side the action helps, in the plain words
+  // the guide uses (Cats, Miners), then the goods and the guide's Echoes for
+  // the tier the option sits in, then `?` for the challenge ("Cats +3 CP ·
+  // Secret ×10 + Clue ×25? · 2 E"). At Low Tide the figure is a formula rather
+  // than a number, because the game's is: a push is worth 1 + the preparation
+  // the other faction got at High Tide, so the badge says "Miners +1+Prep ·
+  // Cats −3" and the tooltip spells both quality names out. Nothing here
+  // pretends to know your Preparations or Receptivity: they are not on any
+  // page this script reads.
+  //
+  // The Perigee options are labelled with the standing they need rather than
+  // scored, because all four pay the same -- one item of 12.50 Echoes and three
+  // of 2.50 -- and the choice is made for you by which faction is ahead.
+  //
+  // Transcribed from the guide's three tables, with every storylet page fetched
+  // through the API (2026-09-17) as the cross-check on the option lists; that
+  // found *Check the lay of the land*, a free action the guide's table has not
+  // got, and it is carried with `guide`. The guide's per-tier Echo figures
+  // (2.00 easy, 3.00 hard, 3.20 advanced skill) are the ones on the badges;
+  // no page prices the items themselves. Left out: Explore Port Cecil and
+  // Visit The Poisoned Pawn, which are the way in rather than the carousel, and
+  // the Evolution options on the Perigee. Corrections go in PC2_OPTIONS and
+  // nowhere else.
+  //
+  //   side      'Cats' or 'Miners' -- who the action helps.
+  //   prep      the flat +3 CP a High Tide option gives that side.
+  //   scaled    the Low Tide formula, e.g. '+1+Prep'; `drops` what it takes
+  //             from the other side.
+  //   tag / gives / worth   the goods and the guide's Echoes.
+  //   ch { stat, diff, narrow } / fail / needs / label / note / guide / actions.
+
+  const PC2_HIGH = 'High Tide in The Poisoned Pawn';
+  const PC2_LOW = 'Low Tide in the Scintillack Pools';
+  const PC2_PERIGEE = 'The Perigee of Silver';
+
+  // The Tides window each storylet is open in, off its page.
+  const PC2_WINDOWS = {};
+  PC2_WINDOWS[PC2_HIGH] = 'Tides 0–5 · 6 actions';
+  PC2_WINDOWS[PC2_LOW] = 'Tides 6–12 · 7 actions';
+  PC2_WINDOWS[PC2_PERIGEE] = 'Tides 13 · pays out';
+
+  const PC2_OPTIONS = [
+    { storylet: PC2_HIGH, name: 'Lead the lamp-cats in a chess lesson', side: 'Cats', prep: 3,
+      ch: { stat: 'Watchful', diff: 120 }, tag: 'Secret ×10 + Clue ×25', worth: 2,
+      gives: 'Appalling Secret ×10 and Cryptic Clue ×25' },
+    { storylet: PC2_HIGH, name: 'Provide the lamp-cats with somewhere to rest', side: 'Cats', prep: 3,
+      ch: { stat: 'Watchful', diff: 180 }, tag: 'Terror ×6', worth: 3, gives: 'Tale of Terror!! ×6' },
+    { storylet: PC2_HIGH, name: 'Instruct the lamp-cats in the coral calcification of the locals', side: 'Cats', prep: 3,
+      ch: { stat: 'Monstrous Anatomy', diff: 8, narrow: true }, tag: 'Gossip ×5 + Notion ×7', worth: 3.2,
+      gives: 'Scrap of Incendiary Gossip ×5 and Romantic Notion ×7', fail: 'Scandal +2 CP' },
+    { storylet: PC2_HIGH, name: 'Provision the miners with ropes and harnesses', side: 'Miners', prep: 3,
+      ch: { stat: 'Persuasive', diff: 120 }, tag: 'Moon-Pearl ×200', worth: 2, gives: 'Moon-Pearl ×200' },
+    { storylet: PC2_HIGH, name: 'Direct the miners towards a promising dig site', side: 'Miners', prep: 3,
+      ch: { stat: 'Persuasive', diff: 180 }, tag: 'Zee-Ztory ×6', worth: 3, gives: 'Zee-Ztory ×6' },
+    { storylet: PC2_HIGH, name: 'Use your knowledge of the Red Science to improve the miners’ pump', side: 'Miners',
+      prep: 3, ch: { stat: 'Artisan of the Red Science', diff: 8, narrow: true }, tag: 'Map Scrap ×7 + Scintillack',
+      worth: 3.2, gives: 'Map Scrap ×7 and a Knob of Scintillack', fail: 'Wounds +2 CP',
+      note: 'The Scintillack sells straight for Hinterland Scrip.' },
+
+    { storylet: PC2_LOW, name: 'Check the lay of the land', label: 'free · read the standings', actions: 0,
+      gives: 'the text tells you where both factions stand',
+      guide: 'nothing at all: this option is on the storylet page and not in the guide’s table' },
+    { storylet: PC2_LOW, name: 'Distract the lamp-cats with local wildlife', side: 'Miners', scaled: '+1+Prep',
+      drops: 'Cats −3', ch: { stat: 'Watchful', diff: 150 }, tag: 'Tentacle ×4', worth: 2,
+      gives: 'Withered Tentacle ×4' },
+    { storylet: PC2_LOW, name: 'Deploy advanced cat-wrangling tactics', side: 'Miners', scaled: '+1+Prep',
+      drops: 'Cats −3', ch: { stat: 'Watchful', diff: 200 }, tag: 'Claw ×30', worth: 3,
+      gives: 'Silvered Cat’s Claw ×30' },
+    { storylet: PC2_LOW, name: 'Bring the scintillack miners some ‘refreshments’', side: 'Cats', scaled: '+1+Recep',
+      drops: 'Miners −3', ch: { stat: 'Persuasive', diff: 150 }, tag: 'Shores ×4', worth: 2,
+      gives: 'Memory of Distant Shores ×4' },
+    { storylet: PC2_LOW, name: 'Prey on the miners’ health concerns', side: 'Cats', scaled: '+1+Recep',
+      drops: 'Miners −3', ch: { stat: 'Persuasive', diff: 200 }, tag: 'Journal ×6', worth: 3,
+      gives: 'Journal of Infamy ×6' },
+    { storylet: PC2_LOW, name: 'Convince the miners and lamp-cats of their commonality', side: 'both',
+      scaled: 'Cats +Recep · Miners +Prep', ch: { stat: 'Mithridacy', diff: 5, narrow: true }, tag: 'Notion ×20',
+      worth: 3.2, gives: 'Romantic Notion ×20',
+      fail: 'both sides get 1 + their preparation instead, which is the tie-keeping line the guide recommends' },
+    { storylet: PC2_LOW, name: 'Liberate some raw scintillack', side: 'both', scaled: 'both +1+theirs',
+      ch: { stat: 'Shadowy', diff: 120 }, tag: 'Scintillack', worth: 2, gives: 'a Knob of Scintillack',
+      note: 'Raises both sides by the same rule on success and on failure -- the other half of the guide’s tie strategy.' },
+
+    { storylet: PC2_PERIGEE, name: 'Travel back to port with the celebrating miners',
+      label: 'Damask + Scintillack ×3', needs: 'Extraction above Argentation, and Extraction 3+',
+      gives: 'a Puzzle-Damask Scrap and Knob of Scintillack ×3' },
+    { storylet: PC2_PERIGEE, name: 'Bear witness to a lamp-cat ritual', label: 'Revelation + Implication ×3',
+      needs: 'Argentation above Extraction, and Argentation 3+',
+      gives: 'an Emetic Revelation and Extraordinary Implication ×3' },
+    { storylet: PC2_PERIGEE, name: 'Claim something that no-one was looking for',
+      label: 'Assistant + Ribcage ×3', needs: 'Extraction and Argentation equal, and both 3+',
+      gives: 'a Lost Research Assistant and Segmented Ribcage ×3' },
+    { storylet: PC2_PERIGEE, name: 'Meet with a bright and fading mind', label: 'Mystery + Lesser Self ×3',
+      needs: 'both Extraction and Argentation under 3',
+      gives: 'an Antique Mystery and Memory of a Much Lesser Self ×3, and a quality of its own',
+      note: 'The guide’s hardest ending to steer to: both factions must end under 6 change points.' },
+  ];
+
+  const PC2_STORYLETS = PC2_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const PC2_INDEX = carouselIndex(PC2_OPTIONS);
+
+  const PC2_CLASS = 'fl-ux-port-cecil';
+  const PC2_FLAG = 'flUxPortCecil';
+  const PC2_BRANCH_CLASS = 'fl-ux-port-cecil-branch';
+  const PC2_BRANCH_FLAG = 'flUxPortCecilBranch';
+
+  const PC2_PERIGEE_PAY = 'Every Perigee option pays one item worth 12.50 Echoes and three worth 2.50.';
+
+  const PC2_RULES = 'The carousel is 14 fixed actions on Tides of Port Cecil:, and every option there moves it by 1 on a '
+    + 'success or a failure. High Tide (6 actions) builds Receptivity of the Lamp-Cats or Miners’ Preparations, which do '
+    + 'not pay out themselves -- they set how much a Low Tide push is worth. Low Tide (7 actions) moves Feline Argentation '
+    + 'and Iron & Misery Scintillack Extraction, and the Perigee pays on which of those two is ahead, never by how much. '
+    + PC2_PERIGEE_PAY + ' Up to two thirds of a run’s goods come from the tides themselves, not the ending.';
+
+  function pc2BadgeCore(e) {
+    if (e.label) return e.label;
+    const parts = [];
+    if (e.prep != null) parts.push(e.side + ' +' + e.prep + ' CP');
+    else if (e.scaled) parts.push(e.side === 'both' ? e.scaled : e.side + ' ' + e.scaled);
+    if (e.drops) parts.push(e.drops);
+    if (e.tag) parts.push(e.tag + (e.ch ? CAROUSEL_MARK_CHALLENGE : ''));
+    let text = parts.join(' · ');
+    if (e.worth != null) text += ' · ' + e.worth + ' E';
+    return text;
+  }
+
+  function pc2BadgeText(e) {
+    return withFactions(pc2BadgeCore(e), e);
+  }
+
+  function pc2Color(e) {
+    if (e.storylet === PC2_PERIGEE) return CAROUSEL_COLOR_PAYOUT;
+    if (e.label) return CAROUSEL_COLOR_NEUTRAL;
+    return e.prep != null ? CAROUSEL_COLOR_SETUP : CAROUSEL_COLOR_PROGRESS;
+  }
+
+  function pc2Spec(e) {
+    const body = [];
+    if (e.ch) body.push(carouselChallenge(e.ch));
+    if (e.prep != null) {
+      body.push('Gives ' + (e.side === 'Cats' ? 'Receptivity of the Lamp-Cats' : 'Miners’ Preparations') + ' +' + e.prep
+        + ' CP, on a success and on a failure alike.');
+    }
+    if (e.scaled) {
+      body.push('Low Tide: a push is worth 1 + the preparation that side got at High Tide. This one gives '
+        + (e.side === 'both'
+          ? 'Feline Argentation + Receptivity of the Lamp-Cats and Iron & Misery Scintillack Extraction + Miners’ Preparations'
+          : (e.side === 'Miners' ? 'Iron & Misery Scintillack Extraction' : 'Feline Argentation') + ' ' + e.scaled
+            + (e.drops ? ', and takes 3 CP from ' + (e.side === 'Miners' ? 'Feline Argentation' : 'Iron & Misery Scintillack Extraction') : ''))
+        + '. Your own Receptivity and Preparations are not on any page this script can read, so no total is claimed.');
+    }
+    if (e.gives) body.push((e.ch ? 'Success also: ' : 'Gives: ') + e.gives + '.');
+    if (e.worth != null) body.push('The guide’s value for this tier: ' + e.worth + ' Echoes.');
+    if (e.fail) body.push('Failure: ' + e.fail + '.');
+    if (e.needs) body.push('Needs: ' + e.needs + '. ' + PC2_PERIGEE_PAY);
+    body.push(carouselActionsLine(e));
+    if (e.guide) body.push('The guide says ' + e.guide + '; the page is followed.');
+    return { text: pc2BadgeText(e), color: pc2Color(e), title: carouselTooltip('Port Cecil', e, body, PC2_RULES) };
+  }
+
+  function pc2StoryletSpec(key) {
+    const storylet = PC2_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet) return null;
+    return { text: PC2_WINDOWS[storylet] || 'Port Cecil', color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('Port Cecil', storylet, PC2_OPTIONS, pc2BadgeText, PC2_RULES) };
+  }
+
+  function pc2Ratings() {
+    carouselRatings({
+      storylets: PC2_STORYLETS, index: PC2_INDEX, storyletSpec: pc2StoryletSpec, optionSpec: pc2Spec,
+      cls: PC2_CLASS, flag: PC2_FLAG, branchCls: PC2_BRANCH_CLASS, branchFlag: PC2_BRANCH_FLAG,
+    });
+  }
+
+  // === feature: Hunting the Beasts of the Zee ============================
+  //
+  // Hunting the Beasts of the Zee (Guide): from Your Cabin you pick a quarry,
+  // zail to its region, and then work one storylet -- Approaching the
+  // <somewhere> -- until In Pursuit of a Zee-Beast is high enough to finish the
+  // hunt. The beast decides the threshold; Elusiveness of your Quarry and Zee
+  // Peril decide how hard every check on the way is. The kills pay in Officially
+  // Recognised Valorous Deeds, which are traded at The Restless Quartermaster's
+  // Warehouse.
+  //
+  // **What the badge says.** On a hunting action, the Pursuit a success and a
+  // failure make ("Pursuit +14/+7?") -- because every one of them advances the
+  // hunt and the only question is by how much, and *Take a risk* is the one
+  // that can go backwards. The two Elusiveness options say what they take off
+  // instead ("Elusiveness −7/−3? ▼"), since lowering Elusiveness lowers both
+  // the checks and, at a rounding point, the Pursuit the beast needs. A kill
+  // carries what it pays, the guide's Echoes and the Pursuit it is gated on; a
+  // choice of quarry carries its region, the guide's challenge level and the
+  // Pursuit it will want, which is the whole of that decision.
+  //
+  // **No difficulty is claimed.** The checks here scale with Elusiveness and
+  // Zee Peril -- two numbers nothing on screen reports -- so the badge says
+  // `?` and the tooltip gives the rule (Zee Peril, or Zee Peril + 75, or the
+  // guide's logistic formula between 4 and 14) rather than a figure that would
+  // be wrong in every region but one.
+  //
+  // Transcribed from the guide's beast table, difficulty table, hunting-action
+  // table and Valorous Deed table, with every option page fetched through the
+  // API (2026-09-17). Where a title is shared, it is ONE row saying so: the
+  // three Lifeberg hunts are one option title with three regions behind it, and
+  // so are the three Lifeberg kills. The storylet itself is named for the beast
+  // ("Approaching the Lifeberg's Hunting Grounds"), so all seven of those
+  // headings are aliased onto one canonical storylet. Left out: *Engage the
+  // plated seal in single combat*, whose page was not read, and the Living
+  // World Events that decide which beasts exist at all. Corrections go in
+  // ZB_OPTIONS and nowhere else.
+  //
+  //   pursuit / failPursuit    In Pursuit of a Zee-Beast, in change points.
+  //   elusive / failElusive    what an option takes off Elusiveness.
+  //   region / level / need    a quarry's waters, challenge level and threshold.
+  //   tag / gives / worth      a kill's pay. deeds / value: a Warehouse trade.
+  //   ch / uses / needs / label / note / actions.
+
+  const ZB_HUNT = 'Hunting the Beasts of the Zee';
+  const ZB_APPROACH = 'Approaching the Zee-Beast';
+  const ZB_WAREHOUSE = 'The Restless Quartermaster’s Warehouse';
+
+  // The approach storylet is headed for the quarry, so every heading the game
+  // can show is mapped onto the one canonical name the table is filed under.
+  // These seven come off the kill pages; the wiki's own placeholder title is
+  // here too, for anyone reading the table against the wiki.
+  const ZB_APPROACH_NAMES = [
+    'Approaching the (Zee-Beast Location)',
+    'Approaching the Plated Seal Spawning Grounds',
+    'Approaching the Angler Crab Spawning Grounds',
+    'Approaching the Lifeberg’s Hunting Grounds',
+    'Approaching the Feral Crocodile Hunting Grounds',
+    'Approaching the Wake of the Midnight Whale',
+    'Approaching the Lorn-Fluke Occupying London’s Home Waters',
+    'Approaching the Sorrow-Spider Fleet Occupying London’s Home Waters',
+  ];
+
+  const ZB_STORYLET_ALIASES = {};
+  ZB_APPROACH_NAMES.forEach(function (name) {
+    ZB_STORYLET_ALIASES[normalizeName(name)] = normalizeName(ZB_APPROACH);
+  });
+
+  const ZB_OPTIONS = [
+    { storylet: ZB_HUNT, name: 'Hunt a Plated Seal', aliases: ['Hunt a Plated Seal 2'], region: 'Stormbones',
+      level: '110', need: 'a narrow Pursuit 5 check', needs: 'Making Progress in the Labyrinth of Tigers 16, and no Plated Seal',
+      note: 'The only quarry finished on a challenge rather than a threshold.' },
+    { storylet: ZB_HUNT, name: 'Hunt an Angler Crab', region: 'Shepherd’s Wash', level: '111–209', need: 'Pursuit 8–13',
+      needs: 'the Angler Crab population, and base Monstrous Anatomy 1',
+      note: 'Both the difficulty and the pay scale with how few crabs are left: Elusiveness runs 1 to 99 and the Pursuit '
+        + 'needed 8 to 13, and the Rostygold is half the Rarity.' },
+    { storylet: ZB_HUNT, name: 'Join the Citizen’s Armada to hunt the Ravenous Lifeberg',
+      label: 'three regions · Pursuit 8–13',
+      note: 'One title, three hunts: The Salt Steppes (challenge level 210, Pursuit 8), The Sea of Voices (220, Pursuit 10) '
+        + 'and Shepherd’s Wash (230, Pursuit 13). The guide: the Salt Steppes run is the profitable one, around 10 Echoes an '
+        + 'action for a Monster-Hunter, and Shepherd’s Wash drops below 6.',
+      needs: 'a Ravenous Lifeberg in the world, and base Monstrous Anatomy 1' },
+    { storylet: ZB_HUNT, name: 'Hunt a feral crocodile', region: 'Home Waters', level: '175', need: 'Pursuit 11',
+      needs: 'Monstrous Anatomy 5' },
+    { storylet: ZB_HUNT, name: 'Aid a Midnight Whale on its final journey', region: 'The Salt Steppes', level: '220',
+      need: 'Pursuit 11', needs: 'a Midnight Whale in the world, and base Monstrous Anatomy 1',
+      note: 'The Primordial Shrieks climb as the whale nears the Gant Pole.' },
+    { storylet: ZB_HUNT, name: 'Do battle against a Fluke', region: 'Home Waters', level: '165', need: 'Pursuit 12',
+      needs: 'a Lorn-Fluke in the world, and base Monstrous Anatomy 1' },
+    { storylet: ZB_HUNT, name: 'Sally out against the Forest of Years', region: 'Home Waters', level: '165',
+      need: 'Pursuit 12', needs: 'Sorrow-Spiders in the world, and base Monstrous Anatomy 1' },
+
+    { storylet: ZB_APPROACH, name: 'Make a daring approach', pursuit: 24,
+      needs: 'A Notched Bone Harpoon, and Pursuit exactly 1',
+      note: 'The Monster-Hunter’s opening: it takes Pursuit straight to 6, guaranteed.' },
+    { storylet: ZB_APPROACH, name: 'Pursue the (Zee-Beast)', pursuit: 14, failPursuit: 7,
+      ch: { stat: 'Dangerous', peril: 'Zee Peril + Elusiveness of your Quarry' },
+      note: 'The opening for everyone else, and the guide: pursuing, outflanking and predicting all pay the same, so take '
+        + 'whichever you are likeliest to pass.' },
+    { storylet: ZB_APPROACH, name: 'Take a risk', pursuit: 24, failPursuit: -5, needs: 'Pursuit 2',
+      ch: { stat: 'Dangerous', peril: 'Zee Peril + 75 + Elusiveness of your Quarry' },
+      note: 'The only line that can go backwards. The guide: avoid it while you are also trying to keep Troubled Waters '
+        + 'down, which is most of the time.' },
+    { storylet: ZB_APPROACH, name: 'Outflank the (Zee-Beast)', pursuit: 14, failPursuit: 7, needs: 'Pursuit 2',
+      ch: { stat: 'Zeefaring', formula: true } },
+    { storylet: ZB_APPROACH, name: 'Use your hard-won knowledge of monstrous behaviour to predict its movements',
+      aliases: ['Predict its movements'], pursuit: 14, failPursuit: 7, needs: 'Pursuit 2',
+      ch: { stat: 'Monstrous Anatomy', formula: true } },
+    { storylet: ZB_APPROACH, name: 'Chum the waters', elusive: 7, failElusive: 3, uses: 'a Deep-zee Catch, either way',
+      ch: { stat: 'Monstrous Anatomy', diff: 3, narrow: true },
+      note: 'The guide: worth it when the beast’s Elusiveness is less than 7 above a rounding point (10, 30, 50, 70…), '
+        + 'because that also drops the Pursuit the kill needs by one level.' },
+    { storylet: ZB_APPROACH, name: 'Dive below the waves', elusive: 5, failElusive: 2, needs: 'Zubmersibility',
+      ch: { stat: 'Shadowy', peril: 'Zee Peril + 30' },
+      note: 'The guide: the same rounding trick, at less than 5 above a rounding point.' },
+
+    { storylet: ZB_APPROACH, name: 'Capture the plated seal', tag: 'a Plated Seal', need: 'a narrow Pursuit 5 check',
+      gives: 'a Plated Seal, In the Company of Monsters +1 CP and A Hunter of Zee-Beasts +1',
+      fail: 'Troubled Waters +1 CP', ch: { stat: 'In Pursuit of a Zee-Beast', diff: 5, narrow: true } },
+    { storylet: ZB_APPROACH, name: 'Strike down the Angler Crab', tag: 'Glim + Moon-Pearl + bones',
+      worth: '19.39–53.91', need: 'Pursuit 8 + Elusiveness ÷ 20',
+      gives: 'Crustacean Pincer ×2, Deep-zee Catch ×2, Shard of Glim ×208–1000, Moon-Pearl ×237–800, a Headless Skeleton, '
+        + 'Fin Bones ×1–6, Knob of Scintillack ×2 and Piece of Rostygold ×(Rarity ÷ 2)',
+      note: 'The guide’s Echoes leave the bones out of the count.' },
+    { storylet: ZB_APPROACH, name: 'Finish off the crocodile', tag: 'Relic ×100 + Glim ×700', worth: '32',
+      need: 'Pursuit 11', gives: 'Relic of the Second City ×100, Shard of Glim ×700 and Tale of Terror!! ×20' },
+    { storylet: ZB_APPROACH, name: 'Blast the Ravenous Lifeberg with all you’ve got', tag: 'Revelation + a Deed',
+      worth: 'up to 45–50', need: 'Pursuit 8, 10 or 13',
+      gives: 'an Emetic Revelation, an Officially Recognised Valorous Deed, and goods by region: Khaganian Lightbulbs, '
+        + 'Coinage and Fourth City Relics in The Salt Steppes (Pursuit 8); an Aeolian Scream, Primordial Shrieks and Traces '
+        + 'of the First City in The Sea of Voices (Pursuit 10); Human Arms, Appalling Secrets and Inklings of Identity in '
+        + 'Shepherd’s Wash (Pursuit 13)',
+      note: 'One title, three kills. Most of the reward scales with base Watchful.' },
+    { storylet: ZB_APPROACH, name: 'End your guidance of the Midnight Whale', tag: 'Shriek ×1000+ + ivory',
+      worth: '36.40–85.32', need: 'Pursuit 11',
+      gives: 'Primordial Shriek ×1034–2466 (more the nearer the Gant Pole), Appalling Secret ×22–60, Romantic Notion '
+        + '×21–80, Memory of Distant Shores ×1–10, Unearthly Fossil ×2, Ambiguous Eolith ×1–10 and Carved Ball of Stygian '
+        + 'Ivory ×2' },
+    { storylet: ZB_APPROACH, name: 'Repel the Lorn-Fluke with a show of force', tag: 'Amber + Shriek + a Deed',
+      worth: '50.22–62.19', need: 'Pursuit 12',
+      gives: 'Primordial Shriek ×382–625, Maniac’s Prayer ×67–149, Correspondence Plaque ×6, Aeolian Scream ×4, Nodule of '
+        + 'Deep Amber ×303–786 and an Officially Recognised Valorous Deed' },
+    { storylet: ZB_APPROACH, name: 'Attempt to calm the Lorn-Fluke', tag: 'Amber + Shriek + a Deed',
+      worth: '50.22–62.19', need: 'Pursuit 12',
+      gives: 'the same rewards the guide records for repelling it -- the two endings differ in the telling, not the pay' },
+    { storylet: ZB_APPROACH, name: 'Sink a sapling of the Forest of Years', tag: 'Silk + bones + a Deed',
+      need: 'Pursuit 12',
+      gives: 'Silk Scrap ×639–1400, Whisper-Satin Scrap ×11–29, Tale of Terror!! ×6, Extraordinary Implication ×4, Bone '
+        + 'Fragments ×248–774 and an Officially Recognised Valorous Deed',
+      note: 'The wiki marks these quantities unconfirmed, and gives no Echo value, so none is claimed here.' },
+    { storylet: ZB_APPROACH, name: 'Treat with the sapling of the Forest of Years', tag: 'Silk + bones + a Deed',
+      need: 'Pursuit 12',
+      gives: 'the same rewards the guide records for sinking it -- the two endings differ in the telling, not the pay' },
+
+    { storylet: ZB_WAREHOUSE, name: 'Claim a crate of clinking souls', deeds: 1, tag: 'Soul ×1000', value: 20,
+      gives: 'Soul ×1000', actions: 0, note: 'Worth more to Shepherds and Spirifers than the flat 20.' },
+    { storylet: ZB_WAREHOUSE, name: 'Claim an armful of discarded steel', deeds: 2, tag: 'Steel ×80', value: 20,
+      gives: 'Bessemer Steel Ingot ×80', actions: 0, note: 'The guide: awkward to turn back into Echoes.' },
+    { storylet: ZB_WAREHOUSE, name: 'Claim a box marked "FAULTY ORDNANCE: DO NOT USE".', deeds: 3,
+      tag: 'Devices + Hillmovers', value: 20, gives: 'Unlawful Device ×2, Hillmover ×2 and Extraordinary Implication ×4',
+      actions: 0, note: 'The guide: the Hillmovers are really worth a Revolutionary Favour each.' },
+    { storylet: ZB_WAREHOUSE, name: 'Claim a pile of waterlogged papers', deeds: 4, tag: 'Procedures + papers', value: 20,
+      gives: 'a Fragment of the Tragedy Procedures, a Legal Document and Sworn Statement ×2', actions: 0 },
+    { storylet: ZB_WAREHOUSE, name: 'Claim a strongbox, illuminated from within', deeds: 4, tag: 'Dawn + Light ×35',
+      value: 20, gives: 'an Element of Dawn and Memory of Light ×35', actions: 0 },
+    { storylet: ZB_WAREHOUSE, name: 'Claim a pallet of mouldering rations', deeds: 5, tag: 'Pies ×40', value: 20,
+      gives: 'Basket of Rubbery Pies ×40', actions: 0 },
+    { storylet: ZB_WAREHOUSE, name: 'Claim a suitcase, stamped with a horse’s head', deeds: 10, tag: 'Atlas + Airag',
+      value: 20, gives: 'a Salt Steppe Atlas, a Bottle of Fourth City Airag, a Crackling Device and a Vital Intelligence',
+      actions: 0, note: 'The guide: 22.4 a Deed through the Rat Market, 25.76 with Crackling Trade.' },
+    { storylet: ZB_WAREHOUSE, name: 'Claim a consignment of confiscated silks', deeds: 16, tag: 'Organza + Bombazine ×3',
+      value: 20, gives: 'a Scrap of Ivory Organza and Thirsty Bombazine Scrap ×3', actions: 0,
+      note: 'The guide: 25.47 a Deed if the Organza goes through the Rat Market.' },
+  ];
+
+  const ZB_STORYLETS = ZB_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const ZB_INDEX = carouselIndex(ZB_OPTIONS);
+
+  const ZB_CLASS = 'fl-ux-zee-beasts';
+  const ZB_FLAG = 'flUxZeeBeasts';
+  const ZB_BRANCH_CLASS = 'fl-ux-zee-beasts-branch';
+  const ZB_BRANCH_FLAG = 'flUxZeeBeastsBranch';
+
+  const ZB_RULES = 'A hunt is: pick the quarry in Your Cabin, zail to its waters, then raise In Pursuit of a Zee-Beast on '
+    + 'the approach storylet until the kill unlocks. The beast sets the threshold; Elusiveness of your Quarry and Zee Peril '
+    + 'set every difficulty, and neither is on any page this script can read, so no odds are claimed. These waters are not '
+    + 'docks, so they never reset Troubled Waters -- the guide docks at about 6. Every finished hunt gives A Hunter of '
+    + 'Zee-Beasts +1, and the Deeds are traded at The Restless Quartermaster’s Warehouse, 20 Echoes each.';
+
+  function zbChallengeLine(e) {
+    if (!e.ch) return null;
+    if (e.ch.peril) return 'Challenge: ' + e.ch.stat + ' at ' + e.ch.peril + '.';
+    if (e.ch.formula) {
+      return 'Challenge: ' + e.ch.stat + ', a difficulty between 4 and 14 that climbs with Elusiveness of your Quarry plus '
+        + 'Zee Peril (the guide’s logistic curve, halfway at 170).';
+    }
+    return carouselChallenge(e.ch);
+  }
+
+  function zbBadgeCore(e) {
+    if (e.label) return e.label;
+    if (e.deeds != null) return e.deeds + ' deed' + (e.deeds === 1 ? '' : 's') + ' → ' + e.tag + ' · ' + e.value + ' E';
+    if (e.region) return e.region + ' · challenge ' + e.level + ' · ' + e.need;
+    if (e.pursuit != null) {
+      return 'Pursuit ' + carouselSigned(e.pursuit)
+        + (e.failPursuit != null ? '/' + carouselSigned(e.failPursuit) : '')
+        + (e.ch ? CAROUSEL_MARK_CHALLENGE : '') + (e.needs && !e.ch ? ' ' + CAROUSEL_MARK_HIDDEN : '');
+    }
+    if (e.elusive != null) {
+      return 'Elusiveness −' + e.elusive + (e.failElusive != null ? '/−' + e.failElusive : '')
+        + (e.ch ? CAROUSEL_MARK_CHALLENGE : '') + (e.uses ? ' ' + CAROUSEL_MARK_USES : '');
+    }
+    return e.tag + (e.worth ? ' · ' + e.worth + ' E' : '') + ' · needs ' + e.need;
+  }
+
+  function zbBadgeText(e) {
+    return withFactions(zbBadgeCore(e), e);
+  }
+
+  function zbColor(e) {
+    if (e.label) return CAROUSEL_COLOR_NEUTRAL;
+    if (e.deeds != null || e.tag) return CAROUSEL_COLOR_PAYOUT;
+    if (e.region) return CAROUSEL_COLOR_LABEL;
+    if (e.failPursuit != null && e.failPursuit < 0) return CAROUSEL_COLOR_RISK;
+    return e.elusive != null ? CAROUSEL_COLOR_SETUP : CAROUSEL_COLOR_PROGRESS;
+  }
+
+  function zbSpec(e) {
+    const body = [];
+    body.push(zbChallengeLine(e));
+    if (e.pursuit != null) {
+      body.push('Success: In Pursuit of a Zee-Beast ' + carouselSigned(e.pursuit) + ' CP.'
+        + (e.failPursuit != null ? ' Failure: ' + carouselSigned(e.failPursuit) + ' CP.' : ''));
+    }
+    if (e.elusive != null) {
+      body.push('Success: Elusiveness of your Quarry −' + e.elusive + '. Failure: −' + e.failElusive
+        + '. Lower Elusiveness means easier checks, and at a rounding point one level less Pursuit needed.');
+    }
+    if (e.region) body.push('Waters: ' + e.region + '. The guide’s challenge level: ' + e.level + '. Needs ' + e.need + '.');
+    if (e.gives) body.push('Gives: ' + e.gives + '.');
+    if (e.worth) body.push('The guide’s value: ' + e.worth + ' Echoes.');
+    if (e.deeds != null) {
+      body.push('Spends Officially Recognised Valorous Deed ×' + e.deeds + ', about ' + (e.deeds * 20) + ' Echoes of them.');
+    }
+    if (e.fail) body.push('Failure: ' + e.fail + '.');
+    if (e.need && !e.region && e.deeds == null) body.push('Unlocked at ' + e.need + '.');
+    if (e.uses) body.push(CAROUSEL_MARK_USES + ' Uses up ' + e.uses + '.');
+    if (e.needs) body.push('Needs: ' + e.needs + '.');
+    body.push(carouselActionsLine(e));
+    return { text: zbBadgeText(e), color: zbColor(e),
+      title: carouselTooltip('Hunting the Beasts of the Zee', e, body, ZB_RULES) };
+  }
+
+  function zbStoryletSpec(key) {
+    const storylet = ZB_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet) return null;
+    const text = storylet === ZB_HUNT ? 'pick a quarry' : storylet === ZB_WAREHOUSE ? 'spend Valorous Deeds'
+      : 'the hunt · raise Pursuit';
+    return { text: text, color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('Hunting the Beasts of the Zee', storylet, ZB_OPTIONS, zbBadgeText, ZB_RULES) };
+  }
+
+  function zbRatings() {
+    carouselRatings({
+      storylets: ZB_STORYLETS, index: ZB_INDEX, storyletSpec: zbStoryletSpec, optionSpec: zbSpec,
+      cls: ZB_CLASS, flag: ZB_FLAG, branchCls: ZB_BRANCH_CLASS, branchFlag: ZB_BRANCH_FLAG,
+      aliases: ZB_STORYLET_ALIASES,
+    });
+  }
+
+  // === feature: The Chessboard ===========================================
+  //
+  // The Chessboard (Guide): the corner of Parabola where the Great Game is
+  // played. A match is nine actions across three storylets -- Supervise the New
+  // Game (two opening moves), Oversee the Middle Game (five), Determine the
+  // Endgame -- and what you may finish with depends on one number: your
+  // Positional Advantages minus your Strategic Weaknesses. The Chessboard deals
+  // no opportunity cards, so this badges storylet headings and the options of
+  // the open storylet.
+  //
+  // **What the badge says.** That number, as the move changes it: `Score +3?`
+  // for an aggressive move, `Score −3 · Weak +3` for sabotaging your own side,
+  // `Score +7 ▼` for spending Vital Intelligence. The guide talks in score
+  // throughout -- its "Can I Still Win?" table is entirely in score -- so score
+  // is what the badge leads with; the Weaknesses follow it whenever the move
+  // moves them, because two endings are gated on Weaknesses rather than on
+  // score (seven of them for A Player's Studies 1, at most six for Studies 2).
+  // `SCORE` is computed from the two columns and never stored, so the parts and
+  // the total cannot drift apart.
+  //
+  // The colour you play is a move of its own: Red is always allowed and opens
+  // at +1, White needs you to be going slowly on the Liberation and opens at
+  // +3, Black opens at +0. Those three are badged with what they cost and what
+  // they open, since the guide's whole opening advice is which colour you are.
+  //
+  // Transcribed from the guide's three move tables and its endgame table, with
+  // every storylet page fetched through the API (2026-09-17) as the cross-check
+  // on the option lists. A move that changes neither Advantages nor Weaknesses
+  // and does not advance the board is labelled rather than scored. Left out:
+  // the Ambition and Coilheart Games options (Search for a sign of your enemy
+  // aside, which the guide's table carries), and the stalemate recipes in the
+  // guide's Grand Master section, which are sequences rather than options.
+  // Corrections go in CB_OPTIONS and nowhere else.
+  //
+  //   adv / weak     Positional Advantages and Strategic Weaknesses a success gives.
+  //   ch { stat, diff, narrow } / luck. uses / needs / gives / label / note.
+  //   noProgress     does not advance Progress on the Board.
+
+  const CB_NEW = 'Supervise the New Game';
+  const CB_MIDDLE = 'Oversee the Middle Game';
+  const CB_END = 'Determine the Endgame';
+
+  const CB_WINDOWS = {};
+  CB_WINDOWS[CB_NEW] = 'Progress 1–2 · two moves';
+  CB_WINDOWS[CB_MIDDLE] = 'Progress 3–7 · five moves';
+  CB_WINDOWS[CB_END] = 'Progress 8 · the result';
+  CB_WINDOWS['Leave the Chessboard'] = 'leave';
+
+  const CB_OPTIONS = [
+    { storylet: CB_NEW, name: 'Play as red', label: 'colour · opens +1',
+      gives: 'Colour at the Chessboard 1 (Red): always allowed, marks you neutral, and opens with Play a novel approach (+1)' },
+    { storylet: CB_NEW, name: 'Play as white', label: 'colour · opens +3',
+      needs: 'advancing the Liberation of Night slowly or not at all',
+      gives: 'Colour at the Chessboard 3 (White): the best opening (+3), a −3 sabotage, and the Judgements’ side' },
+    { storylet: CB_NEW, name: 'Play as black', label: 'colour · opens +0',
+      needs: 'advancing the Liberation of Night less slowly',
+      gives: 'Colour at the Chessboard 2 (Black): the worst opening (+0), a −3 sabotage, and the Liberation’s side' },
+    { storylet: CB_NEW, name: 'Change to white', label: 'colour · opens +3' },
+    { storylet: CB_NEW, name: 'Change to black', aliases: ['Change to black 1', 'Change to black 2'],
+      label: 'colour · opens +0' },
+    { storylet: CB_NEW, name: 'Change to red', label: 'colour · opens +1' },
+    { storylet: CB_NEW, name: 'Remain current Colour', label: 'colour · keep it' },
+
+    { storylet: CB_NEW, name: 'Mirror white’s opening', adv: 0, ch: { stat: 'A Player of Chess', diff: 3, narrow: true },
+      needs: 'Black' },
+    { storylet: CB_NEW, name: 'Open according to accepted best practices', adv: 3,
+      ch: { stat: 'A Player of Chess', diff: 2, narrow: true }, needs: 'White, and Progress exactly 1',
+      note: 'Only as your FIRST move: the second opening has to be something else.' },
+    { storylet: CB_NEW, name: 'Play a novel approach', adv: 1, ch: { stat: 'A Player of Chess', diff: 2, narrow: true },
+      needs: 'Red' },
+    { storylet: CB_NEW, name: 'Open with a strong move', adv: 4, uses: 'a Vienna Opening',
+      note: 'The best opening in the game, and it does not care what colour you are.' },
+    { storylet: CB_NEW, name: 'Recognise an opening', adv: 0, noProgress: true, uses: 'a Vital Intelligence',
+      gives: 'Vienna Opening ×6', note: 'Costs an action but no move: it does not advance Progress on the Board.' },
+    { storylet: CB_NEW, name: 'Follow the movements of the pieces', adv: 0, weak: 1,
+      ch: { stat: 'Watchful', diff: 200 }, gives: 'A Player of Chess +2 CP, and more on a rare success',
+      note: 'The only way up in chess skill, and the guide’s way into a deliberate loss.' },
+    { storylet: CB_NEW, name: 'Recognise an opening because of your professional affiliations', adv: 0,
+      noProgress: true, gives: 'a Vienna Opening', needs: 'a Shrine to Saint Joshua (Midnighter), and Progress exactly 1' },
+    { storylet: CB_NEW, name: 'Open with a familiar move – then deviate', adv: 4,
+      ch: { stat: 'A Player of Chess', diff: 5, narrow: true }, needs: 'an Opening Novelty, from the Khanate',
+      note: 'A failure still pays one Positional Advantage.' },
+    { storylet: CB_NEW, name: 'Search for a sign of your enemy', adv: 0, noProgress: true,
+      gives: 'A Player of Chess +1 CP', needs: 'Traces of Veils the Intriguer 1 (Ambition: Bag a Legend!)' },
+
+    { storylet: CB_MIDDLE, name: 'Contemplate a losing position', adv: 0, noProgress: true,
+      needs: 'Weaknesses above Advantages', gives: 'Nightmares +1 CP' },
+    { storylet: CB_MIDDLE, name: 'Contemplate a perfectly equal position', adv: 0, noProgress: true,
+      needs: 'Weaknesses equal to Advantages' },
+    { storylet: CB_MIDDLE, name: 'Contemplate a winning position', adv: 0, noProgress: true, luck: 0.5,
+      needs: 'Advantages above Weaknesses', gives: 'Nightmares −1 CP on a success' },
+    { storylet: CB_MIDDLE, name: 'Make a move you know will work', adv: 1, uses: 'a Move in the Great Game' },
+    { storylet: CB_MIDDLE, name: 'Play aggressively', adv: 3, ch: { stat: 'A Player of Chess', diff: 3, narrow: true },
+      note: 'The guide: −3 on a failure. Automatic at A Player of Chess 8.' },
+    { storylet: CB_MIDDLE, name: 'Play defensively', weak: -1, ch: { stat: 'A Player of Chess', diff: 4, narrow: true },
+      gives: 'Wounds −1 CP on the alternative success',
+      note: 'Removes a Weakness rather than adding an Advantage -- worth +1 of score only while you have a Weakness left.' },
+    { storylet: CB_MIDDLE, name: 'Play a move you learned from the Boatman', adv: 5,
+      ch: { stat: 'A Player of Chess', diff: 6, narrow: true }, needs: 'The Boatman’s Opponent 40, and A Player of Chess 2',
+      note: 'The guide: −5 on a failure.' },
+    { storylet: CB_MIDDLE, name: 'Turn one of their spies', adv: 3, ch: { stat: 'Persuasive', diff: 200 },
+      needs: 'A Crooked Cross (Crooked-Cross)',
+      note: 'A failure turns you Red rather than costing the full −3.' },
+    { storylet: CB_MIDDLE, name: 'Kill another of your kind, in passing', adv: 3, ch: { stat: 'Dangerous', diff: 200 },
+      needs: 'A List of Aliases, Writ in Gant (Licentiate), and A Player of Chess 2',
+      note: 'The guide: risks −1 and Wounds rather than the full −3.' },
+    { storylet: CB_MIDDLE, name: 'Use your people however proves necessary', weak: 1, uses: 'a Justificande Coin',
+      gives: 'Moves in the Great Game ×2' },
+    { storylet: CB_MIDDLE, name: 'Sabotage your side (Black)', weak: 3, needs: 'Black, and A Player of Chess 2',
+      gives: 'Advancing the Liberation of Night −3 CP' },
+    { storylet: CB_MIDDLE, name: 'Sabotage your side (White)', weak: 3, needs: 'White, and A Player of Chess 2',
+      gives: 'Advancing the Liberation of Night +3 CP' },
+    { storylet: CB_MIDDLE, name: 'Allow yourself to be sacrificed', label: 'end early · a Coin',
+      needs: 'Progress 5', gives: 'a Justificande Coin, and the board resets',
+      note: 'Not counted as a loss, so it cannot be traded in for A Player’s Studies.' },
+    { storylet: CB_MIDDLE, name: 'Take advantage of your Intelligence', adv: 7, uses: 'a Vital Intelligence',
+      note: 'The biggest single move on the board, and the guide’s way of rescuing a failed +3.' },
+    { storylet: CB_MIDDLE, name: 'Obliterate your weaknesses', label: 'Weaknesses → 0',
+      needs: 'the Society of the Three-Fingered Hand (Ambition: Bag a Legend!), and Progress exactly 7' },
+
+    { storylet: CB_END, name: 'Choose an epaulette mate', label: 'Epaulette Mate + Pawns',
+      ch: { stat: 'A Player of Chess', diff: 6, narrow: true }, needs: 'Advantages above Weaknesses',
+      gives: 'an Epaulette Mate, Well-Placed Pawns scaling with A Player of Chess, and A Player of Chess +1 CP' },
+    { storylet: CB_END, name: 'Choose a queen mate', label: 'Queen Mate + Pawns',
+      ch: { stat: 'A Player of Chess', diff: 4, narrow: true }, needs: 'Advantages above Weaknesses',
+      gives: 'a Queen Mate, Well-Placed Pawns scaling with A Player of Chess, and A Player of Chess +1 CP' },
+    { storylet: CB_END, name: 'Offer a draw', label: 'Threefold Repetition + Pawns', needs: 'score exactly 0',
+      gives: 'a Threefold Repetition and Well-Placed Pawns scaling with A Player of Chess' },
+    { storylet: CB_END, name: 'Stalemate', aliases: ['Stalemate (Action)'], label: 'Stalemate + Intelligence',
+      needs: 'score exactly 0, and Threefold Repetition ×2', gives: 'a Stalemate and a Vital Intelligence' },
+    { storylet: CB_END, name: 'Force a Stalemate', label: 'Stalemate ▼',
+      needs: 'Weaknesses 1 or more but below Advantages, Parabolan Dominance exactly 4, and Well-Placed Pawn ×360',
+      gives: 'a Stalemate' },
+    { storylet: CB_END, name: 'Resign', label: 'nothing', gives: 'nothing at all' },
+    { storylet: CB_END, name: 'Recognise new possibilities in the depth of your loss', label: 'Player’s Studies 1',
+      needs: 'Strategic Weaknesses 7, and no A Player’s Studies',
+      gives: 'A Player’s Studies 1, which lifts the A Player of Chess cap to 6',
+      note: 'The reason to play a match to lose: the guide’s route is Follow the movements of the pieces plus a sabotage.' },
+    { storylet: CB_END, name: 'Recognise new possibilities in the height of your win', label: 'Player’s Studies 2',
+      needs: 'Positional Advantages 23, Weaknesses under 7, and A Player’s Studies 1',
+      gives: 'A Player’s Studies 2, which lifts the cap to 7',
+      note: 'The guide’s recipe: play White, open with best practices, then three aggressive moves and two Vital Intelligence.' },
+    { storylet: CB_END, name: 'Betray! Destroy! Take white down from the inside!', label: '3 Revolutionary favours',
+      factions: [['Favours: Revolutionaries', 3]], needs: 'White, A Player of Chess 4, and Advancing the Liberation of Night',
+      gives: 'Advancing the Liberation of Night +50 CP, Steadfast −5 CP, and your colour turns Black' },
+    { storylet: CB_END, name: 'Betray! Destroy! Take black down from the inside!', label: '3 Great Game favours',
+      factions: [['Favours: The Great Game', 3]], needs: 'Black, and A Player of Chess 4',
+      gives: 'Advancing the Liberation of Night −45 CP, Steadfast −5 CP, and your colour turns White' },
+
+    { storylet: 'Leave the Chessboard', name: 'Go back to your Base-Camp', label: 'leave',
+      note: 'The match is kept: Progress on the Board is where you left it.' },
+  ];
+
+  const CB_STORYLETS = CB_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const CB_INDEX = carouselIndex(CB_OPTIONS);
+
+  const CB_CLASS = 'fl-ux-chessboard';
+  const CB_FLAG = 'flUxChessboard';
+  const CB_BRANCH_CLASS = 'fl-ux-chessboard-branch';
+  const CB_BRANCH_FLAG = 'flUxChessboardBranch';
+
+  const CB_RULES = 'A match is two opening moves, five middle-game moves and the endgame, and the only number that '
+    + 'decides what you may finish with is your score: Positional Advantages minus Strategic Weaknesses. Positive lets '
+    + 'you pick a mate, exactly zero a draw or a stalemate, and a LOSS is worth playing for -- Strategic Weaknesses 7 '
+    + 'trades in for A Player’s Studies 1, and Advantages 23 with fewer than 7 Weaknesses for Studies 2, which are the '
+    + 'only ways to lift the A Player of Chess cap.';
+
+  function cbScore(e) {
+    return (e.adv || 0) - (e.weak || 0);
+  }
+
+  function cbBadgeCore(e) {
+    if (e.label) return e.label + (e.uses ? ' ' + CAROUSEL_MARK_USES : '');
+    const parts = ['Score ' + carouselSigned(cbScore(e)) + (e.ch || e.luck != null ? CAROUSEL_MARK_CHALLENGE : '')];
+    if (e.weak) parts.push('Weak ' + carouselSigned(e.weak));
+    if (e.noProgress) parts.push('no move');
+    let text = parts.join(' · ');
+    if (e.uses) text += ' ' + CAROUSEL_MARK_USES;
+    return text;
+  }
+
+  function cbBadgeText(e) {
+    return withFactions(cbBadgeCore(e), e);
+  }
+
+  function cbColor(e) {
+    if (e.storylet === CB_END) return CAROUSEL_COLOR_PAYOUT;
+    if (e.label) return CAROUSEL_COLOR_NEUTRAL;
+    if (cbScore(e) < 0) return CAROUSEL_COLOR_RISK;
+    return cbScore(e) > 0 ? CAROUSEL_COLOR_PROGRESS : CAROUSEL_COLOR_SETUP;
+  }
+
+  function cbSpec(e) {
+    const body = [];
+    if (e.ch) body.push(carouselChallenge(e.ch));
+    if (e.luck != null) body.push('Challenge: Luck, ' + Math.round(e.luck * 100) + '%.');
+    if (!e.label) {
+      body.push('Success: Positional Advantages ' + carouselSigned(e.adv || 0) + ', Strategic Weaknesses '
+        + carouselSigned(e.weak || 0) + ' -- a score of ' + carouselSigned(cbScore(e)) + '.');
+    }
+    if (e.noProgress) body.push('Costs an action but not a move: Progress on the Board stays where it is.');
+    if (e.gives) body.push('Gives: ' + e.gives + '.');
+    if (e.uses) body.push(CAROUSEL_MARK_USES + ' Uses up ' + e.uses + '.');
+    if (e.needs) body.push('Needs: ' + e.needs + '.');
+    body.push(factionLine(e));
+    body.push(carouselActionsLine(e));
+    return { text: cbBadgeText(e), color: cbColor(e), title: carouselTooltip('The Chessboard', e, body, CB_RULES) };
+  }
+
+  function cbStoryletSpec(key) {
+    const storylet = CB_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet) return null;
+    return { text: CB_WINDOWS[storylet] || 'The Chessboard', color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('The Chessboard', storylet, CB_OPTIONS, cbBadgeText, CB_RULES) };
+  }
+
+  function cbRatings() {
+    carouselRatings({
+      storylets: CB_STORYLETS, index: CB_INDEX, storyletSpec: cbStoryletSpec, optionSpec: cbSpec,
+      cls: CB_CLASS, flag: CB_FLAG, branchCls: CB_BRANCH_CLASS, branchFlag: CB_BRANCH_FLAG,
+    });
+  }
+
+  // === feature: Parabolan Hunting ========================================
+  //
+  // Parabolan Hunting (Guide): from the Parabolan Base-Camp you either Track
+  // the Animals of Parabola or Search Parabola for a Place in the Neath. Both
+  // run through Lost in Strange Lands, where one check stands between you and
+  // your quarry, and both are priced by the same number: Parabolan Ferocity.
+  // The hunt deals no opportunity cards, so this badges storylet headings and
+  // the options of the open storylet.
+  //
+  // **What the badge says.** Ferocity first, because it IS the difficulty:
+  // every check on the way is `180 + 20 × (Ferocity − Parabolan Scouting)`, so
+  // a quarry of Ferocity 20 and one of Ferocity 6 are two different hunts, and
+  // the number decides whether you should be spending actions on Scouting
+  // first. Then what the hunt pays ("Ferocity 14 · a Storm-bird"). On the way
+  // there, an option that buys Scouting shows what it buys and what it costs
+  // ("Scouting +8 ▼"), and an option that takes Ferocity off the quarry shows
+  // that instead ("Ferocity −5 ▼"), because those two are the only levers on
+  // the formula.
+  //
+  // **No difficulty is claimed.** Parabolan Scouting is not on any page this
+  // script reads, so the badge never turns the formula into a number; the
+  // tooltip carries the formula and the Ferocity, which is the half that is
+  // knowable.
+  //
+  // Transcribed from the guide's quarry, destination and hunting-action tables,
+  // with every storylet page fetched through the API (2026-09-17) as the
+  // cross-check on the option lists. Four options are on the pages and in no
+  // guide table -- the Aureate Stag, the Malice-in-Emerald, the location of
+  // Procession and "Demonstrate a sporting commitment to fairness" -- and are
+  // labelled rather than scored. Left out: the Ambition: Bag a Legend! hunts,
+  // which are one-time story steps. Corrections go in PH_OPTIONS and nowhere
+  // else.
+  //
+  //   ferocity     the quarry's or destination's Parabolan Ferocity.
+  //   tag / gives  what defeating it pays; `lair` what searching the lair pays.
+  //   scouting     Parabolan Scouting an option buys; `drops` Ferocity it removes.
+  //   ch { stat, diff, narrow } / uses / needs / label / note / factions.
+
+  const PH_TRACK = 'Track the Animals of Parabola';
+  const PH_SEARCH = 'Search Parabola for a Place in the Neath';
+  const PH_LOST = 'Lost in Strange Lands';
+  const PH_PURSUING = 'Pursuing the (Parabolan Quarry)';
+  const PH_EMBATTLED = 'Embattled with the (Parabolan Quarry)';
+  const PH_MIRROR = 'Seeking a Mirror from the Far Side';
+
+  const PH_WINDOWS = {};
+  PH_WINDOWS[PH_TRACK] = 'pick a quarry';
+  PH_WINDOWS[PH_SEARCH] = 'pick a place in the Neath';
+  PH_WINDOWS[PH_LOST] = 'the tracking check · buy Scouting';
+  PH_WINDOWS[PH_PURSUING] = 'found it · how to close';
+  PH_WINDOWS[PH_EMBATTLED] = 'the confrontation';
+  PH_WINDOWS[PH_MIRROR] = 'claim the place';
+
+  const PH_OPTIONS = [
+    { storylet: PH_TRACK, name: 'Pick up the trail of a Seven-Throated Warbler', ferocity: 6, tag: 'a Warbler',
+      gives: 'a Seven-Throated Warbler', lair: 'a Hillmover' },
+    { storylet: PH_TRACK, name: 'Pick up the trail of a Focused Albatross', ferocity: 8, tag: 'an Albatross',
+      gives: 'a Focused Albatross', needs: 'a Dream-Trophy of Parabola' },
+    { storylet: PH_TRACK, name: 'Pick up the trail of the Storm-bird', ferocity: 14, tag: 'a Storm-bird',
+      gives: 'a Storm-bird', lair: 'Bessemer Steel Ingot ×5, or rarely a Whirring Contraption or A Miniature Model Ship',
+      needs: 'Conflagration' },
+    { storylet: PH_TRACK, name: 'Set your Terror Bird Running', ferocity: 20, tag: 'a Direful Reflection',
+      gives: 'a Direful Reflection', lair: 'a Thorned Ribcage', needs: 'an Iron-Toothed Terror Bird',
+      note: 'The fiercest quarry in the table, and one you can recapture rather than kill.' },
+    { storylet: PH_TRACK, name: 'Track your Carnivorous Aurochs', ferocity: 18, tag: 'a Memory of Discordance',
+      gives: 'a Memory of Discordance', needs: 'a Carnivorous Aurochs' },
+    { storylet: PH_TRACK, name: 'Pick up the trail of the Honey-Mazed Bear', ferocity: 16, tag: 'a Honey-Mazed Bear',
+      gives: 'a Honey-Mazed Bear -- and An Estimable Trophy ×6 when it is returned to Ealing Gardens',
+      needs: 'the Ealing Gardens promise, Dream-Trophies of Parabola ×30, and Dangerous 200' },
+    { storylet: PH_TRACK, name: 'Pick up the trail of the Pinewood Shark', ferocity: 18, tag: 'Shark + Trophy ×6',
+      gives: 'Remains of a Pinewood Shark, Fin Bones ×2 and An Estimable Trophy ×6',
+      factions: [['Favours: The Docks', 1]],
+      needs: 'Capture the Honey-Mazed Bear, Parabolan Defences, and Dangerous 203' },
+    { storylet: PH_TRACK, name: 'Search Parabola for a Second City vessel', ferocity: 15, tag: 'a Human Ribcage',
+      gives: 'a Human Ribcage, or an alteration to the vessel instead of destroying it',
+      needs: 'The Prelapsarian Exhibition 100' },
+    { storylet: PH_TRACK, name: 'Hunt down a nightmare of talon and flame', ferocity: 8, tag: 'Mystery + Scream + Psalm',
+      gives: 'an Antique Mystery, a Storm-Threnody, an Aeolian Scream and an Apostate’s Psalm',
+      needs: 'Having Municipal Dreams: This Dreadfull Beast, and Embroiled in Mass Nightmare' },
+    { storylet: PH_TRACK, name: 'Pick up the trail of an Aureate Stag', label: 'not in the guide',
+      note: 'On the storylet page only: no guide here records its Ferocity or its pay.' },
+    { storylet: PH_TRACK, name: 'Track a Malice-in-Emerald', label: 'not in the guide',
+      note: 'On the storylet page only: no guide here records its Ferocity or its pay.' },
+
+    { storylet: PH_SEARCH, name: 'Look for Mr Iron’s Warehouse', ferocity: 6, tag: 'Steel ×100 · Gains → 3',
+      gives: 'Bessemer Steel Ingot ×100, and Shadowy Gains set to 3', uses: 'An Identity Uncovered! ×15',
+      needs: 'base Shadowy 200' },
+    { storylet: PH_SEARCH, name: 'Case the townhouse of a Discerning Deviless', ferocity: 10,
+      tag: 'a Deviless’ Address · Gains → 6', gives: 'A Deviless’ Address, and after the heist a Discordant Soul; '
+        + 'Shadowy Gains set to 6', uses: 'Favours: Hell ×7', factions: [['Favours: Hell', -7]],
+      needs: 'Shadowy Gains 3, and base Shadowy 203' },
+    { storylet: PH_SEARCH, name: 'Find the weakness in an opponent’s defences', ferocity: 10,
+      tag: 'Casing +28 CP · Gains → 9', gives: 'Casing... +28 CP, and Shadowy Gains set to 9',
+      needs: 'Shadowy Gains 6, and base Shadowy 206',
+      note: 'The guide: the best source of Casing there is -- about 4.5 actions at Glasswork 12 and Shadowy 275.' },
+    { storylet: PH_SEARCH, name: 'Track down evidence against you', ferocity: 12,
+      tag: 'Disappearing +30 CP · Gains → 12', gives: 'Disappearing... +30 CP, and Shadowy Gains set to 12',
+      needs: 'Shadowy Gains 9, and base Shadowy 209' },
+    { storylet: PH_SEARCH, name: 'Investigate where the transport items are going', ferocity: 8,
+      tag: 'your vehicles back', gives: 'every Loaned Out Vehicle returned',
+      needs: 'Humouring a Buyer of Transports' },
+    { storylet: PH_SEARCH, name: 'Search Parabola for the location of a particular treasure', ferocity: 14,
+      tag: 'a Hiding Place', gives: 'a Hiding Place of a Peculiar Item, and after the heist one of four treasures with '
+        + 'sixteen of its matching good', uses: 'a Flask of Waswood Wellspring Water' },
+    { storylet: PH_SEARCH, name: 'Look for the bloody traces of the Red-Handed Queen', ferocity: 10,
+      tag: 'Blood Oath ×10–15', gives: 'Blood Oath ×10–15, and then either a Memory of Moonlight or a Direful Reflection',
+      needs: 'Firmament Chapter 7, and A Troupe in Need of Bodies' },
+    { storylet: PH_SEARCH, name: 'Look for the location of Procession', label: 'not in the guide',
+      note: 'On the storylet page only: no guide here records its Ferocity or its pay.' },
+
+    { storylet: PH_LOST, name: 'Push onward', label: 'the check itself',
+      note: 'A failure gives Nightmares -- and Parabolan Scouting ×2, so the hunt gets easier even when you fail. At '
+        + 'Nightmares 8 a menace card fires when you return to camp.' },
+    { storylet: PH_LOST, name: 'Sneak forward', label: 'the check itself',
+      note: 'The Shadowy version, for a place in the Neath rather than a quarry.' },
+    { storylet: PH_LOST, name: 'Apply your own knowledge', scouting: 10, ch: { stat: 'Glasswork', diff: 1, narrow: true },
+      note: 'The guide: spend this one FIRST -- its check climbs each time, and the other Scouting options do not make it '
+        + 'easier. The difficulty listed here is a placeholder: the page states only that it rises.' },
+    { storylet: PH_LOST, name: 'Follow your silver skein', scouting: 10, ch: { stat: 'Chthonosophy', diff: 1, narrow: true },
+      needs: 'a Skein of Silvered Catgut, on a quarry hunt only' },
+    { storylet: PH_LOST, name: 'Allow your Acicular Squirrel to lead you', scouting: 10,
+      ch: { stat: 'Kataleptic Toxicology', diff: 1, narrow: true },
+      needs: 'an Acicular Squirrel, when searching for a place in the Neath only' },
+    { storylet: PH_LOST, name: 'Claim the aid of Fingerkings', scouting: 6, uses: 'Favours: Fingerkings ×2',
+      factions: [['Favours: Fingerkings', -2]], note: 'Favours come from the Dome of Scales.' },
+    { storylet: PH_LOST, name: 'Make use of a Glass Gazette', scouting: 8, uses: 'a Glass Gazette',
+      note: 'Gazettes are researched in the University Laboratory.' },
+    { storylet: PH_LOST, name: 'Pass through a distracting mirror', scouting: 10, label: 'Scouting +10 · a dream ▼',
+      note: 'Trades a dream-quality for Scouting. Which trade is offered depends on Airs of Parabola, and the trade is a '
+        + 'Luck check; the guide records no odds.' },
+    { storylet: PH_LOST, name: 'Continue towards (Quarry Home)', label: 'on to the lair',
+      note: 'The second check, at the same difficulty as the first.' },
+    // Filed under the wiki's numbered title with the plain one as the alias:
+    // three storylets in Parabola offer a "Return to your Base-Camp", and only
+    // one table may own that name.
+    { storylet: PH_LOST, name: 'Return to your Base-Camp 1', aliases: ['Return to your Base-Camp'],
+      label: 'abandon · Glasswork', gives: 'Glasswork +1 CP, a small chance of a Thorned Ribcage, and the quarry’s '
+        + 'Ferocity gone',
+      note: 'Abandoning HERE pays; abandoning from Pursuing does not.' },
+
+    { storylet: PH_PURSUING, name: 'Await the (Parabolan Quarry) at (its lair)', label: 'lair · one more check',
+      note: 'The same difficulty again. A lair can be searched instead of fought, for the lair reward -- and then you do '
+        + 'not face the quarry at all.' },
+    { storylet: PH_PURSUING, name: 'Trick the (Parabolan Quarry) into chasing you', label: 'straight to the fight',
+      needs: 'Nightmares 5',
+      note: 'The guide: only worth it on a quarry you are likely to beat, since a failed confrontation costs two more '
+        + 'actions at least.' },
+    { storylet: PH_PURSUING, name: 'Wound the (Parabolan Quarry)', drops: '1 + Monstrous Anatomy',
+      needs: 'Monster-Hunter', note: 'The biggest single cut to Ferocity there is, and it helps the lair check too. The '
+        + 'page reports a bug at Monstrous Anatomy 14–15.' },
+    { storylet: PH_PURSUING, name: 'Bait the Focused Albatross', drops: 5, uses: 'bait' },
+    { storylet: PH_PURSUING, name: 'Bait the bear with honey', drops: 5, uses: 'honey' },
+    { storylet: PH_PURSUING, name: 'Trap the bear', drops: 5, uses: 'a trap' },
+    { storylet: PH_PURSUING, name: 'Bait the ushabti', drops: 5, uses: 'bait' },
+    { storylet: PH_PURSUING, name: 'Demonstrate a sporting commitment to fairness', label: 'not in the guide',
+      note: 'On the storylet page only; no guide here records what it does.' },
+    { storylet: PH_PURSUING, name: 'Abandon pursuit of the (Parabolan Quarry)', label: 'abandon · nothing',
+      note: 'Straight back to the Base-Camp, without the Glasswork that abandoning in Strange Lands pays.' },
+
+    { storylet: PH_EMBATTLED, name: 'Ambush the (Parabolan Quarry) at close range', drops: '2 + Monstrous Studies',
+      gives: 'Monstrous Anatomy on a success', needs: 'having gone to the lair; not on a Whitsun companion',
+      note: 'A failure gives Wounds. The guide: ambush until the kill is at or near 100%, rather than risking the fight.' },
+    { storylet: PH_EMBATTLED, name: 'Capture the Seven-Throated Warbler', tag: 'a Warbler + Trophy' },
+    { storylet: PH_EMBATTLED, name: 'Capture the Focused Albatross', tag: 'an Albatross + Trophy' },
+    { storylet: PH_EMBATTLED, name: 'Capture the Storm-bird', tag: 'a Storm-bird + Trophy' },
+    { storylet: PH_EMBATTLED, name: 'Capture the Honey-Mazed Bear', tag: 'a Bear + Trophy' },
+    { storylet: PH_EMBATTLED, name: 'Recapture the Carnivorous Aurochs', tag: 'a Memory of Discordance + Trophy' },
+    { storylet: PH_EMBATTLED, name: 'Recapture the Iron-Toothed Terror Bird', tag: 'a Direful Reflection + Trophy' },
+    { storylet: PH_EMBATTLED, name: 'Kill the Pinewood Shark', tag: 'Shark + Trophy ×6', factions: [['Favours: The Docks', 1]] },
+    { storylet: PH_EMBATTLED, name: 'Destroy the Ushabti-Vessel', tag: 'a Human Ribcage + Trophy' },
+    { storylet: PH_EMBATTLED, name: 'Make an alteration to the vessel, and its purpose', label: 'alter it instead',
+      note: 'Takes the vessel’s purpose rather than its ribcage.' },
+    { storylet: PH_EMBATTLED, name: 'Face down the dragon of nightmare', tag: 'Mystery + Scream + Psalm' },
+    { storylet: PH_EMBATTLED, name: 'Give up and flee the (Parabolan Quarry)', label: 'flee',
+      note: 'The guide: only when a failure would take Wounds to 8.' },
+
+    { storylet: PH_MIRROR, name: 'Press against the glass', label: 'claim the place',
+      note: 'Most destinations need no check here; Mr Iron’s Warehouse and the Deviless’ townhouse do.' },
+  ];
+
+  const PH_STORYLETS = PH_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const PH_INDEX = carouselIndex(PH_OPTIONS);
+
+  const PH_CLASS = 'fl-ux-parabolan-hunting';
+  const PH_FLAG = 'flUxParabolanHunting';
+  const PH_BRANCH_CLASS = 'fl-ux-parabolan-hunting-branch';
+  const PH_BRANCH_FLAG = 'flUxParabolanHuntingBranch';
+
+  const PH_RULES = 'Every check on a hunt is 180 + 20 × (Parabolan Ferocity − Parabolan Scouting), so the quarry’s '
+    + 'Ferocity is the whole of its difficulty and Scouting is the only thing you can do about it -- buy it in Strange '
+    + 'Lands, or take Ferocity off the quarry once you have found it. Your Scouting is on no page this script can read, '
+    + 'so no odds are claimed. A hunt is: the tracking check, then the lair or a trick, then the confrontation. Every '
+    + 'defeated quarry pays a Dream-Trophy of Parabola.';
+
+  function phBadgeCore(e) {
+    if (e.label) return e.label + (e.uses ? ' ' + CAROUSEL_MARK_USES : '');
+    if (e.ferocity != null) {
+      return 'Ferocity ' + e.ferocity + (e.tag ? ' · ' + e.tag : '') + (e.uses ? ' ' + CAROUSEL_MARK_USES : '');
+    }
+    if (e.scouting != null) {
+      return 'Scouting +' + e.scouting + (e.ch ? CAROUSEL_MARK_CHALLENGE : '') + (e.uses ? ' ' + CAROUSEL_MARK_USES : '');
+    }
+    if (e.drops != null) {
+      // A formula gets brackets, or "Ferocity −1 + Monstrous Anatomy" reads as
+      // a subtraction and an addition rather than one cut.
+      const cut = typeof e.drops === 'number' ? String(e.drops) : '(' + e.drops + ')';
+      return 'Ferocity −' + cut + (e.ch ? CAROUSEL_MARK_CHALLENGE : '') + (e.uses ? ' ' + CAROUSEL_MARK_USES : '');
+    }
+    return e.tag + CAROUSEL_MARK_CHALLENGE;
+  }
+
+  function phBadgeText(e) {
+    return withFactions(phBadgeCore(e), e);
+  }
+
+  function phColor(e) {
+    if (e.label) return CAROUSEL_COLOR_NEUTRAL;
+    if (e.ferocity != null) return CAROUSEL_COLOR_LABEL;
+    if (e.scouting != null || e.drops != null) return CAROUSEL_COLOR_SETUP;
+    return CAROUSEL_COLOR_PAYOUT;
+  }
+
+  function phSpec(e) {
+    const body = [];
+    if (e.ch) body.push(carouselChallenge(e.ch));
+    if (e.ferocity != null) {
+      body.push('Parabolan Ferocity ' + e.ferocity + ': every check on this hunt is 180 + 20 × (' + e.ferocity
+        + ' − your Parabolan Scouting).');
+    }
+    if (e.scouting != null) body.push('Gives Parabolan Scouting +' + e.scouting + ', which comes straight off the difficulty.');
+    if (e.drops != null) body.push('Takes ' + e.drops + ' off the quarry’s Parabolan Ferocity.');
+    if (e.gives) body.push('Gives: ' + e.gives + '.');
+    if (e.tag && !e.gives && e.ferocity == null) body.push('Pays the quarry’s reward, and a Dream-Trophy of Parabola.');
+    if (e.lair) body.push('Searching the lair instead pays: ' + e.lair + '.');
+    if (e.uses) body.push(CAROUSEL_MARK_USES + ' Uses up ' + e.uses + '.');
+    if (e.needs) body.push('Needs: ' + e.needs + '.');
+    body.push(factionLine(e));
+    body.push(carouselActionsLine(e));
+    return { text: phBadgeText(e), color: phColor(e), title: carouselTooltip('Parabolan Hunting', e, body, PH_RULES) };
+  }
+
+  function phStoryletSpec(key) {
+    const storylet = PH_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet) return null;
+    return { text: PH_WINDOWS[storylet] || 'Parabolan hunting', color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('Parabolan Hunting', storylet, PH_OPTIONS, phBadgeText, PH_RULES) };
+  }
+
+  // Two of these storylets are headed for the quarry -- "Pursuing the
+  // Storm-bird", "Embattled with the Carnivorous Aurochs" -- and the list of
+  // quarries is open-ended (the pages carry two the guide has never heard of).
+  // So rather than enumerate headings, this maps any heading of either shape
+  // onto the canonical name the table is filed under. `carouselCanonical` takes
+  // a function for exactly this.
+  function phCanonical(key) {
+    if (/^pursuing the /.test(key)) return normalizeName(PH_PURSUING);
+    if (/^embattled with the /.test(key)) return normalizeName(PH_EMBATTLED);
+    return null;
+  }
+
+  function phRatings() {
+    carouselRatings({
+      storylets: PH_STORYLETS, index: PH_INDEX, storyletSpec: phStoryletSpec, optionSpec: phSpec,
+      cls: PH_CLASS, flag: PH_FLAG, branchCls: PH_BRANCH_CLASS, branchFlag: PH_BRANCH_FLAG,
+      aliases: phCanonical,
+    });
+  }
+
+  // === feature: Oneiropomp ===============================================
+  //
+  // Oneiropomp (Guide): in the Viric Jungle you take charge of someone else's
+  // dream. Two qualities run: Intensity of the Dream, which every reward is
+  // proportional to and which the guide prices at 2 Echoes a level, and
+  // Duration of a Dream, which every action adds and which pays 15 Sightings of
+  // a Parabolan Landmark a level -- about 1.5 Echoes. The jungle deals no
+  // opportunity cards, so this badges storylet headings and the options of the
+  // open storylet.
+  //
+  // **What the badge says.** What the option adds to each ("Intensity +6 ·
+  // Duration +2 ▼"), because the two together ARE the payout and they are not
+  // interchangeable: the item options buy Intensity outright while the free
+  // ones test against a check that climbs with the Intensity you already have.
+  // A cash-out shows its three tiers in order and what the top one is worth
+  // ("Bribe 12.5 → Statement 2.5 → Snippet 0.2"), since those pay by the modulo
+  // method -- the top reward as often as your Intensity covers it, then the
+  // remainder down the tiers.
+  //
+  // **Parabola is either relaxed or strained**, and that decides which options
+  // exist at all: gaining Intensity strains it, and you then either spend an
+  // action letting it relax (Observe and learn) or push through (More!
+  // Further!). Every row carries its state, and the rules line carries the
+  // guide's rule for choosing between those two: push only above about a 70%
+  // success rate.
+  //
+  // Transcribed from the guide's Intensity, modular-reward and non-modular
+  // tables, with the two storylet pages fetched through the API (2026-09-17) as
+  // the cross-check on the option lists; that found *Infuse the dream with
+  // terrible poetry*, which no guide table carries, and it is labelled rather
+  // than scored. The Echo values on the cash-outs are the guide's per-item
+  // figures. Corrections go in ON_OPTIONS and nowhere else.
+  //
+  //   intensity / duration   what a success adds; `duration` defaults to 1.
+  //   tiers      [[item, echoes], …] for a modulo cash-out, best first.
+  //   ch { stat, diff, narrow } / uses / needs / state / label / gives / note.
+
+  const ON_CHOICE = 'Dreams: A Choice of Reverie';
+  const ON_ATTEND = 'Attend to the Dreamer';
+  const ON_INTENSITY_ECHOES = 2;
+  const ON_DURATION_SIGHTINGS = 15;
+
+  const ON_OPTIONS = [
+    { storylet: ON_CHOICE, name: 'Inspire the Bohemian Sculptress', label: 'dreamer · the Sculptress',
+      gives: 'the dream every other dreamer is measured against: her cash-outs are the Comprehensive Bribes' },
+    { storylet: ON_CHOICE, name: 'Tend the Captivating Princess’ Dream-Garden', label: 'dreamer · the Princess',
+      needs: 'Acquaintance: the Captivating Princess',
+      note: 'The guide’s best rate: Care for the rooted courtiers and Observe and learn cycle indefinitely, because '
+        + 'neither difficulty scales -- about 3.1 to 3.5 Echoes an action.' },
+    { storylet: ON_CHOICE, name: 'Take charge of the Honey-Addled Detective', label: 'dreamer · the Detective',
+      needs: 'Oneiropomp 5' },
+    { storylet: ON_CHOICE, name: 'Play Oneiropomp to Madame Petrovsky', label: 'dreamer · Madame Petrovsky',
+      needs: 'Oneiropomp 10, and Embroiled in the Wars of Illusion 10' },
+    { storylet: ON_CHOICE, name: 'A guide to the Oneiropompic arts', label: 'the rules, in game' },
+
+    { storylet: ON_CHOICE, name: 'Lend power to the dream', intensity: [1, 2], ch: { stat: 'Persuasive' },
+      state: 'relaxed', note: 'The free line, and the one whose check climbs with the Intensity you have already built.' },
+    { storylet: ON_CHOICE, name: 'Draw in another place', intensity: 6, duration: 2,
+      ch: { stat: 'Glasswork', diff: 2, narrow: true }, uses: 'Sighting of a Parabolan Landmark ×125', state: 'relaxed',
+      note: 'The guide: a Sighting is worth 0.1 Echoes, so this buys 12 Echoes of Intensity for 12.5 of Sightings -- a '
+        + 'slight loss, paid for in actions saved.' },
+    { storylet: ON_CHOICE, name: 'Infuse the dream with external influences', intensity: 6, duration: 2,
+      ch: { stat: 'Glasswork', diff: 2, narrow: true }, uses: 'Slim Volume of Bazaarine Poetry ×5', state: 'relaxed' },
+    { storylet: ON_CHOICE, name: 'Transform dream into prophecy', intensity: [1, 2], ch: { stat: 'Glasswork' },
+      needs: 'The Marvellous', state: 'relaxed' },
+    { storylet: ON_CHOICE, name: 'Infuse the dream with terrible poetry', label: 'not in the guide', state: 'relaxed',
+      note: 'On the storylet page only; no guide here records what it gives.' },
+    { storylet: ON_CHOICE, name: 'Introduce your own evidence', intensity: [1, 2], ch: { stat: 'Watchful' },
+      state: 'relaxed', needs: 'the Detective' },
+    { storylet: ON_CHOICE, name: 'Improve the statistical rigour of this investigation', intensity: 6, duration: 2,
+      ch: { stat: 'Glasswork', diff: 2, narrow: true }, uses: 'a Mirthless Compendium of Statistical Observations',
+      state: 'relaxed', needs: 'the Detective' },
+    { storylet: ON_CHOICE, name: 'Set the Detective on the trail of your reflection', intensity: 5,
+      ch: { stat: 'Shadowy', diff: 120 }, uses: 'Memory of a Much Lesser Self ×4', state: 'relaxed',
+      needs: 'the Detective' },
+    { storylet: ON_CHOICE, name: 'Transform this dream with vistas of the First City', intensity: 1,
+      ch: { stat: 'Persuasive' }, uses: 'an Expertise of the First City', state: 'relaxed', needs: 'Madame Petrovsky' },
+    { storylet: ON_CHOICE, name: 'Infuse this dream with the knowledge of Irem', intensity: 2,
+      ch: { stat: 'Persuasive', diff: 100 }, uses: 'a Justificande Coin', state: 'relaxed', needs: 'Madame Petrovsky' },
+    { storylet: ON_CHOICE, name: 'Care for the rooted courtiers', intensity: [1, 2],
+      ch: { stat: 'Kataleptic Toxicology', diff: 5, narrow: true }, state: 'relaxed', needs: 'the Princess',
+      note: 'The one Intensity line whose difficulty does NOT climb, which is what makes the Princess the best rate.' },
+    { storylet: ON_CHOICE, name: 'Fertilise the plants with mulched anathema', intensity: 6, duration: 2,
+      ch: { stat: 'Kataleptic Toxicology', diff: 3, narrow: true }, uses: 'a Caustic Apocryphon', state: 'relaxed',
+      needs: 'the Princess' },
+
+    { storylet: ON_CHOICE, name: 'Inspire her to imagine His Amused Lordship as a historical figure',
+      ch: { stat: 'Mithridacy', diff: 2, narrow: true }, state: 'relaxed', needs: 'the Sculptress',
+      tiers: [['Comprehensive Bribe', 12.5], ['Sworn Statement', 2.5], ['Intriguing Snippet', 0.2]],
+      note: 'The guide: the game pays twice as many Snippets as the method calls for, which nudges this one’s value up.' },
+    { storylet: ON_CHOICE, name: 'Inspire her to imagine His Amused Lordship as more himself than ever',
+      ch: { stat: 'Kataleptic Toxicology', diff: 2, narrow: true }, state: 'relaxed',
+      needs: 'a Venomous Caricaturist, and the Sculptress',
+      tiers: [['Comprehensive Bribe', 12.5], ['An Identity Uncovered!', 2.5], ['Venom-Ruby', 0.1]] },
+    { storylet: ON_CHOICE, name: 'Inspire her to sculpt a Saint of Axile',
+      ch: { stat: 'Shapeling Arts', diff: 2, narrow: true }, state: 'relaxed',
+      needs: 'a Cloud-filled Sphere, and the Sculptress',
+      tiers: [['Nodule of Trembling Amber', 12.5], ['Unearthly Fossil', 2.5], ['Nodule of Warm Amber', 0.1]],
+      note: 'Pays bonus Intensity of up to a quarter of your Duration, so it rewards the long dreams.' },
+    { storylet: ON_CHOICE, name: 'Present a vision of (your saint)',
+      ch: { stat: 'Glasswork', diff: 5, narrow: true }, state: 'relaxed',
+      needs: 'Skeleton in Progress 100, and Skeleton: Support for a Counter-church Theology 3',
+      tiers: [['Verse of Counter-Creed', 12.5], ['Apostate’s Psalm', 2.5], ['Palimpsest Scrap', 0.5]],
+      note: 'Pays bonus Intensity of up to a quarter of your Duration.' },
+    { storylet: ON_CHOICE, name: 'Extract clues from his thoughts', ch: { stat: 'Watchful', diff: 100 },
+      state: 'relaxed', needs: 'the Detective',
+      tiers: [['Uncanny Incunabulum', 12.5], ['Extraordinary Implication', 2.5], ['Appalling Secret', 0.15]] },
+    { storylet: ON_CHOICE, name: 'Make a thorough examination of the Princess’ orangery',
+      ch: { stat: 'Kataleptic Toxicology', diff: 2, narrow: true }, state: 'relaxed', needs: 'the Princess',
+      tiers: [['Blackmail Material', 12], ['An Identity Uncovered!', 2.5], ['Intriguing Snippet', 0.2]],
+      note: 'The guide: this one seems to pay more of the top tier than the method says. Possibly a bug.' },
+    { storylet: ON_CHOICE, name: 'Inspire her with a patroness of Freedom', label: 'Memory of Light · 0.5 E',
+      ch: { stat: 'Glasswork', diff: 5, narrow: true }, state: 'relaxed',
+      needs: 'A Palatial Holiday Home in the Arctic Circle, and the Sculptress',
+      gives: 'Memory of Light, and bonus Intensity of up to a quarter of your Duration' },
+    { storylet: ON_CHOICE, name: 'Let her take her visions home and peddle them to her followers',
+      label: 'Hinterland Scrip', ch: { stat: 'Persuasive', diff: 100 }, state: 'relaxed', needs: 'Madame Petrovsky',
+      gives: 'Hinterland Scrip' },
+
+    { storylet: ON_ATTEND, name: 'Observe and learn', intensity: 0, duration: [1, 2], state: 'strained',
+      gives: 'nothing but Duration -- and Parabola relaxes again',
+      note: 'The guide: rest rather than push below about a 70% success rate on More! Further!, and below 75% if you are '
+        + 'after Duration.' },
+    { storylet: ON_ATTEND, name: 'More! Further!', intensity: [1, 2], ch: { stat: 'Persuasive' }, state: 'strained',
+      note: 'A failure takes an Intensity off. The check climbs with both your Intensity and your Ravages of Parabolan '
+        + 'Warfare.' },
+    { storylet: ON_ATTEND, name: 'Fill an empty Mirrorcatch box with Viric', label: 'Viric box · Intensity −1',
+      state: 'strained', needs: 'an empty Mirrorcatch Box, and Intensity 3',
+      gives: 'a Viric-filled Mirrorcatch Box; the dream carries on' },
+    { storylet: ON_ATTEND, name: 'Take your own inspiration from this dream', label: 'Inspired ×9.5 per Intensity',
+      ch: { stat: 'Persuasive', diff: 100 }, state: 'strained', needs: 'the Sculptress',
+      gives: 'Inspired... equal to 9.5 × your Intensity' },
+    { storylet: ON_ATTEND, name: 'Learn from the Detective’s investigation', label: 'Investigating ×20 per Intensity',
+      ch: { stat: 'Watchful', diff: 100 }, state: 'strained', needs: 'the Detective',
+      gives: 'Investigating... equal to 20 × your Intensity' },
+    { storylet: ON_ATTEND, name: 'Comprehend something elemental', label: 'an Elemental Secret',
+      ch: { stat: 'Watchful', diff: 200 }, state: 'strained',
+      needs: 'Oneiromantic Revelation ×4, Antique Mystery ×3, Intensity 5 and Duration 10, with Madame Petrovsky' },
+    { storylet: ON_ATTEND, name: 'Stare into the glow that is the Princess', label: 'a Searing Enigma',
+      ch: { stat: 'Persuasive', diff: 320 }, state: 'strained',
+      needs: 'Direful Reflection ×3, Intensity 5 and Duration 10, with the Princess',
+      note: 'A Scholar of the Correspondence and your Duration both bring that 320 down.' },
+    { storylet: ON_ATTEND, name: 'Hand over this dream as an offering', label: 'a Palimpsest Scrap',
+      ch: { stat: 'Glasswork', diff: 2, narrow: true }, state: 'strained',
+      needs: 'The Long-Dead Priests of the Red Bird', gives: 'a Palimpsest Scrap, and one bonus Intensity' },
+    { storylet: ON_ATTEND, name: 'Let this vista influence the dreamers of the Royal Beth',
+      label: 'a Vision of the Surface', ch: { stat: 'Glasswork', diff: 2, narrow: true }, state: 'strained',
+      needs: 'A Bright Brass Button', gives: 'a Vision of the Surface' },
+  ];
+
+  const ON_STORYLETS = ON_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const ON_INDEX = carouselIndex(ON_OPTIONS);
+
+  const ON_CLASS = 'fl-ux-oneiropomp';
+  const ON_FLAG = 'flUxOneiropomp';
+  const ON_BRANCH_CLASS = 'fl-ux-oneiropomp-branch';
+  const ON_BRANCH_FLAG = 'flUxOneiropompBranch';
+
+  const ON_RULES = 'A dream is one action to start, one to end, and as many as you like between. Intensity of the Dream '
+    + 'is what the cash-out is proportional to (' + ON_INTENSITY_ECHOES + ' Echoes a level); Duration of a Dream rises '
+    + 'with every action and pays ' + ON_DURATION_SIGHTINGS + ' Sightings of a Parabolan Landmark a level at the end. '
+    + 'Gaining Intensity STRAINS Parabola, and while it is strained you may only rest (Observe and learn) or push (More! '
+    + 'Further!) -- the guide: push only above about a 70% success rate. The cash-outs pay by the modulo method: the top '
+    + 'tier as often as your Intensity covers it, then the remainder down the tiers.';
+
+  function onRange(v) {
+    return Array.isArray(v) ? v[0] + '–' + v[1] : String(v);
+  }
+
+  function onBadgeCore(e) {
+    if (e.tiers) {
+      return e.tiers.map(function (t) { return t[0].replace(/^(a|an|the) /i, '') + ' ' + t[1]; }).join(' → ')
+        + (e.ch ? CAROUSEL_MARK_CHALLENGE : '');
+    }
+    if (e.label) return e.label + (e.ch ? CAROUSEL_MARK_CHALLENGE : '') + (e.uses ? ' ' + CAROUSEL_MARK_USES : '');
+    const parts = [];
+    if (e.intensity != null && !(e.intensity === 0)) parts.push('Intensity +' + onRange(e.intensity));
+    const duration = e.duration == null ? 1 : e.duration;
+    if (duration !== 1 || e.intensity === 0) parts.push('Duration +' + onRange(duration));
+    let text = parts.join(' · ') + (e.ch ? CAROUSEL_MARK_CHALLENGE : '');
+    if (e.uses) text += ' ' + CAROUSEL_MARK_USES;
+    return text;
+  }
+
+  function onBadgeText(e) {
+    return withFactions(onBadgeCore(e), e);
+  }
+
+  function onColor(e) {
+    if (e.tiers) return CAROUSEL_COLOR_PAYOUT;
+    if (e.label) return CAROUSEL_COLOR_NEUTRAL;
+    return e.uses ? CAROUSEL_COLOR_SETUP : CAROUSEL_COLOR_PROGRESS;
+  }
+
+  function onSpec(e) {
+    const body = [];
+    if (e.ch) {
+      body.push(e.ch.diff == null
+        ? 'Challenge: ' + e.ch.stat + ', at a difficulty that climbs with the Intensity you have already built.'
+        : carouselChallenge(e.ch));
+    }
+    if (e.intensity != null) {
+      const duration = e.duration == null ? 1 : e.duration;
+      body.push('Success: Intensity of the Dream +' + onRange(e.intensity) + ' ('
+        + (Array.isArray(e.intensity) ? onRange(e.intensity[0] * ON_INTENSITY_ECHOES) + '–'
+          + e.intensity[1] * ON_INTENSITY_ECHOES : e.intensity * ON_INTENSITY_ECHOES)
+        + ' Echoes), Duration of a Dream +' + onRange(duration) + ' (' + ON_DURATION_SIGHTINGS + ' Sightings a level).');
+    }
+    if (e.tiers) {
+      body.push('Pays by the modulo method: ' + e.tiers.map(function (t) {
+        return t[0] + ' at ' + t[1] + ' Echoes';
+      }).join(', then ') + ' -- the top tier as often as your Intensity covers it, the remainder down the tiers.');
+    }
+    if (e.gives) body.push('Gives: ' + e.gives + '.');
+    if (e.state) body.push('Offered while Parabola is ' + e.state + '.');
+    if (e.uses) body.push(CAROUSEL_MARK_USES + ' Uses up ' + e.uses + '.');
+    if (e.needs) body.push('Needs: ' + e.needs + '.');
+    body.push(carouselActionsLine(e));
+    return { text: onBadgeText(e), color: onColor(e), title: carouselTooltip('Oneiropomp', e, body, ON_RULES) };
+  }
+
+  function onStoryletSpec(key) {
+    const storylet = ON_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet) return null;
+    return { text: storylet === ON_CHOICE ? 'Parabola relaxed · build or cash in' : 'Parabola strained · rest or push',
+      color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('Oneiropomp', storylet, ON_OPTIONS, onBadgeText, ON_RULES) };
+  }
+
+  function onRatings() {
+    carouselRatings({
+      storylets: ON_STORYLETS, index: ON_INDEX, storyletSpec: onStoryletSpec, optionSpec: onSpec,
+      cls: ON_CLASS, flag: ON_FLAG, branchCls: ON_BRANCH_CLASS, branchFlag: ON_BRANCH_FLAG,
+    });
+  }
+
+  // === feature: The Sacroboscan Calendar =================================
+  //
+  // The Sacroboscan Calendar (Guide): in the Waswood, two world qualities --
+  // Whim and Fancy, each cycling 1 to 6 and both resetting on Thursdays at
+  // 14:00 UTC -- decide which two past festivals you may live through this
+  // week. You may take ONE of them: finishing either sets A Jaunt in the
+  // Waswood, which lasts exactly a week. The Waswood deals no opportunity
+  // cards, so this badges the Calendar's storylet heading and its options.
+  //
+  // **What the badge says.** Which cycle and slot the event belongs to, and
+  // what is unique about it ("Whim 4 · 4 uniques + a memento"). There are no
+  // per-option numbers to quote: the guide is plain that none of this is
+  // profitable, and that you come for the items you cannot get any other way.
+  // So the badge counts the uniques and the tooltip lists them with what each
+  // one costs -- which is the only question a player actually has here, since
+  // the choice is between two events and cannot be unmade for a week.
+  //
+  // The twelve events' titles come from the Whim and Fancy world-quality pages
+  // and the option pages themselves (fetched through the API, 2026-09-17): each
+  // has a first-time title and, for seven of them, a different title for a
+  // return visit, carried as an alias. One disagreement is recorded rather than
+  // resolved: the wiki's *Reconstruct the Museum of Prelapsarian History* page
+  // says Whim 3, while the guide and the Fancy quality page both put the museum
+  // at Fancy 3 -- the two agreeing sources are followed, and the row says so.
+  // Left out: the rest of the Waswood (the histories you compose, the Mog, the
+  // Ambition steps), which are not the Calendar. Corrections go in SC_OPTIONS
+  // and nowhere else.
+  //
+  //   cycle / slot   'Whim' or 'Fancy', and 1–6.
+  //   uniques        the rewards you can only get here, each with its cost.
+  //   goods          the ordinary items worth having; `note` / `guide`.
+
+  const SC_CALENDAR = 'The Sacroboscan Calendar';
+  const SC_WASWOOD = 'Stay a little while';
+
+  const SC_OPTIONS = [
+    { storylet: SC_WASWOOD, name: 'Search out the lost histories of London', label: 'to the Calendar',
+      note: 'The way in. The two events on offer are set by Whim and Fancy, which both roll over on Thursdays at 14:00 UTC.' },
+
+    { storylet: SC_CALENDAR, name: 'Remember the Election of 1896', cycle: 'Whim', slot: 1,
+      uniques: ['You have pledged your support to - 7–9', 'Meeting Mr Slowcake'],
+      goods: 'a Favour in High Places, and grindable Extraordinary Implications and Identities Uncovered',
+      note: 'The 2018 election, replayed. Nothing here needs an item.' },
+    { storylet: SC_CALENDAR, name: 'Relive the Great Sink of 1899', aliases: ['Return to a reverie of the Great Sink'],
+      cycle: 'Whim', slot: 2,
+      uniques: ['a Sturdy Pick', 'A Pre-Lapsarian Speaking Tube', 'M. D_____’ A_____ for _______: F____ Edition',
+        'a Polythreme Drinking Vessel', 'A Poisoned Pen', 'Wax-Hardened Boots', 'A Reverie of Heroism (costs a T8 item)',
+        'Singed and Stained Work Gloves (costs A Reverie of Heroism)', 'a memento, one of four',
+        'A Volunteer During the Great Sink of 1899'],
+      goods: 'Compromising Documents, a Thirsty Bombazine Scrap, an Emetic Revelation, a Flourishing Ribcage with Bone '
+        + 'Fragments ×3250, Cryptic Clue ×100 and Sighting of a Parabolan Landmark ×50',
+      note: 'The richest event in the calendar for equipment -- but at most three of the middle six can be had in one visit.' },
+    { storylet: SC_CALENDAR, name: 'Remember the Election of 1898', cycle: 'Whim', slot: 3,
+      uniques: ['You have pledged your support to - 13–15', 'Questions about the Dreams of Rubbery Men'],
+      goods: 'grindable Aeolian Screams, Memories of Distant Shores, Extraordinary Implications, Incendiary Gossip, '
+        + 'Maniac’s Prayers and Dubious Testimony' },
+    { storylet: SC_CALENDAR, name: 'Live a Dream of the Starved War', aliases: ['Relive the Starved War'],
+      cycle: 'Whim', slot: 4,
+      uniques: ['a Strange Aeronaut', 'Honorary Membership in the London Horticultural Society (costs Parabolan '
+        + 'Orange-apple ×3)', 'The Rank of Flight Captain (costs an Oneiric Pearl)',
+        'A Hard-Earned Knack for Repair (needs A Dream of London’s Ruination at 0 before the final check)',
+        'a memento, one of three'],
+      goods: 'Memory of Light ×5, Jasmine Leaves ×15, Whispered Hint ×100, a Bottle of Broken Giant 1844, '
+        + 'Storm-Threnody ×2, Secluded Address ×9, Whisper-Satin Scrap ×9, Brilliant Soul ×9 and more' },
+    { storylet: SC_CALENDAR, name: 'Remember the Mayorality of Virginia', aliases: ['Return to the Mayorality of Virginia'],
+      cycle: 'Whim', slot: 5,
+      uniques: ['An Anonymous White Mask, Zee-Stained and Mildewy'],
+      goods: 'Scrap of Incendiary Gossip ×3 with either a Favour in High Places or a Storm-Threnody',
+      note: 'The 2019 Fruits of the Zee, replayed.' },
+    { storylet: SC_CALENDAR, name: 'Live a dream of a missing Hell', aliases: ['Relive a dream of a missing Hell'],
+      cycle: 'Whim', slot: 6, uniques: [],
+      note: 'Estival 2025, replayed. The guide has not yet recorded what it pays.' },
+
+    { storylet: SC_CALENDAR, name: 'Live a dream of the Coilheart Games', cycle: 'Fancy', slot: 1,
+      uniques: ['The Distinction of the Waking Fire (costs a Parabolan Parable)',
+        'In Mr Huffam’s Good Graces (costs a Vital Intelligence and Blackmail Material ×2)',
+        'Coilbreaker’s Prints (costs an Oneiromantic Revelation)', 'A Fierce and Terrible Warmth',
+        'a memento, one of three'],
+      goods: 'Sapphire ×25, Incendiary Gossip ×10, Dubious Testimony ×5, Tale of Terror!! ×5, a Captivating Ballad, a '
+        + 'Bottle of Broken Giant 1844, Blackmail Material and a choice from each of six groups by which side you back' },
+    { storylet: SC_CALENDAR, name: 'Remember the Election of 1897', cycle: 'Fancy', slot: 2,
+      uniques: ['You have pledged your support to - 10–12'],
+      goods: 'grindable Extraordinary Implications, Dubious Testimony, Incendiary Gossip, Maniac’s Prayers and Aeolian Screams' },
+    { storylet: SC_CALENDAR, name: 'Relive the construction of the Museum of Prelapsarian History',
+      aliases: ['Reconstruct the Museum of Prelapsarian History'], cycle: 'Fancy', slot: 3,
+      uniques: ['a Memory of a Miniature Museum (costs a Vitreous Almanac, Sightings ×75 and Memory of Light ×10)',
+        'An Initiate into the Perfumer’s Arts (costs a Viric-filled Mirrorcatch Box, Emetic Revelation ×3 and '
+        + 'Venom-Ruby ×250)', 'Your Name in F.F. Gebrandt’s Address Book (costs an Oneiric Pearl)',
+        'a memento, one of three', 'A Memory of the Affair of the Ushabti'],
+      goods: 'an Extraordinary Implication, three picks from the Revel, and Cryptic Clues equal to your base Watchful',
+      guide: 'Fancy 3, as does the Fancy quality page; the wiki’s page for the return option says Whim 3' },
+    { storylet: SC_CALENDAR, name: 'Remember the Mayorality of Sinning Jenny',
+      aliases: ['Return to the Mayorality of Sinning Jenny'], cycle: 'Fancy', slot: 4,
+      uniques: ['Sinning Jenny’s Forsaken Wimple (consumes the Wimple!)', 'An Encounter with Jenny'],
+      goods: 'one of a Favour in High Places, a Magnificent Diamond or Blackmail Material' },
+    { storylet: SC_CALENDAR, name: 'Remember the Opening of Arbor', cycle: 'Fancy', slot: 5,
+      uniques: ['An Ambassador', 'In Arbor I Walked With', 'A Clue from the Duchess', 'A Clue from the Princess',
+        'A Clue from the Widow'],
+      goods: 'grindable Inklings of Identity', note: 'Hallowmas 2018, replayed.' },
+    { storylet: SC_CALENDAR, name: 'Remember the Mayorality of the Viscountess',
+      aliases: ['Return to the Mayorality of the Viscountess'], cycle: 'Fancy', slot: 6,
+      uniques: ['the Viscount’s Bejewelled Collar', 'the Viscountess’ Bejewelled Collar'],
+      goods: 'a Magnificent Diamond and an Extraordinary Implication',
+      note: 'One collar a visit; come back for the other.' },
+
+    { storylet: SC_CALENDAR, name: 'Return to the Waswood proper', label: 'back to the Waswood' },
+    { storylet: SC_CALENDAR, name: 'Return to your Base-Camp (The Sacroboscan Calendar)',
+      aliases: ['Return to your Base-Camp'], label: 'leave' },
+  ];
+
+  const SC_STORYLETS = SC_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const SC_INDEX = carouselIndex(SC_OPTIONS);
+
+  const SC_CLASS = 'fl-ux-sacroboscan';
+  const SC_FLAG = 'flUxSacroboscan';
+  const SC_BRANCH_CLASS = 'fl-ux-sacroboscan-branch';
+  const SC_BRANCH_FLAG = 'flUxSacroboscanBranch';
+
+  const SC_RULES = 'Two events a week: one at Whim of the Sacroboscan Calendar and one at Fancy, each cycling 1 to 6 and '
+    + 'both rolling over on Thursdays at 14:00 UTC. You may live through ONE of them -- finishing it sets A Jaunt in the '
+    + 'Waswood for exactly a week -- so the choice is between this week’s two and nothing else. The guide is plain that '
+    + 'none of it is profitable in actions: come for the uniques, or for the story.';
+
+  function scBadgeCore(e) {
+    if (e.label) return e.label;
+    const n = e.uniques.length;
+    const what = n === 0 ? 'nothing recorded yet' : n + ' unique' + (n === 1 ? '' : 's');
+    return e.cycle + ' ' + e.slot + ' · ' + what;
+  }
+
+  function scBadgeText(e) {
+    return withFactions(scBadgeCore(e), e);
+  }
+
+  function scColor(e) {
+    if (e.label) return CAROUSEL_COLOR_NEUTRAL;
+    return e.uniques.length ? CAROUSEL_COLOR_PAYOUT : CAROUSEL_COLOR_SETUP;
+  }
+
+  function scSpec(e) {
+    const body = [];
+    if (e.cycle) {
+      body.push('Offered while ' + e.cycle + ' of the Sacroboscan Calendar is exactly ' + e.slot
+        + ', which is one week in six.');
+    }
+    if (e.uniques && e.uniques.length) {
+      body.push('Only here: ' + e.uniques.join('; ') + '.');
+    } else if (e.uniques) {
+      body.push('No guide here records what this one pays.');
+    }
+    if (e.goods) body.push('Also: ' + e.goods + '.');
+    if (e.aliases) body.push('A return visit is offered under a different title: ' + e.aliases.join(', ') + '.');
+    body.push(carouselActionsLine(e));
+    if (e.guide) body.push('The guide says ' + e.guide + '; the two agreeing sources are followed.');
+    return { text: scBadgeText(e), color: scColor(e),
+      title: carouselTooltip('The Sacroboscan Calendar', e, body, SC_RULES) };
+  }
+
+  function scStoryletSpec(key) {
+    const storylet = SC_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet) return null;
+    return { text: storylet === SC_CALENDAR ? 'this week’s two events' : 'the Waswood', color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('The Sacroboscan Calendar', storylet, SC_OPTIONS, scBadgeText, SC_RULES) };
+  }
+
+  function scRatings() {
+    carouselRatings({
+      storylets: SC_STORYLETS, index: SC_INDEX, storyletSpec: scStoryletSpec, optionSpec: scSpec,
+      cls: SC_CLASS, flag: SC_FLAG, branchCls: SC_BRANCH_CLASS, branchFlag: SC_BRANCH_FLAG,
+    });
+  }
+
+  // === feature: Parabolan War ============================================
+  //
+  // Parabolan War (Guide): from the Dolorous Pavilion you assemble a Grand
+  // Parabolan Company, pick a cause, and march. A campaign is three stages or
+  // five, each needing Advance! 24, and it ends by setting Parabolan Dominance
+  // -- which is what the rest of Parabola then looks like. The Pavilion deals
+  // no opportunity cards, so this badges storylet headings and the options of
+  // the open storylet.
+  //
+  // **What the badge says.** On a cause, the three things that actually differ
+  // between campaigns: how many stages it is, what each of its two endings
+  // pays, and whether it moves Dominance ("5 stages · Dominance: Cats"). On a
+  // piece of the company, which way it leans -- every armament, every piece of
+  // infrastructure and every unit is either Oneironaut or Cultivator, and that
+  // pair is the whole of what the choice does mechanically ("Oneironaut +1
+  // ▼"). On clearing the Ravages afterwards, the Ravages an option clears, the
+  // actions it takes and the Echoes each Ravage costs ("Ravages −10 · 5 actions
+  // · 1.25 each ▼"), which is the one place in the war where the rates really
+  // differ.
+  //
+  // **The stages themselves are not badged.** The guide describes the trail by
+  // ACTION TYPE -- safe progress, fast progress, Airs options, skills options,
+  // morale -- and never names the options, which change with the stage and the
+  // units you hired. Those types and their rates are in the rules line instead,
+  // so the numbers are there without a badge claiming to know which option is
+  // in front of you.
+  //
+  // Transcribed from the guide's campaign, stage, general and Ravages tables,
+  // with every Pavilion storylet page fetched through the API (2026-09-17) as
+  // the cross-check on the option lists. Each Ravages row carries the item's own
+  // Echo price as well as the guide's rate, and the suite recomputes one from
+  // the other. Ten options are titled *Move out!* and told apart only by the
+  // wiki's numbering, so they are one row. Left out: the campaign narratives
+  // between stages (the guide's own Campaign Details), which are story rather
+  // than choice, and the Shadowy Gains and Glass Studies ladders at the Dome of
+  // Scales, which belong to the Dome. Corrections go in PW_OPTIONS and nowhere
+  // else.
+  //
+  //   stages / dominance / endings   a cause's length, what it sets, its two payouts.
+  //   lean       'Oneironaut' or 'Cultivator', for a piece of the company.
+  //   cleared / actions / count / item / unit / rate   a Ravages option.
+  //   uses / needs / label / gives / note.
+
+  const PW_CAUSE = 'The Cause of War';
+  const PW_EMBARK = 'Embarking upon a Campaign';
+  const PW_AFTERMATH = 'The Aftermath of a Parabolan War';
+  const PW_MUNITIONS = 'The Munitions of War';
+  const PW_LOGISTICS = 'The Logistics of War';
+  const PW_COMPANIES = 'The Mercenary Companies of Parabola';
+  const PW_ASSEMBLING = 'Assembling a Grand Parabolan Company';
+  const PW_ADVISORS = 'Managing your Advisors';
+  const PW_GENERAL = 'Choose a General';
+  const PW_FRONT = 'Back to the Front';
+
+  // "A Visitor" is two ordinary words and could head a storylet anywhere, so it
+  // is badged only on a greeting that says the Dolorous Pavilion. Confirm-only:
+  // that greeting has not been captured in game, so it may say yes and never no.
+  const PW_AREA = 'The Dolorous Pavilion';
+  const PW_STRICT = ['A Visitor'];
+
+  const PW_WINDOWS = {};
+  PW_WINDOWS[PW_CAUSE] = 'pick a cause';
+  PW_WINDOWS[PW_EMBARK] = 'march out';
+  PW_WINDOWS[PW_FRONT] = 'back to the stage you left';
+  PW_WINDOWS[PW_AFTERMATH] = 'clear the Ravages';
+  PW_WINDOWS[PW_MUNITIONS] = 'Armaments · 3 needed';
+  PW_WINDOWS[PW_LOGISTICS] = 'Infrastructure · 3 needed';
+  PW_WINDOWS[PW_COMPANIES] = 'hire the units';
+  PW_WINDOWS[PW_ASSEMBLING] = 'form the Company';
+  PW_WINDOWS[PW_ADVISORS] = 'your Advisor · picks the tutorial';
+  PW_WINDOWS[PW_GENERAL] = 'appoint a General';
+  PW_WINDOWS['The Seeds of War'] = 'unlocks Generals';
+  PW_WINDOWS['A Visitor'] = 'the third Advisor';
+  PW_WINDOWS['Leave the Dolorous Pavilion'] = 'leave';
+
+  const PW_OPTIONS = [
+    { storylet: PW_CAUSE, name: 'The Viscountess', stages: 3, dominance: null,
+      endings: 'Break the Glass pays Night-Whisper ×3 and Parabolan Cultivator +1; Walk away pays Stalemate ×3 and '
+        + 'Parabolan Oneironaut +1', needs: 'the Viscountess as your Parabolan Counsel',
+      note: 'One of the two tutorials. The guide counts it at 6 actions of narrative between the stages -- the cheapest.' },
+    { storylet: PW_CAUSE, name: 'The Ophidian Gentleman', stages: 3, dominance: null,
+      endings: 'Follow the Gentleman pays Night-Whisper ×3 and Oneironaut +1; Wait for him pays False Hagiotoponym ×3 '
+        + 'and Cultivator +1', needs: 'the Ophidian Gentleman as your Parabolan Counsel',
+      note: 'The other tutorial: 8 to 9 actions of narrative between the stages.' },
+    { storylet: PW_CAUSE, name: 'The Cats', stages: 5, dominance: 'Cats',
+      endings: 'accepting the King’s offer pays a Ray-Drenched Cinder and Cultivator +3; rejecting it pays a Parabolan '
+        + 'Parable and Oneironaut +3', needs: 'a finished tutorial campaign',
+      note: 'Sets Dominance to Cats Throughout, which opens The Dome of Scales, Becoming and the Cub’s Education. '
+        + 'Accepting gives the Restored Palatinate, rejecting the Lost one.' },
+    { storylet: PW_CAUSE, name: 'The Fingerkings', stages: 5, dominance: 'Fingerkings',
+      endings: 'recovering the Khatun pays a Parabolan Parable and Cultivator +3; recovering a piece of the Catastrophe '
+        + 'pays Edicts of the First City and Oneironaut +3', needs: 'a finished tutorial campaign',
+      note: 'Sets Dominance to Fingerkings, which opens The Dome of Scales, Occupied -- and decides whether the Viric '
+        + 'Jungle pays Royal-Blue Feathers or Solacefruit afterwards.' },
+    { storylet: PW_CAUSE, name: 'A Second City Vengeance', stages: 3, dominance: null,
+      endings: 'enforcing your demands pays Mortification of a Great Power ×3 and Cultivator +1; inviting her to join '
+        + 'you pays Oneiromantic Revelation ×3 and Oneironaut +1', needs: 'a finished tutorial campaign' },
+    { storylet: PW_CAUSE, name: 'The Chessboard', aliases: ['The Chessboard 2'], stages: 5, dominance: 'the Red-Handed Queen',
+      endings: 'any Leaning at 4 or more pays a Parabolan Parable and Oneironaut +1; all three at 3 or less pays a '
+        + 'Waswood Almanac and Oneironaut +1 -- and only the second leaves Dominance alone',
+      needs: 'the tutorial, two 5-stage campaigns, and The Prioress’ Habit',
+      note: 'The Almanac is one of only two in the game, and it is what opens the gate at Marigold Station.' },
+    { storylet: PW_CAUSE, name: 'Yourself', stages: 5, dominance: null,
+      endings: 'giving your reflection what it wants pays a Concentrate of Self and Oneironaut +3; denying yourself pays '
+        + 'a Waswood Almanac and Cultivator +3',
+      needs: 'a tutorial, three 5-stage campaigns, a finished Ambition, and Mirror-Fed ×7',
+      note: 'Your Cavalry goes missing for the whole campaign and comes back at the end.' },
+    { storylet: PW_CAUSE, name: 'The Vulgate', label: 'not in the guide',
+      note: 'On the storylet page, behind Firmament; no guide here records its length or its pay.' },
+
+    { storylet: PW_EMBARK, name: 'Move out!', label: 'march · Morale from your leanings',
+      note: 'Ten options by this title, one for each cause and leaning; the wiki numbers them apart. Which one you are '
+        + 'offered follows from the cause and from your Parabolan Oneironaut and Cultivator, which set your starting '
+        + 'Campaign Morale.' },
+    { storylet: PW_EMBARK, name: 'Reconsider your Allegiances', label: 'pick a different cause' },
+
+    { storylet: PW_MUNITIONS, name: 'Words, Broken', lean: 'Oneironaut', uses: 'a Memory of Discordance' },
+    { storylet: PW_MUNITIONS, name: 'The force of law', lean: 'Oneironaut', uses: 'a Legal Document',
+      note: 'One of the guide’s two cheapest armaments.' },
+    { storylet: PW_MUNITIONS, name: 'The Spectre of Decay', lean: 'Cultivator', uses: 'a Thorned Ribcage' },
+    { storylet: PW_MUNITIONS, name: 'An Antiphonal of Doubter’s Hymns', lean: 'Oneironaut', uses: 'a Verse of Counter-Creed' },
+    { storylet: PW_MUNITIONS, name: 'A Vision of Peace', lean: 'Cultivator', uses: 'a Crystallised Euphoria' },
+    { storylet: PW_MUNITIONS, name: 'Muster the Workers’ Dreams', lean: 'Cultivator', uses: 'Strong-Backed Labour ×5',
+      note: 'The guide’s other cheapest armament.' },
+    { storylet: PW_MUNITIONS, name: 'Consider other matters', label: 'back', aliases: ['Consider other matters 1'] },
+
+    { storylet: PW_LOGISTICS, name: 'Sow a crop of Flourishing Aurochs', lean: 'Oneironaut', uses: 'a Horned Skull' },
+    { storylet: PW_LOGISTICS, name: 'Reorient Parabola', lean: 'Cultivator',
+      uses: 'Vienna Opening ×3 and Memory of a Much Lesser Self ×2' },
+    { storylet: PW_LOGISTICS, name: 'Summon dreams past', lean: 'Cultivator', uses: 'Memory of a Much Lesser Self ×5' },
+    { storylet: PW_LOGISTICS, name: 'Kindle a dream of pigs', lean: 'Oneironaut',
+      uses: 'a Sausage About Which No One Complains' },
+    { storylet: PW_LOGISTICS, name: 'Draw upon Parabola’s bounty', lean: 'Oneironaut',
+      uses: 'Crate of Incorruptible Biscuits ×3, Tin of Zzoup ×2 and a Parabolan Orange-apple' },
+    { storylet: PW_LOGISTICS, name: 'Build a Parabolan waterway', lean: 'Cultivator', uses: 'a Cellar of Wine',
+      note: 'The guide’s pick for infrastructure.' },
+
+    { storylet: PW_COMPANIES, name: 'Consider the Infantry', label: 'Wakeful Gentlemen · Satrap-Saints · Pax Homines',
+      note: 'The Wakeful Gentlemen (Cultivator) ask for nothing; the Satrap-Saints (Oneironaut) want Favours: '
+        + 'Fingerkings ×3; the Pax Homines (both) want Having Recurring Dreams: A Game of Chess 15.' },
+    { storylet: PW_COMPANIES, name: 'Consider the Cavalry',
+      label: 'Exiled Rose · Grand Myriad · Peace of October',
+      note: 'The Company of the Exiled Rose (Oneironaut) wants A Vial of Queenly Attar; the Grand Myriad Company '
+        + '(Oneironaut) and The Peace of October (Cultivator) ask for nothing.' },
+    { storylet: PW_COMPANIES, name: 'Consider the Bombard',
+      label: 'Pale League · 77th Hussars · Order Speculorum',
+      note: 'The Pale League of Irem (Oneironaut) asks for nothing; the 77th Queen’s Own Hussars (Cultivator) want a '
+        + 'Flask of Waswood Wellspring Water; the Order Speculorum (Cultivator) want Glasswork 7.' },
+
+    { storylet: PW_ASSEMBLING, name: 'Form your Grand Parabolan Company', label: 'form it · an Airag',
+      gives: 'a Bottle of Fourth City Airag: Year of the Tortoise, and the way to war',
+      needs: 'Armaments ×3, Infrastructure ×3, the three units, and an Advisor' },
+    { storylet: PW_ASSEMBLING, name: 'Dismiss your Grand Parabolan Company', label: 'dissolve it · resets both',
+      note: 'Resets Parabolan Oneironaut and Cultivator, including everything campaigns have added.' },
+    { storylet: PW_ASSEMBLING, name: 'What do you need?', label: 'what is still missing',
+      note: 'One option per Advisor; the wiki tells them apart by name.' },
+    { storylet: PW_ASSEMBLING, name: 'Consult the Viscountess', label: 'advice' },
+    { storylet: PW_ASSEMBLING, name: 'Consult the Ophidian Gentleman', label: 'advice' },
+    { storylet: PW_ASSEMBLING, name: 'Consult the Prioress in (Colour)', label: 'advice' },
+
+    { storylet: PW_ADVISORS, name: 'Recruit the Viscountess', label: 'Advisor · Cats’ tutorial',
+      note: 'Your Advisor decides which tutorial you get, and you may swap at any time, even mid-campaign.' },
+    { storylet: PW_ADVISORS, name: 'Recruit the Ophidian Gentleman', label: 'Advisor · Fingerkings’ tutorial' },
+    { storylet: PW_ADVISORS, name: 'Recruit the Prioress of Many Habits', label: 'Advisor · the Chessboard',
+      needs: 'three finished campaigns, and her visit' },
+    { storylet: PW_ADVISORS, name: 'Dismiss the Viscountess', label: 'dismiss' },
+    { storylet: PW_ADVISORS, name: 'Dismiss the Ophidian Gentleman', label: 'dismiss' },
+    { storylet: PW_ADVISORS, name: 'Dismiss the Prioress', aliases: ['Dismiss the Prioress 2'], label: 'dismiss' },
+
+    { storylet: PW_GENERAL, name: 'Appoint the Empty Principle of Heralds',
+      aliases: ['Appoint the Empty Principle of Heralds (First Time)', 'Appoint the Empty Principle of Heralds (Repeat)'],
+      label: 'General · Cats · Shadowy', note: 'A General lowers the difficulty of the campaign’s checks in its own '
+        + 'attribute. Until upgraded, each may only serve its own power.' },
+    { storylet: PW_GENERAL, name: 'Appoint the Dual Principle of Heralds', label: 'General · Cats · gifted' },
+    { storylet: PW_GENERAL, name: 'Appoint the Unified and United Principle of Heralds',
+      label: 'General · Cats · upgraded', note: 'The Laboratory upgrade: serves any campaign, and lowers more.' },
+    { storylet: PW_GENERAL, name: 'Appoint the Empty Principle of Hollows',
+      aliases: ['Appoint the Empty Principle of Hollows (First Time)', 'Appoint the Empty Principle of Hollows (Repeat)'],
+      label: 'General · Fingerkings · Persuasive' },
+    { storylet: PW_GENERAL, name: 'Appoint the Empowered Principle of Hollows', label: 'General · Fingerkings · gifted' },
+    { storylet: PW_GENERAL, name: 'Appoint the Liberated and Empowered Principle of Hollows',
+      label: 'General · Fingerkings · upgraded' },
+    { storylet: PW_GENERAL, name: 'Appoint the Empty Principle of Horizons',
+      aliases: ['Appoint the Empty Principle of Horizons (First Time)', 'Appoint the Empty Principle of Horizons (Repeat)'],
+      label: 'General · Chessboard · Watchful' },
+    { storylet: PW_GENERAL, name: 'Appoint the Fortified Principle of Horizons', label: 'General · Chessboard · gifted' },
+    { storylet: PW_GENERAL, name: 'Appoint the Independent and Fortified Principle of Horizons',
+      label: 'General · Chessboard · upgraded' },
+    { storylet: PW_GENERAL, name: 'Dismiss your General', label: 'dismiss' },
+
+    { storylet: 'The Seeds of War', name: 'Plant the seeds', label: 'unlocks Generals',
+      note: 'Available once the first tutorial is done.' },
+    { storylet: 'A Visitor', name: 'Greet the Prioress of Many Habits', label: 'the third Advisor',
+      needs: 'three finished campaigns' },
+    { storylet: 'Leave the Dolorous Pavilion', name: 'Make for your Base-Camp', label: 'leave' },
+
+    { storylet: PW_FRONT, name: 'Return to the Wastes of Want', label: 'stage 1' },
+    { storylet: PW_FRONT, name: 'Return to the Hanging Mountains', aliases: ['Return to the Hanging Mountains 2'],
+      label: 'stage 2' },
+    { storylet: PW_FRONT, name: 'Return to the Writhing River', label: 'stage 3' },
+    { storylet: PW_FRONT, name: 'Return to the Smoking Shore', aliases: ['Return to the Smoking Shore 2'],
+      label: 'stage 4' },
+    { storylet: PW_FRONT, name: 'Return to the Castle of Forests', label: 'stage 5' },
+    { storylet: PW_FRONT, name: 'Return to your lodgings',
+      aliases: ['Return to your lodgings 2', 'Return to your lodgings 3'], label: 'the London theatre',
+      note: 'Stages 2 and 4 can be fought from London instead. You keep your Advance!, but you cannot come back to '
+        + 'Parabola until the stage is done -- two actions spent moving, so only worth it if the London options are better.' },
+
+    { storylet: PW_AFTERMATH, name: 'Bejewel the Dome of Scales', cleared: 2, actions: 1, count: 4,
+      item: 'Ostentatious Diamond', unit: 0.5, rate: 1 },
+    { storylet: PW_AFTERMATH, name: 'Repair the Dome of Scales', cleared: 2, actions: 1, count: 1,
+      item: 'Glass Gazette', unit: 2.5, rate: 1.25 },
+    { storylet: PW_AFTERMATH, name: 'Introduce new designs to the Dome', cleared: 10, actions: 5, count: 1,
+      item: 'Direful Reflection', unit: 12.5, rate: 1.25 },
+    { storylet: PW_AFTERMATH, name: 'Purify the Waswood with fresh falsehoods', cleared: 2, actions: 1, count: 4,
+      item: 'Dubious Testimony', unit: 0.5, rate: 1 },
+    { storylet: PW_AFTERMATH, name: 'Dam the Waswood with truths', cleared: 2, actions: 1, count: 1,
+      item: 'Sworn Statement', unit: 2.5, rate: 1.25 },
+    { storylet: PW_AFTERMATH, name: 'Distract the Waswood', cleared: 10, actions: 5, count: 1,
+      item: 'Antique Mystery', unit: 12.5, rate: 1.25 },
+    { storylet: PW_AFTERMATH, name: 'Regrow the Viric Jungle', cleared: 2, actions: 1, count: 4,
+      item: 'Solacefruit', unit: 0.5, rate: 1 },
+    { storylet: PW_AFTERMATH, name: 'Tend the Viric Jungle', cleared: 2, actions: 1, count: 1,
+      item: 'Touching Love Story', unit: 2.5, rate: 1.25 },
+    { storylet: PW_AFTERMATH, name: 'Flush the Viric Jungle clear', cleared: 10, actions: 5, count: 1,
+      item: 'Cellar of Wine', unit: 12.5, rate: 1.25 },
+    { storylet: PW_AFTERMATH, name: 'Bring the Chessboard to heel', cleared: 2, actions: 1, count: 4,
+      item: 'Move in the Great Game', unit: 0.5, rate: 1 },
+    { storylet: PW_AFTERMATH, name: 'Outplay the Chessboard', cleared: 2, actions: 1, count: 1,
+      item: 'Vienna Opening', unit: 2.5, rate: 1.25 },
+    { storylet: PW_AFTERMATH, name: 'Besiege the Chessboard', cleared: 10, actions: 5, count: 1,
+      item: 'Vital Intelligence', unit: 12.5, rate: 1.25 },
+    { storylet: PW_AFTERMATH, name: 'Soothe your Laboratory’s Reflection', cleared: 2, actions: 1, count: 4,
+      item: 'Ambiguous Eolith', unit: 0.5, rate: 1 },
+    { storylet: PW_AFTERMATH, name: 'Instruct your lab’s new occupants', cleared: 2, actions: 1, count: 1,
+      item: 'Volume of Collated Research', unit: 2.5, rate: 1.25 },
+    { storylet: PW_AFTERMATH, name: 'Devise an experimental device to speed the clearage', cleared: 10, actions: 5,
+      count: 1, item: 'Uncanny Incunabulum', unit: 12.5, rate: 1.25 },
+    { storylet: PW_AFTERMATH, name: 'Host a party', cleared: 2, actions: 1, count: 4,
+      item: 'Bottle of Strangling Willow Absinthe', unit: 0.5, rate: 1 },
+    { storylet: PW_AFTERMATH, name: 'Restore your Base-Camp', cleared: 2, actions: 1, count: 1,
+      item: 'Memory of a Much Lesser Self', unit: 2.5, rate: 1.25 },
+    { storylet: PW_AFTERMATH, name: 'Send for your Advisor', cleared: 10, actions: 5, count: 1,
+      item: 'Favour in High Places', unit: 12.5, rate: 1.25 },
+    { storylet: PW_AFTERMATH, name: 'Conclude the work', aliases: ['Conclude the work (Parabolan War)'],
+      label: 'done · march again',
+      note: 'Time, the Healer clears up to 10 Ravages a week, so a small scar can simply be waited out.' },
+  ];
+
+  const PW_STORYLETS = PW_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const PW_INDEX = carouselIndex(PW_OPTIONS);
+
+  const PW_CLASS = 'fl-ux-parabolan-war';
+  const PW_FLAG = 'flUxParabolanWar';
+  const PW_BRANCH_CLASS = 'fl-ux-parabolan-war-branch';
+  const PW_BRANCH_FLAG = 'flUxParabolanWarBranch';
+
+  const PW_RULES = 'A campaign is three stages or five, each needing Advance! 24, and the trail is not badged because '
+    + 'the guide describes it by action TYPE rather than by option: safe progress makes about 1 Advance! an action; '
+    + 'gaining Morale five times and spending it once makes about 1.67, which is the guide’s recommended rhythm; fast '
+    + 'progress pays 3 (4 in the last stage) but costs items and 2 Ravages on a failure; an Airs option pays 4 and costs '
+    + '3 Ravages on a failure; an advanced-skill option pays 2 and costs no Ravages at all. Afterwards the Ravages of '
+    + 'Parabolan Warfare must be cleared before the next campaign.';
+
+  function pwInPavilion() {
+    return normalizeName(currentArea() || '') === normalizeName(PW_AREA);
+  }
+
+  function pwAllowed(storylet) {
+    return PW_STRICT.indexOf(storylet) === -1 || pwInPavilion();
+  }
+
+  function pwBadgeCore(e) {
+    if (e.stages != null) {
+      return e.stages + ' stages · ' + (e.dominance ? 'Dominance: ' + e.dominance : 'Dominance unchanged');
+    }
+    if (e.lean) return e.lean + ' +1' + (e.uses ? ' ' + CAROUSEL_MARK_USES : '');
+    if (e.cleared != null) {
+      return 'Ravages −' + e.cleared + ' · ' + e.actions + ' action' + (e.actions === 1 ? '' : 's') + ' · '
+        + e.rate.toFixed(2) + ' each ' + CAROUSEL_MARK_USES;
+    }
+    return e.label + (e.uses ? ' ' + CAROUSEL_MARK_USES : '');
+  }
+
+  function pwBadgeText(e) {
+    return withFactions(pwBadgeCore(e), e);
+  }
+
+  function pwColor(e) {
+    if (e.stages != null) return CAROUSEL_COLOR_PAYOUT;
+    if (e.cleared != null) return e.rate > 1 ? CAROUSEL_COLOR_RISK : CAROUSEL_COLOR_PROGRESS;
+    if (e.lean) return CAROUSEL_COLOR_SETUP;
+    return CAROUSEL_COLOR_NEUTRAL;
+  }
+
+  function pwSpec(e) {
+    if (!pwAllowed(e.storylet)) return null;
+    const body = [];
+    if (e.stages != null) {
+      body.push('A campaign of ' + e.stages + ' stages, ' + (e.stages * 24) + ' Advance! in all'
+        + (e.dominance ? ', and it sets Parabolan Dominance to ' + e.dominance : ', and it leaves Parabolan Dominance alone')
+        + '.');
+      body.push('Endings: ' + e.endings + '.');
+    }
+    if (e.lean) {
+      body.push('Leans your Company towards Parabolan ' + e.lean + ' (+1), which is all this choice does mechanically: '
+        + 'Oneironaut and Cultivator set your starting Campaign Morale.');
+    }
+    if (e.cleared != null) {
+      body.push('Clears Ravages of Parabolan Warfare ×' + e.cleared + ' for ' + e.actions + ' action'
+        + (e.actions === 1 ? '' : 's') + ' and ' + e.item + ' ×' + e.count + ' (' + e.unit + ' Echoes each, so '
+        + Math.round(e.count * e.unit * 100) / 100 + ' Echoes, ' + e.rate.toFixed(2) + ' a Ravage).');
+    }
+    if (e.gives) body.push('Gives: ' + e.gives + '.');
+    if (e.uses) body.push(CAROUSEL_MARK_USES + ' Uses up ' + e.uses + '.');
+    if (e.needs) body.push('Needs: ' + e.needs + '.');
+    body.push(carouselActionsLine(e));
+    return { text: pwBadgeText(e), color: pwColor(e), title: carouselTooltip('Parabolan War', e, body, PW_RULES) };
+  }
+
+  function pwStoryletSpec(key) {
+    const storylet = PW_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet || !pwAllowed(storylet)) return null;
+    return { text: PW_WINDOWS[storylet] || 'the Pavilion', color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('Parabolan War', storylet, PW_OPTIONS, pwBadgeText, PW_RULES) };
+  }
+
+  function pwRatings() {
+    carouselRatings({
+      storylets: PW_STORYLETS, index: PW_INDEX, storyletSpec: pwStoryletSpec, optionSpec: pwSpec,
+      cls: PW_CLASS, flag: PW_FLAG, branchCls: PW_BRANCH_CLASS, branchFlag: PW_BRANCH_FLAG,
+      salt: '#' + (pwInPavilion() ? 'in' : '-'),
+    });
+  }
+
+  // === feature: A Cub's Education ========================================
+  //
+  // A Cub's Education (Guide): while the Cats are dominant in Parabola, The
+  // Dome of Scales, Becoming is open, and the Cub there will be introduced to
+  // any housecat you own. Each introduction raises A Cub's Education by one
+  // level, and the level decides which of four rewards the Dome will give you
+  // for an action. The Dome deals no opportunity cards, so this badges the
+  // storylet heading and its options.
+  //
+  // **What the badge says.** On a reward, the band of introductions it is
+  // offered in and what it pays ("6–14 cats · a Glass Gazette"), because that
+  // band is the only thing the Cub's Education actually does. On an
+  // introduction, that it counts once and whether it is Fate-locked ("a cat ·
+  // Fate · once"), with where that cat comes from in the tooltip: the whole
+  // activity is a collection problem, a second copy of a cat is worth nothing,
+  // and fifteen of them are needed for the Lions.
+  //
+  // Progress is kept while another power is dominant, so a run of
+  // introductions is never lost -- only paused. That is in the rules line.
+  //
+  // Transcribed from the guide's two tables, with the storylet page fetched
+  // through the API (2026-09-17) as the cross-check on the option titles; the
+  // page carries 22 introductions and the guide's table 23 cats, the difference
+  // being the Midnight Matriarch of the Menagerie of Roses, which the page
+  // lists and the table treats as an upgrade. The guide's list of felines that
+  // do NOT count -- Ministers, tigresses, the Parabolan Panther and the rest --
+  // is in the storylet heading's tooltip, because "why is my cat not here"
+  // is the question this content actually raises. Corrections go in CE_OPTIONS
+  // and nowhere else.
+  //
+  //   band / tag     a reward's range of introductions, and what it pays.
+  //   from           where the cat comes from; `fate` marks a Fate purchase.
+  //   label / needs / note.
+
+  const CE_DOME = 'The Dome of Scales, Becoming';
+
+  // The guide's list of cats the Cub will not learn from: equipment that is
+  // feline but not a housecat.
+  const CE_NOT_CATS = ['Parabolan Panther', 'The Minister of Culture', 'The Minister of Enigmas', 'The Minister of War',
+    'The Minister of State Affairs', 'Bengal Tigress', 'Extravagantly-Titled Tigress', 'Love-Sickened Seneschal',
+    'Tomb-Lion', 'Corresponding Ocelot', 'Starveling Stole', 'Lyon Pursuivant of Arms Extraordinary',
+    'Lovingly Be-Ribboned Kitten'];
+
+  const CE_OPTIONS = [
+    { storylet: CE_DOME, name: 'Treat with the kitten', band: '0–5 cats', tag: 'an Extraordinary Implication' },
+    { storylet: CE_DOME, name: 'Commune with the Chorus of Cats', band: '6–14 cats', tag: 'a Glass Gazette' },
+    { storylet: CE_DOME, name: 'Speak to the Union of Lions',
+      aliases: ['Speak to the Union of Lions (Not Acquainted)'], band: '15+ cats, once', tag: 'a Salve of Righteousness',
+      fate: true, note: 'Also sets Acquainted: The Lion Sacrificial. Fate-locked, and only the first time.' },
+    { storylet: CE_DOME, name: 'Speak to the Union of Lions (Acquainted)', band: '15+ cats, after', tag: 'a Glass Gazette',
+      fate: true },
+
+    { storylet: CE_DOME, name: 'Introduce your Grubby Kitten', from: 'a Connected Pet, from the Urchins' },
+    { storylet: CE_DOME, name: 'Introduce the Starveling Cat', from: 'passing boxes, opening bundles, or a gift' },
+    { storylet: CE_DOME, name: 'Introduce your Parabolan Kitten', from: 'a gift from someone with a Parabolan Panther' },
+    { storylet: CE_DOME, name: 'Introduce your Short-Tempered Shorthair', from: 'the Mysteries, previously' },
+    { storylet: CE_DOME, name: 'Introduce your Pink-Painted Cat',
+      from: 'a gift at the Feast of the Exceptional Rose, for Appalling Secret ×200' },
+    { storylet: CE_DOME, name: 'Introduce your Inquisitive Lamp-Cat', from: 'the Fruits of the Zee festival' },
+    { storylet: CE_DOME, name: 'Introduce your Feline Pariah', from: 'Hallowmas', fate: true },
+    { storylet: CE_DOME, name: 'Introduce your Wretched Mog', from: 'Offer passage to a Wretched Mog, in the Waswood' },
+    { storylet: CE_DOME, name: 'Introduce your August Feline', from: 'Hallowmas', fate: true },
+    { storylet: CE_DOME, name: 'Introduce the Princeling of the Wakeful Court', from: 'Hallowmas', fate: true },
+    { storylet: CE_DOME, name: 'Introduce your Midnight Matriarch', from: 'Nassos Zoologicals, or passing boxes' },
+    { storylet: CE_DOME, name: 'Introduce your Midnight Matriarch of the Menagerie of Roses',
+      from: 'a Midnight Matriarch upgraded at Hallowmas' },
+    { storylet: CE_DOME, name: 'Introduce the Rubbery Feline to the Dome of Scales', from: 'Hallowmas, previously' },
+    { storylet: CE_DOME, name: 'Introduce your Morally and Physically Flexible Rubbery Cat', from: 'Hallowmas', fate: true },
+    { storylet: CE_DOME, name: 'Introduce Benvolio, the Bacon-Thief', from: 'Mr Chimes’ Lost & Found, for Memory of a Tale ×3',
+      fate: true },
+    { storylet: CE_DOME, name: 'Introduce Calliope the Yowler', from: 'Mr Chimes’ Lost & Found, for Memory of a Tale ×3',
+      fate: true },
+    { storylet: CE_DOME, name: 'Introduce Freya, Scourge of Fragile Ornaments',
+      from: 'Mr Chimes’ Lost & Found, for Memory of a Tale ×3', fate: true },
+    { storylet: CE_DOME, name: 'Introduce Gustav, the Ankle Weaver', from: 'Mr Chimes’ Lost & Found, for Memory of a Tale ×3',
+      fate: true },
+    { storylet: CE_DOME, name: 'Introduce Sebastian the Nocturnal Smotherer',
+      from: 'Mr Chimes’ Lost & Found, for Memory of a Tale ×3', fate: true },
+    { storylet: CE_DOME, name: 'Introduce Mercutio of the Hoard', from: 'Mr Chimes’ Lost & Found, for Memory of a Tale ×3',
+      fate: true },
+    { storylet: CE_DOME, name: 'Introduce Lillibet the Strangler', from: 'Mr Chimes’ Lost & Found, for Memory of a Tale ×3',
+      fate: true },
+    { storylet: CE_DOME, name: 'Introduce Horatio, Finest of His Lineage',
+      from: 'Cat Upon Your Person 5, in the House of Chimes', fate: true },
+  ];
+
+  const CE_STORYLETS = [CE_DOME];
+  const CE_INDEX = carouselIndex(CE_OPTIONS);
+
+  const CE_CLASS = 'fl-ux-cubs-education';
+  const CE_FLAG = 'flUxCubsEducation';
+  const CE_BRANCH_CLASS = 'fl-ux-cubs-education-branch';
+  const CE_BRANCH_FLAG = 'flUxCubsEducationBranch';
+
+  const CE_RULES = 'Each cat may be introduced once -- a second copy is worth nothing -- and each introduction raises A '
+    + 'Cub’s Education by a level. The level decides which reward the Dome offers: an Extraordinary Implication below 6, '
+    + 'a Glass Gazette from 6, and the Union of Lions from 15. The storylet is open while Parabolan Dominance is Cats, '
+    + 'and your progress is KEPT while another power is dominant. The Cub learns only from kittens and housecats: '
+    + CE_NOT_CATS.length + ' pieces of feline equipment, the Ministers and the tigresses among them, do not count.';
+
+  function ceBadgeCore(e) {
+    if (e.band) return e.band + ' · ' + e.tag + (e.fate ? ' · Fate' : '');
+    if (e.from) return 'a cat · ' + (e.fate ? 'Fate · ' : '') + 'once';
+    return e.label;
+  }
+
+  function ceBadgeText(e) {
+    return withFactions(ceBadgeCore(e), e);
+  }
+
+  function ceColor(e) {
+    if (e.band) return CAROUSEL_COLOR_PAYOUT;
+    return e.fate ? CAROUSEL_COLOR_NEUTRAL : CAROUSEL_COLOR_SETUP;
+  }
+
+  function ceSpec(e) {
+    const body = [];
+    if (e.band) body.push('Offered at ' + e.band + ' introduced, and pays ' + e.tag + '.');
+    if (e.from) {
+      body.push('A Cub’s Education +1. This cat comes from ' + e.from + '.');
+      body.push('Each cat counts once: a second copy of the same one does nothing.');
+    }
+    if (e.fate) body.push('Fate-locked.');
+    if (e.needs) body.push('Needs: ' + e.needs + '.');
+    body.push(carouselActionsLine(e));
+    return { text: ceBadgeText(e), color: ceColor(e), title: carouselTooltip('A Cub’s Education', e, body, CE_RULES) };
+  }
+
+  function ceStoryletSpec(key) {
+    if (key !== normalizeName(CE_DOME)) return null;
+    const cats = CE_OPTIONS.filter(function (e) { return e.from; }).length;
+    const free = CE_OPTIONS.filter(function (e) { return e.from && !e.fate; }).length;
+    return { text: cats + ' cats · ' + free + ' without Fate', color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('A Cub’s Education', CE_DOME, CE_OPTIONS, ceBadgeText,
+        'Not cats, for this purpose: ' + CE_NOT_CATS.join(', ') + '.\n\n' + CE_RULES) };
+  }
+
+  function ceRatings() {
+    carouselRatings({
+      storylets: CE_STORYLETS, index: CE_INDEX, storyletSpec: ceStoryletSpec, optionSpec: ceSpec,
+      cls: CE_CLASS, flag: CE_FLAG, branchCls: CE_BRANCH_CLASS, branchFlag: CE_BRANCH_FLAG,
+    });
+  }
+
   // === panel: zailing ====================================================
   //
   // The reference half of the zailing work: the numbers that decide a voyage
@@ -20601,6 +23904,39 @@
     { name: 'assembling-skeleton', run: skelRatings },
     { name: 'professional-activities', run: profRatings },
     { name: 'hearts-game', run: hgRatings },
+    // Three from the Early Zailing shelf, and the first features filed under a
+    // zee port rather than London. Hunter's Keep and Mutton Island are two
+    // carousels on ONE progress quality, Time Passing in the Southern
+    // Archipelago, and share no storylet, so each answers only for its own;
+    // Venderbight deals a deck of its own at Ambition: Nemesis 11-14 and so
+    // badges the hand as well. Each gates the handful of its names that are
+    // ordinary English on its own area's greeting.
+    { name: 'hunters-keep', run: hkRatings },
+    { name: 'mutton-island', run: miRatings },
+    { name: 'venderbight', run: vbRatings },
+    // Five from the Mid Zailing shelf, all card-and-storylet markup. Godfall
+    // and Port Cecil deal no cards; the Maze-Garden and the Polythremic
+    // Promenade each deal a deck of their own in Polythreme, so both badge the
+    // hand as well, and they share no storylet with each other. The zee-beast
+    // hunts are the first feature whose STORYLET is named for what you are
+    // hunting, so its seven headings are aliased onto one canonical name.
+    { name: 'godfall', run: gfRatings },
+    { name: 'maze-garden', run: mzRatings },
+    { name: 'promenade', run: ppRatings },
+    { name: 'port-cecil', run: pc2Ratings },
+    { name: 'zee-beasts', run: zbRatings },
+    // Six from the Parabola shelf, all card-and-storylet markup. Nothing in
+    // Parabola deals a deck of its own, so none of them badges a hand. Two
+    // pairs overlap on purpose and share no storylet: the war sets Parabolan
+    // Dominance, which is what opens the Cub's Education at the Dome of Scales,
+    // and the hunt is how you reach the Chessboard, the Waswood and the Viric
+    // Jungle in the first place.
+    { name: 'chessboard', run: cbRatings },
+    { name: 'parabolan-hunting', run: phRatings },
+    { name: 'oneiropomp', run: onRatings },
+    { name: 'sacroboscan', run: scRatings },
+    { name: 'parabolan-war', run: pwRatings },
+    { name: 'cubs-education', run: ceRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
