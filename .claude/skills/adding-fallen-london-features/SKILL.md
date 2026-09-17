@@ -52,6 +52,10 @@ Work in this order. **TRAP** marks the ones that get skipped.
    curl -sL -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
      "https://fallenlondon.wiki/w/api.php?action=parse&page=Port%20Carnelian%20(Guide)&prop=wikitext&format=json&formatversion=2"
    ```
+   For a whole category at once, list the titles first (`list=categorymembers`, follow
+   `cmcontinue`) and fetch the wikitext in batches of about 30 (`titles=A|B|C`): a
+   `generator=categorymembers` query that carries content gets an Anubis page back the
+   moment it continues, and the failure looks like invalid JSON rather than a block.
    Prefer the **individual card and option pages** over a guide's summary table where the
    two can disagree — `ZEE_CARDS` is built that way because the Zailing guide's table goes
    stale, and where they conflicted the page won (A Spit of Land is -1, not the guide's -2).
@@ -78,7 +82,44 @@ Work in this order. **TRAP** marks the ones that get skipped.
    in words in the tooltip. Same for "no reward at all" versus "reward not recorded": a
    `null` and a `0` are different claims.
 
-5. **Write the badge spec as a pure function** — `xBadgeSpec(entry) -> { text, color, title }`,
+5. **TRAP — the title the game shows is not always the wiki's page title.** A randomiser
+   can rewrite an option's title: The Airs of London and the forty-odd other Airs
+   qualities, and per-quality fill-ins like `(growth)`, `(direction)` or `(an Urchin)`.
+   A title your table does not carry goes **unbadged**, so before you write a name down,
+   open the option page and look for a `{{Variant table}}` with `|Effect = Title`
+   **inside the action's description block** — one in a Success or Failure block retitles
+   the *result* and needs nothing from you. Then either
+   - carry the other titles in the entry's `aliases` (the brawl fight has eight; The
+     Rewards of Intrigue's Urchin option two, a Cross and a Nought), or
+   - where the page title itself is a placeholder the game fills in, add it to
+     `CAROUSEL_PLACEHOLDER`, which wildcards it. Enumerate as aliases instead wherever
+     two options on one storylet could then match the same title — that is why the Sixth
+     Coil's verbs are listed in `SIXTH_MIRROR_VERBS` and only its nouns are wildcarded.
+
+   Find them in bulk rather than page by page: every Airs quality files its retitles under
+   its own `Category:<quality> Text Uses`, and `list=allcategories&acprefix=Airs` (plus
+   `acprefix=The Airs`) lists every such quality. A pass over all 40 of those categories
+   on 2026-09-17 found the only Airs retitles in a badged storylet are the two aliased
+   above. The rest sit in storylets no feature has reached yet, and are these — alias them
+   the day a feature does, rather than fetching 40 categories again:
+
+   | Storylet or card | What is retitled | Titles | Quality |
+   |---|---|---|---|
+   | The Usual Glut of Weather (card) | its option *Take a stroll in the (Weather)* | 5 | The Airs of London |
+   | A Jaunt in the (Weather) (storylet) | the storylet's own heading | 5 | The Airs of London |
+   | Among the Rubble in (Location) (The Waswood) | *Leap over (an obstacle)* | 3 | Airs of the Rubble |
+   | A Labyrinth of Roof and Bone (card) | *(Go one way in the catacombs)* and *(Go the other way in the catacombs)* | 20 each | Airs of the Sous |
+   | Hunting the (Roof Prey) (card) | the card's own name | 5 | Airs of the Hunt |
+   | The Wellspring of Spatial Uncertainty | *Attempt to travel (horizontally / vertically / rotationally / cardinally)* | 4 each | Airs of Broken Space |
+   | Poise (card) | *Represent the (Alignment) view on a proposed edifice* | 5 | Airs of Ealing Gardens |
+   | Begin an intrigue | *Expand your network: Recruit (Agent)* | 10 | Airs of the Khanate |
+   | Choose a case | the guilt half of *(Prosecute)* / *(Defend) (a defendant) charged with (crime)* | 2 | Second Airs For CourtRoom |
+
+   The pre-Waswood *Leap over (an obstacle)* page is retired; take the Waswood one. Success
+   and failure TEXT varies with the Airs on many more pages than these: that retitles no
+   option and needs no alias.
+
+6. **Write the badge spec as a pure function** — `xBadgeSpec(entry) -> { text, color, title }`,
    entry in, description out, no DOM. That is what makes the arithmetic behind every badge
    testable, and every existing feature does it.
 
@@ -91,7 +132,7 @@ Work in this order. **TRAP** marks the ones that get skipped.
    Carry it as its own table field (e.g. `factions: [['Favours: Society', 1]]`) so the spec
    appends it and the suite can pin, for every row with the field, that the badge ends with it.
 
-6. **Colour is a value, not decoration — and never the only carrier.** The reader is
+7. **Colour is a value, not decoration — and never the only carrier.** The reader is
    **red-green weak**, so a claim that lives only in a hue is a claim they cannot read. Every
    badge must still say what it means with the colour stripped off: a mark told apart by
    **shape** (`▲`/`▼`, `★`, `?`, `▾`), a word, or the number itself. Then:
@@ -111,13 +152,13 @@ Work in this order. **TRAP** marks the ones that get skipped.
    light is not legible, and the contrast in both directions belongs in the test. So does a
    test that the **text alone** separates two things a colour separates.
 
-7. **Write the tooltip as the whole argument.** It is not a caption: on a phone there is no
+8. **Write the tooltip as the whole argument.** It is not a caption: on a phone there is no
    hover, so `makeBadge` also opens the same text as a tap panel, and it is the only place
    the reasoning exists. Every option, its requirement, what it gives, what a failure costs.
    Put the menaces in the headline too, or a line that is cheap in one currency and
    expensive in another reads as free.
 
-8. **Gate it, in the honest direction.** `currentArea()` reads the screen-reader greeting.
+9. **Gate it, in the honest direction.** `currentArea()` reads the screen-reader greeting.
    Three strengths, and which you may use depends only on evidence:
    - **Confirm-only** (`inZee`, `inPortCarnelian`) — the area list is a *guess*. It may say
      "yes, definitely here" and must never say "no". Default to this.
@@ -132,30 +173,30 @@ Work in this order. **TRAP** marks the ones that get skipped.
    word. Do not spread `strict` on suspicion: refusing on an unverified list blacks the
    feature out in the one place it exists for.
 
-9. **Wire `attachBadge`.** One `cls` and one dataset `flag` per feature, both unique in the
+10. **Wire `attachBadge`.** One `cls` and one dataset `flag` per feature, both unique in the
    file. **The `value` must carry every input the spec depends on**, not just the name —
    `fotz-card-ratings` passes `name + depth + source + holdings.sig`, or setting your depth
    leaves the badges quoting the old one. React recycles container nodes, so a boolean flag
    would leave the last card's badge on the next card. A `null` spec means "nothing to say
    here" *and* clears a badge left by a previous occupant.
 
-10. **TRAP — two features on one selector.** `.branch__title` is walked by both
+11. **TRAP — two features on one selector.** `.branch__title` is walked by both
     `fotz-supplication` and `port-carnelian`. `host.after()` inserts *immediately* after the
     host, so the badge drawn second sits nearer the heading than the one drawn first — which
     is why `attachBadge` walks the whole run of badge siblings to find its own. If you add a
     third feature to a shared selector, give it its own class/flag pair and re-run the
     sibling-order tests in `choice-port-carnelian.test.mjs`.
 
-11. **TRAP — anything you draw into the page needs a signature guard.** Your own writes
+12. **TRAP — anything you draw into the page needs a signature guard.** Your own writes
     trigger the MutationObserver that redraws you. `attachBadge`'s flag is that guard for
     badges; an in-page control needs its own (`depthSig`), and a timestamp in the signature
     must be **bucketed**, or it redraws on every scan forever.
 
-12. **Register in `FEATURES`.** Order matters where one feature's side effect feeds another
+13. **Register in `FEATURES`.** Order matters where one feature's side effect feeds another
     (`fotz-depth-control` runs *after* `fotz-card-ratings`, which is where `forgetStaleDepth`
     lives). Wrap nothing in try/catch yourself — `scan()` already isolates each feature.
 
-13. **Panel — only if the user decided on one.** Whether a guide gets a panel behind ⚙ UX is
+14. **Panel — only if the user decided on one.** Whether a guide gets a panel behind ⚙ UX is
     always the user's call (planning-a-fallen-london-guide-feature); no answer, ask. Push `{ id, icon, label, hint, render }`
     onto `choice-helper.js`'s `PANELS` — `registerPanels` hands the list to UX Enhancers'
     launcher at load, in order; `render(ctx)` is called fresh on every open, so nothing needs
@@ -166,7 +207,7 @@ Work in this order. **TRAP** marks the ones that get skipped.
     so a term can hit an option the collapsed row does not show, and hide a group heading
     whose rows have all gone.
 
-14. **Write `FallenLondon/test/choice-<feature>.test.mjs`.** It evaluates the IIFE against a
+15. **Write `FallenLondon/test/choice-<feature>.test.mjs`.** It evaluates the IIFE against a
     stub DOM and re-exports internals by replacing the closing `})();`. Copy the harness
     from `choice-port-carnelian.test.mjs` or `choice-fruits-of-the-zee.test.mjs` — those two are the
     stubs that implement `after()` and a derived `nextElementSibling`, which you need for
@@ -176,13 +217,13 @@ Work in this order. **TRAP** marks the ones that get skipped.
     of yours is in any other feature's table, and **build the whole panel** — a few hundred
     hand-built nodes is where a typo hides.
 
-15. **TRAP — you just broke three other suites.** `choice-crowds-of-spite`,
+16. **TRAP — you just broke three other suites.** `choice-crowds-of-spite`,
     `choice-fruits-of-the-zee` and `choice-zailing` each assert the **whole** `FEATURES` and
     `PANELS` roster by hand. Adding one entry fails all three, in suites for features you
     never touched. A new **panel** breaks one more: `ux-launcher-docking` pins the four panel
     ids Choice Helper registers. `check.mjs` in this directory finds the first three.
 
-16. **Metadata and docs.** Bump `@version` in `FallenLondon/choice-helper.js` **and** the
+17. **Metadata and docs.** Bump `@version` in `FallenLondon/choice-helper.js` **and** the
     loader's `@version` in `all-in-one/fallen-london.js` by hand (`bump-loaders.mjs` skips a
     loader you already edited). Extend the script's `@description` paragraph, the
     `choice-helper.js` row in `README.md`, and `AGENTS.md` — the feature's own section, an

@@ -192,11 +192,9 @@ Fallen London:
   the storylet each option page names. [N unlock, M text] counts those pages;
   most first. "(in choice-helper)" = a feature already badges that storylet.
   Other places have their own Airs categories (list=allcategories&acprefix=Airs).
-    - Go through FallenLondon/choice-helper.js again with an eye on the Airs: for
-      every storylet a feature badges, check the wiki for options whose title
-      changes with the Airs (Text Uses category, or several titles listed on one
-      option page) and add the other titles as aliases, as done for the brawl
-      fight. An unmatched title goes unbadged.
+  An option that the Airs RETITLE needs its other titles as aliases or it goes
+  unbadged: that rule, the pass run over every Airs category on 2026-09-17 and
+  what it found are in the skill, adding-fallen-london-features, step 5.
     - https://fallenlondon.wiki/wiki/A_Bad_Case_of_Rattus_Faber [19 unlock]
     - https://fallenlondon.wiki/wiki/The_Tower_of_Eyes:_Behind_Closed_Doors_at_a_Handsome_Townhouse [18 unlock]
     - https://fallenlondon.wiki/wiki/Vertiginous_Horticulture [12 unlock, 6 text] (in choice-helper)
