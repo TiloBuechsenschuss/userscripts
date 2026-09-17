@@ -185,11 +185,100 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Marriage_(Guide) (no stage tag) [Your Social Engagements]
     - https://fallenlondon.wiki/wiki/Risen_Burgundy_(Guide) (no stage tag) [Risen Burgundy]
 
-  Custom stuff without a guide:
-    - https://fallenlondon.wiki/wiki/Working_for_the_Widow [airs storylets]
-    - https://fallenlondon.wiki/wiki/Opportunism_in_Spite [airs storylets]
-    - https://fallenlondon.wiki/wiki/The_Alleys_of_Spite [airs storylets]
-    - https://fallenlondon.wiki/wiki/Rob_a_drunk [airs storylets]
+  Airs of London storylets (no guide): storylets and cards with options the
+  Airs of London unlock or retitle. From Category:The_Airs_of_London (353 pages,
+  options unlocked at an Airs range) and Category:The_Airs_of_London_Text_Uses
+  (43 pages, title or text changes with the Airs), fetched 2026-09-17, grouped by
+  the storylet each option page names. [N unlock, M text] counts those pages;
+  most first. "(in choice-helper)" = a feature already badges that storylet.
+  Other places have their own Airs categories (list=allcategories&acprefix=Airs).
+    - Go through FallenLondon/choice-helper.js again with an eye on the Airs: for
+      every storylet a feature badges, check the wiki for options whose title
+      changes with the Airs (Text Uses category, or several titles listed on one
+      option page) and add the other titles as aliases, as done for the brawl
+      fight. An unmatched title goes unbadged.
+    - https://fallenlondon.wiki/wiki/A_Bad_Case_of_Rattus_Faber [19 unlock]
+    - https://fallenlondon.wiki/wiki/The_Tower_of_Eyes:_Behind_Closed_Doors_at_a_Handsome_Townhouse [18 unlock]
+    - https://fallenlondon.wiki/wiki/Vertiginous_Horticulture [12 unlock, 6 text] (in choice-helper)
+    - https://fallenlondon.wiki/wiki/The_Feast_of_the_Rose! [16 unlock]
+    - https://fallenlondon.wiki/wiki/Up_Close_with_a_Festive_Fir [16 unlock]
+    - https://fallenlondon.wiki/wiki/Coffee_with_the_Last_Constable [14 unlock]
+    - https://fallenlondon.wiki/wiki/Dabble_in_the_Great_Game [14 unlock]
+    - https://fallenlondon.wiki/wiki/A_drink_with_the_Cheery_Man [13 unlock]
+    - https://fallenlondon.wiki/wiki/Opportunism_in_Spite [13 unlock]
+    - https://fallenlondon.wiki/wiki/Pursue_Your_Current_Case [13 unlock] (in choice-helper)
+    - https://fallenlondon.wiki/wiki/Pursuing_a_Mutually-Agreed_Divorce [12 unlock]
+    - https://fallenlondon.wiki/wiki/The_Rewards_of_Ambition [12 text]
+    - https://fallenlondon.wiki/wiki/Time_in_bed [12 unlock]
+    - https://fallenlondon.wiki/wiki/A_Dream_of_a_Burning_City [9 unlock, 1 text]
+    - https://fallenlondon.wiki/wiki/Consider_your_Aquaria [8 unlock]
+    - https://fallenlondon.wiki/wiki/Search_your_Terraria [8 unlock]
+    - https://fallenlondon.wiki/wiki/The_Clay_Quarters_(Storylet) [8 unlock]
+    - https://fallenlondon.wiki/wiki/A_Jaunt_in_the_(Weather) [5 unlock, 2 text]
+    - https://fallenlondon.wiki/wiki/Attract_a_Visitor_at_Hallowmas [7 unlock]
+    - https://fallenlondon.wiki/wiki/A_Jaunt_in_the_(Weather)_(The_Waswood) [5 unlock, 1 text]
+    - https://fallenlondon.wiki/wiki/A_long_conversation_with_the_Functionary [6 unlock]
+    - https://fallenlondon.wiki/wiki/Hunting_Dangerous_Prey [6 unlock]
+    - https://fallenlondon.wiki/wiki/Investigate_Clathermont%27s_Tattoo_Parlour [6 unlock]
+    - https://fallenlondon.wiki/wiki/Shifting_Streets_(Storylet) [6 unlock]
+    - https://fallenlondon.wiki/wiki/The_Honey-Dens_of_Veilgarden [6 unlock]
+    - https://fallenlondon.wiki/wiki/Candlefinder:_Canvassing_the_Clay_Men [5 unlock]
+    - https://fallenlondon.wiki/wiki/Duelling_the_Black_Ribbon [5 unlock]
+    - https://fallenlondon.wiki/wiki/Intervene_in_a_Dockers%27_Brawl [3 unlock, 2 text] (in choice-helper)
+    - https://fallenlondon.wiki/wiki/Literary_Ambitions [5 unlock]
+    - https://fallenlondon.wiki/wiki/On_the_Trail_(Storylet) [5 unlock]
+    - https://fallenlondon.wiki/wiki/Send_a_Christmas_Card [5 unlock]
+    - https://fallenlondon.wiki/wiki/Working_for_the_Widow [5 unlock]
+    - https://fallenlondon.wiki/wiki/Business_on_Watchmaker%27s_Hill [4 unlock]
+    - https://fallenlondon.wiki/wiki/Life_on_Ladybones_Road [4 unlock]
+    - https://fallenlondon.wiki/wiki/Visitors_in_the_Quad [4 unlock] (in choice-helper)
+    - https://fallenlondon.wiki/wiki/Wolfstack_in_the_fog [4 unlock]
+    - https://fallenlondon.wiki/wiki/Interdisciplinary_Research [3 unlock] (in choice-helper)
+    - https://fallenlondon.wiki/wiki/Resolving_the_Matter_of_the_Stolen_Artefacts [3 unlock] (in choice-helper)
+    - https://fallenlondon.wiki/wiki/The_Flit_and_its_King [3 unlock]
+    - https://fallenlondon.wiki/wiki/A_Neathy_Education [2 unlock]
+    - https://fallenlondon.wiki/wiki/Candlefinder:_Canvassing_the_Dockers [2 unlock]
+    - https://fallenlondon.wiki/wiki/Candlefinder:_Canvassing_the_Servants [2 unlock]
+    - https://fallenlondon.wiki/wiki/Duty_Calls [2 unlock]
+    - https://fallenlondon.wiki/wiki/Read_incoming_mail [2 text]
+    - https://fallenlondon.wiki/wiki/SNOWBOUND! [2 unlock]
+    - https://fallenlondon.wiki/wiki/The_Alleys_of_Spite [2 unlock]
+    - https://fallenlondon.wiki/wiki/The_Capering_Relicker_and_Gulliver_are_Outside_in_the_Street [2 unlock]
+    - https://fallenlondon.wiki/wiki/The_Coquettish_Relicker_and_Mathilde_are_Making_the_Rounds [2 unlock]
+    - https://fallenlondon.wiki/wiki/The_Curt_Relicker_and_Montgomery_are_Moving_Quietly_Past [2 unlock]
+    - https://fallenlondon.wiki/wiki/The_Shivering_Relicker_and_Pinnock_are_Trundling_By [2 unlock]
+    - https://fallenlondon.wiki/wiki/The_Usual_Glut_of_Weather [2 text]
+    - https://fallenlondon.wiki/wiki/Visiting_the_Person_who_Was_your_Lover [2 unlock]
+    - https://fallenlondon.wiki/wiki/Visiting_the_Person_who_Was_your_Spouse [2 unlock]
+    - https://fallenlondon.wiki/wiki/A_card_game [1 unlock] (in choice-helper)
+    - https://fallenlondon.wiki/wiki/A_Marksmanship_Competition_for_a_Prize_of_Jade! [1 unlock]
+    - https://fallenlondon.wiki/wiki/A_masked_revel_for_the_Feast_of_the_Rose! [1 unlock]
+    - https://fallenlondon.wiki/wiki/A_Public_Lecture [1 text]
+    - https://fallenlondon.wiki/wiki/An_Invitation_to_the_Bazaar [1 text]
+    - https://fallenlondon.wiki/wiki/An_opportunity_for_profit [1 unlock]
+    - https://fallenlondon.wiki/wiki/Bones_in_the_River [1 unlock]
+    - https://fallenlondon.wiki/wiki/Celebrate_the_Feast_of_the_Exceptional_Rose! [1 unlock]
+    - https://fallenlondon.wiki/wiki/Deal_with_Unfinished_Men [1 unlock]
+    - https://fallenlondon.wiki/wiki/Donate_your_body_to_science_for_an_hour_or_two [1 unlock]
+    - https://fallenlondon.wiki/wiki/Fallen_London,_where_everything_is_as_it_should_be [1 text]
+    - https://fallenlondon.wiki/wiki/Guard_duty_at_the_Observatory [1 unlock]
+    - https://fallenlondon.wiki/wiki/Influence_the_Spirit_of_the_Age [1 text] (in choice-helper)
+    - https://fallenlondon.wiki/wiki/Making_your_Name:_Duelling_the_Black_Ribbon [1 unlock]
+    - https://fallenlondon.wiki/wiki/Mrs_Gebrandt_asks_for_your_help [1 unlock]
+    - https://fallenlondon.wiki/wiki/Perusal_of_Forgotten_Pages [1 text]
+    - https://fallenlondon.wiki/wiki/Provide_Training_at_the_Department_of_Menace_Eradication [1 unlock]
+    - https://fallenlondon.wiki/wiki/Rely_on_F.F._Gebrandt [1 unlock] (in choice-helper)
+    - https://fallenlondon.wiki/wiki/Rescue_Shipwrecked_Clay_Men [1 unlock]
+    - https://fallenlondon.wiki/wiki/Rob_a_drunk [1 unlock]
+    - https://fallenlondon.wiki/wiki/The_Chandleress%27_Complaint [1 unlock]
+    - https://fallenlondon.wiki/wiki/The_Inorganic_Sciences_Wing [1 text] (in choice-helper)
+    - https://fallenlondon.wiki/wiki/The_Natural_History_Wing [1 text] (in choice-helper)
+    - https://fallenlondon.wiki/wiki/The_Prussian_Salon [1 unlock]
+    - https://fallenlondon.wiki/wiki/The_Rewards_of_Intrigue [1 text] (in choice-helper)
+    - https://fallenlondon.wiki/wiki/The_Seeking_Road [1 unlock]
+    - https://fallenlondon.wiki/wiki/The_Usual_Glut_of_Weather_(The_Waswood) [1 text]
+    - https://fallenlondon.wiki/wiki/This_Morning%27s_Gazette [1 text]
+    - https://fallenlondon.wiki/wiki/Work_in_your_Cabinet_Noir [1 text]
 
 # Done
 

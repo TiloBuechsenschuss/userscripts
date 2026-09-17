@@ -102,7 +102,7 @@ const TABLES = ['ARBOR_OPTIONS', 'LBI_OPTIONS', 'DME_OPTIONS', 'VH_OPTIONS', 'FQ
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { BRAWL_FIGHTS, BRAWL_REWARDS, BRAWL_PER_POINT, BRAWL_CLASS, BRAWL_BRANCH_CLASS, brawlDiffAt, brawlSide, brawlSpec, brawlRatings, factionText, broadCertainAt, posiBadgeText, carouselHandSpec, '
+    'return { BRAWL_INDEX, carouselLookup, BRAWL_FIGHTS, BRAWL_REWARDS, BRAWL_PER_POINT, BRAWL_CLASS, BRAWL_BRANCH_CLASS, brawlDiffAt, brawlSide, brawlSpec, brawlRatings, factionText, broadCertainAt, posiBadgeText, carouselHandSpec, '
     + TABLES.join(', ')
     + ', ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS, LAB_CARDS, PC_OPTIONS, VSD_OPTIONS, normalizeName,'
     + ' BADGE_CLASS, FEATURES }; })();');
@@ -152,6 +152,15 @@ check('the special attacks are no harder than the plain fight from Brawl 84, as 
 check('alone pays at least as much on every fighting option, and a group\'s threshold is lower on every reward',
   [api.BRAWL_FIGHTS.filter((f) => f.win[1] < f.win[0]).map((f) => f.name),
     api.BRAWL_REWARDS.filter((r) => r.at[0] >= r.at[1]).map((r) => r.group)], [[], []]);
+
+// Reported 2026-09-17: "Fight your way towards the crates!" went unbadged. The
+// plain fight is retitled by The Airs of London, eight titles in all.
+check('the plain fight is found under every title the Airs give it',
+  ['Fight your way towards the crates!', 'Fight your way towards the pier!', 'Fight away from the water\'s edge!',
+    'Fight without taking your eye off the goods!', 'Fight under the sign of the Helmsman!',
+    'Fight away from the doorway of the Helmsman!', 'Fight at the very edge of the water!', 'Fight – and watch your back!']
+    .map((t) => { const e = api.carouselLookup(api.BRAWL_INDEX, t, key('Intervene in a Dockers’ Brawl')); return e && e.name; }),
+  Array(8).fill('Fight without taking your eye off the goods!'));
 
 check('the side is read off the reward titles',
   [api.brawlSide(['Claim the coffer of Admiralty coinage']), api.brawlSide(['Accept a share of the extremely dusty crates']),
