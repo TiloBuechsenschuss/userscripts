@@ -98,7 +98,7 @@ const TABLES = ['ARBOR_OPTIONS', 'LBI_OPTIONS', 'DME_OPTIONS', 'VH_OPTIONS', 'FQ
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { NADIR_STORYLETS, NADIR_CARDS, NADIR_INDEX, NADIR_HAND, NADIR_STRICT, NADIR_CLASS, NADIR_BRANCH_CLASS, NADIR_CARD_CLASS,'
+    'return { factionText, NADIR_STORYLETS, NADIR_CARDS, NADIR_INDEX, NADIR_HAND, NADIR_STRICT, NADIR_CLASS, NADIR_BRANCH_CLASS, NADIR_CARD_CLASS,'
     + ' nadirLeaveLoss, nadirAllowed, zeeCardFor, nadirBadgeText, nadirSpec, nadirStoryletSpec, nadirRatings, carouselHandSpec, carouselLookup, '
     + TABLES.join(', ')
     + ', ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS, LAB_CARDS, PC_OPTIONS, VSD_OPTIONS, normalizeName, BADGE_CLASS, FEATURES }; })();');
@@ -214,6 +214,13 @@ check('no Cave of the Nadir name is in another feature\'s table',
     return rows.flatMap((e) => [e.name].concat(e.aliases || [])).filter((n) => others.includes(key(n))); })(), []);
 
 check('the feature is registered', api.FEATURES.some((f) => f.name === 'cave-of-the-nadir'), true);
+
+// Renown and Favours an option gives or takes follow the badge itself, never
+// the tooltip alone (the adding-fallen-london-features skill, step 5).
+check('every faction result is on the badge, after it',
+  api.NADIR_OPTIONS.filter((e) => e.factions && e.factions.length)
+    .map((e) => [e.name || e.branch, (api.nadirBadgeText(e)).endsWith(' · ' + api.factionText(e.factions))]),
+  [["A favour from the Factotum",true],["The dance goes on",true]]);
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall good');
 process.exit(failures ? 1 : 0);

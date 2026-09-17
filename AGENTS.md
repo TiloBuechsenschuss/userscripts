@@ -888,9 +888,10 @@ navigation. Two consequences:
   `on-a-heist`, `spider-symposium`, `short-stories`, `flash-lays`, `social-actions`,
   `cave-of-the-nadir`, `empress-court`, `breeding-monsters`, `mahogany-hall`, `master-classes`,
   `sixth-coil`, `rat-market`, `boxful-of-intrigue`, `underclay`, `hunting-bees`,
-  `featuring-tales-university`, `term-passing`) and the reference panel built on each
-  one's table (Zailing, Port Carnelian, Scientific Voyages, Fruits of the Zee, University Laboratory;
-  `arbor` and the nineteen carousels have none, by request). The rule that decided where each thing
+  `featuring-tales-university`, `term-passing`, `trade-in-reputations`, `savage-cobbles`,
+  `publishing-newspaper`, `war-of-assassins`, `wars-of-illusion`, `foreign-posting`, `temple-club`)
+  and the reference panel built on each one's table (Zailing, Port Carnelian, Scientific Voyages,
+  Fruits of the Zee, University Laboratory; `arbor` and the carousels have none, by request). The rule that decided where each thing
   went: **a panel goes where its table's badge goes**, because the two are one transcription. The
   Factions panel's `!` pips stayed in UX Enhancers — they are about your possessions, not about
   a storylet. The in-page dive-depth control went with the badges it exists to feed.
@@ -1588,7 +1589,8 @@ navigation. Two consequences:
   that same table (176, 316, 385) are reachable *only* under bankers', so the calculator rounds
   bankers' and the dissenting row is named in the comment and in the test rather than rounded
   around quietly.
-  **A faction Favour is worth 0 Echoes and carries `PC_FAVOUR_MARK` (`❖`) instead.**
+  **A faction Favour is worth 0 Echoes and carries `PC_FAVOUR_MARK` (`❖`) instead**, and is named after
+  the badge like every faction result (`25E ❖ · Favours: Society +1`).
   `Favours: Society` and its siblings are story qualities capped at 7, not items: nothing buys
   one, and the wiki's occasional ~4 Echo figure is notional. Pricing them would let a fixed
   reward out-rank a real cash-out on a number nobody acts on. Tribute gets the same treatment
@@ -2031,6 +2033,95 @@ navigation. Two consequences:
   Dropping the other two carousels dropped that whole mechanism (`tpMerge`, `TP_SHARED`,
   `TP_ORDINALS`, the bespoke `tpSummary`) with it. If they are ever restored, restore the merge too.
 
+  Seven more, added 2026-09-17 from the Early PoSI shelf of the guides, storylet-and-card markup with
+  **no panel** (by request). Six of them share **`posiSpec`**, a small reading of one row shape
+  (`win`/`lose` as `[tag, n]` change points, `sets` for a quality SET to a value, `luck`, `pays`
+  with the guide's Echoes, `label` for a fixed badge) so that none of them re-derives the badge text:
+  progress first, then the failure's after a slash, bare signs when it moves only what the success moved
+  (`Posting +2 CP? / +1`), named when it moves something else (`Clues ×270? / Inv −5 CP`); a Luck line
+  at its expected value (`≈War +0.5 CP`); a payout with the guide's success and failure Echoes
+  (`Rifles · 17.5? / 7.5`). A tuple's third element overrides the " CP" unit — the Newspaper's copy is an
+  item count. A label takes no `▼` of its own (it is written to say what it costs) and is coloured as a
+  payout when it uses something up, as an exchange is. **A Trade in Reputations**
+  (`trade-in-reputations`, `TIR_OPTIONS`, `TIR_STATED`) has its own spec because every figure depends
+  on Advertising Profile: Enterprise, which is not readable mid-campaign: the badge quotes **Enterprise
+  25** — the free maximum the guide raises it to at once — and says so in the rules, with 0/10/15/20
+  in the tooltip (`NR +312/411? −156`: Standard, Rare, and the Standard loss). The Change Tables page
+  states the three tables at twelve Enterprise levels AND the logistic curve behind them; both are
+  carried and the suite pins one against the other. It badges the campaign deck in the hand (`▾` for a
+  line behind a spokesperson, a hireling or an item) and every option. The card *Have (Campaign Focus)
+  Reviewed* is titled after the product in game, so four expansions are aliased — **not captured** —
+  and `carouselHandRatings` now honours `def.aliases` so the hand finds it too; `(campaign focus)` is
+  a new `CAROUSEL_PLACEHOLDER` for the two hireling options. The four *Complete the paperwork* options
+  share one title and are one row. **Riding the Savage Cobbles** (`savage-cobbles`, `RSC_OPTIONS`),
+  **Working toward a Foreign Posting** (`foreign-posting`, `FP_OPTIONS`) and **Fighting a War of
+  Assassins** (`war-of-assassins`, `WOA_OPTIONS`) are ordinary level carousels; each storylet heading
+  says its tier (`Cobbles 5–6`, `Posting 7 · cash in`, `War 4 → Tension`), and the suites derive the
+  guides' action counts (14, 14, 11 a round and 34 a prize) from the CP arithmetic. The Foreign Posting
+  guide labels its tiers 0–5 and 5–7; the pages lock at 5 and are followed. **Publishing a Newspaper**
+  (`publishing-newspaper`, `NP_OPTIONS`, `NP_HOURS`): one storylet per Hour, the badge is the copy a
+  line writes (`Sal +12?`), a failure takes copy back only at Hour 2 (`/ −6`), and an edition shows
+  what it needs and the guide's Echo range (`Merit 60 → Journals · 34–62`). The guide lists no
+  challenges; the pages have Shadowy 115–130 on nearly every line, which is followed. **Embroiled in
+  the Wars of Illusion** (`wars-of-illusion`, `WOI_OPTIONS`, `WOI_CARDS`): the Investigating/Seeking
+  carousel, the Bats/Cats one and the Theosophistical cards (also in the hand, ranked by the Seeking
+  they make; the option the wiki files as impossible is a label so it is never the pick). Ten rows
+  disagree with the guide and each carries a `guide` field the tooltip prints — the suite pins the list.
+  Several storylets share an *Enough* and a *Done for now*; they are one row per storylet, resolved by
+  the open storylet. The Mahogany Hall levels (15+) are story steps without figures and left out.
+  **The Temple Club** (`temple-club`, `TC_OPTIONS`): exchanges, not a carousel — every badge says what
+  it takes and what it gives (`Rostygold ×300 → Scintillack`), `★` on exactly the guide's four reasons
+  to come, the guide's verdict in the tooltip.
+
+  Three more, added 2026-09-17, again storylet-and-card markup with **no panel**. **Attending a Party**
+  (`attending-party`, `PARTY_OPTIONS`): the badge is Talk of the Town CP (`posiBadgeCore`), then a Time
+  cost other than 1 (`Time −2`, `fail Time −2`), Making Waves, and the Favours (`partyBadgeText`). A
+  party card offers a **different option at each Time Remaining**, and Time Remaining is not read, so
+  the hand badge is a **label** (`party card · Time 5, 4 and 3`), never one option's figure; the opened
+  card's option is badged normally. Five rows disagree with the guide and carry `guide`. **Searching
+  out a Missing Woman** (`missing-woman`, `MWS_OPTIONS`) and **Doing Business in Wilmot's End**
+  (`wilmots-business`, `DBW_OPTIONS`): two carousels of one shape — an opening choice that SETS the
+  progress and a gating quality (`Search → 2 Looking → 2`), steps at 2 and 4, a choice at 3, payouts at
+  5 — with the gating range on each storylet heading (`Search 4 · Looking 2–3`) and the two Luck cards
+  in the hand ranked by expected CP (`posiSearchRank`). Both share Dramatic Tension with War of
+  Assassins. The payout titled *An exchange of favours* is filed as `An exchange of favours 2` with the
+  plain title an alias, because `FP_OPTIONS` owns it — the Hunting Bees precedent.
+
+  Four more, added 2026-09-17, card-and-storylet markup with **no panel**. **Brawling with Dockers**
+  (`brawling-dockers`, `BRAWL_FIGHTS`, `BRAWL_REWARDS`): one storylet whose fighting options are titled
+  the same for a group and a lone fighter but pay differently, so `brawlSide` reads the side off the
+  REWARD titles on screen ("Accept a share of …" is a group, "Claim …" alone) and the badge shows both,
+  group first, until one is there; the side is in the `salt`. Each variable reward carries its stated cap
+  and the Brawl it is reached at, and the suite pins cap = 25 × (that − the threshold). **Assembling a
+  Skeleton** (`assembling-skeleton`, `SKEL_BONES`, `SKEL_BUYERS`): bones on *Assemble a Skeleton* show
+  pennies and attributes as [failure, success] ranges — Implausibility is only ever a failure's — and
+  buyers on *Seeking Buyers* their primary and secondary pay and `exhausts`; the declarations, the
+  world-quality buyers and the Draconic Spine are left out. Option titles end in the skeleton's
+  description, a new `(skeleton type)` entry in `CAROUSEL_PLACEHOLDER`. The bones came from the guide's
+  /Bones table, with every option page parsed for the pennies as the cross-check; four rows follow the
+  page. **Professional Activities** (`professional-activities`, `PROF_JOBS`, `PROF_PAYMENTS`): 66 jobs
+  GENERATED from the six *The Business of a …* storylets and their option pages, checked against the
+  guide's per-profession tables; the fourteen disagreements carry `guide`. **Hearts' Game**
+  (`hearts-game`, `HG_ACTIONS`, `HG_REWARDS`): the 50 accomplice cards' basic and advanced actions
+  (Progress, Prep gained, Prep needed, Counterplay, the Tolerance rule) from the option pages, the hand
+  ranked by Progress with a formula counting as nothing; the Page of Quills rewards with the guide's
+  values. *Set an ambush* is filed under the wiki's *Set an ambush (Page of Inversions)* with the plain
+  title an alias, because Hunting Bees owns it.
+
+  **Faction results are always on the badge, after it** (2026-09-17, on request, and step 5 of the
+  adding-fallen-london-features skill). Any `Renown:` or `Favours:` an option gives or takes is a
+  row field `factions: [[quality, change], ...]`, and every feature's badge text is
+  `withFactions(core, e)` — the feature's own badge, then ` · Favours: Society +1` and so on
+  (`factionText`; a change may be a number, a `[lo, hi]` range or a word like `−all`). They are never
+  in the tooltip alone and never folded into a payout tag: Boxful's `+ Criminals favour`, Master-Classes'
+  `Rubbery Favour ×1`, Mahogany Hall's `Tomb-Colonies ×1` and `2 factions`, Nadir's `Favours ×3` and
+  `Revolutionaries ×7`, Breeding Monsters' `+ Hell` and the Temple Club's `Society Favour →` all moved
+  out of the core text. Tables that transcribe a payout as one list of pairs split it with
+  `splitFactions`. Port Carnelian computes its ending's Favours from the purse
+  (`pcCashFactions`): none at the cap, `+1?` when the cap is unread, and `❖` stays as the 0-Echo
+  mark. A *Favour in High Places* is an item, not a faction, and a Renown in `needs` is a
+  requirement, not a result — neither goes there. Every suite whose table has faction rows pins them.
+
   The `factions` panel's static half is `FACTIONS`, transcribing the *Factions (Guide)*
   Faction-Item table (the item that converts Favours to Renown, its shop, its price) and the
   Renown-item ladder (10/25/40, for 3/5/7 Favours), including the wiki's best-in-slot marks and
@@ -2458,6 +2549,46 @@ Confirmed live by the author:
   from the Stone* and *Lies for Clay Men to Tell*, and whether moving between them really costs no
   action. Also whether the tenth reward, *…fight for the Admiralty*, appears at all.
 
+- The **A Trade in Reputations, Riding the Savage Cobbles, Publishing a Newspaper, Fighting a War of
+  Assassins, Wars of Illusion, Foreign Posting and Temple Club badges** (added 2026-09-17). Nothing
+  seen in the game. Report first, in order:
+  **(1) A Trade in Reputations' product-named titles.** What the card *Have (Campaign Focus) Reviewed*
+  and the options *Commission a poster for (Campaign Focus)* / *Commission advertising copy for
+  (Campaign Focus)* actually read — the aliases assume the campaign's name in place of the brackets. If
+  that card goes unbadged, this is why. Also whether the Enterprise-25 figures match the Name
+  Recognition the game hands over at 25, and whether the hand's cards are the campaign deck at all
+  (they are matched by name only, with no area gate).
+  **(2) Wars of Illusion's shared titles.** Whether every *Enough* and *Done for now* badges inside its
+  own storylet, and whether the storylets of the Bats and Cats cash-ins read *Making Use of Bats* /
+  *Making Use of Cats* (the wiki disambiguates them with "(storylet)"). Also which side is right where
+  guide and pages disagree — above all whether the four single cash-ins add Embroiled on every success.
+  **(3) Newspaper.** Whether the option pages' Shadowy challenges are real (the guide lists none), and
+  whether the Spindlewolf option reads *…your Elongated Spindlewolf* or *…the Elongated Spindlewolf*.
+  **(4) The three level carousels.** Whether the Foreign Posting and Savage Cobbles storylets swap at
+  level 5 as the pages say, and whether *Walk away* and *Introduce yourself* read that plainly.
+  **(5) The Temple Club.** Whether *Commission a portrait* really pays Memory of Light ×16 as well.
+
+- The **Attending a Party, Searching out a Missing Woman and Doing Business in Wilmot's End badges**
+  (added 2026-09-17). Nothing seen in the game. Report first, in order:
+  **(1) The party cards' titles.** Whether they read with the trailing dots (*The Turkish Girl...*) and
+  the options with the leading ones (*...has taken her shoes off to dance*); `normalizeName` drops both,
+  so a missing badge would be a different WORD, not the dots. Also whether the Heavily Entitled options
+  keep their quotation marks, and which side is right where guide and pages disagree (five rows).
+  **(2) Wilmot's End.** Whether the storylets at 3 read *Who is she?* (the wiki's *Who is she? 2*), and
+  whether both *Millicent Clathermont* options badge inside their own storylet.
+
+- The **Brawling with Dockers, Assembling a Skeleton, Professional Activities and Hearts' Game badges**
+  (added 2026-09-17). Nothing seen in the game. Report first, in order:
+  **(1) The skeleton's storylet title.** Whether the bones are offered on a storylet headed *Assemble a
+  Skeleton* at every stage of a build, and what the end of a bone's title reads (the badge matches any
+  words after "to your"). If no bone is ever badged, the heading is why.
+  **(2) The brawl's side.** Whether the side is read right once a reward shows, and whether a lone
+  fighter's figures are the ones on screen.
+  **(3) Hearts' Game.** Whether the accomplice cards are named as the wiki has them (*Four of Lures: The
+  Reel*), and whether the Progress on a badge is what the game reports before Tolerance.
+  **(4) Professional Activities.** Which of page and guide is right on the fourteen jobs that disagree,
+  and whether the Licentiate's quoted titles match.
+
 - The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
   table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
   looking at the screen can confirm: a wrong number renders exactly as well as a right one. They
@@ -2847,6 +2978,31 @@ Current tests:
   out of it, never stored twice), that the parser takes a gain, skips a cost and never swallows two
   clauses into one, and that an unpriced row does not print its Connected twice. Then badge text, the
   registered pass, and no name in another table.
+- `FallenLondon/test/choice-trade-in-reputations.test.mjs`, `choice-savage-cobbles.test.mjs`,
+  `choice-publishing-newspaper.test.mjs`, `choice-war-of-assassins.test.mjs`,
+  `choice-wars-of-illusion.test.mjs`, `choice-foreign-posting.test.mjs`, `choice-temple-club.test.mjs` —
+  one per feature, and the first to also assert **no storylet** is in another feature's table. Trade in
+  Reputations pins the Change Tables' stated figures against their curve at all twelve levels, the
+  finishing cards in the guide's order, the hand's `▾`, and a product-named card title resolving through
+  the alias. The three level carousels derive the guides' action counts from the CP arithmetic (14, 14,
+  11/34). The Newspaper suite pins the kinds of copy per Hour against the guide's table and derives the
+  guide's "104 needs late qualities, except Salacious" from the rows. The Wars of Illusion suite pins the
+  exact list of rows that disagree with the guide, the shared *Enough* resolving by open storylet, and
+  the hand never picking the impossible option. The Temple Club suite pins `★` on exactly four rows.
+- `FallenLondon/test/choice-attending-party.test.mjs`, `choice-missing-woman.test.mjs`,
+  `choice-wilmots-business.test.mjs` — one per feature. The party suite derives the guide's "maximum
+  possible 19 CP" from the rows, checks every card label against the Times of its own options, and pins
+  the hand badge as a label. The two Wilmot's End suites check that every gating level a choice can set
+  leaves a storylet open at 2 and at 4, and that the shared titles (*Millicent Clathermont*, *An exchange
+  of favours*) resolve only by the open storylet.
+- `FallenLondon/test/choice-brawling-dockers.test.mjs`, `choice-assembling-skeleton.test.mjs`,
+  `choice-professional-activities.test.mjs`, `choice-hearts-game.test.mjs` — one per feature. Brawling
+  pins every cap against its threshold and the Brawl it is reached at, the guide's "no harder than the
+  plain fight from 84", and the side read off the rewards. The skeleton suite pins Implausibility as a
+  failure's only, the page-over-table rows, and that exactly the multiplying buyers exhaust. Professional
+  Activities pins the guide's three tiers as the shape of every job, save three named rows. Hearts' Game
+  pins one no-Prep basic action per card, Counterplay on every challenge-free Progress line, and that a
+  formula never outranks a figure in the hand.
 - `FallenLondon/test/ux-launcher-placement.test.mjs` — asserts `ux-enhancers.js`'s
   `launcherPlacement`, the pure half of where the "⚙ UX" button sits. It is organised around
   the three real travel controls: wide desktop (beside the sidebar button, bottoms level),

@@ -82,6 +82,15 @@ Work in this order. **TRAP** marks the ones that get skipped.
    entry in, description out, no DOM. That is what makes the arithmetic behind every badge
    testable, and every existing feature does it.
 
+   **The badge text has two parts, in this order:** the badge itself (step 2's number and its
+   marks), then **every faction result the line has** — each `Renown: <faction>` and
+   `Favours: <faction>` it gives or takes, signed, joined with ` · `:
+   `War +1 CP? · Favours: Revolutionaries +1`, `Amber ×300? · Favours: Society +1`,
+   `Jade ≈1.5 × Persuasive · Favours: Society −1`. A line with no faction result has no second
+   part. The faction part is never the tooltip's alone, and never folded into a payout tag.
+   Carry it as its own table field (e.g. `factions: [['Favours: Society', 1]]`) so the spec
+   appends it and the suite can pin, for every row with the field, that the badge ends with it.
+
 6. **Colour is a value, not decoration — and never the only carrier.** The reader is
    **red-green weak**, so a claim that lives only in a hue is a claim they cannot read. Every
    badge must still say what it means with the colour stripped off: a mark told apart by

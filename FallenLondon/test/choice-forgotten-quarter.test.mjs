@@ -211,7 +211,7 @@ check('and no worst case is below the length it is the worst case of',
 check('expedition badges: length, then Archaeologist or Fate',
   ["Seek a thieves' cache", 'The Tomb of the Silken Thread', 'A Temple of Uttermost Wind', 'The Cave of the Nadir']
     .map((n) => api.fqBadgeText(row(n, api.FQ_BEGIN))),
-  ['10 sup · Arch 2? ▼', '30 sup · Arch 3', '30 sup · Fate 7', '60 sup · Arch 5 ▼']);
+  ['10 sup · Arch 2? ▼ · Favours: Criminals −1', '30 sup · Arch 3', '30 sup · Fate 7', '60 sup · Arch 5 ▼']);
 
 // --- the approaches --------------------------------------------------------
 
@@ -234,7 +234,8 @@ check('A sign? is free Progress',
 
 check('every hindrance takes Rivals\' Progress 2 off, on a challenge, using something up',
   api.FQ_OPTIONS.filter((e) => /^A chance to hinder/.test(e.name)).map((e) => api.fqBadgeText(e)),
-  Array(6).fill('Rivals −2? ▼'));
+  ['Rivals −2? ▼', 'Rivals −2? ▼', 'Rivals −2? ▼ · Favours: The Great Game −1', 'Rivals −2? ▼', 'Rivals −2? ▼',
+    'Rivals −2? ▼']);
 
 // --- the conclusions and confrontations ------------------------------------
 
@@ -246,7 +247,7 @@ check('conclusions name what they pay',
 check('confrontations: Progress, and the menace they always raise',
   ["Assault Orthos' camp", 'Bribe Virginia', 'Challenge February to a competition', 'Distract the Lugubrious Seamstress',
    'Other Rivals'].map((n) => api.fqBadgeText(row(n))),
-  ['Prog +5? +Wounds ▼', 'Prog +3? +Nightmares ▼', 'Prog +3? ▼', 'Prog +3–5? +Nightmares ▼', 'Rivals → 1? ▼']);
+  ['Prog +5? +Wounds ▼', 'Prog +3? +Nightmares ▼', 'Prog +3? ▼ · Favours: Revolutionaries −1', 'Prog +3–5? +Nightmares ▼', 'Rivals → 1? ▼']);
 
 check('and their tooltips say the rival is sent back to 1',
   ["Assault Orthos' camp", 'Other Rivals'].map((n) => api.fqSpec(row(n)).title.includes('Rivals’ Progress back to 1')),

@@ -141,7 +141,7 @@ check('badges for each kind of row',
   ['Consult the lead’s Opinions', 'Seek out inspiration among artists', 'Toss it onto the fire', 'Come to an equitable arrangement',
    'Seek inspiration in indulgence', 'Passion and bats', 'Mortification of the flesh!', 'A Wry Satirical Comedy', 'A History',
    'A Tragedy of Romance', 'The ballet'].map((n) => api.courtBadgeText(row(n))),
-  ['Inspired +15/−20?', 'Inspired +30? ▼', '≈Inspired +7', 'Inspired +15 ▼', '≈Inspired +15 ▼', 'Inspired +35? +Suspicion ▼',
+  ['Inspired +15/−20?', 'Inspired +30? ▼ · Favours: Bohemians −1', '≈Inspired +7', 'Inspired +15 ▼', '≈Inspired +15 ▼', 'Inspired +35? +Suspicion ▼ · Favours: Revolutionaries −1',
    'Inspired +5', 'Moon-Pearl ×1700', 'Brass ×1700 +Scandal', 'Moon-Pearl ×3000 +Scandal', 'minor · Inspired 17']);
 
 check('the guide disagrees with the pages in the organ recital and eleven works',

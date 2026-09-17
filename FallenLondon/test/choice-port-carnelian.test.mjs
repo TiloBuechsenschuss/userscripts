@@ -312,7 +312,7 @@ check('the Fate-locked row says so on the badge itself',
 // ordinary item and is priced, not marked.
 check('an ending is priced where it can be and labelled where it cannot',
   api.PC_OPTIONS.filter((e) => e.reset).map((e) => api.pcBadgeText(e, null)),
-  ['25E ' + api.PC_FAVOUR_MARK, 'cash out', 'cash out', '25E']);
+  ['25E ' + api.PC_FAVOUR_MARK + ' · Favours: Society +1?', 'cash out', 'cash out', '25E']);
 
 check('the losing branch reads as the loss it is, and as the Legitimacy it buys',
   api.pcBadgeText(row('Within their rights', '"Quickly, sir - in, in!"')),

@@ -180,8 +180,8 @@ check('badges', [['Elocution'], ['Take on a Clay Pupil'], ['Take on a Rubbery Pu
   ['Encourage him to be confident'],
   ['Make absolutely sure Jasper and Frank won’t be disappointed (3 FATE)']]
   .map(([n]) => api.mcBadgeText(row(n))),
-  ['Pyg +2? · Brass ×97', 'Glim ×3982 · 1.261 EPA', 'Amber ×4854 Trembling Amber ×1 Rubbery Favour ×1 · 1.45 EPA · Fate',
-    'Pyg +3? · Brass ×109 ▼ Pyg −2', 'Pyg +3? · First Sporing ×1 Docks Favour ×1 · Fate']);
+  ['Pyg +2? · Brass ×97', 'Glim ×3982 · 1.261 EPA', 'Amber ×4854 Trembling Amber ×1 · 1.45 EPA · Fate · Favours: Rubbery Men +1',
+    'Pyg +3? · Brass ×109 ▼ Pyg −2', 'Pyg +3? · First Sporing ×1 · Fate · Favours: The Docks +1']);
 
 // The wiki disambiguates the Clay pupil's lesson storylet "Educating Lyme 1".
 check('the wiki\'s disambiguated storylet title is aliased to the game\'s',

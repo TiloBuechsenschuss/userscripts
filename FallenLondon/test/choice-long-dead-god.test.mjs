@@ -105,7 +105,7 @@ const TABLES = ['ARBOR_OPTIONS', 'LBI_OPTIONS', 'DME_OPTIONS', 'VH_OPTIONS', 'FQ
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { MIND_OPTIONS, MIND_STORYLETS, MIND_INDEX, MIND_CLASS, MIND_BRANCH_CLASS, MIND_CARD_CLASS, mindBadgeText,'
+    'return { factionText, MIND_OPTIONS, MIND_STORYLETS, MIND_INDEX, MIND_CLASS, MIND_BRANCH_CLASS, MIND_CARD_CLASS, mindBadgeText,'
     + ' mindSpec, mindStoryletSpec, mindCardSpec, mindFailChance, mindRatings, carouselLookup, ' + TABLES.join(', ')
     + ', ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS, LAB_CARDS, PC_OPTIONS, VSD_OPTIONS, normalizeName, BADGE_CLASS, FEATURES }; })();');
 const api = new Function(
@@ -244,6 +244,13 @@ check('no Long-Dead God name is in another feature\'s table',
     return api.MIND_OPTIONS.flatMap((e) => [e.name].concat(e.aliases || [])).filter((n) => others.includes(key(n))); })(), []);
 
 check('the feature is registered', api.FEATURES.some((f) => f.name === 'long-dead-god'), true);
+
+// Renown and Favours an option gives or takes follow the badge itself, never
+// the tooltip alone (the adding-fallen-london-features skill, step 5).
+check('every faction result is on the badge, after it',
+  api.MIND_OPTIONS.filter((e) => e.factions && e.factions.length)
+    .map((e) => [e.name || e.branch, (api.mindBadgeText(e)).endsWith(' · ' + api.factionText(e.factions))]),
+  [["Accept the gift",true]]);
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall good');
 process.exit(failures ? 1 : 0);

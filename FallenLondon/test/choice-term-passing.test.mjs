@@ -100,7 +100,7 @@ const TABLES = ['ARBOR_OPTIONS', 'LBI_OPTIONS', 'DME_OPTIONS', 'VH_OPTIONS', 'FQ
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { TP_ROWS, TP_OPTIONS, TP_CAROUSEL, TP_STORYLETS, TP_INDEX, TP_CLASS,'
+    'return { factionText, TP_ROWS, TP_OPTIONS, TP_CAROUSEL, TP_STORYLETS, TP_INDEX, TP_CLASS,'
     + ' TP_BRANCH_CLASS, tpBadgeText, tpSpec, tpStoryletSpec, tpRatings, tpConnected, tpWorth,'
     + ' carouselLookup, '
     + TABLES.join(', ')
@@ -261,6 +261,13 @@ check('no Term Passing name is in another feature\'s table',
     return [...new Set(rows.map((e) => e.name))].filter((n) => others.includes(key(n))); })(), []);
 
 check('the feature is registered', api.FEATURES.some((f) => f.name === 'term-passing'), true);
+
+// Renown and Favours an option gives or takes follow the badge itself, never
+// the tooltip alone (the adding-fallen-london-features skill, step 5).
+check('every faction result is on the badge, after it',
+  api.TP_OPTIONS.filter((e) => e.factions && e.factions.length)
+    .map((e) => [e.name || e.branch, (api.tpBadgeText(e)).endsWith(' · ' + api.factionText(e.factions))]),
+  [["Report them to the Constables",true],["Comrades",true]]);
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall good');
 process.exit(failures ? 1 : 0);

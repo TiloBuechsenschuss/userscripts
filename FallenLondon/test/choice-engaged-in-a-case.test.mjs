@@ -170,8 +170,8 @@ check('badges for each kind of row',
   ['Ask anyone with an interest', 'Put together scraps of information', 'Seek wisdom in the flights of bats',
    'Solving a case: ask the spies of London', 'Solving a case: Reach out to the Constables',
    'Solving a case: ask your criminal contacts', 'Solving a case: ask down by the river'].map((n) => api.caseBadgeText(row(n))),
-  ['Prog +6/+3? · 3 actions', 'Prog +6/+3? · 2 actions ▼', '≈Prog +2.4', 'Prog +10 ▼', 'Prog +6', 'Prog +7 ▼',
-   '≈Prog +4.2 ▼']);
+  ['Prog +6/+3? · 3 actions', 'Prog +6/+3? · 2 actions ▼', '≈Prog +2.4', 'Prog +10 ▼ · Favours: The Great Game −1', 'Prog +6',
+   'Prog +7 ▼ · Favours: Criminals −1', '≈Prog +4.2 ▼ · Favours: The Docks −1']);
 
 check('a scaling challenge and cost, worked out at the Poet\'s 5 and the Heiress\'s 8',
   (() => { const t = api.caseSpec(row('Put together scraps of information')).title;

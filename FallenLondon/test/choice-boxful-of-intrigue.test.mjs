@@ -199,7 +199,7 @@ check('badges', [['Expose him to the newspapers'], ['Intercept the messages'],
   ['Those who govern'], ['Memory is a strange old thing (10 FATE)']]
   .map(([n]) => api.boxBadgeText(row(n))),
   ['Conscience · Box +1?', 'Conscience · Box +1? · Plaques ×2', 'either side · Box +1?',
-    'Stolen Correspondence ×300 + Criminals favour · 22 E', 'side: Conscience', 'Fate · play it again']);
+    'Stolen Correspondence ×300 · 22 E · Favours: Criminals +1', 'side: Conscience', 'Fate · play it again']);
 
 // The Airs of London retitle one payout, so both titles have to find it.
 check('the urchin payout is found under either of its two titles',

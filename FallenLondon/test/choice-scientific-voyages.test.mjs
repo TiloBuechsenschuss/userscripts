@@ -128,7 +128,7 @@ class FakeObserver { observe() {} }
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { VSD_OPTIONS, VSD_ISLANDS, VSD_NOTES, VSD_NOTE_KEYS, VSD_ISLAND_ACTIONS,'
+    'return { factionText, VSD_OPTIONS, VSD_ISLANDS, VSD_NOTES, VSD_NOTE_KEYS, VSD_ISLAND_ACTIONS,'
     + ' VSD_COLOR_GOODS, VSD_COLOR_LEAVE, VSD_COLOR_SPEND, VSD_COLOR_BEST,'
     + ' VSD_BEST_PER_NOTE, VSD_STRICT_STORYLETS, VSD_CLASS, VSD_BRANCH_CLASS, VSD_BRANCH_FLAG,'
     + ' vsdLuckValue, vsdPages, vsdBadgeText, vsdColor, vsdSpec, vsdStoryletSpec,'
@@ -513,6 +513,13 @@ check('the feature and the panel are both registered',
   [api.FEATURES.some((f) => f.name === 'scientific-voyages'),
    api.PANELS.some((p) => p.id === 'scientific-voyages' && p.render === api.renderVsdPanel)],
   [true, true]);
+
+// Renown and Favours an option gives or takes follow the badge itself, never
+// the tooltip alone (the adding-fallen-london-features skill, step 5).
+check('every faction result is on the badge, after it',
+  api.VSD_OPTIONS.filter((e) => e.factions && e.factions.length)
+    .map((e) => [e.name || e.branch, (api.vsdBadgeText(e)).endsWith(' · ' + api.factionText(e.factions))]),
+  [["Find promising students",true],["Look at the current trend for Theosophistry",true]]);
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall good');
 process.exit(failures ? 1 : 0);

@@ -511,7 +511,9 @@ check('the zee ratings are registered alongside the other features',
     'sunken-embassy', 'law-furnace', 'prelapsarian-museum', 'on-a-heist', 'spider-symposium', 'short-stories',
     'flash-lays', 'social-actions', 'cave-of-the-nadir', 'empress-court', 'breeding-monsters', 'mahogany-hall', 'master-classes',
     'sixth-coil', 'rat-market', 'boxful-of-intrigue', 'underclay', 'hunting-bees',
-    'featuring-tales-university', 'term-passing']);
+    'featuring-tales-university', 'term-passing', 'trade-in-reputations', 'savage-cobbles', 'publishing-newspaper',
+    'war-of-assassins', 'wars-of-illusion', 'foreign-posting', 'temple-club', 'attending-party', 'missing-woman',
+    'wilmots-business', 'brawling-dockers', 'assembling-skeleton', 'professional-activities', 'hearts-game']);
 
 check('the Zailing panel is in the launcher menu',
   api.PANELS.map((p) => p.id), ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory']);

@@ -1,18 +1,19 @@
-// Ad-hoc test for FallenLondon/choice-helper.js's Breeding Monsters badges
-// ('breeding-monsters').
+// Ad-hoc test for FallenLondon/choice-helper.js's Riding the Savage Cobbles
+// badges ('savage-cobbles').
 //
 // There's no test runner in this repo (see AGENTS.md). This is a standalone
 // Node script: it reads the userscript, evaluates its IIFE against a stub DOM
 // (empty, so the initial scan() finds nothing) and pulls out the internals.
 //
-// What's worth pinning here: every beast's expected Echoes against the
-// guide's overview, 21 CP at +3 being the guide's seven actions, the same
-// breeding title resolving by the open storylet, and the badges.
+// What's worth pinning here: the guide's two cross-checks -- 14 actions to
+// level 7 at full success, and "Dangerous 209" as the level that makes every
+// patrol certain -- then the conclusions' Echo values, which is what the badge
+// quotes, and that a patrol badge is only drawn inside its own storylet.
 //
-// Numbers come from Breeding Monsters (Guide) and its storylet and option
-// pages on fallenlondon.wiki, fetched through the API on 2026-09-15.
+// Numbers come from Riding the Savage Cobbles (Guide) and the storylet and
+// option pages on fallenlondon.wiki, fetched through the API on 2026-09-17.
 //
-//   node FallenLondon/test/choice-breeding-monsters.test.mjs
+//   node FallenLondon/test/choice-savage-cobbles.test.mjs
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -72,11 +73,13 @@ function makeHeading(text) {
 
 let roots = [];
 let branches = [];
+let hand = [];
 const fakeDoc = {
   body: makeEl('body'),
   querySelectorAll: (sel) => {
     if (sel === '.storylet-root__heading' || sel === '.storylet__heading, .storylet-root__heading') return roots;
     if (sel === '.branch__title') return branches;
+    if (sel === '.hand .small-card__body .media__heading') return hand;
     return [];
   },
   querySelector: () => null,
@@ -87,15 +90,19 @@ const fakeDoc = {
 };
 class FakeObserver { observe() {} }
 
-const TABLES = ['ARBOR_OPTIONS', 'LBI_OPTIONS', 'DME_OPTIONS', 'VH_OPTIONS', 'FQ_OPTIONS', 'CM_OPTIONS', 'SOUP_OPTIONS',
-  'MIND_OPTIONS', 'CASE_OPTIONS', 'EMB_OPTIONS', 'LAW_OPTIONS', 'MUS_OPTIONS', 'HEIST_OPTIONS', 'SPIDER_OPTIONS',
-  'STORY_OPTIONS', 'FLASH_OPTIONS', 'SOCIAL_OPTIONS', 'NADIR_OPTIONS', 'COURT_OPTIONS', 'BREED_OPTIONS'];
+const TABLES = ['ARBOR_OPTIONS', 'LBI_OPTIONS', 'DME_OPTIONS', 'VH_OPTIONS', 'FQ_OPTIONS', 'CM_OPTIONS',
+  'SOUP_OPTIONS', 'MIND_OPTIONS', 'CASE_OPTIONS', 'EMB_OPTIONS', 'LAW_OPTIONS', 'MUS_OPTIONS',
+  'HEIST_OPTIONS', 'SPIDER_OPTIONS', 'STORY_OPTIONS', 'FLASH_OPTIONS', 'SOCIAL_OPTIONS', 'NADIR_OPTIONS',
+  'COURT_OPTIONS', 'BREED_OPTIONS', 'MH_OPTIONS', 'MC_OPTIONS', 'SIXTH_ROOM_OPTIONS', 'RM_OPTIONS',
+  'BOX_OPTIONS', 'UC_OPTIONS', 'HB_ALL', 'TP_OPTIONS', 'TIR_OPTIONS', 'RSC_OPTIONS', 'NP_OPTIONS', 'WOA_OPTIONS',
+  'WOI_OPTIONS', 'FP_OPTIONS', 'TC_OPTIONS'];
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { BREED_TABLE, BREED_STORYLETS, BREED_INDEX, BREED_CLASS, BREED_BRANCH_CLASS, breedExpected, breedBadgeText, breedSpec,'
-    + ' breedStoryletSpec, breedRatings, carouselLookup, ' + TABLES.join(', ')
-    + ', ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS, LAB_CARDS, PC_OPTIONS, VSD_OPTIONS, normalizeName, BADGE_CLASS, FEATURES }; })();');
+    'return { RSC_STORYLETS, RSC_LOW, RSC_MID, RSC_CLASS, RSC_BRANCH_CLASS, rscSpec, rscRatings, broadCertainAt, posiBadgeText, carouselHandSpec, '
+    + TABLES.join(', ')
+    + ', ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS, LAB_CARDS, PC_OPTIONS, VSD_OPTIONS, normalizeName,'
+    + ' BADGE_CLASS, FEATURES }; })();');
 const api = new Function(
   'document', 'MutationObserver', 'requestAnimationFrame', 'getComputedStyle', 'console',
   wrapped + '\nreturn globalThis.__flux;')(fakeDoc, FakeObserver, () => {}, () => ({ position: 'relative' }), console);
@@ -110,8 +117,6 @@ function check(label, got, expected) {
   if (!ok) console.log('   expected:', e, '\n   got:     ', g);
 }
 const key = api.normalizeName;
-const rows = api.BREED_OPTIONS;
-const row = (name, storylet) => rows.find((e) => e.name === name && (!storylet || e.storylet === storylet));
 const badgeOf = (head, cls) => {
   for (let n = head.nextElementSibling; n && n.classList.contains(api.BADGE_CLASS); n = n.nextElementSibling) {
     if (n.classList.contains(cls)) return n;
@@ -126,54 +131,61 @@ function otherNames(own) {
     ...api.PC_OPTIONS.flatMap((p) => [p.name, p.branch || '']), ...api.VSD_OPTIONS.flatMap((v) => [v.storylet, v.branch]),
   ].map(key).filter(Boolean);
 }
-const breeds = rows.filter((e) => e.breed);
+function otherStorylets(own) {
+  return TABLES.filter((t) => t !== own).flatMap((t) => api[t].map((e) => e.storylet)).map(key).filter(Boolean);
+}
+const rows = api.RSC_OPTIONS;
+const row = (name) => rows.find((e) => e.name === name);
 
-check('seven breeding storylets, four beasts each', [api.BREED_TABLE.length, breeds.length], [7, 28]);
+// Level 7 is 1 + 2 + … + 7 = 28 CP, which the best patrol makes 2 CP at a time.
+check('14 actions to level 7 at full success, as the guide says',
+  28 / Math.max(...rows.filter((e) => e.win && e.ch).map((e) => e.win[0][1])), 14);
 
-check('every expectation is the guide\'s, at 70% success',
-  breeds.filter((e) => api.breedExpected(e.breed) !== e.breed.guideE).map((e) => e.storylet + ' / ' + e.name), []);
+check('Dangerous 209 makes every Dangerous patrol certain, as the guide says',
+  Math.max(...rows.filter((e) => e.win && e.ch && e.ch.stat === 'Dangerous').map((e) => api.broadCertainAt(e.ch.diff))), 209);
 
-check('6 of a quality is 21 CP: the guide\'s seven actions at +3', [6 * 7 / 2, 6 * 7 / 2 / 3], [21, 7]);
+check('the conclusions\' Echo values are the guide\'s',
+  rows.filter((e) => e.pays).map((e) => [e.pays.worth, e.pays.failWorth == null ? null : e.pays.failWorth]),
+  [[17.5, 7.5], [17.5, 9.5], [18.5, 9.6], [18.5, 9.5], [18, null]]);
 
-check('the Rubbery Hound pays best on every breeding storylet',
-  api.BREED_TABLE.map((s) => {
-    const own = breeds.filter((e) => e.storylet === s[0]);
-    return own.reduce((a, b) => (api.breedExpected(b.breed) > api.breedExpected(a.breed) ? b : a)).beast;
-  }), Array(7).fill('Rubbery Hound'));
+check('eight patrol storylets, four at 0–4 and four at 5–6',
+  [api.RSC_LOW.length, api.RSC_MID.length, [...api.RSC_LOW, ...api.RSC_MID].every((s) => api.RSC_STORYLETS.includes(s))],
+  [4, 4, true]);
 
-check('the same title resolves by the open storylet',
-  ['Breeding through Discipline', 'Pulling out the Stops', 'Casting out Devils']
-    .map((s) => { const e = api.carouselLookup(api.BREED_INDEX, 'Breed the Plated Seal', key(s)); return e && api.breedBadgeText(e); }),
-  ['Passphrase ×15/11 · ≈34.5 ▼', 'Hound of Heaven ×1 · ≈52.5 ▼', null]);
+check('badges', ['Into the street with bottle and truncheon', 'Have a little word', 'Walk away', 'Go and crack some heads',
+  'BLEF! BLEF!', 'Turn a blind eye'].map((n) => api.rscSpec(row(n)).text),
+['Cobbles +2 CP? / +1', 'Cobbles +1 CP', 'Cobbles −2 CP', 'Rifles · 17.5? / 7.5', 'Documents ×36 · 18',
+  'Dangerous +5 CP · keeps Cobbles']);
 
-check('badges', [['Be kind'], ['Breed the Somnolent Hyaena', 'Breeding through Discipline'],
-  ['Sabotage the process, for the benefit of devils']].map(([n, s]) => api.breedBadgeText(row(n, s))),
-  ['Taming +3?', 'Shriek ×1050/700 · ≈18.9 ▼', 'Brass Rings ▼ · Favours: Hell +3 · Favours: The Church −all']);
-
-check('the challenge with no recorded difficulty says so',
-  api.breedSpec(row('Whispering at monsters')).title.includes('the page records no difficulty'), true);
+check('a failure\'s menace is in the tooltip',
+  [api.rscSpec(row('Run to the scene!')).title.includes('Failure: Riding the Savage Cobbles +1 CP, Nightmares +1 CP.'),
+    api.rscSpec(row('Keep a quiet dignity')).title.includes('Proscribed Material ×240, Wounds +2 CP')],
+  [true, true]);
 
 check('the registered pass',
   (() => {
-    const seal = makeHeading('Breed the Plated Seal');
-    const kind = makeHeading('Be kind');
-    branches = [seal, kind];
-    roots = [makeHeading('A Firm Hand')];
-    api.breedRatings();
-    const out = [text(roots[0], api.BREED_CLASS), text(seal, api.BREED_BRANCH_CLASS), text(kind, api.BREED_BRANCH_CLASS)];
-    roots = [makeHeading('Tame your... Thing')];
-    api.breedRatings();
-    out.push(text(roots[0], api.BREED_CLASS), text(seal, api.BREED_BRANCH_CLASS), text(kind, api.BREED_BRANCH_CLASS));
+    const option = makeHeading('Get to it');
+    branches = [option];
+    roots = [makeHeading('Foil a Robbery')];
+    api.rscRatings();
+    const out = [text(roots[0], api.RSC_CLASS), text(option, api.RSC_BRANCH_CLASS)];
+    roots = [makeHeading('Messenger Duty')];
+    api.rscRatings();
+    out.push(text(roots[0], api.RSC_CLASS), text(option, api.RSC_BRANCH_CLASS));
     roots = []; branches = [];
     return out;
   })(),
-  ['breed', 'Damask ×4/2 · ≈42.5 ▼', null, 'progress', null, 'Taming +3?']);
+  ['Cobbles 0–4', 'Cobbles +2 CP? / +1', 'Cobbles 0–4', null]);
 
-check('no Breeding Monsters name is in another feature\'s table',
-  (() => { const others = otherNames('BREED_OPTIONS');
+check('no Savage Cobbles option name is in another feature\'s table',
+  (() => { const others = otherNames('RSC_OPTIONS');
     return [...new Set(rows.map((e) => e.name))].filter((n) => others.includes(key(n))); })(), []);
 
-check('the feature is registered', api.FEATURES.some((f) => f.name === 'breeding-monsters'), true);
+check('no Savage Cobbles storylet is another feature\'s',
+  (() => { const others = otherStorylets('RSC_OPTIONS');
+    return api.RSC_STORYLETS.filter((s) => others.includes(key(s))); })(), []);
+
+check('the feature is registered', api.FEATURES.some((f) => f.name === 'savage-cobbles'), true);
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall good');
 process.exit(failures ? 1 : 0);

@@ -170,8 +170,8 @@ check('badges', [['Steal props and goods from other theatres'], ['Take a backsta
   ['Friday', 'The weekly variety bill!'], ['Book a Decaying Humorist'], ['Spread the seeds'],
   ['‘Obtain’ licences from the Ministry of Public Decency']]
   .map(([n, s]) => api.mhBadgeText(row(n, s))),
-  ['Tales +2? · Brass ×102', '−8 CP? · Jade ×200', 'Tales 12 · Song +1 CP', '−14 CP · Tomb-Colonies ×1',
-    '−20 CP · 3 menaces, 2 factions ▼', 'Tales +2? · Inklings ×30 ▼']);
+  ['Tales +2? · Brass ×102', '−8 CP? · Jade ×200', 'Tales 12 · Song +1 CP', '−14 CP · Favours: Tomb-Colonies +1',
+    '−20 CP · 3 menaces ▼ · Favours: Bohemians −3 · Favours: Society −5', 'Tales +2? · Inklings ×30 ▼']);
 
 // Friday's "reward" is a menace, so it must not read as a count of items.
 check('a change-point figure is printed as itself, not as a number of items',

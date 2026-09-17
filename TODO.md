@@ -45,25 +45,25 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Term_Passing..._(Guide) [The University] (implemented)
 
   Early PoSI:
-    - https://fallenlondon.wiki/wiki/A_Trade_in_Reputations_(Guide) [A Trade in Reputations]
-    - https://fallenlondon.wiki/wiki/Riding_the_Savage_Cobbles_(Guide) [Concord Square]
-    - https://fallenlondon.wiki/wiki/Publishing_a_Newspaper_(Guide) [Doubt Street]
-    - https://fallenlondon.wiki/wiki/Fighting_a_War_of_Assassins_(Guide) [The Flit, The Forgotten Quarter]
-    - https://fallenlondon.wiki/wiki/Embroiled_in_the_Wars_of_Illusion_(Guide) [The Flit, Mahogany Hall]
-    - https://fallenlondon.wiki/wiki/Working_toward_a_Foreign_Posting_(Guide) [The Foreign Office]
-    - https://fallenlondon.wiki/wiki/The_Temple_Club_(Guide) [The Temple Club]
-    - https://fallenlondon.wiki/wiki/Attending_a_Party_(Guide) [Veilgarden]
-    - https://fallenlondon.wiki/wiki/Searching_out_a_Missing_Woman_(Guide) [Wilmot's End]
-    - https://fallenlondon.wiki/wiki/Doing_Business_in_Wilmot%27s_End_(Guide) [Wilmot's End]
+    - https://fallenlondon.wiki/wiki/A_Trade_in_Reputations_(Guide) [A Trade in Reputations] (implemented)
+    - https://fallenlondon.wiki/wiki/Riding_the_Savage_Cobbles_(Guide) [Concord Square] (implemented)
+    - https://fallenlondon.wiki/wiki/Publishing_a_Newspaper_(Guide) [Doubt Street] (implemented)
+    - https://fallenlondon.wiki/wiki/Fighting_a_War_of_Assassins_(Guide) [The Flit, The Forgotten Quarter] (implemented)
+    - https://fallenlondon.wiki/wiki/Embroiled_in_the_Wars_of_Illusion_(Guide) [The Flit, Mahogany Hall] (implemented)
+    - https://fallenlondon.wiki/wiki/Working_toward_a_Foreign_Posting_(Guide) [The Foreign Office] (implemented)
+    - https://fallenlondon.wiki/wiki/The_Temple_Club_(Guide) [The Temple Club] (implemented)
+    - https://fallenlondon.wiki/wiki/Attending_a_Party_(Guide) [Veilgarden] (implemented)
+    - https://fallenlondon.wiki/wiki/Searching_out_a_Missing_Woman_(Guide) [Wilmot's End] (implemented)
+    - https://fallenlondon.wiki/wiki/Doing_Business_in_Wilmot%27s_End_(Guide) [Wilmot's End] (implemented)
 
   Mid PoSI:
-    - https://fallenlondon.wiki/wiki/Brawling_with_Dockers_(Guide) [The Blind Helmsman]
-    - https://fallenlondon.wiki/wiki/Assembling_a_Skeleton_(Guide) [The Bone Market]
+    - https://fallenlondon.wiki/wiki/Brawling_with_Dockers_(Guide) [The Blind Helmsman] (implemented)
+    - https://fallenlondon.wiki/wiki/Assembling_a_Skeleton_(Guide) [The Bone Market] (implemented)
     - https://fallenlondon.wiki/wiki/University_Laboratory_(Guide) [University Laboratory] (implemented) (works)
-    - https://fallenlondon.wiki/wiki/Professional_Activities_(Guide) [Your Activities]
+    - https://fallenlondon.wiki/wiki/Professional_Activities_(Guide) [Your Activities] (implemented)
 
   Late PoSI:
-    - https://fallenlondon.wiki/wiki/Hearts%27_Game_(Guide) [Watchmaker's Hill]
+    - https://fallenlondon.wiki/wiki/Hearts%27_Game_(Guide) [Watchmaker's Hill] (implemented)
 
   Early Parabola:
     - https://fallenlondon.wiki/wiki/The_Chessboard_(Guide) [The Chessboard]

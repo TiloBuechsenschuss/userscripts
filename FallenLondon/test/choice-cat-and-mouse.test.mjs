@@ -201,7 +201,8 @@ check('Luck lines are their expectation, marked as one',
   ['≈Cat +3.5', '≈Cat +5.6', '≈Cat +7', '≈Cat +8.1']);
 
 check('the four options spending two Mouse say so',
-  api.CM_OPTIONS.filter((e) => e.mouse === 2).map((e) => api.cmBadgeText(e)), Array(4).fill('Cat +10 Mouse −2 ▼'));
+  api.CM_OPTIONS.filter((e) => e.mouse === 2).map((e) => api.cmBadgeText(e)),
+  ['Cat +10 Mouse −2 ▼', 'Cat +10 Mouse −2 ▼ · Favours: Society −1', 'Cat +10 Mouse −2 ▼', 'Cat +10 Mouse −2 ▼']);
 
 check('a sure line: Cat, and what it uses up',
   [api.cmBadgeText(row('Time is passing: play it safe', api.CM_MAP)), api.cmColor(row('Time is passing: play it safe'))],

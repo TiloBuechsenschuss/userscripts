@@ -1,18 +1,21 @@
-// Ad-hoc test for FallenLondon/choice-helper.js's Breeding Monsters badges
-// ('breeding-monsters').
+// Ad-hoc test for FallenLondon/choice-helper.js's Doing Business in Wilmot's
+// End badges ('wilmots-business').
 //
 // There's no test runner in this repo (see AGENTS.md). This is a standalone
 // Node script: it reads the userscript, evaluates its IIFE against a stub DOM
 // (empty, so the initial scan() finds nothing) and pulls out the internals.
 //
-// What's worth pinning here: every beast's expected Echoes against the
-// guide's overview, 21 CP at +3 being the guide's seven actions, the same
-// breeding title resolving by the open storylet, and the badges.
+// What's worth pinning here: that every Walking the Paths a choice can set leaves
+// a storylet open at 2 and at 4; the Great Game Favour on the badge, after it;
+// that the payout the game titles "An exchange of favours" is found under that
+// plain title inside its own storylet only -- Working toward a Foreign Posting
+// owns the plain title as a row name -- and the Luck card in the hand.
 //
-// Numbers come from Breeding Monsters (Guide) and its storylet and option
-// pages on fallenlondon.wiki, fetched through the API on 2026-09-15.
+// Numbers come from Doing Business in Wilmot's End (Guide) and the storylet,
+// card and option pages on fallenlondon.wiki, fetched through the API on
+// 2026-09-17.
 //
-//   node FallenLondon/test/choice-breeding-monsters.test.mjs
+//   node FallenLondon/test/choice-wilmots-business.test.mjs
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -72,11 +75,13 @@ function makeHeading(text) {
 
 let roots = [];
 let branches = [];
+let hand = [];
 const fakeDoc = {
   body: makeEl('body'),
   querySelectorAll: (sel) => {
     if (sel === '.storylet-root__heading' || sel === '.storylet__heading, .storylet-root__heading') return roots;
     if (sel === '.branch__title') return branches;
+    if (sel === '.hand .small-card__body .media__heading') return hand;
     return [];
   },
   querySelector: () => null,
@@ -87,15 +92,19 @@ const fakeDoc = {
 };
 class FakeObserver { observe() {} }
 
-const TABLES = ['ARBOR_OPTIONS', 'LBI_OPTIONS', 'DME_OPTIONS', 'VH_OPTIONS', 'FQ_OPTIONS', 'CM_OPTIONS', 'SOUP_OPTIONS',
-  'MIND_OPTIONS', 'CASE_OPTIONS', 'EMB_OPTIONS', 'LAW_OPTIONS', 'MUS_OPTIONS', 'HEIST_OPTIONS', 'SPIDER_OPTIONS',
-  'STORY_OPTIONS', 'FLASH_OPTIONS', 'SOCIAL_OPTIONS', 'NADIR_OPTIONS', 'COURT_OPTIONS', 'BREED_OPTIONS'];
+const TABLES = ['ARBOR_OPTIONS', 'LBI_OPTIONS', 'DME_OPTIONS', 'VH_OPTIONS', 'FQ_OPTIONS', 'CM_OPTIONS',
+  'SOUP_OPTIONS', 'MIND_OPTIONS', 'CASE_OPTIONS', 'EMB_OPTIONS', 'LAW_OPTIONS', 'MUS_OPTIONS',
+  'HEIST_OPTIONS', 'SPIDER_OPTIONS', 'STORY_OPTIONS', 'FLASH_OPTIONS', 'SOCIAL_OPTIONS', 'NADIR_OPTIONS',
+  'COURT_OPTIONS', 'BREED_OPTIONS', 'MH_OPTIONS', 'MC_OPTIONS', 'SIXTH_ROOM_OPTIONS', 'RM_OPTIONS',
+  'BOX_OPTIONS', 'UC_OPTIONS', 'HB_ALL', 'TP_OPTIONS', 'TIR_OPTIONS', 'RSC_OPTIONS', 'NP_OPTIONS', 'WOA_OPTIONS',
+  'WOI_OPTIONS', 'FP_OPTIONS', 'TC_OPTIONS', 'PARTY_OPTIONS', 'MWS_OPTIONS', 'DBW_OPTIONS'];
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { BREED_TABLE, BREED_STORYLETS, BREED_INDEX, BREED_CLASS, BREED_BRANCH_CLASS, breedExpected, breedBadgeText, breedSpec,'
-    + ' breedStoryletSpec, breedRatings, carouselLookup, ' + TABLES.join(', ')
-    + ', ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS, LAB_CARDS, PC_OPTIONS, VSD_OPTIONS, normalizeName, BADGE_CLASS, FEATURES }; })();');
+    'return { DBW, DBW_HAND, DBW_STORYLETS, DBW_CLASS, DBW_BRANCH_CLASS, dbwSpec, dbwRatings, factionText, broadCertainAt, posiBadgeText, carouselHandSpec, '
+    + TABLES.join(', ')
+    + ', ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS, LAB_CARDS, PC_OPTIONS, VSD_OPTIONS, normalizeName,'
+    + ' BADGE_CLASS, FEATURES }; })();');
 const api = new Function(
   'document', 'MutationObserver', 'requestAnimationFrame', 'getComputedStyle', 'console',
   wrapped + '\nreturn globalThis.__flux;')(fakeDoc, FakeObserver, () => {}, () => ({ position: 'relative' }), console);
@@ -110,8 +119,6 @@ function check(label, got, expected) {
   if (!ok) console.log('   expected:', e, '\n   got:     ', g);
 }
 const key = api.normalizeName;
-const rows = api.BREED_OPTIONS;
-const row = (name, storylet) => rows.find((e) => e.name === name && (!storylet || e.storylet === storylet));
 const badgeOf = (head, cls) => {
   for (let n = head.nextElementSibling; n && n.classList.contains(api.BADGE_CLASS); n = n.nextElementSibling) {
     if (n.classList.contains(cls)) return n;
@@ -126,54 +133,56 @@ function otherNames(own) {
     ...api.PC_OPTIONS.flatMap((p) => [p.name, p.branch || '']), ...api.VSD_OPTIONS.flatMap((v) => [v.storylet, v.branch]),
   ].map(key).filter(Boolean);
 }
-const breeds = rows.filter((e) => e.breed);
+function otherStorylets(own) {
+  return TABLES.filter((t) => t !== own).flatMap((t) => api[t].map((e) => e.storylet)).map(key).filter(Boolean);
+}
+const rows = api.DBW_OPTIONS;
+const row = (name) => rows.find((e) => e.name === name);
 
-check('seven breeding storylets, four beasts each', [api.BREED_TABLE.length, breeds.length], [7, 28]);
+check('every Paths a choice can set leaves a storylet open at Business 2 and at 4',
+  [1, 2, 3].map((paths) => ['Business 2', 'Business 4'].map((at) => Object.entries(api.DBW.headings)
+    .filter(([s, h]) => h.indexOf(at) === 0 && !/card|choose|cash/.test(h))
+    .filter(([s, h]) => { const m = h.match(/Paths (\d)–(\d)/); return !m || (paths >= +m[1] && paths <= +m[2]); })
+    .length > 0)), [[true, true], [true, true], [true, true]]);
 
-check('every expectation is the guide\'s, at 70% success',
-  breeds.filter((e) => api.breedExpected(e.breed) !== e.breed.guideE).map((e) => e.storylet + ' / ' + e.name), []);
+check('the Great Game Favour is on the badge, after it',
+  rows.filter((e) => e.factions).map((e) => [e.name, api.dbwSpec(e).text]),
+  [['An exchange of favours 2', 'Stolen Kiss ×8 ▼ · Favours: The Great Game +1']]);
 
-check('6 of a quality is 21 CP: the guide\'s seven actions at +3', [6 * 7 / 2, 6 * 7 / 2 / 3], [21, 7]);
+check('badges', ['Money. Power. The Game itself.', 'The long, twisting path', 'The Iron Way', '“Hard lessons”',
+  'Make the deal', 'Keeping the Game moving'].map((n) => api.dbwSpec(row(n)).text),
+['Business → 2 Paths → 2', 'Business +1 CP?', '≈Business +1.2 CP', 'Business → 4 Paths → 3', 'Legal Document',
+  'Tension +1 CP']);
 
-check('the Rubbery Hound pays best on every breeding storylet',
-  api.BREED_TABLE.map((s) => {
-    const own = breeds.filter((e) => e.storylet === s[0]);
-    return own.reduce((a, b) => (api.breedExpected(b.breed) > api.breedExpected(a.breed) ? b : a)).beast;
-  }), Array(7).fill('Rubbery Hound'));
+check('the Luck card in the hand, and the other card by its challenge',
+  [api.carouselHandSpec(api.DBW_HAND, 'The Sights of Wilmot’s End').text,
+    api.carouselHandSpec(api.DBW_HAND, 'A New Move in the Game').text],
+  ['≈Business +1.2 CP', 'Business +1 CP?']);
 
-check('the same title resolves by the open storylet',
-  ['Breeding through Discipline', 'Pulling out the Stops', 'Casting out Devils']
-    .map((s) => { const e = api.carouselLookup(api.BREED_INDEX, 'Breed the Plated Seal', key(s)); return e && api.breedBadgeText(e); }),
-  ['Passphrase ×15/11 · ≈34.5 ▼', 'Hound of Heaven ×1 · ≈52.5 ▼', null]);
-
-check('badges', [['Be kind'], ['Breed the Somnolent Hyaena', 'Breeding through Discipline'],
-  ['Sabotage the process, for the benefit of devils']].map(([n, s]) => api.breedBadgeText(row(n, s))),
-  ['Taming +3?', 'Shriek ×1050/700 · ≈18.9 ▼', 'Brass Rings ▼ · Favours: Hell +3 · Favours: The Church −all']);
-
-check('the challenge with no recorded difficulty says so',
-  api.breedSpec(row('Whispering at monsters')).title.includes('the page records no difficulty'), true);
-
-check('the registered pass',
+check('"An exchange of favours" is answered here only inside its own storylet',
   (() => {
-    const seal = makeHeading('Breed the Plated Seal');
-    const kind = makeHeading('Be kind');
-    branches = [seal, kind];
-    roots = [makeHeading('A Firm Hand')];
-    api.breedRatings();
-    const out = [text(roots[0], api.BREED_CLASS), text(seal, api.BREED_BRANCH_CLASS), text(kind, api.BREED_BRANCH_CLASS)];
-    roots = [makeHeading('Tame your... Thing')];
-    api.breedRatings();
-    out.push(text(roots[0], api.BREED_CLASS), text(seal, api.BREED_BRANCH_CLASS), text(kind, api.BREED_BRANCH_CLASS));
+    const exchange = makeHeading('An exchange of favours');
+    branches = [exchange];
+    roots = [makeHeading('Another contact in the fog')];
+    api.dbwRatings();
+    const out = [text(roots[0], api.DBW_CLASS), text(exchange, api.DBW_BRANCH_CLASS)];
+    roots = [makeHeading('The Value of Good Names')];
+    api.dbwRatings();
+    out.push(text(exchange, api.DBW_BRANCH_CLASS));
     roots = []; branches = [];
     return out;
   })(),
-  ['breed', 'Damask ×4/2 · ≈42.5 ▼', null, 'progress', null, 'Taming +3?']);
+  ['Business 5 · cash in', 'Stolen Kiss ×8 ▼ · Favours: The Great Game +1', null]);
 
-check('no Breeding Monsters name is in another feature\'s table',
-  (() => { const others = otherNames('BREED_OPTIONS');
+check('no Doing Business option name is in another feature\'s table',
+  (() => { const others = otherNames('DBW_OPTIONS');
     return [...new Set(rows.map((e) => e.name))].filter((n) => others.includes(key(n))); })(), []);
 
-check('the feature is registered', api.FEATURES.some((f) => f.name === 'breeding-monsters'), true);
+check('no Doing Business storylet is another feature\'s',
+  (() => { const others = otherStorylets('DBW_OPTIONS');
+    return api.DBW_STORYLETS.filter((s) => others.includes(key(s))); })(), []);
+
+check('the feature is registered', api.FEATURES.some((f) => f.name === 'wilmots-business'), true);
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall good');
 process.exit(failures ? 1 : 0);
