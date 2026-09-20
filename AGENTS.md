@@ -2229,6 +2229,158 @@ navigation. Two consequences:
   wiki's disambiguated titles with the plain one as an alias, the same rule Hunter's Keep follows for
   *Prepare yourself*.
 
+  **Piracy** (`piracy`, `PIR_OPTIONS`, `PIR_REGIONS`, `PIR_STASH_PORTS`): the two storylets that are
+  piracy's own — *Matters Piratical*, the flag and the bounty desk, and *The Citadel within the
+  Citadel* at Gaider's Mourn, which is the shop. An exchange badges its price in Stashed Treasure and
+  the Respected by the Corsairs it pays (`Candles ×5 · −1,250 · Respected +1`), and the suite checks
+  the two agree at 1,250 treasure a change point. Everything on Matters Piratical is a switch rather
+  than a payout, so those badges say what the switch does — and that **lowering the colours costs three
+  actions** against the one it took to raise them, which is the only number there that can surprise
+  you. **It deliberately owns no card name**: *A Message in a Bottle* and *Cornering the (Bounty) at
+  Last* are `zee-card-ratings`'s, and the regional plunder, chasing and bounty tables hang off the
+  Matters Piratical heading's tooltip instead. `(Bounty)` is in `CAROUSEL_PLACEHOLDER`, because the
+  game puts the quarry's name there. The guide's treasure-port table disagrees with the *Directions to
+  a Hidden Stash* quality page, and the page wins — `PIR_STASH_PORTS` is its eight levels.
+
+  **Irem** (`irem`, `IRM_OPTIONS`, `IRM_FUTURES`): the Loom, ten futures and the thirty passages
+  between them. A passage badges **where it goes and what it spends** (`A Silvered Future · Sinewy
+  ×2`), and taking one resets all three Warps. The claim the feature exists for is the derived one: a
+  future's own three cards pay only some of the three warps, so eight of the thirty passages can only
+  be opened with a card **carried in from elsewhere**, and those are marked `▾ smuggle` while the
+  storylet heading counts them (`Bombazine here · 2 of 3 exits need a smuggled warp ▾`). That is
+  cross-checked against the guide's suggested roads, which name the same legs in words. *A collapsed
+  passageway* is badged `never opens`, because its page says it is ruined for everybody — the guide's
+  map leaves it out rather than saying so. One disagreement went the page's way: *Walk around the
+  block* is Silken ×1, not the guide's ×2.
+
+  **Khaganian Intrigue** (`khaganian-intrigue`, `KH_OPTIONS`, `KH_AGENTS`, `KH_OPPORTUNITIES`): Khan's
+  Heart, its seven quarters, *False-Dawn* and *Begin an intrigue*. A progress option badges the
+  Infiltrating a success pays **and the hours it is offered in** (`Infiltrating +10? · Time 1–4`),
+  because Current Time in the Khanate is a 12-action clock that moves under you; an intrigue start
+  badges the Infiltrating the scheme will need and what it finally pays. Two titles are rewritten by a
+  quality and are carried as **aliases, not wildcards**: *Expand your network: Recruit (Agent)* has ten
+  (Airs of the Khanate) and *An opportunity: (Opportunity)* eleven (An Opportunity in the Khanate) —
+  wildcarding either would let it answer for one of the five other options that begin "An
+  opportunity:". Two pages beat the guide: *Direct your network* pays Infiltrating 5 and ten
+  Well-Placed Pawns, not the usual ten, and the Crackling Device costs 60 coinage and 3,000 slivers,
+  which the guide does not price. Both tooltips also carry the guide's higher A Player of Chess
+  recommendations (13 and 12) beside the pages' certainties (12 and 11). *Explore the canals in a
+  water-taxi* is two options under one title and is one row that names both.
+
+  **Helicon House** (`helicon-house`, `HH_OPTIONS`, `HH_COMPANIONS`): the evening in Ealing Gardens.
+  A badge carries Fitting in at Helicon House, the **Time Remaining window** and whatever shared
+  progress quality the option also pays (`Fitting +2? · TR 2+ · Investigating +20`). The eight options
+  that **end the visit** lead with `ends the night` before their payout, because three of them are the
+  cash-out the whole evening was for and spending one early throws the progress away. Three of the
+  guide's rows are one option in game — the wiki's trailing `2` is a disambiguator — so *Listen to the
+  compositions* is one row with a `[1, 2]` range, and the Euphonium and practitioners rows are one
+  each. *Make polite conversation with (a railway passenger)* is in `CAROUSEL_PLACEHOLDER`.
+  *Arrive fashionably late* is also an option of Attending a Party: a **known, safe exception** to the
+  one-name-one-table rule, because `carouselRatings` looks an option up only inside the open storylet,
+  and the suite pins the pair so it stays known.
+
+  **Painting in Balmoral** (`painting-balmoral`, `PB_OPTIONS`, `PB_PAYOUTS`): the badge exists to say
+  that **failing is fine**. Every painting action raises Painter's Progress by one whether the check
+  passes or not, so a failure costs nothing but the items and only steers the picture towards a
+  different style — and the best-paying composition in the guide's table, Luminosity 3 with Incendiary
+  3 at 6.63 Echoes an action, is three successes and three failures on purpose. So each action badges
+  BOTH outcomes (`Luminosity +1? · fail Nostalgic +1`), which is the one place in this file where
+  quoting only the success would hide the money rather than overstate it. *Unveil your Painting* is
+  seven wiki pages under one title — only the one your composition qualifies for is on the screen — so
+  it is one row pricing all seven, 17.50 Echoes at the worst and 112.16 at the best. One source
+  disagreement is recorded rather than resolved: the guide gives *Paint Balmoral in a subversive cast*
+  a failure of Nostalgic +1, the option page's failure block lists only the lost Vital Intelligence,
+  and the badge says `(guide)`. *Display your own painting* at Helicon House stays `helicon-house`'s
+  option and is priced on the rules line here instead.
+
+  **Disappearing** (`disappearing`, `DI_OPTIONS`): the other half of the Cabinet Noir, and **the first
+  feature to share a STORYLET with another**. `deciphering` owns *Work in your Cabinet Noir*'s
+  code-breaking options and this one owns its two Disappearing options; both badge that heading, with
+  their own class and dataset flag, and `carouselLookup` answers only for names in its own table, so
+  neither draws over the other. The two rows moved here out of `DC_OPTIONS`, where they had been
+  labels with no figures — the figures are in this guide. A badge carries the change points a success
+  pays and **what a failure still pays**, both Cabinet options paying something either way; at the
+  Clay Highwayman's camp it also carries the level off Waiting on a Ransom, which every escape action
+  gives. The cash-in leads with `Suspicion −33 · needs 10 · surplus lost`. One correction went the
+  page's way: the guide files *Map out the camp by candlelight* as a card and as a Watchful check;
+  it is an option of *Darkness at the camp* and the check is Shadowy 190.
+
+  **Cover Identities** (`cover-identities`, `CI_OPTIONS`, `CI_SALES`): the back room behind it. A
+  start badges the **Ties** it locks in, because Ties cannot be changed until the identity is gone and
+  they decide which sales are open; the four earned qualities badge their point and the **Suspicion
+  +3 CP** each costs, which the guide's table omits and the option pages state, and which is why
+  building an identity and erasing yourself are the same evening's work; the seven Backstory purchases
+  badge the points AND the points per ACTION, since the only two-action one pays twelve and is
+  therefore six a turn. None of the nine sales happens in this room, so `CI_SALES` lives on the
+  heading's tooltip with what each wants and pays.
+
+  **The Moonlit Woods** (`moonlit-woods`, `MW_OPTIONS`, `MW_QUARRY`): three numbers at once, and they
+  are not interchangeable — On the Scent is the quarry and is **lost the moment you spot something**,
+  Time Remaining is the clock, and Moonlit is the only thing kept between visits. So a wander badges
+  `Scent +2? · Moonlit +1`, a move the Time it costs, and all three spotting options end with `· ends
+  the walk`, which is the mistake the woods invite. Each clearing's heading names the quarry that can
+  be spotted there and the On the Scent it wants, and the Keeper's three options what the sighting is
+  finally worth in bones and with the Hinterland Prosperity cashed out.
+
+  **Canal Cruising in Jericho Locks** (`canal-cruising`, `CC_OPTIONS`, `CC_PLACES`): Esteem of the
+  Guild in and out. A source badges the Esteem it pays and is required to state its price — the suite
+  checks that, because an Esteem source with no cost would read as free — and a barge badges the fare
+  and the half of the river it buys, with BOTH prices (`−10/6 Esteem · upper river`), since a Doctore
+  of the Guild pays 40% less and that discount is the guide's one piece of strategy. *Watch a parade*
+  spends five Docks Favours, so it carries them as a `factions` row and they are on the badge.
+  *Leave the barge* is six wiki pages and **one row**: only the place the barge took you to is on the
+  screen, and six rows under one storylet would cancel each other out.
+
+  **Barristering at Evenlode** (`barristering`, `BA_OPTIONS`, `BA_CASES`): Prestige of a Legal Case
+  and the step of the trial (`Prestige +1? · paperwork`). Prestige cuts both ways — a harder verdict
+  for a bigger payout, and nothing above 9 but the difficulty — so the four options that LOWER it are
+  badged as the deliberate moves they are. A case badges the faction whose Renown scales it, its
+  Prestige cap and the guide's Echoes per action. **Both trial storylets are named after the case**
+  (*Prosecution of …*, *Defence of …*, four names each), so `baCanonical` matches the shape rather
+  than listing them, the way Parabolan Hunting matches its quarries; the suite pins a case nobody has
+  written down resolving too. Second Airs For CourtRoom rewrites all eight titles on *Choose a case*
+  (*Justly prosecute* / *Prosecute*, *Justly argue* / *Fight a dishonest case*) and the honest and
+  dishonest halves are the same option, so each is one row with the other title as an alias.
+  `(a defendant)`, `(defendant)` and `(crime)` are in `CAROUSEL_PLACEHOLDER`.
+
+  **Diving in the Magistracy** (`magistracy-diving`, `DV_OPTIONS`, `DV_FLOORS`): six floors of drowned
+  First City. Six of the actions pay more the deeper you are, and **nothing on the diving screen
+  states your Diving Depth** — the same wall `fotzDepth` hit — so the badge quotes the RANGE, marks it
+  `▲ by depth`, and the tooltip prints the ladder. The honest place to read the depth is the storylet
+  heading, which is retitled at every floor; `DV_FLOORS` is that list and `dvCanonical` matches the
+  heading on its opening words. *Ascend* and *ASCEND!* differ only by punctuation, which
+  `normalizeName` throws away, so they are one row that states both; *Descend* and *Ascend* are filed
+  under the wiki's disambiguated titles with the plain ones as aliases, because Underclay has a
+  *Descend* of its own.
+
+  **The Railway Board** (`railway-board`, `RB_MEMBERS`, `RB_OPTIONS`): the badge is a fact about a
+  PERSON rather than about an option, which is new here — each of the 26 board members answers to
+  exactly one of Corruption, Obfuscation or Respectability (five answer to none), and that is what
+  decides whether a meeting is one action a member or three. So the same line is badged on *Persuade
+  X* and on *Invite X to the Board*, with the member's deepest interest beside it
+  (`Obfuscation −40 · the Bazaar (40)`). The five counters badge what they raise and by how much, and
+  their tooltips list the members they actually move. Deliberately left out and said so: the 111
+  proposals of the guide's proposal table, whose route, station and charter halves are four further
+  subpages — only the proposals listed on the storylet itself are badged — and *Using Favours to
+  Reduce Opposition*, which the guide's own banner marks as missing.
+
+  **Deciphering** (`deciphering`, `DC_OPTIONS`, `DC_DOCUMENTS`): the Cabinet Noir. Each code-breaking
+  option badges the change points it pays, as a range where a Midnighter gets more, and the cash-in
+  badges that **the surplus is thrown away** — Deciphering... goes to zero whatever it stands at, and
+  a rare leap of insight pays 15 against a target of 5, so that warning is the badge rather than a
+  footnote. The two options a Midnighter improves are one row each, because the game shows one title.
+
+  **Jericho Library** (`jericho-library`, `JL_OPTIONS`, `JL_PROJECTS`): three research projects, three
+  stages of 200 Librarian's Progress each, five topic storylets. A badge is the research a success pays
+  **and what a failure does** (`+39? · fail −2 · Cartography 1`) — several stage-three options pay
+  their failure in Wounds or Nightmares rather than in lost research, and two pay research even on a
+  failure, which is why `fail` and `failMenace` are different fields. An advanced option names its Lead
+  and stage, since that is what decides whether it is on the screen at all; the easy options say `any
+  stage`. *Enlist qualified assistance* is a different companion in each of three storylets and is
+  three rows; *Conclude your thesis* and *Resume your studies* are several wiki pages under one title
+  and are one row each. *Begin an expedition* is the second known exception to one-name-one-table, for
+  the same reason as Helicon House's.
+
   **Faction results are always on the badge, after it** (2026-09-17, on request, and step 5 of the
   adding-fallen-london-features skill). Any `Renown:` or `Favours:` an option gives or takes is a
   row field `factions: [[quality, change], ...]`, and every feature's badge text is
@@ -2752,6 +2904,69 @@ Confirmed live by the author:
   **(4) The Cub's cats.** Whether all 22 introductions are on the storylet at once, and whether the
   Midnight Matriarch of the Menagerie of Roses is a separate introduction from the plain Matriarch.
 
+- The **Piracy, Irem, Khaganian Intrigue, Helicon House and Jericho Library badges** (added
+  2026-09-20). Nothing seen in the game. Report first, in order:
+  **(1) The Khanate's two retitled options.** What *Expand your network: Recruit …* and *An
+  opportunity: …* actually read as on screen. Ten and eleven titles are carried as aliases off the
+  wiki's variant tables; a wording the tables do not have means that option goes unbadged, and for
+  *Expand your network* that is nine days in ten.
+  **(2) Piracy's bounty option.** What the game puts in place of `(Bounty)` in *Abandon your hunt for
+  the …*, since the whole title is wildcarded on that assumption. And whether *Matters Piratical*
+  really appears both in your cabin and while zailing.
+  **(3) Irem's Loom headings.** Whether the ten storylets read as *The Loom: A Nearby Future* and so
+  on, and whether a future's own deck really is only the three cards the guide's Warp Access column
+  lists — the `▾ smuggle` mark is derived from that column and from nothing on screen.
+  **(4) Helicon House's room titles**, especially *Below-Stairs* and the Prussian Salon's
+  *Make polite conversation with …*, and whether the Airs of Ealing Gardens really shows exactly one
+  of its four conversation options at a time. The Sculpture Garden is left out entirely: it is
+  Fate-locked and has no wiki page, so if you have the Pendant, say what is in there.
+  **(5) Jericho's shared titles.** Whether *Conclude your thesis*, *Resume your studies* and *Enlist
+  qualified assistance* really show as one option each, as the merged rows assume.
+
+- The **Canal Cruising, Barristering, Magistracy diving, Railway Board and Deciphering badges** (added
+  2026-09-20). Nothing seen in the game. Report first, in order:
+  **(1) The Magistracy's diving heading.** What it actually reads as at each floor. The wiki says the
+  title *ends on* the floor's name, so `dvCanonical` matches "Diving in the Magistracy" and anything
+  after it; if the game shows the bare floor name instead (*Peligin Water* and no prefix), every badge
+  in the water disappears, and that is the single biggest risk in this batch. While you are down there,
+  say also whether any quality list renders — if it does, the depth could be read instead of ranged.
+  **(2) The Evenlode's trial headings.** Whether they read *Prosecution of Venge-Rat v Straggle-Toothed
+  Urchin* and the like, and what the Airs put in place of *(Prosecute)*, *(Defend)* and *(Side)* on
+  *Choose a case*. Same failure mode: a different shape blanks a whole trial.
+  **(3) Jericho's *Leave the barge*.** Whether all six really share that one title, as the merged row
+  assumes, and whether the fares are 5/10 and 3/6 as both the guide and the pages say.
+  **(4) The board's option titles**, especially *Persuade Furnace*, *Persuade the Viscountess* and
+  *Persuade Cornelius, the Bandaged Prehistoricist*, which are shorter or longer than the member's
+  name; and whether *Bring the meeting to a close* really shows as one option.
+  **(5) The Cabinet Noir's doubles.** Whether *Crack a code*, *Make a leap of code-breaking insight*
+  and *Cover your tracks* each show as one option, as the merged rows assume.
+
+- The **Disappearing, Cover Identities and Moonlit Woods badges** (added 2026-09-20). Nothing seen in
+  the game. Report first, in order:
+  **(1) Two features on one heading.** *Work in your Cabinet Noir* now carries a badge from
+  `deciphering` AND one from `disappearing`. Confirm that both appear, that they do not flicker, and
+  that neither clears the other — this is the first time two features badge the same storylet
+  heading, and `attachBadge`'s sibling walk is what is being trusted.
+  **(2) The camp storylets.** Whether *The Edge of the Woods*, *Whiling away the hours* and *Darkness
+  at the camp* really read as those names when opened, since they are cards and this feature badges
+  them as storylets; and whether *Consider your options* shows under that plain title.
+  **(3) The Ghillie's other option.** What *Flatter the Ghillie to extend your visit* costs and gives:
+  it has no wiki page and the guide does not mention it, so it is badged "no figures recorded".
+  **(4) The Keeper's two forms.** Whether *Speak to the Keeper of the Marigold Menagerie* really shows
+  as one option, and whether the Miserable Keeper's storylet carries the same heading — the reports
+  are filed under one storylet name here.
+  **(5) The Back Room's option titles**, especially *Begin to construct a cover identity*, which the
+  wiki disambiguates as "(No Ties)" and which is assumed to show plain.
+
+- The **Painting in Balmoral badges** (added 2026-09-20). Nothing seen in the game. Report first:
+  **(1) Whether *Unveil your Painting* really shows as one option** under that plain title, as the
+  merged row assumes, and whether the composition on the screen is the one the guide's table predicts.
+  **(2) What a failed *Paint Balmoral in a subversive cast* actually does** — the guide says Painting:
+  Nostalgic +1 and Painter's Progress +1, the option page records neither, and the badge currently
+  sides with the guide and says so. This is the one figure in the feature that nothing corroborates.
+  **(3) Whether *Crathie* and *Representational Arts* are the headings on screen**, the studio being
+  reached by a redirect rather than named directly.
+
 - The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
   table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
   looking at the screen can confirm: a wrong number renders exactly as well as a right one. They
@@ -3167,6 +3382,35 @@ Current tests:
   state of Parabola on every row. The Calendar suite pins the two cycles filling 1–6 exactly once and
   the seven return-visit aliases. The war suite recomputes all eighteen Ravages rates from their parts
   and pins that the trail is not badged. The Cub's suite pins the reward bands tiling without a gap.
+- `FallenLondon/test/choice-painting-balmoral.test.mjs` — the painting suite pins that all three
+  painting actions name both outcomes on the badge, that *Unveil your Painting* is one row pricing all
+  seven compositions, that exactly one row is marked as the guide's word against an option page, and
+  that *Display your own painting* is still `helicon-house`'s and not claimed twice.
+- `FallenLondon/test/choice-disappearing.test.mjs`, `choice-cover-identities.test.mjs`,
+  `choice-moonlit-woods.test.mjs` — one per feature. The Disappearing suite pins that it and
+  `deciphering` share the Cabinet Noir storylet and **no option**, which is what makes two features on
+  one heading safe, and that every camp action takes a Ransom level. The Cover Identities suite pins
+  the Suspicion on all four earned qualities and the points-per-action of all seven Backstory
+  purchases. The Moonlit suite pins that all three spotting options say they end the walk, on the
+  badge and in the tooltip.
+- `FallenLondon/test/choice-canal-cruising.test.mjs`, `choice-barristering.test.mjs`,
+  `choice-magistracy-diving.test.mjs`, `choice-railway-board.test.mjs`, `choice-deciphering.test.mjs`
+  — one per feature. The canal suite checks that every Esteem source states a price and pins both
+  halves of every fare. The Evenlode suite resolves all eight trial headings, including a case nobody
+  has written down, and pins the four options that lower Prestige. The diving suite pins that every
+  depth ladder covers its range without a gap and that every scaled badge is marked as ranged. The
+  board suite pins the 6/7/8/5 split of members across the three levers, which is the arithmetic the
+  guide's advice rests on. The Cabinet suite pins that the cash-in warns about the lost surplus.
+- `FallenLondon/test/choice-piracy.test.mjs`, `choice-irem.test.mjs`,
+  `choice-khaganian-intrigue.test.mjs`, `choice-helicon-house.test.mjs`, `choice-jericho-library.test.mjs`
+  — one per feature. The Piracy suite checks every exchange's price against the Respected it pays at
+  1,250 treasure a change point, and that neither piracy card is in its table. The Irem suite pins the
+  eight passages that need a smuggled warp and the three futures that need none, which is the whole
+  claim the feature makes. The Khanate suite resolves all ten Airs titles and all eleven opportunity
+  titles, and checks the five neighbouring "An opportunity:" options still answer for themselves. The
+  Helicon suite pins that every way out leads with "ends the night", and the library suite that every
+  research option states what a failure does. The last two each pin their one shared title, and that
+  it belongs to a different storylet in each feature.
 - `FallenLondon/test/choice-godfall.test.mjs`, `choice-maze-garden.test.mjs`, `choice-promenade.test.mjs`,
   `choice-port-cecil.test.mjs`, `choice-zee-beasts.test.mjs` — one per feature. Godfall pins that its
   three Echo figures agree with the ending's formula and that every Oblation is a paid option and a free

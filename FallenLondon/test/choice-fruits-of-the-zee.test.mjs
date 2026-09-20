@@ -1858,7 +1858,10 @@ check('the feature list, in order',
     'wilmots-business', 'brawling-dockers', 'assembling-skeleton', 'professional-activities', 'hearts-game',
     'hunters-keep', 'mutton-island', 'venderbight',
     'godfall', 'maze-garden', 'promenade', 'port-cecil', 'zee-beasts',
-    'chessboard', 'parabolan-hunting', 'oneiropomp', 'sacroboscan', 'parabolan-war', 'cubs-education']);
+    'chessboard', 'parabolan-hunting', 'oneiropomp', 'sacroboscan', 'parabolan-war', 'cubs-education',
+    'piracy', 'irem', 'khaganian-intrigue', 'helicon-house', 'jericho-library',
+    'canal-cruising', 'barristering', 'magistracy-diving', 'railway-board', 'deciphering',
+    'disappearing', 'cover-identities', 'moonlit-woods', 'painting-balmoral']);
 
 check('the panel list, in order',
   api.PANELS.map((p) => p.id),

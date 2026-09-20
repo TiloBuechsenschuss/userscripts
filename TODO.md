@@ -91,24 +91,24 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Hunting_the_Beasts_of_the_Zee_(Guide) [Zailing the Unterzee] (implemented)
 
   Late Zailing:
-    - https://fallenlondon.wiki/wiki/Piracy_(Guide) [Gaider's Mourn, Zailing the Unterzee]
-    - https://fallenlondon.wiki/wiki/Irem_(Guide) [Irem]
-    - https://fallenlondon.wiki/wiki/Khaganian_Intrigue_(Guide) [Khan's Heart]
+    - https://fallenlondon.wiki/wiki/Piracy_(Guide) [Gaider's Mourn, Zailing the Unterzee] (implemented)
+    - https://fallenlondon.wiki/wiki/Irem_(Guide) [Irem] (implemented)
+    - https://fallenlondon.wiki/wiki/Khaganian_Intrigue_(Guide) [Khan's Heart] (implemented)
 
   Early Railway:
-    - https://fallenlondon.wiki/wiki/Helicon_House_(Guide) [Helicon House]
-    - https://fallenlondon.wiki/wiki/Jericho_Library_(Guide) [Jericho Locks]
-    - https://fallenlondon.wiki/wiki/Canal_Cruising_in_Jericho_Locks_(Guide) [Jericho Locks]
-    - https://fallenlondon.wiki/wiki/Barristering_at_Evenlode_(Guide) [The Magistracy of the Evenlode]
-    - https://fallenlondon.wiki/wiki/Diving_in_the_Magistracy_(Guide) [The Magistracy of the Evenlode]
-    - https://fallenlondon.wiki/wiki/Railway_Board_(Guide) [Moloch Street]
+    - https://fallenlondon.wiki/wiki/Helicon_House_(Guide) [Helicon House] (implemented)
+    - https://fallenlondon.wiki/wiki/Jericho_Library_(Guide) [Jericho Locks] (implemented)
+    - https://fallenlondon.wiki/wiki/Canal_Cruising_in_Jericho_Locks_(Guide) [Jericho Locks] (implemented)
+    - https://fallenlondon.wiki/wiki/Barristering_at_Evenlode_(Guide) [The Magistracy of the Evenlode] (implemented)
+    - https://fallenlondon.wiki/wiki/Diving_in_the_Magistracy_(Guide) [The Magistracy of the Evenlode] (implemented)
+    - https://fallenlondon.wiki/wiki/Railway_Board_(Guide) [Moloch Street] (implemented)
 
   Late Railway:
-    - https://fallenlondon.wiki/wiki/Deciphering_(Guide) [Balmoral]
-    - https://fallenlondon.wiki/wiki/Disappearing_(guide) [Balmoral]
-    - https://fallenlondon.wiki/wiki/Cover_Identities_(Guide) [Balmoral]
-    - https://fallenlondon.wiki/wiki/Moonlit_Woods_(Guide) [Balmoral]
-    - https://fallenlondon.wiki/wiki/Painting_in_Balmoral_(Guide) [Balmoral]
+    - https://fallenlondon.wiki/wiki/Deciphering_(Guide) [Balmoral] (implemented)
+    - https://fallenlondon.wiki/wiki/Disappearing_(guide) [Balmoral] (implemented)
+    - https://fallenlondon.wiki/wiki/Cover_Identities_(Guide) [Balmoral] (implemented)
+    - https://fallenlondon.wiki/wiki/Moonlit_Woods_(Guide) [Balmoral] (implemented)
+    - https://fallenlondon.wiki/wiki/Painting_in_Balmoral_(Guide) [Balmoral] (implemented)
     - https://fallenlondon.wiki/wiki/A_Church_in_the_Wild_(Guide) [Burrow-Infra-Mump]
     - https://fallenlondon.wiki/wiki/Law-Hunting_(Guide) [Marigold Station]
     - https://fallenlondon.wiki/wiki/Moulin_Expeditions_(Guide) [Moulin]
