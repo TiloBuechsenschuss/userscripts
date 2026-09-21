@@ -520,7 +520,9 @@ check('the zee ratings are registered alongside the other features',
     'piracy', 'irem', 'khaganian-intrigue', 'helicon-house', 'jericho-library',
     'canal-cruising', 'barristering', 'magistracy-diving', 'railway-board', 'deciphering',
     'disappearing', 'cover-identities', 'moonlit-woods', 'painting-balmoral',
-    'church-in-the-wild', 'law-hunting', 'moulin-expeditions', 'writing-monograph', 'kitchen-artists']);
+    'church-in-the-wild', 'law-hunting', 'moulin-expeditions', 'writing-monograph', 'kitchen-artists',
+    'alchemy-station-viii', 'cornelius', 'clay-highwayman',
+    'hurling', 'chthonic-communication', 'digging-hurlers', 'marigold-station']);
 
 check('the Zailing panel is in the launcher menu',
   api.PANELS.map((p) => p.id), ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory']);

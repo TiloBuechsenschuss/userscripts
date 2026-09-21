@@ -2320,6 +2320,85 @@ navigation. Two consequences:
   Tribute to the Sea of Spines* stays `helicon-house`'s; only the step that MAKES the dish is here,
   and the suite pins both halves of that.
 
+  **Alchemy at Station VIII** (`alchemy-station-viii`, `AS_OPTIONS`): one loop, always five actions —
+  take a collection note at the Special Extracts bench, buy a SENTIMENT from Pinnock in London, carry
+  it back and EXTRACT it into a REAGENT. Every extraction is the same action and pays exactly one
+  item, so the only thing that varies is Pinnock's bill and which reagent you end at: a pickup badges
+  `→ Concentrate of Self · 4 stacks of goods ▼` and an extraction badges the reagent alone. **The bill
+  is counted in stacks of goods, never in Echoes** — the guide prices exactly one of the six lines, so
+  an Echo figure would be invented; the items themselves are in the tooltip. `once: null` on the
+  Concentrate of Self is the guide's "None" and is a different claim from a missing field, which the
+  suite pins. The sentiment is not the reagent: the daughter-church at Station VIII wants the
+  sentiment itself, and that warning rides on the extraction's tooltip.
+
+  **Following up Rumours of Cornelius** (`cornelius`, `CN_OPTIONS`): a one-way ladder, so the badge is
+  **the level a rung leaves the quality at** (`Cornelius → 2 ? · needs Investigating... 5`) rather than
+  the Whispered Hints every rung pays alike. The deciphering rung is the exception and says so
+  differently (`Cornelius +1 to 8`), because it is a cap rather than a jump. *Appoint Cornelius in
+  Furnace's place* takes a suffix from the hidden Bridge Troubles quality — "– until you find someone
+  better" at 2, "– until the moment you recover Furnace" at 3 — and both are aliases; without them the
+  most important line in the guide goes unbadged for most players. **The second feature to badge the
+  Board's Convene storylet**: `railway-board` owns its members and counters, this one owns the two
+  options about Furnace's empty chair, and the suite pins that they share the heading and no option.
+
+  **The Tale of the Clay Highwayman** (`clay-highwayman`, `CHW_OPTIONS`): five qualities carry this
+  story and a bare "+1" means something different on nearly every card, so the badge says **which one
+  moves**. A change point, a level and a quality being SET are three separate claims and the table
+  carries a `unit` beside every number to keep them apart (`On the Trail +1 CP`,
+  `A Marauder of the Clay Highwayman −2`, `Waiting on a Ransom → 8`, `The Tale → 6`). On the Trail
+  renames the card twice — *Investigating the Clay Highwayman*, then *The Clay Highwayman's Fate* — so
+  both are aliases. **The second feature in the camp**: `disappearing` owns the storylets about
+  walking out and this one those about the story, and the suite pins that they share no storylet at
+  all. The five larceny cards carry no option rows — the guide gives their four rungs as a pattern and
+  never names them — so the whole ladder is on each card's own heading instead.
+
+  **Hurling** (`hurling`, `HR_CARDS`, `HR_OPTIONS`): the goat-demons play, you bet 15 Hinterland Scrip
+  on which circle will LOSE, and nine levels of Hurlyburly are spent shoving Goat vs Goat about.
+  **Two kinds of claim live here and they are separate fields**: `gvg` is an absolute change, where +
+  helps the Second Circle win, and `favour` is a change in favour of the bet you placed. On a
+  First-Circle bet the two agree and on a Second-Circle bet they are opposites, so folding them into
+  one signed number would be confidently wrong half the time; the badge reads `GvG +6-9` for one and
+  `GvG 7-9 your way` for the other, and a favour figure never carries a sign. A line whose failure
+  adds a Foul! says `+ Foul` in words, five of them being what undoes the work. The Heptagoat's swing
+  is `null` and badges `GvG: not recorded`. It deals its own deck, so it badges the hand too, and the
+  four card names that are ordinary English (*Make Way!*, *Uncooperative*, *Frozen*) wait for a
+  confirmed Adulterine Castle greeting. Five figures went the option page's way against the guide, and
+  they are listed in the feature's comment.
+
+  **Chthonic Communication** (`chthonic-communication`, `CCM_MINDS`, `CCM_OPTIONS`): three minds and
+  the same four-rung climb up each. Every one of the thirty-odd options is the identical trade — The
+  Mind's Ascent +1 CP on a success, Nightmares +2 CP on a failure, nothing else either way — so the
+  only question the screen asks is *which of these three or four qualities do I have*, and the badge
+  answers it: `The Mind's Ascent +1 CP ? · Kataleptic Toxicology 10 · fail Nightmares +2 CP`. The
+  reward is on the badge as well as the check, or it would read as a price with nothing bought. Every
+  check is 10 except the second tier's Steward of the Discordance 4, which is on all three minds and
+  is the one piece of advice the numbers contain; the suite pins that the tiers offer the same
+  qualities on all three. Most rungs are LOCKED at Nightmares 8, so a failure walks you out of the
+  activity, which is on the rules line.
+
+  **Digging in the Hurlers** (`digging-hurlers`, `DH_OPTIONS`): the curios are the **failure** reward,
+  and the guide's advice is to wear Watchful-reducing gear and fail on purpose — so a dig badges
+  `Curio ×9 on a FAIL · 3.0 per Intuition ?` and the "success" is the consolation prize in the
+  tooltip. The rate is curios per point of Frigid Intuition, which is what makes the four Watchful
+  sites comparable; the Hot Spring is a Luck 50% and its better 4.0–5.0 is marked `cannot be steered`
+  so it does not read as a better plan, and the Salt Steppes line costs no Intuition at all and is
+  given no rate rather than a division by zero. **The difficulty is carried as the formula** 50 ×
+  Hurlers: Darkness, not as the 150 the option pages happen to show, which is that formula at Darkness
+  3 and is explained as such. Preparation badges both the Intuition bought and the Echoes spent,
+  because the action is the scarce thing and the Echo price is the constraint.
+
+  **Marigold Station** (`marigold-station`, `MR_FATES`, `MR_OPTIONS`): the emblem loop is three
+  actions and The Marigold Bearer's Fate, rolled 1–3 when you take the commission, decides everything
+  after it — which pair of recovery lines you see and which item the surrender pays. The Fate is
+  invisible on the option itself, so the badge puts it first: `Fate 2 · Watchful 200 ? → a Cave-Aged
+  Code of Honour`. Each Fate's pair is two rows, not one, because spending a Memory of a Much Lesser
+  Self and risking a broad 200 are different offers. The three options titled *Surrender the Marigold
+  Emblem* are one row naming all three payouts. The Gnarled Stationmaster and the Cerise Condottiere
+  run the same loop and both are in the table. *Approach Hell's Walls* is a ladder rather than a
+  gamble — its failure pays 50 of the quality it checks — and the badge says so. **One name is shared
+  with another feature on purpose**: Helicon House's Prussian Salon also has an *Accept a commission*,
+  the two sit under different storylets, and the suite pins that it is the only one.
+
   **Painting in Balmoral** (`painting-balmoral`, `PB_OPTIONS`, `PB_PAYOUTS`): the badge exists to say
   that **failing is fine**. Every painting action raises Painter's Progress by one whether the check
   passes or not, so a failure costs nothing but the items and only steers the picture towards a
@@ -3024,6 +3103,29 @@ Confirmed live by the author:
   **(5) The kitchen's `(dish)` options.** What the game fills in, and whether *Dose yourself with
   (your dish)* and *Dose yourself with the Curatorial Cocktail* each show as one option.
 
+- The **Alchemy, Cornelius, Clay Highwayman, Hurling, Chthonic, Digging and Marigold badges**
+  (added 2026-09-21). Nothing seen in the game. Report first, in order:
+  **(1) Hurling’s two kinds of swing.** Whether a card the guide calls “in favour” really flips with the
+  bet, and whether Goat vs Goat over 100 really means the Second Circle wins — the option pages for
+  *Collect your winnings* contradict themselves on their unlock, so the guide was taken for the win
+  condition. Every badge in that feature rests on it.
+  **(2) Hurling’s card names.** Whether *Cheers!*, *Make Way!*, *Uncooperative* and *Frozen* read as
+  those exact names in the hand, and what the game puts in place of *(Number)*.
+  **(3) The Adulterine Castle greeting.** The gate is confirm-only and the area string is a guess; a
+  verbatim capture would let the four gated names be trusted anywhere and could make the gate exact.
+  **(4) The Cornelius vote’s title.** Whether the Bridge Troubles suffix really appears, and with the
+  en dash the wiki records.
+  **(5) The Clay Highwayman’s camp headings.** Whether *Your Captor, the Clay Highwayman*, *Among the
+  Marauders* and *The Clay Highwayman, alone* read as those names, and what the larceny cards’ four
+  options are actually called — naming them is the one thing that would finish that feature.
+  **(6) Alchemy’s storylet names.** *Factory VIII – After Hours* has no wiki page under that title
+  and is taken from the redirect on *Enter the door marked ‘Special Extracts’*; and whether *Collect
+  the marked crate* shows as one option.
+  **(7) Digging’s dig difficulty.** Whether the Watchful check really moves with Hurlers: Darkness as
+  50 × Darkness, the option pages showing a flat 150.
+  **(8) Marigold’s *Accept a commission*.** Whether it and Helicon House’s really share the title, the
+  wiki filing this one as “Accept a commission 2”.
+
 - The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
   table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
   looking at the screen can confirm: a wrong number renders exactly as well as a right one. They
@@ -3448,6 +3550,25 @@ Current tests:
   suite derives `breaks the circle` from the ring rather than trusting the flag, and checks every
   buyer is reachable from some topic. The kitchen suite pins the four divisors and that the Helicon
   sale is not claimed twice.
+- `FallenLondon/test/choice-alchemy-station-viii.test.mjs`, `choice-cornelius.test.mjs`,
+  `choice-clay-highwayman.test.mjs` — one per feature. The Alchemy suite pins six pickups against six
+  extractions with no reagent made twice, that a costed pickup always names its items and no row
+  claims an Echo price, and that the one reagent with no one-time use carries a `null` rather than a
+  blank. The Cornelius suite pins the ladder in order, that the vote answers to all three of its
+  Bridge Troubles titles, and that it and `railway-board` share the Board storylet and no option. The
+  Clay Highwayman suite pins that only the four known units appear, that every row badges something
+  (an empty label is how that feature fails), that the card answers to all three of its names, and
+  that it and `disappearing` share no camp storylet.
+- `FallenLondon/test/choice-hurling.test.mjs`, `choice-chthonic-communication.test.mjs`,
+  `choice-digging-hurlers.test.mjs`, `choice-marigold-station.test.mjs` — one per feature. The
+  Hurling suite pins that no row carries both an absolute and a favour swing, that a favour badge
+  never shows a sign, that a line which can foul says so in words, and that a gated card name is
+  badged in the castle and nowhere else. The Chthonic suite pins that all three minds offer the same
+  qualities at every tier and that every check is 10 but the three Steward rungs. The Digging suite
+  pins the failure rate of all four Watchful sites, that the Salt Steppes line is given no rate, and
+  that the difficulty is the formula with the page’s 150 explained. The Marigold suite pins one item
+  line and one check line per Fate, and that *Accept a commission* is the only name shared with
+  another feature.
 - `FallenLondon/test/choice-painting-balmoral.test.mjs` — the painting suite pins that all three
   painting actions name both outcomes on the badge, that *Unveil your Painting* is one row pricing all
   seven compositions, that exactly one row is marked as the guide's word against an option page, and

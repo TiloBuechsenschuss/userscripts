@@ -114,15 +114,15 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Moulin_Expeditions_(Guide) [Moulin] (implemented)
     - https://fallenlondon.wiki/wiki/Writing_a_Monograph_(Guide) [Moulin] (implemented)
     - https://fallenlondon.wiki/wiki/A_Kitchen_for_Artists_(Guide) [Station VIII] (implemented)
-    - https://fallenlondon.wiki/wiki/Alchemy_at_Station_VIII_(Guide) [Station VIII]
-    - https://fallenlondon.wiki/wiki/Following_up_Rumours_of_Cornelius_(Guide) [no area; a Railway storyline]
-    - https://fallenlondon.wiki/wiki/The_Tale_of_the_Clay_Highwayman_(Guide) [no area; a Railway storyline]
+    - https://fallenlondon.wiki/wiki/Alchemy_at_Station_VIII_(Guide) [Station VIII] (implemented)
+    - https://fallenlondon.wiki/wiki/Following_up_Rumours_of_Cornelius_(Guide) [no area; a Railway storyline] (implemented)
+    - https://fallenlondon.wiki/wiki/The_Tale_of_the_Clay_Highwayman_(Guide) [no area; a Railway storyline] (implemented)
 
   Post-Railway:
-    - https://fallenlondon.wiki/wiki/Hurling_(Guide) [Adulterine Castle]
-    - https://fallenlondon.wiki/wiki/Chthonic_Communication_(Guide) [The City of the Tracklayers, Your Activities] (no stage tag; placed by area)
-    - https://fallenlondon.wiki/wiki/Digging_in_the_Hurlers_(Guide) [The Hurlers]
-    - https://fallenlondon.wiki/wiki/Marigold_Station_(Guide) [Marigold Station]
+    - https://fallenlondon.wiki/wiki/Hurling_(Guide) [Adulterine Castle] (implemented)
+    - https://fallenlondon.wiki/wiki/Chthonic_Communication_(Guide) [The City of the Tracklayers, Your Activities] (no stage tag; placed by area) (implemented)
+    - https://fallenlondon.wiki/wiki/Digging_in_the_Hurlers_(Guide) [The Hurlers] (implemented)
+    - https://fallenlondon.wiki/wiki/Marigold_Station_(Guide) [Marigold Station] (implemented)
 
   Early Firmament:
     - https://fallenlondon.wiki/wiki/Ecdysis_(Guide) [Hallow's Throat]
