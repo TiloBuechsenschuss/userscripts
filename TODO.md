@@ -109,11 +109,11 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Cover_Identities_(Guide) [Balmoral] (implemented)
     - https://fallenlondon.wiki/wiki/Moonlit_Woods_(Guide) [Balmoral] (implemented)
     - https://fallenlondon.wiki/wiki/Painting_in_Balmoral_(Guide) [Balmoral] (implemented)
-    - https://fallenlondon.wiki/wiki/A_Church_in_the_Wild_(Guide) [Burrow-Infra-Mump]
-    - https://fallenlondon.wiki/wiki/Law-Hunting_(Guide) [Marigold Station]
-    - https://fallenlondon.wiki/wiki/Moulin_Expeditions_(Guide) [Moulin]
-    - https://fallenlondon.wiki/wiki/Writing_a_Monograph_(Guide) [Moulin]
-    - https://fallenlondon.wiki/wiki/A_Kitchen_for_Artists_(Guide) [Station VIII]
+    - https://fallenlondon.wiki/wiki/A_Church_in_the_Wild_(Guide) [Burrow-Infra-Mump] (implemented)
+    - https://fallenlondon.wiki/wiki/Law-Hunting_(Guide) [Marigold Station] (implemented)
+    - https://fallenlondon.wiki/wiki/Moulin_Expeditions_(Guide) [Moulin] (implemented)
+    - https://fallenlondon.wiki/wiki/Writing_a_Monograph_(Guide) [Moulin] (implemented)
+    - https://fallenlondon.wiki/wiki/A_Kitchen_for_Artists_(Guide) [Station VIII] (implemented)
     - https://fallenlondon.wiki/wiki/Alchemy_at_Station_VIII_(Guide) [Station VIII]
     - https://fallenlondon.wiki/wiki/Following_up_Rumours_of_Cornelius_(Guide) [no area; a Railway storyline]
     - https://fallenlondon.wiki/wiki/The_Tale_of_the_Clay_Highwayman_(Guide) [no area; a Railway storyline]

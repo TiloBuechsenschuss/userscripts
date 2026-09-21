@@ -519,7 +519,8 @@ check('the zee ratings are registered alongside the other features',
     'chessboard', 'parabolan-hunting', 'oneiropomp', 'sacroboscan', 'parabolan-war', 'cubs-education',
     'piracy', 'irem', 'khaganian-intrigue', 'helicon-house', 'jericho-library',
     'canal-cruising', 'barristering', 'magistracy-diving', 'railway-board', 'deciphering',
-    'disappearing', 'cover-identities', 'moonlit-woods', 'painting-balmoral']);
+    'disappearing', 'cover-identities', 'moonlit-woods', 'painting-balmoral',
+    'church-in-the-wild', 'law-hunting', 'moulin-expeditions', 'writing-monograph', 'kitchen-artists']);
 
 check('the Zailing panel is in the launcher menu',
   api.PANELS.map((p) => p.id), ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory']);

@@ -369,7 +369,8 @@ check('the card ratings are registered alongside the other features',
     'chessboard', 'parabolan-hunting', 'oneiropomp', 'sacroboscan', 'parabolan-war', 'cubs-education',
     'piracy', 'irem', 'khaganian-intrigue', 'helicon-house', 'jericho-library',
     'canal-cruising', 'barristering', 'magistracy-diving', 'railway-board', 'deciphering',
-    'disappearing', 'cover-identities', 'moonlit-woods', 'painting-balmoral']);
+    'disappearing', 'cover-identities', 'moonlit-woods', 'painting-balmoral',
+    'church-in-the-wild', 'law-hunting', 'moulin-expeditions', 'writing-monograph', 'kitchen-artists']);
 
 console.log(failures ? '\n' + failures + ' FAILURE(S)' : '\nAll checks passed.');
 process.exit(failures ? 1 : 0);

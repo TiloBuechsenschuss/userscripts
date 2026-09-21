@@ -2279,6 +2279,47 @@ navigation. Two consequences:
   one-name-one-table rule, because `carouselRatings` looks an option up only inside the open storylet,
   and the suite pins the pair so it stays known.
 
+  **A Church in the Wild** (`church-in-the-wild`, `CH_OPTIONS`, `CH_PAIRS`): the largest table of pure
+  CHOICES in the file — nothing any of it pays is an item. Fifteen storylets each ask you to pick, and
+  each pick moves two of six qualities that are compared in three opposed pairs at the Bishop's
+  Inspection a dozen actions later; NOTHING on the screen says which. So the badge is
+  `Evangelism +1 · Humility +1` and the tooltip names the comparison it decides. *Play wildly* and
+  *Play softly* on The Devil's Due are the only rows that move a quality DOWN — all six at once, three
+  each way, exact mirrors — so they get the warm brick rather than the setup colour, and the suite
+  pins that they mirror. The Patron's storylet is *Selecting a Patron*, not the guide's section title.
+
+  **Law-Hunting** (`law-hunting`, `LH_OPTIONS`, `LH_FORMS`): a chase closes at 55 change points of
+  Capturing a Law, and a hunt action pays 6, 4 or 2 depending on whether your form answers the law's —
+  so the same chase is ten actions or thirty, and the badge is the band plus the menace a failure
+  pays. A form-change badges the form it buys and what it is the answer to. Every option here is
+  filed under the wiki's `(Hell's Chagrin)` title with the plain one as an alias, the activity having
+  moved to Marigold Station from the 2025 Estival; `(type)` is in `CAROUSEL_PLACEHOLDER`.
+
+  **Moulin Expeditions** (`moulin-expeditions`, `MX_OPTIONS`, `MX_DISCARDS`, `MX_ASSISTANTS`): the
+  badge is what an option COSTS, not what it pays — Supplies are fixed when you set out and cap how
+  far you can walk, and the guide's whole strategy is never being forced into a three-Supply answer.
+  An obstacle moves you whether the check passes or fails, so a failure costs only the menace, which
+  is the badge's other half. **The seven discardable cards carry no option rows at all**: the guide
+  records what each card pays but never names its options, so they are badged on the heading and the
+  tooltip says why. That is the second feature to badge a deck whose option titles it does not have.
+
+  **Writing a Monograph** (`writing-monograph`, `MG_OPTIONS`, `MG_TOPICS`, `MG_BUYERS`): every
+  research action pays the same 1,700 pennies for the same 12.50 Echoes of relics, so the Echoes are
+  never the choice — the choice is which quality goes up and which goes down, in a circle (Cautionary
+  lowers Tragic, Tragic lowers Ironic, Ironic lowers Cautionary) with exactly two exceptions, which
+  the badge marks `breaks the circle`. The suite derives that mark from the ring rather than trusting
+  the flag. The guide's research table is keyed by ITEM, so its eleven rows are matched to the
+  storylet's eleven option titles; ten are exact and *Examine Khaganian Artefacts* is the Rusted
+  Stirrup by elimination, which the row says out loud.
+
+  **A Kitchen for Artists** (`kitchen-artists`, `KA_OPTIONS`): two numbers at once. Culinary
+  Ingredient Value is what every non-specific sale divides, and Current Culinary Concoction is what
+  the dish IS, which is what the specific buyers look at — so a creation step badges both
+  (`Value +1,750? · a Shark Bouillabaisse`), because a step worth 350 may be the only way to reach Mr
+  Spices. A sale badges its divisor, that being the only way to compare them. *Serve up a Culinary
+  Tribute to the Sea of Spines* stays `helicon-house`'s; only the step that MAKES the dish is here,
+  and the suite pins both halves of that.
+
   **Painting in Balmoral** (`painting-balmoral`, `PB_OPTIONS`, `PB_PAYOUTS`): the badge exists to say
   that **failing is fine**. Every painting action raises Painter's Progress by one whether the check
   passes or not, so a failure costs nothing but the items and only steers the picture towards a
@@ -2967,6 +3008,22 @@ Confirmed live by the author:
   **(3) Whether *Crathie* and *Representational Arts* are the headings on screen**, the studio being
   reached by a redirect rather than named directly.
 
+- The **Church, Law-Hunting, Moulin, Monograph and Kitchen badges** (added 2026-09-20). Nothing seen
+  in the game. Report first, in order:
+  **(1) The church's six qualities.** Whether a choice really moves the two the guide's tables say,
+  and by the amounts given — every badge in that feature is those numbers and nothing else, and the
+  consequence is a dozen actions away, so a wrong figure is invisible until the Inspection.
+  **(2) Law-Hunting's titles.** Whether the options read plainly or still carry something of the
+  Estival's wording, and what the game puts in place of *(type)*. Also whether *The Theory and
+  Practice of Law* is the heading, the wiki disambiguating it.
+  **(3) Moulin's discardables.** What their options are actually called — they are badged on the
+  heading only because nothing records them, and naming them is the one thing that would finish that
+  feature.
+  **(4) The monograph's research titles.** Especially *Examine Khaganian Artefacts*, matched to the
+  Rusted Stirrup by elimination; if it turns out to be another relic, that row is wrong.
+  **(5) The kitchen's `(dish)` options.** What the game fills in, and whether *Dose yourself with
+  (your dish)* and *Dose yourself with the Curatorial Cocktail* each show as one option.
+
 - The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
   table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
   looking at the screen can confirm: a wrong number renders exactly as well as a right one. They
@@ -3382,6 +3439,15 @@ Current tests:
   state of Parabola on every row. The Calendar suite pins the two cycles filling 1–6 exactly once and
   the seven return-visit aliases. The war suite recomputes all eighteen Ravages rates from their parts
   and pins that the trail is not badged. The Cub's suite pins the reward bands tiling without a gap.
+- `FallenLondon/test/choice-church-in-the-wild.test.mjs`, `choice-law-hunting.test.mjs`,
+  `choice-moulin-expeditions.test.mjs`, `choice-writing-monograph.test.mjs`,
+  `choice-kitchen-artists.test.mjs` — one per feature. The church suite pins that no choice moves a
+  seventh quality and that the two mirrored options really mirror across all six. Law-Hunting pins
+  that every option answers to its plain title as well as the wiki's. The Moulin suite pins that every
+  obstacle has a two-Supply answer and that NO option row belongs to a discardable card. The monograph
+  suite derives `breaks the circle` from the ring rather than trusting the flag, and checks every
+  buyer is reachable from some topic. The kitchen suite pins the four divisors and that the Helicon
+  sale is not claimed twice.
 - `FallenLondon/test/choice-painting-balmoral.test.mjs` — the painting suite pins that all three
   painting actions name both outcomes on the badge, that *Unveil your Painting* is one row pricing all
   seven compositions, that exactly one row is marked as the guide's word against an option page, and

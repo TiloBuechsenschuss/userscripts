@@ -1861,7 +1861,8 @@ check('the feature list, in order',
     'chessboard', 'parabolan-hunting', 'oneiropomp', 'sacroboscan', 'parabolan-war', 'cubs-education',
     'piracy', 'irem', 'khaganian-intrigue', 'helicon-house', 'jericho-library',
     'canal-cruising', 'barristering', 'magistracy-diving', 'railway-board', 'deciphering',
-    'disappearing', 'cover-identities', 'moonlit-woods', 'painting-balmoral']);
+    'disappearing', 'cover-identities', 'moonlit-woods', 'painting-balmoral',
+    'church-in-the-wild', 'law-hunting', 'moulin-expeditions', 'writing-monograph', 'kitchen-artists']);
 
 check('the panel list, in order',
   api.PANELS.map((p) => p.id),
