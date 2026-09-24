@@ -372,7 +372,8 @@ check('the card ratings are registered alongside the other features',
     'disappearing', 'cover-identities', 'moonlit-woods', 'painting-balmoral',
     'church-in-the-wild', 'law-hunting', 'moulin-expeditions', 'writing-monograph', 'kitchen-artists',
     'alchemy-station-viii', 'cornelius', 'clay-highwayman',
-    'hurling', 'chthonic-communication', 'digging-hurlers', 'marigold-station']);
+    'hurling', 'chthonic-communication', 'digging-hurlers', 'marigold-station',
+    'airs-of-london']);
 
 console.log(failures ? '\n' + failures + ' FAILURE(S)' : '\nAll checks passed.');
 process.exit(failures ? 1 : 0);

@@ -2430,6 +2430,28 @@ navigation. Two consequences:
   with another feature on purpose**: Helicon House's Prussian Salon also has an *Accept a commission*,
   the two sit under different storylets, and the suite pins that it is the only one.
 
+  **The Airs of London** (`airs-of-london`, `AOL_OPTIONS`, `AOL_DREAMS`, `AOL_PRICE`): six London
+  storylets whose options are gated on a randomiser the Myself tab never shows — Opportunism in
+  Spite, Life on Ladybones Road, Business on Watchmaker’s Hill, Dabble in the Great Game, Working for
+  the Widow and the Honey-Dens. **It is two layers.** Twelve of the gated options are *redirects*:
+  they cost no action and open a storylet of their own (*Confound the Constables*, *Lady seeks
+  bodyguard*, …), and the options that do the work are in there. Both layers are in one table, the
+  inner ones with `airs: null` and filed under the storylet they open; the redirect shows its best
+  line inside, worded “best”, and only where that line is priced. The badge is Echoes per action at
+  the item pages’ **sell** price of what a success gives less what it spends, then any quality it
+  moves, then every faction result (`0.36 E? · Connected: The Widow +10`). A range pays its middle;
+  the one Luck option (*Sneak a sip of the brandy*, `LuckChallenge 30`, read as 30%) is its expected
+  value, marked `≈`; a rare success is in the tooltip and **not** in the number, since no page gives
+  its odds; a random bundle (the ring fight, the Fisher-Kings) is marked, not priced. **The trap:**
+  the Honey-Dens’ six dreams are six options under ONE title, told apart only by the Airs window, so
+  they carry one label and the tooltip lists all six — with the gross per action, since the honey
+  they cost scales with your Connoisseur level. Memory of Light and Vision of the Surface are
+  Cross-economy and left unpriced. `(gendertitle)` joined `CAROUSEL_PLACEHOLDER`. Deferred, each a
+  carousel of its own: Duelling the Black Ribbon, Hunting Dangerous Prey, Unfinished Business ×4;
+  and the options that only *re-roll* Airs without being gated on it (*Sample prisoner’s honey*).
+  **Not done: reading the current Airs.** Fallen London shows it only in an unlock tooltip whose
+  markup has never been captured; `aolAirsFrom` parses the text and nothing calls it.
+
   **Painting in Balmoral** (`painting-balmoral`, `PB_OPTIONS`, `PB_PAYOUTS`): the badge exists to say
   that **failing is fine**. Every painting action raises Painter's Progress by one whether the check
   passes or not, so a failure costs nothing but the items and only steers the picture towards a
@@ -3166,6 +3188,17 @@ Confirmed live by the author:
   **(8) Marigold’s *Accept a commission*.** Whether it and Helicon House’s really share the title, the
   wiki filing this one as “Accept a commission 2”.
 
+- The **Airs of London badges** (added 2026-09-24). Nothing seen in the game. Report first, in order:
+  **(1) Where the current Airs is shown.** Open any Airs-gated option and copy the requirement’s HTML —
+  the unlock line that says “The Airs of London 47” — so `aolAirsFrom` can be wired to it and the
+  badges can say which options are on offer *now*. **(2) The redirect titles.** That each redirecting
+  option opens a storylet headed with the wiki’s redirect target (*Weasel-fanciers are abroad*,
+  *Advise on a Tattooed Corpse*, *Uncover Society Indiscretions*, …), and that the option itself is
+  listed under the title the table carries; the Great Game’s *Fascinate* options are carried under
+  the wiki’s title and the storylet page’s shorter one. **(3) “One (gendertitle) and a weasel”.**
+  What the game puts there. **(4) The Honey-Dens’ dream.** That all six really share the title
+  *Deepen your acquaintance with Prisoner’s Honey* and that only one is offered at a time.
+
 - The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
   table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
   looking at the screen can confirm: a wrong number renders exactly as well as a right one. They
@@ -3612,6 +3645,13 @@ Current tests:
   that the difficulty is the formula with the page’s 150 explained. The Marigold suite pins one item
   line and one check line per Fate, and that *Accept a commission* is the only name shared with
   another feature.
+- `tests/choice-airs-of-london.test.mjs` — pins that every window is inside 0–100 and that the
+  four-way splits (Watchmaker’s Hill, Ladybones Road, the Great Game’s *Gather resources*) partition
+  it exactly while Opportunism in Spite and the Widow offer something at every Airs; every item has a
+  price; the arithmetic of a range, a cost, a Luck option, a rare success and a bundle by hand; that
+  the six dreams are one label and never a badge each; the `(gendertitle)`, `Accept the task` and
+  `(5 FATE)` title traps; the two guide-versus-page disagreements; and that no option title is in
+  another feature’s table.
 - `tests/choice-painting-balmoral.test.mjs` — the painting suite pins that all three
   painting actions name both outcomes on the badge, that *Unveil your Painting* is one row pricing all
   seven compositions, that exactly one row is marked as the guide's word against an option page, and

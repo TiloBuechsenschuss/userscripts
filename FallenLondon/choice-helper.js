@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.24
+// @version      1.25
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -547,6 +547,14 @@
  *     of Frigid Intuition, the curios being the failure reward.
  *     And Marigold Station badges the Fate each emblem recovery belongs to and the item that Fate
  *     pays.
+ *     The Airs of London badges the six London storylets whose options depend on it -- Opportunism
+ *     in Spite, Life on Ladybones Road, Business on Watchmaker's Hill, Dabble in the Great Game,
+ *     Working for the Widow and the Honey-Dens -- and the storylets their redirecting options open.
+ *     Each option shows the Echoes per action of what a success gives at the Bazaar sell price, then
+ *     what else it moves and any faction result; a redirect shows its best line inside, a random
+ *     bundle is marked rather than priced, and the six dreams that share one Honey-Dens title carry
+ *     a label with all six windows in the tooltip. Which Airs you are at is not read: Fallen London
+ *     shows it only in a tooltip nobody has captured yet.
  *     Built as a feature registry so further advice can be added as entries.
  */
 
@@ -8299,10 +8307,12 @@
   // and the Evenlode courts three at once -- "(a defendant)" and "(defendant)",
   // the accused, and "(crime)", what they are accused of. Law-Hunting adds
   // "(type)", which is the kind of rogue law you are pinning down, and the
-  // Station VIII kitchen "(dish)" and "(your dish)", whatever you cooked. Only
-  // these thirty-four: a bracket like "(3 FATE)" is part of a real title.
+  // Station VIII kitchen "(dish)" and "(your dish)", whatever you cooked, and
+  // the Airs of London's Watchmaker's Hill "(gendertitle)", as in "One lady and
+  // a weasel". Only these thirty-five: a bracket like "(3 FATE)" is part of a
+  // real title.
   const CAROUSEL_PLACEHOLDER =
-    /\((?:growth|growth type|work leader|first option|second option|a level|a hole|a mirror|direction|somewhere|the workshop|the warzone|the mansion|the jungle|department|campaign focus|skeleton type|garment|Zee-Beast Location|Zee-Beast|Parabolan Quarry|Quarry Home|its lair|your saint|Bounty|a railway passenger|a defendant|defendant|crime|type|your dish|dish|Number|City Name)\)/;
+    /\((?:growth|growth type|work leader|first option|second option|a level|a hole|a mirror|direction|somewhere|the workshop|the warzone|the mansion|the jungle|department|campaign focus|skeleton type|garment|Zee-Beast Location|Zee-Beast|Parabolan Quarry|Quarry Home|its lair|your saint|Bounty|a railway passenger|a defendant|defendant|crime|type|your dish|dish|Number|City Name|gendertitle)\)/;
 
   function carouselMatcher(title) {
     const pieces = String(title).split(CAROUSEL_PLACEHOLDER);
@@ -9076,6 +9086,484 @@
     carouselRatings({
       storylets: [VH_STORYLET], index: VH_INDEX, storyletSpec: vhStoryletSpec, optionSpec: vhSpec,
       cls: VH_CLASS, flag: VH_FLAG, branchCls: VH_BRANCH_CLASS, branchFlag: VH_BRANCH_FLAG,
+    });
+  }
+
+  // === feature: The Airs of London =======================================
+  //
+  // Six storylets of the London quarters deal a different set of options
+  // depending on The Airs of London, a randomiser (0 to 100) that most of the
+  // options re-roll as they are played, and that the Myself tab never shows.
+  // Twelve of the options open a storylet of their own, so there are two
+  // layers, both on the shared carousel plumbing:
+  //
+  //   Opportunism in Spite, Life on Ladybones Road, Business on Watchmaker's
+  //   Hill, Dabble in the Great Game, Working for the Widow, The Honey-Dens of
+  //   Veilgarden -- the Airs-gated options, and beneath them the storylets a
+  //   redirecting option opens, which hold the options that do the work.
+  //
+  // **What the badge says.** Echoes per action at the SELL price of what a
+  // success gives, less what it spends ("0.44 E?"), then any quality it moves
+  // ("Suspicion −3", "Fascinating +2?"), then every faction result, signed.
+  // `?` is a stat challenge's success -- the difficulty is the player's own
+  // business -- and `≈` the expected value of the one Luck option, where the
+  // page gives the odds. A rare success is in the tooltip and NOT in the
+  // number: no page states its odds. A random bundle ("bundle ≤50") is not
+  // priced, since the pages do not say what is in it. A range pays its middle.
+  // An option that opens a storylet shows its best line inside, worded "best".
+  // The Honey-Dens' dream is six options under ONE title, told apart only by
+  // the Airs window, so it carries a label and the tooltip lists all six.
+  //
+  // Each badge's colour is the number's band and nothing else -- blue, teal,
+  // olive, amber, burnt orange -- with the number printed on it, so nothing
+  // rests on a hue. The Airs window is in the tooltip, with whether the option
+  // re-rolls Airs, which is the other half of choosing one.
+  //
+  // NOT DONE: reading the CURRENT Airs. Fallen London shows it only in an
+  // unlock tooltip whose markup has never been captured here, and inventing a
+  // selector is exactly what this file does not do; `aolAirsFrom` parses the
+  // text once someone captures where it sits.
+  //
+  // Transcribed from the option pages and the redirect targets' storylet pages
+  // (fetched through the API, 2026-09-24) with The Airs of London and its
+  // Notable Ranges as the cross-check. Prices are the item pages' "Buying/
+  // Selling" sell figure in Echoes. Where the sources disagree the page is
+  // followed and `guide` quotes the other:
+  //   Deepen your acquaintance ... (Spotted Shadows)   storylet 0–25, page 1–25
+  //   Confound the Constables    the Airs page lists Suspicion −4 or −3 "in
+  //                              addition to" the contracts; the pages give −3
+  //                              with them and −4 alone, and are followed
+  // Left out: Duelling the Black Ribbon, Hunting Dangerous Prey and Unfinished
+  // Business (a carousel each), and the options that carry no Airs window.
+  // Corrections go in AOL_OPTIONS and nowhere else.
+  //
+  //   storylet / name / aliases   where the option is filed and what it is called.
+  //   airs     [[lo, hi], ...] windows the option is offered in.
+  //   open     the storylet it opens, for a redirecting option.
+  //   ch       [stat, difficulty], or { luck } for the odds of a Luck challenge.
+  //   g / u    items a success gives / spends, [item, n | [lo, hi]].
+  //   q / f    qualities / faction results a success moves, [name, n | [lo, hi]].
+  //   bundle   a random bundle the page does not itemise.
+  //   rare / fail  what a rare success / a failure gives: { g, q, f }.
+  //   re       where the page lists Airs re-rolled: 'both', 'win' or 'none'.
+  //   needs / fate / actions / note / guide.
+
+  const AOL_SPITE = 'Opportunism in Spite';
+  const AOL_LADY = 'Life on Ladybones Road';
+  const AOL_HILL = 'Business on Watchmaker’s Hill';
+  const AOL_GAME = 'Dabble in the Great Game';
+  const AOL_WIDOW = 'Working for the Widow';
+  const AOL_HONEY = 'The Honey-Dens of Veilgarden';
+  const AOL_TOP = [AOL_SPITE, AOL_LADY, AOL_HILL, AOL_GAME, AOL_WIDOW, AOL_HONEY];
+  const AOL_DREAM = 'Deepen your acquaintance with Prisoner’s Honey';
+  const AOL_NAME_WHISPERED = 'A Name Whispered in Darkness 3';
+
+  // What the Bazaar pays, in Echoes, per item (the item pages' sell figure).
+  const AOL_PRICE = {
+    'Shard of Glim': 0.01, 'Moon-Pearl': 0.01, 'Whispered Hint': 0.01, 'Jade Fragment': 0.01,
+    'Maniac’s Prayer': 0.10, 'Flask of Abominable Salts': 0.10, 'Infernal Contract': 0.20,
+    'Proscribed Material': 0.04, 'Silk Scrap': 0.01, 'Fistful of Surface Currency': 0.03,
+    'Relic of the Fourth City': 0.05, 'Stolen Correspondence': 0.05, 'Foxfire Candle Stub': 0.01,
+    'Piece of Rostygold': 0.01, 'Lucky Weasel': 0.20, 'Araby Fighting-Weasel': 0.50,
+    'Cryptic Clue': 0.02, 'Flawed Diamond': 0.12, 'Drop of Prisoner’s Honey': 0.02,
+    'Primordial Shriek': 0.02, 'Appalling Secret': 0.15, 'Tale of Terror!!': 0.50,
+    'Extraordinary Implication': 2.5, 'Memory of Distant Shores': 0.5, 'Phosphorescent Scarab': 0.10,
+  };
+  // Cross-economy items: the pages give a figure, but not a Bazaar one.
+  const AOL_UNPRICED = ['Memory of Light', 'Vision of the Surface'];
+  const AOL_Q_SHORT = { 'Playing the Game': 'Game', 'Fascinating...': 'Fascinating' };
+
+  function aolE(storylet, name, airs, more) {
+    return Object.assign({ storylet: storylet, name: name, airs: airs, re: 'both' }, more);
+  }
+
+  const AOL_OPTIONS = [
+    // --- Opportunism in Spite: the Airs-gated options ---------------------
+    aolE(AOL_SPITE, 'Assist the Fisher-Kings', [[0, 25]], { open: 'Assist the Fisher-Kings' }),
+    aolE(AOL_SPITE, 'Confound the Constables', [[0, 25]], { open: 'Confound the Constables', needs: AOL_NAME_WHISPERED,
+      guide: 'The Airs page lists Suspicion −4 or −3 together with the contracts; the pages give −3 with them and −4 alone.' }),
+    aolE(AOL_SPITE, 'Burgle a Glim assayer’s office', [[13, 38]], { ch: ['Shadowy', 42], g: [['Shard of Glim', 42]],
+      q: [['Daring', 1]], rare: { g: [['Maniac’s Prayer', 8]] }, fail: { q: [['Suspicion', 1]] }, re: 'win',
+      note: 'Daring is capped at 6.' }),
+    aolE(AOL_SPITE, 'Burgle a grand residence', [[26, 50]], { open: 'Burgle a grand residence', needs: AOL_NAME_WHISPERED }),
+    aolE(AOL_SPITE, 'Pick pockets at a ring fight', [[26, 50]], { ch: ['Shadowy', 33], bundle: '1–66',
+      note: 'The page does not record a failure re-rolling Airs and marks it an assumption.' }),
+    aolE(AOL_SPITE, 'Burgle a jeweller’s shop', [[39, 63]], { ch: ['Shadowy', 37], g: [['Moon-Pearl', 37]],
+      fail: { q: [['Suspicion', 1]] } }),
+    aolE(AOL_SPITE, 'Rob a honey den', [[51, 75]], { ch: ['Shadowy', 36], g: [['Drop of Prisoner’s Honey', 18]] }),
+    aolE(AOL_SPITE, 'Work the Carnival', [[51, 75]], { ch: ['Shadowy', 60], g: [['Relic of the Fourth City', 12]],
+      needs: AOL_NAME_WHISPERED }),
+    aolE(AOL_SPITE, 'Case a Jeweller’s Shop', [[64, 87]], { ch: ['Shadowy', 30], g: [['Whispered Hint', 30]] }),
+    aolE(AOL_SPITE, 'Case a mansion', [[76, 100]], { open: 'Case a mansion' }),
+    aolE(AOL_SPITE, 'Waylay a Weasel-Seller', [[76, 100]], { ch: ['Shadowy', 53], g: [['Lucky Weasel', 2]],
+      rare: { g: [['Araby Fighting-Weasel', 1]] }, fail: { g: [['Lucky Weasel', 1]], q: [['Wounds', 1]] },
+      needs: AOL_NAME_WHISPERED }),
+    aolE(AOL_SPITE, 'Christen Jack for a Stuttering Fence', [[0, 12], [88, 100]], { ch: ['Shadowy', 15],
+      g: [['Moon-Pearl', 15]], rare: { g: [['Flask of Abominable Salts', 2]] } }),
+
+    // --- ... and what they open -------------------------------------------
+    aolE('Assist the Fisher-Kings', 'Play groundsman for the urchins', null, { ch: ['Shadowy', 25], bundle: '≤50' }),
+    aolE('Assist the Fisher-Kings', 'Rob the urchins', null, { ch: ['Shadowy', 28], bundle: '≤56' }),
+    aolE('Confound the Constables', 'A man with a past', null, { ch: ['Shadowy', 45],
+      g: [['Infernal Contract', 2], ['Proscribed Material', 1]], q: [['Suspicion', -3]], fail: { q: [['Suspicion', 1]] } }),
+    aolE('Confound the Constables', 'A riskier option: hide in a rookery', null, { ch: ['Shadowy', 48],
+      q: [['Suspicion', -4]] }),
+    aolE('Burgle a grand residence', 'Not the silver cutlery, this time', null, { ch: ['Shadowy', 48],
+      g: [['Relic of the Fourth City', 10]], fail: { q: [['Suspicion', 1]] } }),
+    aolE('Burgle a grand residence', 'Books and papers', null, { aliases: ['Books and papers (3 FATE)'], fate: 3,
+      g: [['Stolen Correspondence', 12]], q: [['Scandal', -5]] }),
+    aolE('Case a mansion', 'Valets and scullery maids', null, { ch: ['Shadowy', 39], g: [['Stolen Correspondence', 7]],
+      fail: { q: [['Suspicion', 1]] } }),
+    aolE('Case a mansion', 'Circumspect criminal', null, { ch: ['Watchful', 39], g: [['Foxfire Candle Stub', 13]],
+      fail: { q: [['Suspicion', 1]] } }),
+
+    // --- Life on Ladybones Road -------------------------------------------
+    aolE(AOL_LADY, 'Babysit a troublesome aristocratic miss', [[0, 25]], { open: 'Babysit a troublesome aristocratic miss' }),
+    aolE(AOL_LADY, 'A furtive duo seeks your expertise concerning tattoos...', [[26, 50]], { open: 'Advise on a Tattooed Corpse' }),
+    aolE(AOL_LADY, 'Discover the secrets of the Clay Men', [[51, 75]], { open: 'Discover the secrets of the Clay Men' }),
+    aolE(AOL_LADY, 'Uncover society indiscretions', [[76, 100]], { open: 'Uncover Society Indiscretions' }),
+    aolE('Babysit a troublesome aristocratic miss', 'The girl with mushrooms in her hat', null,
+      { ch: ['Watchful', 21], g: [['Moon-Pearl', [36, 45]]] }),
+    aolE('Babysit a troublesome aristocratic miss', 'She seems to have many friends', null,
+      { ch: ['Persuasive', 21], g: [['Moon-Pearl', [36, 45]]] }),
+    aolE('Advise on a Tattooed Corpse', 'Stick with what you know', null, { ch: ['Watchful', 20],
+      g: [['Fistful of Surface Currency', [11, 18]]], fail: { q: [['Nightmares', 1]] } }),
+    aolE('Advise on a Tattooed Corpse', 'Make educated guesses', null, { ch: ['Watchful', 30],
+      g: [['Fistful of Surface Currency', [14, 21]]], fail: { q: [['Nightmares', 2]] } }),
+    aolE('Discover the secrets of the Clay Men', 'Scour the bookshops', null, { ch: ['Watchful', 22],
+      g: [['Cryptic Clue', [18, 23]]] }),
+    aolE('Discover the secrets of the Clay Men', 'Follow one of them', null, { ch: ['Dangerous', 28],
+      g: [['Cryptic Clue', [18, 27]]] }),
+    aolE('Uncover Society Indiscretions', 'Look into the circumstances of a betrothal', null, { ch: ['Watchful', 23],
+      g: [['Whispered Hint', [16, 25]], ['Moon-Pearl', [16, 25]]] }),
+    aolE('Uncover Society Indiscretions', 'Follow a gentleman of suspect fidelity', null, { ch: ['Shadowy', 28],
+      g: [['Whispered Hint', [21, 30]], ['Moon-Pearl', [21, 30]]] }),
+
+    // --- Business on Watchmaker's Hill ------------------------------------
+    aolE(AOL_HILL, 'Encounter: an enthusiastic outing', [[0, 25]], { open: 'Weasel-fanciers are abroad' }),
+    aolE(AOL_HILL, 'Encounter: a loutish band', [[26, 50]], { open: 'A resurrected tradition' }),
+    aolE(AOL_HILL, 'Encounter: a lady needs a bodyguard for the night', [[51, 75]], { open: 'Lady seeks bodyguard' }),
+    aolE(AOL_HILL, 'Encounter: a sleep-deprived astronomer', [[76, 100]],
+      { open: 'Drive off a troublesome pack of marsh-wolves' }),
+    aolE('Weasel-fanciers are abroad', 'Help keep the L.B.’s away', null, { ch: ['Dangerous', 21],
+      g: [['Piece of Rostygold', [31, 40]]] }),
+    aolE('Weasel-fanciers are abroad', 'One (gendertitle) and a weasel', null, { ch: ['Dangerous', 25],
+      g: [['Moon-Pearl', [36, 45]]], needs: 'Lucky Weasel 1', note: 'The page records no loss of the weasel.' }),
+    aolE('Weasel-fanciers are abroad', 'One (gendertitle) and a weasel of distinction', null, { ch: ['Dangerous', 30],
+      g: [['Moon-Pearl', [46, 55]]], needs: 'Araby Fighting-Weasel 1', note: 'The page records no loss of the weasel.' }),
+    aolE('A resurrected tradition', 'Cosh a few and be on your way', null, { ch: ['Dangerous', 21],
+      g: [['Shard of Glim', [30, 39]]], q: [['Magnanimous', 1], ['Ruthless', -1]] }),
+    aolE('A resurrected tradition', 'Offer your services to the press gang', null, { ch: ['Dangerous', 21],
+      g: [['Shard of Glim', [36, 45]]], q: [['Ruthless', 1], ['Magnanimous', -1]] }),
+    aolE('Lady seeks bodyguard', 'Escort for an evening', null, { ch: ['Dangerous', 23],
+      g: [['Jade Fragment', [36, 45]]],
+      rare: { g: [['Jade Fragment', [36, 44]], ['Cryptic Clue', 2]], q: [['Nightmares', -2]] } }),
+    aolE('Drive off a troublesome pack of marsh-wolves', 'Load for wolf', null, { ch: ['Dangerous', 20],
+      g: [['Piece of Rostygold', [36, 45]]] }),
+    aolE('Drive off a troublesome pack of marsh-wolves', 'Lure them away', null, { ch: ['Dangerous', 30],
+      g: [['Piece of Rostygold', [46, 55]]], fail: { q: [['Wounds', 1]] } }),
+
+    // --- Working for the Widow --------------------------------------------
+    aolE(AOL_WIDOW, 'Help Bring in Smuggled Tea Under Cover of Darkness', [[0, 66]], { ch: ['Shadowy', 49],
+      g: [['Jade Fragment', 43]], f: [['Connected: The Widow', 3]], fail: { q: [['Suspicion', 1]], f: [['Connected: The Widow', -1]] },
+      re: 'win' }),
+    aolE(AOL_WIDOW, 'Attend an audience with the Gracious Widow', [[33, 67]], { ch: ['Shadowy', 57],
+      g: [['Jade Fragment', 36]], f: [['Connected: The Widow', 10]], fail: { f: [['Connected: The Widow', -1]] },
+      needs: 'Connected: The Widow 10' }),
+    aolE(AOL_WIDOW, 'Assist with a Tomb-Colonist Exodus', [[0, 33]], { open: 'Assist with a Tomb-Colonist Exodus' }),
+    aolE(AOL_WIDOW, 'Avoid an Unfair Tax on Jewels', [[34, 100]], { open: 'Avoid an Unfair Tax on Jewels' }),
+    aolE(AOL_WIDOW, 'Help Bring in Peach Brandy', [[67, 100]], { open: 'Help Bring in Peach Brandy' }),
+    aolE('Assist with a Tomb-Colonist Exodus', 'Run interference for the coffins', null, { ch: ['Shadowy', 58],
+      g: [['Jade Fragment', 48]], f: [['Connected: The Widow', 5]], fail: { q: [['Suspicion', 1]] },
+      needs: 'Connected: The Widow 10', re: 'win' }),
+    aolE('Assist with a Tomb-Colonist Exodus', 'Run interference for the coffins – and take a peek', null,
+      { ch: ['Shadowy', 61], g: [['Jade Fragment', 47], ['Cryptic Clue', 1]], f: [['Connected: The Widow', 5]],
+        fail: { q: [['Suspicion', 1]], f: [['Connected: The Widow', -5]] }, needs: 'Connected: The Widow 10' }),
+    aolE('Avoid an Unfair Tax on Jewels', 'Retrieve \'costume\' jewellery', null, { ch: ['Shadowy', 51],
+      g: [['Jade Fragment', 43]], f: [['Connected: The Widow', 4]], fail: { q: [['Suspicion', 1]] },
+      needs: 'Connected: The Widow', re: 'none' }),
+    aolE('Avoid an Unfair Tax on Jewels', 'Take one of the smaller pieces for yourself', null, { ch: ['Shadowy', 54],
+      g: [['Flawed Diamond', 1], ['Jade Fragment', 41]], f: [['Connected: The Widow', 3]],
+      fail: { q: [['Suspicion', 2]], f: [['Connected: The Widow', -10]] }, needs: 'Connected: The Widow', re: 'none' }),
+    aolE('Help Bring in Peach Brandy', 'Steal a shipment of walking-canes', null, { ch: ['Shadowy', 54],
+      g: [['Jade Fragment', 42]], f: [['Connected: The Widow', 6]], fail: { q: [['Suspicion', 1]] },
+      needs: 'Connected: The Widow 5' }),
+    aolE('Help Bring in Peach Brandy', 'Sneak a sip of the brandy', null, { ch: { luck: 0.3 },
+      g: [['Jade Fragment', 42]], q: [['Wounds', -8]], f: [['Connected: The Widow', 5]],
+      fail: { q: [['Suspicion', 2], ['Wounds', 1]], f: [['Connected: The Widow', -15]] },
+      needs: 'Connected: The Widow 15', note: 'The page gives LuckChallenge 30, read as a 30% chance.' }),
+
+    // --- Dabble in the Great Game -----------------------------------------
+    aolE(AOL_GAME, 'Investigate the Courier’s paramour', [[0, 25]], { aliases: ['Investigate the Courier’s paramour (5 FATE)'],
+      fate: 5, g: [['Cryptic Clue', 50]], q: [['Playing the Game', 11], ['Subtle', 3]],
+      guide: 'The storylet page gives Airs 0–25; the option page records no requirement.' }),
+    aolE(AOL_GAME, 'Fascinate: idle chats with the Courier in the Singing Mandrake', [[0, 33]],
+      { aliases: ['Idle chats with the Courier in the Singing Mandrake'], ch: ['Persuasive', 20],
+        q: [['Fascinating...', 1]], rare: { q: [['Fascinating...', [1, 3]]] }, needs: 'Venture: Uncover hidden tattoos, exactly 1' }),
+    aolE(AOL_GAME, 'Fascinate: sketch the Courier on napkins', [[34, 66]],
+      { aliases: ['Sketch the Courier on napkins'], ch: ['Persuasive', 22], q: [['Fascinating...', 2]],
+        rare: { q: [['Fascinating...', [2, 4]]] }, needs: 'Venture: Uncover hidden tattoos 1' }),
+    aolE(AOL_GAME, 'Fascinate: trade tales of the Great Game with the Courier', [[67, 83]],
+      { aliases: ['Trade tales of the Great Game with the Courier'], q: [['Fascinating...', 6], ['Playing the Game', -6]],
+        needs: 'Venture: Uncover hidden tattoos 1 and Playing the Game 3', re: 'win' }),
+    aolE(AOL_GAME, 'Fascinate: attend drawing lessons to impress the Courier', [[84, 100]],
+      { aliases: ['Attend drawing lessons to impress the Courier'], u: [['Moon-Pearl', 50]],
+        q: [['Fascinating...', [6, 8]]], needs: 'Venture: Uncover hidden tattoos 1 and Moon-Pearl 50', re: 'win' }),
+    aolE(AOL_GAME, 'Gather resources: befriend a tomb-colonist', [[0, 20]], { open: 'Befriend a tomb-colonist' }),
+    aolE(AOL_GAME, 'Gather resources: beguile a Useful Official', [[21, 40]], { open: 'Beguile a Useful Official' }),
+    aolE(AOL_GAME, 'Gather resources: rumourmongering!', [[41, 60]], { open: 'Rumourmongering!' }),
+    aolE(AOL_GAME, 'Gather resources: sketches towards a tattoo', [[61, 80]], { open: 'Sketches towards a tattoo' }),
+    aolE(AOL_GAME, 'Gather resources: provide material to an agent of a foreign power', [[81, 100]],
+      { open: 'Provide material to an agent of a foreign power' }),
+    aolE(AOL_GAME, 'Trade on your connections: sell Society’s secrets', [[26, 39]], { ch: ['Persuasive', 25],
+      g: [['Primordial Shriek', [51, 100]]], q: [['Playing the Game', 5]], f: [['Favours: Society', -1]],
+      fail: { q: [['Playing the Game', 3]], f: [['Favours: Society', -1]] }, needs: 'Favours: Society 1' }),
+    aolE(AOL_GAME, 'Trade on your connections: report comings and goings at the Docks', [[40, 53]], { ch: ['Persuasive', 25],
+      g: [['Silk Scrap', [101, 200]]], q: [['Playing the Game', 10]], f: [['Favours: The Docks', -1]],
+      needs: 'Favours: The Docks 1' }),
+    aolE(AOL_GAME, 'Trade on your connections: recommend criminal stooges', [[54, 66]], { ch: ['Persuasive', 25],
+      g: [['Drop of Prisoner’s Honey', [51, 100]]], q: [['Playing the Game', 10]], f: [['Favours: Criminals', -1]],
+      needs: 'Favours: Criminals 1' }),
+    aolE(AOL_GAME, 'Spend Moon-Pearls to win some friends in the Great Game', [[67, 100]],
+      { u: [['Moon-Pearl', 80]], q: [['Playing the Game', [2, 10]]], needs: 'Moon-Pearl 80', re: 'win' }),
+    aolE('Befriend a tomb-colonist', 'Accept the task', null, { ch: ['Persuasive', 20], g: [['Moon-Pearl', [26, 35]]],
+      q: [['Playing the Game', 1]] }),
+    aolE('Befriend a tomb-colonist', 'A riskier approach: arrange for her to be robbed', null, { ch: ['Shadowy', 20],
+      g: [['Moon-Pearl', [26, 35]]], q: [['Playing the Game', 1]] }),
+    aolE('Beguile a Useful Official', 'Accept the task', null, { ch: ['Persuasive', 25],
+      g: [['Whispered Hint', [21, 30]], ['Silk Scrap', 2]],
+      rare: { g: [['Whispered Hint', [27, 30]], ['Silk Scrap', 5]], q: [['Playing the Game', 1]] },
+      note: 'The page files the better outcome as a plain success, not a rare one.' }),
+    aolE('Rumourmongering!', 'Be subtle', null, { ch: ['Persuasive', 20], g: [['Moon-Pearl', [24, 31]]],
+      q: [['Playing the Game', 1]], rare: { g: [['Moon-Pearl', [23, 32]]], q: [['Playing the Game', 2]] } }),
+    aolE('Rumourmongering!', 'Go wild with your inventions', null, { ch: ['Persuasive', 30],
+      g: [['Moon-Pearl', [26, 35]]], q: [['Playing the Game', 2]] }),
+    aolE('Sketches towards a tattoo', 'Begin sketching', null, { ch: ['Persuasive', 23],
+      g: [['Jade Fragment', [29, 40]]], q: [['Playing the Game', 1]],
+      rare: { g: [['Jade Fragment', [39, 47]]], q: [['Playing the Game', 2]] } }),
+    aolE('Provide material to an agent of a foreign power', 'Supply plausible information to the Barely Disguised Diplomat',
+      null, { ch: ['Persuasive', 21], g: [['Moon-Pearl', [25, 35]]] }),
+    aolE('Provide material to an agent of a foreign power', 'You’re an artist! Let the artistry begin!', null,
+      { ch: ['Persuasive', 30], g: [['Moon-Pearl', [31, 47]]], fail: { q: [['Scandal', 1]] } }),
+  ];
+
+  // The Honey-Dens' dream: six options under one title, told apart only by the
+  // window. Each costs 2 actions and as many Drops of Prisoner's Honey as your
+  // A Connoisseur of Neathy Delights level, which the badge cannot know, so
+  // the figure is the GROSS a success gives per action.
+  const AOL_DREAMS = [
+    { dream: 'Spotted Shadows', airs: [1, 25], guideAirs: '0–25', diff: 12, g: [['Memory of Light', 1]],
+      fail: 'Tale of Terror!!, Nightmares +1' },
+    { dream: 'Colours', airs: [20, 45], diff: 18, g: [['Vision of the Surface', 1]],
+      fail: 'Tale of Terror!!, Nightmares +1' },
+    { dream: 'a River', airs: [40, 65], diff: 20, g: [['Memory of Distant Shores', 1]],
+      fail: 'Wounds +1 (only if you have 3 or fewer)' },
+    { dream: 'a Sunrise', airs: [60, 85], diff: 20, g: [], fail: 'Tale of Terror!!' },
+    { dream: 'a Tempest', airs: [85, 100], diff: 19,
+      g: [['Maniac’s Prayer', 2], ['Appalling Secret', 2], ['Cryptic Clue', 5]], q: [['Wounds', -1]],
+      fail: 'Tale of Terror!!' },
+    { dream: 'a City', airs: [95, 100], diff: 25, g: [['Phosphorescent Scarab', 1], ['Extraordinary Implication', 1]],
+      needs: 'A Connoisseur of Neathy Delights 4', fail: 'Appalling Secret' },
+  ];
+
+  const AOL_INDEX = carouselIndex(AOL_OPTIONS.concat([aolE(AOL_HONEY, AOL_DREAM, [[1, 100]], { dream: true })]));
+  const AOL_STORYLETS = AOL_TOP.concat(AOL_OPTIONS.filter(function (e) { return e.storylet !== null && AOL_TOP.indexOf(e.storylet) === -1; })
+    .map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; }));
+
+  const AOL_CLASS = 'fl-ux-aol';
+  const AOL_FLAG = 'flUxAol';
+  const AOL_BRANCH_CLASS = 'fl-ux-aol-branch';
+  const AOL_BRANCH_FLAG = 'flUxAolBranch';
+
+  // Five bands of Echoes per action, one colour each, white ink on all: blue,
+  // teal, olive, amber, burnt orange. The number is on the badge.
+  const AOL_BANDS = [
+    { below: 0.1, color: '#3f5f8a' }, { below: 0.3, color: '#1b7d67' }, { below: 0.6, color: '#5f6b1a' },
+    { below: 1, color: '#8a6420' }, { below: Infinity, color: '#9b4a14' },
+  ];
+
+  function aolMid(n) { return Array.isArray(n) ? (n[0] + n[1]) / 2 : n; }
+
+  function aolWorth(list) {
+    return (list || []).reduce(function (sum, p) { return sum + aolMid(p[1]) * (AOL_PRICE[p[0]] || 0); }, 0);
+  }
+
+  // Echoes per action of a success, or null where there is nothing to price.
+  // A bundle is not priced; a Luck option is its expected value.
+  function aolEpa(e) {
+    if (e.bundle || !((e.g && e.g.length) || (e.u && e.u.length))) return null;
+    const odds = e.ch && !Array.isArray(e.ch) ? e.ch.luck : 1;
+    return (odds * (aolWorth(e.g) - aolWorth(e.u))) / (e.actions || 1);
+  }
+
+  function aolColor(epa) {
+    if (epa === null || epa === undefined) return CAROUSEL_COLOR_NEUTRAL;
+    return AOL_BANDS.filter(function (b) { return epa < b.below; })[0].color;
+  }
+
+  function aolEchoes(x) {
+    const abs = Math.abs(x);
+    return (x < 0 ? '−' : '') + (abs >= 10 ? abs.toFixed(1) : abs.toFixed(2));
+  }
+
+  function aolWindows(airs) {
+    return airs.map(function (w) { return w[0] + '–' + w[1]; }).join(' and ');
+  }
+
+  function aolMoves(list) {
+    return (list || []).map(function (p) {
+      return (AOL_Q_SHORT[p[0]] || p[0]) + ' ' + carouselRange(p[1]);
+    });
+  }
+
+  function aolGives(list) {
+    return (list || []).map(function (p) {
+      const n = p[1];
+      return p[0] + ' ×' + (Array.isArray(n) ? n[0] + '–' + n[1] : n);
+    }).join(', ');
+  }
+
+  // "0.44 E? · Suspicion −3", the parts in the order the design says: the
+  // number, what else moves, then the factions.
+  function aolBadgeText(e) {
+    const epa = aolEpa(e);
+    const luck = e.ch && !Array.isArray(e.ch);
+    const mark = luck ? CAROUSEL_MARK_EXPECTED : e.ch ? CAROUSEL_MARK_CHALLENGE : '';
+    const parts = [];
+    if (epa !== null) parts.push(aolEchoes(epa) + ' E' + mark);
+    else if (e.bundle) parts.push('bundle ' + e.bundle + mark);
+    aolMoves(e.q).forEach(function (m) { parts.push(m + (!parts.length ? mark : '')); });
+    let text = parts.join(' · ');
+    const factions = aolMoves(e.f);
+    if (factions.length) text += (text ? ' · ' : '') + factions.join(' · ');
+    return text;
+  }
+
+  // What a redirecting option shows: its best line inside, by Echoes, the
+  // first of them where nothing is priced.
+  function aolInner(e) {
+    return AOL_OPTIONS.filter(function (o) { return o.storylet === e.open; });
+  }
+
+  function aolBest(list) {
+    let best = list[0];
+    list.forEach(function (o) {
+      const a = aolEpa(o);
+      const b = aolEpa(best);
+      if (a !== null && (b === null || a > b)) best = o;
+    });
+    return best;
+  }
+
+  function aolRerolls(e) {
+    return e.re === 'both' ? 'Re-rolls Airs on a success and on a failure.'
+      : e.re === 'win' ? 'The page lists Airs re-rolled on a success and not on a failure.'
+        : 'The page does not list this option re-rolling Airs.';
+  }
+
+  function aolChallenge(e) {
+    if (!e.ch) return 'No challenge.';
+    if (!Array.isArray(e.ch)) return 'Luck: ' + Math.round(e.ch.luck * 100) + '% to succeed, so the badge is the expected value.';
+    return 'Challenge: ' + e.ch[0] + ' ' + e.ch[1] + ', certain at ' + e.ch[0] + ' ' + broadCertainAt(e.ch[1]) + '.';
+  }
+
+  function aolLines(e) {
+    const lines = [e.name, e.storylet + (e.airs ? ', The Airs of London ' + aolWindows(e.airs) : ''), ''];
+    if (e.airs) lines.push(aolRerolls(e));
+    lines.push(aolChallenge(e));
+    if (e.bundle) lines.push('Success: a random bundle of up to ' + e.bundle.replace('≤', '') + ', not itemised on the page.');
+    const win = [aolGives(e.g), aolMoves(e.q).join(', '), aolMoves(e.f).join(', ')].filter(Boolean).join('; ');
+    if (win) lines.push('Success: ' + win + '.');
+    if (e.u && e.u.length) lines.push('Spends: ' + aolGives(e.u) + '.');
+    if (e.fate) lines.push('Costs ' + e.fate + ' FATE.');
+    const epa = aolEpa(e);
+    if (epa !== null) {
+      lines.push('Worth ' + aolEchoes(epa) + ' Echoes per action at the Bazaar sell price'
+        + (e.ch && Array.isArray(e.ch) ? ', if the challenge succeeds' : '') + '.');
+    }
+    if (e.rare) {
+      lines.push('Rare success: ' + [aolGives(e.rare.g), aolMoves(e.rare.q).join(', ')].filter(Boolean).join('; ')
+        + '. No page states its odds, so it is not in the number.');
+    }
+    if (e.fail) {
+      const bad = [aolGives(e.fail.g), aolMoves(e.fail.q).join(', '), aolMoves(e.fail.f).join(', ')].filter(Boolean);
+      lines.push('Failure: ' + bad.join('; ') + '.');
+    }
+    if (e.needs) lines.push('Needs: ' + e.needs + '.');
+    if (e.note) lines.push(e.note);
+    if (e.guide) lines.push('Note: ' + e.guide);
+    return lines;
+  }
+
+  function aolDreamLines() {
+    const lines = [AOL_DREAM, AOL_HONEY, '',
+      'Six options share this title; the Airs window tells them apart, and it is re-rolled every action.',
+      'Each costs 2 actions and as many Drops of Prisoner’s Honey as your A Connoisseur of Neathy Delights '
+      + 'level, and raises that level by 1. The figure is the gross per action, honey not counted.', ''];
+    AOL_DREAMS.forEach(function (d) {
+      const gross = aolWorth(d.g) / 2;
+      const unpriced = d.g.some(function (p) { return AOL_UNPRICED.indexOf(p[0]) !== -1; });
+      lines.push('Airs ' + d.airs[0] + '–' + d.airs[1] + ' — Dream of ' + d.dream + ' (Persuasive ' + d.diff + '): '
+        + (aolGives(d.g) || 'nothing extra') + (d.q ? '; ' + aolMoves(d.q).join(', ') : '')
+        + (unpriced ? ' (Cross-economy, no Bazaar price)' : ', ' + aolEchoes(gross) + ' E?')
+        + '. Failure: ' + d.fail + '.' + (d.needs ? ' Needs ' + d.needs + '.' : '')
+        + (d.guideAirs ? ' The storylet page says ' + d.guideAirs + '; the option page is followed.' : ''));
+    });
+    return lines;
+  }
+
+  // The spec for one option. A redirecting option carries its best inner line.
+  function aolSpec(e) {
+    if (e.dream) {
+      return { text: 'dream, by Airs', color: CAROUSEL_COLOR_LABEL, title: aolDreamLines().join('\n') };
+    }
+    if (e.open) {
+      const inner = aolInner(e);
+      if (!inner.length) return null;
+      const best = aolBest(inner);
+      const priced = inner.some(function (o) { return aolEpa(o) !== null; });
+      const lines = aolLines(e).slice(0, 2);
+      lines.push('', 'Opens ' + e.open + ' (no action of its own). Its options:');
+      inner.forEach(function (o) { lines.push('  • ' + o.name + ' — ' + aolBadgeText(o)); });
+      if (e.needs) lines.push('', 'Needs: ' + e.needs + '.');
+      // "best" is a claim only where the lines are priced; otherwise say what is inside.
+      return {
+        text: priced ? 'best ' + aolBadgeText(best) : inner.map(aolBadgeText).join(' | '),
+        color: aolColor(aolEpa(best)), title: lines.join('\n'),
+      };
+    }
+    return { text: aolBadgeText(e), color: aolColor(aolEpa(e)), title: aolLines(e).join('\n') };
+  }
+
+  function aolStoryletSpec(key) {
+    const own = AOL_OPTIONS.filter(function (e) { return normalizeName(e.storylet) === key; });
+    if (!own.length) return key === normalizeName(AOL_HONEY) ? { text: 'Airs', color: CAROUSEL_COLOR_LABEL, title: aolDreamLines().join('\n') } : null;
+    const lines = [own[0].storylet, ''];
+    own.forEach(function (e) {
+      lines.push('  • ' + e.name + (e.airs ? ' [Airs ' + aolWindows(e.airs) + ']' : '') + ' — '
+        + (e.open ? 'opens ' + e.open : aolBadgeText(e)));
+    });
+    if (AOL_TOP.indexOf(own[0].storylet) !== -1) {
+      lines.push('', 'The Airs of London is re-rolled by most of these options; the Myself tab does not show it.');
+    }
+    lines.push('', 'Open the storylet and every option is badged in its own right.');
+    // No figure: a redirecting option can hold better than any option beside it.
+    return { text: 'Airs', color: CAROUSEL_COLOR_LABEL, title: lines.join('\n') };
+  }
+
+  // The Airs of London a piece of requirement text states, or null. Nothing
+  // calls this yet: where Fallen London puts that text has not been captured.
+  function aolAirsFrom(text) {
+    const m = /The Airs of London\D{0,12}?(\d{1,3})\b/i.exec(String(text || ''));
+    return m && +m[1] <= 100 ? +m[1] : null;
+  }
+
+  function aolRatings() {
+    carouselRatings({
+      storylets: AOL_STORYLETS, index: AOL_INDEX, storyletSpec: aolStoryletSpec,
+      optionSpec: function (e) { return aolSpec(e); },
+      cls: AOL_CLASS, flag: AOL_FLAG, branchCls: AOL_BRANCH_CLASS, branchFlag: AOL_BRANCH_FLAG,
     });
   }
 
@@ -31780,6 +32268,9 @@
     { name: 'chthonic-communication', run: ccmRatings },
     { name: 'digging-hurlers', run: dhRatings },
     { name: 'marigold-station', run: mrRatings },
+    // Six London storylets gated on The Airs of London, and the storylets their
+    // redirecting options open: the same titles reappear nowhere else.
+    { name: 'airs-of-london', run: aolRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
