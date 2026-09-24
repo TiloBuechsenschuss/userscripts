@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/all-in-one/fallen-london.js
-// @version      0.47
+// @version      0.48
 // @description  Single-install loader for the Fallen London userscripts in this repo.
 //
 // @match        https://www.fallenlondon.com/*

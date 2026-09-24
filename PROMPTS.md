@@ -1,3 +1,3 @@
-Can you use /adding-fallen-london-features to add the first remaining point from the list not yet implemented? No popup needed, just card and storylet markup. After you're done, append implemented to the todo.
+Can you use /adding-fallen-london-features to add the first remaining point from the list not yet implemented? No popup needed, just card and storylet markup. After you're done, append implemented to the todo. Make a detailed plan to follow.
 
-Kannst du /adding-fallen-london-features verwenden, um die ersten noch nicht umgesetzten Punkte aus der Liste hinzuzufügen? Kein Popup nötig, nur Card- und Storylet-Markup. Wenn du fertig bist, hänge "implemented" an den Eintrag in der Todo-Liste an.
+Kannst du /adding-fallen-london-features verwenden, um die ersten noch nicht umgesetzten Punkte aus der Liste hinzuzufügen? Kein Popup nötig, nur Card- und Storylet-Markup. Wenn du fertig bist, hänge "implemented" an den Eintrag in der Todo-Liste an. Erstelle einen detaillierten Plan zur Abarbeitung.

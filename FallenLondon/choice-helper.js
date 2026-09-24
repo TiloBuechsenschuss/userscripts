@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.23
+// @version      1.24
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -451,7 +451,7 @@
  *     And the zee-beast hunts show the In Pursuit of a Zee-Beast each action makes on a success and
  *     a failure, what each kill pays and the Pursuit it is gated on, and what a quarry's waters and
  *     challenge level are before you set out.
- *     Parabola follows, in six pieces.
+ *     Parabola follows, in seven pieces.
  *     On the moonlit Chessboard every move shows what it does to the one number a match is decided
  *     by -- Positional Advantages minus Strategic Weaknesses -- with the Weaknesses beside it,
  *     since two endings are gated on those rather than on the score, and the three colours show the
@@ -468,6 +468,15 @@
  *     afterwards costs in actions and in Echoes a Ravage.
  *     And at the Dome of Scales the Cub's Education shows which band of introduced cats each reward
  *     is offered in, and which cats count at all.
+ *     The seventh is the rest of the Parabola guide's walkthrough, the storylets no table above
+ *     covers. In the Base-Camp an option shows what it does to Wounds and Nightmares, the two menaces
+ *     that fire something at 8 (the rules line says what Falling apart and Conflagration take with
+ *     them), a Tree fertiliser what it costs, and the Route-finding options the Glasswork check and
+ *     what a failure costs. On the Waswood's shore and histories, and at the Dome while the
+ *     Fingerkings hold it, an option shows what it pays and what it uses up, with the Favours:
+ *     Fingerkings a trade buys as the second part; the climb at the top of the Dome and the
+ *     Realisation card the Route to Parabola research deals are badged too, the card in the hand
+ *     with the most Laboratory Research an option gives.
  *     The Late Zailing and Early Railway shelves follow, in five pieces.
  *     Piracy badges the two storylets that are its own — the exchanges at Gaider's Mourn by what
  *     they cost in Stashed Treasure and the Respected they pay, and the flag, the bounty and the
@@ -21315,6 +21324,283 @@
     });
   }
 
+  // === feature: The Parabolan Base-Camp ==================================
+  //
+  // Parabola (Guide) is a walkthrough, not a table: it says what to do, in
+  // what order, and the six Parabola features above already carry the
+  // rateable parts of it (the hunt, the Chessboard, the Waswood's Calendar,
+  // the Dome's Cub, the war, the jungle). This is what is left -- the
+  // storylets the walkthrough sends you through that no table covers: the
+  // Base-Camp's own (Attend to Your Health, Tend a Curious Tree, the two
+  // that fire on their own at Wounds 8 and Nightmares 8, Leave your
+  // Base-Camp), the shore and the histories in the Waswood, the Dome of
+  // Scales while the Fingerkings hold it, the climb at the top of it, and the
+  // Realisation card the Route to Parabola research deals. Card-and-storylet
+  // markup with **no panel**.
+  //
+  // **What the badge says.** What the option does to the two menaces that
+  // rule this place -- Wounds and Nightmares, both of which fire something at
+  // 8 -- or what it pays, then ▼ for whatever it uses up and ? for a check.
+  // No difficulty is claimed for any of the Glasswork checks: your Glasswork
+  // is unreadable and the wiki gives only the narrow difficulty, so the
+  // tooltip says the difficulty and the level that makes it certain. A trade
+  // with the Fingerkings shows the goods, then its **Favours: Fingerkings**
+  // as the faction part, because the Favours are what the guide is buying.
+  //
+  // Three storylets are left unbadged on the heading on purpose: Attend to
+  // Your Health, Conflagration and Falling apart are ordinary English, and
+  // Stay a little while is the Calendar's (`sacroboscan` badges its heading).
+  // Their OPTIONS are unique to Parabola and are badged.
+  //
+  // Transcribed from the option pages (fetched through the API, 2026-09-24),
+  // with the guide as the cross-check on the fertilisers, the Dome's prices
+  // and the Storm-bird's payout. Recorded honestly where the page does not
+  // say: which Tree Season a fertiliser reaches, what the Viscountess
+  // conversation pays, and what a failed Fingerkings observation costs.
+  // Corrections go in BC_OPTIONS and nowhere else.
+  //
+  //   label     the badge's core, before ? and ▼. `research` builds it instead.
+  //   kind      heal / grow / pay / study / route, which only picks a colour.
+  //   ch { stat, diff, narrow } / fail / uses / needs / unless / note.
+  //   factions  [[quality, change]], the badge's second part.
+
+  const BC_HEALTH = 'Attend to Your Health';
+  const BC_CONFLAG = 'Conflagration';
+  const BC_FALLING = 'Falling apart';
+  const BC_TREE = 'Tend a Curious Tree';
+  const BC_SHORE = 'Stay a little while';
+  const BC_DOME = 'The Dome of Scales, Occupied';
+  const BC_TOP = 'The Top of the Dome';
+  const BC_LEAVE = 'Leave your Parabolan Base-Camp';
+  const BC_REAL = 'Realisation';
+
+  const BC_FINGER = 'Favours: Fingerkings';
+
+  const BC_OPTIONS = [
+    { storylet: BC_HEALTH, name: 'Sneak away from your wounds', kind: 'heal', label: 'Wounds −3 CP · Glasswork +1 CP',
+      ch: { stat: 'Glasswork', diff: 5, narrow: true },
+      fail: 'Wounds +1 CP instead, and Glasswork +1 CP all the same',
+      note: 'The reliable way to grind Glasswork: it pays a change point whether you pass or fail.' },
+    { storylet: BC_HEALTH, name: 'Eat only the safe part of the Orange-apple', kind: 'heal',
+      label: 'Wounds −6 CP · Kataleptic Toxicology +1 CP', ch: { stat: 'Kataleptic Toxicology', diff: 5, narrow: true },
+      uses: 'a Parabolan Orange-apple',
+      fail: 'Wounds +1 CP instead; the Kataleptic Toxicology change point and the loss of the Orange-apple both stand',
+      note: 'Faster than any other heal here, and the way to get a first level of Kataleptic Toxicology from Parabola.' },
+
+    { storylet: BC_CONFLAG, name: 'Cry to the storm-bird', kind: 'heal', label: 'Nightmares −8 CP · Storm-bird sighted +1',
+      uses: 'a base level each of Glasswork and Monstrous Anatomy, in change points',
+      note: 'Fires by itself at Nightmares 8. Harmless while you have no Glasswork or Monstrous Anatomy, which is why '
+        + 'the guide lets Nightmares climb early.' },
+    { storylet: BC_FALLING, name: 'Tie yourself to a mossy tree', kind: 'heal', label: 'Wounds set to 6',
+      uses: 'a base level each of Glasswork and Kataleptic Toxicology, in change points',
+      note: 'Fires by itself at Wounds 8. Harmless while you have no Kataleptic Toxicology, which is what the guide '
+        + 'means by not healing Wounds early.' },
+
+    { storylet: BC_TREE, name: 'Fertilise the tree with screams', kind: 'grow', label: 'Screams ×5 → Tree Season',
+      uses: '5 Aeolian Screams', needs: 'a barren tree (Parabolan Tree Season 0)' },
+    { storylet: BC_TREE, name: 'Fertilise the tree with bone', kind: 'grow', label: 'Bone ×1,100 → Tree Season',
+      uses: '1,100 Bone Fragments', needs: 'a barren tree (Parabolan Tree Season 0)' },
+    { storylet: BC_TREE, name: 'Feed the tree on the trapped remains of Mr Veils', kind: 'grow',
+      label: 'Bone ×500 → Tree Season', uses: '500 Bone Fragments',
+      needs: 'Ambition: Bag a Legend! at exactly 5000, and a barren tree',
+      note: 'The cheaper way to grow an Orange-apple, but only at that step of the Ambition.' },
+    { storylet: BC_TREE, name: 'Fertilise the tree with the twin powers of electricity and hedonism', kind: 'grow',
+      label: 'Bone ×100 · Hedonist −21 CP → Tree Season', uses: '100 Bone Fragments and 21 change points of Hedonist',
+      needs: 'an Augmented Electrostatic Machine (kept), Hedonist 6, and a barren tree' },
+    { storylet: BC_TREE, name: 'Pick a fruit from the tree', kind: 'grow', label: 'Orange-apple ×1',
+      needs: 'Parabolan Tree Season exactly 1' },
+    { storylet: BC_TREE, name: 'Pick two fruits from the tree', kind: 'grow', label: 'Orange-apple ×2',
+      needs: 'Parabolan Tree Season exactly 2' },
+
+    { storylet: BC_SHORE, name: 'Reach towards the shore', kind: 'pay', label: 'Eolith (Airs 0–49) · Ivory (50–100)',
+      note: 'Two storylets share this title and the Airs of Parabola decide which you are offered. Airs 0–49: an '
+        + 'Ambiguous Eolith and a Knob of Scintillack, rarely (2%) a Mirrorcatch Box; failure pays Correspondence '
+        + 'Plaques and Expertise of the First City, or at even odds Relics of the Third City, a Solacefruit and a '
+        + 'Femur of a Jurassic Beast. Airs 50–100, a Luck 50 challenge: a Carved Ball of Stygian Ivory and an '
+        + 'Unprovenanced Artefact, rarely (2%) a bottle of Fourth City Airag; failure pays Relics and Expertise of '
+        + 'the Second City, or at even odds the Fourth. Cycle the Airs by leaving to the Base-Camp and returning.' },
+    { storylet: BC_SHORE, name: 'Compose a Revisionist History', kind: 'study', label: 'Mithridacy +1 CP · Revisionist Narrative',
+      ch: { stat: 'Mithridacy', diff: 3, narrow: true }, uses: '4 Extraordinary Implications and an Incisive Observation',
+      fail: 'Mithridacy +1 CP and Nightmares +1 CP, and nothing is spent',
+      note: 'Three Revisionist Narratives go into Mithridant Studies.' },
+    { storylet: BC_SHORE, name: 'Compose a Corrective History', kind: 'study', label: 'Mithridacy +1 CP · Corrective Narrative',
+      ch: { stat: 'Mithridacy', diff: 7, narrow: true }, uses: '4 An Identity Uncovered!, and an Incisive Observation held',
+      fail: 'Mithridacy +1 CP and Nightmares +2 CP, and nothing is spent',
+      note: 'You must hold an Incisive Observation, though a success does not spend it.' },
+    { storylet: BC_SHORE, name: 'Offer passage to a Wretched Mog', kind: 'pay', label: 'a Wretched Mog',
+      needs: 'Parabolan Dominance exactly 3 (the Cats), and no Wretched Mog yet',
+      note: 'One more cat for A Cub’s Education.' },
+
+    { storylet: BC_DOME, name: 'Offer the Storm-bird to Fingerkings', kind: 'pay', label: 'Incisive Observation ×4–5',
+      needs: 'a Storm-bird (kept) and Glass Studies',
+      note: 'Rarely pays 5. The Storm-bird is not consumed.' },
+    { storylet: BC_DOME, name: 'Display yourself', kind: 'pay', label: 'Memory of a Much Lesser Self ×1', needs: 'a Tatterskin Shawl' },
+    { storylet: BC_DOME, name: 'Recognise the Fingerking', kind: 'study', label: 'Glasswork cap → 6 · Glasswork +1 CP',
+      needs: 'Touched by Fingerwork 15, Glasswork 5, and no Glass Studies yet',
+      note: 'The free way to the first level of Glass Studies. The other is Be introduced to the enormous snake.' },
+    { storylet: BC_DOME, name: 'Recognise an Ophidian Gentleman', kind: 'study', label: 'Glasswork cap +1 · Glasswork +1 CP',
+      note: 'The wiki page for this option is bare: it records the cap and the change point but no requirement.' },
+    { storylet: BC_DOME, name: 'Be introduced to the enormous snake', kind: 'study', label: 'Glasswork cap → 6 · Glasswork +1 CP',
+      uses: '50 Memory of Light', needs: 'Glasswork 5, and no Glass Studies yet' },
+    { storylet: BC_DOME, name: 'Purchase a greater freedom of the place', kind: 'study', label: 'Glasswork cap → 7',
+      needs: 'Favours: Fingerkings 7 and exactly one level of Glass Studies',
+      factions: [[BC_FINGER, -7]],
+      note: 'Takes all your Favours: Fingerkings, so the guide has you give the Fingerkings three more items afterwards.' },
+    { storylet: BC_DOME, name: 'Lay a tribute of memories before the Fingerking', kind: 'pay', label: 'Distant Shores ×5 · Glasswork +1 CP', uses: '5 Memories of Distant Shores',
+      needs: 'Glass Studies and Glasswork 6', factions: [[BC_FINGER, 1]] },
+    { storylet: BC_DOME, name: 'Offer a habitation to one of the smaller Fingerkings', kind: 'pay',
+      label: 'Goldfish → Possessed Goldfish', uses: 'a Cheerful Goldfish', needs: 'Glass Studies', factions: [[BC_FINGER, 1]] },
+    { storylet: BC_DOME, name: 'Offer a habitation to a moderate-sized Fingerking', kind: 'pay',
+      label: 'Lucky Weasel → Weasel of Social Discomfiture', uses: 'a Lucky Weasel', needs: 'Glass Studies',
+      factions: [[BC_FINGER, 1]] },
+    { storylet: BC_DOME, name: 'Offer a habitation to seven very small Fingerkings', kind: 'pay',
+      label: 'Seven-Throated Warbler → Forty-Nine-Voiced Warbler', uses: 'a Seven-Throated Warbler', needs: 'Glass Studies',
+      factions: [[BC_FINGER, 1]] },
+    { storylet: BC_DOME, name: 'Furnish the Fingerkings with a Lizard', kind: 'pay', label: 'Reprehensible Lizard → Viric Lizard',
+      uses: 'a Reprehensible Lizard', needs: 'Glass Studies', factions: [[BC_FINGER, 1]] },
+    { storylet: BC_DOME, name: 'Develop a more extensive connection with the Fingerkings', kind: 'pay', label: 'Connected: Fingerkings +1',
+      uses: 'a Parabolan Orange-apple', needs: 'Favours: Fingerkings 7, and Connected: Fingerkings below 8',
+      factions: [[BC_FINGER, -7]] },
+    { storylet: BC_DOME, name: 'Speak to the Ophidian Gentleman about the Viscountess', kind: 'pay', label: 'outcome not recorded',
+      needs: 'Connected: Fingerkings', note: 'The wiki page records the requirement and nothing of what it pays.' },
+    { storylet: BC_DOME, name: 'Observe what the Fingerkings do at Mahogany Hall', kind: 'study', label: 'Shadowy Gains, from 12',
+      uses: 'a Memory of Light and 2 Memories of a Much Lesser Self',
+      needs: 'Shadowy Gains 12, Shadowy 212, a Parabolan Commander', factions: [[BC_FINGER, -7]],
+      note: 'A success raises Shadowy Gains only while they are exactly 12. The wiki records the requirements but not '
+        + 'the difficulty, so none is claimed.' },
+    { storylet: BC_DOME, name: 'Observe what the Fingerkings do in Varchas', kind: 'study', label: 'Shadowy Gains, from 18',
+      uses: 'a Zee-Ztory and 2 Memories of a Much Lesser Self', needs: 'Shadowy Gains 18 and Shadowy 218',
+      factions: [[BC_FINGER, -7]], note: 'A success raises Shadowy Gains only while they are exactly 18.' },
+    { storylet: BC_DOME, name: 'Visit the Fingerkings amid the roses of Caduceus', kind: 'study', label: 'Shadowy Gains, from 24',
+      uses: 'a Soul and 2 Memories of a Much Lesser Self', needs: 'Shadowy Gains 24 and Shadowy 224',
+      factions: [[BC_FINGER, -7]], note: 'A success raises Shadowy Gains only while they are exactly 24.' },
+    { storylet: BC_DOME, name: 'Keep below the leaves', kind: 'pay', label: 'Shadowy +275 CP', uses: '4 Vitreous Almanacs',
+      note: 'The guide repeats it, four Almanacs at a time, until Shadowy 200.' },
+
+    { storylet: BC_TOP, name: 'Climb the dome itself', kind: 'pay', label: 'Incisive Observation ×5',
+      ch: { stat: 'Glasswork', diff: 7, narrow: true }, fail: 'Wounds +1 CP',
+      note: 'Also pays Jade Fragments that scale with Glasswork. Three storylets share this title: with Parabolan '
+        + 'Dominance below 3 or exactly 3 it is as above, and at exactly 4 (the Chessboard) it also pays 5 Well-Placed '
+        + 'Pawns and a Wound even on success.' },
+
+    { storylet: BC_LEAVE, name: 'Look for the Moonlit Chessboard', kind: 'route', label: 'Route: the Chessboard',
+      ch: { stat: 'Glasswork', diff: 7, narrow: true }, fail: 'Nightmares +2 CP',
+      needs: 'no Route to the Chessboard yet, and no Shrine to Saint Joshua',
+      note: 'Easier for a Midnighter.' },
+    { storylet: BC_LEAVE, name: 'Find the Moonlit Chessboard', kind: 'route', label: 'Route: the Chessboard · Glasswork +1 CP',
+      ch: { stat: 'Glasswork', diff: 0, narrow: true }, fail: 'Nightmares +2 CP', needs: 'a Shrine to Saint Joshua' },
+    { storylet: BC_LEAVE, name: 'Look for the Reflection of your Laboratory', kind: 'route', label: 'Route: your Laboratory',
+      ch: { stat: 'Glasswork', diff: 1, narrow: true }, fail: 'Nightmares +1 CP', needs: 'a University Laboratory',
+      note: 'The challenge is reduced for Silverers.' },
+    { storylet: BC_LEAVE, name: 'Look for the Viric Jungle', kind: 'route', label: 'Route: the Viric Jungle · Glasswork +1 CP',
+      ch: { stat: 'Glasswork', diff: 7, narrow: true }, fail: 'Nightmares +2 CP, and Glasswork +1 CP all the same' },
+    { storylet: BC_LEAVE, name: 'Look for the Waswood', kind: 'route', label: 'Route: the Waswood · Glasswork +1 CP',
+      ch: { stat: 'Glasswork', diff: 4, narrow: true }, fail: 'Nightmares +2 CP, and Glasswork +1 CP all the same' },
+
+    { storylet: BC_REAL, name: 'Provide gifts to the powers that decide such matters', kind: 'study', research: 10,
+      uses: '5 Memories of Distant Shores' },
+    { storylet: BC_REAL, name: 'Apply what you have heard', kind: 'study', research: 5, ch: { stat: 'Glasswork', diff: 5, narrow: true },
+      fail: 'no research: Glasswork +1 CP and Nightmares +2 CP',
+      unless: 'you have a Set of Cosmogone Spectacles', note: 'Pays Glasswork +1 CP as well, pass or fail.' },
+    { storylet: BC_REAL, name: 'Consult with your Parabolan Kitten', kind: 'study', research: 5, needs: 'a Parabolan Kitten' },
+    { storylet: BC_REAL, name: 'Research what you already know', kind: 'study', research: 5,
+      needs: 'a Set of Cosmogone Spectacles' },
+    { storylet: BC_REAL, name: 'Consult with your Midnight Matriarch', kind: 'study', research: 5,
+      needs: 'a Midnight Matriarch, or a Midnight Matriarch of the Menagerie of Roses' },
+  ];
+
+  const BC_STORYLETS = BC_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const BC_INDEX = carouselIndex(BC_OPTIONS);
+
+  // The headings that get a summary. Attend to Your Health, Conflagration,
+  // Falling apart and Stay a little while are left out (see above), so the
+  // spec answers null for them.
+  const BC_HEADINGS = {};
+  BC_HEADINGS[BC_TREE] = 'grow Orange-apples';
+  BC_HEADINGS[BC_DOME] = 'the Fingerkings';
+  BC_HEADINGS[BC_TOP] = 'Incisive Observations';
+  BC_HEADINGS[BC_LEAVE] = 'find a route';
+  BC_HEADINGS[BC_REAL] = 'Laboratory Research';
+
+  const BC_CLASS = 'fl-ux-parabolan-camp';
+  const BC_FLAG = 'flUxParabolanCamp';
+  const BC_BRANCH_CLASS = 'fl-ux-parabolan-camp-branch';
+  const BC_BRANCH_FLAG = 'flUxParabolanCampBranch';
+  const BC_CARD_CLASS = 'fl-ux-parabolan-camp-card';
+  const BC_CARD_FLAG = 'flUxParabolanCampCard';
+
+  const BC_RULES = 'Two menaces rule the Base-Camp. At Wounds 8, Falling apart fires and takes a base level of Glasswork '
+    + 'and of Kataleptic Toxicology, so heal Wounds only once you have some Kataleptic Toxicology. At Nightmares 8, '
+    + 'Conflagration takes 8 and a base level of Glasswork and of Monstrous Anatomy and gives a Sighting of the '
+    + 'Storm-bird, so let Nightmares climb while you have none. Every Glasswork check here is a narrow one, certain '
+    + 'four levels above its difficulty; your Glasswork is on no page this script can read, so no odds are claimed. '
+    + 'Moving about inside Parabola is free.';
+
+  function bcBadgeCore(e) {
+    if (e.research != null) {
+      return 'Lab Research +' + e.research + (e.ch ? CAROUSEL_MARK_CHALLENGE : '') + (e.uses ? ' ' + CAROUSEL_MARK_USES : '');
+    }
+    return e.label + (e.ch ? CAROUSEL_MARK_CHALLENGE : '') + (e.uses ? ' ' + CAROUSEL_MARK_USES : '');
+  }
+
+  function bcBadgeText(e) {
+    return withFactions(bcBadgeCore(e), e);
+  }
+
+  function bcColor(e) {
+    if (e.kind === 'heal') return CAROUSEL_COLOR_PROGRESS;
+    if (e.kind === 'grow') return CAROUSEL_COLOR_SETUP;
+    if (e.kind === 'pay') return CAROUSEL_COLOR_PAYOUT;
+    if (e.kind === 'study') return CAROUSEL_COLOR_LABEL;
+    return CAROUSEL_COLOR_NEUTRAL;
+  }
+
+  function bcSpec(e) {
+    const body = [];
+    if (e.ch) body.push(carouselChallenge(e.ch));
+    if (e.research != null) body.push('Gives Laboratory Research ' + e.research + '.');
+    if (e.fail) body.push('Failure: ' + e.fail + '.');
+    if (e.uses) body.push(CAROUSEL_MARK_USES + ' Uses up ' + e.uses + '.');
+    if (e.needs) body.push('Needs: ' + e.needs + '.');
+    if (e.unless) body.push('Not offered if ' + e.unless + '.');
+    if (e.storylet === BC_TREE && e.label.indexOf('→') !== -1) {
+      body.push('Gives Parabolan Tree Season: 1 is a tree that bears fruit, 2 one that is especially fertile. The wiki '
+        + 'does not say which this reaches.');
+    }
+    body.push(factionLine(e));
+    body.push(carouselActionsLine(e));
+    return { text: bcBadgeText(e), color: bcColor(e), title: carouselTooltip('Parabolan Base-Camp', e, body, BC_RULES) };
+  }
+
+  function bcStoryletSpec(key) {
+    const storylet = BC_STORYLETS.find(function (s) { return normalizeName(s) === key; });
+    if (!storylet || !BC_HEADINGS[storylet]) return null;
+    return { text: BC_HEADINGS[storylet], color: CAROUSEL_COLOR_LABEL,
+      title: carouselSummary('Parabolan Base-Camp', storylet, BC_OPTIONS, bcBadgeText, BC_RULES) };
+  }
+
+  // Most research first, and a check after a sure thing: a check that fails
+  // pays none.
+  function bcRank(e) {
+    return e.research != null ? [e.research, e.ch ? 0 : 1] : null;
+  }
+
+  const BC_HAND = {
+    storylets: [BC_REAL], rows: BC_OPTIONS, rank: bcRank, badgeText: bcBadgeText, head: 'Parabolan Base-Camp',
+    rules: 'Ranked by the Laboratory Research it pays. The guide’s verdict on this card is that none of it is good: '
+      + 'it is what the Route to Parabola research deals while you work. ' + BC_RULES,
+    cls: BC_CARD_CLASS, flag: BC_CARD_FLAG,
+  };
+
+  function bcRatings() {
+    carouselHandRatings(BC_HAND);
+    carouselRatings({
+      storylets: BC_STORYLETS, index: BC_INDEX, storyletSpec: bcStoryletSpec, optionSpec: bcSpec,
+      cls: BC_CLASS, flag: BC_FLAG, branchCls: BC_BRANCH_CLASS, branchFlag: BC_BRANCH_FLAG,
+    });
+  }
+
   // === feature: Piracy ===================================================
   //
   // Piracy (Guide): once Lessons in Mourning 20 makes you a corsair of
@@ -31422,6 +31708,7 @@
     { name: 'sacroboscan', run: scRatings },
     { name: 'parabolan-war', run: pwRatings },
     { name: 'cubs-education', run: ceRatings },
+    { name: 'parabolan-camp', run: bcRatings },
     // Three from the Late Zailing shelf, all card-and-storylet markup and none
     // of them dealing a deck of its own. Piracy deliberately owns no card
     // name: its two cards, A Message in a Bottle and Cornering the (Bounty) at

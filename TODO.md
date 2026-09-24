@@ -165,7 +165,7 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Menace_Locations_(Guide) (Early MYN) [Special]
     - https://fallenlondon.wiki/wiki/Seeking_(Guide) (Late MYN) [progress quality]
     - https://fallenlondon.wiki/wiki/Dramatic_Tension_(Guide) (Early PoSI) [progress quality]
-    - https://fallenlondon.wiki/wiki/Parabola_(Guide) (Late Parabola) [Parabolan Base-Camp]
+    - https://fallenlondon.wiki/wiki/Parabola_(Guide) (Late Parabola) [Parabolan Base-Camp] (implemented)
     - https://fallenlondon.wiki/wiki/Iron_Republic_Street_Map (Early Zailing) [Iron Republic Streets]
     - https://fallenlondon.wiki/wiki/Firmament_(Guide) (Early Railway) [Firmament overview]
     - https://fallenlondon.wiki/wiki/Railway_(Guide) (Early Railway) [Railway overview]

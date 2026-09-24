@@ -2239,6 +2239,27 @@ navigation. Two consequences:
   wiki's disambiguated titles with the plain one as an alias, the same rule Hunter's Keep follows for
   *Prepare yourself*.
 
+  **The Parabolan Base-Camp** (`parabolan-camp`, `BC_OPTIONS`, `BC_HEADINGS`), added 2026-09-24: what is
+  left of Parabola (Guide) once the six above have taken their tables — the walkthrough is prose, so this
+  is the storylets it sends you through that none of them covers. Nine storylets: Attend to Your Health,
+  Conflagration, Falling apart, Tend a Curious Tree, Leave your Parabolan Base-Camp, the Waswood's *Stay a
+  little while*, the Dome's *Occupied*, *The Top of the Dome* and the Realisation card. Card-and-storylet
+  markup, **no panel**. An option leads with what it does to **Wounds and Nightmares**, the two menaces
+  that fire Falling apart and Conflagration at 8 — the rules line carries the guide's advice (heal Wounds
+  only once you have Kataleptic Toxicology; let Nightmares climb while you have no Glasswork) — or with
+  what it pays; `▼` marks something used up and `?` a check. **No Glasswork difficulty is ever claimed**:
+  the tooltip gives the narrow difficulty and the level that makes it certain, and your Glasswork is
+  unreadable. A Fingerkings trade shows the goods, then **Favours: Fingerkings** as the faction part.
+  **Headings left unbadged on purpose**: Attend to Your Health, Conflagration and Falling apart (ordinary
+  English, and the first is shared with London) and *Stay a little while*, which `sacroboscan` badges;
+  their **options** are unique to Parabola and are badged, so the only cost is the heading. Where the wiki
+  is silent the row says so — which Tree Season a fertiliser reaches, what the Viscountess conversation
+  pays — rather than guess. Three pages under one title are **one row**: *Reach towards the shore* (two
+  storylets by Airs) and *Climb the dome itself* (three by Parabolan Dominance), the variants in the note.
+  *Recognise an Ophidian Gentleman* is transcribed from a bare wiki page and says so. The Realisation
+  card is the feature's one hand badge, through `BC_HAND`; a negative requirement ("not offered if you
+  have the Spectacles") is `unless`, not `needs`, so it does not count as a gate.
+
   **Piracy** (`piracy`, `PIR_OPTIONS`, `PIR_REGIONS`, `PIR_STASH_PORTS`): the two storylets that are
   piracy's own — *Matters Piratical*, the flag and the bounty desk, and *The Citadel within the
   Citadel* at Gaider's Mourn, which is the shop. An exchange badges its price in Stashed Treasure and
@@ -3034,6 +3055,15 @@ Confirmed live by the author:
   **(4) The Cub's cats.** Whether all 22 introductions are on the storylet at once, and whether the
   Midnight Matriarch of the Menagerie of Roses is a separate introduction from the plain Matriarch.
 
+- The **Parabolan Base-Camp badges** (added 2026-09-24). Nothing seen in the game. Report first, in order:
+  **(1) The two titles that are each two storylets.** Whether *Reach towards the shore* and *Climb the dome
+  itself* read as one title in the game, as the guide's talk of two identical storylets implies; if the
+  Airs or Dominance variants carry a suffix on screen, each needs its own row or an alias.
+  **(2) The option titles under Attend to Your Health.** That the two Parabola options read as the wiki
+  has them, and that the storylet's London options do not clash. **(3) Whether the Tree Season a fertiliser
+  reaches** is 1 or 2, which the wiki does not say. **(4) The Realisation card:** that the hand badge and
+  the opened card both show, and whether its options read as the wiki has them.
+
 - The **Piracy, Irem, Khaganian Intrigue, Helicon House and Jericho Library badges** (added
   2026-09-20). Nothing seen in the game. Report first, in order:
   **(1) The Khanate's two retitled options.** What *Expand your network: Recruit …* and *An
@@ -3544,13 +3574,16 @@ Current tests:
   of favours*) resolve only by the open storylet.
 - `tests/choice-chessboard.test.mjs`, `choice-parabolan-hunting.test.mjs`,
   `choice-oneiropomp.test.mjs`, `choice-sacroboscan.test.mjs`, `choice-parabolan-war.test.mjs`,
-  `choice-cubs-education.test.mjs` — one per feature. The Chessboard suite recomputes the guide's score
+  `choice-cubs-education.test.mjs`, `choice-parabolan-camp.test.mjs` — one per feature. The Chessboard suite recomputes the guide's score
   table from the two columns. The hunting suite pins every quarry's Ferocity, that no badge states a
   difficulty, and that any *Pursuing the …* / *Embattled with the …* heading — including a quarry no
   guide has heard of — lands on its storylet. Oneiropomp pins the three modulo tiers in order and the
   state of Parabola on every row. The Calendar suite pins the two cycles filling 1–6 exactly once and
   the seven return-visit aliases. The war suite recomputes all eighteen Ravages rates from their parts
-  and pins that the trail is not badged. The Cub's suite pins the reward bands tiling without a gap.
+  and pins that the trail is not badged. The Cub's suite pins the reward bands tiling without a gap. The
+  Base-Camp suite pins the fertilisers and the Dome's prices against the guide, that every trade with the
+  Fingerkings ends its badge with the Favours, that the four headings left alone stay unbadged,
+  and the Realisation hand ranking.
 - `tests/choice-church-in-the-wild.test.mjs`, `choice-law-hunting.test.mjs`,
   `choice-moulin-expeditions.test.mjs`, `choice-writing-monograph.test.mjs`,
   `choice-kitchen-artists.test.mjs` — one per feature. The church suite pins that no choice moves a
