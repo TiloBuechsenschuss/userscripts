@@ -2244,6 +2244,6 @@
   // The one boot call, kept on a line of its own: the test replaces exactly
   // this line with a `return { ... }` to reach the internals (the re-expose
   // trick from AGENTS.md). Move or rename it and
-  // test/auto-combat-fight-state.test.mjs needs the same edit.
+  // tests/auto-combat-fight-state.test.mjs needs the same edit.
   bootButton();
 })();

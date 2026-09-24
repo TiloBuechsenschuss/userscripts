@@ -161,7 +161,7 @@
   //
   // UX Enhancers and Choice Helper were one file until UX Enhancers 3.0. A
   // userscript has no imports, so the two share no code: every helper both
-  // need is carried by both, byte for byte (FallenLondon/test/fl-shared-
+  // need is carried by both, byte for byte (tests/fl-shared-
   // helpers.test.mjs holds them to it). What they share at RUN time goes
   // through the page instead, as one array and one event on `window` --
   // both scripts are `@grant none`, so both see the page's own `window`.

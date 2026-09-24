@@ -2166,6 +2166,6 @@
   // The one boot call, kept on a line of its own: the tests replace exactly
   // this line with a `return { ... }` to reach the internals (the re-expose
   // trick from AGENTS.md). Move or rename it and the two
-  // test/auto-mine-*.test.mjs files need the same edit.
+  // tests/auto-mine-*.test.mjs files need the same edit.
   boot();
 })();

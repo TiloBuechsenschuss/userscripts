@@ -18,8 +18,8 @@ for three browser games:
 
 There is **no build, no bundler, no package manager, and no lint config**, and no test *runner*
 or framework. The only tests are a handful of **standalone, dependency-free Node scripts** that
-live in a `test/` subfolder inside each game directory (e.g. `KingdomOfLoathing/test/`), named
-`*.test.mjs`, and are run directly with `node <path>` — see "Verifying a change" below.
+live in the `tests/` folder at the repo root, named `*.test.mjs`, and are run directly with
+`node <path>` — see "Verifying a change" below.
 Each `.js` file is the shippable artifact: a single self-contained IIFE prefixed with a
 `// ==UserScript== ... // ==/UserScript==` metadata block. You edit the file, the user
 reloads it in their userscript manager. "Running" a script means installing it in a
@@ -111,7 +111,7 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
 
   When a test would otherwise assert only "these two colours differ", assert instead that the
   **text alone** still tells them apart — see the palette block in
-  `FallenLondon/test/choice-port-carnelian.test.mjs`.
+  `tests/choice-port-carnelian.test.mjs`.
 
 ## Game-specific notes
 
@@ -698,7 +698,7 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   the row weights, the cluster weights, the 0.496 second-gold chance and the calibrated λ
   constants (`ev` 3571; `ev-cluster` 3714 low-visibility / 3500 high) are all theirs. When oreo
   changes, re-port and re-run the tests rather than tuning numbers here until they pass.
-  `test/auto-mine-strategy.test.mjs` is a direct port of oreo's own `test/strategy.test.ts`,
+  `tests/auto-mine-strategy.test.mjs` is a direct port of oreo's own `test/strategy.test.ts`,
   kept in its order, and is the thing that says the port is still faithful.
   What is deliberately **not** ported: the λ calibration harness (a seeded synthetic board
   generator and a sweep; it needs mall prices, and recalibrating means running oreo in KoLmafia
@@ -732,7 +732,7 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   exactly where a run could start; and since the box is repainted on every load, the box is a
   **row of two nodes** — a text span (`#tm-automine-advice-text`) and the button — because the
   advisor writes `textContent`, and writing it on the box would delete the button. That is what
-  `test/auto-mine-advice-box.test.mjs` exists to catch.
+  `tests/auto-mine-advice-box.test.mjs` exists to catch.
   The move also made the advisor **load-bearing**, which cost a second bug: `runAdvisor` used to
   compute the advice and paint at the end, so a throw on the way meant no box — and therefore no
   button, no panel, and no way to undo the preference that caused the throw. It now builds the
@@ -773,7 +773,7 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   a charpane that says someone else is a multi switching characters, not noise, and the cache
   must not be sticky enough to hand character B character A's cavern. Stray `:unknown` buckets
   are deleted rather than merged, since on a multi they could belong to either character.
-  `test/auto-mine-character-key.test.mjs` covers all of it.
+  `tests/auto-mine-character-key.test.mjs` covers all of it.
   There is no `mineLayout6` here, so what each opened square held is kept in `localStorage`
   under `tm-automine-layout` (suffixed with the character name, like the pyramid state in
   `quest-helper.js`), cleared on a cavern reset and whenever the state shows nothing open — which
@@ -833,7 +833,7 @@ not a new file. Four things about that file are load-bearing:
   superset of wiki-links'. Don't let a feature grow a private copy back.
 - **The journal quest logic stays at file scope**, not inside its feature function: `QUESTS`,
   `hintFor`, `key`, `normForMatch` and `headingName` are DOM-free and are what
-  `test/quest-helper.test.mjs` reaches through the end-of-IIFE seam, which cannot see inside a
+  `tests/quest-helper.test.mjs` reaches through the end-of-IIFE seam, which cannot see inside a
   wrapper. Only the injection pass is the registry entry.
 - **The nav sidebar's `+max` button is an API.** `auto-combat.js` — which is *not* in this file
   — finds it and reads its `data-pp-cost` to refresh a buff between fights. The class
@@ -3143,19 +3143,19 @@ and, when possible, by installing the edited file in a userscript manager agains
 Don't claim a script "works" from static review alone — say it's untested in-game.
 
 The exception is the bits of **pure logic** worth verifying without a browser. Those are covered
-by **standalone Node test scripts** under a `test/` subfolder in the relevant game directory,
-named `*.test.mjs`. Each is dependency-free (no runner, matching the no-build convention): it
+by **standalone Node test scripts** in the `tests/` folder at the repo root, named
+`*.test.mjs`. Each is dependency-free (no runner, matching the no-build convention): it
 names its script's IIFE, evaluates it against a stub DOM, and returns the internals to assert on.
 Run one directly, e.g.:
 
 ```
-node KingdomOfLoathing/test/iotm-cup13-sort.test.mjs
-node TwilightHeroes/test/quest-helper.test.mjs
+node tests/iotm-cup13-sort.test.mjs
+node tests/quest-helper.test.mjs
 ```
 
 Current tests:
 
-- `KingdomOfLoathing/test/auto-mine-parse.test.mjs` — asserts `auto-mine.js`'s reading of
+- `tests/auto-mine-parse.test.mjs` — asserts `auto-mine.js`'s reading of
   `mining.php`: the four 36-character state strings KoLmafia's `MineDecoratorTest` pins to KoL's
   real responses, round-tripped through a rebuilt page; a verbatim two-row excerpt of the real
   markup, which is the only thing pinning KoL's actual attribute order and quoting; that `which`
@@ -3163,12 +3163,12 @@ Current tests:
   dig's result stops at the grid, because the mine redraws opened squares with the art of what
   they held and an unscoped read reports gold forever after the first one. Extend it before
   touching either reader.
-- `KingdomOfLoathing/test/auto-mine-strategy.test.mjs` — a direct port of loathers/oreo's
+- `tests/auto-mine-strategy.test.mjs` — a direct port of loathers/oreo's
   `test/strategy.test.ts`, kept in its order, minus the parts that need KoLmafia and minus the
   calibration harness this port doesn't carry. It also pins the calibrated λ table and the
   1226 six-square ore veins. This file's job is to say the strategy still answers the way oreo's
   does, so when oreo changes, re-port from their file rather than editing numbers here.
-- `KingdomOfLoathing/test/auto-mine-advice-box.test.mjs` — asserts `auto-mine.js`'s advice box
+- `tests/auto-mine-advice-box.test.mjs` — asserts `auto-mine.js`'s advice box
   on `mining.php`, which is also where the Start button lives. It pins the regression that
   moving the button out of the charpane created: the advisor repaints its line on every load
   by setting `textContent`, and doing that on the *box* deletes every child, so the button is
@@ -3182,7 +3182,7 @@ Current tests:
   died before painting and took the button, and with it the panel, out of reach. Blank, 0,
   unreadable text and a real price all have to build; negatives and NaN still have to be
   refused. Verified to fail against the pre-fix `setDynamitePrice` before being kept.
-- `KingdomOfLoathing/test/auto-mine-character-key.test.mjs` — asserts `auto-mine.js`'s
+- `tests/auto-mine-character-key.test.mjs` — asserts `auto-mine.js`'s
   `characterName()`, which suffixes both of its `localStorage` keys. It pins the reported bug:
   a charpane mid-reload (what pressing `ux-enhancers.js`'s button causes) has no
   `charsheet.php` link, and answering `'unknown'` there switches both stores to an empty
@@ -3191,7 +3191,7 @@ Current tests:
   win, or a multi inherits the other character's cavern. Both directions are pinned here,
   along with `api.php` as the authoritative source and the cleanup of stray `:unknown`
   buckets. Verified to fail against the pre-fix ordering before being kept.
-- `KingdomOfLoathing/test/auto-mine-daily.test.mjs` — asserts `auto-mine.js`'s daily turn
+- `tests/auto-mine-daily.test.mjs` — asserts `auto-mine.js`'s daily turn
   counter and its low-HP heal gate. The day key comes from `api.php`'s `rollover` first
   (`daynumber`, then the browser's date, are fallbacks), because resetting on the *browser's*
   midnight would cut a KoL day in half. It pins that reading the counter with a new day key is
@@ -3200,10 +3200,10 @@ Current tests:
   without restarting its own. On the heal side it pins the two refusals that must not turn into
   a poll for something that cannot happen: a max HP at or below the floor, and no
   `ux-enhancers.js` button in the charpane.
-- `TwilightHeroes/test/quest-helper.test.mjs` — asserts `quest-helper.js`'s per-stage hint
+- `tests/quest-helper.test.mjs` — asserts `quest-helper.js`'s per-stage hint
   lookup resolves correctly. If you add quests/stages to that hint map (especially
   overlapping-text stages), add a case here too.
-- `KingdomOfLoathing/test/ux-mall-buy.test.mjs` — asserts `ux-enhancers.js`'s mall purchase
+- `tests/ux-mall-buy.test.mjs` — asserts `ux-enhancers.js`'s mall purchase
   planner against the real numbers from a "perfect negroni" search: that a daily limit caps
   stock, that allocation is cheapest-first with price ties keeping page order, that the
   average is over what would actually be bought (not what was asked for), and what the confirm
@@ -3212,24 +3212,24 @@ Current tests:
   bought"), and an unmeasurable run must admit it rather than claim either that nothing
   happened or that the Meat is untouched. This is the money path — extend it before touching
   the planner, never after.
-- `KingdomOfLoathing/test/ux-beer-garden.test.mjs` — asserts `ux-enhancers.js`'s beer garden
+- `tests/ux-beer-garden.test.mjs` — asserts `ux-enhancers.js`'s beer garden
   yield table against the wiki's (3 barley/hops per day, clamped at day 7; day 1 gives no
   fancy item and day 2 gives the first, which is where the threshold comes from), what the
   `confirm()` text says, and that `findBeerGarden` reads the day off the artwork while
   ignoring other crops and other campground images. If you touch the table or the artwork
   regex, adjust this test.
-- `KingdomOfLoathing/test/ux-inventory-mall.test.mjs` — asserts `ux-enhancers.js`'s inventory
+- `tests/ux-inventory-mall.test.mjs` — asserts `ux-enhancers.js`'s inventory
   `[mall]` link: that the search term is the name in quotes (exact match, not substring) and
   survives apostrophes, `™` and a quote embedded in the name; that `t=0` suppresses the link
   while an unreadable `rel` doesn't; and that re-running (the observer fires on every DOM
   change) never stacks up a second link.
-- `KingdomOfLoathing/test/ux-mcd-link.test.mjs` — asserts `ux-enhancers.js`'s monster
+- `tests/ux-mcd-link.test.mjs` — asserts `ux-enhancers.js`'s monster
   aggravation device line: the sign→device map (with Platypus/Opossum/Marmot pinned to
   Canadia, the trap a stat-based grouping falls into), KoL's own URLs and dial ranges, that
   both panes' labels for a device are recognised so the line is never duplicated, that a
   last-adventure link to Hey Deze is *not* mistaken for the Heartbreaker's line (which is
   why the label rather than the href identifies it), and the compact/expanded discriminator.
-- `KingdomOfLoathing/test/ux-daily-dungeon.test.mjs` — asserts `ux-enhancers.js`'s Daily
+- `tests/ux-daily-dungeon.test.mjs` — asserts `ux-enhancers.js`'s Daily
   Dungeon skip marker. The half that matters is negative: every *other* label the wiki lists
   on those four screens is pinned as unmatched, above all **Try the doorknob** and **Proceed
   forward cautiously**, because a green outline on either of those is worse than no feature
@@ -3239,7 +3239,7 @@ Current tests:
   `whichchoice` and a page with none are both left alone, and that a second pass — the same
   page re-scanned — adds no second note. Extend it before adding an option, and take the
   label verbatim from the wiki rather than retyping it.
-- `KingdomOfLoathing/test/daily-checklist-seeding.test.mjs` — asserts `daily-checklist.js`'s
+- `tests/daily-checklist-seeding.test.mjs` — asserts `daily-checklist.js`'s
   `applySeeds`: order on a fresh list, and that a new default reaches a list someone already
   has, in the right place and exactly once. Two traps it pins down — resting, the tea tree
   and the garden all link to plain `campground.php`, and a seed's url is only its identity
@@ -3248,21 +3248,21 @@ Current tests:
   default is spliced in after the seed it follows in `SEED_ITEMS` rather than appended, so it
   doesn't land at the bottom of an existing list. Add a case when you add a seed that shares
   a url with another, and remember to bump `SEED_VERSION`.
-- `KingdomOfLoathing/test/quest-helper-rotation.test.mjs` — asserts `quest-helper.js`'s
+- `tests/quest-helper-rotation.test.mjs` — asserts `quest-helper.js`'s
   Control Freak logic: the turntable arithmetic, what each of the five stops does for each
   inventory state, undo as the exact inverse, the "a turn re-buries the chamber" rule, and
   that a simulated run from a fresh pyramid costs exactly the wiki's 10 wheels. Note it
   cannot use the usual append-a-return trick — the script's page dispatch bails early — so it
   hands the helpers back by replacing the `const puzzle = currentPuzzle();` line instead. If
   you touch that line or the rotation state machine, adjust this test.
-- `KingdomOfLoathing/test/quest-helper-8bit.test.mjs` — asserts `quest-helper.js`'s 8-Bit
+- `tests/quest-helper-8bit.test.mjs` — asserts `quest-helper.js`'s 8-Bit
   Realm advice: the colour→zone→snarfblat map, the fixed black/blue/green/red cycle, the
   points formula (nothing below the floor, 10 per 10 over it in the bonus zone and per 20
   outside, capping at 400 and 200 — the bonus is exactly double), the chest distances, and
   that an unrecognised colour yields no advice. It also parses the real charpane markup
   through both paths (the labelled span, and the `<font color>` fallback). Uses the same
   replace-the-dispatch-line trick as the rotation test.
-- `KingdomOfLoathing/test/quest-helper-combat.test.mjs` — asserts `quest-helper.js`'s
+- `tests/quest-helper-combat.test.mjs` — asserts `quest-helper.js`'s
   fight.php combat cues: that KoL's own round markers fire them (using the literal comment
   payloads from KoLmafia's fixtures) and that neither cue answers for the other's, that an
   ordinary round fires nothing at all, and that the prose fallback still catches a round
@@ -3270,7 +3270,7 @@ Current tests:
   ids are in the map and the **tool-less ones next to them are not**, and a name-only match
   is flagged unsure so the advice hedges instead of promising a tool. Extend it before
   adding a cue, and pin the new marker with a real payload rather than an invented one.
-- `KingdomOfLoathing/test/quest-helper-sven.test.mjs` — asserts `quest-helper.js`'s Sven
+- `tests/quest-helper-sven.test.mjs` — asserts `quest-helper.js`'s Sven
   Golly overview: the wiki's answer table in both directions (who takes what, and who each
   item is for), that each trait is craved by exactly one member and hated by exactly one,
   and the third verdict the two-state reading misses — an item carrying neither trait is
@@ -3279,7 +3279,7 @@ Current tests:
   the other's row; an exclusive item is spent first so the shared one still reaches whoever
   has no alternative. It also pins the reporting contract — an unreadable dropdown says so
   instead of claiming an empty bag, which would send you off to spend turns you don't need.
-- `KingdomOfLoathing/test/quest-helper-merkin.test.mjs` — asserts `quest-helper.js`'s Mer-kin
+- `tests/quest-helper-merkin.test.mjs` — asserts `quest-helper.js`'s Mer-kin
   Deepcity work. For the Colosseum: the counter mapping (each gladiator is beaten with the
   *next* weapon round the cycle, never his own — inverting it is the likeliest edit-time
   mistake and would spend a round on a skill that does nothing), the monster and skill ids,
@@ -3291,7 +3291,7 @@ Current tests:
   — yields nothing; and the solver, including that a failed reading narrows the field, that
   contradictory input reports zero rather than guessing, and that an unscoreable reading is
   dropped whole rather than half-applied.
-- `KingdomOfLoathing/test/auto-combat-fight-state.test.mjs` — asserts `auto-combat.js`'s
+- `tests/auto-combat-fight-state.test.mjs` — asserts `auto-combat.js`'s
   fight-state reading, macro lookup and remembered-choice rule, against markup copied verbatim
   from KoLmafia's fight and choice fixtures. The case the whole file exists for: an open fight
   and a **finished** one carry the *same* block of combat forms, so `hasFightForms` is true for
@@ -3318,22 +3318,22 @@ Current tests:
   `lastadv` parsing, and that a `place.php` action url is not a grindable zone. Note it
   re-exposes the internals by replacing the single `bootButton();` line; move that line and
   this test needs the same edit.
-- `KingdomOfLoathing/test/iotm-cup13-sort.test.mjs` — asserts `iotm.js`'s Cup-of-13s option
+- `tests/iotm-cup13-sort.test.mjs` — asserts `iotm.js`'s Cup-of-13s option
   parser and each ingredient sort order (advs / effect / inventory / name). If you touch that
   parsing or the sort comparators, add/adjust a case here.
-- `KingdomOfLoathing/test/iotm-ball-refusal.test.mjs` — asserts `iotm.js`'s Play Ball
+- `tests/iotm-ball-refusal.test.mjs` — asserts `iotm.js`'s Play Ball
   refusal sniffing: the daily-limit wording marks the diamond spent for the day, the
   "you need to recruit N more foes" wording (only ever said while innings remain) *clears*
   a stale spent flag, and anything else — a played inning, an unrelated page — leaves the
   flag untouched. The subdued button state rests entirely on these two regexes; extend the
   cases if the game's wording moves.
-- `KingdomOfLoathing/test/iotm-codpiece-categories.test.mjs` — asserts `iotm.js`'s codpiece
+- `tests/iotm-codpiece-categories.test.mjs` — asserts `iotm.js`'s codpiece
   gem bucketing: every `MR_STORE_GEMS` entry matches both its item name and its enchantment,
   no entry claims another's label, near-miss mundane gems (torquoise's `Weapon Damage +10%`,
   `So-So Spooky Resistance`) stay out of the Mr. Store bucket, and the pre-existing buckets
   still resolve. Also covers `planMrStore`, the "Insert all" planner (removal phase, consecutive
   slot packing, unowned gems). Add a case when a new IotM gem or category shows up.
-- `FallenLondon/test/choice-crowds-of-spite.test.mjs` — asserts `choice-helper.js`'s Crowds of Spite
+- `tests/choice-crowds-of-spite.test.mjs` — asserts `choice-helper.js`'s Crowds of Spite
   ratings against the wiki guide's table, plus the traps that would silently break the badge:
   name matching squashes punctuation (`A... pickpocket?`, `A Constable!`, `The Rat-Catcher`)
   without colliding two cards; `headingName()` ignores a `wiki-links.js` "W" already inside the
@@ -3347,7 +3347,7 @@ Current tests:
   and a badge drawn in Spite actually coming off when you leave. Extend it whenever you touch
   `SPITE_CARDS`; a new feature with its own pure logic gets its own `choice-*.test.mjs` (or, for
   a UX Enhancers feature, `ux-*.test.mjs`) beside it.
-- `FallenLondon/test/choice-zailing.test.mjs` — asserts `choice-helper.js`'s Zailing feature. Two
+- `tests/choice-zailing.test.mjs` — asserts `choice-helper.js`'s Zailing feature. Two
   halves. The first is the transcription: the routes, the Zee Peril per region, the eight black
   cards, that every zee-threat names a card that actually exists, and the handful of numbers a
   voyage is planned around (Your False-Star's free -5, the Giant of the Unterzee's flat 80, the
@@ -3366,7 +3366,7 @@ Current tests:
   It also builds the whole panel, the way `ux-factions.test.mjs` does, since that is the only way
   to catch a typo in a few hundred hand-built nodes -- including that a multi-region card is
   listed under each of its regions while an everywhere card is listed once.
-- `FallenLondon/test/choice-port-carnelian.test.mjs` — asserts `choice-helper.js`'s Port Carnelian
+- `tests/choice-port-carnelian.test.mjs` — asserts `choice-helper.js`'s Port Carnelian
   feature. The transcription first, and the cross-check that makes it worth carrying twice: the
   guide's Net column against the currency changes it is the sum of, row by row. Then the rules a
   plausible tidy-up would quietly invert — that `either` is worth its figure **once** and only
@@ -3395,7 +3395,7 @@ Current tests:
   not again on the next scan. It ends by banking a reading and running the pass again, which is
   the only thing that shows a badge redrawing on numbers that arrived without the page changing.
   Extend it whenever you touch `PC_OPTIONS` or `PC_CASHOUTS`.
-- `FallenLondon/test/choice-scientific-voyages.test.mjs` — asserts `choice-helper.js`'s Voyages of
+- `tests/choice-scientific-voyages.test.mjs` — asserts `choice-helper.js`'s Voyages of
   Scientific Discovery feature. The centre of it is the **ambiguity**: that a branch name
   shared by the three islands resolves to `null` without an island and to the right row with
   one, that each island's gambles pay that island's own page type, and that an opened
@@ -3407,7 +3407,7 @@ Current tests:
   stated-versus-derived cross-check this table supports; and that no name of its is in any of
   the four other tables. It also drives **all three** `.branch__title` features at once, which
   is the only place the sibling-run clearing is exercised three deep, and builds the panel.
-- `FallenLondon/test/choice-university-lab.test.mjs` — asserts `choice-helper.js`'s University
+- `tests/choice-university-lab.test.mjs` — asserts `choice-helper.js`'s University
   Laboratory feature. The centre of it is the **arithmetic**, since the badge is a formula: half-to-even
   rounding and the up/down exceptions, the brief-project and Unorthodox Methods S-curves, the team
   formula against all four worked examples on the option pages, `labDraft` and `labCollated`, and that
@@ -3422,7 +3422,7 @@ Current tests:
   (options badged only inside a lab card, a strict card silent until confirmed); **four** features
   on one `.branch__title`; no name in another table; the reference tables; and the whole panel.
   It passes a `localStorage` stub with auto-refresh off, so no hidden frame or timer is started.
-- `FallenLondon/test/choice-arbor.test.mjs` — asserts `choice-helper.js`'s Arbor feature. The
+- `tests/choice-arbor.test.mjs` — asserts `choice-helper.js`'s Arbor feature. The
   transcription row by row (challenges, flat outcomes, the six scaling rows, the options costing no
   Permission to Linger, the guide's option count per district) and the four guide disagreements
   pinned by name; the cross-checks (a trip is 1 + 7 + 1 actions, `arborCertainAt` reproducing the
@@ -3434,7 +3434,7 @@ Current tests:
   storylet beating it; `arborRatings` end to end on an opened storylet, a city change redrawing the
   same heading, and the storylet list; no name in any other table; three features on one
   `.branch__title`.
-- `FallenLondon/test/choice-myn-carousels.test.mjs` — asserts `lb-industries`,
+- `tests/choice-myn-carousels.test.mjs` — asserts `lb-industries`,
   `menace-eradication` and `vertiginous-horticulture` and the shared carousel plumbing, in one suite
   because they share it. The plumbing: placeholder titles matching the game's filled-in titles and no
   other bracket, ranges, `broadCertainAt`, and no option found outside its own open storylet. Per
@@ -3444,25 +3444,25 @@ Current tests:
   of row, and Horticulture's Difficulty ranges per `only`. Then no name in another table or another
   carousel, the three registered passes end to end on switching open storylets, and a listed
   storylet's summary.
-- `FallenLondon/test/choice-forgotten-quarter.test.mjs` — asserts `forgotten-quarter`. The guide's
+- `tests/choice-forgotten-quarter.test.mjs` — asserts `forgotten-quarter`. The guide's
   cross-checks (approach Watchful for 100%, Rivals per Progress, Rumours of treasure's 1.4),
   every expedition's length, Archaeologist, Fate and worst-case Supplies, badge text for each kind of
   row including menaces always raised on the badge and failure-only ones kept to the tooltip, the
   three guide disagreements by name, both alias kinds, a title shared by two storylets resolving by
   the open one, every storylet summary listing all its options, the registered pass end to end
   across three storylets, and no name in another table.
-- `FallenLondon/test/choice-cat-and-mouse.test.mjs` — asserts `cat-and-mouse`. The guide's maximum
+- `tests/choice-cat-and-mouse.test.mjs` — asserts `cat-and-mouse`. The guide's maximum
   Cat per case (63, 67 for the Medium) rebuilt from the table, its Echo costs, the Luck lines'
   expected Cat, the two-Mouse badges, what each case start pays, every ending storylet having a
   60+, a 50+ and a <50 option, the guide disagreements by name, titles shared by the two pursuit
   storylets resolving by the open one, the wiki-suffix aliases, the registered pass across both
   pursuit storylets, and no name in another table.
-- `FallenLondon/test/choice-season-in-soup.test.mjs` — asserts `season-in-soup`. The S-curve against
+- `tests/choice-season-in-soup.test.mjs` — asserts `season-in-soup`. The S-curve against
   the guide's 240 Hints at the cap, the three ranges, the cap, half-to-even rounding, the week table
   against the guide's, the three noises, badge text, `soupWeek`, no duplicate title in any week's
   index, the registered pass redrawing Promenade when its week stops being readable, and no name in
   another table.
-- `FallenLondon/test/choice-long-dead-god.test.mjs`, `choice-engaged-in-a-case.test.mjs`,
+- `tests/choice-long-dead-god.test.mjs`, `choice-engaged-in-a-case.test.mjs`,
   `choice-sunken-embassy.test.mjs`, `choice-law-furnace.test.mjs`,
   `choice-prelapsarian-museum.test.mjs` — one per feature. Each pins its table's shape, the guide
   cross-check (38 escape payouts; the pages' Case Difficulty 10 figures; Min for 100%; `lawBase` at
@@ -3471,20 +3471,20 @@ Current tests:
   table. The Long-Dead God suite also runs the Rain/Geology gate in all three greeting states and
   the hand-card badge; the museum suite the Assert placeholder titles; the Law-Furnace suite the
   *Persona Non Grata* alias.
-- `FallenLondon/test/choice-on-a-heist.test.mjs`, `choice-spider-symposium.test.mjs`,
+- `tests/choice-on-a-heist.test.mjs`, `choice-spider-symposium.test.mjs`,
   `choice-short-stories.test.mjs`, `choice-flash-lays.test.mjs`, `choice-social-actions.test.mjs` —
   one per feature: the table's shape, the cross-check (heist expectations and the hand's Tread-first
   ranking with `▾`; the symposium's Min for 100% and Average Gain; the stories' Echo differences;
   the Flash Lay 2.5× difficulty rule and its one exception; the correspondence thresholds), badge text
   per kind of row, the guide disagreements by name, the registered pass (including a hand card for
   the heist and the Flash Lay), and no name in another table.
-- `FallenLondon/test/choice-cave-of-the-nadir.test.mjs`, `choice-empress-court.test.mjs`,
+- `tests/choice-cave-of-the-nadir.test.mjs`, `choice-empress-court.test.mjs`,
   `choice-breeding-monsters.test.mjs` — one per feature: the leaving-penalty table, the hand ranking
   and ▾, and the strict gate in all three greeting states (Nadir); Inspired 17 / 24 as 153 / 300 CP
   and every work's 17 / 30 Echoes (Court); every beast's expected Echoes against the guide and the
   same breeding title resolving by storylet (Breeding); badge text, guide disagreements by name, the
   registered pass, and no name in another table.
-- `FallenLondon/test/choice-mahogany-hall.test.mjs`, `choice-master-classes.test.mjs`,
+- `tests/choice-mahogany-hall.test.mjs`, `choice-master-classes.test.mjs`,
   `choice-sixth-coil.test.mjs`, `choice-rat-market.test.mjs`, `choice-boxful-of-intrigue.test.mjs` —
   one per feature. Each pins the cross-check its transcription rests on: the seven days needing Tales
   8…14 in order and no show's failure costing less CP than its success (Mahogany); a lesson paying its
@@ -3496,13 +3496,13 @@ Current tests:
   them — and asserts each resolves to exactly one row, because a wildcard collision shows up as no
   badge at all and nothing else would catch it. Then badge text, the rows that refuse to be a figure,
   the registered pass, and no name in another table.
-- `FallenLondon/test/fl-badge-tip.test.mjs` — the tap-to-read panel, and the only suite that
+- `tests/fl-badge-tip.test.mjs` — the tap-to-read panel, and the only suite that
   RECORDS what the script binds to `document` and `window` and fires those handlers by hand;
   nothing else reaches that code. It pins the bug it was written for — a click or a scroll from
   inside the panel must not dismiss it, or a tooltip longer than the 60vh cap cannot be read —
   alongside everything that still must dismiss (page scroll, resize, Escape, an outside click),
   the badge exemption that makes a second tap on the same badge a toggle, and `pruneTip`.
-- `FallenLondon/test/choice-underclay.test.mjs`, `choice-hunting-bees.test.mjs`,
+- `tests/choice-underclay.test.mjs`, `choice-hunting-bees.test.mjs`,
   `choice-featuring-tales-university.test.mjs`, `choice-term-passing.test.mjs` — one per feature.
   Underclay and Hunting Bees both pin the guides' "Min for 100%" against the difficulty × 5 ÷ 3, plus
   Underclay's Echoes-per-point banding by **total** cost and Hunting Bees' three disputed Airs windows
@@ -3515,7 +3515,7 @@ Current tests:
   out of it, never stored twice), that the parser takes a gain, skips a cost and never swallows two
   clauses into one, and that an unpriced row does not print its Connected twice. Then badge text, the
   registered pass, and no name in another table.
-- `FallenLondon/test/choice-trade-in-reputations.test.mjs`, `choice-savage-cobbles.test.mjs`,
+- `tests/choice-trade-in-reputations.test.mjs`, `choice-savage-cobbles.test.mjs`,
   `choice-publishing-newspaper.test.mjs`, `choice-war-of-assassins.test.mjs`,
   `choice-wars-of-illusion.test.mjs`, `choice-foreign-posting.test.mjs`, `choice-temple-club.test.mjs` —
   one per feature, and the first to also assert **no storylet** is in another feature's table. Trade in
@@ -3526,13 +3526,13 @@ Current tests:
   guide's "104 needs late qualities, except Salacious" from the rows. The Wars of Illusion suite pins the
   exact list of rows that disagree with the guide, the shared *Enough* resolving by open storylet, and
   the hand never picking the impossible option. The Temple Club suite pins `★` on exactly four rows.
-- `FallenLondon/test/choice-attending-party.test.mjs`, `choice-missing-woman.test.mjs`,
+- `tests/choice-attending-party.test.mjs`, `choice-missing-woman.test.mjs`,
   `choice-wilmots-business.test.mjs` — one per feature. The party suite derives the guide's "maximum
   possible 19 CP" from the rows, checks every card label against the Times of its own options, and pins
   the hand badge as a label. The two Wilmot's End suites check that every gating level a choice can set
   leaves a storylet open at 2 and at 4, and that the shared titles (*Millicent Clathermont*, *An exchange
   of favours*) resolve only by the open storylet.
-- `FallenLondon/test/choice-chessboard.test.mjs`, `choice-parabolan-hunting.test.mjs`,
+- `tests/choice-chessboard.test.mjs`, `choice-parabolan-hunting.test.mjs`,
   `choice-oneiropomp.test.mjs`, `choice-sacroboscan.test.mjs`, `choice-parabolan-war.test.mjs`,
   `choice-cubs-education.test.mjs` — one per feature. The Chessboard suite recomputes the guide's score
   table from the two columns. The hunting suite pins every quarry's Ferocity, that no badge states a
@@ -3541,7 +3541,7 @@ Current tests:
   state of Parabola on every row. The Calendar suite pins the two cycles filling 1–6 exactly once and
   the seven return-visit aliases. The war suite recomputes all eighteen Ravages rates from their parts
   and pins that the trail is not badged. The Cub's suite pins the reward bands tiling without a gap.
-- `FallenLondon/test/choice-church-in-the-wild.test.mjs`, `choice-law-hunting.test.mjs`,
+- `tests/choice-church-in-the-wild.test.mjs`, `choice-law-hunting.test.mjs`,
   `choice-moulin-expeditions.test.mjs`, `choice-writing-monograph.test.mjs`,
   `choice-kitchen-artists.test.mjs` — one per feature. The church suite pins that no choice moves a
   seventh quality and that the two mirrored options really mirror across all six. Law-Hunting pins
@@ -3550,7 +3550,7 @@ Current tests:
   suite derives `breaks the circle` from the ring rather than trusting the flag, and checks every
   buyer is reachable from some topic. The kitchen suite pins the four divisors and that the Helicon
   sale is not claimed twice.
-- `FallenLondon/test/choice-alchemy-station-viii.test.mjs`, `choice-cornelius.test.mjs`,
+- `tests/choice-alchemy-station-viii.test.mjs`, `choice-cornelius.test.mjs`,
   `choice-clay-highwayman.test.mjs` — one per feature. The Alchemy suite pins six pickups against six
   extractions with no reagent made twice, that a costed pickup always names its items and no row
   claims an Echo price, and that the one reagent with no one-time use carries a `null` rather than a
@@ -3559,7 +3559,7 @@ Current tests:
   Clay Highwayman suite pins that only the four known units appear, that every row badges something
   (an empty label is how that feature fails), that the card answers to all three of its names, and
   that it and `disappearing` share no camp storylet.
-- `FallenLondon/test/choice-hurling.test.mjs`, `choice-chthonic-communication.test.mjs`,
+- `tests/choice-hurling.test.mjs`, `choice-chthonic-communication.test.mjs`,
   `choice-digging-hurlers.test.mjs`, `choice-marigold-station.test.mjs` — one per feature. The
   Hurling suite pins that no row carries both an absolute and a favour swing, that a favour badge
   never shows a sign, that a line which can foul says so in words, and that a gated card name is
@@ -3569,18 +3569,18 @@ Current tests:
   that the difficulty is the formula with the page’s 150 explained. The Marigold suite pins one item
   line and one check line per Fate, and that *Accept a commission* is the only name shared with
   another feature.
-- `FallenLondon/test/choice-painting-balmoral.test.mjs` — the painting suite pins that all three
+- `tests/choice-painting-balmoral.test.mjs` — the painting suite pins that all three
   painting actions name both outcomes on the badge, that *Unveil your Painting* is one row pricing all
   seven compositions, that exactly one row is marked as the guide's word against an option page, and
   that *Display your own painting* is still `helicon-house`'s and not claimed twice.
-- `FallenLondon/test/choice-disappearing.test.mjs`, `choice-cover-identities.test.mjs`,
+- `tests/choice-disappearing.test.mjs`, `choice-cover-identities.test.mjs`,
   `choice-moonlit-woods.test.mjs` — one per feature. The Disappearing suite pins that it and
   `deciphering` share the Cabinet Noir storylet and **no option**, which is what makes two features on
   one heading safe, and that every camp action takes a Ransom level. The Cover Identities suite pins
   the Suspicion on all four earned qualities and the points-per-action of all seven Backstory
   purchases. The Moonlit suite pins that all three spotting options say they end the walk, on the
   badge and in the tooltip.
-- `FallenLondon/test/choice-canal-cruising.test.mjs`, `choice-barristering.test.mjs`,
+- `tests/choice-canal-cruising.test.mjs`, `choice-barristering.test.mjs`,
   `choice-magistracy-diving.test.mjs`, `choice-railway-board.test.mjs`, `choice-deciphering.test.mjs`
   — one per feature. The canal suite checks that every Esteem source states a price and pins both
   halves of every fare. The Evenlode suite resolves all eight trial headings, including a case nobody
@@ -3588,7 +3588,7 @@ Current tests:
   depth ladder covers its range without a gap and that every scaled badge is marked as ranged. The
   board suite pins the 6/7/8/5 split of members across the three levers, which is the arithmetic the
   guide's advice rests on. The Cabinet suite pins that the cash-in warns about the lost surplus.
-- `FallenLondon/test/choice-piracy.test.mjs`, `choice-irem.test.mjs`,
+- `tests/choice-piracy.test.mjs`, `choice-irem.test.mjs`,
   `choice-khaganian-intrigue.test.mjs`, `choice-helicon-house.test.mjs`, `choice-jericho-library.test.mjs`
   — one per feature. The Piracy suite checks every exchange's price against the Respected it pays at
   1,250 treasure a change point, and that neither piracy card is in its table. The Irem suite pins the
@@ -3598,7 +3598,7 @@ Current tests:
   Helicon suite pins that every way out leads with "ends the night", and the library suite that every
   research option states what a failure does. The last two each pin their one shared title, and that
   it belongs to a different storylet in each feature.
-- `FallenLondon/test/choice-godfall.test.mjs`, `choice-maze-garden.test.mjs`, `choice-promenade.test.mjs`,
+- `tests/choice-godfall.test.mjs`, `choice-maze-garden.test.mjs`, `choice-promenade.test.mjs`,
   `choice-port-cecil.test.mjs`, `choice-zee-beasts.test.mjs` — one per feature. Godfall pins that its
   three Echo figures agree with the ending's formula and that every Oblation is a paid option and a free
   one. The Maze-Garden recomputes every trade's rate from count × price ÷ cost, pins *Select a head from
@@ -3607,7 +3607,7 @@ Current tests:
   +3 CP across High Tide and that no Low Tide badge states a total. The zee-beast suite pins all seven
   approach headings resolving to one storylet, the quarry wildcard, and *Take a risk* as the only action
   whose failure loses Pursuit.
-- `FallenLondon/test/choice-hunters-keep.test.mjs`, `choice-mutton-island.test.mjs`,
+- `tests/choice-hunters-keep.test.mjs`, `choice-mutton-island.test.mjs`,
   `choice-venderbight.test.mjs` — one per feature. Hunter's Keep pins that every row carries a payout
   (the badge is not the flat progress), `★` on exactly the fifteen Hunter's Insight rows, and *Talk to
   her* resolving under each of its two storylets. Mutton Island pins `reset` on exactly the lines that
@@ -3615,7 +3615,7 @@ Current tests:
   the one captured greeting the same way. Venderbight pins the two either-or options ranked at what
   they guarantee, the Luck expectation, the hand's stat tie-break, and that *A woman of sinister
   repute* never enters the hand.
-- `FallenLondon/test/choice-brawling-dockers.test.mjs`, `choice-assembling-skeleton.test.mjs`,
+- `tests/choice-brawling-dockers.test.mjs`, `choice-assembling-skeleton.test.mjs`,
   `choice-professional-activities.test.mjs`, `choice-hearts-game.test.mjs` — one per feature. Brawling
   pins every cap against its threshold and the Brawl it is reached at, the guide's "no harder than the
   plain fight from 84", and the side read off the rewards. The skeleton suite pins Implausibility as a
@@ -3623,7 +3623,7 @@ Current tests:
   Activities pins the guide's three tiers as the shape of every job, save three named rows. Hearts' Game
   pins one no-Prep basic action per card, Counterplay on every challenge-free Progress line, and that a
   formula never outranks a figure in the hand.
-- `FallenLondon/test/ux-launcher-placement.test.mjs` — asserts `ux-enhancers.js`'s
+- `tests/ux-launcher-placement.test.mjs` — asserts `ux-enhancers.js`'s
   `launcherPlacement`, the pure half of where the "⚙ UX" button sits. It is organised around
   the three real travel controls: wide desktop (beside the sidebar button, bottoms level),
   narrower desktop (above it, because the welcome text shares its row), and mobile (above the
@@ -3638,7 +3638,7 @@ Current tests:
   including the invariant behind it — the stack never opens toward the *smaller* of the two
   gaps. There is deliberately no `window` in its
   stub, which is how the impure `positionLauncher` bails and only the rule is under test.
-- `FallenLondon/test/ux-factions.test.mjs` — asserts `ux-enhancers.js`'s Factions panel. Its stub
+- `tests/ux-factions.test.mjs` — asserts `ux-enhancers.js`'s Factions panel. Its stub
   DOM is rich enough to **actually build the panel** (and carries a tiny selector matcher), which
   is the only way to catch a typo in a few hundred hand-built nodes without loading the live site;
   `getElementById` really searches the tree, or the launcher's id guard would pass vacuously. It
@@ -3661,7 +3661,7 @@ Current tests:
   and routed via the nav link otherwise, replayed exactly once when the page arrives, abandoned
   (not retried forever) for an item that isn't there, and dropped when stale. Update it when you
   touch `FACTIONS` or either scrape.
-- `FallenLondon/test/ux-equipment-helper.test.mjs` — asserts `ux-enhancers.js`'s equipment
+- `tests/ux-equipment-helper.test.mjs` — asserts `ux-enhancers.js`'s equipment
   helper, over a stub Possessions page built from **verbatim labels** out of a real capture (keep
   them verbatim). Label parsing (flavour and "Commonplace" fall out, a negative stays negative, an
   advanced skill reads like any stat, and the menace lines scored 1/2/4 with a reduction positive
@@ -3677,7 +3677,7 @@ Current tests:
   `aria-selected`; picking it clicking the real All and recording BDR; the control reading BDR
   over a hidden value; the stars and summary for the combined score; and BDR cancelled both
   by a clicked real option and by a value changed without a click.
-- `FallenLondon/test/ux-launcher-docking.test.mjs` — asserts `ux-enhancers.js`'s launcher
+- `tests/ux-launcher-docking.test.mjs` — asserts `ux-enhancers.js`'s launcher
   **docking**, which is the half `ux-launcher-placement.test.mjs` can't reach: that one covers
   the two placement rules, which are pure, and this one covers moving a button in and out of
   FL's own chrome, which is not. Its stub is a small but real DOM — parent links, `contains`,
@@ -3711,7 +3711,7 @@ Current tests:
   `window.__flUxPanels` in order and listed after Factions, a panel registered after the menu was
   built turning up the next time it opens, and an id the menu already has — or an entry with no
   `render` — left out.
-- `FallenLondon/test/choice-fruits-of-the-zee.test.mjs` — asserts `choice-helper.js`'s Fruits of the
+- `tests/choice-fruits-of-the-zee.test.mjs` — asserts `choice-helper.js`'s Fruits of the
   Zee feature. Its stub DOM builds both the qualities and the possessions markup and is rich
   enough to **actually build the panel**, in both the mid-festival and the nothing-ever-read
   states. The bulk of it is the **per-depth Favour table**, walked depth by depth for all eleven
@@ -3738,7 +3738,7 @@ Current tests:
   most worth having a test for), that a banked `Full Fathom Five` of 0 is "not diving" rather
   than a depth, `depthSourceText`'s wording per source, and the in-page control's gate and its
   one-button cycle. Update it when you touch any of the `FOTZ_*` tables.
-- `FallenLondon/test/fl-shared-helpers.test.mjs` — asserts what `ux-enhancers.js` and
+- `tests/fl-shared-helpers.test.mjs` — asserts what `ux-enhancers.js` and
   `choice-helper.js` share now that they are two files, which no other suite can see because
   every other suite loads one of the two. First the **copies**: every top-level declaration the
   two files have in common must be byte-identical, bar a short list (`SCRIPT_ID`, `FEATURES`,
@@ -3755,4 +3755,4 @@ Current tests:
 
 The re-expose trick (rename `(function () {` and `return { ... }` the helpers before `})()`) is
 how a test reaches an IIFE's internals — copy an existing test when adding one, and put it in the
-game's `test/` subfolder.
+`tests/` folder at the repo root.

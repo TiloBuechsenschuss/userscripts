@@ -180,25 +180,25 @@ need it, but adding one is the safe default.
 ### Tests
 
 There's no test runner. The few bits of pure logic worth checking without a
-browser have **standalone Node scripts** in a `test/` subfolder inside the
-relevant game directory, named `*.test.mjs` and run directly with `node`:
+browser have **standalone Node scripts** in the `tests/` folder at the repo
+root, named `*.test.mjs` and run directly with `node`:
 
 ```
-node KingdomOfLoathing/test/iotm-cup13-sort.test.mjs
-node KingdomOfLoathing/test/quest-helper-rotation.test.mjs
-node KingdomOfLoathing/test/quest-helper-sven.test.mjs
-node KingdomOfLoathing/test/quest-helper-merkin.test.mjs
-node KingdomOfLoathing/test/quest-helper-beerpong.test.mjs
-node KingdomOfLoathing/test/daily-checklist-seeding.test.mjs
-node KingdomOfLoathing/test/ux-beer-garden.test.mjs
-node KingdomOfLoathing/test/ux-mall-buy.test.mjs
-node KingdomOfLoathing/test/auto-combat-fight-state.test.mjs
-node KingdomOfLoathing/test/auto-mine-parse.test.mjs
-node KingdomOfLoathing/test/auto-mine-strategy.test.mjs
-node TwilightHeroes/test/quest-helper.test.mjs
+node tests/iotm-cup13-sort.test.mjs
+node tests/quest-helper-rotation.test.mjs
+node tests/quest-helper-sven.test.mjs
+node tests/quest-helper-merkin.test.mjs
+node tests/quest-helper-beerpong.test.mjs
+node tests/daily-checklist-seeding.test.mjs
+node tests/ux-beer-garden.test.mjs
+node tests/ux-mall-buy.test.mjs
+node tests/auto-combat-fight-state.test.mjs
+node tests/auto-mine-parse.test.mjs
+node tests/auto-mine-strategy.test.mjs
+node tests/quest-helper.test.mjs
 ```
 
 Each is dependency-free: it loads the userscript, evaluates its IIFE against a
 stub DOM, and asserts on the internals. Copy an existing one when adding a test,
-and keep it in the game's `test/` subfolder. See [`AGENTS.md`](./AGENTS.md) for
+and keep it in the `tests/` folder at the repo root. See [`AGENTS.md`](./AGENTS.md) for
 the re-expose trick these use to reach an IIFE's internals.

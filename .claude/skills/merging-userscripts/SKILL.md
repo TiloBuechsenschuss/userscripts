@@ -45,7 +45,7 @@ Work in this order. Items marked **TRAP** are the ones that get skipped.
    surgery on the source. All of them replace `'(function () {'` (safe — first occurrence
    is the host's opener). The *second* anchor is a literal call site — `'  boot();'`,
    `'addButton();'`, `'const puzzle = currentPuzzle();'` — and a merge moves or renames it.
-   Update `readFileSync(join(here, '..', 'HOST.js'))` and switch the second anchor to the
+   Update `readFileSync(join(here, '..', 'GAME', 'HOST.js'))` and switch the second anchor to the
    merge-proof form, with a pathname no dispatch branch matches:
    ```js
    .replace(/\}\)\(\);\s*$/, 'return { thingUnderTest }; })();');
@@ -95,7 +95,7 @@ Work in this order. Items marked **TRAP** are the ones that get skipped.
 
 ```sh
 for f in */*.js all-in-one/*.js; do node --check "$f" || echo "FAIL $f"; done
-for t in */test/*.test.mjs; do node "$t" | tail -1; done
+for t in tests/*.test.mjs; do node "$t" | tail -1; done
 node scripts/bump-loaders.mjs --check          # must exit 0
 git grep -n '<deleted-basename>'                # only historical notes may remain
 ```

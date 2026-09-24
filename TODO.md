@@ -1,5 +1,8 @@
 # ToDo
 
+Generic
+  - remove long descriptions. Switch to short descriptions and doc block at beginning of script
+
 Fallen London:
   Carousels: https://fallenlondon.wiki/wiki/Guides#Location-Specif  Sorted by each guide's {{Audience}} stage, in the order of
   h  https://fallenlondon.wiki/wiki/Template:Audience (top is earlier in the game);

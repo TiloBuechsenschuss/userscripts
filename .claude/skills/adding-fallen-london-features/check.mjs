@@ -28,7 +28,7 @@ const repo = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const SCRIPT_NAME = 'choice-helper.js';
 const SCRIPT = join(repo, 'FallenLondon', SCRIPT_NAME);
 const LOADER = join(repo, 'all-in-one', 'fallen-london.js');
-const TESTDIR = join(repo, 'FallenLondon', 'test');
+const TESTDIR = join(repo, 'tests');
 
 const only = process.argv.includes('--feature')
   ? process.argv[process.argv.indexOf('--feature') + 1] : null;
@@ -42,7 +42,7 @@ const src = readFileSync(SCRIPT, 'utf8');
 
 // --- load the registries ----------------------------------------------------
 //
-// The same string surgery every suite in FallenLondon/test uses, but asking
+// The same string surgery every suite in tests/ uses, but asking
 // only for the two names that always exist, so this needs no editing when a
 // feature adds internals of its own.
 
@@ -163,7 +163,7 @@ if (registries) {
   for (const feature of named) {
     const covered = suites.some((s) =>
       readFileSync(join(TESTDIR, s), 'utf8').includes("'" + feature.name + "'"));
-    if (!covered) fail('feature "' + feature.name + '"', 'no suite in FallenLondon/test names it');
+    if (!covered) fail('feature "' + feature.name + '"', 'no suite in tests/ names it');
   }
 }
 

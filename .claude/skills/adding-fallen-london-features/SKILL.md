@@ -207,7 +207,7 @@ Work in this order. **TRAP** marks the ones that get skipped.
     so a term can hit an option the collapsed row does not show, and hide a group heading
     whose rows have all gone.
 
-15. **Write `FallenLondon/test/choice-<feature>.test.mjs`.** It evaluates the IIFE against a
+15. **Write `tests/choice-<feature>.test.mjs`.** It evaluates the IIFE against a
     stub DOM and re-exports internals by replacing the closing `})();`. Copy the harness
     from `choice-port-carnelian.test.mjs` or `choice-fruits-of-the-zee.test.mjs` — those two are the
     stubs that implement `after()` and a derived `nextElementSibling`, which you need for
@@ -236,7 +236,7 @@ Work in this order. **TRAP** marks the ones that get skipped.
 ```sh
 node --check FallenLondon/choice-helper.js
 node .claude/skills/adding-fallen-london-features/check.mjs
-for t in FallenLondon/test/*.test.mjs; do node "$t" | tail -1; done
+for t in tests/*.test.mjs; do node "$t" | tail -1; done
 node scripts/bump-loaders.mjs --check
 ```
 
