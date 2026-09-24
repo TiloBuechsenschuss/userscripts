@@ -2447,10 +2447,110 @@ navigation. Two consequences:
   they carry one label and the tooltip lists all six — with the gross per action, since the honey
   they cost scales with your Connoisseur level. Memory of Light and Vision of the Surface are
   Cross-economy and left unpriced. `(gendertitle)` joined `CAROUSEL_PLACEHOLDER`. Deferred, each a
-  carousel of its own: Duelling the Black Ribbon, Hunting Dangerous Prey, Unfinished Business ×4;
-  and the options that only *re-roll* Airs without being gated on it (*Sample prisoner’s honey*).
+  carousel of its own: Unfinished Business ×4 (Duelling the Black Ribbon and Hunting Dangerous Prey
+  went to `running-battle` and `the-hunt-is-on`, below); and the options that only *re-roll* Airs
+  without being gated on it (*Sample prisoner’s honey*).
   **Not done: reading the current Airs.** Fallen London shows it only in an unlock tooltip whose
   markup has never been captured; `aolAirsFrom` parses the text and nothing calls it.
+
+  **Progress qualities: The Hunt is On! and Running Battle** (`the-hunt-is-on`, `THIO_OPTIONS`,
+  `running-battle`, `RUNB_OPTIONS`, both on the shared `pq*` helper): the first two features from the
+  TODO's Reference guides. A progress quality is raised on some options and spent on others, in
+  different storylines and areas, and every source is interchangeable, so both features use ONE
+  vocabulary that later ones (Casing, Fascinating, Investigating) reuse: a gain reads
+  `THiO +3? −1` (the quality a success makes, the one a failure takes back), a spend
+  `THiO 5 ▼ → Jade 938? −5` (the level it needs, ▼ for “uses it up”, what it pays), then any other
+  quality it moves (`APoSB +3`, `FD +4`). The guide’s Echoes per action are in the tooltip and never on the
+  badge: they are the guide’s arithmetic on its own figures, and where the option pages have moved
+  on they no longer agree with it. Every spend is a **narrow** challenge on the level you hold,
+  certain four above its difficulty, and a success takes all of the quality back to 0. **The guide for
+  Running Battle is marked Outdated** (the March 2024 MYN rework), so the option pages are followed and
+  each disagreement is carried as `guide` (Feducci, Vendrick’s failure, the Big Rat’s ambush); THiO
+  carries four (the safari’s Jade, the brigands’ Shriek and level, the kidnap’s Shriek, the live
+  goat-demon’s Procurer). *Hunting Dangerous Prey* and *Duelling the Black Ribbon* are the two Airs
+  storylets the Airs feature deferred: their windows are in the tooltips and neither lists re-rolling
+  Airs except the duelling gains. Duelling is headed *Making your Name: Duelling the Black Ribbon*
+  until A Name Scrawled in Blood 5 and the two headings are one storylet through `aliases`. Its
+  windows start at 1, so Airs 0 offers only *Practise quietly*. The cards (*The tomb-colonist’s dogs*,
+  *Cutthroats and Canalmen*) badge the hand and the opened heading once, through `eachCardName`, and
+  their options through the same pass as a storylet’s. Left out: Breeding Monsters, the later coils,
+  the Firmament card’s two THiO-less options, the Big Rat’s other story (its own guide, *Seeking the
+  Meaning of the Plaster Face*, is in the TODO) and *Purchase some assistance with Casing...*.
+
+  **Casing** (`casing`, `CASING_OPTIONS`, on the same `pq*` helper): Casing... is raised in Spite
+  (area-diving), on the Topsy King's paintings and in the Big Score prelude in the Flit, and by scouting
+  parties on the Clay Highwayman's larceny cards, and spent on the robberies. Two kinds of spend, kept
+  apart in the badge: a **robbery** is a narrow challenge on the level you hold and takes all of it
+  (`Casing 5 ▼ → Glim, Jade, Pearls, Rostygold ×100? −5 · MT +2`), and a **fixed-price** spend takes a set
+  number of CP and leaves the rest (`Casing −6 ▼ → Pearls ×260`; the thefts of particular character
+  `Casing −32 ▼ → Tale of Terror ×25? · fail −51`, which pays even on a failure). The prelude's gains cost
+  three actions (five for the three that pay 16–18), which the badge says (`Casing +9? · 3 actions`);
+  the guide’s 3, 3.2 and 3.6 CP per action are the win over the actions, and the tooltip gives them. **The guide is
+  marked as needing work** (the 2024 MYN rework), so the pages are followed and six disagreements carried
+  (three failure Suspicions in the prelude, two Master Thief figures, and Bringing Revolution!’s extra
+  requirement); the guide’s Echoes for each robbery are tooltip text, never a figure on a badge. **The
+  five larceny cards are shared with `clay-highwayman`**: that feature badges the card’s heading and this one
+  the options inside (its tooltip used to say nothing inside was badged, because the guide named no
+  options; the pages do), and *Join a scouting party* is one title on four cards, told apart by the open
+  card. A scouting party’s difficulty is Shadowy 300 *at Darkness 0* and eases as the area darkens, so the
+  tooltip says that rather than a certain point. Left out: the Grand Larceny rewards (Cover Identities),
+  the prelude’s heist options (On a Heist), Risen Burgundy’s two cards, Parabola’s
+  *Find the weakness in an opponent’s defences*, and the Big Rat’s purchase of Casing.
+
+  **Fascinating... and Inspired...** (`fascinating`, `FAS_OPTIONS`, `inspired`, `INSP_OPTIONS`, both on
+  the `pq*` helper): the two Persuasive progress qualities. Fascinating is raised at court (*Attend to
+  Matters of Allure*) and on the Name Signed with a Flourish seductions, and spent on the seductions’
+  resolutions, the three **court romances** and the Tattooed Courier’s secrets; Inspired on the
+  commissions (fungus verse, prisoner’s honey, Jack-of-Smiles, the Royal Portrait) and a few one-offs.
+  **A court romance is a ladder, not one option**: each of Barbed Wit, Acclaimed Beauty and Unattainable
+  Fashion-Flies has a way in, a storylet for each of levels 1 to 5 (two or three options each) and an
+  ending, and every step is a narrow challenge on Fascinating 6 that takes all of it, raises “Seen with”
+  that romance and sometimes pushes a rival back: `Fasc 6 ▼ → Wit +2? −6 · Beauty −1`. The three
+  “Seen with” qualities are `Wit`, `Beauty` and `Flies`; an amount the page does not give is `↑`. **The
+  guide files the Rising Artist’s and the Rising Artist’s Model’s last two options under each other**: the
+  pages, which say which quality each loses, are followed and the guide’s row is carried. Six more
+  disagreements are carried as `guide` (three narrow difficulties, two levels, one gain), and four options
+  are the guide’s alone because their pages are empty. The servantry is a fixed price on a wider challenge
+  (`Fasc −6 ▼ → …`), the Ambassador’s Ball’s two options are what the card page says rather than the
+  guide’s “Commission a painting”. **Madame Shoshana’s tent is shared**: it holds a Fascinating option, an
+  Inspired one and (later) an Investigating one, and the heading badge is Fascinating’s alone (`noHeading`).
+  Left out: the seductions’ mid-affair steps (the guide lists none), Helicon House and the Clay Highwayman, Seduce
+  an Alluring Masquer, A Visit’s Commission a painting (its page names no card), the empress court’s
+  writing, and Oneiropomp’s inspiration.
+
+  **Investigating...** (`investigating`, `INV_OPTIONS`, `INV_CARDS`, on the `pq*` helper): raised by the
+  Melancholy Curate’s storyline (six gain storylets that each show only at a band of the quality — below 7,
+  3–8, 7–20, 8–14, 10–20, 14 — and an ending of three narrow spends of 18), the University’s six
+  investigations (Watchful 98 to 108, rising by two; the department one is the `(department)`
+  placeholder), ten opportunity cards in London and the Upper River, and a few one-offs; spent on the
+  Curate’s ending, the Correspondence Stones, the Scheme of a Phoenix, the Helicon House tour and the
+  Tracklayers’ crime card. A spend is either a narrow challenge that takes all of it or a **fixed price**
+  (`Inv −15 ▼ → …`). **Belongs elsewhere and not repeated here:** the Heights of Chicanery
+  (`wars-of-illusion`), Cornelius, Helicon House’s doors, the Clay Highwayman’s trail and camp cards
+  (`clay-highwayman`, `disappearing`), the University’s Featuring steps, and the pre-July Porters trade.
+  **Shared storylets:** Madame Shoshana’s tent, *Read incoming mail* and *Attend to the Dreamer* are each
+  headed by another feature (Fascinating, nobody, Oneiropomp) and this one badges only its own option
+  inside (`noHeading`). Seven disagreements with the guide are carried (Up the back stairs’ challenge,
+  the three Curate endings’ difficulties, the forensic failure, the Tracklayers’ Prosperity, the
+  Shoshana gain). The Phoenix option whose cost depends on a Twilit Smuggler is one label saying both, since the game shows
+  both pages under one title. The card *A new piece in the Game* also raises Seeking..., which is its
+  `x`, so the Seeking guide’s one open item is done here. Not done for Seeking: *Making Your Name: Find a
+  Tattooed Courier’s contact*.
+
+  **Someone Is Coming** (`someone-is-coming`, `SIC_OPTIONS`, `SIC_CARDS`, on the `pq*` helper): a counter
+  that a great many opportunity cards raise by **exactly 1 CP**, and that *A Gift from the Capering
+  Relicker* cashes in. So the figure that varies is the **profit**, and the badge names it:
+  `SiC +1? · Brass ×180 · Secret ×2`; a card in the hand says just `SiC +1`. **The payouts are fixed
+  prices**, not resets: the card is dealt at once at level 4 and each of its eight payouts takes 21 CP
+  (`SiC −21 ▼ → Shriek ×275`), the guide’s Echoes per action (0.50 up to 2.00 for the Bone Fragments) in the
+  tooltip; the drunk rat in *Rob a drunk* is the cheap cash-out at 6 CP, level 3. The guide lists only the profit
+  per card, not which option pays it: every option here is one whose own page says
+  “GAIN Someone Is Coming +1 CP”. **Traps:** a failure often still gives the quirks and the profit but not the
+  counter (Attend the ceremony, the Old Friend cards), and a few Luck options raise it either way
+  (the weasel tournament, `fail +1`); the two zee cards (*A Huge Terrible Beast of the Unterzee!*, *Creaking
+  from Above*) keep the Zailing feature’s heading badge and only their option is badged here (`noHeading`), as do
+  *Rob a drunk* and the oracle. Left out: the thirteen Conflict Cards (each wants two Favours; the guide gives
+  only a rate), cards that raise it but are not in the guide’s table, and the other options of these cards.
 
   **Painting in Balmoral** (`painting-balmoral`, `PB_OPTIONS`, `PB_PAYOUTS`): the badge exists to say
   that **failing is fine**. Every painting action raises Painter's Progress by one whether the check
@@ -3199,6 +3299,57 @@ Confirmed live by the author:
   What the game puts there. **(4) The Honey-Dens’ dream.** That all six really share the title
   *Deepen your acquaintance with Prisoner’s Honey* and that only one is offered at a time.
 
+- The **Hunt is On! and Running Battle badges** (added 2026-09-24). Nothing seen in the game. Report
+  first, in order: **(1) The Duelling heading.** That the storylet really is *Making your Name:
+  Duelling the Black Ribbon* before A Name Scrawled in Blood 5 and *Duelling the Black Ribbon* after.
+  **(2) Hunting Dangerous Prey’s and the Big Rat’s headings**, and whether *Jack-of-Smiles has
+  expanded his interests* is the storylet that holds *Prowl the midnight streets* and *Move in for
+  the kill* (the wiki files them under a page it numbers 2). **(3) The Firmament card.** That
+  *Cutthroats and Canalmen* shows both THiO options at Firmament 450. **(4) The Labyrinth’s steps.**
+  That *Meeting a junior keeper*, *The drownie keeper* and *The Tiger Keeper* are headed as the wiki
+  has them, and that *The third coil* holds *Recapturing an escapee*. **(5) The narrow odds.** That a
+  narrow spend really is certain four levels above its difficulty.
+
+- The **Casing badges** (added 2026-09-24). Nothing seen in the game. Report first, in order:
+  **(1) The storylet headings.** That the area-diving storylets are headed *Area-diving: Casing the Target*,
+  *Area-diving: What to Do?* (or *Making Your Name: What to Do with the Box?*) and *Area-diving: a spot of
+  blackmail*, that the paintings are *Steal Paintings for the Topsy King*, and that the theft list is headed
+  *Thefts of a particular character* rather than the wiki’s *Thefts of Particular Character*.
+  **(2) Whether the prelude’s options really cost 3 and 5 actions**, which the pages say and the guide
+  agrees with. **(3) The scouting difficulty.** That Shadowy 300 is at Darkness 0 and how far one level of Darkness
+  moves it. **(4) The three untouched larceny options** that share the other cards’ pattern: the four
+  *Join a scouting party* titles and Burrow-Infra-Mump’s Suspicion 4.
+
+- The **Fascinating and Inspired badges** (added 2026-09-24). Nothing seen in the game. Report first, in
+  order: **(1) The romance storylets.** That the court ladder is headed as the wiki has it (*Attend a ball in
+  aid of a good cause*, *Sparkling wit*, *The Wit and the Physician*, … *Conclude your affair with the Barbed
+  Wit*) and that each level shows the options the pages list. **(2) The seductions’ headings.** *Seduce a
+  Struggling Artist’s Model: the resolution!*, *Become Better Acquainted with a Charming Young Heiress: the
+  Resolution!* and their kin, and *A gentleman to remember* / *A lady to remember*, which the wiki numbers 2
+  and 3. **(3) The commissions’ headings** (*Publish your experiences with prisoner’s honey*, *Commission: A
+  Royal Portrait*). **(4) The Ambassador’s Ball.** Which of Commission a painting and Dance with a certain
+  someone it shows. **(5) The unrecorded amounts** (`↑`): what *Draw the eye* and the Dowager add to “Seen with
+  the Unattainable Fashion-Flies”.
+
+- The **Investigating badges** (added 2026-09-24). Nothing seen in the game. Report first, in order:
+  **(1) The University’s heading.** The wiki files the six investigations under *Making Your Name:
+  Investigations in the university*; what is the heading in the game now, after the July 2026 update, and
+  does *Interview the Department of … staff* read as the placeholder? **(2) The Correspondence
+  Stones.** Which storylet holds *The Correspondence* (the wiki files it under the quality and the
+  page *Investigating the Stones 2*). **(3) The card names in the Upper River**, and whether
+  *Halfway to Hell* and *Cells outside the City* are drawn as those cards; none is gated on a
+  greeting because their names are distinctive. **(4) The Phoenix option’s two costs**, 15 or 55, and which one you see.
+  **(5) The Curate’s six storylets** show at the bands the pages give (below 7, 3–8, 7–20, 8–14,
+  10–20, 14).
+
+- The **Someone Is Coming badges** (added 2026-09-24). Nothing seen in the game. Report first, in order:
+  **(1) The payout card.** That *A Gift from the Capering Relicker* shows all eight payouts and each takes 21 CP
+  rather than resetting the quality, and that the ones behind a Fate item appear at all. **(2) The eighteen
+  card names**, several of them ordinary English (*Weather at last*, *Rats Next Door*, *Jack strikes again*, *A
+  past benefactor*): are they the titles the game shows, and does any other card share one? None is gated
+  on a greeting. **(3) The drunk rat.** That it is an option of *Rob a drunk* and that 6 CP is what it takes.
+  **(4) Which failures still raise it**, since the pages record it for two Luck options only.
+
 - The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
   table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
   looking at the screen can confirm: a wrong number renders exactly as well as a right one. They
@@ -3652,6 +3803,34 @@ Current tests:
   the six dreams are one label and never a badge each; the `(gendertitle)`, `Accept the task` and
   `(5 FATE)` title traps; the two guide-versus-page disagreements; and that no option title is in
   another feature’s table.
+- `tests/choice-progress-qualities.test.mjs` — the shared `pq*` helper and the two features on it:
+  the gain/spend vocabulary by hand for a dozen options, that a rare success and the guide’s Echoes
+  stay off the badge, every guide-versus-page disagreement by name, that Hunting Dangerous Prey offers
+  something at every Airs while Duelling’s windows start at 1, that the Duelling heading’s two names are
+  one storylet, that a card badges the hand and the opened heading once and its options once, and that
+  no title is in another feature’s table.
+- `tests/choice-casing.test.mjs` — the Casing feature: the two kinds of spend by hand (a robbery takes all,
+  a fixed price takes a set number and says what a failure takes), the prelude’s actions and CP per action,
+  that every larceny takes 21, 36 or 55 at level 6, 8 or 10 (the Clay Highwayman feature’s ladder), that
+  the six thefts of particular character are 32 and 51, every guide-versus-page disagreement, the shared
+  *Join a scouting party* title and the two storylet aliases, that a larceny card’s heading is not badged by
+  this feature and its options are, and that no title is in another feature’s table.
+- `tests/choice-fascinating-inspired.test.mjs` — the two features: the spend that moves a second quality
+  by hand (a romance step, a rival pushed back, an arrow for an unrecorded amount), each romance as a
+  ladder of the same shape, the guide’s swapped Rising Artist rows and its other disagreements by name, that
+  two storylets’ “Walk away” are told apart by the open one, that Madame Shoshana’s heading has one badge
+  and both features’ options inside it are badged, the cards, and that no title is in another feature’s
+  table.
+- `tests/choice-investigating.test.mjs` — the vocabulary by hand (a gain, a failure that adds, a range,
+  a fixed price, a label), the Curate’s six bands and three-option ending, the University’s six options and
+  its department placeholder, the seven guide disagreements, that Madame Shoshana’s tent, the mail and the
+  Dreamer keep one heading badge and this feature badges only its own option, the ten cards (hand and
+  opened heading once each), and that no title is in another feature’s table.
+- `tests/choice-someone-is-coming.test.mjs` — the two shapes (a card option that raises it by 1 and names
+  the profit, a payout that takes 21 CP), that all eight payouts need level 4, the drunk rat’s 6 at level 3
+  with its rare 1%, that the guide’s Echoes are tooltip text only, the eighteen cards (hand and opened
+  heading once each), that the zee cards and *Rob a drunk* keep no heading badge of ours while their option is
+  badged, the numbered-page aliases, and that no title is in another feature’s table.
 - `tests/choice-painting-balmoral.test.mjs` — the painting suite pins that all three
   painting actions name both outcomes on the badge, that *Unveil your Painting* is one row pricing all
   seven compositions, that exactly one row is marked as the guide's word against an option page, and

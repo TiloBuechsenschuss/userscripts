@@ -10,6 +10,9 @@ Fallen London:
   "(implemented)" = already in FallenLondon/choice-helper.js.
   "(works)" = tested in game and working
 
+  Early MYN:
+    - https://fallenlondon.wiki/wiki/Seeking_the_Meaning_of_the_Plaster_Face_(Guide) [Big Rat storyline] (found 2026-09-24 while analysing Running Battle; its Running Battle options are already in `running-battle` -- skip those)
+
   Early Firmament:
     - https://fallenlondon.wiki/wiki/Ecdysis_(Guide) [Hallow's Throat]
     - https://fallenlondon.wiki/wiki/The_Midnight_Trade_(Guide) [The Midnight Moon]
@@ -24,6 +27,7 @@ Fallen London:
   Late Firmament:
     - https://fallenlondon.wiki/wiki/Upon_a_Red_Stage_(Guide) [Queeneater's Castle]
     - https://fallenlondon.wiki/wiki/To_Make_a_Moth_(Guide) [Risen Burgundy] (no stage tag; placed with the Firmament's late content)
+    - https://fallenlondon.wiki/wiki/Risen_Burgundy_(Guide) [Risen Burgundy] (no stage tag; card-based carousels, unlocked at Firmament 370; moved from Reference)
     - https://fallenlondon.wiki/wiki/Scaling_the_Quartz_(Guide) [Stonegift]
     - https://fallenlondon.wiki/wiki/The_Marrow_Behind_(Guide) [no area]
 
@@ -41,22 +45,18 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Philosofruits_(Guide) (Mid Zailing) [Mangrove College]
 
   Reference (not carousels: overviews, progress qualities, shops; same order):
-    - https://fallenlondon.wiki/wiki/Casing_(Guide) (Early MYN) [progress quality]
-    - https://fallenlondon.wiki/wiki/Fascinating_(Guide) (Early MYN) [progress quality]
-    - https://fallenlondon.wiki/wiki/The_Hunt_is_On!_(Guide) (Early MYN) [progress quality]
-    - https://fallenlondon.wiki/wiki/Inspired_(Guide) (Early MYN) [progress quality]
-    - https://fallenlondon.wiki/wiki/Investigating_(Guide) (Early MYN) [progress quality]
-    - https://fallenlondon.wiki/wiki/Running_Battle_(Guide) (Early MYN) [progress quality]
-    - https://fallenlondon.wiki/wiki/Someone_Is_Coming_(Guide) (Early MYN) [progress quality]
+  Analysed 2026-09-24; work packages in the plan for these guides (progress-quality
+  helper, THiO + Running Battle first, Casing, Fascinating + Inspired, Investigating,
+  Someone Is Coming, real carousels, statues + economy panel, menace locations,
+  Iron Republic / Hurlers / Firmament).
     - https://fallenlondon.wiki/wiki/Menace_Locations_(Guide) (Early MYN) [Special]
-    - https://fallenlondon.wiki/wiki/Seeking_(Guide) (Late MYN) [progress quality]
-    - https://fallenlondon.wiki/wiki/Dramatic_Tension_(Guide) (Early PoSI) [progress quality]
-    - https://fallenlondon.wiki/wiki/Iron_Republic_Street_Map (Early Zailing) [Iron Republic Streets]
+    - https://fallenlondon.wiki/wiki/Dramatic_Tension_(Guide) (Early PoSI) [progress quality] (nothing new: covered by War of Assassins, Missing Woman, Wilmot's End)
+    - https://fallenlondon.wiki/wiki/Iron_Republic_Street_Map (Early Zailing) [Iron Republic Streets] (needs work; a day graph: badge = destination day)
     - https://fallenlondon.wiki/wiki/Firmament_(Guide) (Early Railway) [Firmament overview]
-    - https://fallenlondon.wiki/wiki/Railway_(Guide) (Early Railway) [Railway overview]
-    - https://fallenlondon.wiki/wiki/Railway_Beginning_(Guide) (Early Railway) [Railway overview]
-    - https://fallenlondon.wiki/wiki/Bessemer_Steel_Ingot_(Guide) (Early Railway) [Railway overview]
-    - https://fallenlondon.wiki/wiki/Hinterland_Scrip-Making (Early Railway) [Railway overview]
+    - https://fallenlondon.wiki/wiki/Railway_(Guide) (Early Railway) [Railway overview] (overview: covered by railway-board; steel per station goes in the economy panel)
+    - https://fallenlondon.wiki/wiki/Railway_Beginning_(Guide) (Early Railway) [Railway overview] (overview: covered by railway-board and university-laboratory)
+    - https://fallenlondon.wiki/wiki/Bessemer_Steel_Ingot_(Guide) (Early Railway) [Railway overview] (sources are all implemented; steel per station goes in the economy panel)
+    - https://fallenlondon.wiki/wiki/Hinterland_Scrip-Making (Early Railway) [Railway overview] (re-ranks activities already badged; nothing new)
     - https://fallenlondon.wiki/wiki/Location-specific_cards_in_the_Hinterlands_(Guide) (Early Railway) [Railway overview]
     - https://fallenlondon.wiki/wiki/Statues_at_the_GHR_Stations_(Guide) (Early Railway) [Railway overview]
     - https://fallenlondon.wiki/wiki/Railway_Station_Developments_(Guide) (Early Railway) [Railway overview]
@@ -64,11 +64,11 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/The_City_of_the_Tracklayers_(Guide) (Post-Railway) [The City of the Tracklayers]
     - https://fallenlondon.wiki/wiki/The_Hurlers_(Guide) (Post-Railway) [The Hurlers]
     - https://fallenlondon.wiki/wiki/Discordant_Studies_-_Costs_and_Rewards_(Guide) (Post-Railway) [The Hurlers]
-    - https://fallenlondon.wiki/wiki/Roof_Economy_(Guide) (Early Firmament) [Firmament overview]
-    - https://fallenlondon.wiki/wiki/Stuiver_Grinding_(Guide) (Early Firmament) [Firmament overview]
+    - https://fallenlondon.wiki/wiki/Roof_Economy_(Guide) (Early Firmament) [Firmament overview] (needs work; economy panel)
+    - https://fallenlondon.wiki/wiki/Stuiver_Grinding_(Guide) (Early Firmament) [Firmament overview] (needs work; economy panel)
     - https://fallenlondon.wiki/wiki/Deeper_Discordant_Studies_(Guide) (no stage tag) [The Hurlers]
-    - https://fallenlondon.wiki/wiki/Marriage_(Guide) (no stage tag) [Your Social Engagements]
-    - https://fallenlondon.wiki/wiki/Risen_Burgundy_(Guide) (no stage tag) [Risen Burgundy]
+    - https://fallenlondon.wiki/wiki/Weddings_(Guide) (no stage tag) [Your Social Engagements] (replaces the Marriage (Guide) stub)
+    - https://fallenlondon.wiki/wiki/Spouses_(Guide) (no stage tag) [Your Social Engagements] (replaces the Marriage (Guide) stub)
 
   Airs of London storylets (no guide): storylets and cards with options the
   Airs of London unlock or retitle. From Category:The_Airs_of_London (353 pages,
@@ -83,10 +83,10 @@ Fallen London:
   Implemented 2026-09-24 (`airs-of-london`, not yet tested in game): the six core
   Name storylets, now under Implemented -- Opportunism in Spite, Life on
   Ladybones Road, Business on Watchmaker's Hill, Dabble in the Great Game, Working
-  for the Widow and the Honey-Dens -- plus the storylets their redirecting options open. Still open:
-  Duelling the Black Ribbon, Hunting Dangerous Prey, Time in bed, Unfinished
-  Business x4, and reading the current Airs off the unlock tooltip (needs a
-  DOM capture).
+  for the Widow and the Honey-Dens -- plus the storylets their redirecting options open. Duelling the
+  Black Ribbon and Hunting Dangerous Prey went to `running-battle` and
+  `the-hunt-is-on` (2026-09-24). Still open: Time in bed, Unfinished Business x4,
+  and reading the current Airs off the unlock tooltip (needs a DOM capture).
     - https://fallenlondon.wiki/wiki/A_Bad_Case_of_Rattus_Faber [19 unlock]
     - https://fallenlondon.wiki/wiki/The_Tower_of_Eyes:_Behind_Closed_Doors_at_a_Handsome_Townhouse [18 unlock]
     - https://fallenlondon.wiki/wiki/The_Feast_of_the_Rose! [16 unlock]
@@ -104,11 +104,9 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Attract_a_Visitor_at_Hallowmas [7 unlock]
     - https://fallenlondon.wiki/wiki/A_Jaunt_in_the_(Weather)_(The_Waswood) [5 unlock, 1 text]
     - https://fallenlondon.wiki/wiki/A_long_conversation_with_the_Functionary [6 unlock]
-    - https://fallenlondon.wiki/wiki/Hunting_Dangerous_Prey [6 unlock]
     - https://fallenlondon.wiki/wiki/Investigate_Clathermont%27s_Tattoo_Parlour [6 unlock]
     - https://fallenlondon.wiki/wiki/Shifting_Streets_(Storylet) [6 unlock]
     - https://fallenlondon.wiki/wiki/Candlefinder:_Canvassing_the_Clay_Men [5 unlock]
-    - https://fallenlondon.wiki/wiki/Duelling_the_Black_Ribbon [5 unlock]
     - https://fallenlondon.wiki/wiki/Literary_Ambitions [5 unlock]
     - https://fallenlondon.wiki/wiki/On_the_Trail_(Storylet) [5 unlock]
     - https://fallenlondon.wiki/wiki/Send_a_Christmas_Card [5 unlock]
@@ -139,7 +137,6 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Donate_your_body_to_science_for_an_hour_or_two [1 unlock]
     - https://fallenlondon.wiki/wiki/Fallen_London,_where_everything_is_as_it_should_be [1 text]
     - https://fallenlondon.wiki/wiki/Guard_duty_at_the_Observatory [1 unlock]
-    - https://fallenlondon.wiki/wiki/Making_your_Name:_Duelling_the_Black_Ribbon [1 unlock]
     - https://fallenlondon.wiki/wiki/Mrs_Gebrandt_asks_for_your_help [1 unlock]
     - https://fallenlondon.wiki/wiki/Perusal_of_Forgotten_Pages [1 text]
     - https://fallenlondon.wiki/wiki/Provide_Training_at_the_Department_of_Menace_Eradication [1 unlock]
@@ -268,9 +265,20 @@ Fallen London:
       - https://fallenlondon.wiki/wiki/Marigold_Station_(Guide) [Marigold Station] (implemented)
 
     Reference (not carousels):
+      - https://fallenlondon.wiki/wiki/Someone_Is_Coming_(Guide) (Early MYN) [progress quality] (implemented; the thirteen Conflict Cards are not)
+      - https://fallenlondon.wiki/wiki/Investigating_(Guide) (Early MYN) [progress quality] (implemented)
+      - https://fallenlondon.wiki/wiki/Seeking_(Guide) (Late MYN) [progress quality] (implemented: Wars of Illusion, and the card A new piece in the Game in `investigating`; not done: Making Your Name: Find a Tattooed Courier's contact)
+      - https://fallenlondon.wiki/wiki/Fascinating_(Guide) (Early MYN) [progress quality] (implemented)
+      - https://fallenlondon.wiki/wiki/Inspired_(Guide) (Early MYN) [progress quality] (implemented)
+      - https://fallenlondon.wiki/wiki/Casing_(Guide) (Early MYN) [progress quality] (implemented) (2024 MYN rework: pages win)
+      - https://fallenlondon.wiki/wiki/The_Hunt_is_On!_(Guide) (Early MYN) [progress quality] (implemented)
+      - https://fallenlondon.wiki/wiki/Running_Battle_(Guide) (Early MYN) [progress quality] (OUTDATED: March 2024 MYN rework; option pages win) (implemented)
       - https://fallenlondon.wiki/wiki/Parabola_(Guide) (Late Parabola) [Parabolan Base-Camp] (implemented)
 
     Airs of London storylets (no guide):
+      - https://fallenlondon.wiki/wiki/Hunting_Dangerous_Prey [6 unlock] (in choice-helper)
+      - https://fallenlondon.wiki/wiki/Duelling_the_Black_Ribbon [5 unlock] (in choice-helper)
+      - https://fallenlondon.wiki/wiki/Making_your_Name:_Duelling_the_Black_Ribbon [1 unlock] (in choice-helper)
       - https://fallenlondon.wiki/wiki/Vertiginous_Horticulture [12 unlock, 6 text] (in choice-helper)
       - https://fallenlondon.wiki/wiki/Dabble_in_the_Great_Game [14 unlock] (in choice-helper)
       - https://fallenlondon.wiki/wiki/Opportunism_in_Spite [13 unlock] (in choice-helper)

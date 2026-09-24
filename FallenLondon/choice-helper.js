@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.25
+// @version      1.26
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -555,6 +555,22 @@
  *     bundle is marked rather than priced, and the six dreams that share one Honey-Dens title carry
  *     a label with all six windows in the tooltip. Which Airs you are at is not read: Fallen London
  *     shows it only in a tooltip nobody has captured yet.
+ *     The Hunt is On! and Running Battle are the first two of the progress qualities that many
+ *     storylines raise and spend, one vocabulary for both: a gain reads "THiO +3? −1", a spend
+ *     "THiO 5 ▼ → Jade 938? −5". They badge Hunting Dangerous Prey, the Labyrinth's odd jobs and
+ *     every hunt that spends the quality, and the sorrow-spiders, the Clay Men, Duelling the Black
+ *     Ribbon and the Big Rat, which the Airs feature left to them.
+ *     Casing... badges the same way: area-diving in Spite, the Topsy King's paintings, the Big Score
+ *     prelude and every robbery in the Flit, the fixed-price spends (selling information, the thefts
+ *     of particular character) and the Clay Highwayman's larcenies, with the actions a gain costs and
+ *     what a failure takes.
+ *     Fascinating... and Inspired... too: Attend to Matters of Allure, the seductions, the three court
+ *     romances step by step with the "Seen with" quality each raises and the rival it pushes back, the
+ *     Courier's secrets and the Inspired commissions.
+ *     Investigating... covers the Melancholy Curate's storyline, the University's investigations, ten
+ *     opportunity cards and the fixed-price spends, with the band of the quality each Curate step shows at.
+ *     Someone Is Coming badges the eight Capering Relicker payouts at their fixed 21 CP and the drunk rat, and
+ *     the cards that raise it by 1 by the profit each pays.
  *     Built as a feature registry so further advice can be added as entries.
  */
 
@@ -9566,6 +9582,1512 @@
       cls: AOL_CLASS, flag: AOL_FLAG, branchCls: AOL_BRANCH_CLASS, branchFlag: AOL_BRANCH_FLAG,
     });
   }
+
+  // === shared: progress qualities ========================================
+  //
+  // A progress quality (The Hunt Is On!, Running Battle..., and later Casing,
+  // Fascinating, Investigating) is raised on some options and spent on others,
+  // in different storylines and different areas, and every source is
+  // interchangeable with every other. One vocabulary for all of them, so a
+  // gain in one storyline reads the same as a gain in the next:
+  //
+  //   gain     "THiO +3? −1"          the quality a success makes, the one a
+  //                                    failure takes back
+  //   spend    "THiO 5 ▼ → Jade 938?" the level it needs, ▼ for "uses it up",
+  //                                    what it pays
+  //
+  // then any other quality the option moves ("APoSB +3", "FD +4"). `?` is a
+  // stat challenge's success, `≈` the expected value of a Luck option. The
+  // guide's Echoes per action are in the tooltip and NOT on the badge: they
+  // are the guide's own arithmetic on its own figures, and where the option
+  // pages have moved on from the guide they no longer agree with the badge.
+  //
+  // Entries share one shape, and `cfg` names the quality:
+  //   storylet / name / aliases   where the option is filed and what it is called.
+  //   ch       { stat, diff, narrow } -- a narrow challenge is certain four
+  //            above its difficulty -- or { luck } for the odds of a Luck one.
+  //   win / rare / lose   the quality a success / a rare success / a failure
+  //            moves, in CP; `lose` is negative.
+  //   spend    the level of the quality the option needs; a success takes ALL
+  //            of it, which is what `reset` (default true) says.
+  //   pay      the badge's word for what a spend pays; g / x / xf the items
+  //            and the other qualities a success gives, and a failure.
+  //   airs / re   the Airs window it is offered in, and where it re-rolls Airs.
+  //   label    a fixed word for an option that opens a storylet or costs Fate.
+  //   needs / fate / note / guide / guideEpa.
+  const PQ_SHORT = {
+    'A Procurer of Savage Beasts': 'APoSB', 'A Fearsome Duellist': 'FD',
+    'Making Progress in the Labyrinth of Tigers': 'Labyrinth', 'Master Thief': 'MT',
+    'A Marauder of the Clay Highwayman': 'Marauder', 'Seen with a Barbed Wit': 'Wit',
+    'Seen with an Acclaimed Beauty': 'Beauty', 'Seen with the Unattainable Fashion-Flies': 'Flies',
+  };
+
+  function pqName(q) { return PQ_SHORT[q] || q; }
+
+  // An amount the page gives only as a question mark ("Dangerous +?") stays one.
+  function pqMoves(list) {
+    return (list || []).map(function (p) {
+      const n = p[1];
+      // A string is a figure the page marks with a question mark ("5?") or a word ("set 2").
+      return pqName(p[0]) + ' ' + (typeof n === 'string' ? (/^[a-z]/i.test(n) ? n : '+' + n) : carouselRange(n));
+    });
+  }
+
+  function pqMark(e) {
+    if (!e.ch) return '';
+    return e.ch.luck !== undefined ? CAROUSEL_MARK_EXPECTED : CAROUSEL_MARK_CHALLENGE;
+  }
+
+  function pqBadgeText(e, cfg) {
+    if (e.label) return e.label;
+    const mark = pqMark(e);
+    const parts = [];
+    let head = '';
+    if (e.cost !== undefined) head = cfg.short + ' −' + e.cost + ' ' + CAROUSEL_MARK_USES + (e.pay ? ' → ' + e.pay : '') + mark;
+    else if (e.spend !== undefined) head = cfg.short + ' ' + e.spend + ' ' + CAROUSEL_MARK_USES + (e.pay ? ' → ' + e.pay : '') + mark;
+    else if (e.win !== undefined) head = cfg.short + ' ' + carouselRange(e.win) + mark;
+    else if (e.g && e.g.length) head = aolGives(e.g.slice(0, 1)) + mark;
+    if (head && e.lose) head += (e.cost !== undefined || e.lose > 0 ? ' · fail ' : ' ') + carouselSigned(e.lose);
+    if (head) parts.push(head);
+    pqMoves(e.x).forEach(function (m) { parts.push(m); });
+    // What a GAIN also pays, when the profit is the point of choosing it.
+    if (e.win !== undefined && e.pay) parts.push(e.pay);
+    if (e.actions > 1) parts.push(e.actions + ' actions');
+    return parts.join(' · ');
+  }
+
+  function pqColor(e) {
+    if (e.label) return CAROUSEL_COLOR_NEUTRAL;
+    return e.spend !== undefined || e.cost !== undefined ? CAROUSEL_COLOR_PAYOUT : CAROUSEL_COLOR_PROGRESS;
+  }
+
+  function pqChallenge(e) {
+    const ch = e.ch;
+    if (!ch) return 'No challenge.';
+    if (ch.luck !== undefined) return 'Luck: ' + Math.round(ch.luck * 100) + '% to succeed, so the badge is the expected value.';
+    if (ch.varies) return 'Challenge: ' + ch.stat + ' ' + ch.diff + ' with ' + ch.varies + ' at 0, easier as that rises.';
+    return 'Challenge: ' + ch.stat + ' ' + ch.diff + (ch.narrow ? ' (narrow)' : '') + ', certain at '
+      + ch.stat + ' ' + (ch.narrow ? ch.diff + 4 : broadCertainAt(ch.diff)) + '.';
+  }
+
+  function pqOutcome(o) {
+    return [aolGives(o.g), pqMoves(o.x).join(', ')].filter(Boolean).join('; ');
+  }
+
+  function pqLines(e, cfg) {
+    const lines = [e.name, e.storylet + (e.airs ? ', The Airs of London ' + aolWindows(e.airs) : ''), ''];
+    if (e.airs) lines.push(aolRerolls(e));
+    lines.push(pqChallenge(e));
+    if (e.spend !== undefined) {
+      lines.push('Needs ' + cfg.quality + ' ' + e.spend + '.'
+        + (e.reset === false ? '' : ' A success takes all of it back to 0.'));
+    }
+    if (e.cost !== undefined) {
+      lines.push('Needs ' + cfg.quality + ' ' + e.need + '. Takes ' + e.cost + ' CP of it, not all.');
+    }
+    if (e.actions > 1) {
+      lines.push('Costs ' + e.actions + ' actions' + (typeof e.win === 'number' ? ', so ' + Math.round(e.win / e.actions * 100) / 100
+        + ' CP per action' : '') + '.');
+    }
+    if (e.u && e.u.length) lines.push('Spends: ' + aolGives(e.u) + '.');
+    if (e.win !== undefined) lines.push('Success: ' + cfg.quality + ' ' + carouselRange(e.win) + ' CP.');
+    const win = pqOutcome(e);
+    if (win) lines.push((e.spend !== undefined ? 'Pays: ' : 'Also on a success: ') + win + '.');
+    if (e.rare) {
+      lines.push('Rare success: ' + [e.rare.win !== undefined ? cfg.quality + ' ' + carouselRange(e.rare.win) + ' CP' : '',
+        pqOutcome(e.rare)].filter(Boolean).join('; ') + (e.rare.odds ? ' (' + e.rare.odds + ')' : '. No page states its odds')
+        + '.');
+    }
+    if (e.lose !== undefined || e.xf) {
+      lines.push('Failure: ' + [e.lose !== undefined ? cfg.quality + ' ' + carouselRange(e.lose) + ' CP' : '',
+        pqMoves(e.xf).join(', ')].filter(Boolean).join('; ') + '.');
+    }
+    if (e.fate) lines.push('Costs ' + e.fate + ' FATE.');
+    if (e.needs) lines.push('Needs: ' + e.needs + '.');
+    if (e.note) lines.push(e.note);
+    if (e.guide) lines.push('Note: ' + e.guide);
+    if (e.guideEpa) lines.push('The guide: ' + e.guideEpa + ' Echoes per action, worked out from its own figures.');
+    lines.push('', cfg.rules);
+    return lines;
+  }
+
+  function pqSpec(e, cfg) {
+    return { text: pqBadgeText(e, cfg), color: pqColor(e), title: pqLines(e, cfg).join('\n') };
+  }
+
+  // A storylet's heading: what its options do with the quality, in a word.
+  function pqStoryletSpec(key, def) {
+    const own = def.options.filter(function (e) { return normalizeName(e.storylet) === key; });
+    if (!own.length) return null;
+    const cfg = def.cfg;
+    const spends = own.filter(function (e) { return e.spend !== undefined || e.cost !== undefined; });
+    const gains = own.filter(function (e) { return e.win !== undefined; });
+    let text = def.summary && def.summary[key];
+    if (!text) {
+      if (spends.length) {
+        text = cfg.short + ' ' + Math.min.apply(null, spends.map(function (e) { return e.spend !== undefined ? e.spend : e.need; }))
+          + ' ' + CAROUSEL_MARK_USES;
+      }
+      else if (gains.length) {
+        const wins = gains.map(function (e) { return aolMid(e.win); });
+        const lo = Math.min.apply(null, wins);
+        const hi = Math.max.apply(null, wins);
+        text = cfg.short + ' ' + carouselRange(lo === hi ? lo : [lo, hi]);
+      } else text = cfg.short;
+    }
+    const lines = [own[0].storylet, ''];
+    own.forEach(function (e) { lines.push('  • ' + e.name + ' — ' + pqBadgeText(e, cfg)); });
+    lines.push('', 'Open the storylet and every option is badged in its own right.', '', cfg.rules);
+    return { text: text, color: CAROUSEL_COLOR_LABEL, title: lines.join('\n') };
+  }
+
+  // A card in the hand: its own badge is its option that moves the quality, and
+  // the tooltip lists the rest. Its options are badged inside the opened card
+  // by the same pass as a storylet's, since an opened card is headed like one.
+  function pqCardSpec(card, def) {
+    const cfg = def.cfg;
+    const mine = def.options.filter(function (e) { return normalizeName(e.storylet) === normalizeName(card.name); });
+    const lines = [card.name, card.needs ? 'Needs: ' + card.needs : '', ''].filter(function (l, i) { return i !== 1 || l; });
+    if (card.lines) card.lines.forEach(function (l) { lines.push(l); });
+    mine.forEach(function (e) { lines.push('  • ' + e.name + ' — ' + pqBadgeText(e, cfg)); });
+    if (card.note) lines.push('', card.note);
+    lines.push('', cfg.rules);
+    const lead = mine.filter(function (e) {
+      return e.win !== undefined || e.spend !== undefined || e.cost !== undefined || e.label;
+    })[0];
+    return { text: card.badge || (lead ? pqBadgeText(lead, cfg) : card.label), color: lead ? pqColor(lead) : CAROUSEL_COLOR_LABEL,
+      title: lines.join('\n') };
+  }
+
+  function pqRatings(def) {
+    carouselRatings({
+      storylets: def.storylets, index: def.index, aliases: def.aliases,
+      // A card's heading is the card badge's, and a storylet another quality's feature already heads keeps one badge.
+      storyletSpec: function (key) {
+        return def.cardKeys.indexOf(key) !== -1 || (def.noHeading || []).indexOf(key) !== -1 ? null : pqStoryletSpec(key, def);
+      },
+      optionSpec: function (e) { return pqSpec(e, def.cfg); },
+      cls: def.cls, flag: def.flag, branchCls: def.branchCls, branchFlag: def.branchFlag,
+    });
+    if (!def.cards.length) return;
+    eachCardName(function (host, name, place, style) {
+      const card = def.cards.filter(function (c) { return normalizeName(c.name) === normalizeName(name); })[0];
+      attachBadge(host, {
+        cls: def.cardCls, flag: def.cardFlag, value: name, spec: card ? pqCardSpec(card, def) : null,
+        place: place, style: style,
+      });
+    });
+  }
+
+  // === feature: The Hunt is On! ==========================================
+  //
+  // The Hunt is On! (THiO) is raised by hunting in Wolfstack Docks and odd jobs
+  // in the Labyrinth of Tigers, and spent on the quarries the Procurer of
+  // Savage Beasts storyline sends you after, and on the Labyrinth's story.
+  // Every spend is a NARROW challenge on the level of THiO you hold, wins the
+  // payout and takes all the THiO back to 0, and a failure takes 5 to 10 back.
+  //
+  // Transcribed from the option and storylet pages (fetched through the API,
+  // 2026-09-24) with The Hunt is On! (Guide) as the cross-check. Where they
+  // disagree the page is followed and `guide` quotes the guide:
+  //   Lead them through the marshes     Jade 938, guide 1000
+  //   Kill the rat brigands             Shriek 655, guide 810; level 8, guide 9
+  //   Kidnap                            Shriek 1151, guide 1638
+  //   Take the goat-demon alive         Procurer +6, guide +5
+  // The Hunting Dangerous Prey windows read 0–33 and 0–50 where the guide says
+  // 1–33 and 1–50; the pages are followed. Its options do not list re-rolling
+  // Airs. Left out: Breeding Monsters (its own feature), the later coils of the
+  // Labyrinth, and the Firmament card's two other options, which move no THiO.
+  // Corrections go in THIO_OPTIONS and nowhere else.
+
+  const THIO_CFG = {
+    quality: 'The Hunt Is On!', short: 'THiO',
+    rules: 'The Hunt Is On! is one quality for every source and every spend: what you raise in Wolfstack Docks '
+      + 'is spent on the hunts, and a successful hunt takes all of it back to 0.',
+  };
+  const THIO_HUNT = 'Hunting Dangerous Prey';
+  const THIO_ODD = 'Odd jobs in the Labyrinth';
+
+  function thioE(storylet, name, more) {
+    return Object.assign({ storylet: storylet, name: name }, more);
+  }
+
+  // What a hunt does: reset, pay, a narrow challenge on the level you hold.
+  function thioHunt(storylet, name, need, diff, pay, g, x, lose, more) {
+    return thioE(storylet, name, Object.assign({
+      spend: need, ch: { stat: 'The Hunt Is On!', diff: diff, narrow: true }, pay: pay, g: g, x: x, lose: lose,
+    }, more));
+  }
+
+  const THIO_OPTIONS = [
+    // --- Hunting Dangerous Prey: gain, offered by Airs ---------------------
+    thioE(THIO_HUNT, 'Stalk your prey subtly', { airs: [[0, 33]], re: 'none', ch: { stat: 'Dangerous', diff: 94 },
+      win: 3, x: [['Subtle', 1], ['Forceful', -1]], xf: [['Wounds', 1]], guide: 'The guide gives Airs 1–33.' }),
+    thioE(THIO_HUNT, 'Speak with other hunters', { airs: [[0, 50]], re: 'none', ch: { stat: 'Dangerous', diff: 86 },
+      win: 2, rare: { win: 3 }, xf: [['Wounds', 2]], guide: 'The guide gives Airs 1–50.' }),
+    thioE(THIO_HUNT, 'Observe your prey', { airs: [[67, 100]], re: 'none', ch: { stat: 'Dangerous', diff: 88 },
+      win: 2, xf: [['Wounds', 1]] }),
+    thioE(THIO_HUNT, 'Prepare your equipment', { airs: [[34, 66]], re: 'none', ch: { stat: 'Dangerous', diff: 90 },
+      win: 2, lose: -1, xf: [['Wounds', 1]] }),
+    thioE(THIO_HUNT, 'Prepare the ground', { airs: [[51, 100]], re: 'none', ch: { stat: 'Dangerous', diff: 92 },
+      win: 3, xf: [['Wounds', 2]] }),
+    thioE(THIO_HUNT, 'Go for the throat!', { airs: [[26, 75]], re: 'none', ch: { stat: 'Dangerous', diff: 96 },
+      win: 3, lose: -1, x: [['Forceful', 1], ['Subtle', -1]], xf: [['Wounds', 1]] }),
+
+    // --- the Labyrinth of Tigers ------------------------------------------
+    thioE(THIO_ODD, 'Feed the rhino his medicine', { ch: { stat: 'Dangerous', diff: 97 }, win: 2, xf: [['Wounds', 2]] }),
+    thioE(THIO_ODD, 'Feed the giant octopus', { ch: { stat: 'Dangerous', diff: 100 }, win: 3, xf: [['Wounds', 1]] }),
+    thioE(THIO_ODD, 'Help to recapture a giant lizard', { ch: { stat: 'Dangerous', diff: 98 }, win: 2, xf: [['Wounds', 1]] }),
+    thioE(THIO_ODD, 'Amuse the lesser hyaenas', { ch: { stat: 'Dangerous', diff: 99 }, win: 3, xf: [['Nightmares', 1]] }),
+    thioE('The third coil', 'Recapturing an escapee', { ch: { stat: 'Dangerous', diff: 102 }, win: 2,
+      g: [['Piece of Rostygold', 102]], x: [['Ruthless', 1]], xf: [['Wounds', 2]],
+      note: 'The page files this under The third coil; its other options are not badged.' }),
+    thioHunt('Meeting a junior keeper', 'Collar the junior keeper', 7, 4, 'Labyrinth +1', null, [['Dangerous', '?']], -4,
+      { note: 'Needs the Labyrinth at step 3 and Navigating Coil 1.' }),
+    thioHunt('The drownie keeper', 'Follow her', 7, 4, 'Labyrinth +1', null, [['Dangerous', '?']], -4,
+      { note: 'Needs the Labyrinth at step 5.' }),
+    thioE('Tiger wrestling for secrets and amusement', 'An eloquent gaze', { spend: 7,
+      ch: { stat: 'Dangerous', diff: 102 }, pay: 'Labyrinth +1', lose: -8, xf: [['Wounds', 3]],
+      note: 'Needs the Labyrinth at step 4.' }),
+    thioE('The Tiger Keeper', 'Go and find him', { spend: 7, pay: 'Labyrinth +1', x: [['Dangerous', '5?']],
+      note: 'Needs the Labyrinth at step 6.' }),
+
+    // --- the hunts that spend it -----------------------------------------
+    thioHunt('Offer to Lead a Safari through the Marshes', 'Lead them through the marshes', 5, 7, 'Jade 938',
+      [['Jade Fragment', 938]], [['A Procurer of Savage Beasts', 3]], -5,
+      { xf: [['Dangerous', 4], ['Scandal', 2]], guide: 'The guide gives Jade 1000.', guideEpa: 0.35,
+        note: 'Procurer of Savage Beasts rises to 3 at most. A success also gives Dangerous +2 CP.' }),
+    thioHunt('Hunt the Fungus-column', 'Kill the Fungus-column', 5, 3, 'Shriek 270', [['Primordial Shriek', 270]],
+      [['A Procurer of Savage Beasts', 2]], -5, { xf: [['Wounds', 1]], guideEpa: 0.39,
+        note: 'Procurer of Savage Beasts rises to 2 at most.' }),
+    thioHunt('Hunt the Fungus-column', 'Take the Fungus-column alive', 5, 7, 'Shriek 469', [['Primordial Shriek', 469]],
+      [['A Procurer of Savage Beasts', 3]], -5, { xf: [['Dangerous', 5], ['Wounds', 3]], guideEpa: 0.40,
+        note: 'Warning from the page: failing here may mean starting over. Procurer of Savage Beasts rises to 2 at most; '
+          + 'a success also gives Dangerous +26–38?.' }),
+    thioHunt('Hunt the White Marsh Wolves', 'Kill a white marsh wolf', 6, 5, 'Shriek 397', [['Primordial Shriek', 397]],
+      [['A Procurer of Savage Beasts', 2]], -7, { xf: [['Wounds', 1]], guideEpa: 0.33,
+        note: 'Procurer of Savage Beasts rises to 2 at most.' }),
+    thioHunt('Hunt the White Marsh Wolves', 'Take a white marsh wolf alive', 6, 8, 'Shriek 590', [['Primordial Shriek', 590]],
+      [['A Procurer of Savage Beasts', 3]], -10, { xf: [['Wounds', 3]], guideEpa: 0.40,
+        note: 'The page marks the Procurer +3, the Dangerous +30 and the failure cost of 10 with a question mark.' }),
+    thioHunt('Hunt the Rattus Faber Brigands', 'Kill the rat brigands', 8, 6, 'Shriek 655', [['Primordial Shriek', 655]],
+      [['A Procurer of Savage Beasts', 4]], -5, { xf: [['Dangerous', 6], ['Wounds', 1]], guideEpa: 0.43,
+        guide: 'The guide gives Primordial Shriek 810 and level 9.', note: 'A success also gives Dangerous +13 CP.' }),
+    thioHunt('Hunt the Rattus Faber Brigands', 'Take the rat brigands alive', 8, 10, 'Shriek 860', [['Primordial Shriek', 860]],
+      [['A Procurer of Savage Beasts', 3]], -10, { xf: [['Dangerous', 1], ['Wounds', 3]], guideEpa: 0.36,
+        note: 'Procurer of Savage Beasts rises to 3 at most.' }),
+    thioHunt('Hunt the Goat-Demon', 'Kill the goat-demon', 9, 8, 'Shriek 852', [['Primordial Shriek', 852]],
+      [['A Procurer of Savage Beasts', 5]], -5, { xf: [['Dangerous', 5], ['Wounds', 2]], guideEpa: 0.45,
+        needs: 'A Procurer of Savage Beasts 2', note: 'A success also gives Dangerous +35 CP and opens A letter from Mr Inch.' }),
+    thioHunt('Hunt the Goat-Demon', 'Take the goat-demon alive', 9, 11, 'Shriek 1088', [['Primordial Shriek', 1088]],
+      [['A Procurer of Savage Beasts', 6]], -5, { xf: [['Dangerous', 8], ['Wounds', 3]], guideEpa: 0.47,
+        needs: 'A Procurer of Savage Beasts 2', guide: 'The guide gives Procurer of Savage Beasts +5.',
+        note: 'A success also gives Dangerous +34 CP and opens A letter from Mr Inch.' }),
+    thioHunt('Capturing a magician', 'Kidnap', 13, 13, 'Shriek 1151', [['Primordial Shriek', 1151]],
+      [['A Procurer of Savage Beasts', 5]], -10, { xf: [['Dangerous', 1], ['Nightmares', 3]], guideEpa: 0.42,
+        needs: 'a Pair of Neathglass Goggles, and A Procurer of Savage Beasts 3', guide: 'The guide gives Primordial Shriek 1638.',
+        note: 'Procurer of Savage Beasts rises to 6 at most. A success also gives Dangerous +2 CP.' }),
+    thioHunt('Hunting That Which Walks on Two Legs', 'To hunt a Snuffer', 11, 11, 'Rostygold 2302',
+      [['Piece of Rostygold', 2302]], [['A Procurer of Savage Beasts', '5?']], -5, { xf: [['Dangerous', 1], ['Wounds', 3]],
+        guideEpa: 0.30, needs: 'A Procurer of Savage Beasts 3', guide: 'The guide gives a THiO loss of 10 on failure.',
+        note: 'A success also gives Dangerous +50 CP.' }),
+    thioHunt('Hunt a Spider-Council', 'This will take work', 13, 13, 'Shriek 1738', [['Primordial Shriek', 1738]],
+      [['A Procurer of Savage Beasts', 7]], -10, { xf: [['Dangerous', 1], ['Wounds', 5], ['Nightmares', 2]], guideEpa: 0.44,
+        needs: 'Dangerous 85, and A Procurer of Savage Beasts 3', note: 'A success also gives Dangerous +2 CP.' }),
+
+    // --- the cards ----------------------------------------------------------
+    thioE('The tomb-colonist’s dogs', 'Hunting to hounds', { ch: { stat: 'Dangerous', diff: 97 }, win: 5, lose: -5,
+      needs: 'A Name Scrawled in Blood 6, Renown: Tomb-Colonies 15 and The Hunt Is On! 1',
+      note: 'The page writes the failure as "− ~5 CP".' }),
+    thioE('The tomb-colonist’s dogs', 'Could you look after them for a day?', { ch: { stat: 'Dangerous', diff: 81 },
+      g: [['Foxfire Candle Stub', 61]], xf: [['Wounds', 1]] }),
+    thioE('Cutthroats and Canalmen', 'Foray beyond the walls', { win: 3, g: [['Sample of Roof-Drip', 10]],
+      note: 'The card needs Firmament 450 and re-rolls the Airs of Burgundy, not those of London.' }),
+    thioE('Cutthroats and Canalmen', 'Heed the call of the hunting-bell', { spend: 15, reset: false, lose: -5,
+      pay: 'Starved Expression 16', g: [['Starved Expression', 16], ['Emetic Revelation', 1], ['Antique Mystery', 1]],
+      xf: [['Wounds', 3]], guideEpa: 2.2,
+      note: 'The card needs Firmament 450. Takes 15 CP, not all of it. The guide gives 2.2 Echoes per CP of THiO here.' }),
+  ];
+
+  const THIO_CARDS = [
+    { name: 'The tomb-colonist’s dogs', needs: 'Dangerous 81–118',
+      note: 'Hunting to hounds is the only option that moves The Hunt is On!.' },
+    { name: 'Cutthroats and Canalmen', needs: 'Firmament 450', label: 'THiO ±',
+      note: 'Two more options, Trade local knowledge with Inverse Boatmen and Get a view of the city from the water, '
+        + 'move no THiO and are left to the Risen Burgundy work.' },
+  ];
+
+  const THIO_ALL_STORYLETS = THIO_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const THIO_INDEX = carouselIndex(THIO_OPTIONS);
+  const THIO_DEF = {
+    cfg: THIO_CFG, options: THIO_OPTIONS, index: THIO_INDEX, storylets: THIO_ALL_STORYLETS, cards: THIO_CARDS,
+    cardKeys: THIO_CARDS.map(function (c) { return normalizeName(c.name); }), aliases: null,
+    cls: 'fl-ux-thio', flag: 'flUxThio', branchCls: 'fl-ux-thio-branch', branchFlag: 'flUxThioBranch',
+    cardCls: 'fl-ux-thio-card', cardFlag: 'flUxThioCard',
+  };
+
+  function thioRatings() { pqRatings(THIO_DEF); }
+
+  // === feature: Running Battle ============================================
+  //
+  // Running Battle... (RB) is raised in a Blind Helmsman duelling storyline,
+  // a sorrow-spider contract, a Clay Men commission and the hunt for the Big
+  // Rat, and spent on their payouts. Every spend is a NARROW challenge on the
+  // level you hold and a success takes it all back to 0. Duelling the Black
+  // Ribbon also raises A Fearsome Duellist (FD), which unlocks the next
+  // opponent.
+  //
+  // The guide is marked Outdated (the March 2024 MYN rework), so the OPTION
+  // PAGES are followed and the guide quoted where it disagrees:
+  //   Duel Feducci                        level 13 and difficulty 13, guide 15;
+  //                                       Rostygold 3217, guide 4000
+  //   A duel to the death, Vendrick       failure takes 9 CP, guide 10
+  //   Fire as soon as he reaches the X    difficulty 8, guide 9
+  // Duelling the Black Ribbon is called Making your Name: Duelling the Black
+  // Ribbon until A Name Scrawled in Blood 5, so both headings are one storylet.
+  // Left out: the contract's first option (the Department of Menace Eradication
+  // feature carries it), Purchase some assistance with Casing... (Casing's),
+  // and the rest of the Big Rat story, which has a guide of its own.
+  // Corrections go in RUNB_OPTIONS and nowhere else.
+
+  const RUNB_CFG = {
+    quality: 'Running Battle...', short: 'RB',
+    rules: 'Running Battle... is one quality for every source and every spend: a successful spend takes all of it '
+      + 'back to 0, a failure takes 1 to 10 back.',
+  };
+  const RUNB_DUEL = 'Duelling the Black Ribbon';
+  const RUNB_SPIDERS = 'Destroy an Infestation of Sorrow-Spiders';
+  const RUNB_JACK = 'Jack-of-Smiles has expanded his interests';
+  const RUNB_BIG_RAT = 'Gather your forces against the Big Rat';
+  const RUNB_CHALLENGE = 'Challenge a Black Ribbon Duellist';
+
+  function runbE(storylet, name, more) {
+    return Object.assign({ storylet: storylet, name: name, re: 'both' }, more);
+  }
+
+  // A duel: level needed, narrow difficulty, what it pays, what it gives, a failure.
+  function runbSpend(storylet, name, need, diff, pay, g, x, lose, more) {
+    return runbE(storylet, name, Object.assign({
+      spend: need, ch: { stat: 'Running Battle...', diff: diff, narrow: true }, pay: pay, g: g, x: x, lose: lose,
+    }, more));
+  }
+
+  const RUNB_OPTIONS = [
+    // --- Sorrow-spiders ---------------------------------------------------
+    runbE(RUNB_SPIDERS, 'A straightforward approach... Squash the filthy things!', { ch: { stat: 'Dangerous', diff: 20 },
+      win: 1, rare: { win: 1, g: [['Whispered Hint', 9]] } }),
+    runbE(RUNB_SPIDERS, 'This might be faster... Track them to their nests', { ch: { stat: 'Watchful', diff: 25 },
+      win: 2, rare: { win: 5, g: [['Relic of the Fourth City', 1]], odds: '15%, by the page' } }),
+    runbSpend(RUNB_SPIDERS, 'Making Your Name: Turn in a sack of sorrow-spider legs', 4, 0, 'Rostygold 72',
+      [['Piece of Rostygold', 72]], [['Dangerous', 13]], -1, { needs: 'A Name Scrawled in Blood exactly 1' }),
+    runbSpend(RUNB_SPIDERS, 'Resolution: turn in a sack of sorrow-spider legs', 4, 1, 'Rostygold 72',
+      [['Piece of Rostygold', 72]], [['Dangerous', 13]], -1, { needs: 'A Name Scrawled in Blood 2 or more' }),
+
+    // --- the Clay Men against Jack-of-Smiles --------------------------------
+    runbE(RUNB_JACK, 'Prowl the midnight streets', { ch: { stat: 'Dangerous', diff: 60 }, win: 2, rare: { win: 4 },
+      xf: [['Wounds', 1]], note: 'The page files this option under Jack-of-Smiles has expanded his interests 2.' }),
+    runbSpend(RUNB_JACK, 'Move in for the kill', 5, 5, 'Diamonds 14',
+      [['Leathery Human Heart', 1], ['Flawed Diamond', 14], ['Ostentatious Diamond', 1]], null, -1, { xf: [['Wounds', 4]] }),
+    runbE(RUNB_JACK, 'A sure thing', { aliases: ['A sure thing (3 FATE)'], label: '3 Fate → Diamonds, no RB', fate: 3,
+      g: [['Leathery Human Heart', 1], ['Flawed Diamond', 14], ['Ostentatious Diamond', 1], ['Cryptic Clue', 30]],
+      note: 'Skips the challenge and resets Running Battle....' }),
+
+    // --- Duelling the Black Ribbon: gain, offered by Airs -------------------
+    runbE(RUNB_DUEL, 'Sparring with ring fighters', { airs: [[1, 33]], ch: { stat: 'Dangerous', diff: 82 }, win: 3, xf: [['Wounds', 1]] }),
+    runbE(RUNB_DUEL, 'Find out more about the Black Ribbon duellists', { airs: [[1, 50]], ch: { stat: 'Dangerous', diff: 74 },
+      win: 2, rare: { win: 3 }, xf: [['Wounds', 2]] }),
+    runbE(RUNB_DUEL, 'Arrange a duel outside the Black Ribbon', { airs: [[26, 75]], ch: { stat: 'Dangerous', diff: 84 }, win: 3,
+      g: [['Piece of Rostygold', 20]], lose: -1, xf: [['Wounds', 1], ['Piece of Rostygold', -10]],
+      needs: 'Piece of Rostygold 10' }),
+    runbE(RUNB_DUEL, 'Study the fighting styles of the other duellists', { airs: [[34, 66]], ch: { stat: 'Dangerous', diff: 78 },
+      win: 2, g: [['Cryptic Clue', 5]], lose: -1, xf: [['Wounds', 1]] }),
+    runbE(RUNB_DUEL, 'Scout a battlefield', { airs: [[51, 100]], ch: { stat: 'Dangerous', diff: 80 }, win: 3, xf: [['Wounds', 2]] }),
+    runbE(RUNB_DUEL, 'Exercise for rough health', { airs: [[67, 100]], ch: { stat: 'Dangerous', diff: 76 }, win: 2,
+      xf: [['Wounds', 1]], needs: 'Route: The Flit' }),
+    runbE(RUNB_DUEL, 'Practise quietly with the Whispering Duellist', { ch: { stat: 'Dangerous', diff: 80 }, win: 3,
+      g: [['Tale of Terror!!', 1], ['Whispered Hint', [4, 17]]], xf: [['Wounds', 2]], needs: 'the Whispering Duellist',
+      note: 'Offered at any Airs, and re-rolls Airs on both outcomes.' }),
+    runbE(RUNB_DUEL, 'Issue a challenge to a duel', { label: 'RB 5 → duels', needs: 'Running Battle... 5',
+      note: 'Opens Challenge a Black Ribbon Duellist. Costs no action.' }),
+
+    // --- Challenge a Black Ribbon Duellist ---------------------------------
+    runbE(RUNB_CHALLENGE, 'Duel Colonel Pommery', { label: 'RB 5 · FD ≤2', note: 'Defeating him raises Fearsome Duellist to 2 at most.' }),
+    runbE(RUNB_CHALLENGE, 'Duel Father Norton, the Pugilistic Priest', { label: 'RB 6 · FD ≤3',
+      note: 'Defeating him raises Fearsome Duellist to 3 at most.' }),
+    runbE(RUNB_CHALLENGE, 'Get into other fights', { label: 'RB 8 · no FD', note: 'These fights do not raise Fearsome Duellist.' }),
+    runbE(RUNB_CHALLENGE, 'Duel Mr Inch and his Menagerie', { label: 'RB 8 · FD ≤4',
+      note: 'Defeating him raises Fearsome Duellist to 4 at most.' }),
+    runbE(RUNB_CHALLENGE, 'Duel Captain Vendrick, the Drunken Zailor', { label: 'RB 9 · FD ≤5',
+      note: 'Defeating him raises Fearsome Duellist to 5 at most.' }),
+    runbE(RUNB_CHALLENGE, 'Duel Chi Lan, the Royal Fencing Instructor', { label: 'RB 11 · FD ≤6',
+      note: 'Defeating her raises Fearsome Duellist to 6 at most.' }),
+    runbE(RUNB_CHALLENGE, 'Duel Feducci', { label: 'RB 13 · FD 7',
+      note: 'Defeating him raises Fearsome Duellist beyond 6. A failure without a Horsehead Amulet sends you to the slow boat.' }),
+
+    // --- the duels ---------------------------------------------------------
+    runbSpend('Duel Colonel Pommery, the Fierce Artillerist', 'A friendly duel with Colonel Pommery', 5, 3, 'Rostygold 432',
+      [['Piece of Rostygold', 432]], [['A Fearsome Duellist', 2]], -5, { xf: [['Wounds', 1]], note: 'A success also gives Dangerous +14 CP.' }),
+    runbSpend('Duel Colonel Pommery, the Fierce Artillerist', 'A duel to the death with Colonel Pommery', 5, 7, 'Rostygold 671',
+      [['Piece of Rostygold', 671]], [['A Fearsome Duellist', 3]], -5, { xf: [['Wounds', 4], ['Dangerous', 6]],
+        note: 'The page warns that failing here may mean starting over. A success also gives Dangerous +38 CP.' }),
+    runbSpend('Duel Father Norton, the Pugilistic Priest', 'A friendly duel with Father Norton', 6, 5, 'Rostygold 658',
+      [['Piece of Rostygold', 658]], [['A Fearsome Duellist', 3]], -5, { xf: [['Wounds', 1]], note: 'A success also gives Dangerous +23 CP.' }),
+    runbSpend('Duel Father Norton, the Pugilistic Priest', 'A duel to the death with Father Norton', 6, 8, 'Rostygold 942',
+      [['Piece of Rostygold', 942]], [['A Fearsome Duellist', 3]], -5, { xf: [['Wounds', 1], ['Dangerous', 6]],
+        note: 'A success also gives Dangerous +35 CP.' }),
+    runbSpend('Duel Mr Inch and his Menagerie', 'A friendly duel with Mr Inch', 8, 6, 'Rostygold 1047',
+      [['Piece of Rostygold', 1047]], [['A Fearsome Duellist', 4]], -5, { xf: [['Wounds', 1]],
+        needs: 'A Fearsome Duellist 1', note: 'A success also gives Dangerous +9 CP.' }),
+    runbSpend('Duel Mr Inch and his Menagerie', 'A duel to the death with Mr Inch', 8, 10, 'Rostygold 1355',
+      [['Piece of Rostygold', 1355]], [['A Fearsome Duellist', 4]], -5, { xf: [['Wounds', 1], ['Dangerous', 7]],
+        needs: 'A Fearsome Duellist 1', note: 'A success also gives Dangerous +28 CP.' }),
+    runbSpend('Duel Captain Vendrick, the Drunken Zailor', 'A friendly duel with Captain Vendrick', 9, 9, 'Rostygold 1417',
+      [['Piece of Rostygold', 1417]], [['A Fearsome Duellist', 5]], -5, { xf: [['Wounds', 2]],
+        needs: 'A Fearsome Duellist 2, Route: The Flit; not once Duelling with the Black Ribbon is 5',
+        note: 'A success also gives Dangerous +32 CP.' }),
+    runbSpend('Duel Captain Vendrick, the Drunken Zailor', 'A duel to the death with Captain Vendrick', 9, 11, 'Rostygold 1872',
+      [['Piece of Rostygold', 1872], ['Black Ribbon', 1]], [['A Fearsome Duellist', 5]], -9,
+      { xf: [['Wounds', 3]], needs: 'Route: The Flit, Duelling with the Black Ribbon 5', guide: 'The guide gives a failure of 10.',
+        note: 'Can be won once. A success also gives Dangerous +2 CP and A Bringer of Death +1 CP.' }),
+    runbSpend('Duel Chi Lan, the Royal Fencing Instructor', 'A duel to the death with Chi Lan', 11, 11, 'Rostygold 2200',
+      [['Piece of Rostygold', 2200]], [['A Fearsome Duellist', 6]], -5, { xf: [['Wounds', 5], ['Dangerous', 7]],
+        needs: 'A Fearsome Duellist 3, Route: The Shuttered Palace, and Wounds below 3', note: 'A success also gives Dangerous +18 CP.' }),
+    runbE('Duel Chi Lan, the Royal Fencing Instructor', 'Duel with Chi Lan, and cheat', { spend: 13, pay: 'Rostygold 3000',
+      g: [['Piece of Rostygold', 3000]], x: [['A Fearsome Duellist', 5], ['Subtle', 1]],
+      needs: 'A Courier for the Dead, and Wounds below 3', note: 'No challenge: it takes all your Running Battle... and uses up the Courier.' }),
+    runbSpend('Duel Feducci', 'A duel to the death with Feducci', 13, 13, 'Rostygold 3217', [['Piece of Rostygold', 3217]],
+      [['A Fearsome Duellist', 7]], -10, { xf: [['Wounds', 15], ['Dangerous', 1]],
+        needs: 'Route: The Forgotten Quarter, a Horsehead Amulet and Wounds below 2',
+        guide: 'The guide gives level 15, difficulty 15 and Rostygold 4000.',
+        note: 'A failure uses up the Amulet; without one it sends you to the slow boat.' }),
+    runbSpend('Get into other fights', 'Volunteer for the spider pit', 9, 7, 'Glim, Jade, Pearls 200',
+      [['Shard of Glim', 200], ['Jade Fragment', 200], ['Moon-Pearl', 200], ['Nodule of Deep Amber', 500],
+        ['Bottle of Strangling Willow Absinthe', 4]], null, -9, { xf: [['Wounds', 1], ['Dangerous', 1]],
+        note: 'The page writes the failure as 9 CP or 1 level. A success also gives Dangerous +2 CP.' }),
+    runbSpend('Get into other fights', 'Wrestle a tiger!', 8, 10, 'Jade, Brass, Clues 500',
+      [['Jade Fragment', 500], ['Nevercold Brass Sliver', 500], ['Cryptic Clue', 500], ['Carnival Ticket', 20]], null, -10,
+      { xf: [['Wounds', 5], ['Dangerous', 1]], note: 'A success also gives Dangerous +2 CP.' }),
+
+    // --- the Big Rat -------------------------------------------------------
+    runbE(RUNB_BIG_RAT, 'Use the cats', { win: 3, needs: 'Making Use of Cats 3' }),
+    runbE(RUNB_BIG_RAT, 'Advertise a spot of hunting', { win: 3, x: [['Scandal', 1]], needs: 'Renown: Society 10',
+      note: 'Also gives a Secluded Address.' }),
+    runbE(RUNB_BIG_RAT, 'Contact Mr Inch', { win: 3, x: [['Scandal', 1]], needs: 'Acquiring Exhibits for the Labyrinth of Tigers 4' }),
+    runbE(RUNB_BIG_RAT, 'Set a watch on the area', { win: 3, needs: 'Renown: Urchins 15' }),
+    runbE(RUNB_BIG_RAT, 'Assemble those rats who would prefer to be free', { ch: { stat: 'Dangerous', diff: 103 }, win: 3,
+      xf: [['Wounds', 1]] }),
+    runbE('Alliance with the Big Rat', 'Purchase some Running Battle assistance…', { win: 6, u: [['Foxfire Candle Stub', 100]],
+      needs: 'Foxfire Candle Stub 100', note: 'Costs 100 Foxfire Candle Stubs. No challenge.' }),
+    runbSpend('Spring the Ambush on the Big Rat', 'Fire as soon as he reaches the chalked X', 5, 8, 'Rostygold 2000',
+      [['Piece of Rostygold', 2000]], null, -3, { needs: 'Seeking the Meaning of the Plaster Face exactly 10',
+        guide: 'The guide gives difficulty 9.', note: 'Also gives 1 Fate, Nightmares −10 and moves the story on.' }),
+    runbSpend('Spring the Ambush on the Big Rat', 'Capture him and take his rat-face mask', 5, 11, 'Rat on a String 10',
+      [['Mystery of the Elder Continent', 1], ['Rat on a String', 10]], null, -10,
+      { needs: 'Seeking the Meaning of the Plaster Face exactly 10', note: 'Also gives 1 Fate and moves the story on.' }),
+  ];
+
+  const RUNB_ALL_STORYLETS = RUNB_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const RUNB_INDEX = carouselIndex(RUNB_OPTIONS);
+  const RUNB_DEF = {
+    cfg: RUNB_CFG, options: RUNB_OPTIONS, index: RUNB_INDEX, storylets: RUNB_ALL_STORYLETS, cards: [], cardKeys: [],
+    aliases: { 'making your name duelling the black ribbon': normalizeName(RUNB_DUEL) },
+    summary: {},
+    cls: 'fl-ux-runb', flag: 'flUxRunb', branchCls: 'fl-ux-runb-branch', branchFlag: 'flUxRunbBranch',
+    cardCls: 'fl-ux-runb-card', cardFlag: 'flUxRunbCard',
+  };
+
+  function runbRatings() { pqRatings(RUNB_DEF); }
+
+  // === feature: Casing ====================================================
+  //
+  // Casing... is raised by area-diving in Spite, painting thefts and the Big
+  // Score prelude in the Flit and scouting parties at the Clay Highwayman's
+  // camp, and spent on the robberies those lead to. Most spends are a NARROW
+  // challenge on the level you hold that takes all of it back to 0 and pays
+  // once; the fixed-price ones (selling information, the thefts of particular
+  // character, the larcenies) take a set number of CP and leave the rest.
+  //
+  // Casing pays nothing until it is spent, so the badge is the CP a gain
+  // makes and, on the robberies, the level they need and the Master Thief they
+  // build; what each spend pays is in the badge in a word and in the tooltip.
+  // The Big Score prelude's options cost 3 actions (5 for the three that pay
+  // 16 to 18), which the badge says.
+  //
+  // The guide is marked as needing work (the 2024 MYN rework), so the OPTION
+  // PAGES are followed and the guide quoted where it disagrees:
+  //   Look for the targets           failure Suspicion +2, guide +3
+  //   Scapegoats and alibis          failure Suspicion +1, guide +3
+  //   The decoy                      failure Suspicion +2, guide +1
+  //   Bomb a meeting of financiers   Master Thief +4, guide +5?
+  //   Wait until it docks ...        Master Thief +4, guide +5?
+  //   the two Bringing Revolution!   Casing 8 only, the guide adds Master Thief 1
+  // Burrow-Infra-Mump's scouting party costs Suspicion +4 on a failure, the
+  // other four +2. Left out: Grand Larcenies' rewards (Cover Identities), the
+  // heist options of the prelude (On a Heist), the Risen Burgundy cards, the
+  // Parabolan option, and the Big Rat's purchase of Casing, which is the Big
+  // Rat's. Corrections go in CASING_OPTIONS and nowhere else.
+
+  const CASING_CFG = {
+    quality: 'Casing...', short: 'Casing',
+    rules: 'Casing... is one quality for every source and every spend: what you raise in Spite or in the Flit is '
+      + 'spent on the robberies. A robbery takes all of it back to 0; the fixed-price spends say how much they take.',
+  };
+  const CASING_DIVE = 'Area-diving: Casing the Target';
+  const CASING_WHAT = 'Area-diving: What to Do?';
+  const CASING_BLACKMAIL = 'Area-diving: a spot of blackmail';
+  const CASING_ART = 'Steal Paintings for the Topsy King';
+  const CASING_PREP = 'Preparing for a Big Score';
+  const CASING_TARGET = 'The Big Score: Choose a Target';
+  const CASING_SELL = 'Sell information';
+  const CASING_THEFTS = 'Thefts of Particular Character';
+  const CASING_LARCENIES = ['Larceny at Ealing Gardens', 'Larceny at Jericho Locks', 'Larceny at the Magistracy',
+    'Larceny at Balmoral', 'Larceny at Burrow-Infra-Mump'];
+
+  function casE(storylet, name, more) {
+    return Object.assign({ storylet: storylet, name: name }, more);
+  }
+
+  // A robbery: the level it needs, its narrow difficulty on Casing, what it pays.
+  function casRob(storylet, name, need, diff, pay, g, x, lose, more) {
+    return casE(storylet, name, Object.assign({
+      spend: need, ch: { stat: 'Casing...', diff: diff, narrow: true }, pay: pay, g: g, x: x, lose: lose,
+    }, more));
+  }
+
+  // A fixed-price spend: the level it needs and the CP it takes.
+  function casCost(storylet, name, need, cost, pay, g, x, more) {
+    return casE(storylet, name, Object.assign({ need: need, cost: cost, pay: pay, g: g, x: x }, more));
+  }
+
+  // The Big Score prelude's gains, three actions each unless they say five.
+  function casGain(name, diff, win, more) {
+    return casE(CASING_PREP, name, Object.assign({ ch: { stat: 'Shadowy', diff: diff }, win: win, actions: 3,
+      note: 'Also raises Shadowy by 6 CP.' }, more));
+  }
+
+  const CASING_OPTIONS = [
+    // --- area-diving, in Spite ------------------------------------------------
+    casE(CASING_DIVE, 'A straightforward approach... Get close and watch', { ch: { stat: 'Shadowy', diff: 24 }, win: 1 }),
+    casE(CASING_DIVE, 'This might be faster... Chat to the kitchen staff on their way in and out',
+      { ch: { stat: 'Persuasive', diff: 35 }, win: 2 }),
+    casE(CASING_DIVE, 'Gather intelligence on your target', { win: 3, u: [['Whispered Hint', 50]],
+      note: 'Also raises Shadowy by 2 CP.' }),
+    casE(CASING_WHAT, 'Hand it over to the authorities for burning', { label: 'Austere +3 · Scandal −2 · Jade ×200',
+      note: 'An Austere choice. Also Hedonist −3. Needs no Casing and ends Villainy: Area-Diving.' }),
+    casE(CASING_WHAT, 'Into the river with it', { label: 'Austere +5 · Scandal −5',
+      note: 'An even more Austere choice. Also Hedonist −5. Needs no Casing and ends Villainy: Area-Diving.' }),
+    casE(CASING_WHAT, 'Keep it', { label: 'Hedonist +3 · Proscribed ×50',
+      note: 'From the guide, which gives Hedonist +3 (to 10), Proscribed Material ×50, Scandal +2 and Austere −3: the option page '
+        + 'records nothing. Needs no Casing and ends Villainy: Area-Diving.' }),
+    casE(CASING_WHAT, 'A spot of blackmail', { label: 'Casing 1 → blackmail', needs: 'A Name Whispered in Darkness 3',
+      note: 'Opens Area-diving: a spot of blackmail.' }),
+    casRob(CASING_BLACKMAIL, 'Blackmail her', 1, 1, 'Pearls ×300', [['Moon-Pearl', 300]], [['Ruthless', 1], ['Magnanimous', -1]], -3,
+      { xf: [['Suspicion', 1]], needs: 'A Name Whispered in Darkness 3', note: 'A Ruthless choice. Ends Villainy: Area-Diving.' }),
+
+    // --- painting thefts for the Topsy King, in the Flit ----------------------------
+    casE(CASING_ART, 'Steal a painting from a struggling artist', { ch: { stat: 'Shadowy', diff: 72 }, win: 2,
+      u: [['Bottle of Greyfields 1879', 10]], needs: 'Bottle of Greyfields 1879 10',
+      note: 'The bottles are spent on a failure as well.' }),
+    casE(CASING_ART, 'Steal a painting from a noted gallery', { ch: { stat: 'Shadowy', diff: 75 }, win: 3, xf: [['Suspicion', 1]] }),
+    casRob(CASING_ART, 'Give the Topsy King the paintings', 3, 3, 'Rat on a String ×225', [['Rat on a String', 225]],
+      [['Shadowy', 2]], -1, { guide: 'The guide gives Casing 3 as the level it needs; the page records none.' }),
+    casCost(CASING_ART, 'Offer to make a wall of stolen paintings', 7, 55, 'Sulky Bat ×8', [['Sulky Bat', 8]], null,
+      { ch: { stat: 'Casing...', diff: 7, narrow: true }, lose: -10, xf: [['Suspicion', 1]],
+        note: 'A narrow challenge on the level you hold; a success takes 55 CP, not all of it.' }),
+
+    // --- the Big Score prelude, in the Flit ----------------------------------------------
+    casE(CASING_PREP, 'Eavesdrop on those in the know', { ch: { stat: 'Shadowy', diff: 50 }, win: 2,
+      note: 'One action. The options that cost 3 actions and pay 9 are the same 3 CP per action.' }),
+    casGain('Look for the targets', 74, 9, { rare: { win: 10 }, xf: [['Suspicion', 2]],
+      guide: 'The guide gives a failure of Suspicion +3.' }),
+    casGain('Examine the target', 76, 9, { xf: [['Suspicion', 2]] }),
+    casGain('Criminal assistance', 78, 9, { g: [['Whispered Hint', 30]], lose: -2, xf: [['Suspicion', 2]] }),
+    casGain('Scapegoats and alibis', 80, 9, { xf: [['Suspicion', 1]], guide: 'The guide gives a failure of Suspicion +3.' }),
+    casGain('Formulate a plan', 82, 9, { aliases: ['Formulate a plan (Preparing for a Big Score)'], xf: [['Suspicion', 1]] }),
+    casGain('The decoy', 84, 9, { bundle: '≤30', lose: -3, xf: [['Suspicion', 2]],
+      guide: 'The guide gives a failure of Suspicion +1.' }),
+    casE(CASING_PREP, 'Well-planned villainy', { win: 16, actions: 5, needs: 'A Person of Some Importance',
+      note: 'No challenge.' }),
+    casE(CASING_PREP, 'Set your gang of hoodlums to business', { ch: { stat: 'Shadowy', diff: 100 }, win: 18, lose: 3,
+      actions: 5, needs: 'A Person of Some Importance and a Gang of Hoodlums',
+      note: 'A failure still raises Casing by 3 CP.' }),
+    casE(CASING_PREP, 'Promenade around in full view', { ch: { stat: 'Watchful', diff: 100 }, win: 18, lose: 3, actions: 5,
+      needs: 'A Person of Some Importance and a Topsy Tailcoat', note: 'A failure still raises Casing by 3 CP.' }),
+    casE(CASING_PREP, 'The Big Score: choose your target', { label: 'Casing 5 → targets', needs: 'Casing... 5',
+      note: 'Opens The Big Score: Choose a Target. Costs no action.' }),
+    casE(CASING_PREP, 'Sell information', { label: 'Casing 3 → sell', note: 'Opens Sell information. Costs no action.' }),
+
+    // --- choosing the target ---------------------------------------------------------------
+    casE(CASING_TARGET, 'Thefts of a particular character', { label: 'Casing 10 · fixed price', needs: 'Casing... 10' }),
+    casE(CASING_TARGET, 'Sell information', { label: 'Casing 3 · fixed price' }),
+    casE(CASING_TARGET, 'Steal the Carnival Strong Box', { label: 'Casing 5 ▼ · MT ≤2' }),
+    casE(CASING_TARGET, 'Rob the Ministry of Public Decency', { label: 'Casing 6 ▼ · MT ≤3' }),
+    casE(CASING_TARGET, 'Bring revolution!', { label: 'Casing 8 ▼ · MT ≤4', needs: 'Master Thief',
+      note: 'Raises Master Thief to 4 at most.' }),
+    casE(CASING_TARGET, 'Rob the glim shipment', { label: 'Casing 8 ▼ · MT ≤4', needs: 'Route: Wolfstack Docks' }),
+    casE(CASING_TARGET, 'Rob the chambers of the Duchess', { label: 'Casing 9 ▼ · MT ≤5', needs: 'Route: The Shuttered Palace' }),
+    casE(CASING_TARGET, 'Rob the Brass Embassy', { label: 'Casing 11 ▼ · MT ≤7', note: 'A failure sends you to New Newgate Prison.' }),
+    casE(CASING_TARGET, 'Rob the Bazaar', { label: 'Casing 13 ▼ · MT any', note: 'A failure raises Nightmares by 36 CP.' }),
+
+    // --- selling information ----------------------------------------------------------------
+    casCost(CASING_SELL, 'Pass on information to a colleague', 4, 10, 'Shadowy +10', null, null,
+      { note: 'The Criminals. Does not raise Master Thief.' }),
+    casCost(CASING_SELL, 'Pass information to the Constables', 3, 6, 'Pearls ×260', [['Moon-Pearl', 260]], null,
+      { note: 'Does not raise Master Thief.' }),
+    casCost(CASING_SELL, 'Pass information to the Brass Embassy', 3, 6, 'Persuasive +10', null, null,
+      { note: 'Hell. Does not raise Master Thief.' }),
+
+    // --- thefts of particular character: 32 CP for a set item, 51 if it goes wrong -------------------
+    casCost(CASING_THEFTS, 'Steal Tales of Terror from a noted author', 10, 32, 'Tale of Terror ×25', [['Tale of Terror!!', 25]], null,
+      { ch: { stat: 'Shadowy', diff: 120 }, lose: -51, note: 'Pays even on a failure, which takes 51 CP.' }),
+    casCost(CASING_THEFTS, 'Steal Journals of Infamy from an Iniquitous Solicitor', 10, 32, 'Journal ×25', [['Journal of Infamy', 25]], null,
+      { ch: { stat: 'Shadowy', diff: 120 }, lose: -51, note: 'Pays even on a failure, which takes 51 CP.' }),
+    casCost(CASING_THEFTS, 'Steal Muscaria Brandy from the Infernal Sommelier', 10, 32, 'Brandy ×5', [['Muscaria Brandy', 5]], null,
+      { ch: { stat: 'Shadowy', diff: 120 }, lose: -51, note: 'Pays even on a failure, which takes 51 CP.' }),
+    casCost(CASING_THEFTS, 'Steal Brilliant Souls en route to Hookman House', 10, 32, 'Brilliant Soul ×25', [['Brilliant Soul', 25]], null,
+      { ch: { stat: 'Shadowy', diff: 120 }, lose: -51, note: 'Pays even on a failure, which takes 51 CP.' }),
+    casCost(CASING_THEFTS, 'Steal an Antique Mystery from Feducci', 10, 32, 'Antique Mystery', [['Antique Mystery', 1]], null,
+      { ch: { stat: 'Shadowy', diff: 120 }, lose: -51, note: 'Pays even on a failure, which takes 51 CP.' }),
+    casCost(CASING_THEFTS, 'Steal a Bazaar Permit from the offices of Baseborn & Fowlingpiece', 10, 32, 'Bazaar Permit',
+      [['Bazaar Permit', 1]], null, { ch: { stat: 'Shadowy', diff: 120 }, lose: -51, note: 'Pays even on a failure, which takes 51 CP.' }),
+
+    // --- the robberies: a narrow challenge on the level, and all of it spent ----------------------------
+    casRob('Steal the Carnival Strong Box', 'Rob the strong-box halfway through the evening', 5, 3, 'Glim, Jade, Pearls, Rostygold ×100',
+      [['Jade Fragment', 100], ['Piece of Rostygold', 100], ['Moon-Pearl', 100], ['Shard of Glim', 100], ['Cryptic Clue', 16]],
+      [['Master Thief', 2]], -5, { xf: [['Suspicion', 1]], note: 'Master Thief rises to 2 at most. Also Shadowy +2 CP. The guide values the haul at 4.32 Echoes and expects 7.3 actions per theft.' }),
+    casRob('Steal the Carnival Strong Box', 'Rob the strongbox at the end of a busy evening', 5, 7, 'Glim, Pearls ×200 · Jade ×138',
+      [['Jade Fragment', 138], ['Moon-Pearl', 200], ['Piece of Rostygold', 100], ['Shard of Glim', 200], ['Cryptic Clue', 18]],
+      [['Master Thief', 3]], -5, { xf: [['Suspicion', 1]], note: 'Master Thief rises to 2 at most. Shadowy +2–10 CP by level. The guide values the haul at 6.74 Echoes and expects 14.9 actions per theft.' }),
+    casRob('Rob the Ministry of Public Decency', 'Rob an outlying depository', 6, 5, 'Clues ×154 · Proscribed ×50',
+      [['Proscribed Material', 50], ['Cryptic Clue', 154], ['Stolen Correspondence', 30]], [['Master Thief', 3]], -5,
+      { xf: [['Suspicion', 1]], note: 'Master Thief rises to 3 at most. Shadowy +23? CP. The guide values the haul at 6.58 Echoes and expects 11.9 actions per theft.' }),
+    casRob('Rob the Ministry of Public Decency', 'Rob the main archive', 6, 8, 'Clues ×130 · Proscribed ×70',
+      [['Proscribed Material', 70], ['Infernal Contract', 4], ['Stolen Correspondence', 65], ['Cryptic Clue', 130]],
+      [['Master Thief', '4?']], -5, { xf: [['Suspicion', 2]], note: 'Master Thief rises to 3 at most. Shadowy +42? CP. The guide values the haul at 9.45 Echoes and expects 20.8 actions per theft.' }),
+    casRob('Bringing Revolution!', 'Destroy a statue', 8, 6, 'Proscribed ×150 · Correspondence ×82',
+      [['Proscribed Material', 150], ['Stolen Correspondence', 82]], [['Master Thief', 4], ['Making Waves', 5]], -5,
+      { xf: [['Suspicion', 1]], guide: 'The guide adds Master Thief 1 to the requirements.',
+        note: 'Also Advancing the Liberation of Night +3 CP and Shadowy +2–23 CP by level. The guide values the haul at 10.10 Echoes and expects 14.7 actions per theft.' }),
+    casRob('Bringing Revolution!', 'Bomb a meeting of financiers', 8, 9, 'Proscribed ×218 · Clues ×200',
+      [['Proscribed Material', 218], ['Cryptic Clue', 200]], [['Master Thief', 4], ['Making Waves', 10]], -5,
+      { xf: [['Suspicion', 2]], guide: 'The guide gives Master Thief +5? and adds Master Thief 1 to the requirements.',
+        note: 'Also Advancing the Liberation of Night +5 CP and Shadowy +2–9? CP. The guide values the haul at 12.72 Echoes and expects 24.8 actions per theft.' }),
+    casRob('Rob the Glim Shipment', 'Rob the glim ship', 8, 6, 'Glim ×1047', [['Shard of Glim', 1047]], [['Master Thief', 4]], -5,
+      { xf: [['Suspicion', 1]], needs: 'Route: Wolfstack Docks',
+        note: 'Shadowy +17? CP. The guide values the haul at 10.47 Echoes and expects 14.7 actions per theft.' }),
+    casRob('Rob the Glim Shipment', 'Wait until it docks and rob the warehouse', 8, 9, 'Glim ×1225', [['Shard of Glim', 1225]],
+      [['Master Thief', 4]], -5, { xf: [['Suspicion', 2]], needs: 'Route: Wolfstack Docks',
+        guide: 'The guide gives Master Thief +5?.', note: 'Shadowy +2–18 CP. The guide values the haul at 12.25 Echoes and expects 24.8 actions per theft.' }),
+    casRob('Rob the Chambers of the Duchess', 'Rob the study', 9, 7, 'Correspondence ×200 · Hint ×162',
+      [['Stolen Correspondence', 200], ['Cryptic Clue', 50], ['Whispered Hint', 162], ['Appalling Secret', 2]],
+      [['Master Thief', 5]], -5, { xf: [['Suspicion', 2], ['Cryptic Clue', -20]],
+        needs: 'Route: The Shuttered Palace, Cryptic Clue 20, and Suspicion 0–3',
+        note: 'Shadowy +28?–41? CP. The guide values the haul at 12.92 Echoes and expects 18.1 actions per theft.' }),
+    casRob('Rob the Chambers of the Duchess', 'Gleams in the darkness', 9, 9, 'Pearls, Jade ×675',
+      [['Moon-Pearl', 675], ['Jade Fragment', 675], ['Rat on a String', 16]], [['Master Thief', 6]], -5,
+      { xf: [['Suspicion', 3], ['Connected: The Duchess', -5]], needs: 'Suspicion 0–3',
+        note: 'Shadowy +15–28 CP. The guide values the haul at 13.66 Echoes and expects 24.8 actions per theft.' }),
+    casRob('Rob the Brass Embassy', 'Nobody would steal from it but you', 11, 11, 'Brass ×600 · Soul ×350',
+      [['Nevercold Brass Sliver', 600], ['Soul', 350], ['Infernal Contract', 30], ['Flawed Diamond', 10], ['Proscribed Material', 25]],
+      [['Master Thief', 7]], -10, { xf: [['Suspicion', 20], ['Shadowy', -50]],
+        needs: 'Suspicion 0–2', note: 'A failure sends you to New Newgate Prison, takes all your Favours: Hell and 50 CP of Shadowy. Shadowy +16 CP. The guide values the haul at 21.20 Echoes.' }),
+    casRob('Rob the Bazaar', 'They know nothing.', 13, 13, 'Street Sign ×12', [['London Street Sign', 12]], [['Master Thief', 9]], -10,
+      { xf: [['Suspicion', 10], ['Nightmares', 36]], needs: 'Suspicion 0–1',
+        note: 'A failure raises Nightmares from 0 to 8 and drives you mad without the right equipment. Shadowy +14 CP. The guide values the haul at 30.00 Echoes.' }),
+
+    // --- the Clay Highwayman's larcenies: scouting, then fixed-price spends -----------------------------------
+    casE(CASING_LARCENIES[0], 'Join a scouting party', { ch: { stat: 'Shadowy', diff: 300, varies: 'Ealing Gardens: Darkness' },
+      win: 4, xf: [['Suspicion', 2]] }),
+    casCost(CASING_LARCENIES[0], 'Ambush an Inattentive Scholar', 6, 21, 'Research ×3 · Humerus ×2',
+      [['Volume of Collated Research', 3], ['Knotted Humerus', 2]], [['A Marauder of the Clay Highwayman', 1]]),
+    casCost(CASING_LARCENIES[0], 'Burgle a Public House', 8, 36, 'Amber, Biscuits, Jasmine',
+      [['Nodule of Trembling Amber', 1], ['Crate of Incorruptible Biscuits', 4], ['Jasmine Leaves', [0, 49]]],
+      [['A Marauder of the Clay Highwayman', 2]], { needs: 'Ealing Gardens Commercial Development',
+        note: 'The page marks the Jasmine Leaves 0–49 with a question mark.' }),
+    casCost(CASING_LARCENIES[0], 'Con an Eccentric Philosopher', 10, 55, 'Fecund Amber', [['Nodule of Fecund Amber', 1]],
+      [['A Marauder of the Clay Highwayman', 3]], { needs: 'a Cover Identity (Backstory 80, Elaboration 10, Credentials 5, Nuance 5), '
+        + 'Acquaintance with Helicon House and Ealing Gardens: Darkness 4', note: 'Uses up the Cover Identity and gives a Fabricator of Past Lives.' }),
+    casE(CASING_LARCENIES[1], 'Join a scouting party', { ch: { stat: 'Shadowy', diff: 300, varies: 'Jericho Locks: Darkness' },
+      win: 4, xf: [['Suspicion', 2]] }),
+    casCost(CASING_LARCENIES[1], 'Ambush a Novice Smuggler', 6, 21, 'Snuff ×1', [['Consignment of Scintillack Snuff', 1]],
+      [['A Marauder of the Clay Highwayman', 1]], { note: 'The snuff cannot be sold directly; the guide converts it to Hinterland Scrip.' }),
+    casCost(CASING_LARCENIES[1], 'Seize a jewel smuggler\'s boat', 8, 36, 'Magnificent Diamond ×2', [['Magnificent Diamond', 2]],
+      [['A Marauder of the Clay Highwayman', 2]]),
+    casCost(CASING_LARCENIES[1], 'Con a Seasoned Smuggler', 10, 55, 'Fabulous Diamond', [['Fabulous Diamond', 1]],
+      [['A Marauder of the Clay Highwayman', 3]], { needs: 'a Cover Identity (Backstory 80, Elaboration 10, Credentials 5, Witnesses 5), '
+        + 'Discovered: The Fiddler\'s Scarlet and Jericho Locks: Darkness 4', note: 'Uses up the Cover Identity and gives a Fabricator of Past Lives.' }),
+    casE(CASING_LARCENIES[2], 'Scout for targets', { aliases: ['Scout for targets (Magistracy of the Evenlode)'],
+      ch: { stat: 'Shadowy', diff: 300, varies: 'Magistracy of the Evenlode: Darkness' }, win: 4, xf: [['Suspicion', 2]] }),
+    casCost(CASING_LARCENIES[2], 'Ambush an Aging Detective', 6, 21, 'Sworn Statement ×5', [['Sworn Statement', 5]],
+      [['A Marauder of the Clay Highwayman', 1]]),
+    casCost(CASING_LARCENIES[2], 'Break into the offices of Baseborn & Fowlingpiece', 8, 36, 'Legal Document ×2', [['Legal Document', 2]],
+      [['A Marauder of the Clay Highwayman', 2]]),
+    casCost(CASING_LARCENIES[2], 'Con an Inconvenient Royal', 10, 55, 'Scrap of Ivory Organza', [['Scrap of Ivory Organza', 1]],
+      [['A Marauder of the Clay Highwayman', 3]], { needs: 'a Cover Identity (Backstory 80, Elaboration 10, Credentials 5, Nuance 5, Ties exactly 2 for the Bazaar) '
+        + 'and the Magistracy\'s Darkness', note: 'Uses up the Casing and the Cover Identity and gives a Fabricator of Past Lives.' }),
+    casE(CASING_LARCENIES[3], 'Join a scouting party', { ch: { stat: 'Shadowy', diff: 300, varies: 'Balmoral: Darkness' },
+      win: 4, xf: [['Suspicion', 2]] }),
+    casCost(CASING_LARCENIES[3], 'Ambush a smuggler', 6, 21, 'Magnificent Diamond', [['Magnificent Diamond', 1]],
+      [['A Marauder of the Clay Highwayman', 1]]),
+    casCost(CASING_LARCENIES[3], 'Ambush a courier', 8, 36, 'Vital Intelligence ×2', [['Vital Intelligence', 2]],
+      [['A Marauder of the Clay Highwayman', 2]]),
+    casCost(CASING_LARCENIES[3], 'Con a Palaeontological Yank', 10, 55, 'Prismatic Frame', [['Prismatic Frame', 1]],
+      [['A Marauder of the Clay Highwayman', 3]], { needs: 'a Cover Identity (Backstory 80, Elaboration 10, Credentials 5, Nuance 5) and Balmoral: Darkness 4',
+        note: 'Uses up the Cover Identity and gives a Fabricator of Past Lives.' }),
+    casE(CASING_LARCENIES[4], 'Join a scouting party', { ch: { stat: 'Shadowy', diff: 300, varies: 'Burrow-Infra-Mump: Darkness' },
+      win: 4, xf: [['Suspicion', 4]], needs: 'A Church in the Wild 50', guide: 'A failure costs Suspicion +4 here, +2 on the other four cards.' }),
+    casCost(CASING_LARCENIES[4], 'Ambush an Amnesiac Theologian', 6, 21, 'Palimpsest Scrap ×25', [['Palimpsest Scrap', 25]],
+      [['A Marauder of the Clay Highwayman', 1]]),
+    casCost(CASING_LARCENIES[4], 'Rob the Museum of Souls', 8, 36, 'Souls', [['Silent Soul', 1], ['Queer Soul', 1], ['Brilliant Soul', [4, 27]]],
+      [['A Marauder of the Clay Highwayman', 2]], { needs: 'A Museum of Souls' }),
+    casCost(CASING_LARCENIES[4], 'Steal a precious manuscript', 10, 55, 'Legenda Cosmogone', [['Legenda Cosmogone', 1]],
+      [['A Marauder of the Clay Highwayman', 3]], { needs: 'a Cover Identity (Backstory 80, Elaboration 10, Credentials 5, Nuance 5), '
+        + 'An Outpost of God\'s Editors and Burrow-Infra-Mump: Darkness 4', note: 'Uses up the Cover Identity and gives a Fabricator of Past Lives.' }),
+  ];
+
+  const CASING_ALL_STORYLETS = CASING_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const CASING_INDEX = carouselIndex(CASING_OPTIONS);
+  const CASING_DEF = {
+    cfg: CASING_CFG, options: CASING_OPTIONS, index: CASING_INDEX, storylets: CASING_ALL_STORYLETS, cards: [],
+    // The five larceny cards keep the Clay Highwayman feature's heading badge; the options inside are this one's.
+    cardKeys: CASING_LARCENIES.map(normalizeName),
+    aliases: {
+      'making your name what to do with the box': normalizeName(CASING_WHAT),
+      'thefts of a particular character': normalizeName(CASING_THEFTS),
+    },
+    cls: 'fl-ux-casing', flag: 'flUxCasing', branchCls: 'fl-ux-casing-branch', branchFlag: 'flUxCasingBranch',
+    cardCls: 'fl-ux-casing-card', cardFlag: 'flUxCasingCard',
+  };
+
+  function casingRatings() { pqRatings(CASING_DEF); }
+
+  // === feature: Fascinating... ============================================
+  //
+  // Fascinating... (Fasc) is raised in the Empress' Court by Attend to Matters
+  // of Allure and on the Name Signed with a Flourish seductions, and spent on
+  // the seductions' resolutions, on the three court romances and on the
+  // Tattooed Courier's secrets. Most spends are a NARROW challenge on the
+  // level you hold and take all of it back to 0; a failure takes 6 (or 1 to
+  // 10) back, and almost every failure adds a Scandal. A spend on a court
+  // romance moves a second progress quality, "Seen with ..." (Wit, Beauty,
+  // Flies), which the badge names, and some of them push a rival back.
+  //
+  // Transcribed from the option and storylet pages (fetched through the API,
+  // 2026-09-24) with Fascinating (Guide) as the cross-check. Where they
+  // disagree the page is followed and `guide` quotes the guide:
+  //   Drop hints (Artist's Model)          difficulty 2, guide 3
+  //   Turn up shivering (Artist's Model)   difficulty 7, guide 8
+  //   Commence an affair (heiress, thief)  difficulty 3, guide needs 4;
+  //                                        the thief's declaration 7, guide 8
+  //   Lay the foundations (Diatomist)      difficulty 3, guide 4
+  //   Throw caution, Hold back             difficulty 8, guide 9
+  //   Arrange matters ... Admirers         +3, guide +2
+  //   The Ambassador's Ball                the card's options are Dance with a
+  //     certain someone and Making a point of not making a point; the guide
+  //     lists "Commission a painting" under it
+  // The guide files the Rising Artist's and the Rising Artist's Model's last
+  // two options each under the other storyline; the pages, which say which
+  // one loses which quality, are followed. Two options have an empty page and
+  // are the guide's alone: Flattery and careless charm, and the heiress's and
+  // thief's "Arrange matters so you meet in a honey-dream".
+  // Left out: the mid-affair steps, which the guide does not list, the
+  // Helicon House and Clay Highwayman options (their features'), Risen
+  // Burgundy's Seduce an Alluring Masquer, and A Visit's Commission a
+  // painting, whose page names no card. Corrections go in FAS_OPTIONS and
+  // nowhere else.
+
+  const FAS_CFG = {
+    quality: 'Fascinating...', short: 'Fasc',
+    rules: 'Fascinating... is one quality for every source and every spend: what you raise at court or on a seduction '
+      + 'is spent on any of them, and a successful spend takes all of it back to 0.',
+  };
+  const FAS_ALLURE = 'Attend to Matters of Allure';
+  const FAS_WIT = 'Seen with a Barbed Wit';
+  const FAS_BEAUTY = 'Seen with an Acclaimed Beauty';
+  const FAS_FLIES = 'Seen with the Unattainable Fashion-Flies';
+
+  function fasE(storylet, name, more) {
+    return Object.assign({ storylet: storylet, name: name }, more);
+  }
+
+  // A spend: the level it needs, its narrow difficulty on Fascinating..., what it pays.
+  function fasSpend(storylet, name, need, diff, pay, g, x, lose, more) {
+    return fasE(storylet, name, Object.assign({
+      spend: need, ch: { stat: 'Fascinating...', diff: diff, narrow: true }, pay: pay, g: g, x: x, lose: lose,
+    }, more));
+  }
+
+  // A court romance's step: narrow on Fascinating 6 and a Scandal on failure.
+  function fasCourt(storylet, name, diff, pay, g, x, more) {
+    return fasSpend(storylet, name, 6, diff, pay, g, x, -6, Object.assign({ xf: [['Scandal', 2]] }, more));
+  }
+
+  // An ending: reset, Memento of Passion, and the three "Seen with" qualities gone.
+  function fasEnd(storylet, name, more) {
+    return fasE(storylet, name, Object.assign({ spend: 6, pay: 'end the affair · Memento of Passion',
+      note: 'Sets all three “Seen with” qualities to gone and takes all of Fascinating....' }, more));
+  }
+
+  const FAS_OPTIONS = [
+    // --- the Empress' Court: raising it -----------------------------------------------
+    fasE(FAS_ALLURE, 'Attend to fashion', { ch: { stat: 'Persuasive', diff: 85 }, win: 2, g: [['Silk Scrap', 85]], xf: [['Scandal', 2]] }),
+    fasE(FAS_ALLURE, 'Take a stroll in the gardens', { ch: { stat: 'Persuasive', diff: 87 }, win: 2, g: [['Cryptic Clue', 44]],
+      lose: -2, xf: [['Scandal', 1]] }),
+    fasE(FAS_ALLURE, 'Attend courtly functions', { ch: { stat: 'Persuasive', diff: 89 }, win: 2, g: [['Whispered Hint', 90]], lose: -4 }),
+    fasE(FAS_ALLURE, 'Write a letter', { ch: { stat: 'Persuasive', diff: 91 }, win: 3, g: [['Stolen Correspondence', 18]], xf: [['Scandal', 2]] }),
+    fasE(FAS_ALLURE, 'Attend a dance', { ch: { stat: 'Persuasive', diff: 93 }, win: 3, g: [['Stolen Correspondence', 18]], lose: -2,
+      xf: [['Scandal', 1]] }),
+    fasE(FAS_ALLURE, 'Perform artistically', { ch: { stat: 'Persuasive', diff: 95 }, win: 3, g: [['Bottle of Morelways 1872', 9]], lose: -4 }),
+
+    // --- the Name Signed with a Flourish seductions ---------------------------------------
+    fasE('Seduce a Struggling Artist’s Model: next steps...', 'Flattery and careless charm', { ch: { stat: 'Persuasive', diff: 9 },
+      win: 3, note: 'From the guide alone: the option page is empty.' }),
+    fasSpend('Seduce a Struggling Artist’s Model: the resolution!', 'Drop hints and wait to be invited back to her rooms.', 3, 2,
+      'Clue ×60', [['Intriguing Snippet', 1], ['Cryptic Clue', 60]], [['Persuasive', 20]], -1,
+      { guide: 'The guide gives difficulty 3.', needs: 'Seduction: Artist’s Model 1' }),
+    fasSpend('Seduce a Struggling Artist’s Model: the resolution!', 'Turn up shivering and desperate at her rooms one midnight. Bang on her door and beg shelter.', 5, 7,
+      'Correspondence ×40 · Clue ×60', [['Stolen Correspondence', 40], ['Cryptic Clue', 60]], [['Persuasive', 20]], -10,
+      { guide: 'The guide gives difficulty 8.', needs: 'Seduction: Artist’s Model 1',
+        note: 'The page warns that failing here may mean starting over.' }),
+    fasE('Seduce a Struggling Artist: next steps...', 'Flattery and careless charm', { ch: { stat: 'Persuasive', diff: 9 },
+      win: 3, note: 'From the guide alone: the option page is empty.' }),
+    fasSpend('Seduce a Struggling Artist: the resolution!', 'Drop hints and wait to be invited back to his studio.', 3, 3,
+      'Hint ×120', [['Whispered Hint', 120], ['Intriguing Snippet', 1]], [['Persuasive', 20]], -1),
+    fasSpend('Seduce a Struggling Artist: the resolution!', 'Turn up shivering and desperate at his studio one midnight. Bang on his door and beg shelter.', 5, 7,
+      'Correspondence ×40 · Hint ×120', [['Stolen Correspondence', 40], ['Whispered Hint', 120]], [['Persuasive', 20]], -10,
+      { note: 'The page warns that failing here may mean starting over.' }),
+    fasE('Become Better Acquainted with a Charming Young Heiress', 'A straightforward approach... Persuade her to share honey with you',
+      { ch: { stat: 'Persuasive', diff: 21 }, win: 2 }),
+    fasE('Become Better Acquainted with a Charming Young Heiress', 'This might be faster... Arrange matters so you meet in a honey-dream.',
+      { ch: { stat: 'Watchful', diff: 18 }, win: 2, note: 'From the guide alone: the option page is empty.' }),
+    fasSpend('Become Better Acquainted with a Charming Young Heiress: the Resolution!', 'Commence an affair with the heiress', 5, 3,
+      'bundle ≤200', null, [['Persuasive', 12]], -2, { bundle: '≤200', guide: 'The guide gives difficulty 4.' }),
+    fasE('Become Better Acquainted with a Charming Young Jewel-Thief', 'A straightforward approach... Persuade him to share honey with you',
+      { ch: { stat: 'Persuasive', diff: 21 }, win: 2 }),
+    fasE('Become Better Acquainted with a Charming Young Jewel-Thief', 'This might be faster... Arrange matters so you meet in a honey-dream.',
+      { ch: { stat: 'Watchful', diff: 18 }, win: 2, note: 'From the guide alone: the option page is empty.' }),
+    fasSpend('Become Better Acquainted with a Charming Young Jewel-Thief: the Resolution!', 'Commence an affair with the jewel-thief', 5, 3,
+      'Jade ×54', [['Jade Fragment', 54]], [['Persuasive', 10]], -5, { guide: 'The guide gives difficulty 4.' }),
+    fasSpend('Become Better Acquainted with a Charming Young Jewel-Thief: the Resolution!',
+      'Commence an affair with the jewel-thief. Unexpectedly declare undying love, and possibly propose marriage.', 5, 7,
+      'Jade ×54 · Pearls ×36', [['Jade Fragment', 54], ['Moon-Pearl', 36]], [['Persuasive', 6]], -10,
+      { guide: 'The guide gives difficulty 8.' }),
+    fasE('Become Better Acquainted with a Cloistered Diatomist', 'A straightforward approach... Persuade him to show you his slides',
+      { ch: { stat: 'Persuasive', diff: 21 }, win: 2 }),
+    fasE('Become Better Acquainted with a Cloistered Diatomist',
+      'This might be faster... Arrange matters so that you have an invitation to a gathering of \'Admirers of the Invisible World\'',
+      { ch: { stat: 'Watchful', diff: 15 }, win: 3, guide: 'The guide gives +2.' }),
+    fasSpend('Seek the Acquaintanceship of a Cloistered Diatomist: the Resolution!', 'Lay the foundations of a firm friendship with the Diatomist', 5, 3,
+      'bundle ≥108', null, [['Persuasive', 12]], -1, { bundle: '≥108', guide: 'The guide gives difficulty 4.' }),
+    fasE('A gentleman to remember', 'Make him jealous', { ch: { stat: 'Persuasive', diff: 66 }, win: 2, xf: [['Scandal', 1]] }),
+    fasE('A gentleman to remember', 'Engineer a \'chance\' meeting', { ch: { stat: 'Watchful', diff: 69 }, win: 3, lose: -1, xf: [['Scandal', 1]] }),
+    fasSpend('A gentleman to remember', 'It is time.', 5, 5, 'Clue ×200', [['Cryptic Clue', 200]], [['Persuasive', 5]], -1,
+      { xf: [['Scandal', 1]], guide: 'The guide files this under the Rising Artist’s Model.' }),
+    fasSpend('A gentleman to remember', 'Hold back, and let him come to you', 5, 8, 'Clue ×400', [['Cryptic Clue', 400]], [['Persuasive', 10]], -10,
+      { xf: [['Scandal', 1]], guide: 'The guide gives difficulty 9 and files it under the Rising Artist’s Model.',
+        note: 'The page warns that failing here may mean starting over.' }),
+    fasE('A lady to remember', 'Ply her with temptation', { ch: { stat: 'Persuasive', diff: 66 }, win: 2, u: [['Drop of Prisoner’s Honey', 2]], xf: [['Scandal', 1]] }),
+    fasE('A lady to remember', 'Enlist the help of an accomplice', { ch: { stat: 'Shadowy', diff: 69 }, win: 3, lose: -1, xf: [['Scandal', 1]] }),
+    fasSpend('A lady to remember', 'The time is right', 5, 5, 'Clue ×200', [['Cryptic Clue', 200]], [['Persuasive', 5]], -1,
+      { xf: [['Scandal', 1]], guide: 'The guide files this under the Rising Artist.' }),
+    fasSpend('A lady to remember', 'Throw caution to the wind', 5, 8, 'Clue ×400', [['Cryptic Clue', 400]], [['Persuasive', 10]], -10,
+      { xf: [['Scandal', 3]], u: [['Nodule of Deep Amber', 50]], needs: 'Nodule of Deep Amber 50',
+        guide: 'The guide gives difficulty 9 and files it under the Rising Artist.', note: 'The Amber is spent on a failure as well.' }),
+
+    // --- the court romances: a spend on Fascinating 6 moves a "Seen with" quality -------------------------------------
+    fasE('A Barbed Wit', 'Pursue the Barbed Wit', { spend: 6, pay: 'Wit +1', x: [], note: 'No challenge. Also gives 2 Scraps of Incendiary Gossip.' }),
+    fasCourt('Attend a ball in aid of a good cause', 'Impress the wit', 6, 'Wit +2', [['Romantic Notion', 9]], null),
+    fasCourt('Attend a ball in aid of a good cause', 'Choose Wit over Beauty', 4, 'Wit +2', [['Romantic Notion', 9]], [[FAS_BEAUTY, -1]]),
+    fasCourt('Sparkling wit', 'Bandy words with the Barbed Wit', 6, 'Wit +3', [['Scrap of Incendiary Gossip', 2]], [['Scandal', 3]]),
+    fasCourt('Sparkling wit', 'Call attention to the Acclaimed Beauty', 4, 'Wit +3', [['Scrap of Incendiary Gossip', 2]], [[FAS_BEAUTY, -1]]),
+    fasE('The Wit and the Physician', 'Throw the villain out of the window', { spend: 6, pay: 'Wit +4 · Scandal +10',
+      x: [['Forceful', 3]], note: 'No challenge. Sends you to the Tomb-Colonies.' }),
+    fasE('The Wit and the Physician', 'Join in with the Barbed Wit against him', { spend: 6, pay: 'Wit +4', note: 'No challenge. Also 2 Scraps of Incendiary Gossip.' }),
+    fasE('The Wit and the Physician', 'Nod and smile along.', { label: 'Wit −3', note: 'Costs no Fascinating....' }),
+    fasCourt('Winning over the Barbed Wit’s friends', 'A night on the town', 6, 'Wit +5', [['Romantic Notion', 39]], null,
+      { u: [['Jade Fragment', 300]], needs: 'Jade Fragment 300' }),
+    fasCourt('Winning over the Barbed Wit’s friends', 'Ask about the affair with the Acclaimed Beauty', 4, 'Wit +5', [['Romantic Notion', 29]], [[FAS_BEAUTY, -1]],
+      { u: [['Bottle of Greyfields 1882', 100]], needs: 'Bottle of Greyfields 1882 100', note: 'The bottles are spent on a failure as well.' }),
+    fasE('An indecorous argument', 'Return fire', { spend: 6, pay: 'Wit +6', note: 'No challenge. Also 2 Scraps of Incendiary Gossip.' }),
+    fasE('An indecorous argument', 'Walk away', { label: 'Wit −5 · resets Fasc', note: 'Takes all of Fascinating....' }),
+    fasEnd('Conclude your affair with the Barbed Wit', 'Break off the affair chastely'),
+    fasEnd('Conclude your affair with the Barbed Wit', 'Let her in with a smile'),
+    fasEnd('Conclude your affair with the Barbed Wit', 'Suggest something a little more... exotic', { needs: 'Hedonist 8',
+      pay: 'end the affair · Scandal +10' }),
+    fasE('A passion carefully arranged', 'Drowning prudence in passion', { spend: 6, pay: 'Scandal +30 · Tomb-Colonies',
+      x: [['Hedonist', 5]], needs: 'Hedonist 8, and Seen with a Barbed Wit and an Acclaimed Beauty both at 6',
+      note: 'Ends the affair, gives Memento of Passion and sends you to the Tomb-Colonies. No challenge.' }),
+
+    fasE('An Acclaimed Beauty', 'Pursue the Acclaimed Beauty', { spend: 6, pay: 'Beauty +1', note: 'No challenge. Also gives 9 Romantic Notions.' }),
+    fasCourt('Attend a ball in aid of a worthy cause', 'Almost music', 6, 'Beauty +2', [['Scrap of Incendiary Gossip', 2]], null),
+    fasCourt('Attend a ball in aid of a worthy cause', 'Choose Beauty over Wit', 4, 'Beauty +2', [['Scrap of Incendiary Gossip', 2]], [[FAS_WIT, -1]]),
+    fasSpend('An occult history', 'Approach a former lover of his', 6, 0, 'Beauty +3', [['Inkling of Identity', 9]], null, -6,
+      { ch: { stat: 'Persuasive', diff: 85 }, xf: [['Scandal', 2]], note: 'A broad Persuasive challenge, not a narrow one.' }),
+    fasCourt('Outshine your rivals', 'Wade into the admiring churchgoers', 6, 'Beauty +4', [['Romantic Notion', 9]], null),
+    fasCourt('Outshine your rivals', 'Make a point of getting in the Wit’s way.', 4, 'Beauty ↑', [['Romantic Notion', 9]], [[FAS_WIT, 'set 2']],
+      { note: 'Sets Seen with a Barbed Wit to 2, whatever it stood at. The page gives no amount for the Beauty.' }),
+    fasCourt('A stroll with the Acclaimed Beauty', 'Take a stroll yourself', 6, 'Beauty +5', [['Nodule of Warm Amber', 1]], null, { xf: [['Scandal', 1]] }),
+    fasCourt('A stroll with the Acclaimed Beauty', 'Speak of the ills done to you by the Barbed Wit', 4, 'Beauty +5',
+      [['Scrap of Incendiary Gossip', 2]], [[FAS_WIT, -1]], { xf: [['Scandal', 1]] }),
+    fasCourt('Opening the heart', 'Offer to listen to his woes', 5, 'Beauty +6', [['Inkling of Identity', 9]], null, { xf: null }),
+    fasEnd('Conclude your affair with the Acclaimed Beauty', 'Break off the affair'),
+    fasEnd('Conclude your affair with the Acclaimed Beauty', 'Call upon his rooms with passionate intent'),
+    fasEnd('Conclude your affair with the Acclaimed Beauty', 'Perhaps something a little more exotic', { needs: 'Hedonist 8' }),
+
+    fasE('The Unattainable Fashion-Flies', 'Pursue the Unattainable Fashion-Flies', { spend: 6, pay: 'Flies +1', note: 'No challenge. Also gives 5 Intriguing Snippets.' }),
+    fasCourt('Attend a ball in aid of... some cause or another', 'Draw the eye. Every eye...', 6, 'Flies ↑', [['Surface-Silk Scrap', 9]], null,
+      { note: 'The page gives no amount for the Fashion-Flies.' }),
+    fasCourt('Attend a ball in aid of... some cause or another', 'Choose fashion over flirtation', 4, 'Flies ↑', [['Surface-Silk Scrap', 9]],
+      [[FAS_BEAUTY, -1], [FAS_WIT, -1]], { note: 'The page gives no amount for the Fashion-Flies.' }),
+    fasCourt('One of the Fashion-Flies’ Secrets', 'Listen for tips', 6, 'Flies ↑', [['Scrap of Incendiary Gossip', 2]], [['Scandal', 3]],
+      { needs: 'Fascinating... 10 for the storylet' }),
+    fasCourt('One of the Fashion-Flies’ Secrets', 'Offer a treatment of your own', 4, 'Flies ↑', [['Cryptic Clue', 45]], null,
+      { needs: 'Fascinating... 10 for the storylet', xf: [['Scandal', [2, 3]]] }),
+    fasE('The Dowager and the Fashion-Fly', 'Topple the dowager into a shrub', { spend: 6, pay: 'Flies ↑ · Scandal +10',
+      x: [['Forceful', 3]], note: 'No challenge. Sends you to the Tomb-Colonies.' }),
+    fasE('The Dowager and the Fashion-Fly', 'Turn the tables on the dowager', { spend: 6, pay: 'Flies ↑', g: [['Intriguing Snippet', 5]], note: 'No challenge.' }),
+    fasE('The Dowager and the Fashion-Fly', 'Provide the dowager with an appreciative audience', { spend: 6, pay: 'Flies set to 2', note: 'No challenge.' }),
+    fasCourt('Making Friends with the Unattainable Fashion-Flies', 'Wooing one by one', 6, 'Flies ↑', [['Intriguing Snippet', 20]], null,
+      { u: [['Jade Fragment', 300]], needs: 'Jade Fragment 300' }),
+    fasE('The Moment of Triumph', 'Trust the Fashion-Flies implicitly', { spend: 6, pay: 'Flies ↑', g: [['Tale of Terror!!', 2]], note: 'No challenge.' }),
+    fasE('The Moment of Triumph', 'Walk away', { label: 'Flies gone · resets Fasc', note: 'Takes all of Fascinating....' }),
+    fasEnd('Conclude your Dalliance with the Unattainable Fashion-Flies', 'Wear last season’s least popular outfit'),
+    fasEnd('Conclude your Dalliance with the Unattainable Fashion-Flies', 'Wear nothing at all', { needs: 'Hedonist 8', pay: 'end the affair · Scandal +10' }),
+
+    // --- the servantry: a set price and a wider challenge ----------------------------------------------------------
+    fasE('Disporting with the servantry', 'Flirt with a parlour-maid', { need: 3, cost: 6, ch: { stat: 'Persuasive', diff: 87 }, pay: 'Confident Smile',
+      g: [['Confident Smile', 1]], x: [['Hedonist', 1]], lose: 0, xf: [['Hedonist', -1]],
+      rare: { g: [['Romantic Notion', 3]], x: [['Hedonist', 1]] }, note: 'The page files the Romantic Notion version as a second success without saying when it happens.' }),
+    fasE('Disporting with the servantry', 'Catch the eye of a butler', { need: 4, cost: 10, ch: { stat: 'Persuasive', diff: 89 }, pay: 'Clue ×45',
+      g: [['Cryptic Clue', 45]], x: [['Hedonist', 1], ['Scandal', -1]], xf: [['Hedonist', -1]] }),
+    fasE('Disporting with the servantry', 'Make overtures to a cook', { need: 5, cost: 15, ch: { stat: 'Persuasive', diff: 91 }, pay: 'Wounds −2',
+      x: [['Hedonist', 1]], xf: [['Hedonist', -1]] }),
+
+    // --- the cards and the fortune-teller -------------------------------------------------------------------------------------
+    fasE('The Ambassador’s Ball', 'Dance with a certain someone', { ch: { stat: 'Persuasive', diff: 90 }, win: [3, 6], lose: -5, needs: 'Fascinating... 1',
+      guide: 'The guide lists Commission a painting of someone you’re trying to Fascinate under this card, at 3 to 6 CP.' }),
+    fasE('The Ambassador’s Ball', 'Making a point of not making a point', { ch: { stat: 'Persuasive', diff: 90 }, g: [['Confident Smile', 1]],
+      x: [['Making Waves', 3]], xf: [['Scandal', 1]], note: 'Moves no Fascinating....' }),
+    fasE('The Seekers of the Garden', 'Entertain a curious crowd', { win: 7, x: [['Making Waves', 3]], u: [['Zee-Ztory', 7]],
+      needs: 'Zee-Ztory 7 and Associating with a Youthful Naturalist 800',
+      note: 'Also gives a Favour: Bohemians and possibly one of the Docks or Society. Not offered at 7 of all three.' }),
+    fasE('The Honours of the Court', 'Bring an acquaintance along', { win: 6, g: [['Well-Placed Pawn', 10]], needs: 'Diptych Painter',
+      note: 'The card needs Firmament 450 and re-rolls the Airs of Burgundy.' }),
+    fasE('Visit Madame Shoshana, the Neath’s Foremost Clairvoyante', 'Ask for a romantic prediction',
+      { ch: { stat: 'Fascinating...', diff: 2, narrow: true }, win: 2, rare: { win: 5, g: [['Whispered Hint', 20]] },
+        u: [['Carnival Ticket', 2]], needs: 'Fascinating... 1 and Carnival Ticket 2',
+        note: 'The two tickets are spent on every outcome.' }),
+
+    // --- the Tattooed Courier's secrets, which end the Venture ----------------------------------------------------------------------
+    fasE('The Tattooed Courier’s Secrets', 'Sell her secrets to the highest bidder', { spend: 6, pay: 'Persuasive +150 · Passphrase ×2',
+      x: [['Ruthless', 3]], u: [['Moon-Pearl', 500]], needs: 'Fascinating... 6, Playing the Game 5 and Moon-Pearl 500',
+      g: [['Presbyterate Passphrase', 2]], note: 'No challenge. Also Favours: The Great Game +1 and Renown: The Great Game +3 CP.' }),
+    fasE('The Tattooed Courier’s Secrets', 'Sell her secrets to her paramour', { spend: 6, pay: 'Persuasive +150 · Identity Uncovered',
+      x: [['Subtle', 3]], u: [['Moon-Pearl', 300]], needs: 'Fascinating... 6, Playing the Game 8 and Moon-Pearl 300',
+      g: [['An Identity Uncovered!', 1]], note: 'No challenge. Also Favours: The Great Game +3 and Renown: The Great Game +3 CP.' }),
+    fasE('The Tattooed Courier’s Secrets', 'Return her secrets to her', { spend: 8, pay: 'Persuasive +150 · Secluded Address',
+      x: [['Magnanimous', 3]], u: [['Moon-Pearl', 300]], needs: 'Fascinating... 8, Playing the Game 5 and Moon-Pearl 300',
+      g: [['Secluded Address', 1], ['Extraordinary Implication', 1]],
+      note: 'No challenge. Also Favours: The Great Game +1 and Renown: The Great Game +3 CP.' }),
+  ];
+
+  const FAS_CARDS = [
+    { name: 'The Ambassador’s Ball', needs: 'Persuasive 81–118' },
+    { name: 'The Seekers of the Garden', needs: 'Associating with a Youthful Naturalist 800' },
+    { name: 'The Honours of the Court', needs: 'Firmament 450' },
+  ];
+  const FAS_ALL_STORYLETS = FAS_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const FAS_INDEX = carouselIndex(FAS_OPTIONS);
+  const FAS_DEF = {
+    cfg: FAS_CFG, options: FAS_OPTIONS, index: FAS_INDEX, storylets: FAS_ALL_STORYLETS, cards: FAS_CARDS,
+    cardKeys: FAS_CARDS.map(function (c) { return normalizeName(c.name); }), aliases: null,
+    cls: 'fl-ux-fas', flag: 'flUxFas', branchCls: 'fl-ux-fas-branch', branchFlag: 'flUxFasBranch',
+    cardCls: 'fl-ux-fas-card', cardFlag: 'flUxFasCard',
+  };
+
+  function fasRatings() { pqRatings(FAS_DEF); }
+
+  // === feature: Inspired... ===============================================
+  //
+  // Inspired... (Insp) is raised by the Name Signed with a Flourish
+  // commissions and a handful of one-off sources, and spent on those
+  // commissions' resolutions. Writing at court and Helicon House have features
+  // of their own. Most spends are a NARROW challenge on the level you hold that
+  // takes all of it; a failure takes back 1 to 10.
+  //
+  // Transcribed from the option and storylet pages (fetched through the API,
+  // 2026-09-24) with Inspired (Guide) as the cross-check. Where they disagree
+  // the page is followed and `guide` quotes the guide:
+  //   Be bold!                          difficulty 5, and a failure takes 5
+  //                                     back; the guide has it +5 and 6
+  //   They asked for it ... blood       difficulty 7, guide needs 8
+  //   Paint a flattering picture        difficulty 5, no level needed; guide 6
+  //   Paint ... subversive portrait     difficulty 8, guide 9
+  //   Celebrate Fungus: Field work!     a Watchful 11 challenge in the Epic; the
+  //     guide lists it a second time under Jack-of-Smiles at Persuasive 12
+  // Left out: the Empress' Court and Helicon House (their features'), Take
+  // your own inspiration from this dream (Oneiropomp's), and the options that
+  // give only 1 CP, which the guide does not list. Corrections go in
+  // INSP_OPTIONS and nowhere else.
+
+  const INSP_CFG = {
+    quality: 'Inspired...', short: 'Insp',
+    rules: 'Inspired... is one quality for every source and every spend: what you raise on one commission can be '
+      + 'spent on another, and a successful spend takes all of it back to 0.',
+  };
+  const INSP_EPIC = 'Making Your Name: A Commissioned Epic';
+  const INSP_HONEY = 'Publish your experiences with prisoner’s honey';
+  const INSP_HONEY_END = 'Publish your experiences with prisoner’s honey: the resolution!';
+  const INSP_JACK = 'Commission: Immortalise Jack-of-Smiles in Another Penny Dreadful!';
+  const INSP_PORTRAIT = 'Commission: A Royal Portrait';
+
+  function inspE(storylet, name, more) {
+    return Object.assign({ storylet: storylet, name: name }, more);
+  }
+
+  function inspSpend(storylet, name, need, diff, pay, g, x, lose, more) {
+    return inspE(storylet, name, Object.assign({
+      spend: need, ch: { stat: 'Inspired...', diff: diff, narrow: true }, pay: pay, g: g, x: x, lose: lose,
+    }, more));
+  }
+
+  const INSP_OPTIONS = [
+    // --- Praising Fungus in Verse -------------------------------------------------------------
+    inspE(INSP_EPIC, 'Celebrate Fungus in Verse: Make up the details', { ch: { stat: 'Persuasive', diff: 8 }, win: 3, lose: 1 }),
+    inspE(INSP_EPIC, 'Celebrate Fungus in Verse: Field work!', { ch: { stat: 'Watchful', diff: 11 }, win: 3,
+      guide: 'The guide gives it as Persuasive 8, and again under Jack-of-Smiles as Persuasive 12.' }),
+    inspSpend(INSP_EPIC, 'Celebrate Fungus in Verse: an honest effort', 4, 3, 'Silk ×27', [['Silk Scrap', 27]],
+      [['Persuasive', 10]], -1, { needs: 'Commission: Praising Fungus in Verse 1, and not A Name Signed with a Flourish' }),
+    inspSpend(INSP_EPIC, 'Celebrate Fungus in Verse: a satire!', 4, 5, 'Silk ×28', [['Silk Scrap', 28]],
+      [['Persuasive', 10]], -3, { needs: 'Commission: Praising Fungus in Verse 1, and not A Name Signed with a Flourish' }),
+
+    // --- writing about Prisoner's Honey -----------------------------------------------------------------
+    inspE(INSP_HONEY, 'A straightforward approach... Convey the more pleasurable dreams with all the skill at your disposal',
+      { ch: { stat: 'Persuasive', diff: 24 }, win: 2 }),
+    inspE(INSP_HONEY, 'This might be faster... Look for the more dangerous dreams', { ch: { stat: 'Dangerous', diff: 21 }, win: 3 }),
+    inspSpend(INSP_HONEY_END, 'Submit your notes', 4, 3, 'bundle ≤126', null, [['Persuasive', 9]], -1, { bundle: '≤126' }),
+    inspSpend(INSP_HONEY_END, 'Be bold!', 6, 5, 'bundle ≤199', null, [['Persuasive', 15], ['Subtle', 1]], -5,
+      { bundle: '≤199', guide: 'The guide gives the failure as +5 and the level as 6; the page records no level.' }),
+
+    // --- Jack-of-Smiles ---------------------------------------------------------------------------------------
+    inspE(INSP_JACK, 'A straightforward approach... Invent detail', { ch: { stat: 'Persuasive', diff: 15 }, win: 2 }),
+    inspSpend(INSP_JACK, 'Turn in a piece of thorough and satisfying trash.', 4, 3, 'Pearls ×36',
+      [['Moon-Pearl', 36]], [['Persuasive', 12]], -1),
+    inspSpend(INSP_JACK, 'They asked for it. They want blood? Give them blood!', 8, 7, 'Pearls ×36 · Soul ×12',
+      [['Moon-Pearl', 36], ['Soul', 12]], [['Persuasive', 12]], -10, { guide: 'The guide gives level 8 and difficulty 8.' }),
+
+    // --- the royal portrait -----------------------------------------------------------------------------------------
+    inspE(INSP_PORTRAIT, 'Arrange a sitting', { ch: { stat: 'Persuasive', diff: 70 }, win: 1, xf: [['Scandal', 2]] }),
+    inspE(INSP_PORTRAIT, 'Take some art lessons', { ch: { stat: 'Persuasive', diff: 73 }, win: 1, x: [['Nightmares', -1]],
+      u: [['Drop of Prisoner’s Honey', 5]], needs: 'Drop of Prisoner’s Honey 5', note: 'The honey is spent on a failure as well.' }),
+    inspSpend(INSP_PORTRAIT, 'Paint a flattering picture', 6, 5, 'Greyfields ×40 · Broken Giant',
+      [['Bottle of Greyfields 1882', 40], ['Bottle of Broken Giant 1844', 1]], [['Persuasive', 6]], -2,
+      { xf: [['Persuasive', 1]], guide: 'The guide gives level 6 and difficulty 6; the page records no level.' }),
+    inspSpend(INSP_PORTRAIT, 'Paint a flattering and subversive portrait', 5, 8, 'Clue ×300 · Amber ×190',
+      [['Cryptic Clue', 300], ['Nodule of Deep Amber', 190]], [['Persuasive', 6]], -10,
+      { xf: [['Scandal', 2], ['Persuasive', 1]], guide: 'The guide gives level 9.' }),
+
+    // --- one-off sources -------------------------------------------------------------------------------------------------
+    inspE('Visit Madame Shoshana, the Neath’s Foremost Clairvoyante', 'Ask for help with artistic endeavours',
+      { ch: { stat: 'Inspired...', diff: 2, narrow: true }, win: 2, rare: { win: 5, g: [['Whispered Hint', 20]] },
+        u: [['Carnival Ticket', 2]], needs: 'Inspired... 1 and Carnival Ticket 2', note: 'The two tickets are spent on every outcome.' }),
+    inspE('Read incoming mail', 'Read a poetic missive', { label: 'Insp +⅕ of base Persuasive', u: [['Poetic Missive', 1]],
+      needs: 'Poetic Missive 1 and Inspired... 1',
+      note: 'Raises Inspired... by a fifth of your base Persuasive in CP: 46 at 230.' }),
+    inspE('Caligula’s Coffee House', 'Drink the number four special', { ch: { stat: 'Persuasive', diff: 90 }, win: 25, lose: -10,
+      x: [['Nightmares', 1]], needs: 'Inspired... 1', note: 'The card is drawn only at Persuasive 81 to 118.' }),
+    inspE('Share in Your Wife’s Passions', 'Suggest taking a day off. Go on an excursion', { win: 20, needs: 'Joyful Illuminator',
+      note: 'The card is drawn only with a Joyful Illuminator.' }),
+  ];
+
+  const INSP_CARDS = [
+    { name: 'Caligula’s Coffee House', needs: 'Persuasive 81–118' },
+    { name: 'Share in Your Wife’s Passions', needs: 'Joyful Illuminator' },
+  ];
+  const INSP_ALL_STORYLETS = INSP_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const INSP_INDEX = carouselIndex(INSP_OPTIONS);
+  const INSP_DEF = {
+    cfg: INSP_CFG, options: INSP_OPTIONS, index: INSP_INDEX, storylets: INSP_ALL_STORYLETS, cards: INSP_CARDS,
+    cardKeys: INSP_CARDS.map(function (c) { return normalizeName(c.name); }), aliases: null,
+    // Madame Shoshana's tent holds a Fascinating... option too, and that feature heads it.
+    noHeading: [normalizeName('Visit Madame Shoshana, the Neath’s Foremost Clairvoyante'), normalizeName('Read incoming mail')],
+    cls: 'fl-ux-insp', flag: 'flUxInsp', branchCls: 'fl-ux-insp-branch', branchFlag: 'flUxInspBranch',
+    cardCls: 'fl-ux-insp-card', cardFlag: 'flUxInspCard',
+  };
+
+  function inspRatings() { pqRatings(INSP_DEF); }
+
+  // === feature: Investigating... ==========================================
+  //
+  // Investigating... (Inv) is raised by the Melancholy Curate's storyline, the
+  // University's investigations, a dozen opportunity cards in London and the
+  // Upper River and a few one-off storylets, and spent on the Curate's ending,
+  // the Correspondence Stones, the Scheme of a Phoenix and the Helicon House
+  // tour. Most spends are a NARROW challenge on the level you hold that takes
+  // all of it; the Phoenix, the tour and the Tracklayers' crime card take a
+  // fixed 15 CP or more and leave the rest. The Heights of Chicanery, the
+  // Tracklayers' Union, Helicon House's other doors, the Clay Highwayman's
+  // trail and the camp cards belong to the features that carry them.
+  //
+  // Transcribed from the option, card and storylet pages (fetched through the
+  // API, 2026-09-24) with Investigating (Guide) as the cross-check. Where they
+  // disagree the page is followed and `guide` quotes the guide:
+  //   Up the back stairs...                 Shadowy 30 (25 is the requirement)
+  //   Knock on the Curate's / Sister's door difficulty 18, guide 19
+  //   Do you know ... both ... charming     difficulty 25, guide 26
+  //   Conduct forensic analyses             a failure takes 6 back, guide 1
+  //   Officially Non-Criminal               Prosperity 220 + Efficiency, guide 250
+  //   Ask for advice on your investigations +2 CP, guide 1
+  //   Ask for help with your case, A new piece in the Game: the guide's card
+  //     names are the pages'
+  // The University's storylet is filed by the wiki as Making Your Name:
+  // Investigations in the university, and its department option is the
+  // "(department)" placeholder. Left out: the Clay Highwayman's trail and camp
+  // cards (`clay-highwayman`, `disappearing`), the Heights of Chicanery
+  // (`wars-of-illusion`), Cornelius, Helicon House's doors, the University's
+  // Featuring steps, and the pre-July Porters trade. Corrections go in
+  // INV_OPTIONS and nowhere else.
+
+  const INV_CFG = {
+    quality: 'Investigating...', short: 'Inv',
+    rules: 'Investigating... is one quality for every source and every spend: what you raise on the Curate, at the '
+      + 'University or from a card can be spent on any of them, and a successful spend takes all of it back to 0.',
+  };
+  const INV_CURATE_END = 'Complete your acquaintance with the Melancholy Curate. Or his Enigmatic Sister.';
+  const INV_UNI = 'Making Your Name: Investigations in the university';
+  const INV_STONES = 'Investigating the Stones 2';
+  const INV_PHOENIX = 'The Scheme of a Phoenix';
+
+  function invE(storylet, name, more) {
+    return Object.assign({ storylet: storylet, name: name }, more);
+  }
+
+  function invSpend(storylet, name, need, diff, pay, g, x, lose, more) {
+    return invE(storylet, name, Object.assign({
+      spend: need, ch: { stat: 'Investigating...', diff: diff, narrow: true }, pay: pay, g: g, x: x, lose: lose,
+    }, more));
+  }
+
+  // A fixed-price spend: the level it needs and the CP it takes.
+  function invCost(storylet, name, need, cost, pay, g, x, more) {
+    return invE(storylet, name, Object.assign({ need: need, cost: cost, pay: pay, g: g, x: x }, more));
+  }
+
+  const INV_OPTIONS = [
+    // --- Intrigue: The Curate and His Sister, in Veilgarden ----------------------------------------
+    invE('Gossip with the Melancholy Curate’s servants', 'Charm information out of them', { ch: { stat: 'Persuasive', diff: 37 },
+      win: 3, g: [['Whispered Hint', 37]], rare: { win: 4, g: [['Whispered Hint', 37], ['Cryptic Clue', 1]] }, xf: [['Scandal', 1]],
+      note: 'The storylet shows at Investigating... below 7.' }),
+    invE('Attend a service at the Melancholy Curate’s church', 'Watch and listen', { ch: { stat: 'Persuasive', diff: 38 }, win: 3,
+      g: [['Foxfire Candle Stub', 37]], rare: { win: 3, g: [['Romantic Notion', 7]] }, lose: -1, xf: [['Scandal', 1]],
+      note: 'The storylet shows at Investigating... 3 to 8.' }),
+    invE('Does the Melancholy Curate have a connection with St Dunstan’s?', 'Ask around about the Curate',
+      { ch: { stat: 'Persuasive', diff: 42 }, win: 2, g: [['Cryptic Clue', 21]], xf: [['Scandal', 1]],
+        note: 'The storylet shows at Investigating... 7 to 20.' }),
+    invE('Present your compliments to the Curate and his sister...', 'Knock on the door with a bunch of fresh fungus',
+      { ch: { stat: 'Persuasive', diff: 37 }, win: 3, g: [['Cryptic Clue', 18]], xf: [['Scandal', 1]],
+        note: 'The storylet shows at Investigating... 8 to 14.' }),
+    invE('Delve into the secrets of the Curate and his sister...', 'A tale of woe', { ch: { stat: 'Persuasive', diff: 39 }, win: 3,
+      g: [['Cryptic Clue', 18]], rare: { win: 5, g: [['Cryptic Clue', 18]] }, lose: -1, xf: [['Scandal', 1]],
+      note: 'The storylet shows at Investigating... 10 to 20.' }),
+    invE('Delve into the secrets of the Curate and his sister...', 'Up the back stairs...', { ch: { stat: 'Shadowy', diff: 30 }, win: 3,
+      g: [['Stolen Correspondence', 6]], rare: { win: 5, g: [['Infernal Contract', 1], ['Stolen Correspondence', 2]],
+        odds: 'about 8.5%, by the page' }, lose: -3, xf: [['Scandal', 1]], needs: 'Shadowy 25',
+      guide: 'The guide gives the challenge as Shadowy 25, which is the requirement.' }),
+    invE('Read poetry with the Melancholy Curate and his Sister', 'Propose the reading of something improving',
+      { ch: { stat: 'Persuasive', diff: 39 }, win: 2, rare: { win: 3 }, lose: 1, xf: [['Scandal', 1]],
+        note: 'The storylet shows at Investigating... 14.' }),
+    invE('Read poetry with the Melancholy Curate and his Sister', 'Propose the reading of something stimulating',
+      { ch: { stat: 'Persuasive', diff: 42 }, win: 3, rare: { win: 5 }, lose: -2, xf: [['Scandal', 1]] }),
+    invSpend(INV_CURATE_END, 'Knock on the Melancholy Curate’s door', 18, 18, 'Silk ×39 · Appalling Secret ×4',
+      [['Silk Scrap', 39], ['Appalling Secret', 4], ['Extraordinary Implication', 1]], [['Persuasive', 200], ['Hedonist', 3]], -3,
+      { xf: [['Scandal', 1]], guide: 'The guide gives difficulty 19.', note: 'Also Austere −3 CP. Ends the Curate’s storyline.' }),
+    invSpend(INV_CURATE_END, 'Knock on the Enigmatic Sister’s door', 18, 18, 'Silk ×42 · Brass ×58',
+      [['Silk Scrap', 42], ['Nevercold Brass Sliver', 58], ['Extraordinary Implication', 1]], [['Persuasive', 200], ['Hedonist', 3]], -3,
+      { guide: 'The guide gives difficulty 19.', note: 'Also Austere −3 CP. Ends the Curate’s storyline.' }),
+    invSpend(INV_CURATE_END, 'Do you know...I think both of them are rather charming.', 18, 25, 'Silk ×80 · Implication ×3',
+      [['Silk Scrap', 80], ['Scrap of Incendiary Gossip', 1], ['Extraordinary Implication', 3]], [['Persuasive', 200], ['Hedonist', 5]], -20,
+      { xf: [['Scandal', 3]], guide: 'The guide gives difficulty 26.', note: 'Ends the Curate’s storyline.' }),
+
+    // --- the University's investigations -------------------------------------------------------------------------
+    invE(INV_UNI, 'Head to the library', { ch: { stat: 'Watchful', diff: 98 }, win: 3, g: [['Cryptic Clue', 49]], xf: [['Nightmares', 2]] }),
+    invE(INV_UNI, 'Interview the suspects', { ch: { stat: 'Watchful', diff: 100 }, win: 3, g: [['Cryptic Clue', 50]], xf: [['Nightmares', 1]] }),
+    invE(INV_UNI, 'Conduct forensic analyses', { ch: { stat: 'Watchful', diff: 102 }, win: 3, g: [['Cryptic Clue', 55]], lose: -6,
+      xf: [['Nightmares', 1]], guide: 'The guide gives a failure of 1.' }),
+    invE(INV_UNI, 'Interview students and staff', { ch: { stat: 'Watchful', diff: 104 }, win: 4, g: [['Cryptic Clue', 52]], xf: [['Nightmares', 2]] }),
+    invE(INV_UNI, 'Interview the Department of (department) staff', { ch: { stat: 'Watchful', diff: 106 }, win: 4,
+      g: [['Cryptic Clue', 53]], xf: [['Nightmares', 1]] }),
+    invE(INV_UNI, 'Talk to the Porters', { ch: { stat: 'Watchful', diff: 108 }, win: 4, g: [['Whispered Hint', 108]], u: [['Cryptic Clue', 25]],
+      xf: [['Nightmares', 1]], needs: 'Cryptic Clue 25', note: 'The 25 Cryptic Clues are spent on a failure as well.' }),
+
+    // --- one-off storylets -----------------------------------------------------------------------------------------------
+    invE('Read incoming mail', 'Read a bundle of investigation notes', { label: 'Inv +⅕ of base Watchful', u: [['Bundle of Investigation Notes', 1]],
+      needs: 'a Bundle of Investigation Notes and Investigating... 1', note: 'Raises Investigating... by a fifth of your base Watchful in CP.' }),
+    invE('Attend to the Dreamer', 'Learn from the Detective’s investigation', { ch: { stat: 'Watchful', diff: 100 },
+      label: 'Inv +20 × Intensity?', needs: 'The Dreamer Identified: The Honey-Addled Detective',
+      note: 'Raises Investigating... by 20 CP for each level of Intensity of the Dream, and gives Sightings of a Parabolan Landmark.' }),
+    invE('Visit Madame Shoshana, the Neath’s Foremost Clairvoyante', 'Ask for advice on your investigations',
+      { ch: { stat: 'Investigating...', diff: 2, narrow: true }, win: 2, rare: { win: 5 }, u: [['Carnival Ticket', 2]],
+        needs: 'Investigating... 1 and Carnival Ticket 2', guide: 'The guide gives +1 CP.',
+        note: 'The two tickets are spent on every outcome. The rare success also takes 1 CP of Inspired...' }),
+    invE(INV_STONES, 'The Correspondence', { ch: { stat: 'Watchful', diff: 75 }, win: 2, needs: 'a Set of Correspondence Stones',
+      note: 'The page files this under Investigation: investigating the Correspondence Stones.' }),
+    invSpend('Investigating the Stones: Conclusion', 'Find out what he knows', 5, 0, 'Clue ×50 · Appalling Secret ×2',
+      [['Cryptic Clue', 50], ['Appalling Secret', 2]], [['Nightmares', 1]], 0, { ch: null, note: 'No challenge.' }),
+    invSpend('Investigating the Stones: Conclusion', 'A bold and original plan', 5, 7, 'Clue ×60 · Appalling Secret ×2',
+      [['Cryptic Clue', 60], ['Appalling Secret', 2]], null, -10, { xf: [['Appalling Secret', 1], ['Nightmares', 3]] }),
+    invCost('Tour the Neighbourhood', 'Track rumours you’ve been hearing', 5, 15, 'opens Helicon House', null, null,
+      { note: 'Gives Acquaintance with Helicon House. No challenge.' }),
+    invCost(INV_PHOENIX, 'Find out more about who was writing to Mr Fires via the Balmoral dumbwaiter', 5, 15, 'Phoenix +1', null, null,
+      { needs: 'The Scheme of a Phoenix 6 and Exploration of a Hinterland City 70', note: 'Also Habituated to the Hinterland +1 CP.' }),
+    invE(INV_PHOENIX, 'Find out whether Mr Fires has continued his correspondence via the Balmoral dumbwaiter',
+      { label: 'Inv −15 (−55 without a Smuggler) ▼ → Phoenix +1', u: [['Hinterland Prosperity', 20000]], needs: 'a Twilit Smuggler, The Scheme of a Phoenix 7, Exploration of a Hinterland City 70 and Hinterland Prosperity 20000',
+        note: 'Also Habituated to the Hinterland +1 CP. Without a Twilit Smuggler it takes 55 CP at level 10.',
+        aliases: ['Find out whether Mr Fires has continued his correspondence via the Balmoral dumbwaiter (no Twilit Smuggler)'] }),
+
+    // --- the opportunity cards, in London and the Upper River ------------------------------------------------------------------
+    invE('Tea with the Inspector', 'Ask for help with your case', { ch: { stat: 'Watchful', diff: 90 }, win: 15, lose: -5, needs: 'Investigating... 1',
+      note: 'The card needs Watchful 81–118 and Renown: Constables 5.' }),
+    invE('A new piece in the Game', 'Have her help out with your current job', { ch: { stat: 'Shadowy', diff: 90 }, win: 4,
+      x: [['Seeking...', 4]], xf: [['Suspicion', 1]], note: 'Gives 4 CP of each only if you already have some. The card needs Shadowy 81–118.' }),
+    invE('Your plant is singing', 'Feed a vicar to your plant', { win: 5, g: [['Appalling Secret', 1], ['Whispered Hint', 10]],
+      needs: 'Renown: The Church 5 and Favours: The Church 1', note: 'Gives 5 CP only if you already have some, and takes a Favour: The Church. No challenge.' }),
+    invE('Canal Workers on the Upper River', 'Ply them with lager and see what they’ll share', { win: [36, 46], u: [['Magisterial Lager', 2]],
+      needs: 'Magisterial Lager 2', note: 'The card needs a Chelatic Mitten and Involved in a Railway Venture 60. No challenge.' }),
+    invE('Cells outside the City', 'Ask the locals about the risk of bombs', { ch: { stat: 'Shadowy', diff: 300, varies: 'Supporting the Emancipationist Tracklayers' },
+      win: 2, u: [['Magisterial Lager', 1]], xf: [['Suspicion', 2]], needs: 'Magisterial Lager',
+      note: 'Also gives a Rumour of the Upper River. The card is replaced by Which meeting? once you have the Language of Laces.' }),
+    invE('Listen to Rumours of Smuggling', 'Ask the locals over a pint', { ch: { stat: 'Shadowy', diff: 120 }, win: 2, u: [['Magisterial Lager', 1]],
+      xf: [['Suspicion', 2]], needs: 'Magisterial Lager',
+      note: 'The difficulty is 40 × Seeing Banditry in the Upper River; 120 is at Banditry 3. Also gives a Rumour of the Upper River. Replaced by Engage in Some Minor Smuggling once you have Pair of Defenestrating Boots.' }),
+    invE('A Tomb-Colonist Tour', 'Discover whether a certain particular Tomb-Colonist has been riding the rails', { ch: { stat: 'Shadowy', diff: 200 }, win: 25,
+      xf: [['Suspicion', 2]], needs: 'Following up Rumours of Cornelius 1–2, Your Very Own Bandages! and Involved in a Railway Venture 50' }),
+    invE('Halfway to Hell', 'Keep an eye on the Devilish activities', { ch: { stat: 'Watchful', diff: 200 }, win: 2, xf: [['Nightmares', 2]],
+      note: 'Also gives a Rumour of the Upper River. The card has five more options that move no Investigating....' }),
+    invE('The Clay Highwayman’s Gang 2', 'Inform on the Gang', { label: 'Banditry ↓ · uses Inv', needs: 'Seeing Banditry in the Upper River 2',
+      note: 'Takes Seeing Banditry in the Upper River down and consumes some Investigating... to take it down further. The wiki gives the amounts in a table not carried here.' }),
+    invCost('Officially Non-Criminal', '(Solve Tracklayers’ City crime)', 5, 15, 'Prosperity ×(220 + Efficiency)', null, null,
+      { ch: null, guide: 'The guide gives Hinterland Prosperity 250 + Efficiency.',
+        note: 'Also Habituated to the Hinterland +1 CP; a failure gives that and Wounds +2 CP.' }),
+  ];
+
+  const INV_CARDS = [
+    { name: 'Tea with the Inspector', needs: 'Watchful 81–118 and Renown: Constables 5' },
+    { name: 'A new piece in the Game', needs: 'Shadowy 81–118' },
+    { name: 'Your plant is singing', needs: 'Attending to the Needs of a Singular Plant 16–18' },
+    { name: 'Canal Workers on the Upper River', needs: 'a Chelatic Mitten and Involved in a Railway Venture 60' },
+    { name: 'Cells outside the City', needs: 'no Language of Laces' },
+    { name: 'Listen to Rumours of Smuggling', needs: 'no Pair of Defenestrating Boots' },
+    { name: 'A Tomb-Colonist Tour', needs: 'Your Very Own Bandages! and Involved in a Railway Venture 50' },
+    { name: 'Halfway to Hell', needs: 'Involved in a Railway Venture 60' },
+    { name: 'The Clay Highwayman’s Gang 2', needs: 'Involved in a Railway Venture 70 and The Tale of the Clay Highwayman 12' },
+    { name: 'Officially Non-Criminal', needs: 'the City of the Tracklayers' },
+  ];
+  const INV_ALL_STORYLETS = INV_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const INV_INDEX = carouselIndex(INV_OPTIONS);
+  const INV_DEF = {
+    cfg: INV_CFG, options: INV_OPTIONS, index: INV_INDEX, storylets: INV_ALL_STORYLETS, cards: INV_CARDS,
+    cardKeys: INV_CARDS.map(function (c) { return normalizeName(c.name); }), aliases: null,
+    // Storylets another quality's or feature's badge already heads: Madame Shoshana's tent (Fascinating), the mail
+    // (Inspired) and the Dreamer (Oneiropomp).
+    noHeading: [normalizeName('Visit Madame Shoshana, the Neath’s Foremost Clairvoyante'), normalizeName('Read incoming mail'),
+      normalizeName('Attend to the Dreamer')],
+    cls: 'fl-ux-inv', flag: 'flUxInv', branchCls: 'fl-ux-inv-branch', branchFlag: 'flUxInvBranch',
+    cardCls: 'fl-ux-inv-card', cardFlag: 'flUxInvCard',
+  };
+
+  function invRatings() { pqRatings(INV_DEF); }
+
+  // === feature: Someone Is Coming =========================================
+  //
+  // Someone Is Coming (SiC) is a counter that a great many opportunity cards
+  // raise by 1 CP, and that A Gift from the Capering Relicker cashes in: at
+  // level 4 the card is dealt at once and eight payouts each take 21 CP. The
+  // drunk rat in Rob a drunk is the cheap cash-out, 6 CP at level 3.
+  //
+  // **What the badge says.** Every card option raises SiC by exactly 1, so
+  // the figure that varies is the PROFIT: "SiC +1? · Brass ×180 · …" names
+  // it, then what else the option moves. A card in the hand carries just
+  // "SiC +1", or on the Relicker's card "SiC −21 ▼ → 8 payouts". A payout is a
+  // fixed price ("SiC −21 ▼ → Shriek ×275"), with the guide's Echoes in the
+  // tooltip: 0.50 EPA for the Shriek up to 2.00 for the Bone Fragments.
+  //
+  // Transcribed from the option, card and storylet pages (fetched through the
+  // API, 2026-09-24) with Someone Is Coming (Guide) as the cross-check. The
+  // guide lists only PROFIT per card, not which option pays it; the option
+  // pages give that, and every option below is one whose page says
+  // "GAIN Someone Is Coming +1 CP". Where a page and the guide disagree the
+  // page is followed and `guide` quotes the guide:
+  //   the payouts        the pages take 21 CP; the guide says the cash-in
+  //                      resets the quality
+  //   Attend the ceremony  a failure still spends the Favour and the Soul and
+  //                      pays the Brass, but does not raise SiC
+  // Left out: the thirteen Conflict Cards (each needs two Favours, and the
+  // guide gives only a rate), the cards that raise SiC but have no page in
+  // the guide's table, and the Firmament and zee cards' other options. The two
+  // zee cards' SiC options are here, but the cards keep the Zailing badge.
+  // Corrections go in SIC_OPTIONS and nowhere else.
+
+  const SIC_CFG = {
+    quality: 'Someone Is Coming', short: 'SiC',
+    rules: 'Someone Is Coming rises 1 CP on each of these options; at level 4 A Gift from the Capering Relicker is dealt '
+      + 'and any of its payouts takes 21 CP. Cash out through the drunk rat first if you are over.',
+  };
+  const SIC_RELICKER = 'A Gift from the Capering Relicker';
+  const SIC_DRUNK = 'Rob a drunk';
+
+  function sicE(storylet, name, more) {
+    return Object.assign({ storylet: storylet, name: name }, more);
+  }
+
+  // A card option that raises SiC by 1 and pays what `g` names.
+  function sicGain(storylet, name, pay, more) {
+    return sicE(storylet, name, Object.assign({ win: 1, pay: pay }, more));
+  }
+
+  // A Relicker payout: a level and 21 CP.
+  function sicPayout(name, pay, g, epa, more) {
+    return sicE(SIC_RELICKER, name, Object.assign({ need: 4, cost: 21, pay: pay, g: g,
+      note: 'The guide values this at ' + epa + '.' }, more));
+  }
+
+  const SIC_OPTIONS = [
+    // --- the payouts ---------------------------------------------------------------------------------
+    sicPayout('A Scream for your Mantel', 'Shriek ×275', [['Primordial Shriek', 275]], '5.5 Echoes, 0.50 per action'),
+    sicPayout('You just put it down for a moment', 'Souls ×300 · Contracts ×25', [['Soul', 300], ['Infernal Contract', 25]],
+      '11 Echoes, 1.00 per action', { needs: 'Your very own Infernal Contract' }),
+    sicPayout('A dealer in souls', 'Mourning Candle ×4', [['Mourning Candle', 4]], '10 Echoes, 0.91 per action',
+      { needs: 'Involved in the Soul Trade (a Fate item)' }),
+    sicPayout('Not making much sense now', 'Maniac’s Prayer ×110', [['Maniac’s Prayer', 110]], '11 Echoes, 1.00 per action',
+      { needs: 'Investigating the Rubbery Murders 1' }),
+    sicPayout('A present for your daughter', 'Documents ×22', [['Compromising Document', 22]], '11 Echoes, 1.00 per action',
+      { needs: 'In Contact with a Long-Lost Daughter (a Fate item)' }),
+    sicPayout('For someone who has it all, or at least most of it', 'Vision of the Surface ×24', [['Vision of the Surface', 24]],
+      '12 Echoes, 1.09 per action', { needs: 'A Person of Some Importance: A Significant Individual' }),
+    sicPayout('Raw material', 'Bone Fragments ×2200', [['Bone Fragments', 2200]], '22 Echoes, 2.00 per action',
+      { needs: 'Route: The Bone Market' }),
+    sicPayout('A bag of jangling coins', 'Coins ×400 · First City ×10', [['Fistful of Surface Currency', 400], ['First City Coin', 10],
+      ['Justificande Coin', 3]], '14.5 Echoes, 1.32 per action (24 and 2.18 with the Rat Market and a Night-Whisper)',
+      { needs: 'Involved in a Railway Venture 50' }),
+    sicE(SIC_DRUNK, 'A furious and incoherent drunken rat', { need: 3, cost: 6, ch: { stat: 'Shadowy', diff: 70 },
+      pay: 'Currency ×(Shadowy ÷ 2)', g: [['Fistful of Surface Currency', '(Shadowy ÷ 2)']],
+      rare: { g: [['Ratwork Watch', 1]], odds: '1%, by the page' }, xf: [['Wounds', 3]],
+      note: 'Takes 6 CP on every outcome. A failure gives a Baptised Rattus Faber Corpse and Wounds +3. The guide values a '
+        + 'success at 3.79 to 5.27 Echoes, 0.54 to 0.75 per action.' }),
+
+    // --- the cards that raise it, the guide's table -------------------------------------------------------------
+    sicGain('A consideration for services rendered', 'Attend the ceremony', 'Brass ×180 · Secret ×2',
+      { ch: { stat: 'Shadowy', diff: 25 }, g: [['Nevercold Brass Sliver', 180], ['Appalling Secret', 2], ['Extraordinary Implication', 1]],
+        u: [['Soul', 1], ['Favours: Hell', 1]], needs: 'Soul 1 and Favours: Hell 1',
+        note: 'A failure still spends the Soul and the Favour and pays the Brass and an Implication, but does not raise SiC. '
+          + 'The guide values it at 4.58 Echoes.' }),
+    sicGain('Weather at last', 'An opportunity!', 'Glim ×15',
+      { ch: { stat: 'Shadowy', diff: 30 }, x: [['Subtle', 1]], xf: [['Suspicion', 1]], needs: 'Free of Surface Ties (the guide)',
+        note: 'Also Melancholy −1 CP. The guide values it at 0.15 Echoes.' }),
+    sicGain('An Elderly Lady has Hailed the Hansom Cab you Wanted!', 'You’re a complicated person...', 'Pearls ×20',
+      { ch: { stat: 'Shadowy', diff: 20 }, x: [['Subtle', 1], ['Magnanimous', -1]], xf: [['Suspicion', 1]],
+        needs: 'A Name Whispered in Darkness 1–3 (the guide)', note: 'A failure gives Subtle and Magnanimous the same way but not SiC. The guide values it at 0.2 Echoes.' }),
+    sicGain('The vigilant gentlemen in blue', 'Find a patsy', 'Suspicion −2', { x: [['Heartless', 3], ['Steadfast', -3]],
+      needs: 'Suspicion 5 (the guide)', note: 'No challenge.' }),
+    sicGain('Rats Next Door', 'Exterminate the rats but charge a fee', 'Rostygold ×30',
+      { ch: { stat: 'Dangerous', diff: 36 }, x: [['Heartless', 1], ['Steadfast', -1]],
+        needs: 'Vermin-free and A Name Scrawled in Blood 3–5 (the guide)', note: 'A failure gives the same quirks but not SiC. The guide values it at 0.3 Echoes.' }),
+    sicGain('City Vices: Orthographic Infection', 'The answer to Nightmares?', 'Appalling Secrets', { ch: { luck: 0.5 },
+      x: [['Watchful', 8], ['Nightmares', 2]], note: 'A Luck challenge; SiC only on a success, and a failure loses Watchful and adds Nightmares '
+        + 'in proportion to what you have. What it pays varies with your Nightmares.' }),
+    sicGain('The Soft-Hearted Widow', 'Give her something, for the sake of appearances', 'Inkling ×10 · Making Waves +1',
+      { u: [['Moon-Pearl', 20]], needs: 'Moon-Pearl 20', note: 'Also Adrift on a Sea of Misery 1. The guide values it at 0.8 Echoes.' }),
+    sicGain('The Soft-Hearted Widow', 'Give a significant donation to her charity for the homeless', 'Kiss ×2 · Making Waves',
+      { u: [['Shard of Glim', 500]], x: [['Steadfast', 3], ['Heartless', -3]], needs: 'Shard of Glim 500',
+        note: 'Making Waves scales with your base Persuasive (÷ 50 CP). Also Adrift on a Sea of Misery 5.' }),
+    sicGain('The Soft-Hearted Widow', 'Look away', 'Austere +1', { aliases: ['Look away 2'], x: [['Heartless', 1], ['Magnanimous', -1]] }),
+    sicGain('They don’t even cheat well', 'Alert the Provost', 'Proscribed ×5 · Correspondence ×5', { x: [['Austere', 1]],
+      needs: 'Featuring in the Tales of the University exactly 5' }),
+    sicGain('They don’t even cheat well', 'Allow yourself to be bribed', 'Rostygold ×85', { x: [['Subtle', 1]],
+      needs: 'Featuring in the Tales of the University exactly 5', note: 'The guide values the card at 0.85 Echoes.' }),
+    sicGain('City Vices: a Rather Decadent Evening', 'Engineer an invitation', 'Morelways ×20 · Absinthe ×4',
+      { ch: { stat: 'Persuasive', diff: 50 }, x: [['Making Waves', '(6 + Scandal)'], ['Scandal', 2]], u: [['Favours: Bohemians', 1]],
+        needs: 'Favours: Bohemians 1', note: 'A failure gives neither SiC nor the invitation, only Honey, Greyfields, Making Waves +2 and Scandal +2. The guide values it at 4 Echoes plus Making Waves.' }),
+    sicGain('City Vices: a tournament of weasels!', 'Attend with a weasel', 'Rostygold ×200 · Nightmares −1',
+      { ch: { luck: 0.3 }, lose: 1, needs: 'Lucky Weasel', note: 'SiC either way. The guide values it at 0.6 Echoes.' }),
+    sicGain('City Vices: a tournament of weasels!', 'Attend with a weasel of quality', 'Rostygold ×200 · Nightmares −1',
+      { ch: { luck: 0.7 }, lose: 1, needs: 'Araby Fighting-Weasel', xf: [['Araby Fighting-Weasel', -1]],
+        note: 'SiC either way; a failure costs the weasel. The guide values it at 2 Echoes plus Confident Smile ×2.' }),
+    sicGain('City Vices: a tournament of weasels!', 'Attend with your Ermine Assassin', 'Rostygold ×200 · Prayer ×15',
+      { needs: 'Ermine Assassin', note: 'No challenge. The guide values it at 3.5 Echoes, and it is the guide’s best ten-cycle cash-in.' }),
+    sicGain('The oracle of the weasel-fights', 'A subtle approach', 'Rostygold ×100', { x: [['Subtle', 1], ['Forceful', -1]],
+      note: 'Needs a Dazed Raven Advisor. The guide values the card at 1 Echo.' }),
+    sicGain('The oracle of the weasel-fights', 'The value of sportsmanship', 'Dangerous +5', { x: [['Steadfast', 1], ['Ruthless', -1]] }),
+    sicGain('The oracle of the weasel-fights', 'A direct approach', 'Rostygold ×100', { aliases: ['A direct approach 4'],
+      x: [['Forceful', 1], ['Subtle', -5]] }),
+    sicGain('An Evening with your Spouses', 'Sit together and read by the fire', 'Nightmares −3', { needs: 'Philosophically Perfect Partnership' }),
+    sicGain('An Evening with your Spouses', 'Attend a clandestine play', 'Distant Shores ×2', { needs: 'Philosophically Perfect Partnership',
+      note: 'The guide values the card at 1 Echo, or Nightmares −3.' }),
+    sicGain('Indulge the Flexible Intelligencer', 'Join him in training', 'Vienna Opening', { needs: 'Flexible Intelligencer',
+      note: 'The guide values it at 2.5 Echoes.' }),
+    sicGain('Jack strikes again', 'Be Heartless. Take the candles.', 'Foxfire ×30', { x: [['Heartless', 3], ['Magnanimous', -3]] }),
+    sicGain('Jack strikes again', 'Be Magnanimous. Help the fellow recover.', 'Watchful +3', { x: [['Magnanimous', 1], ['Heartless', -1]],
+      note: 'The guide values the card at 0.3 Echoes.' }),
+    sicGain('Jack strikes again', 'A balanced and thoughtful approach.', 'Foxfire ×30', { x: [['Subtle', 1], ['Watchful', 1]] }),
+    sicGain('A past benefactor', 'If things had been different...', 'Hard-Earned Lesson', { needs: 'Brass Knuckledusters', note: 'A second-chance card.' }),
+    sicGain('A past benefactor', 'What happened to your friends?', 'Confident Smile', { needs: 'A Bag of Fierce Mint Humbugs' }),
+    sicGain('A past benefactor', 'Who was the Tattooed Woman?', 'Warning Note', { needs: 'Unobtrusive Bowler Hat' }),
+    sicGain('A past benefactor', 'And what of the secrets of Hell?', 'Sudden Insight', { needs: 'Pair of Mirror-Polished Shoes' }),
+    sicGain('City Vices: a Plea from an Old Friend', 'Trounce the fellow', 'Forceful +1', { ch: { stat: 'Dangerous', diff: 20 },
+      x: [['Ruthless', 1]], note: 'A failure gives the quirks but not SiC.' }),
+    sicGain('City Vices: a Plea from an Old Friend', 'Persuade the fellow', 'Subtle +1', { ch: { stat: 'Persuasive', diff: 20 },
+      note: 'A failure gives Subtle but not SiC.' }),
+    sicGain('City Vices: a Plea from an Old Friend', 'Actually, he’s not bad-looking', 'Hedonist +1', { ch: { stat: 'Persuasive', diff: 40 },
+      x: [['Subtle', 1]], note: 'A failure gives the quirks but not SiC.' }),
+    sicGain('City Vices: an Entanglement with an Old Friend', 'Why not? You can afford it', 'Persuasive +1',
+      { u: [['Jade Fragment', 40]], x: [['Magnanimous', 1], ['Melancholy', 1]], needs: 'Jade Fragment 40' }),
+    sicGain('City Vices: an Entanglement with an Old Friend', 'Suggest renewing your old intimacy instead', 'Clue ×10',
+      { u: [['Romantic Notion', 4]], x: [['Hedonist', 1], ['Daring', 1]], needs: 'Romantic Notion 4' }),
+    sicGain('City Vices: an Entanglement with an Old Friend', '"Patron", is it?', 'Scandal +1', { x: [['Melancholy', 1], ['Forceful', 1]] }),
+    sicGain('Bringing the revolution', 'Direct methods', 'Dangerous +5', { x: [['Forceful', 3], ['Subtle', -3]] }),
+    sicGain('Bringing the revolution', 'Subtle methods', 'Shadowy +5', { x: [['Subtle', 1], ['Forceful', -1]] }),
+    sicGain('Bringing the revolution', 'Follow your conscience', 'Watchful +5', { x: [['Melancholy', 1], ['Ruthless', -1]] }),
+    sicGain('Bringing the revolution', 'Don’t ask me', 'Shadowy +5', { x: [['Ruthless', 1], ['Steadfast', -1]] }),
+
+    // --- the zee cards keep the Zailing heading badge; only their SiC option is here -------------------------------
+    sicGain('A Huge Terrible Beast of the Unterzee!', 'Delicious, delicious lumps', 'Tale of Terror ×4',
+      { ch: { stat: 'Dangerous', diff: 100, varies: 'the Zee Peril level' }, xf: [['Troubled Waters', 10]],
+        note: 'The difficulty is your Zee Peril level; 100 is Home Waters. Also Appalling Secret ×2, Zailing progress, and a failure adds Troubled Waters +10.' }),
+    sicGain('Creaking from Above', 'Glim-fall!', 'Glim ×(2 × Peril)', { ch: { luck: 0.5 }, x: [['Troubled Waters', 2]],
+      note: 'A Luck challenge; SiC only on a success, and a failure adds Troubled Waters +9. Also Zailing progress.' }),
+  ];
+
+  const SIC_CARDS = [
+    { name: SIC_RELICKER, badge: 'SiC −21 ▼ → 8 payouts', needs: 'Someone Is Coming 4',
+      note: 'Dealt at once at level 4 and not discardable. Any payout takes 21 CP; the drunk rat takes 6 and is the cheap way to spend the excess.' },
+  ].concat([
+    'A consideration for services rendered', 'Weather at last', 'An Elderly Lady has Hailed the Hansom Cab you Wanted!',
+    'The vigilant gentlemen in blue', 'Rats Next Door', 'City Vices: Orthographic Infection', 'The Soft-Hearted Widow',
+    'They don’t even cheat well', 'City Vices: a Rather Decadent Evening', 'City Vices: a tournament of weasels!',
+    'An Evening with your Spouses', 'Indulge the Flexible Intelligencer', 'Jack strikes again', 'A past benefactor',
+    'City Vices: a Plea from an Old Friend', 'City Vices: an Entanglement with an Old Friend', 'Bringing the revolution',
+  ].map(function (name) { return { name: name, badge: 'SiC +1' }; }));
+
+  const SIC_ALL_STORYLETS = SIC_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const SIC_INDEX = carouselIndex(SIC_OPTIONS);
+  const SIC_DEF = {
+    cfg: SIC_CFG, options: SIC_OPTIONS, index: SIC_INDEX, storylets: SIC_ALL_STORYLETS, cards: SIC_CARDS,
+    cardKeys: SIC_CARDS.map(function (c) { return normalizeName(c.name); }), aliases: null,
+    // The zee cards keep the Zailing feature's badge; Rob a drunk and the oracle are storylets with many other options.
+    noHeading: [normalizeName('A Huge Terrible Beast of the Unterzee!'), normalizeName('Creaking from Above'),
+      normalizeName(SIC_DRUNK), normalizeName('The oracle of the weasel-fights')],
+    cls: 'fl-ux-sic', flag: 'flUxSic', branchCls: 'fl-ux-sic-branch', branchFlag: 'flUxSicBranch',
+    cardCls: 'fl-ux-sic-card', cardFlag: 'flUxSicCard',
+  };
+
+  function sicRatings() { pqRatings(SIC_DEF); }
 
   // === feature: Forgotten Quarter Expeditions ============================
   //
@@ -27959,7 +29481,7 @@
       title: [storylet, 'the Clay Highwayman', '',
         'One of the five larcenies. All four of their options follow the same ladder:',
         chwLarcenyLines(), '',
-        'The guide names no option titles for these, so nothing inside the card is badged.',
+        'The options inside are badged by the Casing feature, from their own pages.',
         'Larcenies cannot be discarded: you have to commit the crime to clear the hand.',
         '', CHW_RULES].join('\n') };
   }
@@ -32271,6 +33793,19 @@
     // Six London storylets gated on The Airs of London, and the storylets their
     // redirecting options open: the same titles reappear nowhere else.
     { name: 'airs-of-london', run: aolRatings },
+    // The first two on the shared progress-quality helper. They stand in
+    // different storylets and share no title with each other or with the Airs
+    // feature: Hunting Dangerous Prey and Duelling the Black Ribbon are the two
+    // Airs storylets that one left to these.
+    { name: 'the-hunt-is-on', run: thioRatings },
+    { name: 'running-battle', run: runbRatings },
+    // Casing shares the larceny cards with the Clay Highwayman feature: that one badges the card's
+    // heading, this one the options inside it, and neither badges the other's.
+    { name: 'casing', run: casingRatings },
+    { name: 'fascinating', run: fasRatings },
+    { name: 'inspired', run: inspRatings },
+    { name: 'investigating', run: invRatings },
+    { name: 'someone-is-coming', run: sicRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
