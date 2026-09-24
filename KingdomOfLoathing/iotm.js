@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/iotm.js
-// @version      1.31
-// @description  Adds an "IotM" button to the KoL icon menu that opens a small popup of Item-of-the-Month actions: fire the Codpiece (inventory.php?action=docodpiece), play ball at the baseball diamond (highlighted when a ball is available), drink from the Cup of 13s, and open the Allied Radio Backpack. Also highlights the worthwhile pitch buttons on the Play Ball! choice (choice.php whichchoice=1598), adds sort buttons to the Cup of 13s ingredient dropdowns (choice.php whichchoice=1601), adds a one-click request table to the Request Supply Drop choice for both the Allied Radio Backpack and the handheld Allied radio (choice.php, detected by the request field), and keeps the Eternity Codpiece decoration tools (choice.php whichchoice=1588) for setting every gem slot at once, filtering the gem list by category (including a "Mr. Store items" category with an "Insert all" button that puts the four IotM gems alphabetically into slots 1-4), emptying every slot at once, and saving/loading gem setups.
+// @version      1.32
+// @description  Adds an "IotM" button to the icon menu with Item-of-the-Month actions.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
 // @match        https://www.kingdomofloathing.com/topmenu.php*
@@ -14,6 +14,23 @@
 // @grant        none
 
 // ==/UserScript==
+
+/*
+ * KoL IotM Menu
+ *
+ * Adds an "IotM" button to the KoL icon menu that opens a small popup of Item-of-the-Month actions:
+ *   fire the Codpiece (inventory.php?action=docodpiece), play ball at the baseball diamond
+ *   (highlighted when a ball is available), drink from the Cup of 13s, and open the Allied Radio
+ *   Backpack.
+ * Also highlights the worthwhile pitch buttons on the Play Ball! choice (choice.php
+ *   whichchoice=1598), adds sort buttons to the Cup of 13s ingredient dropdowns (choice.php
+ *   whichchoice=1601), adds a one-click request table to the Request Supply Drop choice for both
+ *   the Allied Radio Backpack and the handheld Allied radio (choice.php, detected by the request
+ *   field), and keeps the Eternity Codpiece decoration tools (choice.php whichchoice=1588) for
+ *   setting every gem slot at once, filtering the gem list by category (including a "Mr.
+ * Store items" category with an "Insert all" button that puts the four IotM gems alphabetically
+ *   into slots 1-4), emptying every slot at once, and saving/loading gem setups.
+ */
 
 (function () {
   'use strict';

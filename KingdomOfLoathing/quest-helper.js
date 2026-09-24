@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/quest-helper.js
-// @version      2.0
-// @description  Helper for puzzle-y quest choice adventures and combat cues. It never submits or clicks anything on its own -- it fills in, highlights or explains the known-correct answer and leaves the actual move to you. Currently: Drawn Onward (choice 872), the photo frames in Dr. Awkward's office, sets the four photo dropdowns to the correct order; Beginning at the Beginning of Beginning (the Hidden Temple tile floor, tiles.php) glows the tile to step on in each row, spelling B-A-N-A-N-A-S from the bottom up, numbered in step order; Control Freak (choice 929), the pyramid control room, tracks the Lower Chambers rotation and tells you how many more times to turn the wheel, when to go down instead, and when to stop turning. Talk to Sven Golly (pandamonium.php?action=sven) gets an overview of the band -- who craves and hates what, which of the six items each one accepts, which of those you're carrying and where the rest drop -- plus a button per give that fills the dropdowns. On fight.php it watches the combat text for the one round where a move only works right now: a Junkyard gremlin presenting Yossarian's tool (use the molybdenum magnet) and a raver pulling his special dance move (cast Gothy Handwave), highlighting the message and offering to pick the item/skill in the dropdown for you. In the Mer-kin Colosseum it reads the gladiator's telegraph and names the skill that counters it -- Net Gain/Loss/Neutrality, Blade Sling/Roller/Runner or Ball Bust/Sweat/Sack -- says which of the three gladiatorial weapons this opponent needs, and warns when the one you are holding is the wrong one. For the scholar path it tracks the Mer-kin dreadscroll: the eight prophecy words are filed automatically from the pages that print them (the library card catalogue, a healscroll or killscroll in combat, a knucklebone, Deep Dark Visions, sushi with worktea), each failed reading is scored from the length of the Deep-Tainted Mind it cost and fed into a solver, and a "Mer-kin" button in the charpane, under the Current Quest block, opens the tracker anywhere. On the scroll itself it fills in every word it can name and leaves "Read Aloud" to you. At Insult Beer Pong (beerpong.php) it reads Old Don Rickets' insult, names the one retort that answers it and offers to pick it in the dropdown, says outright when you have not collected that retort and the match is therefore lost, and reads the dropdown for which of the eight retorts you own and what your odds of winning a match are. Also reads the 8-Bit Realm Score in the charpane and turns its colour into a link to the zone that is currently paying double, with what to boost there.
+// @version      2.1
+// @description  Fills in or highlights the known answers to puzzle-y quest adventures and combat cues.
 // @match        https://www.kingdomofloathing.com/choice.php*
 // @match        https://kingdomofloathing.com/choice.php*
 // @match        https://www.kingdomofloathing.com/fight.php*
@@ -30,6 +30,43 @@
 // @run-at       document-idle
 // @grant        none
 // ==/UserScript==
+
+/*
+ * KoL Quest Helper
+ *
+ * Helper for puzzle-y quest choice adventures and combat cues.
+ * It never submits or clicks anything on its own -- it fills in, highlights or explains the
+ *   known-correct answer and leaves the actual move to you.
+ * Currently: Drawn Onward (choice 872), the photo frames in Dr.
+ * Awkward's office, sets the four photo dropdowns to the correct order; Beginning at the Beginning
+ *   of Beginning (the Hidden Temple tile floor, tiles.php) glows the tile to step on in each row,
+ *   spelling B-A-N-A-N-A-S from the bottom up, numbered in step order; Control Freak (choice 929),
+ *   the pyramid control room, tracks the Lower Chambers rotation and tells you how many more times
+ *   to turn the wheel, when to go down instead, and when to stop turning.
+ * Talk to Sven Golly (pandamonium.php?action=sven) gets an overview of the band -- who craves and
+ *   hates what, which of the six items each one accepts, which of those you're carrying and where
+ *   the rest drop -- plus a button per give that fills the dropdowns.
+ * On fight.php it watches the combat text for the one round where a move only works right now: a
+ *   Junkyard gremlin presenting Yossarian's tool (use the molybdenum magnet) and a raver pulling
+ *   his special dance move (cast Gothy Handwave), highlighting the message and offering to pick the
+ *   item/skill in the dropdown for you.
+ * In the Mer-kin Colosseum it reads the gladiator's telegraph and names the skill that counters it
+ *   -- Net Gain/Loss/Neutrality, Blade Sling/Roller/Runner or Ball Bust/Sweat/Sack -- says which of
+ *   the three gladiatorial weapons this opponent needs, and warns when the one you are holding is
+ *   the wrong one.
+ * For the scholar path it tracks the Mer-kin dreadscroll: the eight prophecy words are filed
+ *   automatically from the pages that print them (the library card catalogue, a healscroll or
+ *   killscroll in combat, a knucklebone, Deep Dark Visions, sushi with worktea), each failed
+ *   reading is scored from the length of the Deep-Tainted Mind it cost and fed into a solver, and a
+ *   "Mer-kin" button in the charpane, under the Current Quest block, opens the tracker anywhere.
+ * On the scroll itself it fills in every word it can name and leaves "Read Aloud" to you.
+ * At Insult Beer Pong (beerpong.php) it reads Old Don Rickets' insult, names the one retort that
+ *   answers it and offers to pick it in the dropdown, says outright when you have not collected
+ *   that retort and the match is therefore lost, and reads the dropdown for which of the eight
+ *   retorts you own and what your odds of winning a match are.
+ * Also reads the 8-Bit Realm Score in the charpane and turns its colour into a link to the zone
+ *   that is currently paying double, with what to boost there.
+ */
 
 (function () {
   'use strict';

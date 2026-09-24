@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/auto-combat.js
-// @version      0.8
-// @description  Adds an "Auto" button to the charpane, under the Last Adventure readout, that opens a small panel: pick a zone, say how many adventures, press Start, and it adventures there for you. Fights are handed to your "Auto-Attack until finished" combat macro when you have one saved, and fall back to attacking round by round when you don't. Choice adventures work like the Twilight Heroes script: the first time one comes up the run pauses and the panel offers its options (annotated with what the zone's wiki page says each does); pick one and it's remembered, and answered by itself from then on. A "remembered choices" list lets you review or forget any of them. A choice that offers only one button is taken without asking, and a small built-in rule table answers a choice by name wherever it turns up -- "Peering Through Your Peridot" takes "I choose peace" when that option is on the page. Turns are counted from api.php's adventure total rather than from requests sent, and anything it doesn't recognise stops the run rather than guessing. A "stop on level up" checkbox ends the run as soon as api.php reports a higher level than the one you started at. Four zones: The Haunted Bedroom, whose nightstands are answered from a built-in plan (the drawer with the substats in it, and the ghost key ahead of it where the key is worth more); Inside the Palindome, which farms the Elf Farm Raffle ticket -- it refuses to start when you are already carrying a ticket (the elf stays away until they are used) or without the Talisman o' Namsilat equipped, answers the zone's noncombats with the free or cheapest option, stops the run the moment a ticket drops, and keeps a per-character tally of the tickets you have picked up today; The Haunted Storage Room, which farms ghost keys -- Lights Out is answered with "Feel Your Way to the Door" and Chasin' Babies with "Do nothing", and every ghost key that drops is counted, for the run and in a per-character tally for the day; and "wherever I adventured last", which reads your last adventure from api.php when you press Start and grinds there with the ordinary ask-once-then-remember handling.
+// @version      0.9
+// @description  Adds an "Auto" panel to the charpane that adventures in a chosen zone for you.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
 // @match        https://www.kingdomofloathing.com/topmenu.php*
@@ -14,6 +14,37 @@
 // @grant        none
 
 // ==/UserScript==
+
+/*
+ * KoL Auto Combat
+ *
+ * Adds an "Auto" button to the charpane, under the Last Adventure readout, that opens a small
+ *   panel: pick a zone, say how many adventures, press Start, and it adventures there for you.
+ * Fights are handed to your "Auto-Attack until finished" combat macro when you have one saved, and
+ *   fall back to attacking round by round when you don't.
+ * Choice adventures work like the Twilight Heroes script: the first time one comes up the run
+ *   pauses and the panel offers its options (annotated with what the zone's wiki page says each
+ *   does); pick one and it's remembered, and answered by itself from then on.
+ * A "remembered choices" list lets you review or forget any of them.
+ * A choice that offers only one button is taken without asking, and a small built-in rule table
+ *   answers a choice by name wherever it turns up -- "Peering Through Your Peridot" takes "I choose
+ *   peace" when that option is on the page.
+ * Turns are counted from api.php's adventure total rather than from requests sent, and anything it
+ *   doesn't recognise stops the run rather than guessing.
+ * A "stop on level up" checkbox ends the run as soon as api.php reports a higher level than the one
+ *   you started at.
+ * Four zones: The Haunted Bedroom, whose nightstands are answered from a built-in plan (the drawer
+ *   with the substats in it, and the ghost key ahead of it where the key is worth more); Inside the
+ *   Palindome, which farms the Elf Farm Raffle ticket -- it refuses to start when you are already
+ *   carrying a ticket (the elf stays away until they are used) or without the Talisman o' Namsilat
+ *   equipped, answers the zone's noncombats with the free or cheapest option, stops the run the
+ *   moment a ticket drops, and keeps a per-character tally of the tickets you have picked up today;
+ *   The Haunted Storage Room, which farms ghost keys -- Lights Out is answered with "Feel Your Way
+ *   to the Door" and Chasin' Babies with "Do nothing", and every ghost key that drops is counted,
+ *   for the run and in a per-character tally for the day; and "wherever I adventured last", which
+ *   reads your last adventure from api.php when you press Start and grinds there with the ordinary
+ *   ask-once-then-remember handling.
+ */
 
 (function () {
   'use strict';

@@ -3,14 +3,55 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      3.1
-// @description  A grab-bag of small quality-of-life tweaks for Fallen London. A "UX" button docked INTO Fallen London's own chrome beside its travel control -- under the big Travel button on the wide layout, as one more icon in the banner on the narrow one -- so it takes up space in the page like any other control and covers nothing. It opens a menu of reference panels; the last line of that menu switches it back to floating over the page if you preferred it that way, and it falls back to floating on its own if Fallen London's chrome cannot be found. Every panel's header carries a fullscreen button beside its close button, which takes the panel off the popover and over the whole screen and back; the choice is remembered, so a long panel opens at full size every time rather than needing the button pressed again. The first panel is Factions, a table of every faction with your current Renown and Favours (read off the Myself tab and remembered, so it is there from anywhere in London), the three Renown items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown, with where to buy it and what it costs. Renown and Favours come off the Myself tab and which items you hold off Possessions; both are remembered, and opening the panel refreshes them in the background. A Renown item you could go and collect right now -- Renown reached and the Favours in hand -- gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of 7 and are being thrown away is called out too. Each row has a "use" button that opens that faction's item on the Possessions tab so its options appear. Fallen London Choice Helper, a separate script, adds its own panels -- Zailing, Port Carnelian, Scientific Voyages and Fruits of the Zee -- to the same menu when it is installed; the rating badges on cards and storylets that were part of this script until 3.0 live there now. On the Possessions tab, picking a stat in the "Show:" filter puts a gold star on the item in every equipment slot that gives the most of it -- every one, where two tie, and none in a slot where nothing gives any -- with a line above the list saying what the stars mean and what the starred items add up to worn together. The filter also gains a BDR choice after Bizarre, which scores each item on its Bizarre, Dreaded and Respectable added together, so Bizarre +3 beats Respectable +2. A menace works too: pick Nightmares, Scandal, Suspicion or Wounds and the star goes to the item that does most against its build-up, scored the way the Menaces guide does -- reduces 1, greatly 2, massively 4, and an item that increases it counts against itself. It only ever highlights; it never equips anything. Built as a feature registry so further tweaks can be added as entries.
+// @version      3.2
+// @description  Small quality-of-life tweaks for Fallen London, behind a docked "UX" button.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 // @run-at       document-idle
 // @noframes
 // @grant        none
 // ==/UserScript==
+
+/*
+ * Fallen London UX Enhancers
+ *
+ * A grab-bag of small quality-of-life tweaks for Fallen London.
+ * A "UX" button docked INTO Fallen London's own chrome beside its travel control -- under the big
+ *   Travel button on the wide layout, as one more icon in the banner on the narrow one -- so it
+ *   takes up space in the page like any other control and covers nothing.
+ * It opens a menu of reference panels; the last line of that menu switches it back to floating over
+ *   the page if you preferred it that way, and it falls back to floating on its own if Fallen
+ *   London's chrome cannot be found.
+ * Every panel's header carries a fullscreen button beside its close button, which takes the panel
+ *   off the popover and over the whole screen and back; the choice is remembered, so a long panel
+ *   opens at full size every time rather than needing the button pressed again.
+ * The first panel is Factions, a table of every faction with your current Renown and Favours (read
+ *   off the Myself tab and remembered, so it is there from anywhere in London), the three Renown
+ *   items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown,
+ *   with where to buy it and what it costs.
+ * Renown and Favours come off the Myself tab and which items you hold off Possessions; both are
+ *   remembered, and opening the panel refreshes them in the background.
+ * A Renown item you could go and collect right now -- Renown reached and the Favours in hand --
+ *   gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose
+ *   Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of
+ *   7 and are being thrown away is called out too.
+ * Each row has a "use" button that opens that faction's item on the Possessions tab so its options
+ *   appear.
+ * Fallen London Choice Helper, a separate script, adds its own panels -- Zailing, Port Carnelian,
+ *   Scientific Voyages and Fruits of the Zee -- to the same menu when it is installed; the rating
+ *   badges on cards and storylets that were part of this script until 3.0 live there now.
+ * On the Possessions tab, picking a stat in the "Show:" filter puts a gold star on the item in
+ *   every equipment slot that gives the most of it -- every one, where two tie, and none in a slot
+ *   where nothing gives any -- with a line above the list saying what the stars mean and what the
+ *   starred items add up to worn together.
+ * The filter also gains a BDR choice after Bizarre, which scores each item on its Bizarre, Dreaded
+ *   and Respectable added together, so Bizarre +3 beats Respectable +2.
+ * A menace works too: pick Nightmares, Scandal, Suspicion or Wounds and the star goes to the item
+ *   that does most against its build-up, scored the way the Menaces guide does -- reduces 1,
+ *   greatly 2, massively 4, and an item that increases it counts against itself.
+ * It only ever highlights; it never equips anything.
+ * Built as a feature registry so further tweaks can be added as entries.
+ */
 
 (function () {
   'use strict';

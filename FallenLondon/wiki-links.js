@@ -3,13 +3,23 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/wiki-links.js
-// @version      0.6
-// @description  Adds a small "W" badge linking to the Fallen London wiki (fallenlondon.wiki) next to storylet titles in the game -- in a storylet list, at the top of an opened storylet, and on each opportunity card in your hand (both the compact and the full-width card layouts). Clicking opens the wiki article for that storylet/card in a new tab. The individual branch/choice titles inside an opened storylet are intentionally left unlinked. Selectors verified against real game HTML.
+// @version      0.7
+// @description  Adds a small "W" badge linking storylets and cards to the Fallen London wiki.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
 // @run-at       document-idle
 // @grant        none
 // ==/UserScript==
+
+/*
+ * Fallen London Wiki Links
+ *
+ * Adds a small "W" badge linking to the Fallen London wiki (fallenlondon.wiki) next to storylet
+ * titles in the game -- in a storylet list, at the top of an opened storylet, and on each
+ * opportunity card in your hand (both the compact and the full-width card layouts). Clicking opens
+ * the wiki article for that storylet/card in a new tab. The individual branch/choice titles inside
+ * an opened storylet are intentionally left unlinked. Selectors verified against real game HTML.
+ */
 
 (function () {
   'use strict';

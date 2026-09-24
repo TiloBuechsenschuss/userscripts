@@ -53,7 +53,9 @@ Work in this order. Items marked **TRAP** are the ones that get skipped.
 7. **TRAP — check cross-file contracts.** Grep the whole repo for element ids and storage
    keys the absorbed file owned. Another script may reach across frames for one
    (`auto-mine.js` clicks `#tm-charpane-heal`). Keep such an id byte-identical.
-8. **Metadata on the host:** bump `@version`, merge `@description`, union the `@match`
+8. **Metadata on the host:** bump `@version`, merge the two feature doc
+   blocks (the `/* ... */` comment after `// ==/UserScript==`; `@description` stays one short
+   line), union the `@match`
    lines (both bare and `www.` hosts), update `@name` if it no longer describes the file.
    Leave `@downloadURL` alone — the path did not change.
 9. **Carry over the absorbed file's attribution.** A copyright or license line in its

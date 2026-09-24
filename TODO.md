@@ -1,8 +1,5 @@
 # ToDo
 
-Generic
-  - remove long descriptions. Switch to short descriptions and doc block at beginning of script
-
 Fallen London:
   Carousels: https://fallenlondon.wiki/wiki/Guides#Location-Specif  Sorted by each guide's {{Audience}} stage, in the order of
   h  https://fallenlondon.wiki/wiki/Template:Audience (top is earlier in the game);
@@ -282,6 +279,11 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Work_in_your_Cabinet_Noir [1 text]
 
 # Done
+
+Generic:
+  - long `@description` tags → one short line, with the feature write-up in a block
+    comment after `// ==/UserScript==` in every script and loader. Convention is in
+    AGENTS.md, README.md and the two skills that touch metadata.
 
 Kingdom of Loathing:
   - filter box items that can be used to get other items — the "pays out"

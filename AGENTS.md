@@ -56,6 +56,16 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   `Twilight Heroes Autobox`, `KoL IotM Menu`, `Fallen London Wiki Links`). Keep the
   prefix identical across a game's scripts — don't expand `KoL` to `Kingdom of Loathing` for
   one script, or it'll sort away from the rest.
+- **`@description` is one short line; the feature write-up is a block comment.** A metadata
+  tag that runs to thousands of characters breaks syntax highlighting for the rest of the file
+  and is miserable to read or diff. Keep `@description` to a single sentence (roughly 100
+  characters or fewer) saying what the script is for. Put the full user-facing description of
+  what it does — every feature, its limits, any "install X as well" note — in a `/* ... */`
+  block comment directly after `// ==/UserScript==` and before the IIFE, headed by the script's
+  `@name`, wrapped at about 100 columns, one bullet or short paragraph per feature. Add a new
+  feature to that block, not to `@description`. This is separate from the developer notes
+  inside the IIFE, which explain how the code works rather than what it does for the player.
+  The `all-in-one/` loaders follow the same rule.
 - One IIFE, `'use strict';`, no external dependencies, `@grant none` (plain page APIs only).
 - **Idempotency guard**: before injecting UI, bail if the element already exists
   (e.g. `if (document.getElementById(...)) return;`). Scripts may run more than once per page.

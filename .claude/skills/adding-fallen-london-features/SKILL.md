@@ -225,7 +225,8 @@ Work in this order. **TRAP** marks the ones that get skipped.
 
 17. **Metadata and docs.** Bump `@version` in `FallenLondon/choice-helper.js` **and** the
     loader's `@version` in `all-in-one/fallen-london.js` by hand (`bump-loaders.mjs` skips a
-    loader you already edited). Extend the script's `@description` paragraph, the
+    loader you already edited). Extend the feature write-up in the block comment right after `// ==/UserScript==` (keep the
+    `@description` tag itself one short line — never grow it), the
     `choice-helper.js` row in `README.md`, and `AGENTS.md` — the feature's own section, an
     entry in the test-file list, and a line in the **"Not verified in-game"** list saying
     exactly what a player should report back. Leave `@downloadURL` alone; the path did not

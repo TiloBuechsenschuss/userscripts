@@ -3,13 +3,29 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/dwarven-factory-solver.js
-// @version      1.7
-// @description  Adds a panel to the Dwarven Machine Room (dwarfcontraption.php) that solves the Dwarven Factory Complex puzzle. A browser port of That FN Ninja's KoLmafia "DwaFa" (dwafa.ash). Solve spends no adventures on its own: it cracks the digit code by rolling the Dwarvish Dice (gambling, which does NOT cost turns), reads the hoppers, decodes the cards/documents, sets the gauges, runs the diamond→coal chamber and fills the hoppers — then tells YOU to press the red button to forge. The outfit word rune (oi_rune) lives only in the Warehouse: a separate opt-in "Determine oi_rune (Warehouse)" button adventures there to find it and caches it per piece (so it costs adventures only once, and may infer another piece by elimination); you can also type it in by hand. The panel includes a "What to do if Solve can't finish" guide.
+// @version      1.8
+// @description  Solves the Dwarven Factory Complex puzzle from the Dwarven Machine Room.
 // @match        https://www.kingdomofloathing.com/dwarfcontraption.php*
 // @match        https://kingdomofloathing.com/dwarfcontraption.php*
 // @grant        none
 
 // ==/UserScript==
+
+/*
+ * KoL Dwarven Factory Solver
+ *
+ * Adds a panel to the Dwarven Machine Room (dwarfcontraption.php) that solves the Dwarven Factory
+ *   Complex puzzle.
+ * A browser port of That FN Ninja's KoLmafia "DwaFa" (dwafa.ash).
+ * Solve spends no adventures on its own: it cracks the digit code by rolling the Dwarvish Dice
+ *   (gambling, which does NOT cost turns), reads the hoppers, decodes the cards/documents, sets the
+ *   gauges, runs the diamond→coal chamber and fills the hoppers — then tells YOU to press the red
+ *   button to forge.
+ * The outfit word rune (oi_rune) lives only in the Warehouse: a separate opt-in "Determine oi_rune
+ *   (Warehouse)" button adventures there to find it and caches it per piece (so it costs adventures
+ *   only once, and may infer another piece by elimination); you can also type it in by hand.
+ * The panel includes a "What to do if Solve can't finish" guide.
+ */
 
 // ----------------------------------------------------------------------------
 // PORTING NOTES (read me)

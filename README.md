@@ -128,6 +128,9 @@ rules that bite if you forget them:
   each loader's `@require` line) points at its raw path on `main`. Moving or
   renaming a file breaks auto-updates for everyone who has it installed — if you
   move one, update its `@downloadURL` and any `@require` that references it.
+- **Keep `@description` to one short line.** The full feature write-up goes in a
+  `/* ... */` block comment right after `// ==/UserScript==`; a very long metadata
+  tag breaks syntax highlighting for the rest of the file.
 - **Start every `@name` with the game's prefix** so it sorts next to its siblings
   in the userscript manager: `Twilight Heroes ` for `TwilightHeroes/`, `KoL ` for
   `KingdomOfLoathing/`, and `Fallen London ` for `FallenLondon/`. Keep the prefix

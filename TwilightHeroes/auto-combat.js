@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/auto-combat.js
-// @version      1.8
-// @description  Adds three combat automation buttons. On fight.php: "repeat attack until fight done" next to the Attack button, and "repeat skill until fight done" next to the Use-a-Skill button (each re-issues that action every round until the fight ends). "adventure here again and attack until done" appears on the fight-over screen and below the Last Area Patrolled link in the nav sidebar; it re-adventures the same location and auto-attacks, fight after fight, until you hit a non-combat encounter, your HP drops below a threshold, or you run out of turns. Loops by re-submitting the real forms (one visible page reload per round) with a brief Stop window each round; HP is read from the per-round combat form and the sidebar. After each won fight in an adventure chain (buffs can't be cast mid-combat), if PP has filled up it refreshes the shortest-duration buff before re-adventuring by driving that effect's "+max" button in the nav sidebar (added by ux-enhancers.js). On non-combat encounters it adds a "remember choice" button beside each option; once remembered, that option is auto-picked whenever the same encounter recurs during an adventure chain, and choiceless non-combats auto-advance (re-adventure) instead of halting the chain. A "remembered choices…" button in the nav sidebar opens a popup listing every remembered encounter→option pick, with a Delete per row and a Delete-all.
+// @version      1.9
+// @description  Adds combat automation buttons for Twilight Heroes.
 // @match        https://www.twilightheroes.com/fight.php*
 // @match        https://twilightheroes.com/fight.php*
 // @match        https://www.twilightheroes.com/nav.php*
@@ -12,6 +12,29 @@
 // @run-at       document-idle
 // @grant        none
 // ==/UserScript==
+
+/*
+ * Twilight Heroes Auto-Combat
+ *
+ * Adds three combat automation buttons.
+ * On fight.php: "repeat attack until fight done" next to the Attack button, and "repeat skill until
+ *   fight done" next to the Use-a-Skill button (each re-issues that action every round until the
+ *   fight ends).
+ * "adventure here again and attack until done" appears on the fight-over screen and below the Last
+ *   Area Patrolled link in the nav sidebar; it re-adventures the same location and auto-attacks,
+ *   fight after fight, until you hit a non-combat encounter, your HP drops below a threshold, or
+ *   you run out of turns.
+ * Loops by re-submitting the real forms (one visible page reload per round) with a brief Stop
+ *   window each round; HP is read from the per-round combat form and the sidebar.
+ * After each won fight in an adventure chain (buffs can't be cast mid-combat), if PP has filled up
+ *   it refreshes the shortest-duration buff before re-adventuring by driving that effect's "+max"
+ *   button in the nav sidebar (added by ux-enhancers.js).
+ * On non-combat encounters it adds a "remember choice" button beside each option; once remembered,
+ *   that option is auto-picked whenever the same encounter recurs during an adventure chain, and
+ *   choiceless non-combats auto-advance (re-adventure) instead of halting the chain.
+ * A "remembered choices…" button in the nav sidebar opens a popup listing every remembered
+ *   encounter→option pick, with a Delete per row and a Delete-all.
+ */
 
 (function () {
   "use strict";

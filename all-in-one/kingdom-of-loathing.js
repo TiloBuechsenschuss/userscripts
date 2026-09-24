@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/all-in-one/kingdom-of-loathing.js
-// @version      1.50
-// @description  Single-install loader for the Kingdom of Loathing userscripts in this repo. It carries no logic of its own; it @requires each individual script straight from GitHub so installing this one file gives you all of them. NOTE: adventure-choices.js is intentionally NOT bundled here -- it needs GM_* grants, which are incompatible with the @grant none mode the other scripts rely on. Install that one separately.
+// @version      1.51
+// @description  Single-install loader for the Kingdom of Loathing userscripts in this repo.
 //
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -76,6 +76,16 @@
 // @run-at       document-idle
 // @grant        none
 // ==/UserScript==
+
+/*
+ * KoL All-in-One (loader)
+ *
+ * Single-install loader for the Kingdom of Loathing userscripts in this repo. It carries no logic
+ * of its own; it @requires each individual script straight from GitHub so installing this one file
+ * gives you all of them. NOTE: adventure-choices.js is intentionally NOT bundled here -- it needs
+ * GM_* grants, which are incompatible with the @grant none mode the other scripts rely on. Install
+ * that one separately.
+ */
 
 // Intentionally empty. All behaviour comes from the @require'd files above,
 // each of which is a self-contained IIFE that scrapes the page it cares about

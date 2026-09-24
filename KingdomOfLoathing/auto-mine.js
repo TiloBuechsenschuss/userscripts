@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/auto-mine.js
-// @version      0.6
-// @description  A port of the loathers/oreo KoLmafia script to the browser: farms 1,970 carat gold in the Velvet / Gold Mine. Whenever you are looking at mining.php it paints its advice onto the mine -- the recommended square, the route to it, and why -- and puts a "Mine" button in that same advice box, which opens a panel where you pick a strategy (pjb, oreo, ev, ev-cluster), a visibility mode and a turn budget and press Start; the run then drives mining.php from the menu frame, choosing each square by oreo's expected-value model and finding a new cavern when nothing left is worth a turn. The panel also keeps a running total of the turns you have spent mining today, which starts over at each KoL rollover. Unlike oreo it never buys or equips anything -- it reads what you already have and refuses to start when something is missing. The one exception is healing: when HP reaches the floor it can press ux-enhancers.js's own "heal" button and carry on, which you can switch off in the panel. On any mine page -- including Itznotyerzitz, where the advisor stays quiet -- it also makes the twinkling "Promising Chunk of Wall" tiles stand out with a constant pulsing gold glow and subtly marks the other mineable tiles.
+// @version      0.7
+// @description  Browser port of the oreo KoLmafia script for mining the Velvet / Gold Mine.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
 // @match        https://www.kingdomofloathing.com/topmenu.php*
@@ -16,6 +16,28 @@
 // @grant        none
 
 // ==/UserScript==
+
+/*
+ * KoL Auto Mine
+ *
+ * A port of the loathers/oreo KoLmafia script to the browser: farms 1,970 carat gold in the Velvet
+ *   / Gold Mine.
+ * Whenever you are looking at mining.php it paints its advice onto the mine -- the recommended
+ *   square, the route to it, and why -- and puts a "Mine" button in that same advice box, which
+ *   opens a panel where you pick a strategy (pjb, oreo, ev, ev-cluster), a visibility mode and a
+ *   turn budget and press Start; the run then drives mining.php from the menu frame, choosing each
+ *   square by oreo's expected-value model and finding a new cavern when nothing left is worth a
+ *   turn.
+ * The panel also keeps a running total of the turns you have spent mining today, which starts over
+ *   at each KoL rollover.
+ * Unlike oreo it never buys or equips anything -- it reads what you already have and refuses to
+ *   start when something is missing.
+ * The one exception is healing: when HP reaches the floor it can press ux-enhancers.js's own "heal"
+ *   button and carry on, which you can switch off in the panel.
+ * On any mine page -- including Itznotyerzitz, where the advisor stays quiet -- it also makes the
+ *   twinkling "Promising Chunk of Wall" tiles stand out with a constant pulsing gold glow and
+ *   subtly marks the other mineable tiles.
+ */
 
 (function () {
   'use strict';

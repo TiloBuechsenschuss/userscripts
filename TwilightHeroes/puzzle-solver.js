@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/puzzle-solver.js
-// @version      1.0
-// @description  In-page help for Twilight Heroes' interactive puzzles. WORKING: the Goldbergium Door (Asylumbreak, on goldberg.php) -- the goal is randomised per attempt but the component input/output mapping is fixed, so this SOLVES it (a valid 5+ component chain for the current goal), persists the plan, and replays it with progress as you build. NOT YET IMPLEMENTED: the Bit Player (All the World's a Quest, on fight.php) -- intended to TRACK which Shakespeare roles you've tried (correct/wrong/untried, with a reset), since the correct set is randomised per retcon; currently a skeleton that does nothing.
+// @version      1.1
+// @description  In-page help for Twilight Heroes' interactive puzzles.
 // @match        https://www.twilightheroes.com/fight.php*
 // @match        https://twilightheroes.com/fight.php*
 // @match        https://www.twilightheroes.com/goldberg.php*
@@ -12,6 +12,18 @@
 // @run-at       document-idle
 // @grant        none
 // ==/UserScript==
+
+/*
+ * Twilight Heroes Puzzle Solver
+ *
+ * In-page help for Twilight Heroes' interactive puzzles. WORKING: the Goldbergium Door
+ * (Asylumbreak, on goldberg.php) -- the goal is randomised per attempt but the component
+ * input/output mapping is fixed, so this SOLVES it (a valid 5+ component chain for the current
+ * goal), persists the plan, and replays it with progress as you build. NOT YET IMPLEMENTED: the Bit
+ * Player (All the World's a Quest, on fight.php) -- intended to TRACK which Shakespeare roles
+ * you've tried (correct/wrong/untried, with a reset), since the correct set is randomised per
+ * retcon; currently a skeleton that does nothing.
+ */
 
 // DIST: bundled in all-in-one/twilight-heroes.js since loader v1.7 (its @match
 //   union includes goldberg.php for this script). The Goldbergium Door solver is

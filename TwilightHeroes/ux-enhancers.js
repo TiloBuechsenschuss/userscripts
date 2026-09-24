@@ -3,8 +3,8 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/ux-enhancers.js
-// @version      1.0
-// @description  A grab-bag of quality-of-life tweaks for Twilight Heroes, one feature per page. In the header: a "Heal" link that casts your heal skills until HP is full, and Garage / Rest links next to Hideout. On the skills page a "max" button per buff that casts it as many times as your PP allows, mirrored by a compact version in the nav sidebar. On the item pages (inventory / wear / use) a filter box that narrows the list as you type, with a type dropdown, remembered across the reload that equipping or using something causes. On the wear page sortable columns for your wearables. On the sell page sort buttons for the item list. In the journal, the next step for each open quest. Wiki "W" badges on monsters and drops in combat, your last area in the nav bar, quest titles, map areas and item names. And on main.php a "Get & Equip Black Box" button that drives the Black Box quest through criminology.php for you. Each nav-sidebar "+max" button carries its buff's PP cost in data-pp-cost, which auto-combat.js reads to refresh a buff between fights.
+// @version      1.1
+// @description  Grab-bag of quality-of-life tweaks for Twilight Heroes.
 // @match        https://www.twilightheroes.com/main.php*
 // @match        https://twilightheroes.com/main.php*
 // @match        https://www.twilightheroes.com/criminology.php*
@@ -32,6 +32,28 @@
 // @run-at       document-idle
 // @grant        none
 // ==/UserScript==
+
+/*
+ * Twilight Heroes UX Enhancers
+ *
+ * A grab-bag of quality-of-life tweaks for Twilight Heroes, one feature per page.
+ * In the header: a "Heal" link that casts your heal skills until HP is full, and Garage / Rest
+ *   links next to Hideout.
+ * On the skills page a "max" button per buff that casts it as many times as your PP allows,
+ *   mirrored by a compact version in the nav sidebar.
+ * On the item pages (inventory / wear / use) a filter box that narrows the list as you type, with a
+ *   type dropdown, remembered across the reload that equipping or using something causes.
+ * On the wear page sortable columns for your wearables.
+ * On the sell page sort buttons for the item list.
+ * In the journal, the next step for each open quest.
+ * Wiki "W" badges on monsters and drops in combat, your last area in the nav bar, quest titles, map
+ *   areas and item names.
+ * And on main.php a "Get & Equip Black Box" button that drives the Black Box quest through
+ *   criminology.php for you.
+ * Each nav-sidebar "+max" button carries its buff's PP cost in data-pp-cost, which auto-combat.js
+ *   reads to refresh a buff between fights.
+ */
+
 (function () {
   'use strict';
 

@@ -1,6 +1,7 @@
 // ==UserScript==
 // @name           KoL Choice Adventure Rewards Updated
-// @version        3.19
+// @version        3.20
+// @description    Spoiler text on Kingdom of Loathing choice adventure buttons, plus a few other pages.
 // @author	       Tilo
 // @namespace      https://github.com/TiloBuechsenschuss
 // @downloadURL    https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/adventure-choices.js
@@ -41,6 +42,7 @@
 // @grant 	GM_setValue
 // @grant	GM_xmlhttpRequest
 // @grant   GM_registerMenuCommand
+// @history 3.20 added a short @description
 // @history 3.19 moved the Play Ball! (1598) pitch button highlighting to the IotM menu script (still adds the pitch spoiler text)
 // @history 3.18 Play Ball! (1598): highlight MAJOR pitches (gold) and the item-granting pitch (green) buttons
 // @history 3.17 added Play Ball! (choice 1598) pitch spoilers; skip annotating buttons with no matching spoiler text
