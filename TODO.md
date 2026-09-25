@@ -1,5 +1,7 @@
 # ToDo
 
+Fallen London wiki links trigger Anubis - direct page should work better, possibly
+
 Fallen London:
   Carousels: https://fallenlondon.wiki/wiki/Guides#Location-Specif  Sorted by each guide's {{Audience}} stage, in the order of
   h  https://fallenlondon.wiki/wiki/Template:Audience (top is earlier in the game);
@@ -27,7 +29,6 @@ Fallen London:
   Late Firmament:
     - https://fallenlondon.wiki/wiki/Upon_a_Red_Stage_(Guide) [Queeneater's Castle]
     - https://fallenlondon.wiki/wiki/To_Make_a_Moth_(Guide) [Risen Burgundy] (no stage tag; placed with the Firmament's late content)
-    - https://fallenlondon.wiki/wiki/Risen_Burgundy_(Guide) [Risen Burgundy] (no stage tag; card-based carousels, unlocked at Firmament 370; moved from Reference)
     - https://fallenlondon.wiki/wiki/Scaling_the_Quartz_(Guide) [Stonegift]
     - https://fallenlondon.wiki/wiki/The_Marrow_Behind_(Guide) [no area]
 
@@ -57,11 +58,7 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Railway_Beginning_(Guide) (Early Railway) [Railway overview] (overview: covered by railway-board and university-laboratory)
     - https://fallenlondon.wiki/wiki/Bessemer_Steel_Ingot_(Guide) (Early Railway) [Railway overview] (sources are all implemented; steel per station goes in the economy panel)
     - https://fallenlondon.wiki/wiki/Hinterland_Scrip-Making (Early Railway) [Railway overview] (re-ranks activities already badged; nothing new)
-    - https://fallenlondon.wiki/wiki/Location-specific_cards_in_the_Hinterlands_(Guide) (Early Railway) [Railway overview]
     - https://fallenlondon.wiki/wiki/Statues_at_the_GHR_Stations_(Guide) (Early Railway) [Railway overview]
-    - https://fallenlondon.wiki/wiki/Railway_Station_Developments_(Guide) (Early Railway) [Railway overview]
-    - https://fallenlondon.wiki/wiki/Hellworm_(Guide) (Early Railway) [Railway overview]
-    - https://fallenlondon.wiki/wiki/The_City_of_the_Tracklayers_(Guide) (Post-Railway) [The City of the Tracklayers]
     - https://fallenlondon.wiki/wiki/The_Hurlers_(Guide) (Post-Railway) [The Hurlers]
     - https://fallenlondon.wiki/wiki/Discordant_Studies_-_Costs_and_Rewards_(Guide) (Post-Railway) [The Hurlers]
     - https://fallenlondon.wiki/wiki/Roof_Economy_(Guide) (Early Firmament) [Firmament overview] (needs work; economy panel)
@@ -264,7 +261,14 @@ Fallen London:
       - https://fallenlondon.wiki/wiki/Digging_in_the_Hurlers_(Guide) [The Hurlers] (implemented)
       - https://fallenlondon.wiki/wiki/Marigold_Station_(Guide) [Marigold Station] (implemented)
 
+    Late Firmament:
+      - https://fallenlondon.wiki/wiki/Risen_Burgundy_(Guide) [Risen Burgundy] (no stage tag; card-based carousels, unlocked at Firmament 370; moved from Reference) (implemented; no panel)
+
     Reference (not carousels):
+      - https://fallenlondon.wiki/wiki/The_City_of_the_Tracklayers_(Guide) (Post-Railway) [The City of the Tracklayers] (implemented; no panel: the deck and its options; the four Fate-locked vignettes are not, their titles are not on the wiki)
+      - https://fallenlondon.wiki/wiki/Railway_Station_Developments_(Guide) (Early Railway) [Railway overview] (implemented; no panel: 22 conversions whose pages name no storylet are not)
+      - https://fallenlondon.wiki/wiki/Location-specific_cards_in_the_Hinterlands_(Guide) (Early Railway) [Railway overview] (considered, nothing to badge: a matrix of which card is dealt at which station)
+      - https://fallenlondon.wiki/wiki/Hellworm_(Guide) (Early Railway) [Railway overview] (implemented; no panel: the 33-row milking table is not carried)
       - https://fallenlondon.wiki/wiki/Someone_Is_Coming_(Guide) (Early MYN) [progress quality] (implemented; the thirteen Conflict Cards are not)
       - https://fallenlondon.wiki/wiki/Investigating_(Guide) (Early MYN) [progress quality] (implemented)
       - https://fallenlondon.wiki/wiki/Seeking_(Guide) (Late MYN) [progress quality] (implemented: Wars of Illusion, and the card A new piece in the Game in `investigating`; not done: Making Your Name: Find a Tattooed Courier's contact)

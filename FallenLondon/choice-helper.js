@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.26
+// @version      1.27
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -571,6 +571,12 @@
  *     opportunity cards and the fixed-price spends, with the band of the quality each Curate step shows at.
  *     Someone Is Coming badges the eight Capering Relicker payouts at their fixed 21 CP and the drunk rat, and
  *     the cards that raise it by 1 by the profit each pays.
+ *     Hellworm badges the one card's plays, rides and the milking at Disposition 7, and its Scrip purchases.
+ *     Risen Burgundy badges the city's card carousels: the hunt, a Saint's Day, the Weaver, the Poet-Thief,
+ *     Heralds from Elsewhere and the payouts of its two counters, each option naming the quality it moves.
+ *     Station Developments badges what the railway stations' improvements and conversions take and give.
+ *     City of the Tracklayers badges the city's deck: the Prosperity an option pays, and what it does to
+ *     the Waning and the Displeasure.
  *     Built as a feature registry so further advice can be added as entries.
  */
 
@@ -8325,10 +8331,13 @@
   // "(type)", which is the kind of rogue law you are pinning down, and the
   // Station VIII kitchen "(dish)" and "(your dish)", whatever you cooked, and
   // the Airs of London's Watchmaker's Hill "(gendertitle)", as in "One lady and
-  // a weasel". Only these thirty-five: a bracket like "(3 FATE)" is part of a
-  // real title.
+  // a weasel", and Risen Burgundy's hunting card "(Roof Prey)", the quarry it
+  // names. The City of the Tracklayers adds twelve: "(the City)", "(Pub)", "(Inhabitant)", "(Chosen Site)",
+  // "(Alignment)" and "(loved one)" in option titles, the three ideologies in card titles, and three
+  // leader-card phrases. Only these forty-eight: a bracket like "(3 FATE)" is part of a real
+  // title.
   const CAROUSEL_PLACEHOLDER =
-    /\((?:growth|growth type|work leader|first option|second option|a level|a hole|a mirror|direction|somewhere|the workshop|the warzone|the mansion|the jungle|department|campaign focus|skeleton type|garment|Zee-Beast Location|Zee-Beast|Parabolan Quarry|Quarry Home|its lair|your saint|Bounty|a railway passenger|a defendant|defendant|crime|type|your dish|dish|Number|City Name|gendertitle)\)/;
+    /\((?:growth|growth type|work leader|first option|second option|a level|a hole|a mirror|direction|somewhere|the workshop|the warzone|the mansion|the jungle|department|campaign focus|skeleton type|garment|Zee-Beast Location|Zee-Beast|Parabolan Quarry|Quarry Home|its lair|your saint|Bounty|a railway passenger|a defendant|defendant|crime|type|your dish|dish|Number|City Name|gendertitle|Roof Prey|the City|Pub|Inhabitant|Chosen Site|Alignment|loved one|Emancipationist|Liberationist|Prehistoricist|a no-Prehistoricists city|a no-Liberationists city|no-Emancipationist)\)/;
 
   function carouselMatcher(title) {
     const pieces = String(title).split(CAROUSEL_PLACEHOLDER);
@@ -9638,8 +9647,14 @@
     return e.ch.luck !== undefined ? CAROUSEL_MARK_EXPECTED : CAROUSEL_MARK_CHALLENGE;
   }
 
+  // An entry may name its own quality, `q: [name, short]`, for a card game whose options move several.
+  function pqCfgFor(e, cfg) {
+    return e.q ? { quality: e.q[0], short: e.q[1], rules: cfg.rules } : cfg;
+  }
+
   function pqBadgeText(e, cfg) {
     if (e.label) return e.label;
+    cfg = pqCfgFor(e, cfg);
     const mark = pqMark(e);
     const parts = [];
     let head = '';
@@ -9675,6 +9690,7 @@
   }
 
   function pqLines(e, cfg) {
+    cfg = pqCfgFor(e, cfg);
     const lines = [e.name, e.storylet + (e.airs ? ', The Airs of London ' + aolWindows(e.airs) : ''), ''];
     if (e.airs) lines.push(aolRerolls(e));
     lines.push(pqChallenge(e));
@@ -9712,7 +9728,7 @@
   }
 
   function pqSpec(e, cfg) {
-    return { text: pqBadgeText(e, cfg), color: pqColor(e), title: pqLines(e, cfg).join('\n') };
+    return { text: pqBadgeText(e, cfg), color: pqColor(e), title: e.title || pqLines(e, cfg).join('\n') };
   }
 
   // A storylet's heading: what its options do with the quality, in a word.
@@ -9746,7 +9762,7 @@
   // by the same pass as a storylet's, since an opened card is headed like one.
   function pqCardSpec(card, def) {
     const cfg = def.cfg;
-    const mine = def.options.filter(function (e) { return normalizeName(e.storylet) === normalizeName(card.name); });
+    const mine = def.options.filter(function (e) { return normalizeName(e.storylet) === normalizeName(card.canon || card.name); });
     const lines = [card.name, card.needs ? 'Needs: ' + card.needs : '', ''].filter(function (l, i) { return i !== 1 || l; });
     if (card.lines) card.lines.forEach(function (l) { lines.push(l); });
     mine.forEach(function (e) { lines.push('  • ' + e.name + ' — ' + pqBadgeText(e, cfg)); });
@@ -9764,14 +9780,15 @@
       storylets: def.storylets, index: def.index, aliases: def.aliases,
       // A card's heading is the card badge's, and a storylet another quality's feature already heads keeps one badge.
       storyletSpec: function (key) {
-        return def.cardKeys.indexOf(key) !== -1 || (def.noHeading || []).indexOf(key) !== -1 ? null : pqStoryletSpec(key, def);
+        return def.cardKeys.indexOf(key) !== -1 || (def.noHeading || []).indexOf(key) !== -1
+          || def.cards.some(function (c) { return carouselMatcher(c.name)(key); }) ? null : pqStoryletSpec(key, def);
       },
       optionSpec: function (e) { return pqSpec(e, def.cfg); },
       cls: def.cls, flag: def.flag, branchCls: def.branchCls, branchFlag: def.branchFlag,
     });
     if (!def.cards.length) return;
     eachCardName(function (host, name, place, style) {
-      const card = def.cards.filter(function (c) { return normalizeName(c.name) === normalizeName(name); })[0];
+      const card = def.cards.filter(function (c) { return carouselMatcher(c.name)(normalizeName(name)); })[0];
       attachBadge(host, {
         cls: def.cardCls, flag: def.cardFlag, value: name, spec: card ? pqCardSpec(card, def) : null,
         place: place, style: style,
@@ -11088,6 +11105,973 @@
   };
 
   function sicRatings() { pqRatings(SIC_DEF); }
+
+  // === feature: Hellworm ==================================================
+  //
+  // Hellworm (Guide): once you own a Miniature Hellworm and equip it, the card
+  // Your Very Own Hellworm joins the Upper River deck. Its options raise The
+  // Disposition of your Hellworm (Play with your hellworm, +1; Ride your
+  // hellworm, +1 or 2, once you have the saddle) until it reaches 7, and Milk
+  // your hellworm takes all 7 back and pays one of 33 rewards. The rest of the
+  // card is Scrip purchases: the saddle, boots that add +8 Dangerous and +1
+  // Dreaded, and a polish that does nothing.
+  //
+  // **What the badge says.** The Disposition a play makes and what else it does
+  // ("Disp +1 · Nightmares −1–8", "Disp +1–2 · Scandal +1 · Aeolian Scream
+  // ×2"), the level and the word "one of 33" on the milking, and the price on a
+  // purchase. The guide's figures are in the tooltip, not on a badge: 10.03
+  // Echoes per action playing, 15.54 riding, and the 80.26 Echoes average of
+  // the 33 rewards that can be sold straight. The 33-reward table itself is
+  // NOT here; there is no panel for it, by decision.
+  //
+  // Transcribed from the option pages (fetched through the API, 2026-09-25) with
+  // Hellworm (Guide) as the cross-check. Where they disagree the page is
+  // followed and `guide` quotes the guide:
+  //   Play with your hellworm      Nightmares −1 to −8, guide 1 to 7
+  //   Milk your hellworm           needs Kataleptic Toxicology 5, which the guide
+  //                                does not mention
+  // Left out: the milking table, the strategy section's cash-out paths and the
+  // Tasting Flight. Corrections go in HW_OPTIONS and nowhere else.
+
+  const HW_CFG = {
+    quality: 'The Disposition of your Hellworm', short: 'Disp',
+    rules: 'Raise The Disposition of your Hellworm by playing or riding, and milk it at 7, which takes all 7 back. '
+      + 'The card is dealt in the Upper River at any station but the City of the Tracklayers.',
+  };
+  const HW_CARD = 'Your Very Own Hellworm';
+
+  const HW_OPTIONS = [
+    { storylet: HW_CARD, name: 'Play with your hellworm', win: 1, x: [['Nightmares', [-8, -1]]],
+      guide: 'The guide gives Nightmares −1 to −7.',
+      note: 'The guide values a play-and-milk cycle at 10.03 Echoes per action, eight card draws to seven plays and a milking.' },
+    { storylet: HW_CARD, name: 'Ride your hellworm', win: [1, 2], x: [['Scandal', 1]], pay: 'Aeolian Scream ×2',
+      g: [['Aeolian Scream', 2]], needs: 'Your Very Own Miniature Hellworm, Saddled and Bridled',
+      note: 'Also gives Not to be Trifled With. The guide values riding and milking at 15.54 Echoes per action, with one action to shed the Scandal.' },
+    { storylet: HW_CARD, name: 'Milk your hellworm', spend: 7, pay: 'one of 33 rewards', needs: 'Kataleptic Toxicology 5',
+      guide: 'The guide does not mention the Kataleptic Toxicology.',
+      note: 'Takes all 7 back. The 33 rewards run from Bottle of Greyfields 1879 (0.01 Echoes) to Vial of Masters’ Blood (1562.60); '
+        + 'the guide’s average over the ones that sell straight is 80.26 Echoes.' },
+    { storylet: HW_CARD, name: 'Purchase a hellworm saddle', label: 'Scrip ×200,000 → saddle',
+      needs: 'Hinterland Scrip 200000, a Miniature Hellworm and Involved in a Railway Venture 130',
+      note: 'Swaps the Hellworm for the Saddled and Bridled one, which unlocks riding.' },
+    { storylet: HW_CARD, name: 'Purchase a pair of Hellworm-Riding Boots', label: 'Scrip ×200,000 → boots',
+      needs: 'Hinterland Scrip 200000 and the saddled Hellworm',
+      note: 'Boots that give Dangerous +8 and Dreaded +1, no better than boots you probably own.' },
+    { storylet: HW_CARD, name: 'Purchase an amount of Hellworm-Riding Boot Polish', label: 'Scrip ×200,000 → nothing',
+      needs: 'Hinterland Scrip 200000 and the Hellworm-Riding Boots',
+      note: 'The polish does nothing, and can be bought again.' },
+  ];
+
+  const HW_CARDS = [{ name: HW_CARD, badge: 'Disp +1 · milk at 7', needs: 'In the Company of a Hellworm 1' }];
+  const HW_INDEX = carouselIndex(HW_OPTIONS);
+  const HW_DEF = {
+    cfg: HW_CFG, options: HW_OPTIONS, index: HW_INDEX, storylets: [HW_CARD], cards: HW_CARDS,
+    cardKeys: HW_CARDS.map(function (c) { return normalizeName(c.name); }), aliases: null,
+    cls: 'fl-ux-hw', flag: 'flUxHw', branchCls: 'fl-ux-hw-branch', branchFlag: 'flUxHwBranch',
+    cardCls: 'fl-ux-hw-card', cardFlag: 'flUxHwCard',
+  };
+
+  function hwRatings() { pqRatings(HW_DEF); }
+
+  // === feature: Risen Burgundy ============================================
+  //
+  // Risen Burgundy (Guide): the Firmament city, played through the opportunity
+  // deck alone, so every carousel is a set of CARDS. This covers the ones the
+  // guide names:
+  //
+  //   the hunt        Whoso List to Hunt starts it, Hunting the (Roof Prey) is
+  //                   dealt while A Season of Hunting is 2 or more, and the
+  //                   Chevalier's Attend the revels ends it: seven actions.
+  //   a Saint's Day   Preparations for a Saint's Day picks a feast (15) or a
+  //                   march of dissent (25); four progress cards raise it by 1
+  //                   an action, two conflict cards raise a menace, and a
+  //                   payout card ends it.
+  //   the Weaver      A Delivery from the Gall-Eyed Weaver, four cards that
+  //                   share one option title and differ in what they pay.
+  //   the Poet-Thief  a sack (Thief-Bells) or a hat (Count's Rock) that
+  //                   summons an autoplay card until you return it.
+  //   Heralds         a six-step ladder of one card.
+  //   the payouts     Gifts of Burgundy and The Spoils of Rebellion, at 10 of
+  //                   Burgundian Beneficence or Against Time and Kings.
+  //   Casing and Fascinating, spent here, and the weekly cards.
+  //
+  // **What the badge says.** Each option names the quality it moves, since a
+  // card game moves several: "Saint +1? · fail +1", "BB −10 ▼ → Ballad",
+  // "Casing −36 ▼ → Venom-Ruby ×10". The Airs of Burgundy are re-rolled by
+  // almost every option here and are said in the tooltip, not the badge.
+  //
+  // Transcribed from the card and option pages (fetched through the API,
+  // 2026-09-25) with Risen Burgundy (Guide) as the cross-check. The Weaver's
+  // four deliveries multiplied by their payouts give the guide's four totals
+  // exactly (5 × 4 = 20, 1 × 3 = 3, 2 × 4 = 8, 27 × 2 = 54). Where a page and
+  // the guide differ the page is followed and `guide` quotes the guide:
+  //   Stay with the pack   the page is empty, so the challenge is the guide's
+  //   the payouts          the guide says "10" of the quality; the pages take 10 of it
+  // Left out: the eighteen mounts on Whoso List to Hunt (the guide says the
+  // prey is narrative and the challenges do not depend on the steed), the
+  // Weaver's investments and shop, the Ducal Mint's crafting (its card has no
+  // page), the qualities that raise the Notes on a Joyous Entry, As Above
+  // and Glory's Fire cards, and the thirty other cards that raise Beneficence
+  // or Against Time and Kings by 1, which the guide only points to. Corrections
+  // go in RBG_OPTIONS and nowhere else.
+
+  const RBG_CFG = {
+    quality: 'Risen Burgundy', short: 'Bg',
+    rules: 'Risen Burgundy plays through the opportunity deck: the hunt, a Saint’s Day, the Weaver and the Poet-Thief each '
+      + 'run for a few cards, and almost every option re-rolls the Airs of Burgundy.',
+  };
+  const RBG_BB = ['Burgundian Beneficence', 'BB'];
+  const RBG_ATK = ['Against Time and Kings', 'ATK'];
+  const RBG_SAINT = ['Preparations for a Saint’s Day', 'Saint'];
+  const RBG_SEASON = ['A Season of Hunting', 'Season'];
+  const RBG_VISITOR = ['A Visitor to Burgundy', 'Visitor'];
+  const RBG_CASING = ['Casing...', 'Casing'];
+  const RBG_FASC = ['Fascinating...', 'Fasc'];
+  const RBG_LOOM = ['A Modified Loom', 'Loom'];
+  const RBG_HUNT = 'Hunting the (Roof Prey)';
+  const RBG_WEAVER = 'A Delivery from the Gall-Eyed Weaver';
+
+  function rbgE(storylet, name, more) {
+    return Object.assign({ storylet: storylet, name: name }, more);
+  }
+
+  // A payout at 10 of a counter.
+  function rbgPayout(storylet, name, q, pay, g, more) {
+    return rbgE(storylet, name, Object.assign({ q: q, need: 10, cost: 10, pay: pay, g: g }, more));
+  }
+
+  // A Saint's Day progress option: +1 whatever happens, on a narrow challenge on a skill, or a set price.
+  function rbgSaint(storylet, name, more) {
+    return rbgE(storylet, name, Object.assign({ q: RBG_SAINT, win: 1 }, more));
+  }
+
+  const RBG_OPTIONS = [
+    // --- the payouts of the two counters -------------------------------------------------------------
+    rbgPayout('Gifts of Burgundy', 'A chivalric romance', RBG_BB, 'Captivating Ballad', [['Captivating Ballad', 1]]),
+    rbgPayout('Gifts of Burgundy', 'The plunder of a violent history', RBG_BB, 'Mortification of a Great Power', [['Mortification of a Great Power', 1]]),
+    rbgPayout('Gifts of Burgundy', 'The spoils of a great hunt', RBG_BB, 'Glim-Encrusted Carapace', [['Glim-Encrusted Carapace', 1]]),
+    rbgPayout('Gifts of Burgundy', 'Ducal forgiveness', RBG_BB, 'Malefactor −1', null, { needs: 'Malefactor' }),
+    rbgPayout('Gifts of Burgundy', 'Access to the mint', RBG_BB, 'opens the Ducal Mint', null, { needs: 'On the Trail of the Ducal Mint 10–19' }),
+    rbgPayout('The Spoils of Rebellion', 'An aspirational chronicle', RBG_ATK, 'Chimerical Archive', [['Chimerical Archive', 1]]),
+    rbgPayout('The Spoils of Rebellion', 'The promise of cooperation', RBG_ATK, 'Much-Needed Gap', [['Much-Needed Gap', 1]]),
+    rbgPayout('The Spoils of Rebellion', 'A sparking anachronism', RBG_ATK, 'Crackling Device', [['Crackling Device', 1]]),
+    rbgPayout('The Spoils of Rebellion', 'The coffin', RBG_ATK, 'Soothe & Cooper Long-Box', [['Soothe & Cooper Long-Box', 1]]),
+
+    // --- the hunt ---------------------------------------------------------------------------------------------
+    rbgE(RBG_HUNT, 'Go for glory', { q: RBG_SEASON, win: -1, ch: { stat: 'Dangerous + 15 × Neathproofed', diff: 230 },
+      x: [['Making Waves', 5]], xf: [['Wounds', [2, 4]], ['Scandal', [1, 2]]],
+      note: 'Takes one off A Season of Hunting whether it succeeds or fails, and re-rolls the Airs of the Hunt.' }),
+    rbgE(RBG_HUNT, 'Stay with the pack', { q: RBG_SEASON, win: -1, ch: { stat: 'Dangerous + 15 × Insubstantial', diff: 210 },
+      guide: 'The option page is empty: the challenge and the Wounds on a failure are the guide’s.',
+      note: 'Takes one off A Season of Hunting whether it succeeds or fails.' }),
+    rbgE('An Invitation from the Swashbuckling Chevalier', 'Attend the revels', { label: 'ends the hunt → 2 Memories · 2 Codes',
+      g: [['Memory of a Much Stranger Self', 2], ['Cave-Aged Code of Honour', 2]],
+      note: 'Dealt at once when A Season of Hunting is 1. Gives 2 Memory of a Much Stranger Self and 2 Cave-Aged Code of Honour, '
+        + 'and returns the steed and arms. The guide values the whole hunt at 50 Echoes over 7 actions.' }),
+
+    // --- a Saint's Day ----------------------------------------------------------------------------------------------------
+    rbgE('Preparations for a Saint’s Day', 'Pledge yourself to aiding a glorious feast', { label: 'Saint → feast (15) · 5 actions',
+      note: 'Starts a grand feast, paid by In Aid of a Feast at Preparations 15: 4 Cellars of Wine.' }),
+    rbgE('Preparations for a Saint’s Day', 'Foment unrest within a procession', { label: 'Saint → dissent (25) · 5 actions',
+      note: 'Starts a march of dissent, paid by A March for the People at Preparations 25: 4 Caustic Apocryphons.' }),
+    rbgSaint('Aiding a Feast: Church and State', 'Highlight a few appropriate verses', { u: [['Palimpsest Scrap', 5]], needs: 'Palimpsest Scrap 5' }),
+    rbgSaint('Aiding a Feast: Church and State', 'Expose a partisan priest', { ch: { stat: 'A Player of Chess', diff: 10, narrow: true }, lose: 1,
+      xf: [['Scandal', 2]] }),
+    rbgSaint('Aiding a Feast: Hearts and Stomachs', 'Supply the revels with Venison Marrow', { u: [['Pot of Venison Marrow', 5]], needs: 'Pot of Venison Marrow 5' }),
+    rbgSaint('Aiding a Feast: Hearts and Stomachs', 'Test supplies for poisons', { ch: { stat: 'Kataleptic Toxicology', diff: 10, narrow: true }, lose: 1,
+      xf: [['Wounds', 3]] }),
+    rbgSaint('Spreading Sedition: A Twisted Pilgrimage', 'Seed the city with debauchery', { u: [['Night on the Town', 1]], needs: 'Night on the Town' }),
+    rbgSaint('Spreading Sedition: A Twisted Pilgrimage', 'Tweak the route of the pilgrimage', { ch: { stat: 'Zeefaring', diff: 10, narrow: true }, lose: 1,
+      xf: [['Nightmares', 2]] }),
+    rbgSaint('Spreading Sedition: Hearts and Minds', 'Lubricate the marchers with alcohol', { u: [['Magisterial Lager', 5]], needs: 'Magisterial Lager 5' }),
+    rbgSaint('Spreading Sedition: Hearts and Minds', 'Bend the ears of Guildspeople', { ch: { stat: 'Mithridacy', diff: 10, narrow: true }, lose: 1,
+      xf: [['Suspicion', 3]] }),
+    rbgE('A Gloomy Summer', 'Convince her of the harmlessness of the cause', { label: 'Scandal +1 · Secluded Address ×6', g: [['Secluded Address', 6]] }),
+    rbgE('A Gloomy Summer', 'Go about your work in secret', { aliases: ['Go about your work in secret (A Gloomy Summer)'],
+      label: 'Suspicion +1 · Journal ×6', g: [['Journal of Infamy', 6]] }),
+    rbgE('A Gloomy Summer', 'Fund her own activities', { q: RBG_ATK, win: 1, pay: 'Gossip ×7 · ends the conflict', u: [['Blackmail Material', 1]],
+      needs: 'Blackmail Material', g: [['Scrap of Incendiary Gossip', 7]], note: 'Removes the card until the Saint’s Day feast.' }),
+    rbgE('A Duchess’ Disapproval', 'Argue in favour of change', { label: 'Suspicion +1 · Final Breath ×6', g: [['Final Breath', 6]] }),
+    rbgE('A Duchess’ Disapproval', 'Go about your work in secret', { aliases: ['Go about your work in secret (A Duchess’ Disapproval)'],
+      label: 'Suspicion +1 · Journal ×6', g: [['Journal of Infamy', 6]] }),
+    rbgE('A Duchess’ Disapproval', 'Enlighten the Duchess as to revolutionary codes', { q: RBG_BB, win: 1, pay: 'Palimpsest ×7 · ends the conflict',
+      u: [['Cave-Aged Code of Honour', 1]], needs: 'Cave-Aged Code of Honour', g: [['Palimpsest Scrap', 7]],
+      note: 'Removes the card until the Saint’s Day feast.' }),
+    rbgE('In Aid of a Feast', 'Attend the feast', { q: RBG_SAINT, spend: 15, pay: 'Wine ×4', g: [['Cellar of Wine', 4]],
+      note: 'No challenge. Ends the Saint’s Day.' }),
+    rbgE('A March for the People', 'Attend the pilgrimage', { q: RBG_SAINT, spend: 25, pay: 'Apocryphon ×4', g: [['Caustic Apocryphon', 4]],
+      note: 'No challenge. Ends the Saint’s Day. The guide notes the Caustic Apocryphons are worth less than the nominal 50 Echoes.' }),
+
+    // --- the Gall-Eyed Weaver ------------------------------------------------------------------------------------------------------
+    rbgE('The Woes of the Gall-Eyed Weaver', 'Intercede', { label: 'opens the Weaver’s Trading Post', needs: 'Fuel for Glory’s Fire 3' }),
+    rbgE(RBG_WEAVER, 'Unroll your textiles', { q: RBG_LOOM, win: -1, dream: true, pay: 'textile by your Vision',
+      aliases: ['Unroll your textiles (Puzzle-Damask)', 'Unroll your textiles (Parabola-Linen)', 'Unroll your textiles (Bombazine)', 'Unroll your textiles (Whisper-Satin)'],
+      note: 'Four cards share this option. Which one you are dealt is your Weaver’s Vision.' }),
+
+    // --- the Poet-Thief --------------------------------------------------------------------------------------------------------------------
+    rbgE('The Tolling of the Thief-Bells', 'Accept a lucrative opportunity', { label: 'takes a sack · Suspicion −3 a return',
+      note: 'Gives Saddled with a Stolen Sack, which adds Stopped by the Guards (autoplay) and An Encounter with the Poet-Thief to the deck.' }),
+    rbgE('The Tolling of the Thief-Bells', 'Steal from the Gravensteen itself', { q: RBG_CASING, need: 8, cost: 36,
+      pay: 'Venom-Ruby ×10 · Moonlight · Damask · Diamond', g: [['Venom-Ruby', 10], ['Memory of Moonlight', 1], ['Puzzle-Damask Scrap', 1], ['Magnificent Diamond', 1]],
+      note: 'The guide values the reward at 38.5 Echoes, 1.07 per CP of Casing.' }),
+    rbgE('All Around the Count’s Rock', 'Accept a lucrative opportunity', { aliases: ['Accept a lucrative opportunity (All Around the Count’s Rock)'],
+      label: 'takes the hat · Scandal −3 a return',
+      note: 'Gives Clad in Conspicuous Garb, which adds Recognised in the Street (autoplay) and The Poet-Thief’s Vestments to the deck.' }),
+    rbgE('All Around the Count’s Rock', 'Case a lesser keep', { q: RBG_CASING, win: 6, pay: 'Clue ×50', g: [['Cryptic Clue', 50]],
+      note: 'No challenge. The guide values it at 1 Echo more than the Casing.' }),
+    rbgE('All Around the Count’s Rock', 'Seduce an Alluring Masquer', { q: RBG_FASC, need: 8, cost: 36, pay: 'Wine · Favour ×2 · Notion ×10',
+      g: [['Cellar of Wine', 1], ['Favour in High Places', 2], ['Romantic Notion', 10]], needs: 'Fascinating... 8',
+      note: 'The guide values the reward at 38.5 Echoes.' }),
+    rbgE('An Encounter with the Poet-Thief', 'Conclude your business', { aliases: ['Conclude your business (An Encounter with the Poet-Thief)'],
+      label: 'return the sack → Diamonds · Gossip ×8', g: [['Magnificent Diamond', 1], ['Ostentatious Diamond', 3], ['Scrap of Incendiary Gossip', 8]],
+      note: 'Takes the sack back and ends Saddled with a Stolen Sack. The guide values the reward at 18 Echoes.' }),
+    rbgE('The Poet-Thief’s Vestments', 'Conclude your business', { aliases: ['Conclude your business (The Poet-Thief’s Vestments)'],
+      label: 'return the hat → Damask · Satin · Gossip ×8', g: [['Puzzle-Damask Scrap', 1], ['Whisper-Satin Scrap', 3], ['Scrap of Incendiary Gossip', 8]],
+      note: 'Takes the hat back and ends Clad in Conspicuous Garb. The guide values the reward at 18 Echoes.' }),
+    rbgE('Stopped by the Guards', 'Bribe them', { aliases: ['Bribe them (Burgundy)'], label: 'Suspicion +2 · Tale of Terror ×2', g: [['Tale of Terror!!', 2]] }),
+    rbgE('Stopped by the Guards', 'Make a run for it', { aliases: ['Make a run for it (Stopped by the Guards)'], label: 'Suspicion +2 · Peppercaps ×2',
+      g: [['Hand-picked Peppercaps', 2]] }),
+    rbgE('Stopped by the Guards', 'Bluff', { label: 'Suspicion +2 · Shriek ×50', g: [['Primordial Shriek', 50]] }),
+    rbgE('Recognised in the Street', 'Bluster', { label: 'Scandal +2 · Testimony ×2', g: [['Dubious Testimony', 2]] }),
+    rbgE('Recognised in the Street', 'Make a run for it', { aliases: ['Make a run for it (Recognised in the Street)'], label: 'Scandal +2 · Palimpsest ×2',
+      g: [['Palimpsest Scrap', 2]] }),
+    rbgE('Recognised in the Street', 'Feign compliance', { label: 'Scandal +2 · Catch ×2', g: [['Deep-zee Catch', 2]] }),
+
+    // --- Heralds from Elsewhere: a six-step ladder --------------------------------------------------------------------------------------------
+    rbgE('Heralds from Elsewhere', 'Chat to a Six-Throated Gossip', { q: RBG_VISITOR, win: 1, pay: 'Gossip ×5 · Statement', x: [['Scandal', 1]],
+      needs: 'A Visitor to Burgundy 0–1', g: [['Scrap of Incendiary Gossip', 5], ['Sworn Statement', 1]] }),
+    rbgE('Heralds from Elsewhere', 'Sight a Circumspect Smuggler', { q: RBG_VISITOR, win: 1, pay: 'Bone ×450', x: [['Fuel for Glory’s Fire', 1]],
+      needs: 'A Visitor to Burgundy exactly 2', g: [['Bone Fragments', 450]] }),
+    rbgE('Heralds from Elsewhere', 'Rest with a Weary Miser-Herd', { q: RBG_VISITOR, win: 1, pay: 'Glim ×200', x: [['Nightmares', -4]],
+      needs: 'A Visitor to Burgundy exactly 3', g: [['Shard of Glim', 200]] }),
+    rbgE('Heralds from Elsewhere', 'Observe a group of lost miners', { q: RBG_VISITOR, win: 1, pay: 'Map · Thigh Bone',
+      needs: 'A Visitor to Burgundy exactly 4', g: [['Puzzling Map', 1], ['Unidentified Thigh Bone', 1]] }),
+    rbgE('Heralds from Elsewhere', 'Break fast with a Ravenous Researcher', { q: RBG_VISITOR, win: 1, pay: 'Venom-Ruby ×50 · Marrow ×5',
+      x: [['Suspicion', 1]], needs: 'A Visitor to Burgundy exactly 5', g: [['Venom-Ruby', 50], ['Pot of Venison Marrow', 5]],
+      note: 'May make you Unaccountably Peckish.' }),
+    rbgE('Heralds from Elsewhere', 'Look eastward (Salt-Veined)', { q: RBG_VISITOR, win: 1, pay: 'Notion ×20 · Possibility ×45',
+      x: [['As Above Becomes Below', 1], ['Wounds', 2]], needs: 'A Visitor to Burgundy exactly 6 and Salt-Veined',
+      g: [['Romantic Notion', 20], ['Tantalising Possibility', 45]] }),
+    rbgE('Heralds from Elsewhere', 'Look eastward (no Salt-Veined)', { q: RBG_VISITOR, win: 1, pay: 'Possibility ×45', x: [['Nightmares', 2]],
+      needs: 'A Visitor to Burgundy exactly 6, without Salt-Veined', g: [['Tantalising Possibility', 45]],
+      note: 'The guide values a whole round of the six at 38.5 Echoes over six actions, 5.92 per action ignoring the menaces.' }),
+
+    // --- the weekly cards ------------------------------------------------------------------------------------------------------------------------
+    rbgE('Colour and Sound: Market Day', 'Purchase a book of hours', { label: 'Stuiver ×250 → Verse of Counter-Creed ×2', u: [['Stuiver', 250]],
+      note: 'Once a week: any one of the four purchases locks the card until Time, the Healer.' }),
+    rbgE('Colour and Sound: Market Day', 'Purchase some sainted bones', { label: 'Stuiver ×250 → Holy Relic ×2', u: [['Stuiver', 250]],
+      note: 'Once a week: any one of the four purchases locks the card until Time, the Healer.' }),
+    rbgE('Colour and Sound: Market Day', 'Purchase an imperial Fechtbuch', { label: 'Stuiver ×250 → Code of Honour · Legal Document', u: [['Stuiver', 250]],
+      note: 'Once a week: any one of the four purchases locks the card until Time, the Healer.' }),
+    rbgE('Colour and Sound: Market Day', 'Purchase an ell of cloth', { label: 'Stuiver ×250 → Puzzle-Damask ×2', u: [['Stuiver', 250]],
+      note: 'Once a week: any one of the four purchases locks the card until Time, the Healer.' }),
+    rbgE('A Deluge of Charity', 'Grab a tin of ham', { label: 'Tinned Ham · once a month', note: 'Any one of the four locks the card for a month.' }),
+    rbgE('A Deluge of Charity', 'Attend to the Avid Canon’s sermon', { label: 'False Hagiotoponym · once a month', note: 'Any one of the four locks the card for a month.' }),
+    rbgE('A Deluge of Charity', 'Claim a curious bottle', { label: 'Judgements’ Egg · Notes +2 · once a month', note: 'Any one of the four locks the card for a month.' }),
+    rbgE('A Deluge of Charity', 'Demand a private audience with the Avid Canon', { label: '5 Hagiotoponyms → Legenda Cosmogone',
+      needs: 'False Hagiotoponym 5', note: 'Any one of the four locks the card for a month.' }),
+  ];
+
+  // The four deliveries of the Weaver, by the Vision that deals them: what one pays, how many, and the
+  // guide's total and Echoes per action.
+  const RBG_WEAVER_VISIONS = [
+    { vision: 1, item: 'Puzzle-Damask Scrap', each: 2, payouts: 4, total: 8, epa: 7.5, cost: 'a Crackling Device' },
+    { vision: 2, item: 'Parabola-Linen Scrap', each: 1, payouts: 3, total: 3, epa: 6.25, cost: 'Ratwork Mechanism ×13' },
+    { vision: 3, item: 'Thirsty Bombazine Scrap', each: 5, payouts: 4, total: 20, epa: 5.2, cost: 'Whirring Contraption ×4' },
+    { vision: 4, item: 'Whisper-Satin Scrap', each: 27, payouts: 2, total: 54, epa: 4.83, cost: 'an Unlawful Device' },
+  ];
+
+  const RBG_CARDS = [
+    { name: 'Gifts of Burgundy', badge: 'BB −10 ▼ → 5 gifts', needs: 'Burgundian Beneficence 10' },
+    { name: 'The Spoils of Rebellion', badge: 'ATK −10 ▼ → 4 spoils', needs: 'Against Time and Kings 10' },
+    { name: 'Whoso List to Hunt', badge: 'starts a hunt · 7 actions', needs: 'Firmament 450',
+      note: 'Choose a steed and arms, hunt five times, then attend the revels. The eighteen steeds are not badged: the guide says the prey is narrative and the challenges do not depend on the steed.' },
+    { name: RBG_HUNT, badge: 'Season −1', needs: 'A Season of Hunting 2 or more' },
+    { name: 'An Invitation from the Swashbuckling Chevalier', badge: 'ends the hunt' },
+    { name: 'Preparations for a Saint’s Day', badge: 'Saint → 15 or 25', needs: 'Firmament 450' },
+    { name: 'Aiding a Feast: Church and State', badge: 'Saint +1' },
+    { name: 'Aiding a Feast: Hearts and Stomachs', badge: 'Saint +1' },
+    { name: 'Spreading Sedition: A Twisted Pilgrimage', badge: 'Saint +1' },
+    { name: 'Spreading Sedition: Hearts and Minds', badge: 'Saint +1' },
+    { name: 'A Gloomy Summer', badge: 'conflict · ATK +1 with Blackmail' },
+    { name: 'A Duchess’ Disapproval', badge: 'conflict · BB +1 with a Code' },
+    { name: 'In Aid of a Feast', badge: 'Saint 15 ▼ → Wine ×4' },
+    { name: 'A March for the People', badge: 'Saint 25 ▼ → Apocryphon ×4' },
+    { name: 'The Woes of the Gall-Eyed Weaver', badge: 'opens the Trading Post' },
+    { name: RBG_WEAVER, badge: 'Loom −1 → textile by your Vision' },
+    { name: 'The Tolling of the Thief-Bells', badge: 'sack · Casing −36 ▼' },
+    { name: 'All Around the Count’s Rock', badge: 'hat · Casing +6 · Fasc −36 ▼' },
+    { name: 'An Encounter with the Poet-Thief', badge: 'return the sack' },
+    { name: 'The Poet-Thief’s Vestments', badge: 'return the hat' },
+    { name: 'Stopped by the Guards', badge: 'autoplay · Suspicion +2' },
+    { name: 'Recognised in the Street', badge: 'autoplay · Scandal +2' },
+    { name: 'Heralds from Elsewhere', badge: 'Visitor +1 · six steps' },
+    { name: 'Colour and Sound: Market Day', badge: 'Stuiver ×250 · weekly' },
+    { name: 'A Deluge of Charity', badge: 'free · monthly' },
+  ];
+
+  const RBG_ALL_STORYLETS = RBG_OPTIONS.map(function (e) { return e.storylet; })
+    .filter(function (s, i, all) { return all.indexOf(s) === i; });
+  const RBG_INDEX = carouselIndex(RBG_OPTIONS);
+  const RBG_DEF = {
+    cfg: RBG_CFG, options: RBG_OPTIONS, index: RBG_INDEX, storylets: RBG_ALL_STORYLETS, cards: RBG_CARDS,
+    cardKeys: [],
+    // Hunting the Wild Boar, Hunting the Stag...: the card is named after its quarry.
+    aliases: function (key) { return /^hunting the /.test(key) && key !== 'hunting the roof prey' ? normalizeName(RBG_HUNT) : null; },
+    cls: 'fl-ux-rbg', flag: 'flUxRbg', branchCls: 'fl-ux-rbg-branch', branchFlag: 'flUxRbgBranch',
+    cardCls: 'fl-ux-rbg-card', cardFlag: 'flUxRbgCard',
+  };
+
+  // The Weaver's one option, told by the Vision: a card that shares a title with three others.
+  const RBG_WEAVER_OPTION = RBG_OPTIONS.filter(function (e) { return e.dream; })[0];
+  RBG_WEAVER_OPTION.title = [RBG_WEAVER_OPTION.name, RBG_WEAVER, '',
+    'Loom −1 on each. The four cards share this title and are dealt by your Weaver’s Vision; when the Loom reaches 0 the Vision moves on.',
+  ].concat(RBG_WEAVER_VISIONS.map(function (v) {
+    return 'Vision ' + v.vision + ': ' + v.item + ' ×' + v.each + ', ' + v.payouts + ' times, ' + v.total + ' in all (invested for '
+      + v.cost + '); the guide values it at ' + v.epa + ' Echoes per action.';
+  })).join('\n');
+
+  function rbgRatings() { pqRatings(RBG_DEF); }
+
+  // === feature: Station Developments ======================================
+  //
+  // Railway Station Developments (Guide): the Upper River stations can be
+  // built up with Hinterland Scrip at the Offices of the Tracklayer's Union,
+  // and each development unlocks repeatable conversions in the station's own
+  // storylets (lend books, sell fossils, trade diamonds, curate souls). Every
+  // improvement costs 50 Scrip times one more than the station's developments
+  // so far, so the tenth costs 500 and ten cost 2,750 in all. Some add a
+  // second price, and a Charter halves it.
+  //
+  // **What the badge says.** What the option takes and what it gives, in the
+  // wording the badges of the other progress features use: `Scrip 50×(n+1) →
+  // Jericho Library`, `Curio ×5 → Scrip ×25`. `n` is the station's
+  // development count, said in the tooltip, which also holds the full price,
+  // what it needs and the guide's remarks. There is no panel for the
+  // catalogue, by decision.
+  //
+  // Transcribed from the option pages (fetched through the API, 2026-09-25)
+  // with Railway Station Developments (Guide) as the cross-check. Where the
+  // guide's row and the page disagree the page is followed. Rules for what is
+  // here and what is not:
+  //   * An improvement whose page names no storylet is filed under its
+  //     station's Offices branch, where the ones that do name it sit. If the
+  //     game files one elsewhere its badge simply does not appear.
+  //   * Left out: 22 conversions whose pages name no storylet (Ealing Gardens'
+  //     butchery, Postal and Notary Office and Sapphire; the Hurlers'
+  //     hot-spring and Sapphire), the three Larceny options (the Casing
+  //     feature), Marigold (its statue belongs to the statue package), the
+  //     Ealing Watchtower refresh on a card that carries two names, and the
+  //     Location-specific cards guide, which is a matrix of which card is dealt
+  //     where.
+  // Corrections go in SD_OPTIONS and nowhere else.
+
+  const SD_CFG = {
+    quality: 'Station development', short: 'Station',
+    rules: 'Improvements cost 50 Hinterland Scrip times one more than the station’s developments so far, '
+      + 'and each development unlocks more conversions at that station.',
+  };
+  const SD_OFFICES = 'Offices of the Tracklayer’s Union: ';
+  const SD_EG = SD_OFFICES + 'Ealing Gardens Branch';
+  const SD_JL = SD_OFFICES + 'Jericho Branch';
+  const SD_EV = SD_OFFICES + 'Evenlode Branch';
+  const SD_BA = SD_OFFICES + 'Balmoral Branch';
+  const SD_S8 = SD_OFFICES + 'Station VIII Branch';
+  const SD_BI = SD_OFFICES + 'Burrow-Infra-Mump Branch';
+  const SD_MO = SD_OFFICES + 'Moulin Branch';
+  const SD_HU = SD_OFFICES + 'Hurlers Branch';
+  const SD_SCRIP = 'Scrip 50×(n+1)';
+
+  // `give` and `get` are the badge's two halves, `note` the rest of the tooltip.
+  function sd(storylet, name, give, get, note, more) {
+    return Object.assign({ storylet: storylet, name: name, give: give, get: get, note: note }, more);
+  }
+
+  const SD_OPTIONS = [
+    // --- Ealing Gardens ---
+    sd(SD_EG, 'Commission the building of a commercial district', SD_SCRIP, 'commercial district 1', 'The first of three levels; each unlocks more conversions in the station’s butchery.'),
+    sd(SD_EG, 'Further develop the commercial district', SD_SCRIP, 'commercial district 2', 'Needs Ealing Gardens Commercial Development 1 exactly.'),
+    sd(SD_EG, 'Complete the commercial district', SD_SCRIP, 'commercial district 3', 'Needs Ealing Gardens Commercial Development 2 exactly.'),
+    sd(SD_EG, 'Build a branch of Virginia’s Spa', SD_SCRIP, 'Spa', 'Gives Ealing Spa and Favours: Hell ×2.'),
+    sd(SD_EG, 'Build a Watchtower, lit with the reflected light of your own False-Star', SD_SCRIP, 'Watchtower',
+      'Needs A False-Star of your Own, not used up. Ealing Gardens: Darkness −2, Seeing Banditry in the Upper River −2, Advancing the Liberation of Night −3; gives Supporting the Emancipationist Tracklayers.'),
+    sd(SD_EG, 'Build a Watchtower, lit with the ceaseless flame of your Unquenchable Firebird', SD_SCRIP, 'Watchtower',
+      'Needs an Unquenchable Firebird, not used up. Ealing Gardens: Darkness −2, Seeing Banditry −2, Advancing the Liberation of Night −3; gives Supporting the Emancipationist Tracklayers.'),
+    sd(SD_EG, 'Build a Watchtower, lit with the reflected light of Phosphorescent Scarabs', 'Scrip 50×(n+1) + Scarab ×250', 'Watchtower',
+      'Ealing Gardens: Darkness −2, Seeing Banditry −2, Advancing the Liberation of Night −3; gives Supporting the Emancipationist Tracklayers.'),
+    sd(SD_EG, 'Build a Watchtower, lit with the reflected light of the Contrarian’s Monochromatic Lantern', SD_SCRIP, 'Watchtower',
+      'Needs The Contrarian’s Monochromatic Lantern, not used up. Ealing Gardens: Darkness −2, Seeing Banditry −2, Advancing the Liberation of Night −2 (the others −3); gives Supporting the Emancipationist Tracklayers.'),
+    sd(SD_EG, 'Build a Watchtower, lit with the reflected light of the Boatman’s Lantern', SD_SCRIP, 'Watchtower',
+      'Needs The Boatman’s Lantern, not used up. Ealing Gardens: Darkness −2, Seeing Banditry −2, Advancing the Liberation of Night −3; gives Supporting the Emancipationist Tracklayers.'),
+    sd(SD_EG, 'Have the passenger area handsomely furnished', 'Scintillack ×10', 'station space', 'Knob of Scintillack ×10, or ×5 with a Wealth Charter.'),
+    sd(SD_EG, 'Convert the empty passenger area into a post office', 'Final Breath ×50', 'station space', 'Final Breath ×50, or ×25 with an Infernal Charter.'),
+    sd(SD_EG, 'Convert the empty passenger area into a stand selling pies', 'Rubbery Pies ×10', 'station space', 'Basket of Rubbery Pies ×10, or ×5 with a Worker Ownership Charter.'),
+    sd(SD_EG, 'Convert the empty passenger area into a small chapel', 'Surface Blooms ×10', 'station space', 'Preserved Surface Blooms ×10, or ×5 with a Theological Charter.'),
+    sd(SD_EG, 'Convert the empty passenger area into a clinic', 'Laudanum ×8', 'station space', 'F.F. Gebrandt’s Superior Laudanum ×8 and Tincture of Vigour ×8, or ×4 of each with a Charter of the Great Hellbound Railway.'),
+    sd(SD_EG, 'Refurbish the station!', 'Scrip ×50', 'station space', 'Needs the station space you converted.'),
+    sd('Licensed by Mr Hearts', 'Duplicate the wings of a Focused Albatross', 'Bone ×2000 + Amber ×25', 'Albatross Wing ×2',
+      'Needs the Focused Albatross, Commercial Development 2 and Revisions to the Business Model of a Butchery. Bone Fragments ×2000, Nodule of Warm Amber ×25.'),
+    sd('Spa Services', 'Attend for a treatment', '', 'Brilliant Soul ×1–2 · Soul ×100', 'Needs the Ealing Spa.'),
+    sd('Spa Services', 'Offer to design a treatment: a steam-bath of Mutersalt', 'Mutersalt ×1', 'Brilliant Soul ×5', 'A narrow Kataleptic Toxicology 5 challenge.', { ch: 'Kataleptic Toxicology 5 (narrow)' }),
+    sd('Rest in the Passenger Lounge', 'Doze', '', 'Nightmares −1–2', ''),
+    sd('Attend your Rubbery Pie Stand', 'Sell Pies for the Company', 'Pies ×5', 'Corporate Debt −3', ''),
+    sd('Attend your Rubbery Pie Stand', 'Sell Pies for yourself', 'Pies ×5', 'Scrip ×31–33', ''),
+    sd('Visit the Chapel', 'Lead Evensong', '', 'Scandal −2–3', 'Needs The Very Teeth of St George!'),
+    sd('Visit the Chapel', 'Attend Evensong', '', 'Scandal −1–2', ''),
+    sd('Visit the Clinic', 'Have your wounds seen', '', 'Wounds −1–2', ''),
+    sd(SD_EG, 'Have a union member refresh the Watchtower', 'Darkness −2', 'Tailfeather ×1', ''),
+
+    // --- Jericho Locks ---
+    sd(SD_JL, 'Build a small library', SD_SCRIP, 'Library 1', 'The first of three levels of the Jericho Library.'),
+    sd(SD_JL, 'Expand your library', SD_SCRIP, 'Library 2', 'Needs Jericho Library 1 exactly.'),
+    sd(SD_JL, 'Complete your library', SD_SCRIP, 'Library 3', 'Needs Jericho Library 2 exactly.'),
+    sd(SD_JL, 'Construct a Souvenir Shop', 'Scrip 50×(n+1) + Curiosities ×1', 'Souvenir Shop', 'Collection of Curiosities ×1 as well as the Scrip.'),
+    sd('Visit your Library', 'Lend with stultifying effect', 'Statistical Compendium ×1', 'Scrip ×30', 'Mirthless Compendium of Statistical Observations.'),
+    sd('Visit your Library', 'Lend without remorse', 'Bazaarine Poetry ×1', 'Scrip ×10', 'Slim Volume of Bazaarine Poetry.'),
+    sd('Visit your Library', 'Lend proudly', 'Zeefaring Epic ×1', 'Making Waves +2–6 · Rostygold ×275', 'Copy of your Zeefaring Epic. Airs of Jericho Locks 51–75.'),
+    sd('Visit your Library', 'Lend inventively', 'Revisionist Narrative ×1', 'Scrip ×30', 'Needs Jericho Library 2.'),
+    sd('Visit your Library', 'Lend religiously', 'Counter-Creed ×1', 'Scrip ×30', 'Verse of Counter-Creed. Needs Jericho Library 2.'),
+    sd('Visit your Library', 'Lend cautiously', 'Proscribed ×125 + Tale for the People', 'Making Waves +3 · Nightsoil ×15', 'Copy of your Tale for the People and Proscribed Material ×125. Needs Jericho Library 2 and Airs of Jericho Locks 26–50.'),
+    sd('Visit your Library', 'Lend provocatively', 'Corrective Narrative ×1', 'Scrip ×30', 'Needs Jericho Library 3.'),
+    sd('Visit your Library', 'Lend extensively', 'Corrective ×2 + Revisionist ×3', 'Night-Whisper ×1', 'Corrective Historical Narrative ×2 and Revisionist Historical Narrative ×3. Needs Jericho Library 3.'),
+    sd('Visit your Library', 'Lend in expectation', 'Tale of the Future ×1', 'Making Waves +2–3 · Brass Sliver ×275', 'Copy of your Tale of the Future. Needs Jericho Library 3 and Airs of Jericho Locks 1–25. The Making Waves figure is the guide’s, with a question mark.'),
+    sd('Entice Purchasers', 'Sell Unprovenanced Artefacts', 'Artefact ×5', 'Scrip ×(27 + Train Luxuries)', ''),
+    sd('Entice Purchasers', 'Sell Unearthly Fossils', 'Fossil ×5', 'Scrip ×(27 + Train Baggage Accommodations)', ''),
+    sd('Entice Purchasers', 'Sell an Infernal Sharpshooter’s Rifle', 'Rifle ×1', 'Scrip ×(438 + 2×Train Luxuries)', ''),
+
+    // --- the Magistracy of the Evenlode ---
+    sd(SD_EV, 'Construct a Diving Bell in the Magistracy’s Basement', SD_SCRIP, 'Diving Bell 1', 'Needs A Day in the Life of a Novice Policeman 10. Gives Chasing the Glow of Peligin.'),
+    sd(SD_EV, 'Improve the Diving Bell in the Magistracy’s Basement', SD_SCRIP, 'Diving Bell +2', 'Needs Evenlode Diving Bell 1–4. Two pages of the game carry this title, at two levels.'),
+    sd(SD_EV, 'Put in a spur line running into the Plain of Thirst', 'Scrip 50×(n+1) + Steel ×1', 'Route Taken to Evenlode', 'Needs Route Taken to Evenlode exactly 6. Railway Steel ×1. Tracklayers’ Displeasure +3.'),
+    sd(SD_EV, 'Put in a spur line running up to the hills', 'Scrip 50×(n+1) + Steel ×1', 'Route Taken to Evenlode', 'Needs Route Taken to Evenlode exactly 3. Railway Steel ×1.'),
+
+    // --- Balmoral ---
+    sd(SD_BA, 'Construct a Cabinet Noir', SD_SCRIP, 'Cabinet Noir 1', ''),
+    sd(SD_BA, 'Expand your Cabinet Noir', SD_SCRIP, 'Cabinet Noir 2', 'Needs Cabinet Noir 1 exactly and Disappearing… 3.'),
+    sd(SD_BA, 'Further expand your Cabinet Noir', SD_SCRIP, 'Cabinet Noir 3–4 · Fabricator ×1',
+      'Needs Cabinet Noir 2 (then 3) and Cover Identity: Elaboration 2 (then 3, with Credentials). The cover identity is used up. Two pages carry this title.'),
+    sd(SD_BA, 'Install an enormous mirror in your Cabinet Noir', SD_SCRIP, 'Private Mirror', 'Needs Cabinet Noir 1.'),
+
+    // --- Station VIII ---
+    sd('The Station for Factory VIII, or ‘Station VIII’', 'Build washrooms', 'Scrip ×75', 'washrooms', 'Gives The Business of Manufacture 1–3.'),
+    sd('The Station for Factory VIII, or ‘Station VIII’', 'Build a bunkhouse', 'Scrip ×75', 'bunkhouse', 'Gives The Business of Manufacture 1–3.'),
+    sd('The Station for Factory VIII, or ‘Station VIII’', 'Build a canteen', 'Scrip ×75', 'canteen', 'Gives The Business of Manufacture 1–3 and Passenger Dining Room at Station VIII.'),
+    sd(SD_S8, 'Improve your canteen', SD_SCRIP, 'Dining Room +1', 'Needs Passenger Dining Room 1–2. Meals Served at Station VIII 5 or 10. Two pages carry this title.'),
+    sd(SD_S8, 'Kit out your canteen', SD_SCRIP, 'Dining Room 3', 'Needs Passenger Dining Room exactly 3. Gives Halcyonic Tonic, Fillip of Effervescence and Crystallised Euphoria ×1 each.'),
+    sd(SD_S8, 'Place a mirror in the washrooms', SD_SCRIP, 'Private Mirror', 'Needs the washrooms.'),
+    sd(SD_S8, 'Build a lighthouse above the station', SD_SCRIP, 'Lighthouse', 'Station VIII: Darkness −2.'),
+    sd(SD_S8, 'Dim the Lighthouse', '', 'Darkness +3', 'Advancing the Liberation of Night +1.'),
+    sd(SD_S8, 'Turn up the brilliance of the Lighthouse', 'Darkness −3', 'Liberation of Night', 'Advancing the Liberation of Night.'),
+
+    // --- Burrow-Infra-Mump ---
+    sd(SD_BI, 'Build an Allotment Garden', SD_SCRIP, 'Garden', 'Needs Renown: Rubbery Men 10 and A Church in the Wild 50.'),
+    sd(SD_BI, 'Invite God’s Editors to the Burrow', SD_SCRIP, 'God’s Editors', 'Needs A Church in the Wild 50. Uncanny Incunabulum ×1 too if that is 70 or more. Favours: The Church ×1.'),
+    sd(SD_BI, 'Allow a Curatorial Devil to build a Museum of Souls', SD_SCRIP, 'Museum of Souls', 'Needs A Church in the Wild 50 and Renown: Hell 10. Portfolio of Souls ×1 too if that is under 70.'),
+    sd('The Museum of Souls', 'Provide a Judgement’s Egg for the collection', 'Egg ×1', 'Brass Sliver ×5000', 'Judgements’ Egg. Also Brass Ring ×1 and Muscaria Brandy.'),
+    sd('The Museum of Souls', 'Have your soul examined', '', 'Appalling Secret ×5', ''),
+    sd('The Museum of Souls', 'Examine the Galleries', '', 'Cryptic Clue ×50 · Secret ×5', 'A broad Watchful 220 challenge.', { ch: 'Watchful 220' }),
+    sd('The Museum of Souls', 'Ask the Curatorial Devil to curate some souls', 'Soul ×800 + 2 items', 'Portfolio of Souls ×1', 'Soul ×800, Brilliant Soul ×60, Infernal Contract ×50.'),
+    sd('The Museum of Souls', 'Ask the Curatorial Devil to examine numerous souls', 'Portfolio ×1 + Brilliant ×100', 'Discordant Soul ×1', 'A Luck challenge, 40%.', { ch: 'Luck 40%' }),
+    sd('The Museum of Souls', 'Make a substantial donation to the museum', 'Portfolio ×5 + 3 items', 'Coruscating Soul ×1', 'Discordant Soul ×1, Silent Soul ×5, Portfolio of Souls ×5, Brilliant Soul ×125, Muscaria Brandy ×25.'),
+    sd('God’s Editors at Burrow-Infra-Mump', 'Pay for postage on a letter to the Archbishop of Canterbury', 'Surface Currency ×10', 'Church Favour ×1 · Proscribed ×15', 'Fistful of Surface Currency ×10.'),
+    sd('God’s Editors at Burrow-Infra-Mump', 'Rummage through the Pile', '', 'Scrip ×4–7', 'A Luck challenge, 50%.', { ch: 'Luck 50%' }),
+
+    // --- Moulin ---
+    sd(SD_MO, 'Construct an Archaeological Institute', SD_SCRIP, 'Institute', 'Needs Para-Archaeologist 1 + 2 for each Institute you have (1, then 3). Two pages carry this title.'),
+
+    // --- The Hurlers ---
+    sd(SD_HU, 'Reinforce the potbelly stove', 'Scrip 50×(n+1) + Plaque ×77', 'Stoking the Stove', 'Correspondence Plaque ×77. Hurlers: Darkness. Tracklayers’ Displeasure +1.'),
+    sd(SD_HU, 'Establish a trading post', SD_SCRIP, 'trading post 1', ''),
+    sd(SD_HU, 'Secure your trading post', SD_SCRIP, 'trading post 2', 'Needs Hurlers Commercial Development 1 exactly. Seeing Banditry in the Upper River.'),
+    sd(SD_HU, 'Pipe hot air into the trading post', SD_SCRIP, 'trading post 3', 'Needs Hurlers Commercial Development 2 exactly and Hurlers Thermal Development.'),
+    sd(SD_HU, 'Provide funding for the Disembarked Deviless', SD_SCRIP, 'Breaking the Ice', 'Needs Breaking the Ice exactly 1. Gives Crate of Expedition Supplies ×5.'),
+    sd(SD_HU, 'Clear a road into the wastes from the encampment', 'Scrip 50×(n+1) + Labour ×2', 'road · Curio ×3', 'Strong-Backed Labour ×2. Needs Cold Comfort. Tracklayers’ Displeasure +3.'),
+    sd(SD_HU, 'Illuminate the road you’ve built', 'Scrip 50×(n+1) + Candle Stubs ×10000', 'lit road', 'Foxfire Candle Stub ×10000. Needs Hurlers Infrastructural Development exactly 1. Tracklayers’ Displeasure +1.'),
+    sd(SD_HU, 'Blast open a hot-spring outpost for Virginia’s Spa', 'Scrip 50×(n+1) + Hillmover ×3', 'Hot Spring', 'Hillmover ×3. Needs Hurlers Thermal Development.'),
+    sd(SD_HU, 'Build a lavatory equipped with a mirror', SD_SCRIP, 'lavatory', 'Needs Access to a Parabolan Base-Camp.'),
+    sd(SD_HU, 'Add more plaques to the stove', 'Plaque ×7 + Darkness −3', 'Stoking +1', 'Correspondence Plaque ×7. Needs Hurlers Thermal Development.'),
+    sd(SD_HU, 'Light some candles at the stove', 'Darkness +5', 'Candle Stubs', 'Foxfire Candle Stub, the number given in the game. Needs Hurlers Thermal Development.'),
+    sd(SD_HU, 'Sweep the floor a little', 'Stoking 8', 'Candle Stubs ×50–100', 'Foxfire Candle Stub ×50–100. Needs Hurlers Thermal Development and Stoking the Stove 8.'),
+    sd('Licensed by Mr Stones', 'Donate one Crystallised Curio to her stock', 'Curio ×1', 'Charity +1', 'Charity Is Such A Filthy Word +1.'),
+    sd('Licensed by Mr Stones', 'Trade five Crystallised Curios', 'Curio ×5', 'Scrip ×25', ''),
+    sd('Licensed by Mr Stones', 'Ask her to cut apart five Crystallised Curios', 'Curio ×5', 'Artefact ×4–5', 'Unprovenanced Artefact ×4–5.'),
+    sd('Licensed by Mr Stones', 'Trade one Knob of Scintillack', 'Scintillack ×1', 'Scrip ×6', ''),
+    sd('Licensed by Mr Stones', 'Trade one hundred Flawed Diamonds', 'Flawed Diamond ×100', 'Scrip ×30', 'Needs Hurlers Commercial Development 2.'),
+    sd('Licensed by Mr Stones', 'Trade twenty-five Ostentatious Diamonds', 'Ostentatious ×25', 'Biscuits ×6', 'Crate of Incorruptible Biscuits ×6. Needs Hurlers Commercial Development 2.'),
+    sd('Licensed by Mr Stones', 'Trade one Magnificent Diamond', 'Magnificent ×1', 'Love Story ×5–6', 'Touching Love Story ×5–6. Needs Hurlers Commercial Development 2.'),
+    sd('Licensed by Mr Stones', 'Trade one Fabulous Diamond', 'Fabulous ×1', 'Scrip ×625 · Kiss ×2', 'Stolen Kiss ×2. Needs Hurlers Commercial Development 2.'),
+    sd('Licensed by Mr Stones', 'Attempt to rob the Calculating Lapidary’s vault', 'Master Thief 10 + covers', 'a slow boat', 'A broad Shadowy 1000 challenge. Needs Hurlers Commercial Development 3 exactly, Master Thief 10 and a full cover identity. Moves you to a slow boat passing a dark beach on a silent river.', { ch: 'Shadowy 1000' }),
+    sd('Licensed by Mr Stones', 'Trade rumours with the Calculating Lapidary', 'Rumour ×1', 'Gossip ×10–12 or Brass ×248–268',
+      'Scrap of Incendiary Gossip ×10–12 with Stoking the Stove 1–7; Nevercold Brass Sliver ×248–268 with it at 0 or 8 and more. Needs Hurlers Commercial Development 3. Two pages carry this title.'),
+    sd('Licensed by Mr Stones', 'Return the Hideous Promissory Note', 'Promissory Note', 'Magnanimous +3 · Subtle +3', 'Needs Hurlers Commercial Development 4 exactly. Blackmail Material ×10.'),
+    sd('An Opulent Railway Carriage', 'Enter the compartment - with the Hideous Promissory Note', 'Promissory Note', 'The Hurlers · Daring +3 · Heartless +3', 'Foxfire Candle Stubs too. Moves you to The Hurlers.'),
+  ];
+
+  // The badge is what the option takes and what it gives; the tooltip holds the rest.
+  SD_OPTIONS.forEach(function (e) {
+    e.label = e.give && e.get ? e.give + ' → ' + e.get : e.get || e.give;
+    const lines = [e.name, e.storylet, ''];
+    if (e.give) lines.push('Takes: ' + e.give + '.');
+    if (e.give.indexOf(SD_SCRIP) === 0) {
+      lines.push('n is the station’s developments so far: the first improvement costs 50 Scrip, the second 100, and so on.');
+    }
+    if (e.get) lines.push('Gives: ' + e.get + '.');
+    if (e.ch) lines.push('Challenge: ' + e.ch + '.');
+    if (e.note) lines.push(e.note);
+    lines.push('', SD_CFG.rules);
+    e.title = lines.join('\n');
+  });
+
+  const SD_STORYLETS = SD_OPTIONS.map(function (e) { return e.storylet; }).filter(function (s, i, a) { return a.indexOf(s) === i; });
+  const SD_INDEX = carouselIndex(SD_OPTIONS);
+  // A heading says how many options it holds; the tooltip lists each.
+  const SD_SUMMARY = {};
+  SD_STORYLETS.forEach(function (name) {
+    const n = SD_OPTIONS.filter(function (e) { return e.storylet === name; }).length;
+    SD_SUMMARY[normalizeName(name)] = n + (n === 1 ? ' option' : ' options');
+  });
+  const SD_DEF = {
+    cfg: SD_CFG, options: SD_OPTIONS, index: SD_INDEX, storylets: SD_STORYLETS, cards: [], cardKeys: [], aliases: null, summary: SD_SUMMARY,
+    cls: 'fl-ux-sd', flag: 'flUxSd', branchCls: 'fl-ux-sd-branch', branchFlag: 'flUxSdBranch',
+  };
+
+  function sdRatings() { pqRatings(SD_DEF); }
+
+  // === feature: City of the Tracklayers ===================================
+  //
+  // The City of the Tracklayers (Guide): once the railway reaches the
+  // tracklayers' own city, it is a location with a deck of its own, and almost
+  // every card in it has an option that pays Hinterland Prosperity (HP), the
+  // city's currency, worth one Penny each. A success pays 200 or 220 HP plus
+  // your Hinterland Efficiency (0 to 300, built up on the infrastructure
+  // cards); the 220 options usually ask for a double check, a Persuasive,
+  // Watchful, Dangerous or Shadowy challenge and an advanced skill. The city
+  // also keeps two counters that only bad news raises: The City Waning, which
+  // shuts cards off at 8, and Tracklayers' Displeasure. A few options cash HP
+  // out for an item, and three betrayals cash all of it out at once.
+  //
+  // **What the badge says.** The Prosperity a success pays, `HP (220+Eff)?`
+  // (`?` is a challenge, as everywhere else), then what the option does to the
+  // Waning and the Displeasure, and what a failure costs: `HP (220+Eff)? ·
+  // Waning −2 · fail Displ +2`. A cash-out reads `HP −(1050−Eff) ▼ → Puzzling
+  // Map ×1`. `Eff` is your Hinterland Efficiency, which this script does not
+  // read. The tooltip has the challenge, the items, what the option needs and,
+  // where the guide's table of decisions gives one, the value the guide says
+  // makes the challenge certain (it counts a narrow challenge as five above its
+  // difficulty, where the rest of this script counts four).
+  //
+  // Transcribed from the card and option pages (fetched through the API,
+  // 2026-09-26) with The City of the Tracklayers (Guide) as the cross-check.
+  // What the option pages say wins; the guide's own tables say the same things
+  // in different words, apart from the certain-pass values noted above. Left
+  // out:
+  //   * The four Fate-locked vignettes (Invitation to the Lily-rites,
+  //     Sub-Basement, Three Body Problem, The Serpent Muralist) and their eight
+  //     cards. The guide tabulates their options by picture, and the wiki has
+  //     no page for either the cards or the options, so there is no title to
+  //     match. The four options they add to Day of Rest are left out too.
+  //   * The Scheme of a Phoenix, Exploration of a Hinterland City and the rest
+  //     of the storylets: stages of a story, not options to weigh.
+  //   * Twelve cards that only announce something (the events of falling into
+  //     ruin, mass departure, lurking) or whose options are variants of another
+  //     card's.
+  // Corrections go in TLC_OPTIONS and nowhere else.
+
+  const TLC_CFG = {
+    quality: 'Hinterland Prosperity', short: 'HP',
+    rules: 'Hinterland Prosperity is the city’s currency, worth a Penny each. Every point of Hinterland Efficiency '
+      + '(0 to 300) adds to each option that pays it, and every action in the city raises Habituated to the Hinterland.',
+  };
+
+  function tl(card, name, more) {
+    return Object.assign({ storylet: card, name: name }, more);
+  }
+
+  const TLC_OPTIONS = [
+    tl('The Business of the City', 'Assign work shifts', { hp: 220, w: ['Waning −2'], f: ['Displ +2'], a: ['(Assign work shifts) (Emancipationist)', '(Assign work shifts)', '(Assign work shifts) (Liberationist)', '(Assign work shifts) (Other)', '(Assign work shifts) (Prehistoricist)'] }),
+    tl('The (Emancipationist) Way', 'Assist with sabotage of the Masters', { hp: 200, w: ['Liberation +1'], needs: 'Hinterland City - Official Alignment is: Emancipationist-Liberationist', a: ['(Assist with sabotage of the Masters) (Emancipationist)', '(Assist with sabotage of the Masters)'] }),
+    tl('The (Liberationist) Way', 'Assist with sabotage of the Masters', { hp: 200, w: ['Liberation +1'], a: ['(Assist with sabotage of the Masters) (Liberationist)', '(Assist with sabotage of the Masters)'] }),
+    tl('The (Liberationist) Way', 'Assist with the Breeding Programme', { hp: 200, needs: 'Hinterland City - Official Alignment is: Liberationist-Prehistoricist, Lacreous Currency', a: ['(Assist with the Breeding Programme) (Liberationist, Lacreous)', '(Assist with the Breeding Programme) (Liberationist, Non-Lacreous)'] }),
+    tl('The (Prehistoricist) Way', 'Assist with the Breeding Programme', { hp: 200, needs: 'Lacreous Currency', a: ['(Assist with the Breeding Programme) (Prehistoricist, Lacreous)', '(Assist with the Breeding Programme) (Prehistoricist, Non-Lacreous)'] }),
+    tl('Participate in construction efforts', 'Engage in construction as quickly as possible', { hp: 220, b: ['Dangerous', 200], w: ['Waning −2'], f: ['Wounds +2'], a: ['(Engage in construction) as quickly as possible'] }),
+    tl('Participate in construction efforts', 'Engage in construction', { hp: 200, w: ['Common Cause +1'], a: ['(Engage in construction)'] }),
+    tl('A Pugnacious Encounter', 'Fight the pugnacious tracklayers', { w: ['Waning +2', 'Displ −6'], f: ['Wounds +2'], a: ['(Fight the pugnacious tracklayers)'] }),
+    tl('Intervene in Civic Affairs', 'Investigate Mr Fires’ schemes', { hp: 220, f: ['Displ +2'], a: ['(Investigate Mr Fires’ schemes)'] }),
+    tl('Whitsun (The City of the Tracklayers)', 'Observe Whitsun', { hp: 220, f: ['Wounds +2'], get: 'Bone Fragments ×30', a: ['(Observe Whitsun)'] }),
+    tl('Negation', 'Persuade followers of forbidden ideologies', { hp: 200, flat: true, a: ['(Persuade followers of forbidden ideologies)'] }),
+    tl('The (Emancipationist) Way', 'Persuade non-Emancipationist citizens', { hp: 200, a: ['(Persuade non-Emancipationist citizens)'] }),
+    tl('Negation', 'Remove followers of forbidden ideologies', { hp: 200, a: ['(Remove followers of forbidden ideologies)'] }),
+    tl('Imports and Exports', 'Academic encounters', { get: 'Lost Research Assistant ×1', cost: 'HP −(1000–1050−Eff)', needs: 'Hinterland Prosperity (1000 - Hinterland Efficiency) x (Hinterland City - Chosen Site exactly 6) or Hinterland Prosperity (1050 - Hinterland Efficiency) x (otherwise)', note: 'Costs 1000 minus your Hinterland Efficiency when the city’s chosen site is Between Moulin and Hurlers, and 1050 minus it otherwise.' }),
+    tl('The Flow of Commerce', 'Accept delivery of a letter to yourself', { hp: 200, needs: 'Ambition: Nemesis exactly 5000, Story-backed currency' }),
+    tl('Drained', 'Advertise for newcomers even if not from the Union', { b: ['Persuasive', 100], w: ['Displ +2', 'Waning −6'], f: ['Displ +2'], get: 'Inkling of Identity ×3' }),
+    tl('Drained', 'Advertise, and make sure the newcomers are welcome', { n: ['A Player of Chess', 5], b: ['Persuasive', 100], w: ['Waning −6'], f: ['Displ +2'], get: 'Inkling of Identity ×30' }),
+    tl('Developing Infrastructure', 'Aid in leveling and grading', { hp: 200, w: ['Developing +4', 'Common Cause +1'], needs: 'Hinterland City - Infrastructural Focus exactly 1' }),
+    tl('Mouths to Feed', 'Aid the efforts of the Creditor', { hp: 220, n: ['Artisan of the Red Science', 7], b: ['Watchful', 150], f: ['Waning +4', 'Nightmares +2'], needs: 'Habituated to the Hinterland 5, Exploration of a Hinterland City 35', guide: 'certain at Watchful 250 and Artisan of the Red Science 12.' }),
+    tl('Beside Marigold', 'Allow Hell its hour', { b: ['Persuasive', 200], w: ['Efficiency → 0'], get: 'Infernal Contract (HP ÷ 20)', cost: 'HP all', needs: 'Hinterland Prosperity 100000, Exploration of a Hinterland City 80, The City Waning 5, Charter of the Great Hellbound Railway 10 (Infernal Alliance)', note: 'Cashes out all your Prosperity at its value. Also Favours: Hell ×3, Infiltrator of the Tracklayer City +1, Tracklayers’ Displeasure and Nightmares by amounts the page leaves as a question mark. Moves you to lodgings and moves the city to the Hurlers. Destroys every point of Hinterland Efficiency.' }),
+    tl('Negation', 'Ask (the City) to detect wrong-thinking citizens', { hp: 200, w: ['Waning −2'], needs: 'Exploration of a Hinterland City 26' }),
+    tl('Troubled Times Recur', 'Assist the missionaries', { hp: 220, n: ['A Player of Chess', 10], f: ['Waning +4', 'Displ +2'], get: 'Favours: The Church ×1', needs: 'Charter of the Great Hellbound Railway exactly 5, Involved in a Railway Venture 140', guide: 'certain at A Player of Chess 15.' }),
+    tl('Day of Rest', 'Attend prayers with others of your own tradition', { hp: 200 }),
+    tl('Mouths to Feed', 'Attend to a garden of arachnid potatoes', { hp: 220, n: ['Monstrous Anatomy', 7], b: ['Shadowy', 150], f: ['Waning +4', 'Wounds +2'], needs: 'Exploration of a Hinterland City 35, Lacreous Currency', guide: 'certain at Shadowy 250 and Monstrous Anatomy 12.', a: ['Attend to a garden of arachnid potatoes (Mouths to Feed)'] }),
+    tl('Officially Non-Criminal', 'Betray the city to criminal affiliates', { w: ['Waning +36', 'Efficiency → 0'], f: ['Displ +2'], get: 'Journal of Infamy (HP ÷ 50)', cost: 'HP all', note: 'Cashes out all your Prosperity at its value. Also Supporting the Emancipationist Tracklayers +5, Supporting the Liberationist −5, Infiltrator of the Tracklayer City +1, Favours: Criminals ×3. Destroys every point of Hinterland Efficiency.', a: ['Betray the city to (criminal affiliates)'] }),
+    tl('Officially Non-Criminal', 'Betray the city to the Constables', { b: ['Shadowy', 200], w: ['Waning +36', 'Efficiency → 0'], f: ['Displ +2'], get: 'Dubious Testimony (HP ÷ 50)', cost: 'HP all', needs: 'Hinterland Prosperity 100,000 x, Exploration of a Hinterland City 80', note: 'Cashes out all your Prosperity at its value. Also Supporting the Liberationist Tracklayers +5, Supporting the Emancipationist −5, Infiltrator of the Tracklayer City +1, Favours: Constables ×3. Destroys every point of Hinterland Efficiency.' }),
+    tl('Merely Passing Through', 'Burnish your personal legend', { hp: 220, b: ['Persuasive', 180], w: ['Making Waves +1'], f: ['Displ +2?'], needs: 'Newly-Cast Crown of the City of London' }),
+    tl('The Housing Market', 'Buy a fine lodging', { hp: 200, flat: true }),
+    tl('Masked Throngs', 'Celebrate how the city has changed', { hp: 220, get: 'Romantic Notion ×2', needs: 'Hinterland City - Official Alignment ≠ Hinterland City - Initial Alignment' }),
+    tl('Masked Throngs', 'Celebrate the city’s steadfastness', { hp: 220, get: 'Romantic Notion ×2', needs: 'Hinterland City - Official Alignment = Hinterland City - Initial Alignment' }),
+    tl('The Flow of Commerce', 'Censor incendiary imports', { hp: 220, b: ['Persuasive', 200], f: ['Displ +1', 'Waning +1'], needs: 'Story-backed currency', guide: 'certain at Persuasive 334.' }),
+    tl('Charting the Hinterland', 'Collate the results of an expedition', { get: 'Puzzling Map ×1', cost: 'HP −(1050−Eff)', needs: 'Hinterland Prosperity (1050 - Hinterland Efficiency) x' }),
+    tl('Masked Throngs', 'Compare notes on Hallowmas old and new', { hp: 220, needs: 'Ivy' }),
+    tl('Poise', 'Consult (the City) to determine whether any faction is unfairly advantaged', { hp: 200, w: ['Waning −2'], needs: 'Exploration of a Hinterland City 26', a: ['Consult (the City) to determine whether any faction is unfairly advantaged (Balanced)'] }),
+    tl('Compromise', 'Consult (the City) to determine whether any faction is unfairly advantaged', { hp: 200, w: ['Waning −2'], needs: 'Exploration of a Hinterland City 26', a: ['Consult (the City) to determine whether any faction is unfairly advantaged (Mixed)'] }),
+    tl('The (Liberationist) Way', 'Consult (the City) to find hidden hierarchies', { hp: 200, w: ['Waning −2'], needs: 'Exploration of a Hinterland City 26' }),
+    tl('Apolitical', 'Consult (the City) to gain a deeper understanding', { hp: 200, w: ['Waning −2'], needs: 'Exploration of a Hinterland City 26' }),
+    tl('The (Prehistoricist) Way', 'Consult (the City) to judge what should be bred (or built) next', { hp: 200, w: ['Waning −2'], needs: 'Exploration of a Hinterland City 26' }),
+    tl('Each Their Own', 'Consult (the City) to see what can be done', { hp: 200, w: ['Waning −2'], needs: 'Exploration of a Hinterland City 26' }),
+    tl('The (Emancipationist) Way', 'Consult (the City) to understand the city’s needs', { hp: 200, w: ['Waning −2'], needs: 'Exploration of a Hinterland City 26' }),
+    tl('Day of Rest', 'Consult the Marvellous about (City Name)', { hp: 200, needs: 'The Marvellous' }),
+    tl('A Visitor for January', 'Consult your spouse about these meetings', { hp: 220, get: 'Romantic Notion ×3' }),
+    tl('Masked Throngs', 'Consume the confession of (Inhabitant)', { hp: 220, w: ['Plagued by a Popular Song +1'], get: 'Venom-Ruby ×2' }),
+    tl('The Flow of Commerce', 'Contemplate what would be happening if Mr Cups yet lived', { hp: 200, needs: 'Ambition: Nemesis 4300-4999, Story-backed currency' }),
+    tl('Beside Marigold', 'Converse with some damned day-trippers', { hp: 200, get: 'Appalling Secret ×2' }),
+    tl('Merely Passing Through', 'Converse with visiting tomb-colonists', { hp: 220, b: ['Persuasive', 200], w: ['Making Waves +1'], guide: 'certain at Persuasive 334.' }),
+    tl('The Flow of Commerce', 'Convert a few tales into a safer form of art', { get: 'Captivating Ballad ×1', cost: 'HP −6,250', needs: 'Hinterland Prosperity 6,250 x, Story-backed currency' }),
+    tl('The Creditor’s Moods', 'Convince the Solicitor-Baroness to speak on your behalf', { pay: 'Hinterland Scrip ×25, Soul ×25', needs: 'Hinterland Scrip 25 x, Soul 25 x', label: 'Scrip ×25 + Soul ×25 → Creditor’s Quiescence' }),
+    tl('Day of Rest', 'Cook the local cuisine', { hp: 200, needs: 'Habituated to the Hinterland 25' }),
+    tl('Genii Locorum', 'Deal with a questionable observance', { hp: 220, n: ['Steward of the Discordance', 2], b: ['Watchful', 150], f: ['Wounds +2', 'Waning +4'], needs: 'Exploration of a Hinterland City 30, Hinterland City - Founding Body is: Furnace Ancona or Furnace Ancona, Starved', guide: 'certain at Watchful 250 and Steward of the Discordance 7 (a Furnace city).' }),
+    tl('Troubled Times Recur', 'Defend against the barrow-ghosts of the Evenlode', { hp: 220, n: ['Monstrous Anatomy', 7], b: ['Watchful', 150], f: ['Waning +6', 'Wounds +2'], needs: 'Hinterland City - Chosen Site is: Above the Magistracy of the Evenlode, with a Plentiful Supply of Bones', guide: 'certain at Watchful 250 and Monstrous Anatomy 12.' }),
+    tl('Troubled Times Recur', 'Defuse a dangerous experiment', { hp: 220, n: ['Artisan of the Red Science', 10], f: ['Waning +4', 'Wounds +4'], needs: 'Charter of the Great Hellbound Railway exactly 3, Involved in a Railway Venture 140', guide: 'certain at Artisan of the Red Science 15.' }),
+    tl('The Creditor’s Grievances', 'Deploy law against an influx of undesirables', { hp: 220, n: ['Zeefaring', 7], b: ['Persuasive', 150], f: ['Waning +4', 'Displ +2'], needs: 'Exploration of a Hinterland City 70, Currency based in a Promise to Appear, Censused Currency', guide: 'certain at Persuasive 250 and Zeefaring 12.' }),
+    tl('Merely Passing Through', 'Destroy the rail link', { b: ['Dangerous', 180], f: ['Wounds +2', 'Suspicion +2'], pay: 'Hillmover ×5', needs: 'Hillmover 5 x', label: 'Hillmover ×5 → ends the rail link', note: 'A broad Dangerous 180 challenge; on a failure Wounds +2 and Suspicion +2. Takes Involved in a Railway Venture back to 130.' }),
+    tl('Growing the Population', 'Discourage them instead', { hp: 200, w: ['Waning +1–2'] }),
+    tl('A Voice from the Tower', 'Discover what would put an end to him', { hp: 200, n: ['Kataleptic Toxicology', 5], f: ['Nightmares +2'], get: 'Inkling of Identity ×1' }),
+    tl('Genii Locorum', 'Discuss with the visiting Dean', { hp: 200, needs: 'Board Member: The Dean of Xenotheology, Involved in a Railway Venture 140' }),
+    tl('Genii Locorum', 'Distinguish special requests', { hp: 220, n: ['Mithridacy', 7], b: ['Watchful', 150], f: ['Waning +4', 'Nightmares +2'], needs: 'Exploration of a Hinterland City 30, Hinterland City - Founding Body is: Cornelius', guide: 'certain at Watchful 250 and Mithridacy 12 (a Cornelius city).' }),
+    tl('The Creditor’s Moods', 'Do nothing', { w: ['Wounds +2?'], label: 'Wounds +2? · Efficiency → 0', note: 'Destroys all your Hinterland Efficiency.', a: ['Do nothing (The Creditor’s Moods)'] }),
+    tl('Near Balmoral', 'Do you hear something?', { hp: 200, get: 'Romantic Notion ×3' }),
+    tl('Day of Rest', 'Document linguistic drift', { hp: 200 }),
+    tl('Developing Infrastructure', 'Donate lightbulbs to the Illumination Committee', { hp: 200, w: ['Developing +8'], pay: 'Khaganian Lightbulb ×25', needs: 'Hinterland City - Infrastructural Focus 2, Khaganian Lightbulb 25 x' }),
+    tl('Near Burrow', 'Draw comfort as one community from another', { w: ['Waning −4'], needs: 'The City Waning' }),
+    tl('A Voice from the Tower', 'Drive away his audience', { w: ['Displ +4', 'Waning −1'], f: ['Waning +4', 'Displ +2', 'Wounds +2'] }),
+    tl('A Visitor for Mr Fires’ Lackey', 'Eavesdrop', { hp: 220, get: 'Cryptic Clue ×15', a: ['Eavesdrop (A Visitor for Mr Fires’ Lackey)'] }),
+    tl('Troubled Times Recur', 'Eliminate misleading histories', { hp: 220, n: ['Mithridacy', 7], b: ['Watchful', 150], f: ['Waning +6', 'Displ +2'], needs: 'Hinterland City - Chosen Site is: Between Moulin’s Wastes and the Cold of Hurlers, Where No One Else Would Care to Live', guide: 'certain at Watchful 250 and Mithridacy 12.' }),
+    tl('Mouths to Feed', 'Engage in a little light price gouging', { b: ['Persuasive', 200], w: ['Waning +1'], f: ['Displ +2'], get: 'Ambiguous Eolith ×15, Unidentified Thigh Bone ×5', cost: 'HP −(1050−Eff)', needs: 'Hinterland Prosperity (1050 - Hinterland Efficiency) x' }),
+    tl('Participate in construction efforts', 'Engage in a little sabotage', { hp: 220, b: ['Shadowy', 150], w: ['Waning +2'], f: ['Displ +2'] }),
+    tl('Day of Rest', 'Enjoy some quiet hours with your personal library', { hp: 200 }),
+    tl('A Project Concludes', 'Enjoy the fruits of labour', { hp: 300, w: ['Efficiency +50'] }),
+    tl('The Housing Market', 'Entertain a few of your fellow citizens', { w: ['Displ −10'], cost: 'HP −2,500', needs: 'A Worker in the Common Cause 3, Hinterland Prosperity 2500, Tracklayers’ Displeasure' }),
+    tl('The Russet Spindlewolf is Gone', 'Enthral him to the myth', { b: ['Watchful', 600], f: ['Wounds +2', 'Waning +2'], pay: 'Chimerical Archive ×1', needs: 'Chimerical Archive 1 x', label: 'Chimerical Archive · Exploration 80 on a pass' }),
+    tl('Denizens of the Neath', 'Eradicate an infestation of Thirsty Grasses', { hp: 220, n: ['Kataleptic Toxicology', 7], b: ['Dangerous', 150], f: ['Waning +4', 'Wounds +2'], needs: 'Route Taken to Evenlode 3-5', guide: 'certain at Dangerous 250 and Kataleptic Toxicology 12.', a: ['Eradicate an infestation of Thirsty Grasses 2'] }),
+    tl('The (Liberationist) Way', 'Eradicate citizens who are insufficiently Liberationist', { hp: 200, needs: 'Leader of the Tracklayers is: A Lackey of Mr Fires; A Lackey of Yours, Formerly Aligned with Mr Fires; or January, Hinterland City - Official Alignment is: Radical Liberationist' }),
+    tl('The (Prehistoricist) Way', 'Eradicate citizens who do not join in the aims of Prehistoricism', { hp: 500, flat: true, needs: 'Hinterland City - Official Alignment is: Radical Prehistoricist, Leader of the Tracklayers is: A Lackey of Mr Fires, A Lackey of Yours, Formerly Aligned with Mr Fires, or January' }),
+    tl('The Flow of Commerce', 'Establish a book club', { hp: 220, f: ['Displ +1', 'Waning +1'] }),
+    tl('Day of Rest', 'Establish a new sport', { hp: 200, needs: 'Habituated to the Hinterland 17' }),
+    tl('Merely Passing Through', 'Evoke for visitors the memory of a lost time', { hp: 220, n: ['Mithridacy', 7], b: ['Persuasive', 150], f: ['Nightmares +2'], get: 'Romantic Notion ×2', needs: 'Hinterland City - Official Alignment Complacently Unrevolutionary', guide: 'certain at Persuasive 250 and Mithridacy 12.' }),
+    tl('Troubled Times Recur', 'Explain their rights to the worker-shareholders of GHR', { hp: 220, n: ['Zeefaring', 10], w: ['Waning −1'], needs: 'Charter of the Great Hellbound Railway exactly 4, Involved in a Railway Venture 140', guide: 'certain at Zeefaring 15.' }),
+    tl('Aid in the Liberation', 'Feed powerful contacts to the dark', { hp: 220, w: ['Liberation +1'], f: ['Liberation +1', 'Wounds +1', 'Scandal +1'] }),
+    tl('Denizens of the Neath', 'Fend off the incursions of Parabola', { hp: 220, n: ['Glasswork', 7], b: ['Watchful', 150], f: ['Nightmares +2', 'Waning +4'], needs: 'Train through Parabola', guide: 'certain at Watchful 250 and Glasswork 12.' }),
+    tl('No Faith, No Honour', 'Find a new symbol for an old hope', { w: ['Waning −21'], pay: 'Opening Novelty ×5', needs: 'Supporting the Prehistoricist Tracklayers 3, Opening Novelty 5 x' }),
+    tl('The Flow of Commerce', 'Fish out a curious volume', { hp: 200, needs: 'A Co-Conspirator of Mr Fires' }),
+    tl('A Pugnacious Encounter', 'Fists first, then rhetoric', { n: ['Mithridacy', 5], b: ['Dangerous', 120], w: ['Displ −6'], f: ['Wounds +2'] }),
+    tl('A Visit from the Merry Gentleman', 'Follow the Merry Gentleman', { n: ['Glasswork', 10], f: ['Nightmares +3–6'], get: 'Extraordinary Implication ×1', note: 'The wiki has two pages: Nightmares +3–6 on a failure in the Tracklayers’ City and +3 elsewhere.', a: ['Follow the Merry Gentleman (Tracklayers’ City)'] }),
+    tl('Assist Mr Fires’ Lackey', 'Gather materials for Station VIII', { hp: 220, n: ['Zeefaring', 5], b: ['Persuasive', 180], w: ['Waning +2'], f: ['Displ +2'], guide: 'certain at Persuasive 300 and Zeefaring 10.' }),
+    tl('Lend Cornelius a Hand', 'Gather supplies', { n: ['Monstrous Anatomy', 7], get: 'Femur of a Jurassic Beast ×1, Femur of a Surface Deer ×3', needs: 'Hinterland City - Chosen Site is: Above the Magistracy of the Evenlode, with a Plentiful Supply of Bones' }),
+    tl('Officially Non-Criminal', 'Give Mr Wines one in the eye', { get: 'Bottle of Fourth City Airag: Year of the Tortoise ×5', cost: 'HP −31,250', needs: 'Hinterland Prosperity 31,250 x' }),
+    tl('The Grey Man Confined', 'Give him to the Hillchanger Tower', { label: 'story · Exploration' }),
+    tl('Severe Difficulties', 'Go where these matters can be more easily addressed', { n: ['Glasswork', 1], w: ['Nightmares +2'] }),
+    tl('A Visit from the Merry Gentleman', 'Greet the Merry Gentleman', { b: ['Watchful', 1035], w: ['Watchful +1', 'Nightmares −1'], note: 'The wiki has two pages: Watchful 1035 in the Tracklayers’ City and 251 elsewhere.', a: ['Greet the Merry Gentleman (Tracklayers’ City)'] }),
+    tl('Compromise', 'Grow some creatures, smash some lamps, share the wealth around', { hp: 200 }),
+    tl('Growing the Population', 'Guide newcomers to where they might best fit in', { hp: 220, n: ['A Player of Chess', 5], b: ['Persuasive', 180], w: ['Waning −0–1'], f: ['Waning +2'], needs: 'Cephalopod Satchel' }),
+    tl('Drained', 'Hasten the decline', { b: ['Persuasive', 100], w: ['Waning +4'], f: ['Displ +4'] }),
+    tl('The Business of the City', 'Help Furnace spread the revolutionary word Upstairs', { hp: 220, n: ['A Player of Chess', 7], needs: 'Hinterland City - Chosen Site Outside of Balmoral, Accessible to Communications with the Surface', guide: 'certain at A Player of Chess 12.' }),
+    tl('Aid in the Liberation', 'Help hide the refugees', { hp: 220, n: ['Mithridacy', 7], b: ['Persuasive', 180], w: ['Waning −1'], f: ['Displ +1'], needs: 'Leader of the Tracklayers is: January, Habituated to the Hinterland 5, Hinterland City - Official Alignment is: Liberationist, Radical Liberationist, Liberationist-Prehistoricist, or Emancipationist-Liberationist', a: ['Help hide the refugees (Liberationist)', 'Help hide the refugees (Non-Liberationist)'] }),
+    tl('Lend Cornelius a Hand', 'Help interpret Hinterland fossils', { hp: 200, hpHi: 220, w: ['Waning −2'], f: ['Displ +2'], a: ['Help interpret Hinterland fossils (Non-Prehistoricist)', 'Help interpret Hinterland fossils (Prehistoricist)'] }),
+    tl('The Flow of Commerce', 'Help yourself to one of the stories he isn’t watching', { get: 'Captivating Ballad ×1', cost: 'HP −6,250', needs: 'Hinterland Prosperity 6,250 x' }),
+    tl('A Visit from the Merry Gentleman', 'Ignore the Merry Gentleman', { luck: 40, w: ['Nightmares −1'], note: 'A Luck challenge: 40%.', a: ['Ignore the Merry Gentleman (Tracklayers’ City)'] }),
+    tl('Matters of Infrastructure', 'Illumination, of sorts', { hp: 200, w: ['Developing +2'], needs: 'Hinterland City - Official Alignment 100 - 150, 350' }),
+    tl('Matters of Infrastructure', 'Illumination', { hp: 200, w: ['Developing +2'], needs: 'Hinterland City - Official Alignment 200 - 310 or 400+' }),
+    tl('Imports and Exports', 'Infernal encounters', { get: 'Blackmail Material ×1', cost: 'HP −(1000–1050−Eff)', needs: 'Hinterland Prosperity (1000 - Hinterland Efficiency) x (Hinterland City - Chosen Site exactly 7) or Hinterland Prosperity (1050 - Hinterland Efficiency) x (otherwise)', note: 'Costs 1000 minus your Hinterland Efficiency when the city’s chosen site is Near Marigold, and 1050 minus it otherwise.' }),
+    tl('Intervene in Civic Affairs', 'Intervene to your own advantage and the city’s detriment', { hp: 220, n: ['Mithridacy', 5], b: ['Persuasive', 180], w: ['Waning +2'], f: ['Displ +4'] }),
+    tl('Merely Passing Through', 'Investigate the souvenir stalls', { w: ['Waning +1'], get: 'Holy Relic of the Thigh of Saint Fiacre ×1, Verse of Counter-Creed ×3, Apostate’s Psalm ×5', cost: 'HP −6,250', needs: 'Hinterland Prosperity 6250 x' }),
+    tl('A Visiting Lecturer', 'Join the academic discourse', { hp: 220, get: 'Bone Fragments ×30' }),
+    tl('Mouths to Feed', 'Join the work in the fields', { hp: 200, w: ['Common Cause +1', 'Waning −1'], needs: 'A Worker in the Common Cause 7' }),
+    tl('Cornelius Leading (a no-Prehistoricists city)', 'Keep Cornelius just where he is', { hp: 200, n: ['Artisan of the Red Science', 7], b: ['Shadowy', 150], w: ['Displ +2'], f: ['Displ +4'] }),
+    tl('Furnace Leading a Radical (no-Emancipationist) City', 'Keep Furnace just where she is', { hp: 200, n: ['A Player of Chess', 3], b: ['Persuasive', 150], w: ['Displ +2'], f: ['Displ +3?'] }),
+    tl('Furnace Leading Anti-Emancipationists', 'Keep Furnace just where she is', { hp: 200, n: ['A Player of Chess', 3], b: ['Persuasive', 150], w: ['Displ +2'], f: ['Displ +3?'] }),
+    tl('January Leading (a no-Liberationists city)', 'Keep January just where she is', { hp: 200, n: ['Mithridacy', 7], b: ['Persuasive', 150], w: ['Displ +2'], f: ['Displ +4'] }),
+    tl('The Housing Market', 'Know thyself', { hp: 220, n: ['Kataleptic Toxicology', 7], b: ['Watchful', 150], f: ['Nightmares +2', 'Waning +4'], needs: 'Hinterland City - Founding Body Your Own Double, Exploration of a Hinterland City 30', a: ['Know thyself (The Housing Market)'] }),
+    tl('The (Emancipationist) Way', 'Lay out new methods of voting', { hp: 200, a: ['Lay out new methods of voting (Emancipationist)'] }),
+    tl('The (Prehistoricist) Way', 'Lay out new methods of voting', { hp: 200, needs: 'Hinterland City - Official Alignment is: Prehistoricist-Emancipationist', a: ['Lay out new methods of voting (Prehistoricist)'] }),
+    tl('Officially Non-Criminal', 'Learn the new thieves’ cant', { hp: 220, b: ['Watchful', 200], f: ['Nightmares +2'] }),
+    tl('Each Their Own', 'Let coin speak', { hp: 200 }),
+    tl('A Voice from the Tower', 'Let him get on with it', { w: ['Waning +4'] }),
+    tl('No Faith, No Honour', 'Let it be', { w: ['Waning +2'] }),
+    tl('Developing Infrastructure', 'Light up the dark with mirrors', { hp: 200, n: ['Glasswork', 10], b: ['Watchful', 150], w: ['Developing +4'], f: ['Nightmares +2'], needs: 'Hinterland City - Infrastructural Focus 2' }),
+    tl('Genii Locorum', 'Listen to the tales being told', { hp: 200 }),
+    tl('The Housing Market', 'Live simply', { hp: 200, w: ['Common Cause +1'], get: 'Piece of Rostygold ×30', needs: 'Hinterland City - Aware of Land Use, Habituated to the Hinterland 3' }),
+    tl('Genii Locorum', 'Look into this new belief', { hp: 220, n: ['Mithridacy', 10], f: ['Wounds +2'], get: 'Lump of Lamplighter Beeswax ×10', guide: 'certain at Mithridacy 15.' }),
+    tl('Landscape in Moonlight', 'Look towards (Chosen Site)', { hp: 220, hpf: 200, n: ['Mithridacy', 3], b: ['Watchful', 180], f: ['Nightmares +1'], get: 'Romantic Notion ×3' }),
+    tl('The Housing Market', 'Make (City Name) your home of record', { get: 'Sap of the Cedar at the Crossroads ×1', cost: 'HP −10,000', needs: 'Exploration of a Hinterland City 60, Hinterland Prosperity 10000, Habituated to the Hinterland 40, Hinterland City - Official Alignment is: Complacently Unrevolutionary', a: ['Make (City Name) your home of record (Unrevolutionary)'] }),
+    tl('The Creditor’s Moods', 'Make a gift of apology', { pay: 'Cave-Aged Code of Honour ×1, Emetic Revelation ×1, Flask of Waswood Wellspring Water ×1', needs: 'Exploration of a Hinterland City 36, Cave-Aged Code of Honour 1 x, Emetic Revelation 1 x, Flask of Waswood Wellspring Water 1 x', label: 'Code of Honour + Revelation + Water → Creditor’s Quiescence' }),
+    tl('The Sound of Wings (Tracklayers’ City)', 'Make a run for it', { n: ['Neathproofed', 2], b: ['Shadowy', 120], w: ['Nightmares +2'], f: ['Nightmares +2–4', 'Waning +2'], get: 'Memory of a Much Lesser Self ×1, Rumour of the Upper River ×1, Map Scrap ×5', a: ['Make a run for it (Tracklayers’ City)'] }),
+    tl('Troubled Times Recur', 'Master the Revels', { hp: 220, n: ['Glasswork', 7], b: ['Persuasive', 150], f: ['Wounds +3', 'Waning +6'], needs: 'Hinterland City - Chosen Site is: In the Parish of Burrow, Among the Parishioners in the Church of the Wild', guide: 'certain at Persuasive 250 and Glasswork 12.' }),
+    tl('Apolitical', 'Meet your neighbours at (Pub)', { hp: 200 }),
+    tl('A City Near Ealing Gardens', 'Mingle with other families like yours', { get: 'Romantic Notion ×3' }),
+    tl('Troubled Times Recur', 'Mislead the hovering dirigible', { hp: 220, n: ['Mithridacy', 7], b: ['Shadowy', 150], f: ['Waning +6', 'Displ +2'], needs: 'Hinterland City - Chosen Site is: In the Shadow of Station VIII, Where the Masters Can Keep an Eye On It', guide: 'certain at Shadowy 250 and Mithridacy 12.' }),
+    tl('(Hinterland City Streets)', 'Notice the interactions of the populace', { hp: 200, b: ['Watchful', 100], f: ['Nightmares +2'], get: 'Rumour of the Upper River ×0–1' }),
+    tl('(Hinterland City Streets)', 'Observe the (Alignment) culture at work', { hp: 200, b: ['Watchful', 100], f: ['Nightmares +2'] }),
+    tl('Day of Rest', 'Observe the local fashions (Nocturnal)', { hp: 200, needs: 'Habituated to the Hinterland 50, Hinterland City - The Style of a City exactly 10' }),
+    tl('Day of Rest', 'Observe the local fashions', { hp: 200, needs: 'Habituated to the Hinterland 50' }),
+    tl('Lend Cornelius a Hand', 'Offer Cornelius stories relevant to a Prehistoricist', { hp: 220, pay: 'Appalling Secret ×1', needs: 'Associating with a Youthful Naturalist 800, Appalling Secret 1 x' }),
+    tl('Charting the Hinterland', 'Organize an expedition', { hp: 200 }),
+    tl('The Creditor’s Grievances', 'Outmanoeuvre a corporate intervention', { hp: 220, n: ['A Player of Chess', 7], b: ['Persuasive', 150], f: ['Waning +4', 'Nightmares +2'], needs: 'Exploration of a Hinterland City 70, Currency based in a Promise to Appear', guide: 'certain at Persuasive 250 and A Player of Chess 12.' }),
+    tl('The Flow of Commerce', 'Overhear a story in the telling', { hp: 220, b: ['Watchful', 200], f: ['Nightmares +2'], guide: 'certain at Watchful 334.' }),
+    tl('Troubled Times Recur', 'Peel philanthropy away from propaganda', { hp: 220, n: ['A Player of Chess', 9], w: ['Waning −1'], f: ['Waning +4', 'Displ +2'], pay: 'Supporting the Liberationist Tracklayers ×1', needs: 'Charter of the Great Hellbound Railway exactly 2, Involved in a Railway Venture 140', guide: 'certain at A Player of Chess 14.' }),
+    tl('Close to the Magistracy', 'Pet a lamp-cat', { hp: 200, get: 'Romantic Notion ×3' }),
+    tl('No Faith, No Honour', 'Preach', { w: ['Waning −2'], needs: 'Renown: The Church 25' }),
+    tl('The Russet Spindlewolf is Gone', 'Present yourself as his friend', { b: ['Persuasive', 600], f: ['Waning +4'], pay: 'Oil of Companionship ×1', needs: 'Oil of Companionship 1 x', label: 'Oil of Companionship · Exploration 80 on a pass' }),
+    tl('Mouths to Feed', 'Promote urban gardening', { hp: 220, get: 'Hand-picked Peppercaps ×2', pay: 'Nightsoil of the Bazaar ×2', needs: 'Nightsoil of the Bazaar 2 x' }),
+    tl('The Creditor’s Grievances', 'Provide the city with seismic defences', { hp: 220, n: ['Artisan of the Red Science', 7], b: ['Dangerous', 150], f: ['Waning +4', 'Wounds +2'], needs: 'Exploration of a Hinterland City 70', guide: 'certain at Dangerous 250 and Artisan of the Red Science 12.' }),
+    tl('No Faith, No Honour', 'Put an old dream in a new wrapping', { w: ['Waning −21'], pay: 'Opening Novelty ×5', needs: 'Supporting the Emancipationist Tracklayers 3, Opening Novelty 5 x' }),
+    tl('A Visitor for January', 'Put your head in quietly', { hp: 220, get: 'Jade Fragment ×30' }),
+    tl('The (Prehistoricist) Way', 'Re-educate citizens who do not espouse Prehistoricism', { hp: 200, needs: 'Leader of the Tracklayers is: Furnace Ancona, Unopposed; Furnace Ancona; or Cornelius, Hinterland City - Official Alignment is: Radical Prehistoricist' }),
+    tl('The (Liberationist) Way', 'Re-educate citizens who do not espouse the Liberation', { hp: 200, needs: 'Leader of the Tracklayers is: Furnace Ancona, Unopposed; Furnace Ancona; or Cornelius, Hinterland City - Official Alignment is: Radical Liberationist' }),
+    tl('Imports and Exports', 'Real estate development', { get: 'Legal Document ×1', cost: 'HP −(1000–1050−Eff)', needs: 'Hinterland Prosperity (1000 - Hinterland Efficiency) x (Hinterland City - Chosen Site exactly 2) or Hinterland Prosperity (1050 - Hinterland Efficiency) x (otherwise)', note: 'Costs 1000 minus your Hinterland Efficiency when the city’s chosen site is Above the Magistracy of the Evenlode, and 1050 minus it otherwise.' }),
+    tl('Troubled Times Recur', 'Receive a diplomatic visit of devils', { hp: 220, n: ['A Player of Chess', 10], f: ['Waning +4', 'Nightmares +2'], get: 'Favours: Hell ×0–1', needs: 'Charter of the Great Hellbound Railway exactly 10, Involved in a Railway Venture 140', guide: 'certain at A Player of Chess 15.' }),
+    tl('Troubled Times Recur', 'Reckon with the wealth-seeking charter of the GHR', { hp: 220, n: ['A Player of Chess', 10], w: ['In Corporate Debt −1–2'], f: ['Waning +4', 'Displ +2'], needs: 'Charter of the Great Hellbound Railway exactly 1, Involved in a Railway Venture 140', guide: 'certain at A Player of Chess 15.' }),
+    tl('The Flow of Commerce', 'Recognise the clawed grasp of Mr Cups', { hp: 200, needs: 'Ambition: Nemesis exactly 5000' }),
+    tl('The Flow of Commerce', 'Recognise the tattered legacy of Mr Cups', { hp: 200, needs: 'Ambition: Nemesis 4000-4999' }),
+    tl('A Pugnacious Encounter', 'Remind them of their share in the city’s prosperity', { w: ['Displ −10'], cost: 'HP −2,500', needs: 'Hinterland Prosperity 2500' }),
+    tl('Drained', 'Remind them of what the city is', { w: ['Waning −10'], get: 'Antique Mystery ×4', pay: 'Captivating Ballad ×1', needs: 'Captivating Ballad 1 x' }),
+    tl('No Faith, No Honour', 'Remind them that the chains can be broken only by solidarity', { w: ['Waning −21'], pay: 'Opening Novelty ×5', needs: 'Supporting the Liberationist Tracklayers 3, Opening Novelty 5 x' }),
+    tl('The (Emancipationist) Way', 'Remove citizens with other ideologies', { hp: 200, needs: 'Hinterland City - Official Alignment is: Radical Emancipationist, Leader of the Tracklayers is: A Lackey of Mr Fires, A Lackey of Yours, Formerly Aligned with Mr Fires, or January' }),
+    tl('Poise', 'Represent the (Alignment) view on a proposed edifice', { hp: 200 }),
+    tl('A Visit from Virginia', 'Request a seed of the cedar', { get: 'Seed of the Cedar ×1', cost: 'HP −156,250', needs: 'Hinterland Prosperity 156250' }),
+    tl('A Visit from Virginia', 'Request a trophy from a shared enemy', { get: 'Vial of Masters’ Blood ×1', cost: 'HP −156,250', needs: 'Hinterland Prosperity 156250' }),
+    tl('A Visit from Virginia', 'Request connections', { get: 'Rumourmonger’s Network ×1', cost: 'HP −156,250', needs: 'Hinterland Prosperity 156250' }),
+    tl('Developing Infrastructure', 'Reshape the boundaries of sight', { hp: 200, flat: true, n: ['Artisan of the Red Science', 10], b: ['Shadowy', 150], w: ['Developing +4–5'], f: ['Nightmares +2'], needs: 'Hinterland City - Infrastructural Focus exactly 3' }),
+    tl('Aid in the Liberation', 'Reveal the rifts within the Bazaar', { w: ['Liberation +1'], pay: 'Proscribed Material ×5', needs: 'Inroads with a Master –, Proscribed Material 5 x' }),
+    tl('(Hinterland City Streets)', 'Revisit the memory of one you lost', { hp: 200, get: 'Romantic Notion ×2', needs: 'Hinterland City - Founding Body is: Your Own Double, Ambition: Nemesis 1-4999,' }),
+    tl('Matters of Infrastructure', 'Road work', { hp: 200, w: ['Developing +2'] }),
+    tl('Imports and Exports', 'Rubbery liaisons', { get: 'Nodule of Trembling Amber ×1', cost: 'HP −(1000–1050−Eff)', needs: 'Hinterland Prosperity (1000 - Hinterland Efficiency) x (Hinterland City - Chosen Site exactly 1) or Hinterland Prosperity (1050 - Hinterland Efficiency) x (otherwise)', note: 'Costs 1000 minus your Hinterland Efficiency when the city’s chosen site is Ealing Gardens, and 1050 minus it otherwise.' }),
+    tl('The Grey Man Confined', 'Secure him tightly in Hillchanger Tower', { label: 'story · Exploration' }),
+    tl('Whitsun (The City of the Tracklayers)', 'See that the most promising Whitsun hatchling reaches London', { hp: 220, n: ['Monstrous Anatomy', 7], b: ['Shadowy', 180], f: ['Displ +2'], get: 'First City Coin ×1', needs: 'Exploration of a Hinterland City 70' }),
+    tl('Zealotry of Lilies', 'See the Solicitor-Baroness out', { hp: 220, get: 'Jasmine Leaves ×3' }),
+    tl('Between Moulin and Hurlers', 'Seek shelter', { hp: 200, get: 'Jasmine Leaves ×3', a: ['Seek shelter (Tracklayers’ City)'] }),
+    tl('Close to Station VIII', 'Send a few citizens that way, by guile or by force', { hp: 220, w: ['Waning +2', 'Displ +1'] }),
+    tl('The Creditor’s Moods', 'Send guards to the Evenlode', { hp: 220, n: ['Zeefaring', 7], b: ['Dangerous', 150], f: ['Wounds +2'], needs: 'Censused Currency', guide: 'certain at Dangerous 250 and Zeefaring 12.' }),
+    tl('Beside Marigold', 'Send in a few citizens', { hp: 220 }),
+    tl('Intervene in Civic Affairs', 'Settle local disputes', { hp: 220, n: ['Zeefaring', 5], b: ['Persuasive', 180], w: ['Waning −2'], f: ['Displ +2'] }),
+    tl('The Business of the City', 'Share instructive anecdotes about government elsewhere', { hp: 220, pay: 'Appalling Secret ×1', needs: 'Successful Terms as Governor - 5+, Appalling Secret' }),
+    tl('Landscape in Moonlight', 'Share your moonlit vision with the other citizens', { hp: 200, n: ['Glasswork', 3], b: ['Watchful', 180], w: ['Waning −7'], f: ['Nightmares +2'], pay: 'Moonlit ×2', needs: 'Moonlit, The City Waning' }),
+    tl('Denizens of the Neath', 'Shore up the landscape', { hp: 220, n: ['Monstrous Anatomy', 7], b: ['Watchful', 150], f: ['Waning +4', 'Wounds +2'], guide: 'certain at Watchful 250 and Monstrous Anatomy 12.' }),
+    tl('Denizens of the Neath', 'Silence the call of the Monkprince Hills', { hp: 220, n: ['Zeefaring', 7], b: ['Persuasive', 150], f: ['Waning +4', 'Nightmares +2'], needs: 'Route Taken to Evenlode 4-6', guide: 'certain at Persuasive 250 and Zeefaring 12.', a: ['Silence the call of the Monkprince Hills 2'] }),
+    tl('Whitsun (The City of the Tracklayers)', 'Smash them! Smash them all!', { hp: 220, hpf: 200, n: ['Monstrous Anatomy', 5], b: ['Dangerous', 180], f: ['Wounds +2'], get: 'Bone Fragments ×30', needs: 'Hinterland City - Official Alignment is: Anti-Prehistoricist' }),
+    tl('Troubled Times Recur', 'Smooth over disagreements', { hp: 220, n: ['Zeefaring', 7], b: ['Shadowy', 150], f: ['Waning +6'], needs: 'Hinterland City - Chosen Site is: Near Marigold, Snug Beneath the Walls of Hell', guide: 'certain at Shadowy 250 and Zeefaring 12.' }),
+    tl('The Russet Spindlewolf is Gone', 'Snare him', { b: ['Shadowy', 600], f: ['Waning +4'], pay: 'Baited Riddle ×1', needs: 'Baited Riddle 1 x', label: 'Baited Riddle · Exploration 80 on a pass' }),
+    tl('Day of Rest', 'Spend the day with Cornelius', { hp: 200, needs: 'Acquaintance: Cornelius 20' }),
+    tl('Day of Rest', 'Spend the day with Furnace', { hp: 200, needs: 'Acquaintance: Furnace Ancona 20-25, Hinterland City - Founding Body 3000, 4000, 5000' }),
+    tl('Day of Rest', 'Spend the day with January', { hp: 200, needs: 'Acquaintance: January 20' }),
+    tl('Cornelius Leading (a no-Prehistoricists city)', 'Stay out of it', { get: 'Supporting the Prehistoricist Tracklayers ×3', a: ['Stay out of it (Cornelius)'] }),
+    tl('Furnace Leading Anti-Emancipationists', 'Stay out of it', { get: 'Supporting the Emancipationist Tracklayers ×3', a: ['Stay out of it (Furnace)'] }),
+    tl('January Leading (a no-Liberationists city)', 'Stay out of it', { get: 'Supporting the Liberationist Tracklayers ×3', a: ['Stay out of it (January)'] }),
+    tl('Troubled Times Recur', 'Study the most novel portion of the populace', { hp: 220, n: ['Shapeling Arts', 7], b: ['Watchful', 150], f: ['Waning +6', 'Displ +2'], needs: 'Hinterland City - Chosen Site is: Near Ealing Gardens, in Ominous Proximity to London', guide: 'certain at Watchful 250 and Shapeling Arts 12.' }),
+    tl('Genii Locorum', 'Supervise a religious visit', { hp: 220, n: ['Zeefaring', 7], b: ['Persuasive', 150], f: ['Waning +4', 'Nightmares +2'], needs: 'Exploration of a Hinterland City 30, Hinterland City - Founding Body is: The Double of the Manager of the Royal Beth', guide: 'certain at Persuasive 250 and Zeefaring 12 (a Manager city).' }),
+    tl('Troubled Times Recur', 'Supervise a visit from the Castellan of Balmoral', { hp: 220, n: ['A Player of Chess', 7], b: ['Persuasive', 150], f: ['Waning +6', 'Displ +2'], needs: 'Hinterland City - Chosen Site is: Outside of Balmoral, Accessible to Communications with the Surface, Balmoral’s Castellan exactly 3', guide: 'certain at Persuasive 250 and A Player of Chess 12.', a: ['Supervise a visit from the Castellan of Balmoral (September)', 'Supervise a visit from the Castellan of Balmoral (not September)'] }),
+    tl('Developing Infrastructure', 'Supply scarabs to the Liberationists', { hp: 200, flat: true, w: ['Developing +7–8'], pay: 'Phosphorescent Scarab ×25', needs: 'Hinterland City - Infrastructural Focus exactly 3 , Phosphorescent Scarab 25 x' }),
+    tl('Developing Infrastructure', 'Supply the streets with discarded names', { hp: 200, w: ['Developing +8–9'], pay: 'London Street Sign ×1', needs: 'Hinterland City - Infrastructural Focus exactly 1, London Street Sign' }),
+    tl('A Visitor for Your Lackey', 'Surprise them', { hp: 220, get: 'Inkling of Identity ×3' }),
+    tl('The Russet Spindlewolf is Gone', 'Tackle him', { b: ['Dangerous', 600], f: ['Wounds +2', 'Waning +2'], pay: 'Unlawful Device ×5', needs: 'Unlawful Device 5 x', label: 'Unlawful Device ×5 · Exploration 80 on a pass' }),
+    tl('Holiday Cheer', 'Take in the wintry spectacle', { hp: 200, hpf: 200, luck: 50, get: 'Inkling of Identity ×4–7, Memory of Light ×1' }),
+    tl('The Housing Market', 'Take the largest townhouse you can find', { hp: 220, pay: 'Moon-Pearl ×30' }),
+    tl('Close to Station VIII', 'Taste the air', { hp: 200, get: 'Flask of Abominable Salts ×3' }),
+    tl('No Faith, No Honour', 'Teach them to live without such bonds', { w: ['Waning −2'], needs: 'Renown: Hell 25' }),
+    tl('Imports and Exports', 'The book trade', { get: 'Verse of Counter-Creed ×1', cost: 'HP −(1000–1050−Eff)', needs: 'Hinterland Prosperity (1000 - Hinterland Efficiency) x (Hinterland City - Chosen Site exactly 5) or Hinterland Prosperity (1050 - Hinterland Efficiency) x (otherwise)', note: 'Costs 1000 minus your Hinterland Efficiency when the city’s chosen site is In the Parish of Burrow, and 1050 minus it otherwise.' }),
+    tl('Imports and Exports', 'Trade with the Masters', { get: 'Crystallised Euphoria ×1', cost: 'HP −(1000–1050−Eff)', needs: 'Hinterland Prosperity (1000 - Hinterland Efficiency) x (Hinterland City - Chosen Site exactly 4) or Hinterland Prosperity (1050 - Hinterland Efficiency) x (otherwise)', note: 'Costs 1000 minus your Hinterland Efficiency when the city’s chosen site is In the Shadow of Station VIII, and 1050 minus it otherwise.' }),
+    tl('Assist Mr Fires’ Lackey', 'Trick Mr Fires’ Lackey into acting against his master’s interests', { hp: 220, n: ['Mithridacy', 5], b: ['Persuasive', 180], w: ['Waning −2'], f: ['Scandal +2'], guide: 'certain at Persuasive 300 and Mithridacy 10.' }),
+    tl('Imports and Exports', 'Vibrations on the web', { get: 'Vital Intelligence ×1', cost: 'HP −(1000–1050−Eff)', needs: 'Hinterland Prosperity (1000 - Hinterland Efficiency) x (Hinterland City - Chosen Site exactly 3) or Hinterland Prosperity (1050 - Hinterland Efficiency) x (otherwise)', note: 'Costs 1000 minus your Hinterland Efficiency when the city’s chosen site is Outside of Balmoral, and 1050 minus it otherwise.' }),
+    tl('Near Burrow', 'Watch an Amber-Eyed Busker', { hp: 200, get: 'Romantic Notion ×3' }),
+    tl('A City Near Ealing Gardens', 'Welcome some Rubberies', { hp: 200, get: 'Nodule of Warm Amber ×3' }),
+    tl('Growing the Population', 'Welcome some new arrivals', { hp: 200, w: ['Waning −1'] }),
+    tl('Denizens of the Neath', 'Wrangle an escaped Ferrocephalus Viafactor', { hp: 220, n: ['Monstrous Anatomy', 7], b: ['Dangerous', 150], f: ['Waning +4', 'Wounds +2'], needs: 'Patronage of the Prehistoricists', guide: 'certain at Dangerous 250 and Monstrous Anatomy 12.', a: ['Wrangle an escaped Ferrocephalus Viafactor 2'] }),
+    tl('A City Near Ealing Gardens', 'Yield a few blocks to Ealing Council', { hp: 220, w: ['Waning +2', 'Displ +1'] }),
+    tl('(Hinterland City Streets)', 'Your (loved one) is here in spirit', { hp: 200, flat: true, get: 'Romantic Notion ×2', needs: 'Hinterland City - Founding Body is: Your Own Double, Ambition: Nemesis exactly 5000' }),
+  ];
+
+  const TLC_CARD_LIST = [
+    { name: 'The Business of the City', freq: 'Standard', needs: 'Leader of the Tracklayers Furnace Ancona, Habituated to the Hinterland, Exploration of a Hinterland City' },
+    { name: 'The (Emancipationist) Way' },
+    { name: 'The (Liberationist) Way' },
+    { name: 'The (Prehistoricist) Way' },
+    { name: 'Participate in construction efforts' },
+    { name: 'A Pugnacious Encounter', freq: 'Frequent', needs: 'Habituated to the Hinterland, Tracklayers’ Displeasure 5' },
+    { name: 'Intervene in Civic Affairs', freq: 'Standard', needs: 'Leader of the Tracklayers is: A Lackey of Yours, Formerly Aligned with Mr Fires, Habituated to the Hinterland' },
+    { name: 'Whitsun (The City of the Tracklayers)', also: ['Whitsun'] },
+    { name: 'Negation', noHand: true, freq: 'Standard', needs: 'Hinterland City - Official Alignment is: Anti-Liberationist, Anti-Prehistoricist, or Anti-Emancipationist', locked: 'Hinterland City - A Blithe Indifference to Politics' },
+    { name: 'Imports and Exports', freq: 'Standard', needs: 'Habituated to the Hinterland, Hinterland Prosperity 1000 x' },
+    { name: 'The Flow of Commerce' },
+    { name: 'Drained', noHand: true },
+    { name: 'Developing Infrastructure', freq: 'Frequent', needs: 'Developing... 1-4, Habituated to the Hinterland' },
+    { name: 'Mouths to Feed' },
+    { name: 'Beside Marigold', freq: 'Standard', needs: 'Hinterland City - Chosen Site Near Marigold, Snug Beneath the Walls of Hell, Habituated to the Hinterland' },
+    { name: 'Troubled Times Recur', freq: 'Very Infrequent', needs: 'Habituated to the Hinterland' },
+    { name: 'Day of Rest', noHand: true, freq: 'Very Infrequent', needs: 'Hinterland City - Foundation, Habituated to the Hinterland 2, Exploration of a Hinterland City 90', locked: 'The City Waning 8, Tracklayers’ Displeasure 8' },
+    { name: 'Officially Non-Criminal', noHand: true },
+    { name: 'Merely Passing Through', freq: 'Standard', needs: 'Habituated to the Hinterland, Involved in a Railway Venture 140', locked: 'The City Waning 8' },
+    { name: 'The Housing Market' },
+    { name: 'Masked Throngs', freq: 'Frequent', needs: 'Habituated to the Hinterland 3,' },
+    { name: 'Charting the Hinterland', freq: 'Standard', needs: 'Habituated to the Hinterland 3', locked: 'The City Waning 8' },
+    { name: 'Poise', noHand: true, freq: 'Standard', needs: 'Habituated to the Hinterland, Hinterland City - Official Alignment is: Balanced', locked: 'Hinterland City - A Blithe Indifference to Politics' },
+    { name: 'Compromise', noHand: true, freq: 'Standard', needs: 'Habituated to the Hinterland, Hinterland City - Official Alignment is: Mixed' },
+    { name: 'Apolitical', noHand: true, freq: 'Standard', needs: 'Hinterland City - A Blithe Indifference to Politics, Exploration of a Hinterland City' },
+    { name: 'Each Their Own', noHand: true, freq: 'Standard', needs: 'Hinterland City - Official Alignment is: Complacently Unrevolutionary', locked: 'Hinterland City - A Blithe Indifference to Politics' },
+    { name: 'A Visitor for January', freq: 'Rare', needs: 'Habituated to the Hinterland 15, Leader of the Tracklayers is: January, Exploration of a Hinterland City 90', locked: 'The City Waning 8' },
+    { name: 'The Creditor’s Moods', freq: 'Standard', needs: 'Hinterland City - Founding Body is: Cornelius, or Your Own Double, or The Double of the Manager of the Royal Beth, Exploration of a Hinterland City 3', locked: 'Creditor’s Quiescence' },
+    { name: 'Genii Locorum', freq: 'Standard', needs: 'Habituated to the Hinterland', locked: 'The City Waning 8' },
+    { name: 'The Creditor’s Grievances', freq: 'Very Infrequent', needs: 'Exploration of a Hinterland City 70, Habituated to the Hinterland 8' },
+    { name: 'Growing the Population', freq: 'Standard', needs: 'Habituated to the Hinterland', locked: 'The City Waning 8' },
+    { name: 'A Voice from the Tower', freq: 'Frequent', needs: 'Exploration of a Hinterland City 80-90' },
+    { name: 'Near Balmoral', freq: 'Standard', needs: 'Hinterland City - Chosen Site Outside of Balmoral, Accessible to Communications with the Surface, Habituated to the Hinterland' },
+    { name: 'Near Burrow', freq: 'Standard', needs: 'Hinterland City - Chosen Site exactly 5, Habituated to the Hinterland' },
+    { name: 'A Visitor for Mr Fires’ Lackey', freq: 'Rare', needs: 'Habituated to the Hinterland 15, Leader of the Tracklayers is: A Lackey of Mr Fires, Exploration of a Hinterland City 90', locked: 'The City Waning 8' },
+    { name: 'A Project Concludes' },
+    { name: 'The Russet Spindlewolf is Gone', freq: 'Ubiquitous', needs: 'Exploration of a Hinterland City exactly 70, Habituated to the Hinterland 10' },
+    { name: 'Denizens of the Neath', freq: 'Infrequent', needs: 'Exploration of a Hinterland City 70, Habituated to the Hinterland 8' },
+    { name: 'Aid in the Liberation', freq: 'Standard', needs: 'Leader of the Tracklayers is: January, Habituated to the Hinterland, Exploration of a Hinterland City' },
+    { name: 'No Faith, No Honour', freq: 'Standard', needs: 'Habituated to the Hinterland, The City Waning 7' },
+    { name: 'A Visit from the Merry Gentleman', freq: 'Ubiquitous' },
+    { name: 'Assist Mr Fires’ Lackey', freq: 'Standard', needs: 'Leader of the Tracklayers is: A Lackey of Mr Fires, Habituated to the Hinterland' },
+    { name: 'Lend Cornelius a Hand', freq: 'Standard', needs: 'Leader of the Tracklayers is: Cornelius, Habituated to the Hinterland, Exploration of a Hinterland City' },
+    { name: 'The Grey Man Confined', freq: 'Frequent', needs: 'various redirects from The Russet Spindlewolf is Gone' },
+    { name: 'Severe Difficulties', freq: 'Abundant', needs: 'Habituated to the Hinterland 3, Wounds 7, Access to a Parabolan Base-Camp' },
+    { name: 'Matters of Infrastructure', freq: 'High Urgency', needs: 'Habituated to the Hinterland', locked: 'Developing..., Hinterland Efficiency 251' },
+    { name: 'A Visiting Lecturer', freq: 'Rare', needs: 'Habituated to the Hinterland 15, Leader of the Tracklayers is: Cornelius, Exploration of a Hinterland City 90', locked: 'The City Waning 8' },
+    { name: 'Cornelius Leading (a no-Prehistoricists city)' },
+    { name: 'Furnace Leading a Radical (no-Emancipationist) City', freq: 'Infrequent', needs: 'Hinterland City - Official Alignment is: Radical Liberationist, Radical Prehistoricist, Leader of the Tracklayers is: Furnace Ancona, Unopposed or Furnace Ancona', locked: 'Hinterland City - A Blithe Indifference to Politics' },
+    { name: 'Furnace Leading Anti-Emancipationists', freq: 'Frequent', needs: 'Hinterland City - Official Alignment is: Anti-Emancipationist, Leader of the Tracklayers is: Furnace Ancona, Unopposed or Furnace Ancona', locked: 'Hinterland City - A Blithe Indifference to Politics' },
+    { name: 'January Leading (a no-Liberationists city)' },
+    { name: 'Landscape in Moonlight', freq: 'Standard', needs: 'Moonlit, Habituated to the Hinterland, Exploration of a Hinterland City 40' },
+    { name: 'The Sound of Wings (Tracklayers’ City)', also: ['The Sound of Wings'], freq: 'Infrequent', needs: 'Wings of Change' },
+    { name: 'A City Near Ealing Gardens', freq: 'Standard', needs: 'Hinterland City - Chosen Site Near Ealing Gardens, in Ominous Proximity to London, Habituated to the Hinterland' },
+    { name: '(Hinterland City Streets)', noHand: true },
+    { name: 'Close to the Magistracy', freq: 'Standard', needs: 'Hinterland City - Chosen Site is: Above the Magistracy of the Evenlode, with a Plentiful Supply of Bones, Habituated to the Hinterland' },
+    { name: 'A Visit from Virginia', freq: 'Abundant', needs: 'Hinterland Prosperity 156250, Habituated to the Hinterland', locked: 'The City Waning 8' },
+    { name: 'Zealotry of Lilies', freq: 'Rare', needs: 'Habituated to the Hinterland 15, Leader of the Tracklayers Furnace Ancona, Exploration of a Hinterland City 90', locked: 'The City Waning 8' },
+    { name: 'Between Moulin and Hurlers', freq: 'Standard', needs: 'Hinterland City - Chosen Site exactly 6, Habituated to the Hinterland' },
+    { name: 'Close to Station VIII', freq: 'Standard', needs: 'Hinterland City - Chosen Site is: In the Shadow of Station VIII, Where the Masters Can Keep an Eye On It, Habituated to the Hinterland' },
+    { name: 'A Visitor for Your Lackey', freq: 'Rare', needs: 'Habituated to the Hinterland 15, Leader of the Tracklayers is: A Lackey of Yours, Formerly Aligned with Mr Fires, Exploration of a Hinterland City 90', locked: 'The City Waning 8' },
+    { name: 'Holiday Cheer', freq: 'Standard', needs: ', Habituated to the Hinterland 2', locked: 'The City Waning 8' },
+  ];
+
+  function tlcHp(e) {
+    if (e.hp === undefined) return '';
+    const top = e.hpHi ? e.hp + '–' + e.hpHi : String(e.hp);
+    return e.flat ? top : '(' + top + '+Eff)';
+  }
+
+  function tlcChallenge(e) {
+    const parts = [];
+    if (e.luck) parts.push('Luck ' + e.luck + '%');
+    if (e.n) parts.push(e.n[0] + ' ' + e.n[1] + ' (narrow)');
+    if (e.b) parts.push(e.b[0] + ' ' + e.b[1] + ' (broad)');
+    return parts.join(' and ');
+  }
+
+  // A list of items, cut to the first with a count of the rest.
+  function tlcItems(list) {
+    const parts = String(list).split(', ');
+    return parts.length > 2 ? parts[0] + ' +' + (parts.length - 1) + ' more' : parts.join(', ');
+  }
+
+  function tlcLabel(e) {
+    if (e.label) return e.label;
+    const mark = (e.n || e.b) ? CAROUSEL_MARK_CHALLENGE : e.luck ? CAROUSEL_MARK_EXPECTED : '';
+    const parts = [];
+    let moves = (e.w || []).slice(0, 2);
+    if (e.cost) parts.push(e.cost + ' ' + CAROUSEL_MARK_USES + (e.get ? ' → ' + tlcItems(e.get) : ''));
+    else if (e.hp !== undefined) {
+      parts.push('HP ' + tlcHp(e) + mark);
+      if (e.hpf && e.hpf !== e.hp) parts.push('fail HP (' + e.hpf + '+Eff)');
+    } else if (e.get) parts.push(tlcItems(e.get) + mark);
+    else if (mark && moves.length) moves = [moves[0] + mark].concat(moves.slice(1));
+    else if (mark) parts.push(mark);
+    moves.forEach(function (m) { parts.push(m); });
+    if (e.pay) parts.push('−' + tlcItems(e.pay));
+    if (e.f && e.f.length) parts.push('fail ' + e.f.slice(0, 2).join(', '));
+    return parts.join(' · ');
+  }
+
+  function tlcTitle(e) {
+    const lines = [e.name, e.storylet, ''];
+    if (e.cost) lines.push('Takes: ' + e.cost + '.');
+    if (e.pay) lines.push('Costs: ' + e.pay + '.');
+    if (e.hp !== undefined && !e.cost) {
+      const fail = e.hpf !== undefined && (e.n || e.b || e.luck) ? ', and ' + e.hpf + ' + Efficiency on a failure' : '';
+      lines.push('Prosperity: ' + (e.flat ? tlcHp(e) : tlcHp(e).slice(1, -1).replace('+Eff', '') + ' + your Hinterland Efficiency (0 to 300)')
+        + ' on a success' + fail + '.');
+      if (e.hpHi) lines.push('The wiki has one page for each state of your city here, so the figure is their range.');
+    }
+    const ch = tlcChallenge(e);
+    if (ch) lines.push('Challenge: ' + ch + '.');
+    if (e.get) lines.push('Gives: ' + e.get + '.');
+    if (e.w && e.w.length) lines.push('Also on a success: ' + e.w.join(', ') + '.');
+    if (e.f && e.f.length) lines.push('On a failure: ' + e.f.join(', ') + '.');
+    if (e.needs) lines.push('Needs: ' + e.needs + '.');
+    if (e.guide) lines.push('The guide: ' + e.guide);
+    if (e.note) lines.push(e.note);
+    lines.push('', TLC_CFG.rules);
+    return lines.join('\n');
+  }
+
+  TLC_OPTIONS.forEach(function (e) {
+    e.label = tlcLabel(e);
+    e.title = tlcTitle(e);
+  });
+
+  // A card in the hand says the most it pays, or that it cashes out, in a word.
+  function tlcCardBadge(card) {
+    const own = TLC_OPTIONS.filter(function (e) { return normalizeName(e.storylet) === normalizeName(card.name); });
+    const pays = own.filter(function (e) { return e.hp !== undefined && !e.cost; });
+    if (pays.length) {
+      const eff = pays.filter(function (e) { return !e.flat; });
+      if (eff.length) return 'HP up to (' + Math.max.apply(null, eff.map(function (e) { return e.hpHi || e.hp; })) + '+Eff)';
+      return 'HP up to ' + Math.max.apply(null, pays.map(function (e) { return e.hpHi || e.hp; }));
+    }
+    if (own.length && own.every(function (e) { return e.cost; })) return 'cash-out ' + CAROUSEL_MARK_USES;
+    return own.length ? own[0].label || 'story' : 'story';
+  }
+
+  // The game names some cards without the wiki's disambiguating brackets.
+  const TLC_CARDS = TLC_CARD_LIST.map(function (c) {
+    c.badge = tlcCardBadge(c);
+    c.lines = ['Frequency: ' + (c.freq || 'not stated') + '.'].concat(c.locked ? ['Shut off by: ' + c.locked + '.'] : []);
+    return c;
+  });
+  const TLC_HAND = [];
+  TLC_CARDS.forEach(function (c) {
+    if (c.noHand) return;
+    [c.name].concat(c.also || []).forEach(function (n) {
+      TLC_HAND.push(Object.assign({}, c, { name: n }));
+    });
+  });
+  const TLC_MATCHERS = TLC_CARDS.map(function (c) {
+    return { key: normalizeName(c.name), match: [c.name].concat(c.also || []).map(carouselMatcher) };
+  });
+
+  function tlcCanonical(key) {
+    const hit = TLC_MATCHERS.filter(function (m) { return m.match.some(function (f) { return f(key); }); })[0];
+    return hit ? hit.key : null;
+  }
+
+  const TLC_INDEX = carouselIndex(TLC_OPTIONS);
+  const TLC_DEF = {
+    cfg: TLC_CFG, options: TLC_OPTIONS, index: TLC_INDEX, storylets: TLC_CARDS.map(function (c) { return c.name; }),
+    // Officially Non-Criminal is Investigating's card, and keeps its one heading badge.
+    cards: TLC_HAND, cardKeys: [], noHeading: ['officially non criminal'], aliases: tlcCanonical,
+    cls: 'fl-ux-tlc', flag: 'flUxTlc', branchCls: 'fl-ux-tlc-branch', branchFlag: 'flUxTlcBranch',
+    cardCls: 'fl-ux-tlc-card', cardFlag: 'flUxTlcCard',
+  };
+
+  function tlcRatings() { pqRatings(TLC_DEF); }
 
   // === feature: Forgotten Quarter Expeditions ============================
   //
@@ -33806,6 +34790,10 @@
     { name: 'inspired', run: inspRatings },
     { name: 'investigating', run: invRatings },
     { name: 'someone-is-coming', run: sicRatings },
+    { name: 'hellworm', run: hwRatings },
+    { name: 'risen-burgundy', run: rbgRatings },
+    { name: 'station-developments', run: sdRatings },
+    { name: 'city-of-the-tracklayers', run: tlcRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a

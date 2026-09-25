@@ -1,8 +1,8 @@
 # Plan: badges for the TODO's "Reference" guides
 
-Working plan, kept in the repo so it survives an interruption. Started 2026-09-24. Last updated after WP-6.
+Working plan, kept in the repo so it survives an interruption. Started 2026-09-24. Last updated after WP-7 (all four items).
 
-**Status: WP-0 to WP-6 done. Next: WP-7 (real carousels, Hellworm first).** Nothing has been checked in the game yet; each package's "Not verified in-game" list is in `AGENTS.md`.
+**Status: WP-0 to WP-7 done. Next: WP-8 (statues and the economy panel).** Nothing has been checked in the game yet; each package's "Not verified in-game" list is in `AGENTS.md`.
 
 ## Context
 
@@ -19,7 +19,7 @@ Standing project rules (from memory and `AGENTS.md`): **no commits or git-tree c
 
 ## Current state of the code (what exists now)
 
-`choice-helper.js` is at 1.26 (HEAD is 1.25; 1.26 covers WP-2 to WP-6), the loader `all-in-one/fallen-london.js` at 0.50. Features registered at the end of `FEATURES`:
+`choice-helper.js` is at 1.27 (HEAD, committed by the user, is 1.26 and covers WP-2 to WP-6; 1.27 adds Hellworm, Risen Burgundy, Station Developments and the City of the Tracklayers), the loader `all-in-one/fallen-london.js` at 0.51. Features registered at the end of `FEATURES`:
 
 | Feature | Entry point | Table | Package |
 |---|---|---|---|
@@ -31,10 +31,14 @@ Standing project rules (from memory and `AGENTS.md`): **no commits or git-tree c
 | `inspired` | `inspRatings` | `INSP_OPTIONS`, `INSP_CARDS` | WP-4 |
 | `investigating` | `invRatings` | `INV_OPTIONS`, `INV_CARDS` | WP-5 |
 | `someone-is-coming` | `sicRatings` | `SIC_OPTIONS`, `SIC_CARDS` | WP-6 |
+| `hellworm` | `hwRatings` | `HW_OPTIONS`, `HW_CARDS` | WP-7 |
+| `risen-burgundy` | `rbgRatings` | `RBG_OPTIONS`, `RBG_CARDS` | WP-7 |
+| `station-developments` | `sdRatings` | `SD_OPTIONS` | WP-7 |
+| `city-of-the-tracklayers` | `tlcRatings` | `TLC_OPTIONS`, `TLC_CARD_LIST` | WP-7 |
 
 Shared code, all in `choice-helper.js`: the **progress-quality helper** (`pq*`, block headed `// === shared: progress qualities`, right after `aolRatings`), built on the older carousel plumbing (`carouselRatings`, `carouselIndex`, `carouselLookup`, `carouselRange`, `carouselSigned`, `eachCardName`, `attachBadge`).
 
-Tests, one per package: `tests/choice-airs-of-london.test.mjs`, `choice-progress-qualities.test.mjs` (WP-2), `choice-casing.test.mjs` (WP-3), `choice-fascinating-inspired.test.mjs` (WP-4), `choice-investigating.test.mjs` (WP-5), `choice-someone-is-coming.test.mjs` (WP-6). Three older suites list every registered feature by hand and must be edited for each new one: `choice-crowds-of-spite`, `choice-fruits-of-the-zee`, `choice-zailing` (append the new feature name to the roster array; `sed` on the previous last entry works).
+Tests, one per package: `tests/choice-airs-of-london.test.mjs`, `choice-progress-qualities.test.mjs` (WP-2), `choice-casing.test.mjs` (WP-3), `choice-fascinating-inspired.test.mjs` (WP-4), `choice-investigating.test.mjs` (WP-5), `choice-someone-is-coming.test.mjs` (WP-6), `choice-hellworm.test.mjs`, `choice-risen-burgundy.test.mjs`, `choice-station-developments.test.mjs`, `choice-city-of-the-tracklayers.test.mjs` (WP-7). Three older suites list every registered feature by hand and must be edited for each new one: `choice-crowds-of-spite`, `choice-fruits-of-the-zee`, `choice-zailing` (append the new feature name to the roster array; `sed` on the previous last entry works).
 
 ### The badge vocabulary (WP-1, done)
 
@@ -110,7 +114,9 @@ The `pq*` block and vocabulary above. Extended in WP-3 (`cost`/`need`, `actions`
 ### WP-6 — Someone Is Coming — DONE
 `someone-is-coming`. The eight *A Gift from the Capering Relicker* payouts (fixed 21 CP at level 4, not a reset), the drunk rat in *Rob a drunk* (6 CP, level 3), and 40 card options across 17 cards and storylets, each of which raises the counter by exactly 1 so the badge names the profit. Two shapes were added to the shared helper: a gain may carry `pay` (the profit), and a card may carry a fixed `badge` word. Left out: the thirteen Conflict Cards (each wants two Favours; the guide gives only a rate), cards that raise it but are not in the guide's table, and the two zee cards' headings (Zailing's; only their option is here).
 
-### WP-7 — Real carousels, one feature each, in this order — NEXT
+### WP-7 — Real carousels, one feature each, in this order — UNDER WAY
+Done: **Hellworm** (`hellworm`; badges only, no panel: one card with six options, the 33-row milking table not carried) and **Risen Burgundy** (`risen-burgundy`; no panel: 25 cards, about 75 options: the hunt, a Saint's Day, the Weaver, the Poet-Thief, Heralds, the two payout cards, the Casing and Fascinating spends left for it, the weekly cards; the shared helper gained a per-entry quality `q` and placeholder card names). and **Station Developments** (`station-developments`; no panel: about 95 options in 30 storylets, the eight Offices branches and the conversions they unlock; `Curio ×5 → Scrip ×25`, `Scrip 50×(n+1) → Library 1`; 22 conversions whose pages name no storylet left out; the Location-specific cards guide judged a matrix with no option to badge). and the **City of the Tracklayers** (`city-of-the-tracklayers`; no panel: 62 cards, 207 options, the Prosperity each pays and what it does to the Waning and Displeasure; the four Fate-locked vignettes are not there, the wiki has no titles for them; twelve new placeholders). WP-7 is finished. The user said no panel for now; ask the panel question again for WP-8.
+
 Hellworm (smallest, self-contained) → Risen Burgundy (Guide) carousels (also the Firmament-450 cards left out of WP-2, WP-3, WP-4: Cutthroats and Canalmen's other two options, Tolling of the Thief-Bells, Case a lesser keep, Seduce an Alluring Masquer, The Honours of the Court) → Station Developments + Location-specific cards (Hinterlands deck) → The City of the Tracklayers vignettes and decisions. **Ask the panel question for each.**
 
 ### WP-8 — Statues and the economy panel (decided: one panel)
@@ -128,6 +134,7 @@ Dramatic Tension, Seeking (apart from WP-5's card), Bessemer sources, Hinterland
 ### Later, not in the original plan
 - **Weddings (Guide)** and **Spouses (Guide)** (from WP-0): analyse first.
 - **Seeking the Meaning of the Plaster Face (Guide)**: the Big Rat storyline; skip the Running Battle options already done.
+- **The rest of Risen Burgundy's deck** (about 40 of its 67 cards: the dreams, the Ducal-court and Firmament-story cards, the counter-raising cards for Beneficence and Against Time and Kings, the Joyous Entry, As Above and Glory's Fire cards, the eighteen steeds on Whoso List to Hunt, the Weaver's investments). The guide only points at them; the wiki category `Cards - Risen Burgundy` lists them.
 - Airs of London storylets still open in the TODO: *Time in bed*, *Unfinished Business ×4*, and reading the current Airs off the unlock tooltip (needs a DOM capture).
 
 ## Open questions only the game can answer

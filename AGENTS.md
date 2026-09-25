@@ -2552,6 +2552,82 @@ navigation. Two consequences:
   *Rob a drunk* and the oracle. Left out: the thirteen Conflict Cards (each wants two Favours; the guide gives
   only a rate), cards that raise it but are not in the guide’s table, and the other options of these cards.
 
+  **Hellworm** (`hellworm`, `HW_OPTIONS`, on the `pq*` helper; WP-7, the first of the carousels filed as
+  reference): one card, *Your Very Own Hellworm*, in the Upper River deck once a Miniature Hellworm is equipped.
+  Its options raise The Disposition of your Hellworm (`Disp +1 · Nightmares −1–8` playing, `Disp +1–2 · Scandal
+  +1 · Aeolian Scream ×2` riding, which needs the saddle) and *Milk your hellworm* takes all 7 back for one of 33
+  rewards (`Disp 7 ▼ → one of 33 rewards`); three Scrip purchases (saddle, boots, a polish that does nothing) are
+  labels with the price. **No panel, by decision**: the guide’s 33-row milking table and its cash-out paths are
+  not carried, only the 10.03 and 15.54 Echoes per action and the 80.26 average in the tooltips. The guide gives
+  Nightmares −1 to −7 where the page says −1 to −8, and omits the Kataleptic Toxicology 5 that milking needs;
+  both are carried.
+
+  **Risen Burgundy** (`risen-burgundy`, `RBG_OPTIONS`, `RBG_CARDS`, on the `pq*` helper; WP-7, no panel by
+  decision): the Firmament city, played through the opportunity deck alone, so every carousel is a set of
+  **cards** — 25 badged, about 75 options. Covered: the hunt (*Whoso List to Hunt*, *Hunting the (Roof Prey)*,
+  *Attend the revels*), a Saint’s Day (the start, four progress cards of two options, two conflict cards, two
+  payouts), the Gall-Eyed Weaver, the Poet-Thief pair (a sack or a hat, and the two autoplay cards each summons),
+  *Heralds from Elsewhere* (a six-step ladder), the two payout cards at 10 of Burgundian Beneficence or Against
+  Time and Kings, the Casing and Fascinating spends the earlier packages left for here (*Case a lesser keep*,
+  *Steal from the Gravensteen itself*, *Seduce an Alluring Masquer*), and the weekly and monthly cards. **Each
+  option names its own quality** (`q` on the entry, added to the shared helper) because a card game moves
+  several: `Saint +1? · fail +1`, `BB −10 ▼ → Captivating Ballad`, `Casing −36 ▼ → Venom-Ruby ×10 · …`. **Traps:**
+  the Weaver’s four cards share ONE option title, so it is one entry whose tooltip lists all four Visions (the
+  guide’s totals check exactly against the pages: 5 × 4, 1 × 3, 2 × 4, 27 × 2); *Conclude your business* and *Make a
+  run for it* are options of two cards each; the hunting card is named after its quarry, so `(Roof Prey)` joined
+  `CAROUSEL_PLACEHOLDER` and card names now match through `carouselMatcher`. **Left out:** the eighteen steeds on
+  *Whoso List to Hunt* (the guide says the prey is narrative and the challenges do not depend on the steed), the
+  Weaver’s investments and shop, the Ducal Mint (its card has no page), the Joyous Entry, As Above and Glory’s Fire
+  cards, and the thirty-odd other cards that raise Beneficence or Against Time and Kings by 1, which the guide only
+  points to. Almost every option re-rolls the Airs of Burgundy, said in the tooltip.
+
+  **Station Developments** (`station-developments`, `SD_OPTIONS`, on the `pq*` helper; WP-7, no panel by
+  decision): the Upper River stations built up with Hinterland Scrip, and the repeatable conversions each
+  development unlocks. About 95 options in 30 storylets: the eight Offices of the Tracklayer’s Union branches
+  (Ealing Gardens, Jericho, Evenlode for the Magistracy, Balmoral, Station VIII, Burrow-Infra-Mump, Moulin, the
+  Hurlers), *Visit your Library*, *Entice Purchasers*, *Licensed by Mr Stones*, *The Museum of Souls*, *God’s
+  Editors at Burrow-Infra-Mump*, *Spa Services*, the Ealing chapel, clinic, lounge and pie stand, and the carriage.
+  The badge is what the option takes and what it gives, `Curio ×5 → Scrip ×25`, `Scrip 50×(n+1) → Library 1`;
+  `n` is the station’s developments so far (the tenth improvement costs 500, ten cost 2,750), said in the
+  tooltip beside the full price, what it needs and the Charter halvings. A heading says how many options it holds.
+  Entries are `sd(storylet, name, give, get, note)`; `label` and `title` are built from them once. **Traps:** the
+  pages of *Improve your canteen*, *Construct an Archaeological Institute*, *Improve the Diving Bell*, *Further
+  expand your Cabinet Noir* and *Trade rumours with the Calculating Lapidary* are two pages under one title (the
+  game shows the one you qualify for), so each is ONE entry and the tooltip says so; the wiki’s ` 2` suffix is
+  not part of the title. **Guessed:** an improvement whose page names no storylet is filed under its station’s
+  Offices branch, and the Ealing Gardens conversions the pages do not place are left out rather than guessed.
+  **Left out:** 22 conversions whose pages name no storylet (the Ealing butchery, Postal and Notary Office and
+  Sapphire options, the Hurlers’ hot spring and Sapphire), the Larceny options (the Casing feature), Marigold’s
+  statue (the statue package), the Watchtower refresh on a card that carries two names, and the *Location-specific
+  cards in the Hinterlands* guide, a matrix of which card is dealt at which station that carries no option a
+  badge could sit on.
+
+  **City of the Tracklayers** (`city-of-the-tracklayers`, `TLC_OPTIONS`, `TLC_CARD_LIST`, on the `pq*` helper;
+  WP-7, no panel by decision): the location the railway builds for the tracklayers, whose deck of 62 cards is
+  where nearly all of its play is. 207 options are badged. Almost every card has an option that pays Hinterland
+  Prosperity (HP, a Penny each): 200 or 220 plus Hinterland Efficiency (0 to 300), the 220 ones behind a double
+  check. The city also keeps The City Waning (cards shut off at 8) and Tracklayers’ Displeasure, which only bad
+  news raises. **The badge** reads `HP (220+Eff)? · Waning −2 · fail Displ +2`; a cash-out reads `HP −(1050−Eff) ▼
+  → Puzzling Map ×1`; the three betrayals `HP all ▼ → Journal of Infamy (HP ÷ 50) · Waning +36 · Efficiency → 0`.
+  `Eff` is your Efficiency, which is not read. A card in the hand says the most it pays (`HP up to (220+Eff)`) or
+  `cash-out ▼`. The guide’s table of decisions gives the value that makes a challenge certain, and 35 options carry
+  it in the tooltip; a test checks each against its page (a broad challenge at five thirds of its difficulty, as
+  everywhere, but a NARROW one at five above where the rest of this script says four — a difference nobody has
+  settled in the game, and the tooltip quotes the guide). **Traps:** the wiki disambiguates with brackets the game
+  does not show (*Whitsun (The City of the Tracklayers)*, *The Sound of Wings (Tracklayers’ City)*: `also` on the card),
+  and several titles are placeholders, so twelve entries joined `CAROUSEL_PLACEHOLDER` (`(the City)`, `(Pub)`,
+  `(Inhabitant)`, `(Chosen Site)`, `(Alignment)`, `(loved one)`, the three ideologies, and three leader-card
+  phrases); options that come in variants for the state of your city (*Help interpret Hinterland fossils*, the two
+  *Greet the Merry Gentleman* pages) are one entry with the range said in the tooltip; the seven *Imports and
+  Exports* options cost 1000 or 1050 minus Efficiency by the city’s site. *Officially Non-Criminal* is Investigating’s
+  card: it gets no card or heading badge here (`noHand`, `noHeading`) and *Solve Tracklayers’ City crime* stays there,
+  but its cash-outs and the three betrayals are badged here. **Left out:** the four Fate-locked vignettes and their
+  eight cards (the guide tabulates them by picture and the wiki has no page for the cards or their options, so no
+  title exists to match), the storylets of the Scheme of a Phoenix and Exploration of a Hinterland City, and the
+  cards that only announce something. Eight generic card names (*Poise*, *Compromise*, *Negation*, *Apolitical*,
+  *Drained*, *Day of Rest*, *Each Their Own*, *(Hinterland City Streets)*) are not badged in the hand, in case the
+  game deals a card of the same name elsewhere; their options are badged when the card is open.
+
   **Painting in Balmoral** (`painting-balmoral`, `PB_OPTIONS`, `PB_PAYOUTS`): the badge exists to say
   that **failing is fine**. Every painting action raises Painter's Progress by one whether the check
   passes or not, so a failure costs nothing but the items and only steers the picture towards a
@@ -3350,6 +3426,39 @@ Confirmed live by the author:
   on a greeting. **(3) The drunk rat.** That it is an option of *Rob a drunk* and that 6 CP is what it takes.
   **(4) Which failures still raise it**, since the pages record it for two Luck options only.
 
+- The **Hellworm badges** (added 2026-09-25). Nothing seen in the game. Report first: **(1) The card.** That
+  *Your Very Own Hellworm* is drawn at the Upper River stations once a Hellworm is equipped and shows the six
+  options; whether *Milk your hellworm* really needs Kataleptic Toxicology 5. **(2) The Nightmares range** of a
+  play (−1 to −8 by the page, −1 to −7 by the guide).
+
+- The **Risen Burgundy badges** (added 2026-09-25). Nothing seen in the game. Report first, in order:
+  **(1) The hunting card’s title.** That it reads *Hunting the …* with the quarry, and whether the option is
+  *Go for glory* and *Stay with the pack*. **(2) The Weaver’s four cards.** That they really share the title *A
+  Delivery from the Gall-Eyed Weaver* and the option *Unroll your textiles*. **(3) The payout cost.** That a
+  Beneficence or Against Time and Kings payout takes 10 of the quality (the pages say 10 x). **(4) The two
+  autoplay cards** (*Stopped by the Guards*, *Recognised in the Street*): that the options carry the same titles as
+  their twins on the other card. **(5) Saint’s Day progress:** that each option really raises it by 1 and
+  a payout appears at 15 or 25.
+
+- The **Station Developments badges** (added 2026-09-25). Nothing seen in the game. Report first, in order:
+  **(1) The Offices headings.** That each station’s branch really reads *Offices of the Tracklayer’s Union: X
+  Branch*, and that Magistracy is *Evenlode Branch* and Jericho Locks is *Jericho Branch* (the pages say so; the
+  Marigold and Ealing ones were not confirmed for every improvement). **(2) Improvements the pages do not
+  place.** Which Ealing Gardens, Jericho and Hurlers improvements are in the Offices storylet rather than
+  another one; those in the wrong place show no badge. **(3) The two-page titles.** That *Improve your
+  canteen* and the others really show one title at both levels. **(4) The Ealing conversions** the guide lists
+  under Commercial District levels, whose storylet is unknown, and which would earn badges if named.
+
+- The **City of the Tracklayers badges** (added 2026-09-26). Nothing seen in the game. Report first, in order:
+  **(1) The card titles.** That *Whitsun* and *The Sound of Wings* show without the wiki’s brackets, what the three
+  leader cards (*Cornelius Leading …*) and the three ideology cards (*The … Way*) are actually called, and that
+  the option titles with a placeholder (*Look towards (Chosen Site)*, *Meet your neighbours at (Pub)*) read as
+  the place name. **(2) The two-page titles.** Which page you see for *Help interpret Hinterland fossils*, *Greet
+  the Merry Gentleman* and the others, and whether their figures match the badge’s range. **(3) The narrow
+  certain-pass value.** Whether a narrow challenge of difficulty 10 is certain at 14 (this script) or 15 (the
+  guide), given the option badges say `?` and the tooltip says the guide’s number. **(4) The Efficiency.** Whether
+  Hinterland Efficiency can be read off the Myself tab, since then `Eff` could be a number.
+
 - The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
   table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
   looking at the screen can confirm: a wrong number renders exactly as well as a right one. They
@@ -3831,6 +3940,25 @@ Current tests:
   with its rare 1%, that the guide’s Echoes are tooltip text only, the eighteen cards (hand and opened
   heading once each), that the zee cards and *Rob a drunk* keep no heading badge of ours while their option is
   badged, the numbered-page aliases, and that no title is in another feature’s table.
+- `tests/choice-hellworm.test.mjs` — the six options on the one card: a play, a ride, the milking at 7
+  that takes all of it, the three Scrip purchases as labels, the guide’s disagreements, that its Echoes stay
+  in the tooltips, the card in the hand and opened badged once with its options inside, and that no title is
+  in another feature’s table.
+- `tests/choice-risen-burgundy.test.mjs` — the Weaver’s four deliveries times their payouts against the guide’s
+  totals, that its four cards share one option title with one badge and four Visions in the tooltip, the
+  hunting card matched through its `(Roof Prey)` placeholder in the hand and opened, the Saint’s Day ladder
+  (four cards of two options, all +1), the payouts at 10, the Poet-Thief’s twin titles told apart by card,
+  Heralds as six steps in order, the weekly cards, and that no title is in another feature’s table.
+- `tests/choice-station-developments.test.mjs` — the badge form (`Curio ×5 → Scrip ×25`, `Scrip 50×(n+1) →
+  Library 1`), that every formula improvement says what n is and sits in an Offices branch, the 2,750 for ten
+  improvements, the eight branches with the Hurlers’ twelve matching the twelve pages, the shared-title entries,
+  the curly apostrophe, the heading counting options, the opened storylet scoping, and no title in another
+  feature’s table.
+- `tests/choice-city-of-the-tracklayers.test.mjs` — the badge form for a payer, a cash-out and the three betrayals,
+  the seven Imports and Exports costs, the guide’s 35 certain-pass values against the pages (five thirds broad,
+  five above narrow), the two-page titles, the card names with brackets or placeholders, the card in the hand
+  and opened and an option inside it, Officially Non-Criminal left to Investigating, and no title filed under
+  the same card in another feature’s table.
 - `tests/choice-painting-balmoral.test.mjs` — the painting suite pins that all three
   painting actions name both outcomes on the badge, that *Unveil your Painting* is one row pricing all
   seven compositions, that exactly one row is marked as the guide's word against an option page, and
