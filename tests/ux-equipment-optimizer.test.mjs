@@ -925,7 +925,11 @@ function resetPage() {
   return [branchEl(eoPage, 255911, true), branchEl(eoPage, 255912, false)];
 }
 const eoWrap = (b) => b.querySelector('.fl-ux-eo');
-const eoLine = (b) => (b.querySelector('.fl-ux-eo-line') || { textContent: '' }).textContent;
+// The words only: the buttons in the panel are not part of the message.
+const eoLine = (b) => {
+  const line = b.querySelector('.fl-ux-eo-line');
+  return line ? line.children.filter((c) => c.tagName === 'DIV').map((c) => c.textContent).join('\n') : '';
+};
 const eoButton = (b) => b.querySelector('.fl-ux-eo-run');
 
 async function waitFor(cond, ms) {
@@ -1342,6 +1346,110 @@ checkAsync('filling an empty slot is a click on the item, and undoing it a click
   await waitFor(() => w.spa.backs > 1 && eoLine(w.story()).includes('Restored'), 3000);
   return [filled, w.spa.unequips, w.server.worn.Crew, reloads.length];
 }, [[[900001], 900001], [900001], undefined, 0]);
+
+// --- dismissing the result, and items that ask before equipping ------------
+
+check('the result panel has a Dismiss button, touch-sized, that clears it and forgets the result', () => {
+  const branch = drawnBranch();
+  const dismiss = branch.querySelector('.fl-ux-eo-dismiss');
+  const shown = [dismiss !== null, dismiss.textContent, /min-height:\s*44px/.test(dismiss.style.cssText)];
+  dismiss.click();
+  const line = branch.querySelector('.fl-ux-eo-line');
+  return shown.concat([line.style.display, line.children.length, api.readResult()]);
+}, [true, 'Dismiss', true, 'none', 0, null]);
+check('a scan after dismissing does not bring the result back', () => {
+  const branch = drawnBranch();
+  branch.querySelector('.fl-ux-eo-dismiss').click();
+  api.equipmentOptimizer();
+  return branch.querySelector('.fl-ux-eo-line').style.display;
+}, 'none');
+checkAsync('a message that is not a result (already the best outfit) can be dismissed too', async () => {
+  const { server, branches } = freshWorld();
+  server.worn.Hat = 310;
+  api.equipmentOptimizer();
+  eoButton(branches[0]).click();
+  await waitFor(() => eoLine(branches[0]).length > 0);
+  branches[0].querySelector('.fl-ux-eo-dismiss').click();
+  return [branches[0].querySelector('.fl-ux-eo-line').style.display, eoLine(branches[0])];
+}, ['none', '']);
+
+// Some items do not equip on a click: the game opens a react-modal popup with
+// "Use" and "Equip" buttons (reported 2026-09-26, with the popup left open on
+// Possessions; the markup below is from the capture of the Ridiculous Hat's).
+// It has no Close button: react-modal closes on Escape or a click on its
+// overlay. The run must click Equip, NEVER Use, and close what it opened when
+// it gives up.
+function softWorldWithPopups(opts) {
+  const w = softWorld(Object.assign({ ignoreClick: true }, opts));
+  const worldSpa = w.spa;
+  // Replace the item behaviour: clicking opens a popup instead of acting.
+  const popupFor = (kind, id, slot) => {
+    for (const el of doc.body.querySelectorAll('.ReactModalPortal')) el.remove();
+    const portal = add(doc.body, 'div', 'ReactModalPortal');
+    const overlay = add(portal, 'div', 'ReactModal__Overlay ReactModal__Overlay--after-open modal--tooltip-like__overlay');
+    overlay.onReact = () => portal.remove();
+    const content = add(overlay, 'div', 'ReactModal__Content ReactModal__Content--after-open modal--tooltip-like__content');
+    content.setAttribute('role', 'dialog');
+    const buttons = add(add(add(content, 'div', 'tooltip--item-modal'), 'div', 'tooltip__desc'), 'div', 'tooltip__buttons');
+    const use = add(buttons, 'button', 'button button--primary button--sm button--tooltip');
+    use.textContent = 'Use';
+    use.onReact = () => { worldSpa.uses = (worldSpa.uses || 0) + 1; };
+    const act = add(buttons, 'button', 'button button--primary button--sm button--tooltip');
+    act.textContent = kind === 'equip' ? 'Equip' : 'Unequip';
+    act.onReact = () => {
+      if (opts && opts.popupDead) return;
+      if (kind === 'equip') { w.server.worn[slot] = id; worldSpa.equips.push(id); } else { delete w.server.worn[slot]; worldSpa.unequips.push(id); }
+      portal.remove();
+      // The list redraws with the new state.
+      redraw();
+    };
+    return portal;
+  };
+  let redraw = () => {};
+  // Reach the possessions drawing through a click on the link, then hook the items.
+  const nav = doc.body.querySelector('a.cursor-pointer');
+  if (nav) {
+    const first = nav.onReact;
+    const hook = () => {
+      for (const node of doc.body.querySelectorAll('.icon--available-item, .equipped-item')) {
+        const id = Number(node.getAttribute('data-quality-id'));
+        const button = node.children[0];
+        const isWorn = String(node.className).includes('equipped-item');
+        const slot = { 304: 'Hat', 310: 'Hat', 312: 'Hat', 556: 'Hat', 900001: 'Crew', 147174: 'Luggage', 147136: 'Luggage', 134971: 'Companion' }[id];
+        button.onReact = () => popupFor(isWorn ? 'unequip' : 'equip', id, slot);
+      }
+    };
+    nav.onReact = () => { first(); hook(); redraw = () => { first(); hook(); }; };
+  }
+  return w;
+}
+
+checkAsync('an item that asks first: the run clicks Equip (never Use) in its popup, and nothing is left open', async () => {
+  const w = softWorldWithPopups();
+  api.equipmentOptimizer();
+  eoButton(w.branches[0]).click();
+  await waitFor(() => w.spa.backs > 0 && eoLine(w.story()).length > 0, 3000);
+  return [w.spa.equips, w.server.equips(), reloads.length, doc.body.querySelector('.ReactModalPortal'), w.spa.uses || 0];
+}, [[310], [], 0, null, 0]);
+
+checkAsync('a popup whose Equip does nothing: the API makes the swap, the popup is closed by its overlay, the page reloads', async () => {
+  const w = softWorldWithPopups({ popupDead: true });
+  api.equipmentOptimizer();
+  eoButton(w.branches[0]).click();
+  await waitFor(() => reloads.length > 0, 3000);
+  return [w.spa.equips, w.server.equips(), reloads.length, doc.body.querySelector('.ReactModalPortal'), w.spa.uses || 0];
+}, [[], [310], 1, null, 0]);
+
+checkAsync('emptying a slot can also ask first (Unequip in a popup)', async () => {
+  const w = softWorldWithPopups({ dangerous: true });
+  w.server.worn.Crew = 900001;
+  api.saveUndo(api.undoFor([FILL_CREW], 255911));
+  api.saveResult({ branchId: 255911, lines: ['x'], undoable: true });
+  api.equipmentOptimizer();
+  w.branches[0].querySelector('.fl-ux-eo-undo').click();
+  await waitFor(() => w.spa.backs > 0 && eoLine(w.story()).includes('Restored'), 3000);
+  return [w.spa.unequips, w.server.worn.Crew, reloads.length, doc.body.querySelector('.ReactModalPortal')];
+}, [[900001], undefined, 0, null]);
 
 // --- finish ----------------------------------------------------------------
 

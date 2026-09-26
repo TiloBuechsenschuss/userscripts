@@ -100,3 +100,30 @@ ToolOfTheTrade, Adornment, Luggage, Crew.
   the items on the Possessions tab, then go back: the Story tab refetches
   `GET /api/opportunity` and `POST /api/storylet` on arrival, seen in the
   capture). Neither route has been tried after an API equip.
+
+## Items that ask before equipping
+
+Clicking a spare item on the Possessions tab does not always equip it. An item
+that "may be used or equipped" (the Ridiculous Hat, captured 2026-09-26) opens a
+popup instead. **Verified markup:**
+
+```
+.ReactModal__Overlay
+  .ReactModal__Content[role="dialog"][tabindex="-1"][aria-modal="true"]
+    .tooltip--item-modal
+      .icon.tooltip__icon > img[alt=<item name>]
+      .tooltip__desc
+        p.item__name
+        p "This item may be used or equipped."
+        .tooltip__buttons
+          button "Use"
+          button "Equip"
+```
+
+- **"Use" spends or activates the item.** Automation must click only the button
+  reading exactly "Equip".
+- There is no Close button. react-modal closes on Escape (on the focused dialog)
+  or on a click on `.ReactModal__Overlay`.
+- **Unknown:** whether a worn item can open a similar popup with an Unequip
+  button. Clicking a worn item in the Adornment slot emptied it directly.
+- The API `POST /api/outfit/equip` does not go through this popup.

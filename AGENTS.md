@@ -3072,6 +3072,19 @@ navigation. Two consequences:
     `canChangeOutfit` is false. **Known limit:** it scores only the stats the challenges test, so an
     item with a small gain there and a big penalty elsewhere (say +2 Dangerous, -300 Watchful) can be
     chosen. Nothing guards other stats yet.
+  - **Items that ask first, and the Dismiss button** (added 2026-09-26, on the report of an item whose
+    click opened a popup with an "Equip" button and left the run stuck on Possessions). After a click
+    the run waits for either the change or a dialog button reading exactly "Equip" (or "Unequip" when
+    emptying a slot); it clicks that and waits again. **The popup's markup is captured** (the Ridiculous
+    Hat's, 2026-09-26): a react-modal, `.ReactModal__Overlay` > `.ReactModal__Content[role="dialog"]` >
+    `.tooltip--item-modal` > `.tooltip__desc` ("This item may be used or equipped.") >
+    `.tooltip__buttons` with two buttons, **"Use" and "Equip"**. The run clicks only the button reading
+    exactly "Equip": "Use" spends the item and must never be clicked. There is no Close button;
+    react-modal closes on Escape (on the focused dialog) or a click on its overlay, so a swap that
+    gives up dispatches Escape on the dialog and clicks the overlay before falling back to the API,
+    so nobody is left behind a popup. Whether an *Unequip* popup exists was not captured (emptying a
+    slot by click worked directly on the Adornment slot). The result panel has a **Dismiss** button that
+    clears the message and forgets the stored result; it is on every message, not only results.
   - **Legibility.** The result panel brings its own background and ink (`EO_PANEL_CSS`, from `UI`), and
     every line repeats the ink, so it reads the same on a white action as on a dark one (reported
     2026-09-26: light text on white was barely readable). It is hidden while empty. The test checks a

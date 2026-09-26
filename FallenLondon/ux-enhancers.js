@@ -3485,6 +3485,28 @@
     });
   }
 
+  // Some items do not equip on a click: the game opens a popup instead
+  // (reported 2026-09-26, with the popup left open on Possessions). CAPTURED
+  // (the Ridiculous Hat's): a react-modal, `.ReactModal__Overlay` >
+  // `.ReactModal__Content[role="dialog"]` > `.tooltip--item-modal` >
+  // `.tooltip__desc` "This item may be used or equipped." > `.tooltip__buttons`
+  // holding two buttons, "Use" and "Equip". The run clicks the button reading
+  // exactly "Equip" and NEVER "Use", which spends the item. There is no Close
+  // button: react-modal closes on Escape (on the dialog it has focused) or a
+  // click on its overlay. The button is found by its words inside anything
+  // that looks like a dialog, so a look-alike popup is handled the same way.
+  function eoInDialog(el) {
+    for (let n = el; n && n.nodeType === 1; n = n.parentNode) {
+      if (n.getAttribute && n.getAttribute('role') === 'dialog') return true;
+      if (/popup|modal|dialog|popover|overlay/i.test(String(n.className || ''))) return true;
+    }
+    return false;
+  }
+
+  function eoDialogButtons() {
+    return Array.from(document.querySelectorAll('button, [role="button"], a')).filter(eoInDialog);
+  }
+
   // The page, as far as the run needs it; a stand-in is injected in tests.
   function eoSoftIo() {
     return {
@@ -3501,6 +3523,30 @@
       // The element the game made focusable is the one its handler is bound to.
       click: function (node) { (node.querySelector('[role="button"]') || node).click(); },
       wait: function (cond) { return eoWait(cond, EO_TIMING.itemMs); },
+      // The button of a popup the click opened, if one is showing.
+      confirmButton: function (emptying) {
+        const want = emptying ? /^\s*unequip\s*$/i : /^\s*equip\s*$/i;
+        return eoDialogButtons().filter(function (b) { return want.test(b.textContent); })[0] || null;
+      },
+      // Whatever a give-up leaves open is closed, so nobody is stuck behind it:
+      // Escape on the dialog (react-modal listens there), then a click on the
+      // overlay (its other way out), then any Close-like button of a dialog
+      // that is not a react-modal.
+      closePopups: function () {
+        Array.from(document.querySelectorAll('.ReactModal__Overlay')).forEach(function (overlay) {
+          const dialog = overlay.querySelector('[role="dialog"]') || overlay;
+          try {
+            if (dialog.dispatchEvent && typeof KeyboardEvent === 'function') {
+              dialog.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', keyCode: 27, which: 27, bubbles: true }));
+            }
+          } catch (e) { /* the overlay click is the other way out */ }
+          overlay.click();
+        });
+        const close = /^\s*(close|cancel|no|never mind|\u00D7|\u2715|x)\s*$/i;
+        eoDialogButtons().filter(function (b) {
+          return close.test(b.textContent) || close.test((b.getAttribute && b.getAttribute('aria-label')) || '');
+        }).forEach(function (b) { b.click(); });
+      },
       back: async function (branchId) {
         history.back();
         return eoWait(function () {
@@ -3517,12 +3563,24 @@
     for (const swap of swaps) {
       const emptying = swap.to.id == null;
       const node = emptying ? io.worn(swap.from.id) : io.spare(swap.to.id);
-      if (!node) return { done: done, failed: swap, onPage: true };
+      if (!node) {
+        io.closePopups();
+        return { done: done, failed: swap, onPage: true };
+      }
       io.click(node);
-      const ok = await io.wait(function () {
+      const settled = function () {
         return emptying ? !io.worn(swap.from.id) : !!io.worn(swap.to.id);
-      });
-      if (!ok) return { done: done, failed: swap, onPage: true };
+      };
+      // Either the click did it, or it opened a popup that asks first.
+      let ok = await io.wait(function () { return settled() || io.confirmButton(emptying); });
+      if (ok && !settled()) {
+        io.click(io.confirmButton(emptying));
+        ok = await io.wait(settled);
+      }
+      if (!ok) {
+        io.closePopups();
+        return { done: done, failed: swap, onPage: true };
+      }
       done.push(swap);
     }
     return { done: done, failed: null, onPage: true };
@@ -3722,6 +3780,23 @@
         type: 'button', className: 'fl-ux-eo-undo', textContent: 'Undo',
         css: eoButtonCss(),
         on: { click: function (e) { e.preventDefault(); e.stopPropagation(); eoRun(wrap, branchId, true); } },
+      }));
+    }
+    // Any message can be put away; a result put away is forgotten, so a scan
+    // (or a reload) does not bring it back.
+    if (lines && lines.length) {
+      line.appendChild(h('button', {
+        type: 'button', className: 'fl-ux-eo-dismiss', textContent: 'Dismiss',
+        css: eoButtonCss(),
+        on: {
+          click: function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            clearResult();
+            wrap.dataset.flUxEoShown = '';
+            eoDraw(wrap, branchId, [], false);
+          },
+        },
       }));
     }
   }
