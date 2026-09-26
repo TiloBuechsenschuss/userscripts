@@ -2577,9 +2577,36 @@ navigation. Two consequences:
   run for it* are options of two cards each; the hunting card is named after its quarry, so `(Roof Prey)` joined
   `CAROUSEL_PLACEHOLDER` and card names now match through `carouselMatcher`. **Left out:** the eighteen steeds on
   *Whoso List to Hunt* (the guide says the prey is narrative and the challenges do not depend on the steed), the
-  Weaver’s investments and shop, the Ducal Mint (its card has no page), the Joyous Entry, As Above and Glory’s Fire
-  cards, and the thirty-odd other cards that raise Beneficence or Against Time and Kings by 1, which the guide only
-  points to. Almost every option re-rolls the Airs of Burgundy, said in the tooltip.
+  Weaver’s investments and shop, the Ducal Mint (its card has no page). Almost every option re-rolls the Airs of
+  Burgundy, said in the tooltip.
+
+  **The rest of the Risen Burgundy deck** (added 2026-09-27, `RBG_MORE`, `RBG_MORE_CARDS`, same feature): 36 more
+  cards and 109 options, the ones the guide only points at: the seven dreams (autoplay: `Nightmares +3 · Having
+  Recurring Dreams: Pale for Weariness (set)`), the Ducal-court and Firmament-story cards, and the cards that raise
+  Beneficence or Against Time and Kings by 1. They are badged the way the menace places are: what the option does,
+  the counters first (`BB +1`, `ATK +1`), then what else it moves, what it costs (`−ATK ×2`) and what a failure does,
+  and a card in the hand says which counters it can raise (`BB/ATK +1`) or how many options it has. A trade of one
+  counter for the other (*A Disturbance at the Market*) reads `Scandal +3 · BB +1 · −ATK ×2`. **Traps:** the wiki’s
+  three variants of *Attend the Gravensteen gracefully* are one option; *Firmament: To be Feasted* is found under its
+  bare title; *The Honours of the Court* is Fascinating’s card (it keeps that badge, only its other three options are
+  here) and *Cutthroats and Canalmen* The Hunt Is On!’s (its other two options are here). **Left out:** the
+  eighteen steeds, the Weaver’s investments and shop, the Ducal Mint, and *The Sound of Wings (Burgundy)*, whose
+  title Zailing’s card shares.
+
+  **Plaster Face** (`plaster-face`, `PF_OPTIONS`, on the `pq*` helper; no panel by decision): Seeking the Meaning of the
+  Plaster Face (Guide), the Big Rat story in the Flit. 67 options, 4 cards. It runs on Seeking the Meaning of the
+  Plaster Face (`Plaster`, 0 to 20), Having Rodentine Minions Investigate... (`HRMI`, 5 to move on), Serenity of the
+  Plaster Face (the higher, the easier for the rats), Sympathetic about Ratly Concerns (`SaRC`) and the optional
+  prelude quality (`Inv`). **The badge** is what the option does to them, in the other progress features’
+  vocabulary: `HRMI +3 (60%) · fail Serenity −4`, `Plaster → 6? · fail Serenity +10`, `Plaster → 20 · SaRC +3 ·
+  Piece of Rostygold ×2000`. `Plaster → N` is the level the step sets, worked out from the storylet that follows (the
+  pages say only “sets”); a test checks that every level from 0 to 9 has a step and the endings set 15 or 20. The
+  tooltip has the page’s warning (a failed rat is lost), the requirement and the guide’s advice (the Bandit is
+  quickest, then the Disgraced, then the Talker, and the Talker is the cheap one). **Guide against pages:** *Who
+  Controls the Face?* asks a narrow Serenity 6 where the guide says 7, and every ending pays 1 Fate in the guide where
+  the page lists none. **Left out:** what Running Battle owns (the five options of *Gather your forces against the Big
+  Rat*, the purchase in the Alliance, the two Ambush options). The step order comes from the storylets’ own unlock
+  levels on the quality’s wiki page.
 
   **Station Developments** (`station-developments`, `SD_OPTIONS`, on the `pq*` helper; WP-7, no panel by
   decision): the Upper River stations built up with Hinterland Scrip, and the repeatable conversions each
@@ -3581,6 +3608,13 @@ Confirmed live by the author:
   exists (its page carries no storylet, so it is on the guide’s word). **(2) The step order.** Whether the levels
   the badges say match what you see.
 
+- The **rest of Risen Burgundy and the Plaster Face badges** (added 2026-09-27). Nothing seen in the game. Report first:
+  **(1) The Burgundy card titles.** Whether *Firmament: To be Feasted* shows as *To be Feasted*, and whether the
+  numbered wiki cards show without their numeral. **(2) The dreams.** That the seven *A Dream of …* cards play from
+  the hand for no action. **(3) The Plaster Face levels.** That each step really sets the level the badge says,
+  worked out from the next storylet’s unlock, and that the four cards (*Sartorial squeamishness*, *The Departed*,
+  *Rat Melancholy*, *The Albino Rat’s story*) are titled so.
+
 - The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
   table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
   looking at the screen can confirm: a wrong number renders exactly as well as a right one. They
@@ -4101,6 +4135,9 @@ Current tests:
 - `tests/choice-discordant-studies.test.mjs` — Crystalline Knowledge climbing 1 to 6 and Cold Comfort 3 to 7 in the
   guide’s order, each step needing the level below it, the badge form, the numbered wiki pages found under the
   game’s titles, Deeper Discordant Studies’ tiers in order, the costs and rewards figures, and the heading.
+- `tests/choice-plaster-face.test.mjs` — the guide’s table of investigation options row by row, the story as a chain
+  (every level 0 to 9 has a step, endings 15 or 20), the guide’s disagreements with the pages, the Alliance, what
+  Running Battle owns not being here, the four cards in the hand, and no title in another feature’s table.
 - `tests/choice-painting-balmoral.test.mjs` — the painting suite pins that all three
   painting actions name both outcomes on the badge, that *Unveil your Painting* is one row pricing all
   seven compositions, that exactly one row is marked as the guide's word against an option page, and

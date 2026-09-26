@@ -1,8 +1,12 @@
 # ToDo
 
-- Fallen London wiki links trigger Anubis - direct page should work better, possibly
+- KoL
+  - Mining does not work anymore
+  - daily checklist: link to hagnks
 
-- Optimize equipment button
+- Fallen London
+  -  wiki links trigger Anubis - direct page should work better, possibly
+  - Optimize equipment button
 
 Fallen London:
   Carousels: https://fallenlondon.wiki/wiki/Guides#Location-Specif  Sorted by each guide's {{Audience}} stage, in the order of
@@ -15,7 +19,6 @@ Fallen London:
   "(works)" = tested in game and working
 
   Early MYN:
-    - https://fallenlondon.wiki/wiki/Seeking_the_Meaning_of_the_Plaster_Face_(Guide) [Big Rat storyline] (found 2026-09-24 while analysing Running Battle; its Running Battle options are already in `running-battle` -- skip those)
 
   Early Firmament:
     - https://fallenlondon.wiki/wiki/Ecdysis_(Guide) [Hallow's Throat]
@@ -59,8 +62,6 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Hinterland_Scrip-Making (Early Railway) [Railway overview] (re-ranks activities already badged; nothing new)
     - https://fallenlondon.wiki/wiki/Roof_Economy_(Guide) (Early Firmament) [Firmament overview] (needs work; economy panel, not built: no badge surface)
     - https://fallenlondon.wiki/wiki/Stuiver_Grinding_(Guide) (Early Firmament) [Firmament overview] (needs work; economy panel, not built: no badge surface)
-    - https://fallenlondon.wiki/wiki/Weddings_(Guide) (no stage tag) [Your Social Engagements] (replaces the Marriage (Guide) stub)
-    - https://fallenlondon.wiki/wiki/Spouses_(Guide) (no stage tag) [Your Social Engagements] (replaces the Marriage (Guide) stub)
 
   Airs of London storylets (no guide): storylets and cards with options the
   Airs of London unlock or retitle. From Category:The_Airs_of_London (353 pages,
@@ -257,9 +258,10 @@ Fallen London:
       - https://fallenlondon.wiki/wiki/Marigold_Station_(Guide) [Marigold Station] (implemented)
 
     Late Firmament:
-      - https://fallenlondon.wiki/wiki/Risen_Burgundy_(Guide) [Risen Burgundy] (no stage tag; card-based carousels, unlocked at Firmament 370; moved from Reference) (implemented; no panel; 25 of its 67 cards are badged, the rest of the deck is still open: the dreams, the Ducal-court and Firmament-story cards, the counter-raising cards for Beneficence and Against Time and Kings, the Joyous Entry, As Above and Glory's Fire cards, the eighteen steeds on Whoso List to Hunt, the Weaver's investments; the wiki category `Cards - Risen Burgundy` lists them)
+      - https://fallenlondon.wiki/wiki/Risen_Burgundy_(Guide) [Risen Burgundy] (no stage tag; card-based carousels, unlocked at Firmament 370; moved from Reference) (implemented; no panel; the whole deck is badged except the eighteen steeds on Whoso List to Hunt, the Weaver's investments and shop, the Ducal Mint, and The Sound of Wings (Burgundy))
 
     Reference (not carousels):
+      - https://fallenlondon.wiki/wiki/Seeking_the_Meaning_of_the_Plaster_Face_(Guide) [Big Rat storyline] (found 2026-09-24 while analysing Running Battle; its Running Battle options are already in `running-battle` -- skip those) (implemented as `plaster-face`; no panel: the investigation, the steps, the endings and the cards; Running Battle keeps its own options)
       - https://fallenlondon.wiki/wiki/Firmament_(Guide) (Early Railway) [Firmament overview] (implemented; no panel: the choices the guide says what they set; its sub-guides below stay separate)
       - https://fallenlondon.wiki/wiki/The_Hurlers_(Guide) (Post-Railway) [The Hurlers] (implemented as `discordant-studies`; no panel)
       - https://fallenlondon.wiki/wiki/Discordant_Studies_-_Costs_and_Rewards_(Guide) (Post-Railway) [The Hurlers] (implemented as `discordant-studies`: the costs are on the first deep step)

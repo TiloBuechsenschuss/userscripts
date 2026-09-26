@@ -300,14 +300,14 @@ check('the cards in the hand carry their word: the payouts, the ladder, the auto
     return out;
   }), ['BB −10 ▼ → 5 gifts', 'Saint → 15 or 25', 'autoplay · Suspicion +2', 'Visitor +1 · six steps', 'free · monthly']);
 
-check('every card of ours has options in the table, and every storylet in the table is one of our cards',
-  [api.RBG_CARDS.filter((c) => !api.RBG_OPTIONS.some((e) => key(e.storylet) === key(c.name))).map((c) => c.name),
+check('every card of ours has options in the table, and every storylet in the table is one of our cards (but the two whose badges belong to Fascinating and The Hunt Is On!)',
+  [api.RBG_CARDS.filter((c) => !c.canon).filter((c) => !api.RBG_OPTIONS.some((e) => key(e.storylet) === key(c.name))).map((c) => c.name),
     api.RBG_OPTIONS.map((e) => e.storylet).filter((s, i, a) => a.indexOf(s) === i)
       .filter((s) => !api.RBG_CARDS.some((c) => key(c.name) === key(s))).length],
-  [['Whoso List to Hunt'], 0]);
+  [['Whoso List to Hunt'], 2]);
 
-check('the card set is twenty-five cards, Whoso List to Hunt with a word and no options',
-  [api.RBG_CARDS.length, api.RBG_OPTIONS.filter((e) => e.storylet === 'Whoso List to Hunt').length], [25, 0]);
+check('the card set is the first twenty-five, thirty-six more and the one alias, Whoso List to Hunt with a word and no options',
+  [api.RBG_CARDS.length, api.RBG_CARDS.filter((c) => c.canon).length, api.RBG_OPTIONS.filter((e) => e.storylet === 'Whoso List to Hunt').length], [62, 1, 0]);
 
 check('a card of another feature is left alone',
   (() => {
@@ -343,6 +343,44 @@ check('no option title is also a title in another feature\'s table (apart from t
   })(), []);
 
 check('the feature is registered', api.FEATURES.some((f) => f.name === 'risen-burgundy'), true);
+
+// --- the rest of the deck ---------------------------------------------------------------------------------
+const rbgOpt = (card, name) => api.RBG_OPTIONS.find((e) => key(e.storylet) === key(card) && key(e.name) === key(name));
+
+check('the counter trades: one counter raised for two of the other, the way the guide says',
+  [rbgOpt('A Disturbance at the Market', 'Give the Propagandist a chance to escape').label,
+    rbgOpt('A Disturbance at the Market', 'Help apprehend the criminal').label,
+    rbgOpt('A Stranger Out of Time', 'Recontextualise your behaviour').label],
+  ['Suspicion +3 · ATK +1 · −BB ×2', 'Scandal +3 · BB +1 · −ATK ×2', 'Scandal −5 · Scrap of Incendiary Gossip ×1 · −Volume of Collated Research ×1']);
+
+check('a challenge is marked and a failure named; a Luck option is marked',
+  [rbgOpt('Elusive Industries', 'Nose around').label, rbgOpt('Sought by Pike and Guardsman', 'Act natural').label,
+    rbgOpt('The Honours of the Court', 'Rescue an Unwary Reichsgraf').label],
+  ['Extraordinary Implication ×1 +2 more? · fail Wounds +2', 'Suspicion −2≈ · fail Suspicion +1, Wounds +1', 'BB +1? · fail Wounds +4, Live Specimen ×1']);
+
+check('the seven dreams are autoplay cards with one effect each, and a card in the hand says which counters it can raise',
+  (() => {
+    const t = (h) => { const b = badgeOf(h, api.RBG_DEF.cardCls); return b && b.textContent; };
+    const dream = makeHeading('A Dream of Oceans');
+    const trade = makeHeading('A Disturbance at the Market');
+    const plain = makeHeading('The Banners of the Guilds');
+    const feast = makeHeading('To be Feasted');
+    hand = [dream, trade, plain, feast];
+    api.rbgRatings();
+    const out = [t(dream), t(trade), t(plain), t(feast)];
+    hand = [];
+    return out;
+  })(), ['Nightmares +3 · Having Recurring Dreams: Pale for Weariness (set)', 'BB/ATK +1', '4 options', '3 options']);
+
+check('cards another feature owns keep its badge: The Honours of the Court is Fascinating’s, Cutthroats and Canalmen The Hunt Is On!’s',
+  [api.RBG_CARDS.some((c) => key(c.name) === key('The Honours of the Court')), api.RBG_CARDS.some((c) => key(c.name) === key('Cutthroats and Canalmen')),
+    api.RBG_DEF.noHeading.join('|'), api.RBG_OPTIONS.some((e) => key(e.name) === key('Bring an acquaintance along'))],
+  [false, false, 'cutthroats and canalmen|the honours of the court', false]);
+
+check('the Firmament card is found under its game title, and its variants are one option with the states named',
+  [api.RBG_DEF.aliases('to be feasted'), /pages under this title/.test(rbgOpt('Firmament: To be Feasted', 'Attend the Gravensteen gracefully').title)],
+  ['firmament to be feasted', true]);
+
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall good');
 process.exit(failures ? 1 : 0);

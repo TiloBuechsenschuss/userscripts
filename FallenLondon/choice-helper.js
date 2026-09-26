@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.28
+// @version      1.29
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -584,6 +584,7 @@
  *     Iron Republic badges the day each option in the Iron Republic Streets leads to, and what it costs.
  *     Firmament badges what each choice of the Roof story sets, in the guide's words, marking what it is unsure of.
  *     Discordant Studies badges the road to Steward of the Discordance 10 step by step, hints in the guide's order.
+ *     Plaster Face badges the Big Rat story in the Flit step by step, from the rats' investigations to the endings.
  *     Built as a feature registry so further advice can be added as entries.
  */
 
@@ -11217,11 +11218,9 @@
   //   the payouts          the guide says "10" of the quality; the pages take 10 of it
   // Left out: the eighteen mounts on Whoso List to Hunt (the guide says the
   // prey is narrative and the challenges do not depend on the steed), the
-  // Weaver's investments and shop, the Ducal Mint's crafting (its card has no
-  // page), the qualities that raise the Notes on a Joyous Entry, As Above
-  // and Glory's Fire cards, and the thirty other cards that raise Beneficence
-  // or Against Time and Kings by 1, which the guide only points to. Corrections
-  // go in RBG_OPTIONS and nowhere else.
+  // Weaver's investments and shop, and the Ducal Mint's crafting (its card has
+  // no page). The rest of the deck is below, added later. Corrections go in
+  // RBG_OPTIONS and RBG_MORE and nowhere else.
 
   const RBG_CFG = {
     quality: 'Risen Burgundy', short: 'Bg',
@@ -11418,14 +11417,251 @@
     { name: 'A Deluge of Charity', badge: 'free · monthly' },
   ];
 
+  // --- the rest of the deck ------------------------------------------------------------------------------
+  //
+  // The thirty-odd cards the guide only points at: the dreams, the Ducal-court and
+  // Firmament-story cards, the cards that raise Beneficence and Against Time and Kings
+  // by 1, the Joyous Entry, As Above and Glory's Fire cards. Most are ordinary
+  // cards with three or four options, so they are badged the way the menace places
+  // are (see mlLabel): what the option does, the counters first. `BB +1` and `ATK
+  // +1` raise the two counters the payout cards spend at 10; `pay` is what the
+  // option takes, and a trade of one counter for the other (A Disturbance at the
+  // Market) reads `BB +1 · −ATK ×2`. A card in the hand says which counters it can
+  // raise. Transcribed from the card and option pages (fetched through the API,
+  // 2026-09-27). Left out: The Sound of Wings (Burgundy), whose title Zailing's card
+  // shares, and the two options of Cutthroats and Canalmen that the Hunt is On!
+  // feature already badges (the other two are here).
+
+  function rbgM(storylet, name, more) {
+    return Object.assign({ storylet: storylet, name: name }, more);
+  }
+
+  const RBG_MORE = [
+    rbgM('A City Not Your Own', 'Make yourself known', {  }),
+    rbgM('A Disturbance at the Market', 'Give the Propagandist a chance to escape', { w: ['Suspicion +3', 'ATK +1'], pay: 'BB ×2' }),
+    rbgM('A Disturbance at the Market', 'Help apprehend the criminal', { w: ['Scandal +3', 'BB +1'], pay: 'ATK ×2' }),
+    rbgM('A Night in Ghent', 'Carouse', { lock: 'Carousing in Burgundy' }),
+    rbgM('A Stranger Out of Time', 'Soldier on', { w: ['Scandal +2'] }),
+    rbgM('A Stranger Out of Time', 'Acquire the help of a Master of Etiquette', { w: ['Scandal −2', 'BB +1'], pay: 'Stuiver ×20', needs: 'Stuiver 20 x' }),
+    rbgM('A Stranger Out of Time', 'Recontextualise your behaviour', { w: ['Scandal −5'], get: 'Scrap of Incendiary Gossip ×1', pay: 'Volume of Collated Research ×1', needs: 'Volume of Collated Research 1 x' }),
+    rbgM('A Stranger Out of Time', 'Abandon your distinctive hat', { w: ['Scandal −5'], needs: 'Clad in Conspicuous Garb' }),
+    rbgM('Beneath the Gilt Exterior', 'Search for the garden', { b: ['Persuasive', 200], f: ['Suspicion +0–2'], get: 'Memory of Light ×1, A Breach in a Garden Green ×1', needs: 'A Breach in a Garden Green 2-4' }),
+    rbgM('Beneath the Gilt Exterior', 'Disseminate pamphlets', { w: ['Suspicion +0–2', 'ATK +1'] }),
+    rbgM('Beneath the Gilt Exterior', 'Give alms', { w: ['Nightmares +1', 'Notes +2'], get: 'Stolen Kiss ×1, Dubious Testimony ×3', pay: 'Stuiver ×10', needs: 'Stuiver 10 x' }),
+    rbgM('Beneath the Gilt Exterior', 'Offer your elbow-grease to dissidents', { get: 'Caustic Apocryphon ×1', pay: 'Strong-Backed Labour ×3', needs: 'Strong-Backed Labour 3 x' }),
+    rbgM('Cardinal Disagreements', 'Study the light', { w: ['As Above +2'], get: 'Memory of Light ×8' }),
+    rbgM('Cardinal Disagreements', 'Probe the local gravity', { w: ['As Above +2'], get: 'Shard of Glim ×450', needs: 'As Above Becomes Below 5' }),
+    rbgM('Cardinal Disagreements', 'Focus on the weight in your heart', { w: ['As Above +2', 'Stone-Hearted −5', 'Wounds −2', 'Nightmares −2'], get: 'Memory of Moonlight ×1, Stolen Kiss ×1, Sample of Roof-Drip ×50', needs: 'Stone-Hearted 3, As Above Becomes Below 7' }),
+    rbgM('Cardinal Disagreements', 'Press your palms to the stone', { n: ['Chthonosophy', 7], w: ['As Above +2'], f: ['Nightmares +2', 'As Above +2'], get: 'Stolen Kiss ×1, Touching Love Story ×1', needs: 'As Above Becomes Below 10' }),
+    rbgM('Cardinal Disagreements', 'Clothe yourself in silver', { w: ['Pale dream +1', 'As Above +2'], pay: 'Moonlight Scales ×500, Memory of Moonlight ×5, Moonlit ×10', needs: 'As Above Becomes Below 10, Moon-Pearl 10,000 x, Moonlight Scales 500 x, Moonlit 10, Memory of Moonlight 5 x', lock: 'Having Recurring Dreams: Pale for Weariness, Sun-Blazoned Cuirass' }),
+    rbgM('Cardinal Disagreements', 'Clothe yourself in silver and the memories of shattering', { w: ['Pale dream +1', 'As Above +2'], pay: 'Moonlight Scales ×500, Memory of Moonlight ×5, Moonlit ×10', needs: 'As Above Becomes Below 10, Moon-Pearl 10,000 x, Moonlight Scales 500 x, Moonlit 10, Memory of Moonlight 5 x, Sun-Blazoned Cuirass', lock: 'Having Recurring Dreams: Pale for Weariness' }),
+    rbgM('Casting Grandeur', 'Carolus', { get: 'A Bell in the Bellfort (set), Captivating Ballad ×1' }),
+    rbgM('Casting Grandeur', 'Maria', { get: 'A Bell in the Bellfort (set), Captivating Ballad ×1' }),
+    rbgM('Casting Grandeur', 'Maximilianus', { get: 'A Bell in the Bellfort (set), Captivating Ballad ×1' }),
+    rbgM('Casting Grandeur', 'Roeland', { get: 'A Bell in the Bellfort (set), Captivating Ballad ×1' }),
+    rbgM('Casting Grandeur', 'Gundobad', { get: 'A Bell in the Bellfort (set), Captivating Ballad ×1' }),
+    rbgM('Casting Grandeur', 'Arturus', { get: 'A Bell in the Bellfort (set), Captivating Ballad ×1' }),
+    rbgM('Casting Grandeur', 'Burgundia', { get: 'A Bell in the Bellfort (set), Captivating Ballad ×1' }),
+    rbgM('Cutthroats and Canalmen', 'Trade local knowledge with Inverse Boatmen', { get: 'Unearthly Fossil ×2, Carved Ball of Stygian Ivory ×2, Final Breath ×9', pay: 'Roof-Chart ×4', needs: 'Roof-Chart 4 x' }),
+    rbgM('Cutthroats and Canalmen', 'Get a view of the city from the water', { w: ['As Above +2'], get: 'Tempestuous Tale ×7, Extraordinary Implication ×2', pay: 'Stuiver ×100', needs: 'Stuiver 100 x' }),
+    rbgM('Dreams of Honour and Glory', 'Determine to sleep', { luck: 50, w: ['Nightmares −1'], f: ['Nightmares +2'] }),
+    rbgM('Dreams of Honour and Glory', 'Sink into the dreams', { w: ['Nightmares +1', 'Fuel +2'], get: 'Tantalising Possibility ×10, Aeolian Scream ×1' }),
+    rbgM('Dreams of Honour and Glory', 'Conquer yourself, and sleep soundly', { w: ['Nightmares −5'], get: 'Tempestuous Tale ×1', pay: 'Memory of a Much Lesser Self ×1', needs: 'Memory of a Much Lesser Self' }),
+    rbgM('Duke and Duchess Both', 'Advise a Ducal Portraitist', { b: ['Persuasive', 220], w: ['BB +1'], f: ['Scandal +1'] }),
+    rbgM('Duke and Duchess Both', 'Look in on the couple', { get: 'Touching Love Story ×1, Romantic Notion ×15' }),
+    rbgM('Duke and Duchess Both', 'Commission new copies of the Gesta Ducissae', { w: ['Making Waves +5'], get: 'Tempestuous Tale ×14', pay: 'Volume of Collated Research ×1', needs: 'Volume of Collated Research 1 x', a: ['Commission new copies of the ’’Gesta Ducissae’’'] }),
+    rbgM('Echoes of Storms Past', 'Report the patterns of thunder to the anarchists', { w: ['Suspicion +1', 'ATK +1'] }),
+    rbgM('Echoes of Storms Past', 'Shelter from the damp', { get: 'Tale of Terror!! ×8' }),
+    rbgM('Echoes of Storms Past', 'Shout into the storm', { w: ['Nightmares +1'], get: 'Storm-Threnody ×1', pay: 'Tempestuous Tale ×16', needs: 'Tempestuous Tale 16 x, Stormy-Eyed' }),
+    rbgM('Echoes of Storms Past', 'Watch the winds', { b: ['Watchful', 200], w: ['As Above +2'], f: ['Wounds +1'], get: 'Aeolian Scream ×1, Maniac’s Prayer ×10' }),
+    rbgM('Elusive Industries', 'Nose around', { b: ['Shadowy', 220], f: ['Wounds +2'], get: 'Extraordinary Implication ×1, Stuiver ×50, On the Trail of the Ducal Mint (set)' }),
+    rbgM('Firmament: To be Feasted', 'Attend the Gravensteen gracefully', { get: 'Firmament (set)', note: 'The wiki has 2 pages under this title, for different states of your character.' }),
+    rbgM('Firmament: To be Feasted', 'Attend the Gravensteen with ill grace', { get: 'Firmament (set)' }),
+    rbgM('Firmament: To be Feasted', 'Contact Summer', { get: 'Chief Engineer: Summer (set)', pay: 'Magnificent Diamond ×15, Mortification of a Great Power ×1, Oil of Companionship ×1', needs: 'On the Slab exactly 2, Slaughtered 2, Oil of Companionship, Mortification of a Great Power, Magnificent Diamond 15 x', lock: 'Chief Engineer: Summer' }),
+    rbgM('Glories and Half-Lives', 'Aid a Terrified Weaver', { w: ['Nightmares +2', 'Fuel +2'], get: 'Tale of Terror!! ×8' }),
+    rbgM('Glories and Half-Lives', 'Observe the flight patterns of Tapestry-Moths', { n: ['Monstrous Anatomy', 11], w: ['Fuel +2'], f: ['Scandal +2'], get: 'Mourning Candle ×1, Inkling of Identity ×20', needs: 'Fuel for Glory’s Fire 5' }),
+    rbgM('Glories and Half-Lives', 'Watch the boats of Slaughterhall', { w: ['Fuel +2'], get: 'Thirsty Bombazine Scrap ×1, Human Arm ×1', needs: 'Fuel for Glory’s Fire 10' }),
+    rbgM('Glories and Half-Lives', 'Buy a round for a Memorious Guildsman', { b: ['Persuasive', 220], w: ['Fuel +2'], f: ['Scandal +1', 'Suspicion +1'], get: 'Magisterial Lager ×2, Acquaintance: The Moth-Eaten Mortician (set)', getf: 'Magisterial Lager ×1', pay: 'Stuiver ×50', needs: 'Fuel for Glory’s Fire 10, Stuiver 50 x', lock: 'Acquaintance: The Moth-Eaten Mortician' }),
+    rbgM('Glory and High Renown', 'Address your recent misdeeds', {  }),
+    rbgM('Glory and High Renown', 'Process through the city', { get: 'Tantalising Possibility (? + ? x Knights of the Golden Carapace) x (set)' }),
+    rbgM('Glory and High Renown', 'Search your holdings', { get: 'Certifiable Scrap ×10–12, Piece of Rostygold ×100' }),
+    rbgM('Maximilian, the Duke in Mourning', 'Perform obeisance at the Gravensteen', { n: ['Mithridacy', 16], w: ['BB +1'], f: ['Suspicion +1?'] }),
+    rbgM('Maximilian, the Duke in Mourning', 'Visit him in the Gravensteen', { get: 'Tale of Terror!! ×8' }),
+    rbgM('Maximilian, the Duke in Mourning', 'Spread stories of Maximilian’s deeds in Lost Time', { w: ['Making Waves +5'], get: 'Favour in High Places ×1, Bottle of Strangling Willow Absinthe ×9', pay: 'Caustic Apocryphon ×1', needs: 'Caustic Apocryphon 1 x' }),
+    rbgM('Maximilian, the Duke', 'Preach his doctrine of darkness', { b: ['Persuasive', 220], w: ['Liberation +1?', 'ATK +1'], f: ['Scandal +3?'], needs: 'Burgundy’s Ruler Maximillian, Thrall to the Liberation' }),
+    rbgM('Maximilian, the Duke', 'Perform obeisance at the Gravensteen', { n: ['Mithridacy', 16], w: ['BB +1'], f: ['Suspicion +1?'] }),
+    rbgM('Maximilian, the Duke', 'Visit him in the Gravensteen', { get: 'Tale of Terror!! ×8' }),
+    rbgM('Maximilian, the Duke', 'Spread stories of Maximilian’s deeds in Lost Time', { w: ['Making Waves +5'], get: 'Favour in High Places ×1, Bottle of Strangling Willow Absinthe ×9', pay: 'Caustic Apocryphon ×1', needs: 'Caustic Apocryphon 1 x' }),
+    rbgM('Midnight in Burgundy', 'Rest before the Feast of the Duchess’ return', { get: 'Firmament (set), Memory of Light ×3', needs: 'Firmament exactly 450' }),
+    rbgM('Ontologically Besieged', 'Observe them', { b: ['Watchful', 240], w: ['Nightmares +2'], f: ['Nightmares +3'], get: 'Anticandle ×1, Tale of Terror!! ×4' }),
+    rbgM('Ontologically Besieged', 'Man the bombards', { w: ['Nightmares +3'], get: 'Tempestuous Tale ×8' }),
+    rbgM('Ontologically Besieged', 'Soak the city in violant', { w: ['BB +1'], get: 'Mirrorcatch Box ×1, Emetic Revelation ×5', pay: 'Violant-filled Mirrorcatch Box ×1', needs: 'Violant-filled Mirrorcatch Box' }),
+    rbgM('Rising and Falling', 'Wander the streets', { w: ['Notes +2'], get: 'Partial Map ×1, Final Breath ×3' }),
+    rbgM('Rising and Falling', 'Skirt the empty places', { w: ['Notes +2'], get: 'Unprovenanced Artefact ×1, Correspondence Plaque ×4', needs: 'Notes on a Joyous Entry 5' }),
+    rbgM('Rising and Falling', 'Eavesdrop on ducal loyalists', { w: ['Notes +2'], get: 'Tantalising Possibility ×25, Extraordinary Implication ×1', needs: 'Notes on a Joyous Entry 10' }),
+    rbgM('Rising and Falling', 'Pledge a fortune to the cause of Burgundy', { get: 'A Knight of the Order of the Golden Carapace (set)', needs: 'Notes on a Joyous Entry 10, Stuiver 1,000,000 x', lock: 'A Knight of the Order of the Golden Carapace' }),
+    rbgM('Sought by Pike and Guardsman', 'Act natural', { luck: 50, w: ['Suspicion −2'], f: ['Suspicion +1', 'Wounds +1'] }),
+    rbgM('Sought by Pike and Guardsman', 'Pay for a tale from a prisoner', { w: ['Suspicion +2'], get: 'Memory of Moonlight ×1', pay: 'Stuiver ×160', needs: 'Stuiver 160 x' }),
+    rbgM('Sought by Pike and Guardsman', 'Donate Roof-Charts to the dockmasters', { get: 'Tale of Terror!! ×1', pay: 'Roof-Chart ×1', needs: 'Roof-Chart 1 x' }),
+    rbgM('Sought by Pike and Guardsman', 'Hand over a sack of stolen goods', { w: ['Suspicion −6'], needs: 'Saddled with a Stolen Sack' }),
+    rbgM('The Banners of the Guilds', 'Ferret out the Guild of Apothecaries', { n: ['Kataleptic Toxicology', 11], f: ['Scandal +2'], get: 'Flask of Abominable Salts ×10, Starved Expression ×6', lock: 'Airs of Burgundy 51' }),
+    rbgM('The Banners of the Guilds', 'Visit the Inverse Boatmen', { n: ['Zeefaring', 11], f: ['Scandal +2'], get: 'Roof-Chart ×1, Map Scrap ×15', needs: 'Airs of Burgundy 51' }),
+    rbgM('The Banners of the Guilds', 'Watch for Tapestry-Moths', { w: ['Fuel +2'], get: 'Cryptic Clue ×175' }),
+    rbgM('The Banners of the Guilds', 'Labour for the Guild of Morel-measurers', { w: ['Suspicion −3'], get: 'Starved Expression ×1', pay: 'Strong-Backed Labour ×1', needs: 'Suspicion 4, Strong-Backed Labour 1 x' }),
+    rbgM('The Burgundy of Blood', 'Call for the doctor', { luck: 50, w: ['Wounds −1'], f: ['Wounds +2'] }),
+    rbgM('The Burgundy of Blood', 'Permit anarchists to test ’new techniques’', { w: ['Wounds +1', 'ATK +1'] }),
+    rbgM('The Burgundy of Blood', 'Purchase relief from a visiting Starved Man', { w: ['Wounds −4–5'], get: 'Starved Expression ×1', pay: 'Nodule of Warm Amber ×25', needs: 'Nodule of Warm Amber 25 x' }),
+    rbgM('The Donjon of Lilies', 'Unravel a fever of glory', { n: ['Glasswork', 12], w: ['Nightmares +1', 'Fuel +2'], f: ['Nightmares +2'], get: 'Tempestuous Tale ×7' }),
+    rbgM('The Donjon of Lilies', 'Inscribe the dream with the desired qualities', { n: ['A Player of Chess', 12], f: ['Nightmares +3'], get: 'Memory of a Much Stranger Self ×1', pay: 'Mourning Candle ×3', needs: 'Route: the Lilymire, Mourning Candle 3 x' }),
+    rbgM('The Donjon of Lilies', 'Broaden her understanding of Parabola', { w: ['ATK +1'], get: 'Memory of Light ×5', pay: 'Sighting of a Parabolan Landmark ×25', needs: 'Sighting of a Parabolan Landmark 25 x' }),
+    rbgM('The Donjon of Lilies', 'Supply her with Prisoner’s Honey', { get: 'Whirring Contraption ×1', pay: 'Drop of Prisoner’s Honey ×75', needs: 'Drop of Prisoner’s Honey 75 x' }),
+    rbgM('The Honours of the Court', 'Make yourself the centre of attention', { b: ['Persuasive', 220], f: ['Scandal +2'], get: 'Final Breath ×6, Dubious Testimony ×2' }),
+    rbgM('The Honours of the Court', 'Rescue an Unwary Reichsgraf', { n: ['Monstrous Anatomy', 11], w: ['BB +1'], f: ['Wounds +4'], getf: 'Live Specimen ×1' }),
+    rbgM('The Honours of the Court', 'Walk the court’s eponymous broken walls', { get: 'Night on the Town ×1, Tempestuous Tale ×2' }),
+    rbgM('The One True Duchess', 'Divine the needs of the duchy', { b: ['Watchful', 220], w: ['BB +1'], f: ['Scandal +2'], needs: 'The Tyranny of the Last Duchess exactly 2' }),
+    rbgM('The One True Duchess', 'Convince her to free minor dissidents', { b: ['Shadowy', 220], w: ['ATK +1'], f: ['Suspicion +3'], needs: 'The Tyranny of the Last Duchess exactly 1' }),
+    rbgM('The One True Duchess', 'Visit her in the Gravensteen', { get: 'Memory of Distant Shores ×8' }),
+    rbgM('The One True Duchess', 'Commission new copies of the Gesta Ducissae', { w: ['Making Waves +5'], get: 'Tempestuous Tale ×14', pay: 'Volume of Collated Research ×1', needs: 'Volume of Collated Research 1 x', a: ['Commission new copies of the ’’Gesta Ducissae’’'] }),
+    rbgM('The Other One True Duchess', 'Divine the needs of the duchy', { b: ['Watchful', 220], w: ['BB +1'], f: ['Scandal +2'], needs: 'The Tyranny of the Last Duchess exactly 2' }),
+    rbgM('The Other One True Duchess', 'Visit her in the Gravensteen', { get: 'Memory of Distant Shores ×8' }),
+    rbgM('The Other One True Duchess', 'Commission new copies of the Gesta Ducissae', { w: ['Making Waves +5'], get: 'Tempestuous Tale ×14', pay: 'Volume of Collated Research ×1', needs: 'Volume of Collated Research 1 x' }),
+    rbgM('The Tint of Unworthiness', 'Carry anarchist supplies into the streets around the Gravensteen', { b: ['Watchful', 180], w: ['ATK +1'], f: ['Suspicion +2'] }),
+    rbgM('The Tint of Unworthiness', 'Revel in the hypocrisy', { w: ['Notes +2'], get: 'Tale of Terror!! ×7' }),
+    rbgM('The Tint of Unworthiness', 'Search for ways to regain your standing', { w: ['Suspicion +1'], get: 'Scrap of Incendiary Gossip ×7' }),
+    rbgM('The Walls of Oud Sint-Elisabeth', 'Pray', { w: ['Scandal +1'], get: 'Favours: Rubbery Men ×1, Palimpsest Scrap ×1', lock: 'Favours: Rubbery Men 7 x' }),
+    rbgM('The Walls of Oud Sint-Elisabeth', 'Do not pray', { w: ['Nightmares +3'], get: 'Memory of Discordance ×1', pay: 'Palimpsest Scrap ×15', needs: 'Memory of an Anchorhold 1 x, Beatific Stone 1 x, Palimpsest Scrap 15 x' }),
+    rbgM('The Walls of Oud Sint-Elisabeth', 'Question some of the laywomen', { n: ['Mithridacy', 12], w: ['Notes +2'], f: ['Scandal +2'], get: 'Apostate’s Psalm ×1, Palimpsest Scrap ×1, Scrap of Incendiary Gossip ×1', getf: 'Scrap of Incendiary Gossip ×1' }),
+    rbgM('The Walls of Oud Sint-Elisabeth', 'Examine the walls with the aid of amber', { n: ['Shapeling Arts', 12], f: ['Wounds +3'], get: 'Nodule of Trembling Amber ×1', pay: 'Nodule of Warm Amber ×80', needs: 'Nodule of Warm Amber 80 x' }),
+    rbgM('Vine-Strangled Aisles', 'Pick a sainted fruit', { get: 'Counterfeit Head of John the Baptist ×1, An Identity Uncovered! ×1' }),
+    rbgM('Vine-Strangled Aisles', 'Save a priest!', { n: ['Monstrous Anatomy', 12], w: ['BB +1'], f: ['Scandal +2'], needs: 'Attending to the Needs of a Singular Plant 16' }),
+    rbgM('Vine-Strangled Aisles', 'Give ’charity’', { get: 'Apostate’s Psalm ×3', pay: 'Nightsoil of the Bazaar ×5', needs: 'Nightsoil of the Bazaar 5 x' }),
+    rbgM('Warrens of Worship', 'Ask for directions', { b: ['Watchful', 250], w: ['Notes +2'], f: ['Nightmares +2', 'Notes +2'], get: 'Partial Map ×1, Palimpsest Scrap ×2', getf: 'Partial Map ×1' }),
+    rbgM('Warrens of Worship', 'Light candles in the Count’s Chapel', { w: ['BB +1'], get: 'Touching Love Story ×1, Extraordinary Implication ×1', pay: 'Mourning Candle ×2', needs: 'Mourning Candle 2 x' }),
+    rbgM('Warrens of Worship', 'Make a generous donation', { get: 'Verse of Counter-Creed ×5', pay: 'Stuiver ×1160', needs: 'Stuiver 1160 x' }),
+    rbgM('Warrens of Worship', 'Leave post-haste', { w: ['Nightmares +0–1?'], get: 'Apostate’s Psalm ×1, Final Breath ×3' }),
+    rbgM('A Dream of Breaking Walls', 'A Dream of Breaking Walls', { w: ['Nightmares +2'], get: 'Having Recurring Dreams: Pale for Weariness (set)' }),
+    rbgM('A Dream of Contact', 'A Dream of Contact', { w: ['Nightmares +2'], get: 'Having Recurring Dreams: Pale for Weariness (set)' }),
+    rbgM('A Dream of Golden Thread', 'A Dream of Golden Thread', { w: ['Nightmares +2'], get: 'Having Recurring Dreams: Pale for Weariness (set)' }),
+    rbgM('A Dream of Homesickness', 'A Dream of Homesickness', { w: ['Nightmares +2'], get: 'Having Recurring Dreams: Pale for Weariness (set)' }),
+    rbgM('A Dream of Oceans', 'A Dream of Oceans', { w: ['Nightmares +3'], get: 'Having Recurring Dreams: Pale for Weariness (set)' }),
+    rbgM('A Dream of Propriety', 'A Dream of Propriety', { w: ['Nightmares +3'], get: 'Having Recurring Dreams: Pale for Weariness (set)' }),
+    rbgM('A Dream of Reflections', 'A Dream of Reflections', { w: ['Nightmares +2'], get: 'Having Recurring Dreams: Pale for Weariness (set)' }),
+  ];
+
+  const RBG_MORE_CARDS = [
+    { name: 'A City Not Your Own' },
+    { name: 'A Disturbance at the Market' },
+    { name: 'A Night in Ghent' },
+    { name: 'A Stranger Out of Time' },
+    { name: 'Beneath the Gilt Exterior' },
+    { name: 'Cardinal Disagreements' },
+    { name: 'Casting Grandeur' },
+    { name: 'Dreams of Honour and Glory' },
+    { name: 'Duke and Duchess Both' },
+    { name: 'Echoes of Storms Past' },
+    { name: 'Elusive Industries' },
+    { name: 'Firmament: To be Feasted' },
+    { name: 'Glories and Half-Lives' },
+    { name: 'Glory and High Renown' },
+    { name: 'Maximilian, the Duke in Mourning' },
+    { name: 'Maximilian, the Duke' },
+    { name: 'Midnight in Burgundy' },
+    { name: 'Ontologically Besieged' },
+    { name: 'Rising and Falling' },
+    { name: 'Sought by Pike and Guardsman' },
+    { name: 'The Banners of the Guilds' },
+    { name: 'The Burgundy of Blood' },
+    { name: 'The Donjon of Lilies' },
+    { name: 'The One True Duchess' },
+    { name: 'The Other One True Duchess' },
+    { name: 'The Tint of Unworthiness' },
+    { name: 'The Walls of Oud Sint-Elisabeth' },
+    { name: 'Vine-Strangled Aisles' },
+    { name: 'Warrens of Worship' },
+    { name: 'A Dream of Breaking Walls', auto: true },
+    { name: 'A Dream of Contact', auto: true },
+    { name: 'A Dream of Golden Thread', auto: true },
+    { name: 'A Dream of Homesickness', auto: true },
+    { name: 'A Dream of Oceans', auto: true },
+    { name: 'A Dream of Propriety', auto: true },
+    { name: 'A Dream of Reflections', auto: true },
+  ];
+
+  function rbgmItems(list) {
+    const parts = String(list).split(', ');
+    return parts.length > 2 ? parts[0] + ' +' + (parts.length - 1) + ' more' : parts.join(', ');
+  }
+
+  function rbgmLabel(e) {
+    const mark = (e.n || e.b) ? CAROUSEL_MARK_CHALLENGE : e.luck ? CAROUSEL_MARK_EXPECTED : '';
+    const moves = (e.w || []).slice(0, 3);
+    if (mark && moves.length) moves[0] += mark;
+    const parts = moves.slice();
+    if (e.get) parts.push(rbgmItems(e.get) + (moves.length ? '' : mark));
+    if (e.pay) parts.push('−' + rbgmItems(e.pay));
+    const failing = (e.f || []).filter(function (m) { return (e.w || []).indexOf(m) === -1; });
+    if (failing.length || e.getf) parts.push('fail ' + failing.slice(0, 2).concat(e.getf ? [rbgmItems(e.getf)] : []).join(', '));
+    return parts.join(' · ') || 'story';
+  }
+
+  function rbgmTitle(e) {
+    const lines = [e.name, e.storylet, ''];
+    const ch = [];
+    if (e.luck) ch.push('Luck ' + e.luck + '%');
+    if (e.n) ch.push(e.n[0] + ' ' + e.n[1] + ' (narrow)');
+    if (e.b) ch.push(e.b[0] + ' ' + e.b[1] + ' (broad)');
+    if (ch.length) lines.push('Challenge: ' + ch.join(' and ') + '.');
+    if (e.w && e.w.length) lines.push((ch.length ? 'On a success: ' : 'Does: ') + e.w.join(', ') + '.');
+    if (e.get) lines.push('Gives: ' + e.get + '.');
+    if (e.r && e.r.length) lines.push('On a rare success: ' + e.r.join(', ') + '.');
+    if (e.f && e.f.length || e.getf) lines.push('On a failure: ' + (e.f || []).concat(e.getf ? [e.getf] : []).join(', ') + '.');
+    if (e.pay) lines.push('Costs: ' + e.pay + '.');
+    if (e.needs) lines.push('Needs: ' + e.needs + '.');
+    if (e.lock) lines.push('Not offered with: ' + e.lock + '.');
+    if (e.note) lines.push(e.note);
+    lines.push('', 'BB is Burgundian Beneficence and ATK Against Time and Kings: at 10 of either the Gifts of Burgundy or the Spoils of Rebellion cash it in. '
+      + 'Almost every option here re-rolls the Airs of Burgundy.');
+    return lines.join('\n');
+  }
+
+  RBG_MORE.forEach(function (e) {
+    e.label = rbgmLabel(e);
+    e.color = (e.w || []).some(function (m) { return /^(BB|ATK) \+/.test(m); }) ? CAROUSEL_COLOR_PROGRESS : CAROUSEL_COLOR_NEUTRAL;
+    e.title = rbgmTitle(e);
+  });
+  RBG_OPTIONS.push.apply(RBG_OPTIONS, RBG_MORE);
+
+  // A card in the hand says which counters it can raise, or that it is a story or a dream.
+  RBG_MORE_CARDS.forEach(function (c) {
+    const own = RBG_MORE.filter(function (e) { return normalizeName(e.storylet) === normalizeName(c.name); });
+    const counters = ['BB', 'ATK'].filter(function (q) {
+      return own.some(function (e) { return (e.w || []).some(function (m) { return m.indexOf(q + ' +') === 0; }); });
+    });
+    if (c.auto && own.length) {
+      c.badge = own[0].label;
+      c.color = own[0].color;
+    } else {
+      c.badge = counters.length ? counters.join('/') + ' +1' : own.length + (own.length === 1 ? ' option' : ' options');
+      c.color = counters.length ? CAROUSEL_COLOR_PROGRESS : CAROUSEL_COLOR_LABEL;
+    }
+    const stripped = c.name.replace(/^Firmament: /, '');
+    RBG_CARDS.push(c);
+    if (stripped !== c.name) RBG_CARDS.push(Object.assign({}, c, { name: stripped, canon: c.name }));
+  });
+
   const RBG_ALL_STORYLETS = RBG_OPTIONS.map(function (e) { return e.storylet; })
     .filter(function (s, i, all) { return all.indexOf(s) === i; });
   const RBG_INDEX = carouselIndex(RBG_OPTIONS);
   const RBG_DEF = {
     cfg: RBG_CFG, options: RBG_OPTIONS, index: RBG_INDEX, storylets: RBG_ALL_STORYLETS, cards: RBG_CARDS,
     cardKeys: [],
+    // Cutthroats and Canalmen keeps The Hunt is On!'s heading badge, The Honours of the Court Fascinating's card badge.
+    noHeading: ['cutthroats and canalmen', 'the honours of the court'],
     // Hunting the Wild Boar, Hunting the Stag...: the card is named after its quarry.
-    aliases: function (key) { return /^hunting the /.test(key) && key !== 'hunting the roof prey' ? normalizeName(RBG_HUNT) : null; },
+    aliases: function (key) {
+      if (key === 'to be feasted') return 'firmament to be feasted';
+      return /^hunting the /.test(key) && key !== 'hunting the roof prey' ? normalizeName(RBG_HUNT) : null;
+    },
     cls: 'fl-ux-rbg', flag: 'flUxRbg', branchCls: 'fl-ux-rbg-branch', branchFlag: 'flUxRbgBranch',
     cardCls: 'fl-ux-rbg-card', cardFlag: 'flUxRbgCard',
   };
@@ -13727,6 +13963,217 @@
   };
 
   function hsRatings() { pqRatings(HS_DEF); }
+
+  // === feature: Plaster Face ==============================================
+  //
+  // Seeking the Meaning of the Plaster Face (Guide): an early-midgame story
+  // in the Flit about a Big Rat, tied to a set of qualities that other stories
+  // reuse. It runs on Seeking the Meaning of the Plaster Face (`Plaster`, 0 to
+  // 20), and along the way on Having Rodentine Minions Investigate... (`HRMI`,
+  // 5 to move on), Serenity of the Plaster Face (`Serenity`, which makes the
+  // rats' challenges easier as it rises), Sympathetic about Ratly Concerns
+  // (`SaRC`), Investigating a threat to your Rat Companions... (`Inv`, the
+  // optional prelude) and Running Battle... (`RB`, owned by the Running Battle
+  // feature).
+  //
+  // **What the badge says.** What the option does to those qualities, in the
+  // vocabulary of the other progress features: `HRMI +3 (60%) · fail Serenity −4`
+  // for an investigation, `Plaster → 6 · fail Serenity +10` for a step of the
+  // story, `Plaster → 20 · SaRC +3 · Rostygold ×2000` for an ending. `Plaster →
+  // N` is the level the step sets, worked out from the unlock of the storylet
+  // that follows (the option pages say only "sets"). A tooltip has the
+  // requirement, the page's warning (a failed rat is lost) and the guide's
+  // advice: the Bandit is quickest, then the Disgraced, then the Talker, and the
+  // Talker is the cheap one.
+  //
+  // Transcribed from the option pages (fetched through the API, 2026-09-27) with
+  // the guide as the cross-check. Where they differ the page is followed and the
+  // tooltip quotes the guide: Who Controls the Face? asks a narrow Serenity 6
+  // where the guide says 7, and every ending pays 1 Fate in the guide where the
+  // page lists none. Left out: the five options of Gather your forces against the
+  // Big Rat, the purchase of Running Battle and the Ambush, which the Running
+  // Battle feature badges. Corrections go in PF_OPTIONS and nowhere else.
+
+  const PF_CFG = {
+    quality: 'Seeking the Meaning of the Plaster Face', short: 'Plaster',
+    rules: 'The story needs Having Rodentine Minions Investigate... at 5 for every step from level 3 to 9; Serenity of the Plaster Face '
+      + 'makes the rats’ challenges easier, and a failed rat is lost.',
+  };
+
+  function pf(storylet, name, more) {
+    return Object.assign({ storylet: storylet, name: name }, more);
+  }
+
+  const PF_OPTIONS = [
+    pf('A night-time conference', 'Hang back and overhear what you can', { w: ['Inv +1'], needs: 'Rattus Faber Bandit-Chief 1 x, Working Rat 1 x, Talkative Rattus Faber 1 x' }),
+    pf('A night-time conference', 'One always gets left out', { w: ['Inv +1'], get: 'Cryptic Clue ×50', needs: 'Rattus Faber Bandit-Chief 1 x, Working Rat 1 x, Talkative Rattus Faber 1 x, Disgraced Rattus Faber Bandit-Chief 1 x' }),
+    pf('Address the problem of this Big Rat', 'Put the offer to your companions', { n: ['Inv', 5], w: ['SaRC +3'], f: ['Inv −6'], get: 'Cryptic Clue ×213', needs: 'Investigating a threat to your Rat Companions... 5' }),
+    pf('Address the problem of this Big Rat', 'Find the Big Rat on your own', { n: ['Inv', 8], get: 'Cryptic Clue ×510', needs: 'Investigating a threat to your Rat Companions... 5', instr: 'Warning: failure here will cost all of your progress so far.' }),
+    pf('Alliance with the Big Rat', 'Betray the Big Rat (5 FATE)', { a: ['Betray the Big Rat'], fate: 5 }),
+    pf('Alliance with the Big Rat', 'See if the Big Rat can become intoxicated', { luck: 70, get: 'Mystery of the Elder Continent ×1, Intriguing Snippet ×10', pay: 'Bottle of Greyfields 1882 ×50', needs: 'Bottle of Greyfields 1882 50 x' }),
+    pf('Alliance with the Big Rat', 'Purchase some assistance with Casing...', { w: ['Casing +9'], pay: 'Talker ×3', needs: 'Talkative Rattus Faber 3 x' }),
+    pf('Alliance with the Big Rat', 'Acquire a new rat companion', { w: ['Wounds +1', '+Bandit'], pay: 'Antique Mystery ×15', needs: 'Antique Mystery 15 x', lock: 'Rattus Faber Bandit-Chief 1 x', instr: 'You can acquire Antique Mysteries by using Elder items in your inventory.' }),
+    pf('Alliance with the Big Rat', 'Press him for information about the Elder Continent', { get: 'Mystery of the Elder Continent ×1, Dark-Dewed Cherry ×3, Inkling of Identity ×3', pay: 'Foxfire Candle Stub ×100, Lump of Lamplighter Beeswax ×100', needs: 'Foxfire Candle Stub 100 x, Lump of Lamplighter Beeswax 100 x, Mystery of the Elder Continent 5 x' }),
+    pf('Carnage on the street', 'Cultivate some rodent acquaintances (3 FATE)', { w: ['Plaster → 3', 'SaRC +15', 'Serenity set'], a: ['Cultivate some rodent acquaintances'], at: 2, fate: 3 }),
+    pf('Carnage on the street', 'Look for clues', { luck: 10, w: ['Plaster → 3', 'Serenity set'], f: ['Nightmares +1'], get: 'Rattus Faber Rifle ×1', at: 2 }),
+    pf('Carnage on the street', 'Consult with rats you know', { w: ['Plaster → 3', 'Serenity set'], needs: 'Sympathetic about Ratly Concerns 3', at: 2 }),
+    pf('Decide the fate of the Big Rat', 'Kill him', { w: ['Plaster → 20', 'SaRC +3'], get: 'Piece of Rostygold ×2000' }),
+    pf('Decide the fate of the Big Rat', 'Hand him over to the Constables', { w: ['Plaster → 20', 'Suspicion −15'], get: 'Piece of Rostygold ×500, Favours: Constables ×3' }),
+    pf('Decide the fate of the Big Rat', 'What good would extermination do?', { w: ['Plaster → 15', 'SaRC −15'], get: 'Piece of Rostygold ×2000' }),
+    pf('Framing the Lieutenants', 'If you just want him to talk...', { n: ['Serenity', 7], w: ['Plaster → 9'], f: ['Serenity +10'], getf: 'Rat on a String ×1', needs: 'Talkative Rattus Faber 1 x', instr: 'Warning – if you fail, you will lose your rat, and the Big Rat will feel reassured that he has got rid of a spy.', at: 8 }),
+    pf('Framing the Lieutenants', 'It takes a chief', { n: ['Serenity', 1], w: ['Plaster → 9'], f: ['Serenity +28'], getf: 'Rat on a String ×1', needs: 'Rattus Faber Bandit-Chief 1 x, Having Rodentine Minions Investigate... 8', instr: 'Warning – if you fail, you will lose your rat, and the Big Rat will feel reassured that he has got rid of a spy.', at: 8 }),
+    pf('Framing the Lieutenants', '"Let me have this one. It’s time I cleared my name."', { n: ['Serenity', 2], w: ['Plaster → 9', 'Serenity +10'], f: ['Serenity +28'], getf: 'Rat on a String ×1', r: ['Rattus Faber Bandit-Chief ×1'], pay: 'Disgraced ×1', needs: 'Disgraced Rattus Faber Bandit-Chief 1 x', instr: 'This is probably a suicide mission, but at least he’ll die redeemed.', at: 8 }),
+    pf('Investigating the Big Rat', 'Have the Talkative Rat ask the Big Rat’s guards', { luck: 60, w: ['HRMI +3'], f: ['Serenity −4'], get: 'Foxfire Candle Stub ×50', r: ['HRMI +3', 'Lump of Lamplighter Beeswax ×5', 'Foxfire Candle Stub ×55'], needs: 'Talkative Rattus Faber 1 x' }),
+    pf('Investigating the Big Rat', 'Have the Working Rat drill a peephole into the Big Rat’s lair', { luck: 70, w: ['HRMI +1'], f: ['Serenity −1'], r: ['HRMI +3'], needs: 'Working Rat 1 x' }),
+    pf('Investigating the Big Rat', 'Have the Rattus Faber Bandit-Chief discover the Big Rat’s next move', { luck: 80, w: ['HRMI +3'], f: ['Serenity −10'], r: ['HRMI +3'], needs: 'Rattus Faber Bandit-Chief 1 x' }),
+    pf('Investigating the Big Rat', 'Let the Disgraced Rattus Faber Bandit-Chief loiter', { luck: 50, w: ['HRMI +4'], f: ['Serenity −2'], r: ['HRMI +5'], needs: 'Disgraced Rattus Faber Bandit-Chief 1 x' }),
+    pf('Investigating the Big Rat', 'Make a contribution in Lamplighter Beeswax', { w: ['Serenity +1', 'HRMI +3'], pay: 'Lump of Lamplighter Beeswax ×100', needs: 'Lump of Lamplighter Beeswax 100 x' }),
+    pf('Investigating the Big Rat', 'Send a lavish tribute of Foxfire Candles', { w: ['HRMI +3', 'Serenity +10'], pay: 'Foxfire Candle Stub ×500', needs: 'Foxfire Candle Stub 500 x' }),
+    pf('Investigating the Big Rat', 'Deface the face', { b: ['Dangerous', 100], w: ['Serenity −3'], f: ['Wounds +1', 'HRMI −1'], instr: 'Warning: this may annoy the Big Rat.' }),
+    pf('Investigating the Big Rat', 'A remarkable piece of good fortune! (9 FATE)', { w: ['HRMI set', 'Serenity set'], a: ['A remarkable piece of good fortune!'], fate: 9 }),
+    pf('Making Contacts', 'Send the Talkative Rat', { n: ['Serenity', 6], w: ['Plaster → 6'], f: ['Serenity +10'], needs: 'Talkative Rattus Faber 1 x, Having Rodentine Minions Investigate... 5', instr: 'Warning - if you fail, you will lose your rat, and the Big Rat will feel reassured that he has gotten rid of a spy.', at: 5 }),
+    pf('Making Contacts', 'Send the Working Rat', { n: ['Serenity', 2], w: ['Plaster → 6'], f: ['Serenity +10'], needs: 'Working Rat 1 x, Having Rodentine Minions Investigate... 7', instr: 'Warning - if you fail, you will lose your rat, and the Big Rat will feel reassured that he has gotten rid of a spy.', at: 5 }),
+    pf('Making Contacts', 'Send the Bandit-Chief', { n: ['Serenity', 1], w: ['Plaster → 6'], f: ['Serenity +28'], get: 'Piece of Rostygold ×200, Shard of Glim ×200', needs: 'Rattus Faber Bandit-Chief 1 x, Having Rodentine Minions Investigate... 8', instr: 'Warning - if you fail, you will lose your rat, and the Big Rat will feel reassured that he has gotten rid of a spy.}}', at: 5 }),
+    pf('Making Contacts', 'Send the Disgraced Rat', { n: ['Serenity', 3], w: ['Plaster → 6'], f: ['Serenity +28'], needs: 'Having Rodentine Minions Investigate... 6, Disgraced Rattus Faber Bandit-Chief 1 x', instr: 'Warning - if you fail, you will lose your rat, and the Big Rat will feel reassured that he has gotten rid of a spy.', at: 5 }),
+    pf('Meeting with the Albino Rat', 'Send the Talkative Rat', { n: ['Serenity', 6], w: ['Plaster → 5'], f: ['Serenity +10'], needs: 'Talkative Rattus Faber 1 x', instr: 'Warning - if you fail, you will lose your rat, and the Big Rat will feel reassured that he has gotten rid of a spy.', at: 4 }),
+    pf('Meeting with the Albino Rat', 'Send the Working Rat', { n: ['Serenity', 2], w: ['Plaster → 5'], f: ['Serenity +15'], needs: 'Working Rat 1 x, Having Rodentine Minions Investigate... 7', instr: 'Warning - if you fail, you will lose your rat, and the Big Rat will feel reassured that he has gotten rid of a spy.', at: 4 }),
+    pf('Meeting with the Albino Rat', 'Send the Bandit-Chief', { n: ['Serenity', 1], w: ['Plaster → 5'], f: ['Serenity +28'], needs: 'Rattus Faber Bandit-Chief 1 x, Having Rodentine Minions Investigate... 8', instr: 'Warning - if you fail, you will lose your rat, and the Big Rat will feel reassured that he has gotten rid of a spy.', at: 4 }),
+    pf('Meeting with the Albino Rat', 'Send the Disgraced Rat', { n: ['Serenity', 3], w: ['Plaster → 5'], f: ['Serenity +28'], needs: 'Disgraced Rattus Faber Bandit-Chief 1 x , Having Rodentine Minions Investigate... 6', at: 4 }),
+    pf('Out-ratting the rats', 'Bribe them', { w: ['Inv +5'], pay: 'Rostygold ×50', needs: 'Piece of Rostygold 50 x' }),
+    pf('Out-ratting the rats', 'Nurse a wounded visitor', { w: ['Inv +1', '+Disgraced'], pay: 'Rostygold ×200', needs: 'Piece of Rostygold 200 x', lock: 'Disgraced Rattus Faber Bandit-Chief' }),
+    pf('Out-ratting the rats', 'Threaten them', { b: ['Dangerous', 85], w: ['Inv +3'] }),
+    pf('Rat Melancholy', 'Let her grieve in dignified silence', { w: ['SaRC +3'], get: 'Bottle of Greyfields 1882 ×50' }),
+    pf('Rat Melancholy', 'Listen to her story', { w: ['SaRC +3'], get: 'Cryptic Clue ×50', pay: 'Silk Scrap ×1', needs: 'Silk Scrap 1 x' }),
+    pf('Rat Melancholy', 'Employ your Albino Rat in your Laboratory', { w: ['Someone is Coming +10', 'Employed your Albino Rat set'], needs: 'Equipment for Scientific Experimentation 7', lock: 'Employed your Albino Rat', instr: 'This will permanently dismiss this card.' }),
+    pf('Rat Melancholy', 'Perhaps she was happiest before (30 FATE)', { pay: 'Albino Rat ×1', a: ['Perhaps she was happiest before'], fate: 30 }),
+    pf('Rat Melancholy', 'He’s back! (10 FATE)', { w: ['+Disgraced'], a: ['He’s back!'], fate: 10 }),
+    pf('Sartorial squeamishness', 'Assure him none of the rats were his kin', { b: ['Persuasive', 50], w: ['SaRC +1'], get: 'Cryptic Clue ×10, Confident Smile ×1' }),
+    pf('Sartorial squeamishness', 'Sigh and sell off the ratskin suit', { get: 'Piece of Rostygold ×613, Lump of Lamplighter Beeswax ×264, Devilbone Die ×3', pay: 'Ratskin Suit ×1' }),
+    pf('Sartorial squeamishness', 'Sigh and sell off the Working Rat', { w: ['Heartless +1'], get: 'Moon-Pearl ×3400', pay: 'Worker ×1' }),
+    pf('Sartorial squeamishness', 'Ask the Disgraced Rattus Faber Bandit-Chief to talk to him', { w: ['SaRC +1', 'Subtle +1'], needs: 'Disgraced Rattus Faber Bandit-Chief 1 x' }),
+    pf('Subverting Supplies', 'Send the Talkative Rat', { n: ['Serenity', 6], w: ['Plaster → 8'], f: ['Serenity +10'], getf: 'Rat on a String ×1', needs: 'Talkative Rattus Faber 1 x, Having Rodentine Minions Investigate... 5', instr: 'Warning – if you fail, you will lose your rat, and the Big Rat will feel reassured that he has got rid of a spy.', at: 7 }),
+    pf('Subverting Supplies', 'Send the Working Rat', { n: ['Serenity', 2], w: ['Plaster → 8'], f: ['Serenity +28'], get: 'Shard of Glim ×50', getf: 'Rat on a String ×1', needs: 'Working Rat 1 x, Having Rodentine Minions Investigate... 7', instr: 'Warning – if you fail, you will lose your rat, and the Big Rat will feel reassured that he has got rid of a spy.', at: 7 }),
+    pf('Subverting Supplies', 'Send the Bandit-Chief', { n: ['Serenity', 1], w: ['Plaster → 8'], f: ['Serenity +28'], get: 'Shard of Glim ×500, Sulky Bat ×1', getf: 'Rat on a String ×1', needs: 'Rattus Faber Bandit-Chief 1 x, Having Rodentine Minions Investigate... 8', instr: 'Warning – if you fail, you will lose your rat, and the Big Rat will feel reassured that he has got rid of a spy.', at: 7 }),
+    pf('Subverting Supplies', 'Send the Disgraced Rat', { n: ['Serenity', 3], w: ['Plaster → 8', 'Serenity −5'], f: ['Serenity +28'], get: 'Appalling Secret ×2', getf: 'Rat on a String ×1', needs: 'Disgraced Rattus Faber Bandit-Chief 1, Having Rodentine Minions Investigate... 6', instr: 'Warning – if you fail, you will lose your rat, and the Big Rat will feel reassured that he has got rid of a spy.', at: 7 }),
+    pf('The Albino Rat’s story', 'The History of Rats and Watchmakers', { w: ['Albino Rat set'], get: 'Cryptic Clue ×25, Inkling of Identity ×2' }),
+    pf('The Departed', 'Watch', { w: ['Watchful +2', 'Melancholy +2', 'Nightmares −1'] }),
+    pf('The Departed', 'Add your own dead to the pile', { w: ['SaRC +3', 'Persuasive +2', 'Melancholy +3', 'Steadfast +3', 'Nightmares −1', 'Heartless −3'], get: 'Sudden Insight ×1', pay: 'Rat on a String ×1', needs: 'Rat on a String 1 x' }),
+    pf('The Departed', 'Add a few dozen dead to the pile', { b: ['Dangerous', 20], w: ['SaRC −1'], f: ['Wounds +2', 'SaRC −1'], get: 'Troubled by Vermin ×1', getf: 'Troubled by Vermin ×1', pay: 'Rat on a String ×24', needs: 'Rat on a String 48 x' }),
+    pf('The Departed', 'Oho! Ripe rats!', { b: ['Dangerous', 40], w: ['Heartless +3', 'SaRC −2', 'Melancholy −3'], f: ['Heartless +3', 'Wounds +2', 'SaRC −1', 'Melancholy −3'], get: 'Troubled by Vermin ×2, Rat on a String ×50, Favours: The Church ×1', getf: 'Troubled by Vermin ×1, Proscribed Material ×1' }),
+    pf('The Plaster Face is Sneering', 'Record the behaviour of the face', { b: ['Watchful', 100], w: ['Plaster → 2', 'Serenity set'], f: ['Nightmares +1'], at: 1 }),
+    pf('The Plaster Face is Sneering', 'Set your rat to keep an eye on it', { w: ['Plaster → 2', 'Serenity set'], needs: 'Working Rat 1', at: 1 }),
+    pf('The Sculpted Scowl', 'Study the face from the opposite roof', { b: ['Watchful', 100], w: ['Plaster → 1'], f: ['Nightmares +1'], at: 0 }),
+    pf('The Sculpted Scowl', 'Climb up for a direct inspection', { b: ['Dangerous', 102], w: ['Plaster → 1'], f: ['Wounds +1'], needs: 'Pair of Luminous Neathglass Goggles 1 x', at: 0 }),
+    pf('Up through the Ranks', 'Send the Talkative Rat', { n: ['Serenity', 6], w: ['Plaster → 7'], f: ['Serenity +10'], getf: 'Rat on a String ×1', needs: 'Talkative Rattus Faber 1 x', instr: 'Warning – if you fail, you will lose your rat, and the Big Rat will feel reassured that he has got rid of a spy.', at: 6 }),
+    pf('Up through the Ranks', 'Send the Working Rat', { n: ['Serenity', 2], w: ['Plaster → 7'], f: ['Serenity +28'], getf: 'Rat on a String ×1', needs: 'Working Rat 1 x, Having Rodentine Minions Investigate... 7', instr: 'Warning – if you fail, you will lose your rat, and the Big Rat will feel reassured that he has got rid of a spy.', at: 6 }),
+    pf('Up through the Ranks', 'Send the Bandit-Chief', { n: ['Serenity', 1], w: ['Plaster → 7'], f: ['Serenity +28'], get: 'Piece of Rostygold ×200', getf: 'Rat on a String ×1', needs: 'Rattus Faber Bandit-Chief 1 x, Having Rodentine Minions Investigate... 8', instr: 'Warning – if you fail, you will lose your rat, and the Big Rat will feel reassured that he has got rid of a spy.', at: 6 }),
+    pf('Up through the Ranks', 'Send the Disgraced Rat', { n: ['Serenity', 3], w: ['Plaster → 7'], f: ['Serenity +28'], getf: 'Rat on a String ×1', needs: 'Disgraced Rattus Faber Bandit-Chief 1 x, Having Rodentine Minions Investigate... 6', instr: 'Warning – if you fail, you will lose your rat, and the Big Rat will feel reassured that he has got rid of a spy.', at: 6 }),
+    pf('Who Controls the Face?', 'Sneak into the upper room yourself', { b: ['Shadowy', 110], w: ['Plaster → 4', 'Serenity −20'], f: ['Suspicion +1'], get: 'Whispered Hint ×1400', at: 3 }),
+    pf('Who Controls the Face?', 'Send a Talkative Rat into the upper room', { n: ['Serenity', 6], w: ['Plaster → 4'], f: ['Serenity +10'], get: 'Cryptic Clue ×700', needs: 'Talkative Rattus Faber 1 x', instr: 'Warning – if you fail, you will lose your rat.', at: 3 }),
+    pf('You Have Done Well', 'Compose a short note to the Big Rat', { w: ['Plaster → 10'], lock: 'Serenity of the Plaster Face 5', at: 9 }),
+    pf('You Have Done Well', 'Attack psychologically', { w: ['Serenity −6'], pay: 'Phosphorescent Scarab ×1', needs: 'Phosphorescent Scarab 1 x', at: 9 }),
+  ];
+
+  // The guide's advice, by option title.
+  const PF_RATS = 'A failed rat is lost and raises Serenity, which makes the next try easier; the Talkers are cheap, so use them.';
+  const PF_GUIDE = {
+    'Have the Talkative Rat ask the Big Rat’s guards': 'The economical choice: the Bandit is quickest, then the Disgraced, then the Talker. Five successes with the Bandit or the Talker, or three with the Disgraced and one with another rat, take HRMI from 0 to 5.',
+    'Have the Rattus Faber Bandit-Chief discover the Big Rat’s next move': 'The quickest of the rats.',
+    'Let the Disgraced Rattus Faber Bandit-Chief loiter': 'Second quickest; three successes and one with another rat make 5.',
+    'Deface the face': 'Warning: this may annoy the Big Rat.',
+    'A remarkable piece of good fortune! (9 FATE)': 'The guide only says "see the action".',
+    'Sneak into the upper room yourself': 'Doing it yourself is a Shadowy 110 challenge and lowers Serenity by 20 on a success; with low Serenity you might as well.',
+    'Send a Talkative Rat into the upper room': 'A Serenity challenge; the guide gives 7 where the page says 6. ' + PF_RATS,
+    'Send the Talkative Rat': PF_RATS + ' Steps 4 to 7 must be done by a rat.',
+    'Send the Working Rat': 'A failed rat is lost, and a rat that is not talkative also needs more investigation first.',
+    'Send the Bandit-Chief': 'A failed rat is lost, and a Bandit-Chief is dear.',
+    'Send the Disgraced Rat': 'A failed rat is lost. The guide says use Talkers unless your odds with the Disgraced are decent.',
+    'If you just want him to talk...': 'Step 8 of the story. ' + PF_RATS,
+    '"Let me have this one. It’s time I cleared my name."': 'Step 8: a rare success with the Disgraced gives a Bandit; anything else costs the Disgraced. With the prelude done you can find as many Disgraced as you need.',
+    'Attack psychologically': 'Step 9: you must lower Serenity all the way to 4 to go on; to 0 if you like cleared qualities.',
+    'Kill him': 'The guide: 2000 Rostygold and 1 Fate; you later draw The Albino Rat’s story.',
+    'Hand him over to the Constables': 'The guide: 500 Rostygold, 3 Constables Favours and 1 Fate.',
+    'What good would extermination do?': 'Joins the Big Rat: opens Alliance with the Big Rat in your lodgings. Allowing him to live hits SaRC.',
+    'Purchase some assistance with Casing...': 'The guide values 9 CP of Casing for 3 Talkers at 2.4 Echoes.',
+    'Acquire a new rat companion': 'The guide: a Bandit-Chief for 15 Antique Mysteries, worth 187.5 Echoes, instead of buying one for 320.',
+    'Add your own dead to the pile': 'The guide: laying a single rat in the pile raises SaRC, as long as you already have 1 CP of it from the clothing card.',
+    'Employ your Albino Rat in your Laboratory': 'The guide: removes the card either way, once your equipment is at level 7.',
+  };
+
+  function pfItems(list) {
+    const parts = String(list).split(', ');
+    return parts.length > 2 ? parts[0] + ' +' + (parts.length - 1) + ' more' : parts.join(', ');
+  }
+
+  function pfLabel(e) {
+    if (e.label) return e.label;
+    const mark = (e.n || e.b) ? CAROUSEL_MARK_CHALLENGE : '';
+    const moves = (e.w || []).slice(0, 3);
+    if (moves.length) {
+      if (mark) moves[0] += mark;
+      else if (e.luck) moves[0] += ' (' + e.luck + '%)';
+    }
+    const parts = moves.slice();
+    if (e.get) parts.push(pfItems(e.get) + (moves.length ? '' : mark || (e.luck ? ' (' + e.luck + '%)' : '')));
+    if (e.pay) parts.push('−' + pfItems(e.pay));
+    const failing = (e.f || []).slice(0, 2).concat(e.getf ? [pfItems(e.getf)] : []);
+    if (failing.length) parts.push('fail ' + failing.join(', '));
+    if (e.fate) parts.push('Fate ' + e.fate);
+    return parts.join(' · ') || 'story';
+  }
+
+  function pfTitle(e) {
+    const lines = [e.name, e.storylet + (e.at !== undefined ? ' (Plaster ' + e.at + ')' : ''), ''];
+    const ch = [];
+    if (e.luck) ch.push('Luck ' + e.luck + '%');
+    if (e.n) ch.push(e.n[0] + ' ' + e.n[1] + ' (narrow)');
+    if (e.b) ch.push(e.b[0] + ' ' + e.b[1] + ' (broad)');
+    if (ch.length) lines.push('Challenge: ' + ch.join(' and ') + '.');
+    if (e.w && e.w.length) lines.push((ch.length ? 'On a success: ' : 'Does: ') + e.w.join(', ') + '.');
+    if (e.get) lines.push('Gives: ' + e.get + '.');
+    if (e.r && e.r.length) lines.push('On a rare success: ' + e.r.join(', ') + '.');
+    if (e.f && e.f.length || e.getf) lines.push('On a failure: ' + (e.f || []).concat(e.getf ? [e.getf] : []).join(', ') + '.');
+    if (e.pay) lines.push('Costs: ' + e.pay + '.');
+    if (e.fate) lines.push('Costs ' + e.fate + ' FATE.');
+    if (e.needs) lines.push('Needs: ' + e.needs + '.');
+    if (e.lock) lines.push('Not offered with: ' + e.lock + '.');
+    if (e.instr) lines.push('The page: ' + e.instr);
+    const g = PF_GUIDE[e.name.replace(/’/g, '\'')] || PF_GUIDE[e.name];
+    if (g) lines.push('The guide: ' + g);
+    lines.push('', PF_CFG.rules);
+    return lines.join('\n');
+  }
+
+  PF_OPTIONS.forEach(function (e) {
+    e.label = pfLabel(e);
+    e.color = (e.w || []).some(function (m) { return /^Plaster →/.test(m); }) ? CAROUSEL_COLOR_PROGRESS : CAROUSEL_COLOR_NEUTRAL;
+    e.title = pfTitle(e);
+  });
+
+  const PF_CARDS = [
+    { name: 'Sartorial squeamishness', badge: 'starts SaRC', needs: 'a Working Rat and a Ratskin Suit' },
+    { name: 'The Departed', badge: 'SaRC by the pile' },
+    { name: 'The Albino Rat’s story', badge: 'Albino Rat', needs: 'Plaster 20' },
+    { name: 'Rat Melancholy', badge: 'the Albino Rat’s card', needs: 'Plaster 20 and an Albino Rat' },
+  ];
+  const PF_STORYLETS = PF_OPTIONS.map(function (e) { return e.storylet; }).filter(function (s, i, a) { return a.indexOf(s) === i; });
+  const PF_SUMMARY = {};
+  PF_STORYLETS.forEach(function (s) {
+    const own = PF_OPTIONS.filter(function (e) { return e.storylet === s; });
+    const at = own[0].at;
+    PF_SUMMARY[normalizeName(s)] = (at !== undefined ? 'Plaster ' + at + ' → ' + (at + 1) : own.length + (own.length === 1 ? ' option' : ' options'));
+  });
+  PF_SUMMARY[normalizeName('Investigating the Big Rat')] = 'HRMI 5 to go on';
+  PF_SUMMARY[normalizeName('Decide the fate of the Big Rat')] = 'Plaster → 15 or 20';
+  const PF_INDEX = carouselIndex(PF_OPTIONS);
+  const PF_DEF = {
+    cfg: PF_CFG, options: PF_OPTIONS, index: PF_INDEX, storylets: PF_STORYLETS, cards: PF_CARDS,
+    cardKeys: PF_CARDS.map(function (c) { return normalizeName(c.name); }), aliases: null, summary: PF_SUMMARY,
+    cls: 'fl-ux-pf', flag: 'flUxPf', branchCls: 'fl-ux-pf-branch', branchFlag: 'flUxPfBranch',
+    cardCls: 'fl-ux-pf-card', cardFlag: 'flUxPfCard',
+  };
+
+  function pfRatings() { pqRatings(PF_DEF); }
 
   // === feature: Forgotten Quarter Expeditions ============================
   //
@@ -36454,6 +36901,7 @@
     { name: 'iron-republic', run: irRatings },
     { name: 'firmament', run: firRatings },
     { name: 'discordant-studies', run: hsRatings },
+    { name: 'plaster-face', run: pfRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
