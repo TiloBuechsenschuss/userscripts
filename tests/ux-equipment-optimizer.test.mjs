@@ -758,11 +758,27 @@ check('a storylet the game will not let you change outfit in',
   () => blocked(PREACH, { canChangeOutfit: false }), ['blocked', 'cannot-change']);
 check('not being inside a storylet',
   () => blocked(PREACH, { phase: 'Available' }), ['blocked', 'not-in-storylet']);
-check('a stat you have no level in, on a challenge that is not fixed',
-  () => blocked(Object.assign({}, PREACH, { challenges: [chal('Neathproofed', 'Skills', 50)] })),
-  ['blocked', 'no-level']);
-check('a fixed challenge on a quality with no level is simply left as it is',
-  () => planOf(Object.assign({}, PREACH, { challenges: [chal('Neathproofed', 'Skills', 100)] })).status, 'already');
+// Reported 2026-09-26: "Could not read your level in a stat this challenge
+// tests." A quality with no possession is level 0 (a skill you have not
+// started), and one that nothing you wear touches is left as the game shows it
+// and NAMED, instead of refusing the whole action.
+check('a challenge on something you have no level in and nothing you wear changes is left as shown, and named',
+  () => {
+    const p = planOf(Object.assign({}, PREACH, { challenges: [chal('Luck', 'Luck', 50), chal('Persuasive', 'BasicAbility', 90)] }));
+    return [p.status, p.ignored, p.predicted[0], p.swaps.map((s) => s.slot)];
+  }, ['change', ['Luck'], { name: 'Luck', shown: 50 }, ['Hat']]);
+check('a plan with nothing else to do still names what it did not count',
+  () => {
+    const p = planOf(Object.assign({}, PREACH, { challenges: [chal('Luck', 'Luck', 50)] }));
+    return [p.status, p.ignored];
+  }, ['already', ['Luck']]);
+check('a stat with no possession that something you own boosts counts as level 0 plus what you wear',
+  () => {
+    const p = planOf(Object.assign({}, PREACH, { challenges: [chal('Watchful', 'BasicAbility', 50)] }));
+    return [p.status, p.swaps.map((s) => s.to.name), p.ignored];
+  }, ['change', ['Extraordinary Hat'], []]);
+check('the base of a stat with no possession is 0, whatever is worn',
+  () => api.baseFor(MYSELF, gear().slots, 'watchful'), 0);
 
 // --- applying an outfit, and undoing it ------------------------------------
 
@@ -979,7 +995,8 @@ function fakeServer(opts) {
       return reply(200, { canChangeOutfit: opts.cannotChange !== true, phase: 'In', storylet: { childBranches: [Object.assign({}, PREACH, {
         challenges: opts.dangerous
           ? [chal('Dangerous', 'BasicAbility', dangerousShown())]
-          : [chal('Mithridacy', 'Skills', 20), chal('Persuasive', 'BasicAbility', shown())],
+          : [chal('Mithridacy', 'Skills', 20), chal('Persuasive', 'BasicAbility', shown())]
+            .concat(opts.luck ? [chal('Luck', 'Luck', 50)] : []),
         qualityRequirements: [],
       })] } });
     }
@@ -1134,6 +1151,15 @@ checkAsync('Undo of a filled slot takes the item out again with an unequip', asy
   return [server.log.filter((c) => c[1].startsWith('/api/outfit/')).map((c) => [c[1], c[2]]),
     server.worn.Crew, api.readUndo()];
 }, [[['/api/outfit/unequip', { qualityId: 900001 }]], undefined, null]);
+
+checkAsync('what the run did not count is said in the result, by name', async () => {
+  const { branches } = freshWorld({ luck: true });
+  api.equipmentOptimizer();
+  eoButton(branches[0]).click();
+  await waitFor(() => reloads.length > 0);
+  const text = api.readResult().lines.join(' ');
+  return [text.includes('Not counted: Luck'), text.includes('Hat: Iron Hat')];
+}, [true, true]);
 
 checkAsync('a second click while it runs does nothing, and the button says it is working', async () => {
   let open;

@@ -2931,6 +2931,13 @@
   //    therefore says nothing about how far it is from changing, so it is
   //    treated as fixed (and a 100% one holds its stat where it is).
   //
+  // CONFIRMED WORKING in-game by the author (2026-09-26): the button on real
+  // actions, the change made through the Possessions tab and back with no
+  // reload, an item whose click opens the Use/Equip popup, the result panel on a
+  // white action, and an action whose challenge level cannot be read. Not yet
+  // reported on: Undo, Dismiss, filling an empty slot, the API-and-reload
+  // fallback, and the phone layout.
+  //
   // The search below is exact: it keeps every outfit that is not beaten on
   // every stat AND on the number of slots changed, then picks the highest
   // chance, and among equal chances the fewest changes, so a tie never
@@ -3233,16 +3240,22 @@
     return p ? p.effectiveLevel : null;
   }
 
-  // The level WITHOUT the worn gear in `slots`: what any outfit is added to.
-  function baseFor(myself, slots, stat) {
-    let level = levelOf(myself, stat);
-    if (level == null) return null;
+  // What the worn gear in `slots` gives in a stat.
+  function wornBonus(slots, stat) {
+    let n = 0;
     slots.forEach(function (slot) {
       slot.items.forEach(function (it) {
-        if (it.equipped) level -= it.bonus[stat] || 0;
+        if (it.equipped) n += it.bonus[stat] || 0;
       });
     });
-    return level;
+    return n;
+  }
+
+  // The level WITHOUT the worn gear in `slots`: what any outfit is added to.
+  // A quality you have no possession of is level 0, so the base is 0.
+  function baseFor(myself, slots, stat) {
+    const level = levelOf(myself, stat);
+    return level == null ? 0 : level - wornBonus(slots, stat);
   }
 
   function branchFrom(storylet, branchId) {
@@ -3297,10 +3310,12 @@
   // What to do for one branch, from the four replies. Never touches the page
   // or the game. Returns
   //   { status: 'blocked', reason }   reason: no-branch, no-challenge, combined,
-  //                                   cannot-change, not-in-storylet, no-level,
-  //                                   no-outfit
-  //   { status: 'already', chance }
-  //   { status: 'change', before, after, swaps, challenges, predicted, approx }
+  //                                   cannot-change, not-in-storylet, no-outfit
+  //   { status: 'already', chance, ignored }
+  //   { status: 'change', before, after, swaps, challenges, predicted, ignored,
+  //     approx }
+  // `ignored` names the challenges left as the game shows them because your
+  // level in them could not be read and nothing you wear changes them (Luck, say).
   // A swap is { slot, from: { id, name }, to: { id, name } }; an id of null is
   // an empty slot ("nothing"), so filling one has `from.id === null`.
   function planFor(branch, storylet, outfit, myself) {
@@ -3311,18 +3326,34 @@
     if (!storylet || storylet.phase !== 'In') return blocked('not-in-storylet');
 
     const gear = gearFrom(outfit, myself);
+    const touched = {};
+    gear.slots.forEach(function (slot) {
+      slot.items.forEach(function (it) { Object.keys(it.bonus).forEach(function (k) { touched[k] = true; }); });
+    });
     const challenges = [];
     const holds = [];
     const names = [];
+    const ignored = [];
     for (const ch of branch.challenges) {
-      const level = levelOf(myself, normalizeName(ch.name));
-      const fixed = Number(ch.targetNumber) >= 100 || Number(ch.targetNumber) <= 10;
-      if (level == null && !fixed && !(ch.bonuses && ch.bonuses.length)) return blocked('no-level');
+      if (ch.bonuses && ch.bonuses.length) return blocked('combined');
+      const stat = normalizeName(ch.name);
+      let level = levelOf(myself, stat);
+      if (level == null) {
+        // No possession of it. If nothing you own touches it either (Luck), it
+        // stays as the game shows it and is named; if something does, you are at
+        // level 0 plus what you wear (a skill not started, but boosted).
+        if (!touched[stat]) {
+          challenges.push({ fixed: Number(ch.targetNumber) / 100 });
+          names.push(ch.name);
+          ignored.push(ch.name);
+          continue;
+        }
+        level = wornBonus(gear.slots, stat);
+      }
       const c = inferChallenge(ch, level);
       if (!c) return blocked('combined');
       if (c.hold) {
-        // A level we cannot read cannot be held.
-        if (level != null) holds.push(c.hold);
+        holds.push(c.hold);
         delete c.hold;
       }
       challenges.push(c);
@@ -3347,7 +3378,7 @@
     });
     const before = successChance(challenges, wornLevels);
     if (best.changes === 0 || best.chance <= before + 1e-9) {
-      return { status: 'already', chance: before };
+      return { status: 'already', chance: before, ignored: ignored };
     }
 
     const swaps = [];
@@ -3366,7 +3397,7 @@
     });
     return {
       status: 'change', before: before, after: best.chance, swaps: swaps,
-      challenges: challenges, predicted: predicted, approx: !!best.approx,
+      challenges: challenges, predicted: predicted, ignored: ignored, approx: !!best.approx,
     };
   }
 
@@ -3631,7 +3662,6 @@
     'combined': 'This challenge combines several stats, which is not supported yet.',
     'cannot-change': 'The game does not let you change your outfit here.',
     'not-in-storylet': 'Open the action list first.',
-    'no-level': 'Could not read your level in a stat this challenge tests.',
     'no-outfit': 'No outfit meets this action’s requirements.',
   };
 
@@ -3666,8 +3696,12 @@
     return swap.slot + ': ' + swap.from.name + ' → ' + swap.to.name + '.';
   }
 
-  function eoNotes(branch) {
+  function eoNotes(branch, plan) {
     const notes = [];
+    if (plan && plan.ignored && plan.ignored.length) {
+      notes.push('Not counted: ' + plan.ignored.join(', ')
+        + ' (your level in it could not be read, and nothing you wear changes it).');
+    }
     if ((branch.challenges || []).some(function (c) { return c.secondChanceId > 0; })) {
       notes.push('A second chance is not counted.');
     }
@@ -3694,7 +3728,7 @@
       return { lines: [EO_BLOCKED[plan.reason] || 'Cannot optimize this action.'] };
     }
     if (plan.status === 'already') {
-      return { lines: ['Already the best outfit: ' + eoPct(eoShown(branch)) + '.'].concat(eoNotes(branch)) };
+      return { lines: ['Already the best outfit: ' + eoPct(eoShown(branch)) + '.'].concat(eoNotes(branch, plan)) };
     }
 
     // Kept BEFORE the first equip, in case the page dies mid-run; rewritten
@@ -3737,7 +3771,7 @@
       lines.push(eoChanceLine(plan.before, plan.after).replace(/\.$/, ' (predicted; the game could not be re-read).'));
       lines.push.apply(lines, plan.swaps.map(eoSwapLine));
     }
-    return { lines: lines.concat(eoNotes(branch)), reload: run.reload, persist: true, undoable: true };
+    return { lines: lines.concat(eoNotes(branch, plan)), reload: run.reload, persist: true, undoable: true };
   }
 
   // Puts the saved outfit back. Only what actually changed is in the record.

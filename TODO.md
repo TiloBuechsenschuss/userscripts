@@ -1,8 +1,5 @@
 # ToDo
 
-- Fallen London
-  - Optimize equipment button
-
 Fallen London:
   Carousels: https://fallenlondon.wiki/wiki/Guides#Location-Specif  Sorted by each guide's {{Audience}} stage, in the order of
   h  https://fallenlondon.wiki/wiki/Template:Audience (top is earlier in the game);
@@ -334,5 +331,15 @@ Kingdom of Loathing:
   - sort those items by type — the "group by type" box under it, ux-enhancers
     1.22. Verified in-game: multi-use recipes / Meat / random yield / items,
     each under its own heading.
+
+Fallen London:
+  - "Optimize equipment" button beside every action with challenges — ux-enhancers
+    3.4 (loader 0.54). Verified in-game by the author (2026-09-26): it works on real
+    actions — it plans from the game's own API, makes the change by clicking through
+    the Possessions tab and back with no page reload, handles an item whose click
+    opens the Use/Equip popup, shows its result in a panel that is readable on a
+    white action, and no longer refuses an action whose challenge level it cannot
+    read ("Not counted: X"). Not reported on, so still unverified: Undo, Dismiss,
+    filling an empty slot, the API-and-reload fallback, and the phone layout.
 
 # Maybe

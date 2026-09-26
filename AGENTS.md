@@ -3085,6 +3085,11 @@ navigation. Two consequences:
     so nobody is left behind a popup. Whether an *Unequip* popup exists was not captured (emptying a
     slot by click worked directly on the Adornment slot). The result panel has a **Dismiss** button that
     clears the message and forgets the stored result; it is on every message, not only results.
+  - **A challenge whose level cannot be read** (reported 2026-09-26 as "Could not read your level in a
+    stat this challenge tests", which refused the whole action). No possession of a quality means level 0,
+    so if something you own boosts it the level is 0 plus what you wear; if nothing you own touches it
+    (Luck, say) the challenge is left at the percentage the game shows and the result says
+    "Not counted: X". `planFor` no longer blocks on it.
   - **Legibility.** The result panel brings its own background and ink (`EO_PANEL_CSS`, from `UI`), and
     every line repeats the ink, so it reads the same on a white action as on a dark one (reported
     2026-09-26: light text on white was barely readable). It is hidden while empty. The test checks a
@@ -3092,8 +3097,10 @@ navigation. Two consequences:
   - **The token** is sent to `api.fallenlondon.com` only and never logged or put in a message.
   - `tests/ux-equipment-optimizer.test.mjs` pins all of it with values from the capture. The open
     questions (unequip, combined stats, second chances, other challenge categories) are in
-    `okf/fallen-london/open-questions.md`; settle one there before relying on it here. **Not yet
-    tested in-game by the author.**
+    `okf/fallen-london/open-questions.md`; settle one there before relying on it here. **Confirmed working
+    in-game by the author (2026-09-26)** on real actions, including the in-page route, the Use/Equip
+    popup and the unreadable-level case. Not yet reported on: Undo, Dismiss, filling an empty slot, the
+    API-and-reload fallback, and the phone layout.
 - **Refreshing the Factions panel: `fetch` does not work, and that is settled.** Fallen London is
   client-rendered — `GET /myself` returns a ~4.7KB shell whose `#root` holds a loading splash and
   no quality list (checked against the live site, not assumed). So `refreshBackgroundState()` uses a
