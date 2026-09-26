@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/daily-checklist.js
-// @version      1.25
+// @version      1.26
 // @description  Adds a Checklist button that opens a daily to-do list popup.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -58,7 +58,7 @@
   // An item marked `hidden: true` is skipped entirely during seeding -- the
   // tidy alternative to commenting the block out (see applySeeds).
   // Bump SEED_VERSION to push new defaults to people who already have a saved list.
-  const SEED_VERSION = 9;
+  const SEED_VERSION = 10;
   const SEED_ITEMS = [
     {
       text: 'Dig with spade',
@@ -132,6 +132,7 @@
     },
     {
       text: 'Pull from Hagnk\'s',
+      url: '/storage.php?which=5',
       off: false,
       disabled: 'post-ronin'
     },

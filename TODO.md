@@ -1,9 +1,5 @@
 # ToDo
 
-- KoL
-  - Mining does not work anymore
-  - daily checklist: link to hagnks
-
 - Fallen London
   -  wiki links trigger Anubis - direct page should work better, possibly
   - Optimize equipment button

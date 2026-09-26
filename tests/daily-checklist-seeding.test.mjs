@@ -134,5 +134,26 @@ check('a renamed task is matched by its unique url, not duplicated',
 check('...and gets the run-state flag backfilled onto it',
   reworded.items[0].disabled, 'ronin');
 
+// --- Hagnk's gained a link -------------------------------------------------
+// It was seeded without a url; a list saved before that must pick the link up
+// without losing progress, and a url the user set themselves must survive.
+const HAGNK = 'Pull from Hagnk\'s';
+const HAGNK_URL = '/storage.php?which=5';
+const noLink = {
+  date: '2026-07-28', seed: api.SEED_VERSION - 1, ronin: false,
+  items: [{ text: HAGNK, done: true, off: false, seeded: true }],
+};
+api.applySeeds(noLink);
+check('Hagnk\'s picks up its storage link', noLink.items[0].url, HAGNK_URL);
+check('...without losing progress', noLink.items[0].done, true);
+check('...and a new list gets the link too',
+  fresh.items.find((it) => it.text === HAGNK).url, HAGNK_URL);
+const ownLink = {
+  date: '2026-07-28', seed: api.SEED_VERSION - 1, ronin: false,
+  items: [{ text: HAGNK, done: false, off: false, url: '/mystorage.php', seeded: true }],
+};
+api.applySeeds(ownLink);
+check('a url the user set is not overwritten', ownLink.items[0].url, '/mystorage.php');
+
 console.log(failures ? '\n' + failures + ' FAILED' : '\nAll passed');
 process.exit(failures ? 1 : 0);
