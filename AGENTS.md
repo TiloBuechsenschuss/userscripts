@@ -873,8 +873,13 @@ navigation. Two consequences:
   debounced `MutationObserver(document.body, {childList, subtree})`, relying on a per-element
   `data-*` flag to stay idempotent across the repeated passes.
 - `wiki-links.js`'s selectors are verified against real HTML. The wiki-link helper is confirmed
-  (the wiki is MediaWiki; `wiki/Special:Search?search=...&go=Go` resolves exact titles and
-  otherwise lands on search results). A storylet title shows up three ways, all badged: in a list
+  (the wiki is MediaWiki behind Anubis, which challenges `Special:Search` at difficulty 6 -- a
+  wait of many seconds -- but lets `/wiki/Title` and `api.php` through). So links go straight to
+  `/wiki/Title`, and `resolveWikiLinks()` asks `api.php?action=query&titles=...&redirects=1` which
+  names are not pages and re-points only those at the `Special:Search?...&go=Go` fallback. The
+  block (`wikiHref`, `wikiSearchHref`, `wikiTag`, `resolveWikiLinks`) is duplicated in
+  `wiki-links.js`, `choice-helper.js` and `ux-enhancers.js`; keep the three identical, and never
+  build a bare `Special:Search` link. A storylet title shows up three ways, all badged: in a list
   it's `<h2 class="... storylet__heading">` inside `.media.storylet`; atop an opened storylet it's
   `<h1 class="... storylet-root__heading">` inside `.media--root`; and each opportunity card in hand,
   which has two layouts. In the compact (small-media) layout the card title is a bare

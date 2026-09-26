@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.29
+// @version      1.30
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -647,25 +647,101 @@
     return el;
   }
 
-  // A link to the Fallen London wiki, by the same "Go" search wiki-links.js
-  // uses: an exact title redirects straight to the article, anything else lands
-  // on the search results for the text rather than a dead redlink.
+  // A link to the Fallen London wiki. The wiki's Anubis challenge makes
+  // Special:Search take many seconds, so link straight to the article and let
+  // resolveWikiLinks() re-point only the names the API says are not pages at
+  // the "Go" search. Same block as wiki-links.js (see "Wiki URL" there), sharing
+  // its lookups through sessionStorage; keep them identical.
+  const WIKI_BASE = 'https://fallenlondon.wiki/';
+  const WIKI_BAD_TITLE = /[#<>\[\]{}|]/;
+  function wikiCleanName(name) {
+    return String(name == null ? '' : name).trim().replace(/\s+/g, ' ');
+  }
+  function wikiSearchHref(name) {
+    return WIKI_BASE + 'wiki/Special:Search?'
+      + new URLSearchParams({ search: wikiCleanName(name), go: 'Go' }).toString();
+  }
   function wikiHref(name) {
-    const t = String(name == null ? '' : name).trim().replace(/\s+/g, ' ');
+    const t = wikiCleanName(name);
     if (!t) return null;
-    return 'https://fallenlondon.wiki/wiki/Special:Search?'
-      + new URLSearchParams({ search: t, go: 'Go' }).toString();
+    // Characters no page title can hold: the search is the only useful target.
+    if (WIKI_BAD_TITLE.test(t)) return wikiSearchHref(t);
+    return WIKI_BASE + 'wiki/' + encodeURIComponent(t.replace(/ /g, '_'))
+      .replace(/%3A/gi, ':').replace(/%2F/gi, '/');
+  }
+  // Marks a link for resolveWikiLinks(). Names that cannot be titles are
+  // already search links, so there is nothing to look up.
+  function wikiTag(a, name) {
+    const t = wikiCleanName(name);
+    if (t && !WIKI_BAD_TITLE.test(t)) a.dataset.flWikiTitle = t;
+  }
+
+  const WIKI_EXISTS_KEY = 'fl-wiki-exists';
+  const wikiInFlight = new Set();
+  const wikiFailed = new Set();
+  function wikiKnownRead() {
+    try { return JSON.parse(sessionStorage.getItem(WIKI_EXISTS_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function wikiKnownWrite(known) {
+    try { sessionStorage.setItem(WIKI_EXISTS_KEY, JSON.stringify(known)); } catch (e) { /* uncached */ }
+  }
+  function wikiLookup(names) {
+    names.forEach(function (n) { wikiInFlight.add(n); });
+    const url = WIKI_BASE + 'w/api.php?action=query&redirects=1&format=json&formatversion=2&origin=*'
+      + '&titles=' + names.map(encodeURIComponent).join('%7C');
+    fetch(url)
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (data) {
+        const q = data && data.query;
+        if (!q) throw new Error('no query in reply');
+        // A name maps to its page through `normalized` (case of the first
+        // letter, underscores) and then `redirects`; `pages` are the targets.
+        const norm = {}, redir = {}, found = {};
+        (q.normalized || []).forEach(function (x) { norm[x.from] = x.to; });
+        (q.redirects || []).forEach(function (x) { redir[x.from] = x.to; });
+        (q.pages || []).forEach(function (p) { found[p.title] = !p.missing && !p.invalid; });
+        const known = wikiKnownRead();
+        names.forEach(function (n) {
+          const t0 = norm[n] || n;
+          known[n] = found[redir[t0] || t0] === true;
+        });
+        wikiKnownWrite(known);
+      })
+      .catch(function () { names.forEach(function (n) { wikiFailed.add(n); }); })
+      .then(function () {
+        names.forEach(function (n) { wikiInFlight.delete(n); });
+        resolveWikiLinks();
+      });
+  }
+  function resolveWikiLinks() {
+    const anchors = document.querySelectorAll('a[data-fl-wiki-title]:not([data-fl-wiki-checked])');
+    if (!anchors.length) return;
+    const known = wikiKnownRead();
+    const need = new Set();
+    anchors.forEach(function (a) {
+      const name = a.dataset.flWikiTitle;
+      if (name in known) {
+        a.dataset.flWikiChecked = '1';
+        if (!known[name]) a.href = wikiSearchHref(name);
+      } else if (!wikiInFlight.has(name) && !wikiFailed.has(name)) {
+        need.add(name);
+      }
+    });
+    const names = Array.from(need);
+    for (let i = 0; i < names.length; i += 50) wikiLookup(names.slice(i, i + 50));
   }
 
   function wikiLink(name, text, style) {
     const href = wikiHref(name);
     if (!href) return document.createTextNode(text || String(name || ''));
-    return h('a', {
+    const a = h('a', {
       href: href, target: '_blank', rel: 'noopener',
       textContent: text || name,
       title: 'FL wiki: ' + name,
       style: Object.assign({ color: 'inherit', textDecoration: 'none', borderBottom: '1px dotted currentColor' }, style || {}),
     });
+    wikiTag(a, name);
+    return a;
   }
 
   // === shared: where you are =============================================
@@ -36975,6 +37051,7 @@
         console.error('FL Choice Helper: feature "' + feature.name + '" failed.', e);
       }
     }
+    resolveWikiLinks();
   }
   function schedule() {
     if (pending) return;

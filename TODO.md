@@ -1,7 +1,6 @@
 # ToDo
 
 - Fallen London
-  -  wiki links trigger Anubis - direct page should work better, possibly
   - Optimize equipment button
 
 Fallen London:

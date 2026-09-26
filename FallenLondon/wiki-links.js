@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/wiki-links.js
-// @version      0.7
+// @version      0.8
 // @description  Adds a small "W" badge linking storylets and cards to the Fallen London wiki.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -17,7 +17,8 @@
  * Adds a small "W" badge linking to the Fallen London wiki (fallenlondon.wiki) next to storylet
  * titles in the game -- in a storylet list, at the top of an opened storylet, and on each
  * opportunity card in your hand (both the compact and the full-width card layouts). Clicking opens
- * the wiki article for that storylet/card in a new tab. The individual branch/choice titles inside
+ * the wiki article for that storylet/card in a new tab (straight to the article, never the
+ * Anubis-challenged search page -- see "Wiki URL" below). The individual branch/choice titles inside
  * an opened storylet are intentionally left unlinked. Selectors verified against real game HTML.
  */
 
@@ -32,19 +33,95 @@
   const WIKI_BASE = 'https://fallenlondon.wiki/';
 
   // --- Wiki URL ---------------------------------------------------------
-  // The wiki is MediaWiki (+ Semantic MediaWiki). Link via its "Go" search
-  // (wiki/Special:Search?search=...&go=Go): when the name is an exact page
-  // title, Go redirects straight to the article (already first-letter-case-
-  // insensitive); when it is not (a slightly-off title, a name with extra
-  // words), it lands on the search-results page for the text, which is still
-  // useful instead of a dead redlink. Verified live: this form resolves
-  // "Making Waves" to its article and is the same pattern the KoL script uses.
-  // URLSearchParams encodes spaces as '+' and ':' as '%3A'.
+  // The wiki is MediaWiki (+ Semantic MediaWiki) behind Anubis proof-of-work.
+  // Anubis lets article views (/wiki/Title) and the API straight through but
+  // puts Special:Search behind a difficulty-6 challenge -- a wait of many
+  // seconds, repeated whenever the pass cookie lapses. So a link must never
+  // land on the search page when it can avoid it:
+  //   - wikiHref() points straight at the article, /wiki/Title.
+  //   - resolveWikiLinks() then asks the API (no challenge, CORS open) which of
+  //     the linked names are not pages, and re-points just those at the search
+  //     ("Go" search: an exact title would have redirected, anything else lands
+  //     on the results rather than a dead redlink). An unanswered lookup leaves
+  //     the article link, whose worst case is the wiki's 404 page.
+  // The same block is in choice-helper.js and ux-enhancers.js, and they share
+  // the lookups through sessionStorage. Keep the three identical.
+  const WIKI_BAD_TITLE = /[#<>\[\]{}|]/;
+  function wikiCleanName(name) {
+    return String(name == null ? '' : name).trim().replace(/\s+/g, ' ');
+  }
+  function wikiSearchHref(name) {
+    return WIKI_BASE + 'wiki/Special:Search?'
+      + new URLSearchParams({ search: wikiCleanName(name), go: 'Go' }).toString();
+  }
   function wikiHref(name) {
-    const t = name.trim().replace(/\s+/g, ' ');
+    const t = wikiCleanName(name);
     if (!t) return null;
-    const qs = new URLSearchParams({ search: t, go: 'Go' });
-    return WIKI_BASE + 'wiki/Special:Search?' + qs.toString();
+    // Characters no page title can hold: the search is the only useful target.
+    if (WIKI_BAD_TITLE.test(t)) return wikiSearchHref(t);
+    return WIKI_BASE + 'wiki/' + encodeURIComponent(t.replace(/ /g, '_'))
+      .replace(/%3A/gi, ':').replace(/%2F/gi, '/');
+  }
+  // Marks a link for resolveWikiLinks(). Names that cannot be titles are
+  // already search links, so there is nothing to look up.
+  function wikiTag(a, name) {
+    const t = wikiCleanName(name);
+    if (t && !WIKI_BAD_TITLE.test(t)) a.dataset.flWikiTitle = t;
+  }
+
+  const WIKI_EXISTS_KEY = 'fl-wiki-exists';
+  const wikiInFlight = new Set();
+  const wikiFailed = new Set();
+  function wikiKnownRead() {
+    try { return JSON.parse(sessionStorage.getItem(WIKI_EXISTS_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function wikiKnownWrite(known) {
+    try { sessionStorage.setItem(WIKI_EXISTS_KEY, JSON.stringify(known)); } catch (e) { /* uncached */ }
+  }
+  function wikiLookup(names) {
+    names.forEach(function (n) { wikiInFlight.add(n); });
+    const url = WIKI_BASE + 'w/api.php?action=query&redirects=1&format=json&formatversion=2&origin=*'
+      + '&titles=' + names.map(encodeURIComponent).join('%7C');
+    fetch(url)
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (data) {
+        const q = data && data.query;
+        if (!q) throw new Error('no query in reply');
+        // A name maps to its page through `normalized` (case of the first
+        // letter, underscores) and then `redirects`; `pages` are the targets.
+        const norm = {}, redir = {}, found = {};
+        (q.normalized || []).forEach(function (x) { norm[x.from] = x.to; });
+        (q.redirects || []).forEach(function (x) { redir[x.from] = x.to; });
+        (q.pages || []).forEach(function (p) { found[p.title] = !p.missing && !p.invalid; });
+        const known = wikiKnownRead();
+        names.forEach(function (n) {
+          const t0 = norm[n] || n;
+          known[n] = found[redir[t0] || t0] === true;
+        });
+        wikiKnownWrite(known);
+      })
+      .catch(function () { names.forEach(function (n) { wikiFailed.add(n); }); })
+      .then(function () {
+        names.forEach(function (n) { wikiInFlight.delete(n); });
+        resolveWikiLinks();
+      });
+  }
+  function resolveWikiLinks() {
+    const anchors = document.querySelectorAll('a[data-fl-wiki-title]:not([data-fl-wiki-checked])');
+    if (!anchors.length) return;
+    const known = wikiKnownRead();
+    const need = new Set();
+    anchors.forEach(function (a) {
+      const name = a.dataset.flWikiTitle;
+      if (name in known) {
+        a.dataset.flWikiChecked = '1';
+        if (!known[name]) a.href = wikiSearchHref(name);
+      } else if (!wikiInFlight.has(name) && !wikiFailed.has(name)) {
+        need.add(name);
+      }
+    });
+    const names = Array.from(need);
+    for (let i = 0; i < names.length; i += 50) wikiLookup(names.slice(i, i + 50));
   }
 
   // The "W" badge. Small, opens in a new tab so a misclick mid-story does not
@@ -60,6 +137,7 @@
     a.rel = 'noopener';
     a.textContent = 'W';
     a.title = 'FL wiki: ' + name.trim();
+    wikiTag(a, name);
     a.style.cssText =
       'display:inline-block;margin-left:4px;padding:0 3px;' +
       'font-family:arial,sans-serif;font-size:9px;font-weight:bold;' +
@@ -176,6 +254,7 @@
     pending = false;
     linkStorylets();
     linkHandCards();
+    resolveWikiLinks();
   }
   function schedule() {
     if (pending) return;
