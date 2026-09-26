@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/all-in-one/kingdom-of-loathing.js
-// @version      1.51
+// @version      1.52
 // @description  Single-install loader for the Kingdom of Loathing userscripts in this repo.
 //
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
