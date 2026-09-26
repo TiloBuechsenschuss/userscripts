@@ -114,6 +114,22 @@ instead, there is nothing to do.
 | `TwilightHeroes/quest-helper.js` | [`TwilightHeroes/ux-enhancers.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/ux-enhancers.js) | ux-enhancers 1.0 | The journal quest hints. Its `wikiHref` was the more capable of the two and is the one the whole file now uses |
 | `TwilightHeroes/autobox.js` | [`TwilightHeroes/ux-enhancers.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/TwilightHeroes/ux-enhancers.js) | ux-enhancers 1.0 | The "Get & Equip Black Box" button and the criminology.php run it drives |
 
+## Knowledge files (`okf/`)
+
+What we have learned about how the games behave, and that is not obvious from the
+scripts, lives in **OKF** (open knowledge format) files: structured markdown with a
+short front-matter block (`okf`, `title`, `kind`, `status`, `verified`, `see_also`),
+one topic per file, and every claim marked *verified* (with the capture it was checked
+against), *assumed*, or *unknown*. They sit under `okf/<game>/`, with an `index.md`
+that lists them:
+
+- [`okf/fallen-london/`](./okf/fallen-london/index.md): the game's web API, how a
+  challenge's percentage relates to your stats, equipment and outfits, and the open
+  questions still to be captured.
+
+Read the relevant file before writing code against the game, and update it (and its
+`open-questions.md`) when you learn something new.
+
 ## Editing / contributing
 
 There is no build, bundler, package manager, test runner, or linter. You edit a
@@ -195,6 +211,7 @@ node tests/quest-helper-beerpong.test.mjs
 node tests/daily-checklist-seeding.test.mjs
 node tests/ux-beer-garden.test.mjs
 node tests/ux-mall-buy.test.mjs
+node tests/ux-equipment-optimizer.test.mjs
 node tests/auto-combat-fight-state.test.mjs
 node tests/auto-mine-parse.test.mjs
 node tests/auto-mine-strategy.test.mjs

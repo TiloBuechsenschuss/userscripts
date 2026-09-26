@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      3.3
+// @version      3.4
 // @description  Small quality-of-life tweaks for Fallen London, behind a docked "UX" button.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -49,7 +49,14 @@
  * A menace works too: pick Nightmares, Scandal, Suspicion or Wounds and the star goes to the item
  *   that does most against its build-up, scored the way the Menaces guide does -- reduces 1,
  *   greatly 2, massively 4, and an item that increases it counts against itself.
- * It only ever highlights; it never equips anything.
+ * The stars only highlight; nothing on the Possessions tab equips anything.
+ * Beside every action that has challenges there is an "Optimize equipment" button. It reads your levels,
+ *   your outfit and the open storylet from the game's own API, works out which outfit gives the best
+ *   chance of passing all the challenges (fewest changes on a tie, and never breaking a requirement
+ *   you meet now), equips it, and reloads so the game redraws. The line under the button gives the
+ *   chance before and after -- as the game itself shows it -- what changed, and an Undo. It fills an empty slot when an
+ *   item helps, but never empties a slot that holds something, leaves locked slots alone, and
+ *   refuses a challenge that combines stats.
  * Built as a feature registry so further tweaks can be added as entries.
  */
 
@@ -2901,6 +2908,778 @@
     drawEquipSummary(list, stat ? equipSummary(stat, total, menace) : '');
   }
 
+  // === feature: equipment optimizer ======================================
+  //
+  // An "Optimize equipment" button beside every action that has challenges.
+  // It works out which outfit gives the best chance of passing them, equips
+  // it through the game's own API, and reloads so the game redraws.
+  //
+  // Everything below about the API and the chances comes from a real capture
+  // (2026-09-26), not from a guess:
+  //
+  //  - `challenges[].targetNumber` is the percentage the game SHOWS, not a
+  //    difficulty, and the game FLOORS it (66.7 is shown as 66). No difficulty
+  //    and no broad/narrow flag is sent, so both are inferred from the shown
+  //    percentage and your level.
+  //  - A BasicAbility challenge (Persuasive, Shadowy...) behaves as BROAD:
+  //    `0.6 x level / difficulty`. Persuasive 270 -> 200 took 90% to 66%. A
+  //    Skills challenge behaves as NARROW: `0.6 + 0.1 x (level - difficulty)`.
+  //    Mithridacy 1 -> 3 took 60% to 80% and 20% to 40%.
+  //  - Both are clamped to 10%..100%. A challenge shown at 10% or at 100%
+  //    therefore says nothing about how far it is from changing, so it is
+  //    treated as fixed (and a 100% one holds its stat where it is).
+  //
+  // The search below is exact: it keeps every outfit that is not beaten on
+  // every stat AND on the number of slots changed, then picks the highest
+  // chance, and among equal chances the fewest changes, so a tie never
+  // shuffles your gear. `tests/ux-equipment-optimizer.test.mjs` checks it
+  // against an exhaustive search.
+
+  function challengeChance(kind, diff, level) {
+    let p;
+    if (kind === 'narrow') p = 0.6 + 0.1 * (level - diff);
+    else p = diff > 0 ? 0.6 * level / diff : 1;
+    return Math.min(1, Math.max(0.1, p));
+  }
+
+  // One `challenges[]` entry from the game, as the model. `level` is your
+  // effective level in the challenge's stat right now. Returns
+  //   { kind, diff, terms }  a stat challenge we can predict,
+  //   { fixed, hold? }       one whose chance we cannot move (`hold` is a
+  //                          requirement keeping the stat where it is),
+  //   null                   a challenge that combines stats, not modelled.
+  function inferChallenge(ch, level) {
+    if (ch.bonuses && ch.bonuses.length) return null;
+    const stat = normalizeName(ch.name);
+    const shown = Number(ch.targetNumber);
+    if (shown >= 100) return { fixed: 1, hold: { stat: stat, min: level } };
+    if (shown <= 10) return { fixed: shown / 100 };
+    // Narrow moves in steps of ten, so a percentage that is not a multiple of
+    // ten is broad whatever its category says. The game floors what it shows,
+    // so a broad figure is read as half a point higher.
+    const broad = (ch.category === 'BasicAbility' || shown % 10 !== 0) && level > 0;
+    const p = (broad ? shown + 0.5 : shown) / 100;
+    return {
+      kind: broad ? 'broad' : 'narrow',
+      diff: broad ? 0.6 * level / p : level - (p - 0.6) / 0.1,
+      terms: [{ stat: stat, weight: 1 }],
+    };
+  }
+
+  function successChance(challenges, S) {
+    let p = 1;
+    for (const c of challenges) {
+      if (c.fixed != null) {
+        p *= c.fixed;
+        continue;
+      }
+      let level = 0;
+      for (const t of c.terms) level += t.weight * (S[t.stat] || 0);
+      p *= challengeChance(c.kind, c.diff, level);
+    }
+    return p;
+  }
+
+  // A state is dropped only when another has every level at least as high and
+  // no more changes. A stat with an upper limit is compared for equality
+  // instead: a higher level there is not "better", it may be out of range.
+  function optDominates(a, b, exact) {
+    if (a.changes > b.changes) return false;
+    for (let i = 0; i < a.vec.length; i++) {
+      if (exact[i] ? a.vec[i] !== b.vec[i] : a.vec[i] < b.vec[i]) return false;
+    }
+    return true;
+  }
+
+  function optPareto(list, exact) {
+    list.sort(function (a, b) { return a.changes - b.changes; });
+    const kept = [];
+    for (const s of list) {
+      if (!kept.some(function (k) { return optDominates(k, s, exact); })) kept.push(s);
+    }
+    return kept;
+  }
+
+  // How many partial outfits the search keeps between slots. Real gear never
+  // gets near it (a slot's non-beaten items are few), so the answer is exact;
+  // it is a guard so a pathological wardrobe answers in well under a second
+  // rather than hanging the page. When it bites, the result says `approx`.
+  const OPT_STATE_CAP = 4000;
+
+  // slots: [{ name, items: [{ id, equipped, bonus: { stat: n } }] }], one item
+  // worn per slot and always among `items`. base: your level in each stat
+  // WITHOUT the gear in `slots`. requirements: [{ stat, min?, max? }] on the
+  // final level. Returns { chance, changes, picks (one item id per slot, in
+  // order), levels, approx? }, or null when no outfit meets the requirements.
+  function optimizeOutfit(slots, base, challenges, requirements) {
+    requirements = requirements || [];
+    const stats = [];
+    const note = function (s) { if (stats.indexOf(s) === -1) stats.push(s); };
+    challenges.forEach(function (c) { (c.terms || []).forEach(function (t) { note(t.stat); }); });
+    requirements.forEach(function (r) { note(r.stat); });
+    const exact = stats.map(function (st) {
+      return requirements.some(function (r) { return r.stat === st && r.max != null; });
+    });
+    const levels = function (vec) {
+      const S = {};
+      stats.forEach(function (st, i) { S[st] = (base[st] || 0) + vec[i]; });
+      return S;
+    };
+    const allowed = function (S) {
+      return requirements.every(function (r) {
+        return S[r.stat] >= (r.min == null ? -Infinity : r.min)
+          && S[r.stat] <= (r.max == null ? Infinity : r.max);
+      });
+    };
+    // The most any slots from `i` on could still add to each stat. An outfit
+    // cannot do better than its levels plus this, which is what lets the
+    // search drop a partial outfit that cannot beat what you already wear.
+    const rest = slots.map(function () { return stats.map(function () { return 0; }); });
+    rest.push(stats.map(function () { return 0; }));
+    for (let i = slots.length - 1; i >= 0; i--) {
+      rest[i] = stats.map(function (st, k) {
+        let most = 0;
+        for (const it of slots[i].items) most = Math.max(most, it.bonus[st] || 0);
+        return rest[i + 1][k] + most;
+      });
+    }
+    const ceiling = function (vec, from) {
+      return successChance(challenges, levels(vec.map(function (v, k) { return v + rest[from][k]; })));
+    };
+
+    // What you wear now is the outfit to beat: a tie keeps it.
+    const wornVec = stats.map(function (st) {
+      let n = 0;
+      for (const slot of slots) for (const it of slot.items) if (it.equipped) n += it.bonus[st] || 0;
+      return n;
+    });
+    let best = null;
+    if (allowed(levels(wornVec))) {
+      best = {
+        chance: successChance(challenges, levels(wornVec)), changes: 0,
+        picks: slots.map(function (slot) {
+          return slot.items.filter(function (it) { return it.equipped; })[0].id;
+        }),
+        levels: levels(wornVec),
+      };
+    }
+
+    let approx = false;
+    let states = [{ vec: stats.map(function () { return 0; }), changes: 0, picks: [] }];
+    slots.forEach(function (slot, index) {
+      const options = optPareto(slot.items.map(function (it) {
+        return {
+          vec: stats.map(function (st) { return it.bonus[st] || 0; }),
+          changes: it.equipped ? 0 : 1,
+          picks: it.id,
+        };
+      }), exact);
+      // The same levels reached in fewer changes beat the longer way there.
+      const byLevels = new Map();
+      for (const s of states) {
+        for (const o of options) {
+          const vec = s.vec.map(function (v, i) { return v + o.vec[i]; });
+          const changes = s.changes + o.changes;
+          const key = vec.join(',');
+          const seen = byLevels.get(key);
+          if (!seen || changes < seen.changes) {
+            byLevels.set(key, { vec: vec, changes: changes, picks: s.picks.concat([o.picks]) });
+          }
+        }
+      }
+      let next = Array.from(byLevels.values());
+      if (best) {
+        next = next.filter(function (s) { return ceiling(s.vec, index + 1) > best.chance + 1e-12; });
+      }
+      if (next.length > OPT_STATE_CAP) {
+        approx = true;
+        const scored = next.map(function (s) { return { s: s, c: ceiling(s.vec, index + 1) }; });
+        scored.sort(function (a, b) { return b.c - a.c || a.s.changes - b.s.changes; });
+        next = scored.slice(0, OPT_STATE_CAP).map(function (x) { return x.s; });
+      }
+      states = optPareto(next, exact);
+    });
+    for (const s of states) {
+      const S = levels(s.vec);
+      if (!allowed(S)) continue;
+      const p = successChance(challenges, S);
+      if (!best || p > best.chance + 1e-12
+          || (Math.abs(p - best.chance) <= 1e-12 && s.changes < best.changes)) {
+        best = { chance: p, changes: s.changes, picks: s.picks, levels: S };
+      }
+    }
+    if (best && approx) best.approx = true;
+    return best;
+  }
+
+  // --- the game's own API ------------------------------------------------
+  //
+  // The page's React app draws everything from JSON on api.fallenlondon.com,
+  // sending `Authorization: Bearer <token>`. The token is in
+  // `localStorage.access_token` (possibly stored with quotes). VERIFIED with a
+  // read-only `GET /api/outfit` (2026-09-26); the endpoints and shapes are in
+  // okf/fallen-london/api.md. The token goes to that host and nowhere else, is
+  // never logged, and never appears in an error message.
+
+  const FL_API = 'https://api.fallenlondon.com';
+
+  function flToken() {
+    try {
+      return String(localStorage.getItem('access_token') || '').replace(/^"|"$/g, '');
+    } catch (e) {
+      return '';
+    }
+  }
+
+  // kind: 'auth' (not signed in, or refused), 'http' (any other bad status),
+  // 'network' (nothing came back).
+  function flFail(kind, status, text) {
+    const e = new Error(text);
+    e.kind = kind;
+    e.status = status || 0;
+    return e;
+  }
+
+  function flApi(method, path, body) {
+    const token = flToken();
+    if (!token) return Promise.reject(flFail('auth', 0, 'Not signed in.'));
+    const init = { method: method, headers: { Authorization: 'Bearer ' + token } };
+    if (body !== undefined) {
+      init.headers['Content-Type'] = 'application/json';
+      init.body = JSON.stringify(body);
+    }
+    return fetch(FL_API + path, init).then(function (res) {
+      if (res.status === 401 || res.status === 403) {
+        throw flFail('auth', res.status, 'The game refused the request (' + res.status + ').');
+      }
+      if (!res.ok) throw flFail('http', res.status, 'The game answered ' + res.status + '.');
+      return res.json().catch(function () {
+        throw flFail('http', res.status, 'The game sent something unreadable.');
+      });
+    }, function () {
+      throw flFail('network', 0, 'Could not reach the game.');
+    });
+  }
+
+  // --- your levels, your gear, the open storylet -----------------------------
+  //
+  // From the game's replies (okf/fallen-london/equipment.md):
+  //  - `GET /api/character/myself` lists every possession. A stat has `level`
+  //    (base) and `effectiveLevel` (with the gear worn). VERIFIED in four outfit
+  //    states: effective minus base is exactly the sum of the worn items'
+  //    `enhancements` for that stat.
+  //  - `GET /api/outfit` is the only place the worn items are listed: a slot's
+  //    `qualityId` is its item, and none means empty.
+  //  - An item's `category` is its slot's name without spaces, except that
+  //    the Spouse slot takes ConstantCompanion.
+
+  const SLOT_CATEGORY = { Spouse: 'ConstantCompanion' };
+
+  function slotCategory(name) {
+    return SLOT_CATEGORY[name] || String(name).replace(/\s+/g, '');
+  }
+
+  function flItems(myself) {
+    const out = [];
+    ((myself && myself.possessions) || []).forEach(function (group) {
+      (group.possessions || []).forEach(function (p) { out.push(p); });
+    });
+    return out;
+  }
+
+  function bonusOf(item) {
+    const bonus = {};
+    (item.enhancements || []).forEach(function (e) {
+      const key = normalizeName(e.qualityName);
+      bonus[key] = (bonus[key] || 0) + e.level;
+    });
+    return bonus;
+  }
+
+  // The slots the optimizer may work on: changeable, not a temporary effect,
+  // and either holding something or having something you own to put in. An
+  // EMPTY slot is offered with "nothing" as its worn choice (id null), so it
+  // may be filled and may also stay empty. A slot that holds an item is never
+  // emptied by the optimizer, only swapped: emptying loses everything the item
+  // does besides the challenge stats.
+  const NOTHING = 'nothing';
+
+  function gearFrom(outfit, myself) {
+    const equippable = flItems(myself).filter(function (p) { return p.equippable; });
+    const slots = [];
+    ((outfit && outfit.slots) || []).forEach(function (s) {
+      if (!s.canChange || s.isEffect) return;
+      const items = equippable.filter(function (p) { return p.category === slotCategory(s.name); });
+      const empty = s.qualityId == null;
+      if (empty && !items.length) return;
+      // A worn item the possessions do not list cannot be swapped safely.
+      if (!empty && !items.some(function (p) { return p.id === s.qualityId; })) return;
+      const choices = items.map(function (p) {
+        return { id: p.id, name: p.name, equipped: p.id === s.qualityId, bonus: bonusOf(p) };
+      });
+      if (empty) choices.unshift({ id: null, name: NOTHING, equipped: true, bonus: {} });
+      slots.push({ name: s.name, items: choices });
+    });
+    return { slots: slots };
+  }
+
+  // Effective level of a stat, or null when you have none of it.
+  function levelOf(myself, stat) {
+    const p = flItems(myself).filter(function (q) {
+      return !q.equippable && normalizeName(q.name) === stat;
+    })[0];
+    return p ? p.effectiveLevel : null;
+  }
+
+  // The level WITHOUT the worn gear in `slots`: what any outfit is added to.
+  function baseFor(myself, slots, stat) {
+    let level = levelOf(myself, stat);
+    if (level == null) return null;
+    slots.forEach(function (slot) {
+      slot.items.forEach(function (it) {
+        if (it.equipped) level -= it.bonus[stat] || 0;
+      });
+    });
+    return level;
+  }
+
+  function branchFrom(storylet, branchId) {
+    const list = (storylet && storylet.storylet && storylet.storylet.childBranches) || [];
+    return list.filter(function (b) { return String(b.id) === String(branchId); })[0] || null;
+  }
+
+  // Requirements that are met now and sit on a stat gear can change need
+  // guarding, or an outfit chosen for its challenges could lock the action.
+  // Wordings are verbatim from the capture: "(you needed 30-70)", "(you needed
+  // 70)", "(you needed 50 at most)", "(you needed exactly 0)". One with no
+  // number ("by not having any") pins the stat where it is. One you do not
+  // meet ("You need X 50") is not guarded: unlocking by gear is not attempted.
+  function requirementsFor(branch, slots, myself) {
+    const touched = {};
+    slots.forEach(function (slot) {
+      slot.items.forEach(function (it) {
+        Object.keys(it.bonus).forEach(function (k) { touched[k] = true; });
+      });
+    });
+    const out = [];
+    ((branch && branch.qualityRequirements) || []).forEach(function (r) {
+      const stat = normalizeName(r.qualityName);
+      if (r.status !== 'Unlocked' || !touched[stat]) return;
+      const text = String(r.tooltip || '').replace(/<[^>]+>/g, '');
+      const needed = /needed\s+([^)]*)\)/.exec(text);
+      const spec = needed ? needed[1] : '';
+      let m;
+      if ((m = /^exactly\s+(\d+)/.exec(spec))) {
+        out.push({ stat: stat, min: Number(m[1]), max: Number(m[1]) });
+      } else if ((m = /^(\d+)\s+at most/.exec(spec))) {
+        out.push({ stat: stat, max: Number(m[1]) });
+      } else if ((m = /^(\d+)\s*[-–]\s*(\d+)/.exec(spec))) {
+        out.push({ stat: stat, min: Number(m[1]), max: Number(m[2]) });
+      } else if ((m = /^(\d+)/.exec(spec))) {
+        out.push({ stat: stat, min: Number(m[1]) });
+      } else {
+        const now = levelOf(myself, stat);
+        if (now != null) out.push({ stat: stat, min: now, max: now });
+      }
+    });
+    return out;
+  }
+
+  // The number the API and the page both call the branch: `data-branch-id`.
+  function branchIdOf(branchEl) {
+    return (branchEl && branchEl.getAttribute && branchEl.getAttribute('data-branch-id')) || '';
+  }
+
+  // --- planning one action -------------------------------------------------
+
+  // What to do for one branch, from the four replies. Never touches the page
+  // or the game. Returns
+  //   { status: 'blocked', reason }   reason: no-branch, no-challenge, combined,
+  //                                   cannot-change, not-in-storylet, no-level,
+  //                                   no-outfit
+  //   { status: 'already', chance }
+  //   { status: 'change', before, after, swaps, challenges, predicted, approx }
+  // A swap is { slot, from: { id, name }, to: { id, name } }; an id of null is
+  // an empty slot ("nothing"), so filling one has `from.id === null`.
+  function planFor(branch, storylet, outfit, myself) {
+    const blocked = function (reason) { return { status: 'blocked', reason: reason }; };
+    if (!branch) return blocked('no-branch');
+    if (!(branch.challenges || []).length) return blocked('no-challenge');
+    if (storylet && storylet.canChangeOutfit === false) return blocked('cannot-change');
+    if (!storylet || storylet.phase !== 'In') return blocked('not-in-storylet');
+
+    const gear = gearFrom(outfit, myself);
+    const challenges = [];
+    const holds = [];
+    const names = [];
+    for (const ch of branch.challenges) {
+      const level = levelOf(myself, normalizeName(ch.name));
+      const fixed = Number(ch.targetNumber) >= 100 || Number(ch.targetNumber) <= 10;
+      if (level == null && !fixed && !(ch.bonuses && ch.bonuses.length)) return blocked('no-level');
+      const c = inferChallenge(ch, level);
+      if (!c) return blocked('combined');
+      if (c.hold) {
+        // A level we cannot read cannot be held.
+        if (level != null) holds.push(c.hold);
+        delete c.hold;
+      }
+      challenges.push(c);
+      names.push(ch.name);
+    }
+
+    const requirements = holds.concat(requirementsFor(branch, gear.slots, myself));
+    const base = {};
+    challenges.forEach(function (c) { (c.terms || []).forEach(function (t) { base[t.stat] = baseFor(myself, gear.slots, t.stat); }); });
+    requirements.forEach(function (r) {
+      if (!(r.stat in base)) base[r.stat] = baseFor(myself, gear.slots, r.stat) || 0;
+    });
+
+    const best = optimizeOutfit(gear.slots, base, challenges, requirements);
+    if (!best) return blocked('no-outfit');
+    const wornLevels = {};
+    Object.keys(base).forEach(function (st) {
+      wornLevels[st] = base[st] + gear.slots.reduce(function (n, slot) {
+        return n + slot.items.filter(function (it) { return it.equipped; })
+          .reduce(function (m, it) { return m + (it.bonus[st] || 0); }, 0);
+      }, 0);
+    });
+    const before = successChance(challenges, wornLevels);
+    if (best.changes === 0 || best.chance <= before + 1e-9) {
+      return { status: 'already', chance: before };
+    }
+
+    const swaps = [];
+    gear.slots.forEach(function (slot, i) {
+      const to = slot.items.filter(function (it) { return it.id === best.picks[i]; })[0];
+      const from = slot.items.filter(function (it) { return it.equipped; })[0];
+      if (to.id !== from.id) {
+        swaps.push({ slot: slot.name, from: { id: from.id, name: from.name }, to: { id: to.id, name: to.name } });
+      }
+    });
+    const predicted = challenges.map(function (c, i) {
+      const p = c.fixed != null ? c.fixed : challengeChance(c.kind, c.diff, c.terms.reduce(function (n, t) {
+        return n + t.weight * (best.levels[t.stat] || 0);
+      }, 0));
+      return { name: names[i], shown: Math.floor(p * 100 + 1e-9) };
+    });
+    return {
+      status: 'change', before: before, after: best.chance, swaps: swaps,
+      challenges: challenges, predicted: predicted, approx: !!best.approx,
+    };
+  }
+
+  // --- applying an outfit, undoing it --------------------------------------
+
+  // One call per swap, in order, one at a time, and no retry. Putting an item
+  // in is `POST /api/outfit/equip {qualityId: item}`; taking one out (a swap
+  // to id null) is `POST /api/outfit/unequip {qualityId: the item worn}` --
+  // both verified in captures. A swap counts only if the game says
+  // `isSuccess` AND its reply shows the slot as wanted: the reply is the new
+  // outfit, so this is checked, not assumed. The first failure stops the run,
+  // so nothing is changed after a slot that did not change.
+  // `call(method, path, body)` is `flApi` (injected for tests).
+  async function applySwaps(swaps, call) {
+    const done = [];
+    for (const swap of swaps) {
+      const emptying = swap.to.id == null;
+      let out;
+      try {
+        out = emptying
+          ? await call('POST', '/api/outfit/unequip', { qualityId: swap.from.id })
+          : await call('POST', '/api/outfit/equip', { qualityId: swap.to.id });
+      } catch (e) {
+        return { done: done, failed: swap, error: e };
+      }
+      const slot = ((out && out.slots) || []).filter(function (s) { return s.name === swap.slot; })[0];
+      const now = slot ? slot.qualityId : undefined;
+      const right = emptying ? now == null : now === swap.to.id;
+      if (!out || out.isSuccess !== true || !right) return { done: done, failed: swap };
+      done.push(swap);
+    }
+    return { done: done, failed: null };
+  }
+
+  // What each changed slot held (id null: nothing), and what is in it now, so
+  // it can be put back -- and, for a slot that was filled, taken out again,
+  // which needs the id of the item now worn.
+  function undoFor(swaps, branchId) {
+    return {
+      branchId: branchId,
+      restore: swaps.map(function (s) {
+        return { slot: s.slot, id: s.from.id, name: s.from.name, was: s.to.id, wasName: s.to.name };
+      }),
+    };
+  }
+
+  function undoSwaps(rec) {
+    return rec.restore.map(function (r) {
+      return { slot: r.slot, from: { id: r.was, name: r.wasName }, to: { id: r.id, name: r.name } };
+    });
+  }
+
+  // The undo record and the result line survive the reload the run ends with,
+  // in sessionStorage, and go stale after half an hour.
+  const EQUIP_UNDO_KEY = 'fl-ux-equip-undo';
+  const EQUIP_RESULT_KEY = 'fl-ux-equip-result';
+  const EQUIP_KEEP_MS = 30 * 60 * 1000;
+
+  function keepRecord(key, rec) {
+    try {
+      sessionStorage.setItem(key, JSON.stringify(Object.assign({ at: Date.now() }, rec)));
+    } catch (e) { /* private mode: the note just won't survive the reload */ }
+  }
+
+  function readRecord(key) {
+    try {
+      const rec = JSON.parse(sessionStorage.getItem(key) || 'null');
+      if (!rec || typeof rec !== 'object') return null;
+      if (Date.now() - (rec.at || 0) > EQUIP_KEEP_MS) {
+        sessionStorage.removeItem(key);
+        return null;
+      }
+      return rec;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function dropRecord(key) {
+    try { sessionStorage.removeItem(key); } catch (e) { /* nothing to do */ }
+  }
+
+  function saveUndo(rec) { keepRecord(EQUIP_UNDO_KEY, rec); }
+  function readUndo() { return readRecord(EQUIP_UNDO_KEY); }
+  function clearUndo() { dropRecord(EQUIP_UNDO_KEY); }
+  function saveResult(rec) { keepRecord(EQUIP_RESULT_KEY, rec); }
+  function readResult() { return readRecord(EQUIP_RESULT_KEY); }
+  function clearResult() { dropRecord(EQUIP_RESULT_KEY); }
+
+  // --- the button ------------------------------------------------------------
+  //
+  // One "Optimize equipment" button in each branch that has a `.challenges`
+  // block, beside the action's own buttons. The markup, from a real branch
+  // (2026-09-26): `.branch[data-branch-id]` > `.branch__body` > `.challenges` >
+  // `.challenge`, and `.storylet__buttons` holding the Go / Unlock buttons.
+  // The branch id is the same number the API calls the branch.
+  //
+  // A click reads your levels, your outfit and this storylet from the API, plans
+  // (planFor), equips the swaps (applySwaps), re-reads the storylet to compare
+  // what the game now shows with what was predicted, saves the result line and
+  // reloads, because an equip made through the API does not redraw the page.
+  // The line then appears under the same branch, with an Undo.
+
+  const EO_CLASS = 'fl-ux-eo';
+  const EO_LINE = 'fl-ux-eo-line';
+  let eoBusy = false;
+
+  const EO_BLOCKED = {
+    'no-challenge': 'This action has no challenge to optimize.',
+    'no-branch': 'This action is not on screen any more. Reload the page and try again.',
+    'combined': 'This challenge combines several stats, which is not supported yet.',
+    'cannot-change': 'The game does not let you change your outfit here.',
+    'not-in-storylet': 'Open the action list first.',
+    'no-level': 'Could not read your level in a stat this challenge tests.',
+    'no-outfit': 'No outfit meets this action’s requirements.',
+  };
+
+  function eoFailText(e) {
+    if (e && e.kind === 'auth') {
+      return e.status ? 'The game refused the request. Sign in again, then try again.'
+        : 'Sign in first, then try again.';
+    }
+    if (e && e.kind === 'network') return 'Could not reach the game.';
+    if (e && e.kind === 'http') return e.message + ' Try again in a moment.';
+    return 'Something went wrong.';
+  }
+
+  function eoPct(p) {
+    return (p * 100).toFixed(1) + '%';
+  }
+
+  // What the game shows for a whole action: the shown percentages multiplied.
+  function eoShown(branch) {
+    return (branch.challenges || []).reduce(function (p, c) { return p * (Number(c.targetNumber) / 100); }, 1);
+  }
+
+  // The change in words AND shapes, so no colour has to carry it.
+  function eoChanceLine(before, after) {
+    const d = Math.round((after - before) * 1000) / 10;
+    const mark = d > 0 ? '▲ +' + d.toFixed(1) + ', better'
+      : d < 0 ? '▼ −' + Math.abs(d).toFixed(1) + ', worse' : '= same';
+    return 'Chance ' + eoPct(before) + ' → ' + eoPct(after) + '  ' + mark + '.';
+  }
+
+  function eoSwapLine(swap) {
+    return swap.slot + ': ' + swap.from.name + ' → ' + swap.to.name + '.';
+  }
+
+  function eoNotes(branch) {
+    const notes = [];
+    if ((branch.challenges || []).some(function (c) { return c.secondChanceId > 0; })) {
+      notes.push('A second chance is not counted.');
+    }
+    return notes;
+  }
+
+  // The whole run for one branch. Returns { lines, reload?, undoable? } and
+  // touches nothing on the page. `call` is `flApi`.
+  async function runOptimize(branchId, call) {
+    let myself;
+    let outfit;
+    let storylet;
+    try {
+      // One at a time, as the game itself does.
+      myself = await call('GET', '/api/character/myself');
+      outfit = await call('GET', '/api/outfit');
+      storylet = await call('POST', '/api/storylet');
+    } catch (e) {
+      return { lines: [eoFailText(e)] };
+    }
+    const branch = branchFrom(storylet, branchId);
+    const plan = planFor(branch, storylet, outfit, myself);
+    if (plan.status === 'blocked') {
+      return { lines: [EO_BLOCKED[plan.reason] || 'Cannot optimize this action.'] };
+    }
+    if (plan.status === 'already') {
+      return { lines: ['Already the best outfit: ' + eoPct(eoShown(branch)) + '.'].concat(eoNotes(branch)) };
+    }
+
+    // Kept BEFORE the first equip, in case the page dies mid-run; rewritten
+    // below for what actually changed.
+    saveUndo(undoFor(plan.swaps, branchId));
+    const run = await applySwaps(plan.swaps, call);
+    if (run.done.length) saveUndo(undoFor(run.done, branchId));
+    else clearUndo();
+
+    if (run.failed) {
+      const why = run.error ? ' ' + eoFailText(run.error) : '';
+      const lines = ['Could not equip ' + run.failed.to.name + ' in ' + run.failed.slot + '.' + why
+        + (run.done.length
+          ? ' ' + run.done.length + ' of ' + plan.swaps.length + ' changes were made.'
+          : ' Nothing was changed.')];
+      return { lines: lines.concat(run.done.map(eoSwapLine)), reload: run.done.length > 0, undoable: run.done.length > 0 };
+    }
+
+    // The game's own figures decide whether it worked.
+    let after = null;
+    try {
+      after = branchFrom(await call('POST', '/api/storylet'), branchId);
+    } catch (e) { /* the line falls back to the prediction, and says so */ }
+    const lines = [];
+    if (after && (after.challenges || []).length === plan.predicted.length) {
+      lines.push(eoChanceLine(eoShown(branch), eoShown(after)));
+      lines.push.apply(lines, plan.swaps.map(eoSwapLine));
+      const off = plan.predicted.map(function (p, i) {
+        return { name: p.name, predicted: p.shown, shown: Number(after.challenges[i].targetNumber) };
+      }).filter(function (x) { return Math.abs(x.predicted - x.shown) > 1; });
+      if (off.length) {
+        lines.push('Predicted ' + off.map(function (x) { return x.predicted + '% for ' + x.name; }).join(', ')
+          + ', but the game shows ' + off.map(function (x) { return x.shown + '%'; }).join(', ')
+          + '. Undo it if it looks wrong.');
+      }
+    } else {
+      lines.push(eoChanceLine(plan.before, plan.after).replace(/\.$/, ' (predicted; the game could not be re-read).'));
+      lines.push.apply(lines, plan.swaps.map(eoSwapLine));
+    }
+    return { lines: lines.concat(eoNotes(branch)), reload: true, undoable: true };
+  }
+
+  // Puts the saved outfit back. Only what actually changed is in the record.
+  async function runUndo(call) {
+    const rec = readUndo();
+    if (!rec) return { lines: ['Nothing to undo.'] };
+    const run = await applySwaps(undoSwaps(rec), call);
+    if (run.failed) {
+      const left = rec.restore.filter(function (r) {
+        return !run.done.some(function (d) { return d.slot === r.slot; });
+      });
+      saveUndo({ branchId: rec.branchId, restore: left });
+      const why = run.error ? ' ' + eoFailText(run.error) : '';
+      return {
+        lines: ['Could not put ' + run.failed.to.name + ' back in ' + run.failed.slot + '.' + why],
+        reload: run.done.length > 0, undoable: true,
+      };
+    }
+    clearUndo();
+    return { lines: ['Restored your previous outfit.'], reload: true, undoable: false };
+  }
+
+  function eoDraw(wrap, branchId, lines, undoable) {
+    const line = wrap.querySelector('.' + EO_LINE);
+    for (const child of Array.from(line.children)) child.remove();
+    (lines || []).forEach(function (text) {
+      line.appendChild(h('div', { textContent: text }));
+    });
+    if (undoable) {
+      line.appendChild(h('button', {
+        type: 'button', className: 'fl-ux-eo-undo', textContent: 'Undo',
+        css: eoButtonCss(),
+        on: { click: function (e) { e.preventDefault(); e.stopPropagation(); eoRun(wrap, branchId, true); } },
+      }));
+    }
+  }
+
+  function eoButtonCss() {
+    return 'min-height:44px;margin:6px 8px 0 0;padding:0 14px;cursor:pointer;'
+      + 'background:' + UI.bgAlt + ';color:' + UI.text + ';border:1px solid ' + UI.accent + ';'
+      + 'border-radius:3px;font:600 14px ' + UI.font + ';touch-action:manipulation;';
+  }
+
+  // A click on either button. One run at a time, page-wide.
+  async function eoRun(wrap, branchId, undo) {
+    if (eoBusy) return;
+    eoBusy = true;
+    const button = wrap.querySelector('.fl-ux-eo-run');
+    const label = button.textContent;
+    button.textContent = 'Optimizing…';
+    clearResult();
+    eoDraw(wrap, branchId, [], false);
+    let out;
+    try {
+      out = undo ? await runUndo(flApi) : await runOptimize(branchId, flApi);
+    } catch (e) {
+      out = { lines: [eoFailText(e)] };
+    }
+    eoBusy = false;
+    button.textContent = label;
+    if (out.reload) {
+      saveResult({ branchId: branchId, lines: out.lines, undoable: !!out.undoable });
+      location.reload();
+      return;
+    }
+    eoDraw(wrap, branchId, out.lines, false);
+  }
+
+  function eoBuild(branchEl) {
+    const branchId = branchIdOf(branchEl);
+    const wrap = h('div', { className: EO_CLASS, css: 'flex:1 0 100%;width:100%;margin-top:8px;' }, [
+      h('button', {
+        type: 'button', className: 'fl-ux-eo-run', textContent: 'Optimize equipment',
+        title: 'Equips the outfit that gives the best chance of passing this action’s challenges.',
+        css: eoButtonCss(),
+        on: { click: function (e) { e.preventDefault(); e.stopPropagation(); eoRun(wrap, branchId, false); } },
+      }),
+      h('div', { className: EO_LINE, css: 'margin-top:6px;color:' + UI.text + ';font:14px/1.5 ' + UI.font + ';' }),
+    ]);
+    const target = branchEl.querySelector('.storylet__buttons') || branchEl.querySelector('.branch__body') || branchEl;
+    target.appendChild(wrap);
+    return wrap;
+  }
+
+  function equipmentOptimizer() {
+    const stored = readResult();
+    document.querySelectorAll('.branch').forEach(function (branchEl) {
+      if (!branchEl.querySelector('.challenges')) return;
+      const wrap = branchEl.querySelector('.' + EO_CLASS) || eoBuild(branchEl);
+      // A result belongs to the branch it was made for, and is drawn once.
+      const mine = stored && String(stored.branchId) === branchIdOf(branchEl);
+      const key = mine ? String(stored.at) : '';
+      if ((wrap.dataset.flUxEoShown || '') === key) return;
+      wrap.dataset.flUxEoShown = key;
+      if (mine) eoDraw(wrap, branchIdOf(branchEl), stored.lines, !!stored.undoable);
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -2914,6 +3693,9 @@
     // Possessions: stars the best item per slot for the "Show:" stat, and
     // adds BDR to that filter.
     { name: 'equipment-helper', run: equipmentHelper },
+    // Every action with a challenge: an "Optimize equipment" button that equips
+    // the outfit giving the best chance, through the game's own API.
+    { name: 'equipment-optimizer', run: equipmentOptimizer },
   ];
 
   // === dispatch ==========================================================

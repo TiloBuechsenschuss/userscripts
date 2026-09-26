@@ -25,6 +25,27 @@ Each `.js` file is the shippable artifact: a single self-contained IIFE prefixed
 reloads it in their userscript manager. "Running" a script means installing it in a
 userscript manager and loading the matching game page — it cannot be exercised from this repo.
 
+## Knowledge files (`okf/`)
+
+Facts about how a game behaves that took a capture to establish are written down in **OKF**
+(open knowledge format) files, under `okf/<game>/`, not only in code comments. Currently
+`okf/fallen-london/`: `index.md` (start here), `api.md` (the game's web API: base URL, the
+bearer token, every endpoint seen and its reply shapes), `challenges.md` (broad and narrow
+chances, the 10% floor and 100% cap, how to infer what the game does not send),
+`equipment.md` (slots, item bonuses, effective versus base level, equipping) and
+`open-questions.md` (what has not been captured).
+
+The format is structured markdown: a front-matter block (`okf: 1`, `title`, `kind`,
+`status`, `verified` or `updated`, `see_also`), one topic per file, tables for shapes, and
+every claim labelled **verified** (say against what), **assumed**, or **unknown**. Unknown
+things live only in `open-questions.md`.
+
+How to use them: read the matching file before writing code against the game's API or its
+numbers; when a capture settles a question, move the fact into the right file and delete
+the open question; when code depends on an assumption, keep it labelled *assumed* there and
+check it at run time in the script. Never put a login token, a character name or other
+personal data in them, and do not commit raw captures.
+
 ## Distribution model (important)
 
 Each script carries a `@downloadURL` pointing at its own raw GitHub path on `main`, e.g.
@@ -2998,6 +3019,53 @@ navigation. Two consequences:
   Idempotency is the usual flag: `markItem`'s dataset key carries stat, item id and figure, since
   React re-renders the list into the same nodes, and the summary and the BDR label only write
   when their text or place has actually changed.
+- **`equipment-optimizer`** (added 2026-09-26, `ux-enhancers.js` 3.4) puts an **"Optimize equipment"**
+  button in every `.branch` that has a `.challenges` block, inside `.storylet__buttons`. Unlike the
+  Possessions-tab helper above it **does equip**, and it does so through **the game's own API**, not
+  by clicking: the HTML routes are an empty shell, but `api.fallenlondon.com` answers a script on
+  the page when sent `Authorization: Bearer <token>` (the token is `localStorage.access_token`, maybe
+  quoted). Every endpoint, reply shape and verified fact is in `okf/fallen-london/` (`api.md`,
+  `challenges.md`, `equipment.md`); read those before touching it. In short:
+  - **A click**: `GET /api/character/myself`, `GET /api/outfit` (the only place the *worn* items are
+    listed), `POST /api/storylet` (the open storylet; read-only) — one at a time — then `planFor`,
+    then one `POST /api/outfit/equip {qualityId}` per changed slot, then `POST /api/storylet` again
+    to compare what the game now shows with what was predicted, then a **reload** (an API equip does
+    not redraw the page). The result line survives the reload in `sessionStorage`
+    (`fl-ux-equip-result`, and `fl-ux-equip-undo` for the Undo), is drawn under the branch with the
+    same `data-branch-id`, and goes stale after 30 minutes.
+  - **`targetNumber` is the percentage the game shows (floored), not a difficulty**; no difficulty and
+    no broad/narrow flag is sent. `inferChallenge` solves the difficulty from it and your level: a
+    `BasicAbility` challenge is **broad** (`0.6 × level / difficulty`), a `Skills` one **narrow**
+    (`0.6 + 0.1 × (level − difficulty)`), a percentage that is not a multiple of ten is always broad;
+    both clamp to 10%–100%. A challenge shown at 10% or 100% hides its headroom, so it is **fixed**,
+    and a 100% one **holds its stat** at today's level. Checked against real outfit changes (Persuasive
+    270→200: 90%→66%; Mithridacy 1→3: 60%→80%). **The kind rule is a working guess for other
+    categories**: the post-run comparison ("Predicted X%, the game shows Y%") is what catches it.
+  - **Base level** is `effectiveLevel` minus the bonuses of the worn items in the slots being
+    optimised (verified: effective minus base is exactly the worn items' `enhancements`).
+  - **`optimizeOutfit` is exact**: it keeps every partial outfit not beaten on every stat *and* on
+    slots changed, then takes the highest chance and, among equals, the fewest changes (so a tie never
+    shuffles your gear). It was checked against an exhaustive search on 600 random wardrobes. A stat
+    with an upper limit (a met `(you needed 30-70)` requirement) is compared for equality, because a
+    higher level there is not better. `OPT_STATE_CAP` (4000) guards a pathological wardrobe and marks
+    the answer `approx`; real gear never reaches it.
+  - **Empty slots and unequipping.** An empty changeable slot you own items for is offered with
+    "nothing" (id `null`) as its worn choice, so it is filled when an item helps and left empty when
+    none does. Filling is `POST /api/outfit/equip`; emptying is `POST /api/outfit/unequip` with the
+    id of the item worn (both verified). Undo of a fill is therefore an unequip, which is why the undo
+    record keeps `was`/`wasName` beside `id`/`name`.
+  - **What it will not do**, on purpose: empty a slot that holds something (only swap it; emptying
+    loses everything else the item does), touch a slot the game marks `canChange: false`, model a
+    challenge with a non-empty `bonuses` (stats added together: refused), count a second chance, or
+    unlock a locked action. It guards a *met* requirement on a stat gear can change, and refuses when
+    `canChangeOutfit` is false. **Known limit:** it scores only the stats the challenges test, so an
+    item with a small gain there and a big penalty elsewhere (say +2 Dangerous, -300 Watchful) can be
+    chosen. Nothing guards other stats yet.
+  - **The token** is sent to `api.fallenlondon.com` only and never logged or put in a message.
+  - `tests/ux-equipment-optimizer.test.mjs` pins all of it with values from the capture. The open
+    questions (unequip, combined stats, second chances, other challenge categories) are in
+    `okf/fallen-london/open-questions.md`; settle one there before relying on it here. **Not yet
+    tested in-game by the author.**
 - **Refreshing the Factions panel: `fetch` does not work, and that is settled.** Fallen London is
   client-rendered — `GET /myself` returns a ~4.7KB shell whose `#root` holds a loading splash and
   no quality list (checked against the live site, not assumed). So `refreshBackgroundState()` uses a
