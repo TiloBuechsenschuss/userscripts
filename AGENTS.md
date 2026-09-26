@@ -3028,9 +3028,20 @@ navigation. Two consequences:
   `challenges.md`, `equipment.md`); read those before touching it. In short:
   - **A click**: `GET /api/character/myself`, `GET /api/outfit` (the only place the *worn* items are
     listed), `POST /api/storylet` (the open storylet; read-only) — one at a time — then `planFor`,
-    then one `POST /api/outfit/equip {qualityId}` per changed slot, then `POST /api/storylet` again
-    to compare what the game now shows with what was predicted, then a **reload** (an API equip does
-    not redraw the page). The result line survives the reload in `sessionStorage`
+    then the swaps, then `POST /api/storylet` again to compare what the game now shows with what was
+    predicted. **The swaps go through the page, not the API, when they can** (added 2026-09-26, on
+    the report that a full reload took several seconds): `applyOutfit` clicks the game's own
+    `a[href="/possessions"]` router link (the one `openItem` uses), clicks the spare in the drawer
+    (`.icon--available-item[data-quality-id]`, its `[role="button"]`) to equip or the worn
+    `.equipped-item[data-quality-id]` to empty a slot, waits for the item to appear or go, and
+    returns with `history.back()`; the Story tab refetches on arrival (`GET /api/opportunity`,
+    `POST /api/storylet` in the capture). The GAME made the change, so its own state (Possessions,
+    sidebar) stays consistent, which an API equip does not do. If a step will not go that way (no
+    link, the item not on the list because a "Show:" filter hides it, a click the game ignores) the
+    rest is made through `POST /api/outfit/equip`/`unequip` and the page **reloads**, as it used to.
+    The DOM route is verified only against the markup the equipment helper reads; it has not been
+    tried in-game. The result line survives a reload (and the trip through Possessions, which
+    replaces the button) in `sessionStorage`
     (`fl-ux-equip-result`, and `fl-ux-equip-undo` for the Undo), is drawn under the branch with the
     same `data-branch-id`, and goes stale after 30 minutes.
   - **`targetNumber` is the percentage the game shows (floored), not a difficulty**; no difficulty and
@@ -3061,6 +3072,10 @@ navigation. Two consequences:
     `canChangeOutfit` is false. **Known limit:** it scores only the stats the challenges test, so an
     item with a small gain there and a big penalty elsewhere (say +2 Dangerous, -300 Watchful) can be
     chosen. Nothing guards other stats yet.
+  - **Legibility.** The result panel brings its own background and ink (`EO_PANEL_CSS`, from `UI`), and
+    every line repeats the ink, so it reads the same on a white action as on a dark one (reported
+    2026-09-26: light text on white was barely readable). It is hidden while empty. The test checks a
+    WCAG contrast of at least 7 between the two, not merely that they differ.
   - **The token** is sent to `api.fallenlondon.com` only and never logged or put in a message.
   - `tests/ux-equipment-optimizer.test.mjs` pins all of it with values from the capture. The open
     questions (unequip, combined stats, second chances, other challenge categories) are in

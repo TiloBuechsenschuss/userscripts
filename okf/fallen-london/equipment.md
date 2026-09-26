@@ -92,8 +92,11 @@ ToolOfTheTrade, Adornment, Luggage, Crew.
   `maxOutfits` was 4.
 - `canChangeOutfit` (on `character`, on `character.setting` and on the storylet reply)
   says whether the game allows it now.
-- **Assumed:** after an equip made through the API the page keeps showing the
-  old figures until it redraws. A reload is the way to redraw. Verified by hand
-  (F5 during a storylet): the same storylet returns, and its percentages match
-  the current outfit. Not yet verified: that a reload right after an API equip
-  shows the new figures.
+- **Assumed:** after an equip made through the API the game's own copy of your
+  character (Possessions, sidebar) stays as it was until something refetches it,
+  because the page only refreshes what it changed itself. Two ways to get a
+  consistent page: reload it (F5 during a storylet returns the same storylet,
+  verified by hand), or make the change through the game's own screens (click
+  the items on the Possessions tab, then go back: the Story tab refetches
+  `GET /api/opportunity` and `POST /api/storylet` on arrival, seen in the
+  capture). Neither route has been tried after an API equip.

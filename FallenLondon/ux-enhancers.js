@@ -53,7 +53,9 @@
  * Beside every action that has challenges there is an "Optimize equipment" button. It reads your levels,
  *   your outfit and the open storylet from the game's own API, works out which outfit gives the best
  *   chance of passing all the challenges (fewest changes on a tie, and never breaking a requirement
- *   you meet now), equips it, and reloads so the game redraws. The line under the button gives the
+ *   you meet now), and equips it by clicking through the game's own Possessions tab and back, so
+ *   the Story tab refreshes without a page reload (if that cannot be done it uses the API and
+ *   reloads). The line under the button gives the
  *   chance before and after -- as the game itself shows it -- what changed, and an Undo. It fills an empty slot when an
  *   item helps, but never empties a slot that holds something, leaves locked slots alone, and
  *   refuses a challenge that combines stats.
@@ -3454,6 +3456,99 @@
   function readResult() { return readRecord(EQUIP_RESULT_KEY); }
   function clearResult() { dropRecord(EQUIP_RESULT_KEY); }
 
+  // --- changing outfit through the page ---------------------------------------
+  //
+  // A full reload after every run took several seconds (reported 2026-09-26).
+  // Instead the run goes to the Possessions tab with the game's OWN router link
+  // (the one `openItem` uses), clicks the items as you would -- a spare in the
+  // drawer equips it, the worn item empties its slot -- and goes back with
+  // `history.back()`. The Story tab refetches the storylet on arrival (seen in
+  // the capture: `GET /api/opportunity`, `POST /api/storylet`), and the game's
+  // own state stays consistent because the GAME made the change. An equip made
+  // through the API leaves that state stale, which is why the reload existed.
+  // If any step will not go that way -- no link to click, the item not on the
+  // list (a "Show:" filter can hide it), a click the game ignores -- the
+  // remaining swaps are made through the API and the page reloads, as before.
+
+  const EO_TIMING = { pageMs: 8000, itemMs: 5000, backMs: 10000 };
+
+  function eoWait(cond, ms) {
+    return new Promise(function (resolve) {
+      const t0 = Date.now();
+      (function poll() {
+        let ok = false;
+        try { ok = !!cond(); } catch (e) { ok = false; }
+        if (ok) return resolve(true);
+        if (Date.now() - t0 >= ms) return resolve(false);
+        setTimeout(poll, 40);
+      })();
+    });
+  }
+
+  // The page, as far as the run needs it; a stand-in is injected in tests.
+  function eoSoftIo() {
+    return {
+      goToPossessions: async function () {
+        const link = document.querySelector('a.cursor-pointer[href="/possessions"]')
+          || document.querySelector('nav a[href="/possessions"]')
+          || document.querySelector('a[href="/possessions"]');
+        if (!link) return false;
+        link.click();
+        return eoWait(function () { return document.querySelector('.equipment-group-list'); }, EO_TIMING.pageMs);
+      },
+      spare: function (id) { return document.querySelector('.icon--available-item[data-quality-id="' + id + '"]'); },
+      worn: function (id) { return document.querySelector('.equipped-item[data-quality-id="' + id + '"]'); },
+      // The element the game made focusable is the one its handler is bound to.
+      click: function (node) { (node.querySelector('[role="button"]') || node).click(); },
+      wait: function (cond) { return eoWait(cond, EO_TIMING.itemMs); },
+      back: async function (branchId) {
+        history.back();
+        return eoWait(function () {
+          return document.querySelector('.branch[data-branch-id="' + branchId + '"]');
+        }, EO_TIMING.backMs);
+      },
+    };
+  }
+
+  // Every swap by clicking. Stops at the first one that will not go through.
+  async function applyInPage(swaps, io) {
+    const done = [];
+    if (!(await io.goToPossessions())) return { done: done, failed: swaps[0], onPage: false };
+    for (const swap of swaps) {
+      const emptying = swap.to.id == null;
+      const node = emptying ? io.worn(swap.from.id) : io.spare(swap.to.id);
+      if (!node) return { done: done, failed: swap, onPage: true };
+      io.click(node);
+      const ok = await io.wait(function () {
+        return emptying ? !io.worn(swap.from.id) : !!io.worn(swap.to.id);
+      });
+      if (!ok) return { done: done, failed: swap, onPage: true };
+      done.push(swap);
+    }
+    return { done: done, failed: null, onPage: true };
+  }
+
+  // The whole change: through the page if it will go, the API for whatever it
+  // would not. Returns { done, failed, error?, onPage, reload, backFailed }.
+  //   reload      the page is stale (the API was used) and must be reloaded;
+  //   onPage      the run left the Story tab, so the old button is gone and
+  //               the result has to be drawn after the return.
+  async function applyOutfit(swaps, call, io, branchId) {
+    if (!swaps.length) return { done: [], failed: null, onPage: false, reload: false };
+    const page = await applyInPage(swaps, io);
+    if (!page.failed) {
+      const back = await io.back(branchId);
+      return { done: page.done, failed: null, onPage: true, reload: false, backFailed: !back };
+    }
+    // Back to the story before the API takes over, so the reload lands there.
+    if (page.onPage) await io.back(branchId);
+    const viaApi = await applySwaps(swaps.slice(page.done.length), call);
+    return {
+      done: page.done.concat(viaApi.done), failed: viaApi.failed, error: viaApi.error,
+      onPage: page.onPage, reload: true,
+    };
+  }
+
   // --- the button ------------------------------------------------------------
   //
   // One "Optimize equipment" button in each branch that has a `.challenges`
@@ -3523,7 +3618,7 @@
 
   // The whole run for one branch. Returns { lines, reload?, undoable? } and
   // touches nothing on the page. `call` is `flApi`.
-  async function runOptimize(branchId, call) {
+  async function runOptimize(branchId, call, io) {
     let myself;
     let outfit;
     let storylet;
@@ -3547,7 +3642,7 @@
     // Kept BEFORE the first equip, in case the page dies mid-run; rewritten
     // below for what actually changed.
     saveUndo(undoFor(plan.swaps, branchId));
-    const run = await applySwaps(plan.swaps, call);
+    const run = await applyOutfit(plan.swaps, call, io, branchId);
     if (run.done.length) saveUndo(undoFor(run.done, branchId));
     else clearUndo();
 
@@ -3557,7 +3652,10 @@
         + (run.done.length
           ? ' ' + run.done.length + ' of ' + plan.swaps.length + ' changes were made.'
           : ' Nothing was changed.')];
-      return { lines: lines.concat(run.done.map(eoSwapLine)), reload: run.done.length > 0, undoable: run.done.length > 0 };
+      return {
+        lines: lines.concat(run.done.map(eoSwapLine)), undoable: run.done.length > 0,
+        reload: run.done.length > 0 && run.reload, persist: run.onPage || run.done.length > 0,
+      };
     }
 
     // The game's own figures decide whether it worked.
@@ -3581,14 +3679,14 @@
       lines.push(eoChanceLine(plan.before, plan.after).replace(/\.$/, ' (predicted; the game could not be re-read).'));
       lines.push.apply(lines, plan.swaps.map(eoSwapLine));
     }
-    return { lines: lines.concat(eoNotes(branch)), reload: true, undoable: true };
+    return { lines: lines.concat(eoNotes(branch)), reload: run.reload, persist: true, undoable: true };
   }
 
   // Puts the saved outfit back. Only what actually changed is in the record.
-  async function runUndo(call) {
+  async function runUndo(call, io) {
     const rec = readUndo();
     if (!rec) return { lines: ['Nothing to undo.'] };
-    const run = await applySwaps(undoSwaps(rec), call);
+    const run = await applyOutfit(undoSwaps(rec), call, io, rec.branchId);
     if (run.failed) {
       const left = rec.restore.filter(function (r) {
         return !run.done.some(function (d) { return d.slot === r.slot; });
@@ -3597,19 +3695,28 @@
       const why = run.error ? ' ' + eoFailText(run.error) : '';
       return {
         lines: ['Could not put ' + run.failed.to.name + ' back in ' + run.failed.slot + '.' + why],
-        reload: run.done.length > 0, undoable: true,
+        reload: run.done.length > 0 && run.reload, persist: run.onPage || run.done.length > 0, undoable: true,
       };
     }
     clearUndo();
-    return { lines: ['Restored your previous outfit.'], reload: true, undoable: false };
+    return { lines: ['Restored your previous outfit.'], reload: run.reload, persist: true, undoable: false };
   }
+
+  // The result panel brings its own background AND its own ink, and each line
+  // repeats the ink, so it reads the same on a white action as on a dark one
+  // (reported 2026-09-26: light text with no background was barely legible on
+  // white). It is hidden while it has nothing to say.
+  const EO_PANEL_CSS = 'margin-top:6px;padding:8px 12px;border-left:3px solid ' + UI.accent + ';'
+    + 'border-radius:3px;background:' + UI.bgAlt + ';color:' + UI.text + ';'
+    + 'font:14px/1.5 ' + UI.font + ';';
 
   function eoDraw(wrap, branchId, lines, undoable) {
     const line = wrap.querySelector('.' + EO_LINE);
     for (const child of Array.from(line.children)) child.remove();
     (lines || []).forEach(function (text) {
-      line.appendChild(h('div', { textContent: text }));
+      line.appendChild(h('div', { textContent: text, css: 'color:' + UI.text + ';' }));
     });
+    line.style.display = (lines && lines.length) ? 'block' : 'none';
     if (undoable) {
       line.appendChild(h('button', {
         type: 'button', className: 'fl-ux-eo-undo', textContent: 'Undo',
@@ -3636,15 +3743,23 @@
     eoDraw(wrap, branchId, [], false);
     let out;
     try {
-      out = undo ? await runUndo(flApi) : await runOptimize(branchId, flApi);
+      out = undo ? await runUndo(flApi, eoSoftIo()) : await runOptimize(branchId, flApi, eoSoftIo());
     } catch (e) {
       out = { lines: [eoFailText(e)] };
     }
     eoBusy = false;
     button.textContent = label;
-    if (out.reload) {
+    if (out.persist || out.reload) {
+      // The result is kept and drawn under the branch when it is on screen: a
+      // run that went through the Possessions tab has replaced the old button.
       saveResult({ branchId: branchId, lines: out.lines, undoable: !!out.undoable });
+    }
+    if (out.reload) {
       location.reload();
+      return;
+    }
+    if (out.persist) {
+      equipmentOptimizer();
       return;
     }
     eoDraw(wrap, branchId, out.lines, false);
@@ -3652,6 +3767,8 @@
 
   function eoBuild(branchEl) {
     const branchId = branchIdOf(branchEl);
+    const line = h('div', { className: EO_LINE, css: EO_PANEL_CSS });
+    line.style.display = 'none';
     const wrap = h('div', { className: EO_CLASS, css: 'flex:1 0 100%;width:100%;margin-top:8px;' }, [
       h('button', {
         type: 'button', className: 'fl-ux-eo-run', textContent: 'Optimize equipment',
@@ -3659,7 +3776,7 @@
         css: eoButtonCss(),
         on: { click: function (e) { e.preventDefault(); e.stopPropagation(); eoRun(wrap, branchId, false); } },
       }),
-      h('div', { className: EO_LINE, css: 'margin-top:6px;color:' + UI.text + ';font:14px/1.5 ' + UI.font + ';' }),
+      line,
     ]);
     const target = branchEl.querySelector('.storylet__buttons') || branchEl.querySelector('.branch__body') || branchEl;
     target.appendChild(wrap);

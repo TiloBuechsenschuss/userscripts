@@ -257,7 +257,7 @@ const add = (parent, tag, className, props) => {
 // comes back undefined, so its check fails by name rather than the file
 // crashing.
 const NAMES = [
-  'challengeChance', 'inferChallenge', 'successChance', 'optimizeOutfit',
+  'EO_TIMING', 'challengeChance', 'inferChallenge', 'successChance', 'optimizeOutfit',
   'flApi', 'flToken',
   'gearFrom', 'levelOf', 'baseFor', 'branchFrom', 'requirementsFor',
   'planFor',
@@ -270,15 +270,17 @@ const wrapped = src
   .replace(/\}\)\(\);\s*$/, 'return { ' + exposed + ' }; })();');
 
 let fetchImpl = () => Promise.reject(new Error('no fetch stub set'));
+let backHandler = () => {};
+const historyStub = { back() { backHandler(); } };
 const reloads = [];
 const location = { pathname: '/', reload() { reloads.push(1); } };
 const api = new Function(
   'document', 'MutationObserver', 'requestAnimationFrame', 'getComputedStyle', 'console',
-  'URLSearchParams', 'localStorage', 'sessionStorage', 'location', 'Event', 'fetch',
+  'URLSearchParams', 'localStorage', 'sessionStorage', 'location', 'Event', 'fetch', 'history',
   wrapped + '\nreturn globalThis.__flux;')(
   doc, class { observe() {} }, () => {}, () => ({ position: 'static', color: 'rgb(51, 51, 51)' }),
   console, URLSearchParams, storage, storage, location, class {},
-  (...args) => fetchImpl(...args));
+  (...args) => fetchImpl(...args), historyStub);
 
 // --- the chance model ------------------------------------------------------
 
@@ -1153,6 +1155,193 @@ checkAsync('when the game shows something other than predicted, the result says 
   const r = api.readResult();
   return [r.lines.join(' ').includes('Predicted'), r.undoable];
 }, [true, true]);
+
+// --- legibility on any page ------------------------------------------------
+//
+// Reported 2026-09-26: the result text was barely readable on a white action.
+// The panel now brings its own background AND ink, so nothing depends on what
+// is behind it.
+
+function rgbOf(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+function contrastOf(a, b) {
+  const lum = (hex) => {
+    const [r, g, bl] = rgbOf(hex).map((v) => {
+      const c = v / 255;
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
+  };
+  const hi = Math.max(lum(a), lum(b));
+  const lo = Math.min(lum(a), lum(b));
+  return (hi + 0.05) / (lo + 0.05);
+}
+const cssColor = (css, prop) => {
+  const m = new RegExp('(?:^|;)\\s*' + prop + ':\\s*(#[0-9a-fA-F]{6})').exec(css);
+  return m ? m[1] : null;
+};
+const drawnBranch = () => {
+  const { branches } = freshWorld();
+  api.saveResult({ branchId: 255911, lines: ['Chance 18.0% → 18.4%  ▲ +0.4, better.', 'Hat: Iron Hat → Beguiling Mask.'], undoable: true });
+  api.equipmentOptimizer();
+  return branches[0];
+};
+
+check('the result panel has a background and an ink of its own, at contrast 7 or better', () => {
+  const css = drawnBranch().querySelector('.fl-ux-eo-line').style.cssText;
+  const bg = cssColor(css, 'background');
+  const ink = cssColor(css, 'color');
+  return bg !== null && ink !== null && contrastOf(bg, ink) >= 7;
+}, true);
+check('...and it does not depend on white or transparent showing through', () => {
+  const css = drawnBranch().querySelector('.fl-ux-eo-line').style.cssText;
+  return [cssColor(css, 'background') !== '#ffffff', /background:\s*transparent/.test(css)];
+}, [true, false]);
+check('every line of text carries the panel\'s ink itself, so a page style cannot recolour it', () => {
+  const line = drawnBranch().querySelector('.fl-ux-eo-line');
+  const ink = cssColor(line.style.cssText, 'color');
+  return line.children.filter((c) => c.tagName === 'DIV').map((c) => cssColor(c.style.cssText, 'color') === ink);
+}, [true, true]);
+check('the panel shows only while it has something to say', () => {
+  const { branches } = freshWorld();
+  api.equipmentOptimizer();
+  const line = branches[0].querySelector('.fl-ux-eo-line');
+  const empty = line.style.display;
+  api.saveResult({ branchId: 255911, lines: ['x'], undoable: false });
+  api.equipmentOptimizer();
+  return [empty, line.style.display];
+}, ['none', 'block']);
+check('the buttons keep their own colours too: readable, and edged so they show on any page', () => {
+  const branch = drawnBranch();
+  return ['.fl-ux-eo-run', '.fl-ux-eo-undo'].map((sel) => {
+    const css = branch.querySelector(sel).style.cssText;
+    return [contrastOf(cssColor(css, 'background'), cssColor(css, 'color')) >= 7, /border:\s*1px solid/.test(css)];
+  });
+}, [[true, true], [true, true]]);
+
+// --- changing outfit through the page, without a reload --------------------
+//
+// Reported 2026-09-26: reloading the whole app after every run is harsh. The
+// run now goes to the Possessions tab with the game's own router link, clicks
+// the items as you would, and goes back: the Story tab refetches on arrival
+// (seen in the capture), and the game's own state stays consistent because the
+// GAME did the equipping. If any step will not go that way, the remaining
+// swaps are made through the API and the page reloads, as before.
+
+api.EO_TIMING && Object.assign(api.EO_TIMING, { pageMs: 60, itemMs: 60, backMs: 60 });
+
+// A stand-in for the game's own screens. Clicking an available item equips it,
+// clicking a worn item empties its slot, and history.back() returns to the story.
+function softWorld(opts) {
+  opts = opts || {};
+  // Nothing left over from the last world: a stale link would answer for this one.
+  for (const el of doc.body.querySelectorAll('a.cursor-pointer, .possessions')) el.remove();
+  const w = freshWorld(opts);
+  const spa = { equips: [], unequips: [], navClicks: 0, backs: 0 };
+  const byId = {};
+  for (const g of MYSELF.possessions) for (const p of g.possessions) if (p.equippable) byId[p.id] = p;
+  let screen = null;
+  const drawPossessions = () => {
+    if (screen) screen.remove();
+    screen = add(doc.body, 'div', 'possessions');
+    const list = add(screen, 'ul', 'equipment-group-list');
+    for (const slot of ['Hat', 'Luggage', 'Companion', 'Crew']) {
+      const g = add(add(list, 'li', 'equipment-group-list__item'), 'div', 'equipment-group');
+      add(g, 'h2', 'equipment-group__name').textContent = slot;
+      const wrap = add(g, 'div', 'equipment-group__slot-and-available-items');
+      const slotBox = add(wrap, 'div', 'equipment-group__equipment-slot-container');
+      const avail = add(wrap, 'ul', 'available-item-list');
+      for (const p of Object.values(byId).filter((x) => x.category === slot)) {
+        const isWorn = w.server.worn[slot] === p.id;
+        if (!isWorn && opts.hideItems && opts.hideItems.includes(p.id)) continue;
+        const node = isWorn
+          ? add(slotBox, 'div', 'equipped-item')
+          : add(add(avail, 'li', 'available-item-list__item'), 'div', 'icon icon--emphasize icon--available-item');
+        node.setAttribute('data-quality-id', String(p.id));
+        const button = add(node, 'div');
+        button.setAttribute('role', 'button');
+        button.onReact = () => {
+          if (opts.ignoreClick) return;
+          if (isWorn) { delete w.server.worn[slot]; spa.unequips.push(p.id); } else { w.server.worn[slot] = p.id; spa.equips.push(p.id); }
+          drawPossessions();
+        };
+      }
+    }
+  };
+  if (!opts.noLink) {
+    const nav = add(doc.body, 'a', 'cursor-pointer');
+    nav.setAttribute('href', '/possessions');
+    nav.onReact = () => {
+      spa.navClicks++;
+      for (const child of eoPage.children.slice()) child.remove();
+      drawPossessions();
+    };
+  }
+  backHandler = () => {
+    spa.backs++;
+    if (screen) screen.remove();
+    resetPage();
+  };
+  return Object.assign(w, { spa, story: () => eoPage.querySelector('.branch[data-branch-id="255911"]') });
+}
+
+checkAsync('a run goes through the game\'s own Possessions screen and back: the game equips, nothing is reloaded', async () => {
+  const w = softWorld();
+  api.equipmentOptimizer();
+  eoButton(w.branches[0]).click();
+  await waitFor(() => w.spa.backs > 0 && eoLine(w.story()).length > 0, 3000);
+  return [w.spa.navClicks, w.spa.equips, w.server.equips(), w.spa.backs, reloads.length,
+    eoLine(w.story()).includes('18.4%'), eoLine(w.story()).includes('Hat: Iron Hat → Beguiling Mask'),
+    w.story().querySelector('.fl-ux-eo-undo') !== null];
+}, [1, [310], [], 1, 0, true, true, true]);
+
+checkAsync('with no Possessions link to click, the API makes the swaps and the page reloads, as before', async () => {
+  const w = softWorld({ noLink: true });
+  api.equipmentOptimizer();
+  eoButton(w.branches[0]).click();
+  await waitFor(() => reloads.length > 0, 3000);
+  return [w.spa.equips, w.server.equips(), reloads.length];
+}, [[], [310], 1]);
+
+checkAsync('an item the Possessions list does not show (a filter hides it) falls back to the API and a reload', async () => {
+  const w = softWorld({ hideItems: [310] });
+  api.equipmentOptimizer();
+  eoButton(w.branches[0]).click();
+  await waitFor(() => reloads.length > 0, 3000);
+  return [w.spa.equips, w.server.equips(), reloads.length];
+}, [[], [310], 1]);
+
+checkAsync('a click the game ignores falls back to the API and a reload', async () => {
+  const w = softWorld({ ignoreClick: true });
+  api.equipmentOptimizer();
+  eoButton(w.branches[0]).click();
+  await waitFor(() => reloads.length > 0, 3000);
+  return [w.spa.equips, w.server.equips(), reloads.length];
+}, [[], [310], 1]);
+
+checkAsync('Undo goes the same way: the game puts the Iron Hat back, no reload', async () => {
+  const w = softWorld();
+  w.server.worn.Hat = 310;
+  api.saveUndo(api.undoFor([SWAP_HAT], 255911));
+  api.saveResult({ branchId: 255911, lines: ['x'], undoable: true });
+  api.equipmentOptimizer();
+  w.branches[0].querySelector('.fl-ux-eo-undo').click();
+  await waitFor(() => w.spa.backs > 0 && eoLine(w.story()).includes('Restored'), 3000);
+  return [w.spa.equips, reloads.length, api.readUndo(), eoLine(w.story()).includes('Restored')];
+}, [[304], 0, null, true]);
+
+checkAsync('filling an empty slot is a click on the item, and undoing it a click on the worn item', async () => {
+  const w = softWorld({ dangerous: true });
+  api.equipmentOptimizer();
+  eoButton(w.branches[0]).click();
+  await waitFor(() => w.spa.backs > 0 && eoLine(w.story()).length > 0, 3000);
+  const filled = [w.spa.equips, w.server.worn.Crew];
+  w.story().querySelector('.fl-ux-eo-undo').click();
+  await waitFor(() => w.spa.backs > 1 && eoLine(w.story()).includes('Restored'), 3000);
+  return [filled, w.spa.unequips, w.server.worn.Crew, reloads.length];
+}, [[[900001], 900001], [900001], undefined, 0]);
 
 // --- finish ----------------------------------------------------------------
 
