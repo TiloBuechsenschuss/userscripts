@@ -1,8 +1,8 @@
 # Plan: badges for the TODO's "Reference" guides
 
-Working plan, kept in the repo so it survives an interruption. Started 2026-09-24. Last updated after WP-7 (all four items).
+Working plan, kept in the repo so it survives an interruption. Started 2026-09-24. Last updated after WP-10 (all of it).
 
-**Status: WP-0 to WP-7 done. Next: WP-8 (statues and the economy panel).** Nothing has been checked in the game yet; each package's "Not verified in-game" list is in `AGENTS.md`.
+**Status: WP-0 to WP-10 done (WP-8 as badges only; the economy panel is not built). Next: WP-11, which builds nothing, and the "Later" list.** Nothing has been checked in the game yet; each package's "Not verified in-game" list is in `AGENTS.md`.
 
 ## Context
 
@@ -19,7 +19,7 @@ Standing project rules (from memory and `AGENTS.md`): **no commits or git-tree c
 
 ## Current state of the code (what exists now)
 
-`choice-helper.js` is at 1.27 (HEAD, committed by the user, is 1.26 and covers WP-2 to WP-6; 1.27 adds Hellworm, Risen Burgundy, Station Developments and the City of the Tracklayers), the loader `all-in-one/fallen-london.js` at 0.51. Features registered at the end of `FEATURES`:
+`choice-helper.js` is at 1.28 (HEAD, committed by the user, is 1.27 and covers WP-2 to WP-7; 1.28 adds Station Statues, Menace Locations, Iron Republic, Firmament and Discordant Studies), the loader `all-in-one/fallen-london.js` at 0.52. Features registered at the end of `FEATURES`:
 
 | Feature | Entry point | Table | Package |
 |---|---|---|---|
@@ -35,10 +35,15 @@ Standing project rules (from memory and `AGENTS.md`): **no commits or git-tree c
 | `risen-burgundy` | `rbgRatings` | `RBG_OPTIONS`, `RBG_CARDS` | WP-7 |
 | `station-developments` | `sdRatings` | `SD_OPTIONS` | WP-7 |
 | `city-of-the-tracklayers` | `tlcRatings` | `TLC_OPTIONS`, `TLC_CARD_LIST` | WP-7 |
+| `station-statues` | `stRatings` | `ST_OPTIONS` | WP-8 |
+| `menace-locations` | `mlRatings` | `ML_OPTIONS`, `ML_CARD_LIST` | WP-9 |
+| `iron-republic` | `irRatings` | `IR_OPTIONS` | WP-10 |
+| `firmament` | `firRatings` | `FIR_OPTIONS` | WP-10 |
+| `discordant-studies` | `hsRatings` | `HS_OPTIONS` | WP-10 |
 
 Shared code, all in `choice-helper.js`: the **progress-quality helper** (`pq*`, block headed `// === shared: progress qualities`, right after `aolRatings`), built on the older carousel plumbing (`carouselRatings`, `carouselIndex`, `carouselLookup`, `carouselRange`, `carouselSigned`, `eachCardName`, `attachBadge`).
 
-Tests, one per package: `tests/choice-airs-of-london.test.mjs`, `choice-progress-qualities.test.mjs` (WP-2), `choice-casing.test.mjs` (WP-3), `choice-fascinating-inspired.test.mjs` (WP-4), `choice-investigating.test.mjs` (WP-5), `choice-someone-is-coming.test.mjs` (WP-6), `choice-hellworm.test.mjs`, `choice-risen-burgundy.test.mjs`, `choice-station-developments.test.mjs`, `choice-city-of-the-tracklayers.test.mjs` (WP-7). Three older suites list every registered feature by hand and must be edited for each new one: `choice-crowds-of-spite`, `choice-fruits-of-the-zee`, `choice-zailing` (append the new feature name to the roster array; `sed` on the previous last entry works).
+Tests, one per package: `tests/choice-airs-of-london.test.mjs`, `choice-progress-qualities.test.mjs` (WP-2), `choice-casing.test.mjs` (WP-3), `choice-fascinating-inspired.test.mjs` (WP-4), `choice-investigating.test.mjs` (WP-5), `choice-someone-is-coming.test.mjs` (WP-6), `choice-hellworm.test.mjs`, `choice-risen-burgundy.test.mjs`, `choice-station-developments.test.mjs`, `choice-city-of-the-tracklayers.test.mjs` (WP-7), `choice-station-statues.test.mjs` (WP-8), `choice-menace-locations.test.mjs` (WP-9), `choice-iron-republic.test.mjs`, `choice-firmament.test.mjs`, `choice-discordant-studies.test.mjs` (WP-10). Three older suites list every registered feature by hand and must be edited for each new one: `choice-crowds-of-spite`, `choice-fruits-of-the-zee`, `choice-zailing` (append the new feature name to the roster array; `sed` on the previous last entry works).
 
 ### The badge vocabulary (WP-1, done)
 
@@ -119,13 +124,16 @@ Done: **Hellworm** (`hellworm`; badges only, no panel: one card with six options
 
 Hellworm (smallest, self-contained) → Risen Burgundy (Guide) carousels (also the Firmament-450 cards left out of WP-2, WP-3, WP-4: Cutthroats and Canalmen's other two options, Tolling of the Thief-Bells, Case a lesser keep, Seduce an Alluring Masquer, The Honours of the Court) → Station Developments + Location-specific cards (Hinterlands deck) → The City of the Tracklayers vignettes and decisions. **Ask the panel question for each.**
 
-### WP-8 — Statues and the economy panel (decided: one panel)
+### WP-8 — Statues (DONE as badges only) and the economy panel (NOT BUILT)
+Done: **Station Statues** (`station-statues`; no panel by the user's decision: 53 statues with the guide's ratings on the options that build them, about 55 card options with what they take and give; `(subject)` and `(Subject)` placeholders). The economy panel below was set aside ("no panel for now"); Roof Economy and Stuiver Grinding stay open in the TODO with no badge surface, and the steel-per-station table has no home. If the user later wants the panel, this is the spec:
 Badges on *Commissioning a Statue* (rating 1–4, requirement, Favour type) and *Under the Statue at X* (regular / favour / special, about 6 EPA baseline, `(Subject)` placeholder, "statue not read" case). Panel "Upper River & Firmament economy": Roof Economy shops, trading posts and equipment, Stuiver-exclusive items and grinds, the statue table, steel per station (from Railway (Guide)), Scrip conversions. Register through `PANELS` → `registerPanels`; styles from `UI`/`TH`/`TD`, `wikiLink`; copy the Zailing panel's search filter; read holdings through the existing Possessions reader; update `ux-launcher-docking` (it pins the panel ids).
 
-### WP-9 — Menace Locations
+### WP-9 — Menace Locations (DONE, badges only)
+Done: **Menace Locations** (`menace-locations`; no panel by decision; one feature, 242 options and 118 cards, under the 250-row split threshold; the card badge in the hand is confirm-only on the greeting, which nobody has captured yet). The notes below are the original plan.
 Five locations (Wounds boat, Scandal Tomb-Colonies, Suspicion New Newgate, Nightmares ×2), each a red deck plus storylets. Badge = menace change signed and directed (down good, teal; up bad, warm), side effects ("Approaching the Gates +5"), stat requirement 15. Confirm-only greeting gate; capture the real greetings first. Split in two if the card data exceeds about 250 rows.
 
-### WP-10 — Navigation and story (spoilers included)
+### WP-10 — Navigation and story (spoilers included) — DONE
+Done: **Iron Republic** (`iron-republic`; no panel: 43 options, the destination day per option, the graph walked by a test). Also done: **Firmament** (`firmament`; 158 options, the guide's words for what each sets, a ⚠ where it is unsure) and **Discordant Studies** (`discordant-studies`; The Hurlers, Costs and Rewards and Deeper guides in one road, hints in the guide's order). The Firmament sub-guides (Ecdysis, Kinetoculus, Stacks, Midnight Trade, High Sancta, Moon-Miser Herding, Sous Catacombs, Upon a Red Stage, Scaling the Quartz, The Marrow Behind) stay open in the TODO. The notes below are the original plan.
 Iron Republic map (destination day per option, Committed/Hedonist gates); The Hurlers (Guide) + Discordant Studies Costs and Rewards + Deeper Discordant Studies (step badge, tooltip Hint 1 / Hint 2 / Answer); Firmament (Guide), chapter by chapter, consequence badges ("+Flammier", "+The Shepherd's Rejections", endings), warn where the guide says a branch is unverified. Its sub-guides stay separate TODO items.
 
 ### WP-11 — Nothing to build; record it
@@ -137,6 +145,17 @@ Dramatic Tension, Seeking (apart from WP-5's card), Bessemer sources, Hinterland
 - **The rest of Risen Burgundy's deck** (about 40 of its 67 cards: the dreams, the Ducal-court and Firmament-story cards, the counter-raising cards for Beneficence and Against Time and Kings, the Joyous Entry, As Above and Glory's Fire cards, the eighteen steeds on Whoso List to Hunt, the Weaver's investments). The guide only points at them; the wiki category `Cards - Risen Burgundy` lists them.
 - Airs of London storylets still open in the TODO: *Time in bed*, *Unfinished Business ×4*, and reading the current Airs off the unlock tooltip (needs a DOM capture).
 
+### Left out of the built packages (candidates to pick up)
+- **Economy panel** (WP-8): Roof Economy shops, trading posts and equipment, Stuiver-exclusive items and grinds, the statue table, steel per station, Scrip conversions. Not built by decision; spec under WP-8 above.
+- **City of the Tracklayers:** the four Fate-locked vignettes and their eight cards (no wiki pages, so no titles); the Scheme of a Phoenix and Exploration of a Hinterland City storylets.
+- **Station Developments:** 22 conversions whose pages name no storylet; the Location-specific cards guide (judged a matrix with no option to badge).
+- **Station Statues:** Marigold's all-statues and self-statue options; Balmoral and Station VIII statues are labels only.
+- **Menace Locations:** Conflagration, ambition-story storylets set in the places, Offer the Boatman a sacrifice.
+- **Iron Republic:** Take this demagogue for tea and muffins, the Nemesis ambition's storylets, the CENSORED day.
+- **Firmament:** step-only options, the endings tables; the sub-guides (Ecdysis, Kinetoculus, Stacks, Midnight Trade, High Sancta, Moon-Miser Herding, Sous Catacombs, Upon a Red Stage, Scaling the Quartz, The Marrow Behind) are separate TODO items.
+- **Discordant Studies:** the Adulterine Castle's cards (titles unknown), the Discordant Law table.
+- **Hinterland Efficiency** is not read, so the City's badges say `Eff`.
+
 ## Open questions only the game can answer
 
-Greetings of the menace locations and Hinterland stations; whether progress qualities can be read from the Myself tab; what `(Subject)` reads as in the statue cards; the storylet headings each package lists in its `AGENTS.md` "Not verified in-game" entry (Duelling's two names, the area-diving and Thefts headings, the seductions' and commissions' headings, the court ladder's headings, the Ambassador's Ball's options).
+Greetings of the menace locations and Hinterland stations (the menace card badge in the hand depends on them); whether a narrow challenge is certain at difficulty +4 (the rest of the script) or +5 (the City of the Tracklayers guide); whether Hinterland Efficiency can be read; the Iron Republic day headings, Firmament's "Firmament: " storylet prefixes and Discordant Studies' numbered wiki titles; whether progress qualities can be read from the Myself tab; what `(Subject)` reads as in the statue cards; the storylet headings each package lists in its `AGENTS.md` "Not verified in-game" entry (Duelling's two names, the area-diving and Thefts headings, the seductions' and commissions' headings, the court ladder's headings, the Ambassador's Ball's options).

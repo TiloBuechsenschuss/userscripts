@@ -2628,6 +2628,96 @@ navigation. Two consequences:
   *Drained*, *Day of Rest*, *Each Their Own*, *(Hinterland City Streets)*) are not badged in the hand, in case the
   game deals a card of the same name elsewhere; their options are badged when the card is open.
 
+  **Station Statues** (`station-statues`, `ST_OPTIONS`, on the `pq*` helper; WP-8, no panel by decision): the
+  statue each station can have, and the options its *Under the Statue* card then offers. 53 statues (Ealing Gardens
+  6, Jericho 4, the Magistracy 3, Balmoral 3, Station VIII 14, Burrow-Infra-Mump 5, Moulin 4, the Hurlers 8,
+  Marigold 6) and about 55 card options. On the option that **builds** a statue the badge is the guide’s 1 to 4
+  rating and what the statue does, `rated 3/4 · Urchins ×4 → 28.5 E` (a rating the guide gives as a range reads
+  `2–3/4`; the digits carry it, not a colour). On an option of the **card** it is what the option takes and gives,
+  `Urchins ×4 ▼ → Puzzle-Damask Scrap ×1 +2 more`, and the tooltip names the statue, its rating and the guide’s
+  Echo value. The card shows only the options of the statue you built, so there is never more than one such badge
+  and the script does not need to read which statue it is (an unread statue is not a case). The statues are built
+  from the Offices branches of Station Developments (Ealing, Jericho, the Evenlode, Balmoral, Burrow, Moulin), from
+  *A Selection of Statues* (Station VIII), *Commissioning a Statue* (the Hurlers) and *Consider building a statue at
+  Marigold Station*; the Offices headings keep Station Developments’ count (`noHeading`) and the other three say
+  `statues`. **Traps:** the Ealing card is called just *Under the Statue*; *Practice sketching the Statue to
+  (subject)* is on every card and `(subject)` and `(Subject)` joined `CAROUSEL_PLACEHOLDER`; the two Jericho Church
+  statues share the title *Call in favours from the Church*, so they are one entry; *Have this statue removed* is
+  the game’s wording where the Hurlers page says melted and each page appends its Fate cost (3 at Station VIII, 10
+  elsewhere). **Left out:** Balmoral has no card, so its three statues are labelled and not weighed, and Station
+  VIII’s fourteen are cosmetic; the Marigold card’s all-statues and self-statue options (*Meet with a Statuesque
+  Deviless*, *Share a honey-dream*, *Reclaim the Inescapable Ubiquity*); the guide’s analysis text and its
+  cross-reference table of Favours by type. The economy panel the plan once held (Roof Economy, Stuiver Grinding, the
+  statue table) is NOT built, and those two guides stay open in TODO with no badge surface.
+
+  **Menace Locations** (`menace-locations`, `ML_OPTIONS`, `ML_CARD_LIST`, on the `pq*` helper; WP-9, no panel by
+  decision): the five places you are sent to when Wounds, Scandal, Suspicion or Nightmares reaches 8 (a slow boat
+  passing a dark beach on a silent river, the Tomb-Colonies in disgrace, New Newgate Prison again, a state of some
+  confusion and the Mirror-Marches; Nightmares has two). 242 options, 118 cards (49 of them red cards that play
+  for no action). **The badge** is the change to the location's menace, first and signed, lower being better,
+  then what else the option moves and what a failure does: `Scandal −2 · Austere +3 · Hedonist −3`, `Nightmares
+  −1? · Watchful −4 · fail Nightmares −3`. A Luck option is worked out from its two outcomes and marked `≈`
+  (`Suspicion ≈−0.5`, `Scandal ≈−4.9`, the figures the guide gives); one whose failure the page does not give
+  shows its odds. Teal cuts the menace, brick raises it, grey does neither, and the sign says the same without
+  the colour. A red card in the hand shows its one effect, a white one `best Scandal −6`, and a storylet's heading
+  the same. The guide's remarks (a challenge you want to FAIL, the 63% rule for chess, the cards to avoid) are in
+  the tooltips. **The card badge is confirm-only:** the decks are full of ordinary names (*The Governor*,
+  *Remnants*), so a card in the hand is badged only while the greeting (`currentArea`) names its place; the
+  options inside an open card are scoped by that card and need no greeting. **Traps:** the wiki numbers pages
+  that the game shows under one title (*A white cat! 1* and *2*, *The view from your room 1* to *3*), so a
+  trailing numeral is dropped and two pages that share a title AND an option are one entry with `alt` (the badge
+  gives both); *Play Chess with the Boatman* is eight options of different levels of The Boatman's Opponent, and
+  each is its own entry; the shared helper gained an optional `color` on an entry and on a card, because the
+  colour here depends on the direction, not the kind. **Left out:** the *Conflagration* storylet (Parabola's own
+  way out of Nightmares), the ambition-story storylets that only happen to be set in these places, and
+  *Offer the Boatman a sacrifice*, whose page lists no option.
+
+  **Iron Republic** (`iron-republic`, `IR_OPTIONS`, on the `pq*` helper; WP-10 part 1, no panel by decision): the
+  Iron Republic Streets are a graph of days, each Day storylet with one to three options that lead on to another
+  day until Day 99 lets you out through *A Day for Reading*. 34 Day options plus the eight of the way out, and
+  *Open the gate*. **The badge is the destination:** `→ Day 12? · Wounds +5 · Scandal +2 · fail → Day 8 ·
+  Nightmares +3, Suspicion +3`; `set to 3` is the guide’s wording for a menace a day pins to a level, where the page
+  shows a bare gain; `back → Day 8` is the one door that goes back. A Day heading names the days its doors lead to
+  (`→ 42 / 48 / 51 / 55`). The Changed by the Iron Republic each step adds is in the tooltip, with what the guide
+  prints in bold as of particular interest. A test walks the graph: every door leads to a day that exists, every
+  day is reachable from Day 1 and reaches Day 99, and the guide’s 34 table rows match the entries door for door.
+  **The guide** is marked needing work and the option pages win; the tooltips quote it where they differ (the
+  challenge of *Municipal amenities*, *Talk them down*, *A lucky number* and the Revolutionaries favour is one
+  off, *An exchange of knowledge* adds Nightmares +2). **Traps:** Day 81 is filed by the wiki under its bare title,
+  so it has an alias. **Left out:** *Take this demagogue for tea and muffins* (its page is empty), the Nemesis
+  ambition’s extra storylets, and the day titled CENSORED, which the guide keeps as a spoiler.
+
+  **Firmament** (`firmament`, `FIR_OPTIONS`, on the `pq*` helper; WP-10 part 2, no panel by decision, spoilers on
+  purpose): the nine-part Roof story, played once, whose choices set qualities that later parts read. The badge is
+  what the option sets **in the guide’s own words**: `+Duchess 1 · Tyranny =3` (`+` gives, `−` takes, `=` sets, `→`
+  raises to), `Vulgatis =2`, `+Flammier`, `no reputation change`, `narrative only`. The crew’s favour qualities are
+  abbreviated (Duchess, Dawnseeker, Shepherd, Summer, Valentine, Service). A `⚠` marks the lines the guide itself is
+  unsure of (“needs confirmed”, “appears to”, a hidden quality) and the tooltip says the story can be played only once.
+  158 options, all nine parts and the prologue. **How it was built:** a link in the guide counts only when its wiki
+  page is an option (it has a *From* storylet or card) AND the guide says what it does; the guide’s sentence is the
+  tooltip. Effect clauses were compressed by a script and then hand-corrected (the overrides are the labels in the
+  table). **Traps:** the wiki files some storylets as *Firmament: A Choice of Commissions*, so the storylet keeps the
+  prefix and an alias function finds it under the game’s bare heading; where two options share a title the guide’s
+  display text is the game title, not the page title. **Left out:** the options the guide only names as steps
+  (*Enter the catacombs*, *Look for the Performer*), the requirement lists that open each part, the tables of
+  endings (Immanence, the Victor in Burgundy, which turn on qualities rather than options), and the parts other
+  guides own (the Stacks, Ecdysis, the Kinetoculus, the High Sancta, Risen Burgundy, the Sous Catacombs, the
+  Midnight Trade, Upon a Red Stage), all still open in TODO.
+
+  **Discordant Studies** (`discordant-studies`, `HS_OPTIONS`, on the `pq*` helper; WP-10 part 3, no panel by decision,
+  spoilers on purpose): The Hurlers (Guide), Discordant Studies - Costs and Rewards and Deeper Discordant Studies,
+  the road from the Encampment to Steward of the Discordance 10. **The badge** is what the option raises, to which
+  level, in the guide’s order of play: `Knowledge → 2 · Cold Comfort → 5`, `Trust → 0` for the Steward’s Trust it
+  spends. A test walks it: Crystalline Knowledge climbs 1 to 6 and Cold Comfort 3 to 7 in step order, each step
+  needing the level below it. The tooltip has the step number, the requirements and the guide’s remarks; on the four
+  options of Deeper Discordant Studies it carries the guide’s tiers **in its order, Hint 1, Hint 2, then the
+  answer**, so a reader can stop after the hint, and the first deep step carries the Costs and Rewards guide’s
+  figures. 19 options. **Traps:** the wiki numbers pages the game shows under one title (*Discuss the Hurlers 2*,
+  *Approach the Anchoress 2*); *Open your eyes* is ONE title at two levels (into the castle at Crystalline Knowledge
+  3 to 6, the final seal at 7), so one entry that says so. **Left out:** Digging in the Hurlers and Hurling (their own
+  features), ripping out the Discordant Law (Digging’s), the Discordant Law comparison (three laws, not an option),
+  and the castle’s cards, which the Costs and Rewards guide tabulates by picture so their titles are unknown.
+
   **Painting in Balmoral** (`painting-balmoral`, `PB_OPTIONS`, `PB_PAYOUTS`): the badge exists to say
   that **failing is fine**. Every painting action raises Painter's Progress by one whether the check
   passes or not, so a failure costs nothing but the items and only steers the picture towards a
@@ -3459,6 +3549,38 @@ Confirmed live by the author:
   guide), given the option badges say `?` and the tooltip says the guide’s number. **(4) The Efficiency.** Whether
   Hinterland Efficiency can be read off the Myself tab, since then `Eff` could be a number.
 
+- The **Station Statues badges** (added 2026-09-26). Nothing seen in the game. Report first, in order: **(1) The
+  statue storylets.** That Station VIII’s statues really sit in *A Selection of Statues*, the Hurlers’ in
+  *Commissioning a Statue* and Marigold’s in *Consider building a statue at Marigold Station*, and that the other
+  six are in the Offices branch you already know. **(2) The card titles.** That the Ealing card is called just
+  *Under the Statue*, and what the seven others read. **(3) The option titles with a subject.** That the sketching
+  option reads *Practice sketching the Statue to …* and the graffiti one *Read the graffiti on the Statue to …*,
+  and what the Fate options read. **(4) The Marigold options.** Whether the card offers the sketching option too
+  (the wiki page does not list it).
+
+- The **Menace Locations badges** (added 2026-09-26). Nothing seen in the game. Report first, in order: **(1) The
+  greetings.** What the sidebar says in each of the five places, verbatim: the card badge in the hand appears only
+  when the greeting contains the location’s wiki name (*a slow boat passing a dark beach on a silent river*,
+  *Disgraced exile in the Tomb-Colonies*, *New Newgate Prison - again!*, *A state of some confusion*, *The
+  Mirror-Marches*). **(2) The card titles.** That the numbered wiki cards (*A white cat!*, *The view from your
+  room*, *The new cell*) and the bracketed ones (*You’ve unfinished business in the world of the living*) show
+  without the suffix. **(3) The two-page titles.** Which of *A white cat!*’s two effects (Manager +1 or
+  Nightmares −3) you see. **(4) The red cards.** That they play from the hand with one click and no action.
+
+- The **Iron Republic badges** (added 2026-09-26). Nothing seen in the game. Report first: **(1) The Day
+  headings.** That each reads *Day N, Title* as the wiki gives it, and what Day 81 is called. **(2) The doors.**
+  Whether any option sends you to a different day than its badge says, and what *Take this demagogue for tea
+  and muffins* does. **(3) The challenge figures** where the guide is one off from the pages.
+
+- The **Firmament badges** (added 2026-09-26). Nothing seen in the game. Report first: **(1) The storylet
+  headings.** Whether the ones the wiki prefixes with *Firmament:* show without it in the game, and whether the
+  Naples day is *Napoli, 1899*. **(2) Any badge that differs from what the choice did**, especially the `=` ones,
+  which are the guide’s wording for a set. **(3) The ⚠ lines.** Which the game settles.
+- The **Discordant Studies badges** (added 2026-09-26). Nothing seen in the game. Report first: **(1) The titles.**
+  Whether *Discuss the Hurlers* and *Approach the Anchoress* show without the wiki’s numeral, and that *Close your eyes*
+  exists (its page carries no storylet, so it is on the guide’s word). **(2) The step order.** Whether the levels
+  the badges say match what you see.
+
 - The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
   table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
   looking at the screen can confirm: a wrong number renders exactly as well as a right one. They
@@ -3959,6 +4081,26 @@ Current tests:
   five above narrow), the two-page titles, the card names with brackets or placeholders, the card in the hand
   and opened and an option inside it, Officially Non-Criminal left to Investigating, and no title filed under
   the same card in another feature’s table.
+- `tests/choice-station-statues.test.mjs` — the guide’s 53 statues by station and all its ratings one by one, the
+  N/4 badge form, what a card option takes and gives and its tooltip, the merged Jericho Church entry, the
+  sketching option through its placeholder, the Fate costs, a build option badged inside an Offices branch whose
+  heading stays Station Developments’, the same title on two cards told apart, the cards in the hand and opened,
+  and no title in another feature’s table.
+- `tests/choice-menace-locations.test.mjs` — the badge form, the guide’s figures place by place (the Wounds red
+  cards, the letters to an old flame, bribery, the lawyer, the manager, the Mirror-Marches’ cards and frames),
+  Luck options worked out to the guide’s −4.9, −0.5, −1 and −1.5, colour by direction, the confirm-only hand
+  badge in four greeting states, the numbered and bracketed card titles, two pages under one title, and no
+  title in another feature’s table.
+- `tests/choice-iron-republic.test.mjs` — the guide’s 34 table rows against the entries, door for door, the graph
+  (every door lands on a real day, every day reachable from Day 1 and reaching Day 99, one door back), the badge
+  form, the guide’s disagreements and bold text in the tooltips, the way out, the day headings and Day 81’s
+  alias, and no title in another feature’s table.
+- `tests/choice-firmament.test.mjs` — the badge form in the guide’s words, its figures part by part (the airship,
+  the Gullet, Lost Naples, the feast’s seats and endings, the Calendar, the three histories), the `⚠` mark and its
+  tooltip, the wiki’s *Firmament:* prefix found under the bare heading, and no title in another feature’s table.
+- `tests/choice-discordant-studies.test.mjs` — Crystalline Knowledge climbing 1 to 6 and Cold Comfort 3 to 7 in the
+  guide’s order, each step needing the level below it, the badge form, the numbered wiki pages found under the
+  game’s titles, Deeper Discordant Studies’ tiers in order, the costs and rewards figures, and the heading.
 - `tests/choice-painting-balmoral.test.mjs` — the painting suite pins that all three
   painting actions name both outcomes on the badge, that *Unveil your Painting* is one row pricing all
   seven compositions, that exactly one row is marked as the guide's word against an option page, and

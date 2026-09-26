@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.27
+// @version      1.28
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -577,6 +577,13 @@
  *     Station Developments badges what the railway stations' improvements and conversions take and give.
  *     City of the Tracklayers badges the city's deck: the Prosperity an option pays, and what it does to
  *     the Waning and the Displeasure.
+ *     Station Statues badges the guide's rating of each statue where it is built, and what each Under the
+ *     Statue option takes and gives.
+ *     Menace Locations badges what each option in the five places you are sent to at menace 8 does to the
+ *     menace, first and signed, lower being better.
+ *     Iron Republic badges the day each option in the Iron Republic Streets leads to, and what it costs.
+ *     Firmament badges what each choice of the Roof story sets, in the guide's words, marking what it is unsure of.
+ *     Discordant Studies badges the road to Steward of the Discordance 10 step by step, hints in the guide's order.
  *     Built as a feature registry so further advice can be added as entries.
  */
 
@@ -8334,10 +8341,10 @@
   // a weasel", and Risen Burgundy's hunting card "(Roof Prey)", the quarry it
   // names. The City of the Tracklayers adds twelve: "(the City)", "(Pub)", "(Inhabitant)", "(Chosen Site)",
   // "(Alignment)" and "(loved one)" in option titles, the three ideologies in card titles, and three
-  // leader-card phrases. Only these forty-eight: a bracket like "(3 FATE)" is part of a real
+  // leader-card phrases, and the Station Statues add "(subject)" and "(Subject)". Only these fifty: a bracket like "(3 FATE)" is part of a real
   // title.
   const CAROUSEL_PLACEHOLDER =
-    /\((?:growth|growth type|work leader|first option|second option|a level|a hole|a mirror|direction|somewhere|the workshop|the warzone|the mansion|the jungle|department|campaign focus|skeleton type|garment|Zee-Beast Location|Zee-Beast|Parabolan Quarry|Quarry Home|its lair|your saint|Bounty|a railway passenger|a defendant|defendant|crime|type|your dish|dish|Number|City Name|gendertitle|Roof Prey|the City|Pub|Inhabitant|Chosen Site|Alignment|loved one|Emancipationist|Liberationist|Prehistoricist|a no-Prehistoricists city|a no-Liberationists city|no-Emancipationist)\)/;
+    /\((?:growth|growth type|work leader|first option|second option|a level|a hole|a mirror|direction|somewhere|the workshop|the warzone|the mansion|the jungle|department|campaign focus|skeleton type|garment|Zee-Beast Location|Zee-Beast|Parabolan Quarry|Quarry Home|its lair|your saint|Bounty|a railway passenger|a defendant|defendant|crime|type|your dish|dish|Number|City Name|gendertitle|Roof Prey|the City|Pub|Inhabitant|Chosen Site|Alignment|loved one|Emancipationist|Liberationist|Prehistoricist|a no-Prehistoricists city|a no-Liberationists city|no-Emancipationist|subject|Subject)\)/;
 
   function carouselMatcher(title) {
     const pieces = String(title).split(CAROUSEL_PLACEHOLDER);
@@ -9672,6 +9679,7 @@
   }
 
   function pqColor(e) {
+    if (e.color) return e.color;
     if (e.label) return CAROUSEL_COLOR_NEUTRAL;
     return e.spend !== undefined || e.cost !== undefined ? CAROUSEL_COLOR_PAYOUT : CAROUSEL_COLOR_PROGRESS;
   }
@@ -9771,7 +9779,7 @@
     const lead = mine.filter(function (e) {
       return e.win !== undefined || e.spend !== undefined || e.cost !== undefined || e.label;
     })[0];
-    return { text: card.badge || (lead ? pqBadgeText(lead, cfg) : card.label), color: lead ? pqColor(lead) : CAROUSEL_COLOR_LABEL,
+    return { text: card.badge || (lead ? pqBadgeText(lead, cfg) : card.label), color: card.color || (lead ? pqColor(lead) : CAROUSEL_COLOR_LABEL),
       title: lines.join('\n') };
   }
 
@@ -12072,6 +12080,1653 @@
   };
 
   function tlcRatings() { pqRatings(TLC_DEF); }
+
+  // === feature: Station Statues ===========================================
+  //
+  // Statues at the GHR Stations (Guide): every station of the Upper River can
+  // have one statue, built from the station's Offices storylet (or, at
+  // Station VIII, the Hurlers and Marigold, from a storylet of its own), and
+  // for most stations the statue you chose decides which options the station's
+  // "Under the Statue" card offers. A regular statue turns 1, 2 or 4 Favours of
+  // one faction into items worth about 6 Echoes an action; a Favour statue
+  // gives Favours; a special one does something else. The guide rates each
+  // statue from 1 (very bad) to 4 (exceptional), leaving out synergies between
+  // statues and the fact that a statue of yourself counts towards the
+  // all-statues reward.
+  //
+  // **What the badge says.** On the option that BUILDS a statue, the guide's
+  // rating and what the statue does, `rated 3/4 · Urchins ×4 → 28.5 E`
+  // (`E` is the guide's Echo value of the reward; `2–3/4` is a rating the
+  // guide gives as a range). On an option of the "Under the Statue" card, what
+  // it takes and gives, `Urchins ×4 ▼ → Puzzle-Damask Scrap ×1 +2 more`; the
+  // card shows only the options of the statue you built, so there is one
+  // badge at a time and the tooltip names the statue, its rating and value.
+  // The guide's analysis of each statue is not carried, only its numbers.
+  //
+  // Transcribed from the option and card pages (fetched through the API,
+  // 2026-09-26) with Statues at the GHR Stations (Guide) as the cross-check.
+  // The pages win. Two things the guide and the pages say differently:
+  // Station VIII's card costs 3 Fate to remove a statue where the others cost
+  // 10, and the sketching challenge is Persuasive 200 at four stations, 250
+  // minus ten a point of Darkness at Station VIII (the guide states the
+  // formula for all of them). Left out: the statue at Balmoral changes
+  // nothing but the all-statues reward, so its three options are labelled and
+  // not weighed; Station VIII's fourteen options are cosmetic and are
+  // labelled the same way; the options of the Marigold card that belong to the
+  // all-statues and self-statue stories; and the "Statues by Favour type"
+  // table, a cross-reference. Corrections go in ST_OPTIONS and nowhere else.
+
+  const ST_CFG = {
+    quality: 'Station statue', short: 'Statue',
+    rules: 'Each station has one statue. It decides which options its Under the Statue card offers, and removing it '
+      + 'costs Fate (10 at most stations, 3 at Station VIII), except at Balmoral where a Much-Needed Gap will do.',
+  };
+  const ST_VIII = 'A Selection of Statues';
+  const ST_HURLERS = 'Commissioning a Statue';
+  const ST_MARIGOLD = 'Consider building a statue at Marigold Station';
+  const ST_CARDS = {
+    ealing: 'Under the Statue', jericho: 'Under the Statue at Jericho Locks', magistracy: 'Under the Statue at the Magistracy',
+    viii: 'Under the Statue at Station VIII', burrow: 'Under the Statue at Burrow-Infra-Mump', moulin: 'Under the Statue at Moulin',
+    hurlers: 'Under the Statue at the Hurlers', marigold: 'Under the Statue at Marigold Station',
+  };
+  const ST_SKETCH = 'Practice sketching the Statue to (subject)';
+  const ST_REMOVED = 'Have this statue removed';
+
+  // `rate` and `worth` are the guide's; `label` is the badge.
+  function st(storylet, name, label, more) {
+    return Object.assign({ storylet: storylet, name: name, label: label }, more);
+  }
+
+  function stSketch(card, extra) {
+    return st(card, ST_SKETCH, 'Romantic Notion ×5 +1 more? · fail Scandal +2', Object.assign({
+      note: 'Persuasive 200 (broad); 100 Drop of Prisoner’s Honey and 5 Romantic Notion on a success. The guide gives 250 minus ten for each point of Darkness at the station.',
+    }, extra));
+  }
+
+  function stRemove(card, fate, extra) {
+    return st(card, ST_REMOVED, 'Fate ' + fate + ' → statue removed', Object.assign({
+      aliases: ['Have this statue removed (' + fate + ' FATE)', 'Have this statue melted (' + fate + ' FATE)'],
+      note: 'Removes the statue so another can be built.',
+    }, extra));
+  }
+
+  const ST_OPTIONS = [
+    // --- Ealing Gardens: building ---
+    st(SD_EG, 'Put up a statue honouring Sinning Jenny, former Mayor and current Board Member', 'rated 3/4 · Urchins ×4 → 28.5 E',
+      { rate: '3', worth: 28.5, needs: 'Board Member: Sinning Jenny', note: 'Regular statue. Nearly the same as the Widow’s at the Magistracy; the bundle of oddities counts at 3.5 E.' }),
+    st(SD_EG, 'Put up a statue honouring Feducci, former Mayor and current Board Member', 'rated 2/4 · Tomb-Colonies ×2 → 18 E',
+      { rate: '2', worth: 18, needs: 'Board Member: Feducci', note: 'Tomb-Colonies Favours are among the rarest, and Jericho pays better for them once unlocked.' }),
+    st(SD_EG, 'Put up a statue honouring the Jovial Contrarian, former Mayor and current Board Member', 'rated 3/4 · Revolutionaries ×4 → 30 E',
+      { rate: '3', worth: 30, needs: 'Board Member: Jovial Contrarian', note: 'No Advancing the Liberation of Night.' }),
+    st(SD_EG, 'Put up a statue honouring Virginia, former Mayor and current Board Member', 'rated 2–3/4 · Hell ×2 → 12.5–20 E',
+      { rate: '2–3', worth: '12.5 to 20', needs: 'Board Member: Virginia', note: 'The reward is variable; the guide averages about 18 E. Hell Favours cannot be called in at Jericho until Marigold.' }),
+    st(SD_EG, 'Put up a statue honouring the Tentacled Entrepreneur', 'rated 2/4 · Rubbery Men ×2 → 18 E',
+      { rate: '2', worth: 18, needs: 'Board Member: Tentacled Entrepreneur', note: 'Amber valued at 10p each. Jericho gives two skeleton torsos for the same Favours.' }),
+    st(SD_EG, 'Install a statue to the current Poet-Laureate', 'rated 1/4 · Bohemians ×4 → 35 E',
+      { rate: '1', worth: 35, needs: 'A Poet-Laureate 21', note: 'A statue of yourself. Ivory Humeri valued at 15 E each; Jericho’s Bohemian option pays better and needs no card.' }),
+
+    // --- Jericho Locks: building ---
+    st(SD_JL, 'Put up a statue honouring the Dean of Xenotheology', 'rated 2/4 · Church ×2 → 18 E',
+      { rate: '2', worth: 18, needs: 'Board Member: The Dean of Xenotheology', note: 'Warm Amber at 10p each; easy to get in bulk through the Bone Market.' }),
+    st(SD_JL, 'Put up a statue honouring the Bishop of Southwark', 'rated 3/4 · Church ×1 → 12.5 E',
+      { rate: '3', worth: 12.5, needs: 'Board Member: The Bishop of Southwark', note: '6.25 EPA; a good source of Strong-Backed Labour, but one Favour a card.' }),
+    st(SD_JL, 'Put up a statue honouring the Bishop of Saint Fiacre’s', 'rated 4/4 · Church ×4 → 30 E',
+      { rate: '4', worth: 30, needs: 'Board Member: The Bishop of Saint Fiacre’s', note: 'Two Holy Relics of the Thigh of Saint Fiacre and 500 Bone Fragments; the best long-term value of the Upper River statues.' }),
+    st(SD_JL, 'Put up a statue honouring yourself, Pre-eminent Scholar of the Correspondence', 'rated 1–2/4 · Church ×1 → 12 E',
+      { rate: '1–2', worth: 12, needs: 'A Scholar of the Correspondence 21', note: 'A statue of yourself. Whispered Hints have many other sources.' }),
+
+    // --- the Magistracy of the Evenlode: building ---
+    st(SD_EV, 'Put up a statue honouring the Gracious Widow', 'rated 2–3/4 · Urchins ×4 → 29.4 E',
+      { rate: '2–3', worth: 29.37, needs: 'Board Member: the Gracious Widow', note: 'Nearly the same as Sinning Jenny’s; 5.87 EPA at one action a Favour.' }),
+    st(SD_EV, 'Put up a statue in honour of the Clay Highwayman', 'rated 3–4/4 · Criminals ×2 → 21.9 E',
+      { rate: '3–4', worth: 21.94, needs: 'On the Trail of the Clay Highwayman 5', note: '7.31 EPA; the bundle grows with Seeing Banditry in the Upper River.' }),
+    st(SD_EV, 'Put up a statue honouring the Defender of Public Safety, which is yourself', 'rated 2–3/4 · Constables ×1 gained',
+      { rate: '2–3', worth: '1 Favour', needs: 'Defender of the Public Safety 21', note: 'A statue of yourself, and the first that makes Favours rather than spending them. A Special Dispensation takes 7.' }),
+
+    // --- Balmoral: building (no card, nothing but the all-statues reward) ---
+    st(SD_BA, 'Put up a statue in honour of the Empress’ Consort', 'no reward · counts for all statues', { note: 'The only statue that needs nothing else.' }),
+    st(SD_BA, 'Put up a statue in honour of the Captivating Princess', 'no reward · counts for all statues', { needs: 'Acquaintance: the Captivating Princess' }),
+    st(SD_BA, 'Put up a statue in honour of your Cover Identity (which is to say, yourself)', 'no reward · counts as a self statue',
+      { needs: 'a Cover Identity made in Balmoral (Elaboration 5, Backstory 5, Ties 2, Credentials, Nuance, Witnesses)' }),
+    st(SD_BA, 'Tear down the Statue to (Subject)', 'Labour + Favour in High Places + Gap → new statue',
+      { needs: 'Strong-Backed Labour ×1, Favour in High Places ×1, Much-Needed Gap ×1', note: 'The only statue that can be replaced without Fate.' }),
+
+    // --- Station VIII: building (all cosmetic) ---
+    st(ST_VIII, 'Put up a statue honouring a Veteran Revolutionary', 'no reward · looks only'),
+    st(ST_VIII, 'Put up a statue honouring Mr Fires', 'no reward · looks only'),
+    st(ST_VIII, 'Put up a statue honouring Mr Spices', 'no reward · looks only'),
+    st(ST_VIII, 'Put up a statue honouring Mr Wines', 'no reward · looks only'),
+    st(ST_VIII, 'Put up a statue honouring Mr Veils', 'no reward · looks only', { note: 'A variant with Ambition: Bag a Legend! completed.' }),
+    st(ST_VIII, 'Put up a statue honouring Mr Cups', 'no reward · looks only', { note: 'A variant with Ambition: Nemesis at 4300 to 4500.' }),
+    st(ST_VIII, 'Put up a statue honouring Mr Iron', 'no reward · looks only'),
+    st(ST_VIII, 'Put up a statue honouring Mr Stones', 'no reward · looks only'),
+    st(ST_VIII, 'Put up a statue honouring Mr Apples', 'no reward · looks only'),
+    st(ST_VIII, 'Put up a statue honouring Mr Pages', 'no reward · looks only'),
+    st(ST_VIII, 'Put up a statue honouring yourself for your culinary experiments', 'no reward · looks only', { needs: 'Meals Served at Station VIII 20' }),
+    st(ST_VIII, 'Put up a statue showing yourself in the company of Masters', 'no reward · looks only', { needs: 'Connected: The Masters of the Bazaar 10' }),
+    st(ST_VIII, 'Put up a statue honouring Mr Cards, which is to say, yourself', 'no reward · looks only', { needs: 'The Robe of Mr Cards' }),
+    st(ST_VIII, 'Put up a statue honouring Mr –, the self you are destined to be', 'no reward · looks only', { needs: 'The Road; costs Fate' }),
+
+    // --- Burrow-Infra-Mump: building ---
+    st(SD_BI, 'Put up a statue honouring St. Augustine of Canterbury', 'rated 1/4 · Church ×1 → Society ×1',
+      { rate: '1', worth: '−0.20', note: 'Trades one Favour for a less valuable one and uses up a Bottle of Greyfields 1868 First Sporing.' }),
+    st(SD_BI, 'Put up a statue honouring St. Hildegard of Bingen', 'rated 1/4 · Bohemians ×1 → Revolutionaries ×1',
+      { rate: '1', worth: '−0.20', note: 'Trades one Favour for a less valuable one and takes 10 Drops of Prisoner’s Honey.' }),
+    st(SD_BI, 'Put up a statue honouring your Custom-Made Saint', 'rated 1–2/4 · Benthic ↔ bones',
+      { rate: '1–2', needs: 'Church: Dedication 2 (Custom-Made Saint), Skeleton: Support for a Counter-church Theology 5', note: 'Impossible without paying Fate to restart the Church in the Wild if you dedicated it to someone else.' }),
+    st(SD_BI, 'Put up a sculptural memento mori – in the form of a statue of yourself', 'rated 3–4/4 · Horsehead Amulet',
+      { rate: '3–4', needs: 'Doubled Skull ×1 (not used up), Approaching the Gates of the Garden 50', note: 'A statue of yourself. Costs value, but Horsehead Amulets are nearly impossible to get otherwise.' }),
+    st(SD_BI, 'Put up a statue honouring the Bishop of Watchmaker’s Hill, that is, Yourself', 'rated 1/4 · Verse of Counter-Creed',
+      { rate: '1', worth: 2.5, needs: 'Genesis of a Diocese 400; costs Fate', note: 'A statue of yourself, worth it only for the all-self-statues reward.' }),
+
+    // --- Moulin: building ---
+    st(SD_MO, 'Put up a statue honouring a Legendary Zee-Captain, that is, Yourself', 'rated 3/4 · Docks ×4 → 30 E, and Docks Favours gained',
+      { rate: '3', worth: 30, needs: 'a Survivor of the Iron Republic (Hardly Changed), a Crimson Violist or Doctore of the Gondoliers, and 150 each of the Cryptopalaeontological, Prelapsarian Archaeological and Theosophistical notes',
+        note: 'A statue of yourself. Both a Favour statue and a regular one; the rare Salt Steppe Atlas is worth 62.5 E.' }),
+    st(SD_MO, 'Put up a statue honouring London’s Ambassador to the Khanate, that is, Yourself', 'rated 2–3/4 · Great Game ×2 → 18 E',
+      { rate: '2–3', worth: 18, needs: 'Cover Identity: Backstory 50, Credentials 5, Depth of Historical Study 5, Revisionist Historical Narrative ×1, Object of Historical Study 230 (the rivalry between London and the Khanate)',
+        note: 'A statue of yourself. 6 EPA in Scrip; the Upper River has few Great Game Favours.' }),
+    st(SD_MO, 'Put up a statue of Clio, the Muse of History', 'rated 3/4 · Favours by monograph, or 175 Cryptic Clues',
+      { rate: '3', worth: '3.5 or 1 Favour', needs: 'Monograph in Progress 10', note: 'Gives a Favour of the kind your monograph is about; the same options as the Archaeologist’s statue.' }),
+    st(SD_MO, 'Put up a statue honouring Moulin’s preeminent Archaeologist, that is, yourself', 'rated 3/4 · Favours by monograph, or 175 Cryptic Clues',
+      { rate: '3', worth: '3.5 or 1 Favour', needs: 'Para-Archaeologist 8, Walking the Falling Cities 40, an exceptional concluded Monograph', note: 'A statue of yourself; the same options as Clio’s.' }),
+
+    // --- the Hurlers: building ---
+    st(ST_HURLERS, 'Put up a statue honouring the Liberation of Night', 'rated 2–3/4 · Revolutionaries ×4 → 30 E',
+      { rate: '2–3', worth: 30, needs: 'Advancing the Liberation of Night: Less slowly', note: 'Nights on the Town, which are hard to get and have few uses here; Jericho pays better.' }),
+    st(ST_HURLERS, 'Put up a statue honouring the Fingerkings', 'rated 3/4 · Parabolan Sightings, no Favours',
+      { rate: '3', worth: '5.4 at Connected: Fingerkings 8', needs: 'Crystalline Knowledge 4', note: 'One of the few non-Parabola sources of Sightings of a Parabolan Landmark.' }),
+    st(ST_HURLERS, 'Put up a statue honouring the Anchoress', 'rated 3/4 · Church ×4 → 30 E',
+      { rate: '3', worth: 30, needs: 'Identified with a Philosophy: The Legacy of the Anchoress, Crystalline Knowledge 4', note: 'Competes with your other Church Favour uses.' }),
+    st(ST_HURLERS, 'Put up a statue honouring Goat-Demons', 'rated 3–4/4 · Hell ×4 → 60 Scrip',
+      { rate: '3–4', worth: '60 Scrip', needs: 'Crystalline Knowledge 1', note: 'Nightsoil sells for Scrip; one of the best Scrip and Echo sources at the Hurlers.' }),
+    st(ST_HURLERS, 'Put up a statue honouring your Overgoat', 'rated 3–4/4 · Hell ×4 → 30 E',
+      { rate: '3–4', worth: 30, needs: 'Crystalline Knowledge 1, an Overgoat', note: 'Aeolian Screams, which sell better once turned into Storm-Threnodies.' }),
+    st(ST_HURLERS, 'Put up a statue honouring your Übergoat', 'rated 3–4/4 · Hell ×4 → 30 E',
+      { rate: '3–4', worth: 30, needs: 'Crystalline Knowledge 1, an Übergoat; costs Fate', note: 'The Anchoress’s reward for Hell Favours instead of Church ones.' }),
+    st(ST_HURLERS, 'Put up a statue honouring your Heptagoat', 'rated 1/4 · Hell ×7 → 15.5 E',
+      { rate: '1', worth: 15.54, needs: 'Crystalline Knowledge 1, a Heptagoat; costs Fate', note: 'Seven Favours for 777 Primordial Shrieks and a lower Displeasure.' }),
+    st(ST_HURLERS, 'Put up a statue honouring yourself, a Steward of the Discordance', 'rated 1–2/4 · Memories of Discordance ×2 → 30 E',
+      { rate: '1–2', worth: 30, needs: 'Crystalline Knowledge 5, Steward of the Discordance 4', note: 'A statue of yourself. Memories of Discordance are near-impossible to get in quantity.' }),
+
+    // --- Marigold Station: building ---
+    st(ST_MARIGOLD, 'Put up a statue honouring Furnace and the Tracklayer’s Union', 'rated 2–3/4 · Revolutionaries ×4 → 30 E',
+      { rate: '2–3', worth: 30, needs: 'Leader of the Tracklayers: Furnace Ancona', note: 'The four Union statues are mechanically the same.' }),
+    st(ST_MARIGOLD, 'Put up a statue honouring Cornelius and the Tracklayer’s Union', 'rated 2–3/4 · Revolutionaries ×4 → 30 E',
+      { rate: '2–3', worth: 30, needs: 'Leader of the Tracklayers: Cornelius', note: 'The four Union statues are mechanically the same.' }),
+    st(ST_MARIGOLD, 'Put up a statue honouring January and the Tracklayer’s Union', 'rated 2–3/4 · Revolutionaries ×4 → 30 E',
+      { rate: '2–3', worth: 30, needs: 'Leader of the Tracklayers: January', note: 'Also advances the Liberation of Night.' }),
+    st(ST_MARIGOLD, 'Put up a statue honouring the Tracklayer’s Union', 'rated 2–3/4 · Revolutionaries ×4 → 30 E',
+      { rate: '2–3', worth: 30, note: 'Also advances the Liberation of Night.' }),
+    st(ST_MARIGOLD, 'Put up a statue honouring the Marigold Devils', 'rated 1–2/4 · Society ×4 → 30.4 E',
+      { rate: '1–2', worth: 30.4, note: 'No other statue works with Society Favours; the payout is barely above Jericho’s.' }),
+    st(ST_MARIGOLD, 'Put up a statue honouring yourself, a Respectable Industrialist', 'rated 1/4 · Criminals ×4 → 30 E',
+      { rate: '1', worth: 30, needs: 'Twilit Smuggler 21', note: 'A statue of yourself. Most of the payout cannot be sold at the Rat Market.' }),
+
+    // --- Ealing Gardens: the card (titled just "Under the Statue") ---
+    stSketch(ST_CARDS.ealing),
+    st(ST_CARDS.ealing, 'Call in favours from Urchins', 'Urchins ×4 ▼ → Puzzle-Damask Scrap ×1 +2 more',
+      { statue: 'Sinning Jenny', rate: '3', worth: 28.5, note: 'Thirsty Bombazine Scrap ×5 and a Bundle of Oddities (up to at least 552).' }),
+    st(ST_CARDS.ealing, 'Call in favours from Tomb Colonists', 'Tomb-Colonies ×2 ▼ → Sapphire ×5 +2 more',
+      { statue: 'Feducci', rate: '2', worth: 18, note: 'Also Venom-Ruby ×49 and a Magnificent Diamond.' }),
+    st(ST_CARDS.ealing, 'Call in favours from Revolutionaries', 'Revolutionaries ×4 ▼ → Proscribed Material ×750',
+      { statue: 'the Jovial Contrarian', rate: '3', worth: 30 }),
+    st(ST_CARDS.ealing, 'Call in favours from Hell', 'Hell ×2 ▼ → Muscaria Brandy ×8, or Brass Ring ×1',
+      { statue: 'Virginia', rate: '2–3', worth: '12.5 to 20', note: 'The Brass Ring is the rare success.' }),
+    st(ST_CARDS.ealing, 'Call in favours from Rubbery Men', 'Rubbery Men ×2 ▼ → Trembling Amber ×1 +1 more',
+      { statue: 'the Tentacled Entrepreneur', rate: '2', worth: 18, note: 'Also Nodule of Warm Amber ×55.' }),
+    st(ST_CARDS.ealing, 'Call in favours from Bohemians', 'Bohemians ×4 ▼ → Ivory Humerus ×2 +1 more',
+      { statue: 'yourself, the Poet-Laureate', rate: '1', worth: 35, note: 'Also Romantic Notion ×50.' }),
+    stRemove(ST_CARDS.ealing, 10),
+
+    // --- Jericho Locks: the card ---
+    stSketch(ST_CARDS.jericho),
+    st(ST_CARDS.jericho, 'Trade on your academic and theological connections', 'Church ×2 ▼ → Warm Amber ×180',
+      { statue: 'the Dean of Xenotheology', rate: '2', worth: 18 }),
+    st(ST_CARDS.jericho, 'Call in favours from the Church', 'Church ×1 ▼ → Labour ×5, or ×4 ▼ → Holy Relic ×2 +1 more',
+      { statue: 'the Bishop of Southwark (1 Favour, Strong-Backed Labour ×5, rated 3) or the Bishop of Saint Fiacre’s (4 Favours, two Holy Relics and 500 Bone Fragments, rated 4)',
+        note: 'Two pages carry this title, one for each statue; the card shows only the one you built.' }),
+    st(ST_CARDS.jericho, 'Converse with a few retired scholars', 'Church ×1 ▼ → Whispered Hint ×1200 +1 more',
+      { statue: 'yourself, Scholar of the Correspondence', rate: '1–2', worth: 12, note: 'Also Expertise of the Second City ×5.' }),
+    stRemove(ST_CARDS.jericho, 10),
+
+    // --- the Magistracy: the card ---
+    stSketch(ST_CARDS.magistracy),
+    st(ST_CARDS.magistracy, 'Call in favours with the Gracious Widow', 'Urchins ×4 ▼ → Puzzle-Damask Scrap ×1 +2 more',
+      { statue: 'the Gracious Widow', rate: '2–3', worth: 29.37, note: 'Thirsty Bombazine Scrap ×5 and a Bundle of Oddities (up to at least 659).' }),
+    st(ST_CARDS.magistracy, 'Receive an offering from the Clay Highwayman', 'Criminals ×2 ▼ → Magnificent Diamond ×1 +3 more',
+      { statue: 'the Clay Highwayman', rate: '3–4', worth: 21.94, note: 'Also Certifiable Scrap, Flawed Diamond ×42 and a bundle of 150 to 450 plus 10 for each Seeing Banditry.' }),
+    st(ST_CARDS.magistracy, 'Set a Watch beside the Statue of Yourself', 'Dangerous 200? → Constables ×1',
+      { statue: 'yourself, Defender of the Public Safety', rate: '2–3', worth: '1 Favour', note: 'A challenge on Dangerous; a success gives a Favour: Constables.' }),
+    stRemove(ST_CARDS.magistracy, 10),
+
+    // --- Station VIII: the card ---
+    stSketch(ST_CARDS.viii, { note: 'Persuasive 250 minus 10 a point of Station VIII: Darkness (220 at Darkness 3); 100 to 120 Drops of Prisoner’s Honey and 5 Romantic Notion on a success.' }),
+    st(ST_CARDS.viii, 'Read the graffiti on the Statue to (subject)', 'Unusual Love Story ×5–7? · fail Nightmares +2',
+      { worth: '2.5 to 3.5', note: 'Watchful 125 plus 25 a point of Darkness, and A Scholar of the Correspondence 5.' }),
+    st(ST_CARDS.viii, 'Write something to sear the eyes of fools and lift up the great powers', 'Violant Ink + Plaque ×4 + Scream ×3 → Storm-Threnody ×1',
+      { worth: 3, note: 'Needs A Pot of Violant Ink, Correspondence Plaque ×4 and Aeolian Scream ×3 (the Correspondent profession).' }),
+    stRemove(ST_CARDS.viii, 3),
+
+    // --- Burrow-Infra-Mump: the card ---
+    stSketch(ST_CARDS.burrow),
+    st(ST_CARDS.burrow, 'Dinner with a Curate', 'Church ×1 + Greyfields ▼ → Society ×1',
+      { statue: 'St Augustine', rate: '1', worth: '−0.20', note: 'Uses up a Bottle of Greyfields 1868 First Sporing.' }),
+    st(ST_CARDS.burrow, 'Supply Honey for a Theological Salon', 'Bohemians ×1 + Honey ×10 ▼ → Revolutionaries ×1',
+      { statue: 'St Hildegard', rate: '1', worth: '−0.20' }),
+    st(ST_CARDS.burrow, 'An Evening of Palaeontological Discussion', 'Benthic +? · Rumour of the Upper River ×1',
+      { statue: 'your Custom-Made Saint', rate: '1–2', worth: 2.5, note: 'Needs a Skeleton in Progress and Connected: Benthic under 41. Raises Connected: Benthic by twice the skeleton’s support for a counter-church theology plus its value over 1000; does not use the skeleton up.' }),
+    st(ST_CARDS.burrow, 'Trade Favours for Bones', 'Luck 50% · Benthic −70 → Ribcage',
+      { statue: 'your Custom-Made Saint', rate: '1–2', worth: '12.5 to 312.5', note: 'Needs Connected: Benthic 20. A Luck challenge: a Flourishing Ribcage for 70 Benthic, a rare Prismatic Frame for 200, a Femur and a Helical Thighbone for 60 on a failure.' }),
+    st(ST_CARDS.burrow, 'Meditate on Death', 'Approaching +5 · Memory of a Much Lesser Self ×1',
+      { statue: 'yourself, alongside Memento Mori', rate: '3–4', worth: '2.5 to 4.5', note: 'A broad Approaching the Gates of the Garden 50 challenge: Incisive Observation, or on a success a Horsehead Amulet, or on a failure only the Memory.' }),
+    st(ST_CARDS.burrow, 'Make an addendum to the Church in the Wild’s Theology', 'Implication ×2 + Memory ×2 ▼ → Verse of Counter-Creed ×1 · Scandal, Suspicion',
+      { statue: 'yourself, Bishop of Watchmaker’s Hill', rate: '1', worth: 2.5, note: 'Costs Fate.' }),
+    stRemove(ST_CARDS.burrow, 10),
+
+    // --- Moulin: the card ---
+    stSketch(ST_CARDS.moulin),
+    st(ST_CARDS.moulin, 'Share a drink with a Zailor', 'Docks ×4 ▼ → Puzzling Map ×2 +1 more',
+      { statue: 'yourself, a Legendary Zee-Captain', rate: '3', worth: '30 (rare success 62.5)', note: 'Also Map Scrap ×50; the rare success is a Salt Steppe Atlas.' }),
+    st(ST_CARDS.moulin, 'Share a tale of your travels', 'Zee-Ztory ▼ → Docks ×1 + Magisterial Lager',
+      { statue: 'yourself, a Legendary Zee-Captain', rate: '3', worth: '0.5 and 1 Favour', note: 'Needs Zeefaring.' }),
+    st(ST_CARDS.moulin, 'Make contact with an agent', 'Great Game ×2 ▼ → Vital Intelligence ×1 +1 more',
+      { statue: 'yourself, London’s Ambassador to the Khanate', rate: '2–3', worth: '18 (36 Scrip)', note: 'Also Moves in the Great Game ×11.' }),
+    st(ST_CARDS.moulin, 'Draw inspiration for a Monograph', 'Cryptic Clue ×175',
+      { statue: 'Clio or the Archaeologist', rate: '3', worth: 3.5, note: 'Only while you have no Object of Historical Study.' }),
+    st(ST_CARDS.moulin, 'Deliver a lecture on Parabolan Historiography', 'Bohemians ×1 gained',
+      { statue: 'Clio or the Archaeologist', rate: '3', worth: '1 Favour', note: 'Needs Renown: Bohemians 10 and an Object of Historical Study of 100 to 130. Does not use the monograph up.' }),
+    st(ST_CARDS.moulin, 'Deliver a lecture on London’s History', 'Church ×1 gained',
+      { statue: 'Clio or the Archaeologist', rate: '3', worth: '1 Favour', note: 'Needs Renown: The Church 10 and an Object of Historical Study of 210 to 240. Does not use the monograph up.' }),
+    st(ST_CARDS.moulin, 'Deliver a lecture on Neathy History', 'Great Game ×1 gained',
+      { statue: 'Clio or the Archaeologist', rate: '3', worth: '1 Favour', note: 'Needs Renown: The Great Game 10 and an Object of Historical Study of 300 to 400. Does not use the monograph up.' }),
+    st(ST_CARDS.moulin, 'A lecture on Hell’s History', 'Hell ×1 gained',
+      { statue: 'Clio or the Archaeologist', rate: '3', worth: '1 Favour', note: 'Needs Renown: Hell 10 and an Object of Historical Study of 500. Does not use the monograph up.' }),
+    stRemove(ST_CARDS.moulin, 10),
+
+    // --- the Hurlers: the card ---
+    stSketch(ST_CARDS.hurlers, { note: 'Persuasive; 100 Drops of Prisoner’s Honey and 5 Romantic Notion on a success. Here a failure costs Wounds +2, not Scandal.' }),
+    st(ST_CARDS.hurlers, 'Call in favours from Revolutionaries', 'Revolutionaries ×4 ▼ → Night on the Town ×12',
+      { statue: 'the Liberation of Night', rate: '2–3', worth: 30, note: 'Also Advancing the Liberation of Night +1.' }),
+    st(ST_CARDS.hurlers, 'Sleep beside the statue', 'Sighting of a Parabolan Landmark ×? (by Fingerkings)',
+      { statue: 'the Fingerkings', rate: '3', worth: '5.4 at Connected: Fingerkings 8', note: 'Costs no Favours; the reward grows with Connected: Fingerkings.' }),
+    st(ST_CARDS.hurlers, 'Call in favours from the Church', 'Church ×4 ▼ → Collated Research ×12',
+      { statue: 'the Anchoress', rate: '3', worth: 30 }),
+    st(ST_CARDS.hurlers, 'Call in favours from Hell', 'Hell ×4 ▼ → Nightsoil ×60',
+      { statue: 'Goat-Demons', rate: '3–4', worth: '60 Scrip' }),
+    st(ST_CARDS.hurlers, 'Ask your Overgoat to perform a trick', 'Hell ×4 ▼ → Aeolian Scream ×12',
+      { statue: 'your Overgoat', rate: '3–4', worth: 30, needs: 'an Overgoat' }),
+    st(ST_CARDS.hurlers, 'Ask your Übergoat to perform a trick', 'Hell ×4 ▼ → Collated Research ×12',
+      { statue: 'your Übergoat', rate: '3–4', worth: 30, needs: 'an Übergoat', note: 'Costs Fate.' }),
+    st(ST_CARDS.hurlers, 'Ask your Heptagoat to perform a trick', 'Hell ×7 ▼ → Primordial Shriek ×777 · Displ −?',
+      { statue: 'your Heptagoat', rate: '1', worth: 15.54, needs: 'a Heptagoat', note: 'Costs Fate.' }),
+    st(ST_CARDS.hurlers, 'Meditate in your statue’s shadow', 'Memory of Discordance ×2 ▼ → Plaque ×60',
+      { statue: 'yourself, a Steward of the Discordance', rate: '1–2', worth: 30 }),
+    stRemove(ST_CARDS.hurlers, 10),
+
+    // --- Marigold Station: the card ---
+    st(ST_CARDS.marigold, 'Sell surplus Railway Steel to the Moloch Line', 'Steel ×1 ▼ → Silent Soul ×1 + Hell ×1',
+      { statue: 'any statue', note: 'The way to turn Railway Steel into Hell Favours.' }),
+    st(ST_CARDS.marigold, 'Call in favours with the Tracklayer’s Union', 'Revolutionaries ×4 ▼ → Vital Intelligence ×2 +2 more',
+      { statue: 'a Union statue (Furnace, Cornelius, January or none)', rate: '2–3', worth: '30 (60 Scrip)', note: 'Also Vienna Opening ×2 and Advancing the Liberation of Night (by an amount the page leaves as a question mark).' }),
+    st(ST_CARDS.marigold, 'Admire the statue', 'Society ×4 ▼ → Magnificent Diamond ×2 +1 more',
+      { statue: 'the Marigold Devils', rate: '1–2', worth: 30.4, note: 'Also Flawed Diamond ×45.' }),
+    st(ST_CARDS.marigold, 'Sit by your statue', 'Criminals ×4 ▼ → Unlawful Device ×1 +2 more',
+      { statue: 'yourself, a Respectable Industrialist', rate: '1', worth: 30, note: 'Also Cave-Aged Code of Honour ×1 and Compromising Document ×10.' }),
+    stRemove(ST_CARDS.marigold, 10),
+  ];
+
+  function stTitle(e) {
+    const lines = [e.name, e.storylet, ''];
+    if (e.statue) lines.push('Offered with: the statue of ' + e.statue + '.');
+    if (e.rate) {
+      lines.push('The guide rates the statue ' + e.rate + ' of 4 (1 very bad, 2 situationally good, 3 pretty decent, 4 exceptional).');
+    }
+    if (e.worth !== undefined) {
+      const w = String(e.worth);
+      lines.push('The guide values the reward at ' + w + (/^[\d.−\s-]+(to [\d.]+)?$/.test(w) ? ' Echoes' : '') + '.');
+    }
+    if (e.needs) lines.push('Needs: ' + e.needs + '.');
+    if (e.note) lines.push(e.note);
+    lines.push('', ST_CFG.rules);
+    return lines.join('\n');
+  }
+
+  ST_OPTIONS.forEach(function (e) { e.title = stTitle(e); });
+
+  const ST_STORYLETS = ST_OPTIONS.map(function (e) { return e.storylet; }).filter(function (s, i, a) { return a.indexOf(s) === i; });
+  const ST_CARD_LIST = Object.keys(ST_CARDS).map(function (k) {
+    return { name: ST_CARDS[k], badge: 'statue rewards', lines: ['Which options it offers depends on the statue you built here.'] };
+  });
+  const ST_INDEX = carouselIndex(ST_OPTIONS);
+  const ST_DEF = {
+    cfg: ST_CFG, options: ST_OPTIONS, index: ST_INDEX, storylets: ST_STORYLETS, cards: ST_CARD_LIST,
+    cardKeys: ST_CARD_LIST.map(function (c) { return normalizeName(c.name); }),
+    // The Offices branches are headed by Station Developments, which counts their options.
+    noHeading: [SD_EG, SD_JL, SD_EV, SD_BA, SD_BI, SD_MO].map(normalizeName), aliases: null,
+    summary: (function () {
+      const s = {};
+      [ST_VIII, ST_HURLERS, ST_MARIGOLD].forEach(function (n) { s[normalizeName(n)] = 'statues'; });
+      return s;
+    })(),
+    cls: 'fl-ux-st', flag: 'flUxSt', branchCls: 'fl-ux-st-branch', branchFlag: 'flUxStBranch',
+    cardCls: 'fl-ux-st-card', cardFlag: 'flUxStCard',
+  };
+
+  function stRatings() { pqRatings(ST_DEF); }
+
+  // === feature: Menace Locations ==========================================
+  //
+  // Menace Locations (Guide): when Wounds, Scandal, Suspicion or Nightmares
+  // reaches 8 you are taken to a place of that menace (a slow boat passing a
+  // dark beach on a silent river, the Tomb-Colonies in disgrace, New Newgate
+  // Prison, a state of some confusion, or the Mirror-Marches) and can leave
+  // only when it is back at 0. Each place has a few storylets of its own and a
+  // deck of its own, red cards that play for no action and cut the menace by
+  // 1 to 3, and white ones with options.
+  //
+  // **What the badge says.** What the option does to the menace, signed and
+  // first, then what else it moves and what a failure does: `Scandal −2 ·
+  // Austere +3 · Hedonist −3`, `Wounds ≈−0.5 · Approaching +1`. Lower is
+  // better, and the sign says so without colour; the badge is teal when it
+  // cuts the menace and brick when it raises it (the same words in both). `?`
+  // is a challenge and `≈` the expected value of a Luck option, worked out
+  // from its two outcomes. A red card in the hand is badged with its one
+  // effect, a white one with the deepest cut any of its options makes.
+  //
+  // Transcribed from the card and option pages (fetched through the API,
+  // 2026-09-26) with Menace Locations (Guide) as the cross-check; the pages
+  // win, and the guide's notes go in the tooltips. Left out: the storylets and
+  // cards of ambition stories that only happen to be set in these places, and
+  // the Conflagration storylet (Parabola's own way out of Nightmares).
+  // **The card badge is confirm-only:** the
+  // decks are full of ordinary names (The Governor, Remnants), so a card in the
+  // hand is badged only while the sidebar greeting names one of the five
+  // places. The options inside an open card or storylet are scoped by that
+  // card and need no greeting. Corrections go in ML_OPTIONS and nowhere else.
+
+  const ML_CFG = {
+    quality: 'Menace', short: 'Menace',
+    rules: 'You leave a menace location when its menace is back at 0. Red cards cost no action; every other option costs one.',
+  };
+  const ML_LOCATIONS = {
+    wounds: { menace: 'Wounds', area: 'a slow boat passing a dark beach on a silent river' },
+    scandal: { menace: 'Scandal', area: 'Disgraced exile in the Tomb-Colonies' },
+    suspicion: { menace: 'Suspicion', area: 'New Newgate Prison - again!' },
+    conf: { menace: 'Nightmares', area: 'A state of some confusion' },
+    mirror: { menace: 'Nightmares', area: 'The Mirror-Marches' },
+  };
+
+  function ml(loc, storylet, name, more) {
+    return Object.assign({ loc: loc, storylet: storylet, name: name }, more);
+  }
+
+  const ML_OPTIONS = [
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', '’...I have attended a ball...’', '’I demonstrated all the latest dances...’', { w: ['Scandal −1', 'Hedonist +3', 'Austere −3'] }),
+    ml('scandal', '’...I have attended a ball...’', '’I spent the evening in a quiet corner’', { w: ['Scandal −2', 'Austere +3', 'Hedonist −3'] }),
+    ml('scandal', '’I Met a Curious Creature.’', '’...but then, we are all maltreated here...’', { w: ['Scandal −1', 'Hedonist +3'] }),
+    ml('scandal', '’I Met a Curious Creature.’', '’...so I set myself the task of feeding it up...’', { w: ['Scandal −2', 'Austere +3'] }),
+    ml('scandal', '’I Met a Curious Creature.’', '’...I made overtures...’', { w: ['Monsters +1'], pay: 'F.F. Gebrandt’s Tincture of Vigour ×1', needs: 'F.F. Gebrandt’s Tincture of Vigour 1 x, Making Progress in the Labyrinth of Tigers 16', lock: 'Tomb-Lion 1 x' }),
+
+    // --- a slow boat passing a dark beach on a silent river (Wounds) ---
+    ml('wounds', '...or you could just give up', 'Lie back and close your eyes', { w: ['Wounds +3', 'Approaching +8', 'Nightmares −3'] }),
+    ml('wounds', '...or you could just give up', 'Lie back and have a friendly chat', { w: ['Wounds −5', 'Nightmares +2'], needs: 'Associating with a Youthful Naturalist exactly 800' }),
+    ml('wounds', '...or you could just give up', 'Lie back and meditate', { w: ['Wounds −5', 'Nightmares +2'], needs: 'Associating with a Youthful Naturalist exactly 900' }),
+    ml('wounds', '...or you could just give up', 'Lie back and daydream', { w: ['Wounds −5', 'Nightmares −2'], needs: 'Associating with a Youthful Naturalist exactly 1000' }),
+
+    // --- The Mirror-Marches (Nightmares) ---
+    ml('mirror', 'A bird-of-paradise', 'Follow it', { w: ['Nightmares −2', 'Fingerwork +5'] }),
+    ml('mirror', 'A bird-of-paradise', 'Pick up the feather', { w: ['Nightmares +2', 'Fingerwork +5'] }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'A Chilly Infestation', '’So I chose to sleep without the candle...’', { w: ['Scandal −1', 'Burial dream +1', 'Nightmares +3'] }),
+    ml('scandal', 'A Chilly Infestation', '’So I suffered...’', { w: ['Scandal −2'] }),
+    ml('scandal', 'A Chilly Infestation', '’A plan occured!’', { w: ['Scandal −3', 'Watchful +2'], pay: 'Sudden Insight ×1', needs: 'Sudden Insight 1 x' }),
+    ml('scandal', 'A Chilly Infestation', '’I climbed to the top of the house once more.’', { w: ['Scandal −1', 'Stairs −18'], needs: 'Haunted by Stairs, Transformed by Stairs 20-29' }),
+
+    // --- New Newgate Prison - again! (Suspicion) ---
+    ml('suspicion', 'A Favour for an Old Friend', 'Perform a favour for the Dapper Underworld Boss', { pay: 'Favours: Criminals ×1', lock: 'Flowers for Peter 10' }),
+    ml('suspicion', 'A Favour for an Old Friend', 'Return to the Dapper Underworld Boss', { get: 'Bat with Attitude ×1', needs: 'Flowers for Peter exactly 5' }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'A friend of sorts', 'A contest of wits', { w: ['Scandal −2'], get: 'Sudden Insight ×1' }),
+    ml('scandal', 'A friend of sorts', 'A contest of skill', { w: ['Scandal −2', 'Wounds +1'], get: 'Hard-Earned Lesson ×1' }),
+
+    // --- A state of some confusion (Nightmares) ---
+    ml('conf', 'A friendly visage', 'Follow the False Student', {  }),
+
+    // --- The Mirror-Marches (Nightmares) ---
+    ml('mirror', 'A green vine', 'Grasp the vine', { luck: 50, w: ['Nightmares −3', 'Fingerwork +5'], get: 'Cryptic Clue ×10' }),
+
+    // --- A state of some confusion (Nightmares) ---
+    ml('conf', 'A lamentable affair', 'Spurn her advances', { w: ['Manager +2'] }),
+    ml('conf', 'A lamentable affair', 'Invite her back to your room', { w: ['Nightmares +2', 'Falling Cities +5'] }),
+    ml('conf', 'A lamentable affair', 'Invite her to discuss meteorology', { w: ['Nightmares −3', 'Stormy-Eyed −1'], needs: 'Stormy-Eyed 1' }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'A letter from an old acquaintance - Artist’s Model', '’I replied fondly.’', { w: ['Hedonist +3', 'Austere −3'], get: 'Confident Smile ×1' }),
+    ml('scandal', 'A letter from an old acquaintance - Artist’s Model', '’I replied coolly.’', { w: ['Scandal −2', 'Austere +3', 'Hedonist −3'] }),
+    ml('scandal', 'A letter from an old acquaintance - Artist', '’I wrote a very personal reply.’', { w: ['Hedonist +3', 'Austere −3'], get: 'Confident Smile ×1' }),
+    ml('scandal', 'A letter from an old acquaintance - Artist', '’I wrote a very professional reply.’', { w: ['Scandal −2', 'Austere +3', 'Hedonist −3'] }),
+    ml('scandal', 'A letter from the Comtessa’s Father', '’As it should be.’', { w: ['Scandal +3', 'Hedonist +3', 'Austere −3'], get: 'Favours: Tomb-Colonies ×1' }),
+    ml('scandal', 'A letter from the Comtessa’s Father', '’He is too kind.’', { w: ['Scandal −2', 'Nightmares +1', 'Austere +3', 'Heartless −3'] }),
+    ml('scandal', 'A letter from the Palace', 'He has proven useful', { w: ['Scandal −2', 'Ruthless +1', 'Steadfast −1'], get: 'Intriguing Snippet ×1' }),
+    ml('scandal', 'A letter from the Palace', 'He has proven himself a friend', { w: ['Scandal −2', 'Steadfast +1', 'Heartless −1'], get: 'Intriguing Snippet ×1', pay: 'Penny ×50' }),
+    ml('scandal', 'A letter to a trusted friend', '’Tell me: has the memory of that unfortunate affair faded?’', { b: ['Persuasive', 50], w: ['Scandal +1'], f: ['Scandal −1'] }),
+    ml('scandal', 'A letter to a trusted friend', '’It was, at least, an opportunity to ascend to a different roof-top...’', { w: ['Scandal −1', 'Stairs −18'], needs: 'Haunted by Stairs, Transformed by Stairs 20-29' }),
+    ml('scandal', 'A letter to an old flame', '’...I have written to the Bishop of St Fiacre’s...’', { w: ['Scandal −6'], pay: 'Favours: The Church ×1', needs: 'Favours: The Church 1 x' }),
+    ml('scandal', 'A letter to an old flame', '’...I have a few friends yet in Society...’', { luck: 90, w: ['Scandal −6'], f: ['Scandal +5'], pay: 'Favours: Society ×1', needs: 'Favours: Society 1 x' }),
+    ml('scandal', 'A letter to an old flame', '’...I flatter myself the Duchess was fond of me...’', { w: ['Scandal −3', 'Duchess −10'], needs: 'Connected: The Duchess 5' }),
+    ml('scandal', 'A letter to an old flame', '’...I have, with some trepidation, contacted a hooded acquaintance...’', { w: ['Scandal −10', 'Masters −1'], needs: 'Connected: The Masters of the Bazaar 1' }),
+    ml('scandal', 'A letter to an old flame', '’I penned a letter to an architect I once knew...’', { w: ['Scandal −1', 'Stairs −18'], needs: 'Haunted by Stairs, Transformed by Stairs 20-29' }),
+
+    // --- A state of some confusion (Nightmares) ---
+    ml('conf', 'A lost secret', 'Search for your missing secret', { b: ['Watchful', 30], w: ['Nightmares +5'], f: ['Nightmares −4'], r: ['Nightmares +3'], get: 'Appalling Secret ×1' }),
+    ml('conf', 'A lost secret', 'Wait for it to come back to you', { luck: 50, w: ['Nightmares +2'], f: ['Nightmares −2'], get: 'Appalling Secret ×1' }),
+    ml('conf', 'A lost secret', 'Keep a weather eye open for it', { w: ['Nightmares −3', 'Stormy-Eyed −1'], needs: 'Stormy-Eyed 1' }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'A moment of joy', '’I took full advantage of the situation.’', { w: ['Hedonist +3', 'Neathy Delights +1', 'Austere −3', 'Melancholy −1'] }),
+    ml('scandal', 'A moment of joy', '’I restrained my appetites.’', { w: ['Scandal −2', 'Austere +3', 'Melancholy +1', 'Hedonist −3'] }),
+    ml('scandal', 'A moment of joy', '’I examined the cellar steps.’', { w: ['Scandal −1', 'Stairs −18'], needs: 'Haunted by Stairs, Transformed by Stairs 20-29' }),
+
+    // --- New Newgate Prison - again! (Suspicion) ---
+    ml('suspicion', 'A Pile of Stinking Rags', 'Prod the heap of rags', {  }),
+
+    // --- A state of some confusion (Nightmares) ---
+    ml('conf', 'A plan occurs', 'Start a fire in the kitchens', { w: ['Nightmares −5', 'Fire dream −5'] }),
+    ml('conf', 'A plan occurs', 'Set fire to your mirror (11 FATE)', { w: ['Fingerwork +20', 'Watchful +1'] }),
+    ml('conf', 'A plan occurs', 'I will call the lightning down upon them! (3 FATE)', { w: ['Nightmares −3', 'Stormy-Eyed +3'] }),
+    ml('conf', 'A plan occurs', 'Start the fire', { w: ['Nightmares −2', 'Stormy-Eyed −1'], needs: 'Stormy-Eyed 1' }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'A repairer of reputations (Hallowmas)', 'You confronted the intruder', {  }),
+
+    // --- The Mirror-Marches (Nightmares) ---
+    ml('mirror', 'A shining beetle', 'Catch the beetle', { luck: 50, w: ['Nightmares −3', 'Fingerwork +5'], f: ['Nightmares +2', 'Wounds +2'], get: 'Flawed Diamond ×1' }),
+
+    // --- A state of some confusion (Nightmares) ---
+    ml('conf', 'A shining nest', 'Make something sensible', { w: ['Nightmares +1', 'Fingerwork +5'] }),
+    ml('conf', 'A shining nest', 'Make a garland for your hair', { w: ['Nightmares −1', 'Stormy-Eyed −1'], needs: 'Stormy-Eyed 1' }),
+    ml('conf', 'A single-minded gentleman', 'Go with him', { w: ['Nightmares +2'], get: 'Shard of Glim ×1' }),
+    ml('conf', 'A single-minded gentleman', 'Push him down the stairs', { w: ['Nightmares −3'] }),
+    ml('conf', 'A single-minded gentleman', 'I will speak to the stars (3 FATE)', { w: ['Nightmares −3', 'Stormy-Eyed +3'] }),
+    ml('conf', 'A single-minded gentleman', 'Watch the weather', { w: ['Nightmares −1', 'Stormy-Eyed −1'], needs: 'Stormy-Eyed 1' }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'A Smuggler scorned', 'Why should you?', {  }),
+    ml('scandal', 'A Smuggler scorned', 'Who was he again?', { w: ['Scandal −2'] }),
+    ml('scandal', 'A Smuggler scorned', 'Send him a token of your affection (12 FATE)', { pay: 'Nodule of Deep Amber ×100' }),
+
+    // --- The Mirror-Marches (Nightmares) ---
+    ml('mirror', 'A snatch of music', 'Follow the music', { w: ['Nightmares +2'] }),
+    ml('mirror', 'A snatch of music', 'I will sing with the forest!', { w: ['Nightmares −1', 'Stormy-Eyed +1'], needs: 'Stormy-Eyed 1-10' }),
+    ml('mirror', 'A thunderstorm', 'Listen to the thunder', { w: ['Nightmares −4', 'Fingerwork +5'], needs: 'Having Recurring Dreams: What the Thunder Said 10' }),
+    ml('mirror', 'A thunderstorm', 'Take shelter', { w: ['Nightmares −1'] }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'A tiny square of paper...', '...on the operations of the Law', { w: ['Scandal −1', 'Shadowy +5'], get: 'Hastily Scrawled Warning Note ×1' }),
+    ml('scandal', 'A tiny square of paper...', '...on underhanded means of battle', { w: ['Scandal −1', 'Dangerous +5'], get: 'Hard-Earned Lesson ×1' }),
+
+    // --- The Mirror-Marches (Nightmares) ---
+    ml('mirror', 'A tree of scars', 'Try to read the markings', { w: ['Nightmares −1', 'Icarus +5'] }),
+    ml('mirror', 'A tree of scars', 'Read the markings, if you know how', { w: ['Nightmares −5', 'Icarus +5'], needs: 'A Scholar of the Correspondence 1' }),
+
+    // --- New Newgate Prison - again! (Suspicion) ---
+    ml('suspicion', 'A visit from a priest', 'Lament your sins', { w: ['Suspicion +2', 'Nightmares −2', 'Scandal −2'] }),
+    ml('suspicion', 'A visit from a priest', 'Admit nothing', { w: ['Suspicion −1–2'] }),
+
+    // --- A state of some confusion (Nightmares) ---
+    ml('conf', 'A word with the manager', 'Complain to the manager', { w: ['Nightmares −10', 'Manager −15'] }),
+    ml('conf', 'A word with the manager', 'Thank the manager', { w: ['Nightmares +3', 'Manager −15'] }),
+    ml('conf', 'A word with the manager', 'Speak to the manager about...', { w: ['Watchful +3', 'Manager −15'], get: 'First City Coin ×1', needs: 'Ambition: Heart’s Desire - The Bishop of St Fiacre’s 4' }),
+    ml('conf', 'A word with the manager', 'Ask the manager to make it rain', { luck: 50, w: ['Nightmares −10', 'Stormy-Eyed −1', 'Manager −15'], f: ['Nightmares −5', 'Stormy-Eyed −1', 'Manager −15'], get: 'Appalling Secret ×1', needs: 'Stormy-Eyed 1' }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'Among the dead', 'An investment in soaps', { w: ['Scandal −1', 'Hedonist +3', 'Nightmares −1', 'Austere −3'], pay: 'Penny ×50', needs: 'Penny 50 x' }),
+    ml('scandal', 'Among the dead', 'An investment in self-control', { w: ['Scandal −2', 'Austere +3', 'Hedonist −3'] }),
+    ml('scandal', 'Among the dead', '’I had to get away...’', { w: ['Scandal −1', 'Stairs −18'], needs: 'Haunted by Stairs, Transformed by Stairs 20-29' }),
+
+    // --- A state of some confusion (Nightmares) ---
+    ml('conf', 'An Abrupt Door', 'Unlock the door', { w: ['Nightmares −5–6'] }),
+    ml('conf', 'An Abrupt Door', 'Hurry away from the door', { w: ['Nightmares −4'] }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'An unexplained disappearance', 'Press the matter', { w: ['Scandal −1', 'Forceful +1', 'Nightmares +1', 'Subtle −1'] }),
+    ml('scandal', 'An unexplained disappearance', '’I took the hint...’', { w: ['Scandal −1', 'Subtle +1', 'Nightmares −1', 'Forceful −1'] }),
+    ml('scandal', 'An unexplained disappearance', '’I searched for them in the rooftops...’', { luck: 50, w: ['Scandal −2', 'Stairs −18'], f: ['Scandal −1', 'Stairs −18'], needs: 'Haunted by Stairs, Transformed by Stairs 20-29' }),
+    ml('scandal', 'An Unusual Remedy', '’I pressed the matter’', { b: ['Persuasive', 100], w: ['Scandal −1', 'Nightmares +1', 'Forceful +3', 'Subtle −3'], f: ['Forceful +3', 'Subtle −3'], pay: 'Appalling Secret ×1' }),
+    ml('scandal', 'An Unusual Remedy', '’I did not press the matter’', { w: ['Scandal −2', 'Subtle +1', 'Forceful −3'] }),
+    ml('scandal', 'An Unusual Remedy', '’I followed her...’', { w: ['Scandal −1', 'Nightmares −1', 'Stairs −18'], needs: 'Haunted by Stairs, Transformed by Stairs 20-29' }),
+
+    // --- New Newgate Prison - again! (Suspicion) ---
+    ml('suspicion', 'Bilge duty', 'Volunteer', { w: ['Suspicion −2', 'Wounds +2', 'Dangerous −10', 'Shadowy −10', 'Persuasive −10'], get: 'Favours: Criminals ×1' }),
+    ml('suspicion', 'Bilge duty', 'Avoid', { w: ['Suspicion −1'], pay: 'Whispered Hint ×1', needs: 'Whispered Hint 1 x' }),
+    ml('suspicion', 'Bribery', 'Arrange for some booze', { w: ['Suspicion −3'], pay: 'Bottle of Greyfields 1879 ×50', needs: 'Bottle of Greyfields 1879 50 x' }),
+    ml('suspicion', 'Bribery', 'Candles for the gaolers', { w: ['Suspicion −3'], pay: 'Foxfire Candle Stub ×50', needs: 'Foxfire Candle Stub 50 x' }),
+    ml('suspicion', 'Bribery', 'A better breed of shiv', { w: ['Suspicion −7'], get: 'Favours: Criminals ×1', pay: 'Skyglass Knife ×1', needs: 'Skyglass Knife 1 x' }),
+    ml('suspicion', 'Bribery', 'Appeal to a higher court (7 FATE)', { w: ['Wounds −3'], get: 'Bottle of Morelways 1872 ×1' }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'Burial of the Dead: Still Haunted by Stairs', '’There are many steps to climb in this place...’', {  }),
+    ml('scandal', 'Causing a scene', '’...I flung it into the fire.’', { w: ['Scandal −1', 'Forceful +3', 'Austere −3'] }),
+    ml('scandal', 'Causing a scene', '’...I returned it to him, politely.’', { w: ['Scandal −2', 'Austere +3', 'Nightmares +1', 'Forceful −3'], pay: 'Confident Smile ×1' }),
+    ml('scandal', 'Causing a scene', '’I stormed upstairs’', { w: ['Scandal −1', 'Stairs −18'], needs: 'Haunted by Stairs, Transformed by Stairs 20-29' }),
+
+    // --- A state of some confusion (Nightmares) ---
+    ml('conf', 'Chat to the guests', 'Reminisce about Fallen London', { n: ['Nightmares', 8], w: ['Nightmares −1', 'Watchful −4'], f: ['Nightmares −3'] }),
+
+    // --- New Newgate Prison - again! (Suspicion) ---
+    ml('suspicion', 'Contact your lawyer', 'Pen a letter', { luck: 50, w: ['Suspicion −2'], f: ['Suspicion +1'] }),
+    ml('suspicion', 'Contact your lawyer', 'Write instead to the Ambitious Barrister', { luck: 50, w: ['Suspicion −4'], f: ['Suspicion +2'], needs: 'A Person of Some Importance -' }),
+
+    // --- a slow boat passing a dark beach on a silent river (Wounds) ---
+    ml('wounds', 'Dice with the Boatman', 'Rattling the dice in your cupped hands...', { luck: 50, w: ['Wounds −3', 'Approaching +1'], f: ['Wounds +2'] }),
+
+    // --- A state of some confusion (Nightmares) ---
+    ml('conf', 'Drink from the fountain in the lobby', 'Take a deep gulp', { n: ['Nightmares', 8], w: ['Nightmares −1', 'Persuasive −4'], f: ['Nightmares −3'] }),
+    ml('conf', 'Drink from the fountain in the lobby', 'Immerse yourself in the fountain', { w: ['Nightmares −3', 'Stormy-Eyed −1'], needs: 'Stormy-Eyed 1' }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'Flowers for Peter', 'Call on Peter to fulfill his debt', { pay: 'Favours: Tomb-Colonies ×1', needs: 'Favours: Tomb-Colonies 1 x' }),
+
+    // --- The Mirror-Marches (Nightmares) ---
+    ml('mirror', 'Heavenly fruits', 'Eat a plum', { w: ['Nightmares +1'], get: 'Unaccountably Peckish ×1' }),
+    ml('mirror', 'Heavenly fruits', 'Eat some grapes', { w: ['Nightmares +1', 'Wounds +1'] }),
+    ml('mirror', 'Heavenly fruits', 'Eat some cherries', { w: ['Nightmares −2'], pay: 'Unaccountably Peckish ×1' }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'Home: at last', 'Return home unchanged', { w: ['Waves +5'], get: 'Zee-Ztory ×1, Memory of Distant Shores ×1', lock: 'Scandal, Hedonist 10, Austere 10, Visiting with Singular Purpose' }),
+    ml('scandal', 'Home: at last', 'Return home a little more subdued', { w: ['Waves +2'], get: 'Zee-Ztory ×1, Memory of Distant Shores ×1', needs: 'Austere 10', lock: 'Scandal, Visiting with Singular Purpose' }),
+    ml('scandal', 'Home: at last', 'Unrepentant!', { w: ['Scandal +3', 'Waves +10'], get: 'Zee-Ztory ×1, Memory of Distant Shores ×1, Scrap of Incendiary Gossip ×1', needs: 'Hedonist 10', lock: 'Scandal, Austere 10, Visiting with Singular Purpose' }),
+
+    // --- a slow boat passing a dark beach on a silent river (Wounds) ---
+    ml('wounds', 'How much can you see of the far bank?', 'You can almost see details.', { w: ['Wounds +5', 'Nightmares +3', 'Approaching +5'], get: 'Appalling Secret ×3', needs: 'Watchful 20' }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'Lamentable tastes', '’I abandoned the endeavour’', { w: ['Scandal −1', 'Hedonist +3', 'Austere −3'] }),
+    ml('scandal', 'Lamentable tastes', '’I persevered for hours. Hours!’', { w: ['Scandal −6', 'Austere +3', 'Nightmares +2', 'Hedonist −3'], get: 'Appalling Secret ×2' }),
+    ml('scandal', 'Lamentable tastes', '’I escaped upstairs’', { w: ['Scandal −1', 'Stairs −18'], needs: 'Haunted by Stairs, Transformed by Stairs 20-29' }),
+
+    // --- a slow boat passing a dark beach on a silent river (Wounds) ---
+    ml('wounds', 'Looking upwards', 'Haunt someone on the Surface', { w: ['Wounds −3'] }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'Musings on the Causes of Exile', 'Looking for disreputable help', { w: ['Scandal −3'], get: 'Whispered Hint ×50, Bottle of Black Wings Absinthe ×1' }),
+
+    // --- The Mirror-Marches (Nightmares) ---
+    ml('mirror', 'Orange lilies', 'Get closer to the lilies', { w: ['Nightmares +2', 'Wounds +2', 'Fingerwork +5'] }),
+
+    // --- a slow boat passing a dark beach on a silent river (Wounds) ---
+    ml('wounds', 'Pilfer a few breaths from another passenger', 'Carefully now...', { b: ['Shadowy', 40], w: ['Wounds −2', 'Approaching +5'] }),
+    ml('wounds', 'Play Chess with the Boatman', 'He’s done this before...', { b: ['Watchful', 10], w: ['Wounds −3', 'Approaching +1', 'Opponent +1', 'Lessons +1'], f: ['Wounds +2', 'Lessons +1'], lock: 'The Boatman’s Opponent 5' }),
+    ml('wounds', 'Play Chess with the Boatman', 'A smile of recognition', { b: ['Watchful', 30], w: ['Wounds −3', 'Opponent +2', 'Approaching +1', 'Lessons +1'], f: ['Wounds +2', 'Lessons +1'], needs: 'The Boatman’s Opponent 5-8' }),
+    ml('wounds', 'Play Chess with the Boatman', 'A nod of respect', { b: ['Watchful', 100], w: ['Wounds −2', 'Opponent +3', 'Approaching +1', 'Lessons +1'], f: ['Wounds +2', 'Lessons +1'], needs: 'The Boatman’s Opponent 9 to 14' }),
+    ml('wounds', 'Play Chess with the Boatman', 'A friendly greeting', { b: ['Watchful', 150], w: ['Wounds −2', 'Opponent +5', 'Approaching +1', 'Lessons +1'], f: ['Wounds +2', 'Opponent +2', 'Lessons +1'], needs: 'The Boatman’s Opponent 15 to 24' }),
+    ml('wounds', 'Play Chess with the Boatman', 'A grin of sorts', { b: ['Watchful', 200], w: ['Wounds −2', 'Opponent +5', 'Approaching +1', 'Lessons +1'], f: ['Wounds +2', 'Opponent +3', 'Lessons +1'], needs: 'The Boatman’s Opponent 25 - 29' }),
+    ml('wounds', 'Play Chess with the Boatman', 'A silent inclination of the skull', { b: ['Watchful', 255], w: ['Wounds −2', 'Opponent +5', 'Approaching +1', 'Lessons +1'], f: ['Wounds +2', 'Opponent +3', 'Lessons +1'], needs: 'The Boatman’s Opponent 30 - 39' }),
+    ml('wounds', 'Play Chess with the Boatman', 'Your move...', { b: ['Watchful', 300], w: ['Wounds −2', 'Nightmares +2', 'Lessons +1'], f: ['Wounds +3', 'Nightmares +3', 'Lessons +1'], get: 'Extraordinary Implication ×1, Appalling Secret ×1', getf: 'Appalling Secret ×1', needs: 'The Boatman’s Opponent 40', lock: 'Nightmares 10' }),
+    ml('wounds', 'Play Chess with the Boatman', 'Play to lose as well as to win', { luck: 80, w: ['Wounds −2', 'Lessons +1'], f: ['Wounds +2', 'Lessons +1'], needs: 'The Boatman’s Opponent 40, Of Stripes, and Coils 150' }),
+
+    // --- New Newgate Prison - again! (Suspicion) ---
+    ml('suspicion', 'Prison life', 'Observing New Newgate', { b: ['Watchful', 40], w: ['Suspicion −1'], f: ['Suspicion +1', 'Persuasive −1'], get: 'Cryptic Clue ×20' }),
+    ml('suspicion', 'Prison life', 'Keep your nose clean', { w: ['Suspicion −2', 'Persuasive −1'] }),
+    ml('suspicion', 'Promises of revenge', 'The matters of the heart', { w: ['Suspicion −1'] }),
+
+    // --- The Mirror-Marches (Nightmares) ---
+    ml('mirror', 'Purple orchids', 'Pick an orchid', { w: ['Nightmares −2'] }),
+
+    // --- a slow boat passing a dark beach on a silent river (Wounds) ---
+    ml('wounds', 'Recall pitched battle against the Starved Men', 'Ask the Boatman whether Starved Men can die', { w: ['Wounds +3', 'Nightmares +3'], get: 'Journal of Infamy ×4' }),
+    ml('wounds', 'Remember a ruddy set of armour', 'Follow the Knight of Numbers', {  }),
+    ml('wounds', 'Remember where you fell', 'A sobering thought', { w: ['Wounds −2', 'Approaching +5'] }),
+    ml('wounds', 'Remember where you fell', 'A spark of light (11 FATE)', {  }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'Remnants', 'Ignore it', { w: ['Scandal −2', 'Hedonist +3', 'Austere −3'] }),
+    ml('scandal', 'Remnants', 'Investigate it', { w: ['Scandal +1'], get: 'Memory of Distant Shores ×1, Favours: Tomb-Colonies ×1', needs: 'A Scholar of the Correspondence 1, Archaeologist 1' }),
+    ml('scandal', 'Remnants', '’Climbing, always climbing’', { w: ['Scandal −1', 'Stairs −18'], needs: 'Haunted by Stairs, Transformed by Stairs 20-29' }),
+    ml('scandal', 'Remnants', '’Inquiries about Limestone’', { needs: 'The Prelapsarian Exhibition 40-49', lock: 'Clue: The Tomb-Colonies' }),
+
+    // --- New Newgate Prison - again! (Suspicion) ---
+    ml('suspicion', 'Scratched on the wall', 'Read it', { w: ['Suspicion −2', 'Nightmares +1'] }),
+    ml('suspicion', 'Scratched on the wall', 'Scratch a ribald ballad of your own', { b: ['Persuasive', 60], w: ['Suspicion −2', 'Waves +4'], f: ['Suspicion −1'] }),
+
+    // --- A state of some confusion (Nightmares) ---
+    ml('conf', 'See Yourself Wholly Changed', 'Consider', { w: ['Nightmares −3'] }),
+    ml('conf', 'See Yourself Wholly Changed', 'Commit', { needs: 'The Date - After Certain Neathy Affairs are Complete' }),
+
+    // --- a slow boat passing a dark beach on a silent river (Wounds) ---
+    ml('wounds', 'Speak of Replacing Him', 'Ask questions', { w: ['Wounds −3'] }),
+    ml('wounds', 'Speak of Replacing Him', 'Commit', { needs: 'The Date - After Certain Neathy Affairs are Complete' }),
+
+    // --- New Newgate Prison - again! (Suspicion) ---
+    ml('suspicion', 'Start a brawl', '"Who among you would like some of this?!"', { b: ['Dangerous', 40], w: ['Suspicion −1'], f: ['Suspicion +1'] }),
+    ml('suspicion', 'Starvation day', 'Nothing to be done', { w: ['Suspicion −1', 'Wounds +1', 'Dangerous −5', 'Persuasive −5', 'Shadowy −5', 'Watchful −5'] }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'The construction of the ’Grand Sanatoria’', '’How are they constructed?’', { b: ['Watchful', 100], w: ['Scandal −1'], get: 'Cryptic Clue ×50' }),
+    ml('scandal', 'The construction of the ’Grand Sanatoria’', '’...mysteries I have chosen not to pursue’', { w: ['Scandal −2'] }),
+    ml('scandal', 'The construction of the ’Grand Sanatoria’', '’Of course, I climbed the building...’', { w: ['Scandal −1', 'Stairs −18'], needs: 'Haunted by Stairs, Transformed by Stairs 20-29' }),
+
+    // --- New Newgate Prison - again! (Suspicion) ---
+    ml('suspicion', 'The Governor', 'Having a little word', { b: ['Persuasive', 40], w: ['Suspicion −3'], f: ['Suspicion +1'], pay: 'Intriguing Snippet ×2', needs: 'Intriguing Snippet 2 x' }),
+
+    // --- The Mirror-Marches (Nightmares) ---
+    ml('mirror', 'The mirror-frames', 'Look at the wooden frame', { w: ['Nightmares −2'], needs: 'Nightmares 1-2' }),
+    ml('mirror', 'The mirror-frames', 'Look at the brass frame', { w: ['Nightmares −2', 'Scandal +0–1'], needs: 'Nightmares 3-5' }),
+    ml('mirror', 'The mirror-frames', 'Look at the silver frame', { w: ['Nightmares −2', 'Wounds +1'], needs: 'Nightmares 4-5' }),
+    ml('mirror', 'The mirror-frames', 'Look at the iron frame', { w: ['Nightmares −2', 'Wounds +2'], needs: 'Nightmares 6' }),
+    ml('mirror', 'The mirror-frames', 'Look at the ivory frame', { luck: 90, w: ['Nightmares −2'], f: ['Nightmares −2'], get: 'Cat: Getting Warmer ×9', pay: 'Mouse: So Little Time ×1', needs: 'Mouse: So Little Time 3-6, Playing Cat and Mouse with an Evasive Target exactly 6' }),
+
+    // --- New Newgate Prison - again! (Suspicion) ---
+    ml('suspicion', 'The new cell', 'Decipher the graffiti', {  }),
+    ml('suspicion', 'The new cell', 'Ignore the graffiti', { w: ['Suspicion −1'] }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'The price of forgiveness', 'Send a gift to the Church', { w: ['Scandal −3'], pay: 'Foxfire Candle Stub ×200', needs: 'Foxfire Candle Stub 200 x' }),
+    ml('scandal', 'The price of forgiveness', 'Send a gift to a fashionable charity', { w: ['Scandal −3'], pay: 'Proscribed Material ×50', needs: 'Proscribed Material 50 x' }),
+    ml('scandal', 'The price of forgiveness', 'Send a donation to the revolutionary cause', { w: ['Scandal −3', 'Suspicion +1'], pay: 'Primordial Shriek ×50', needs: 'Primordial Shriek 50 x' }),
+    ml('scandal', 'The price of forgiveness', 'An Imperial pronouncement? (7 FATE)', {  }),
+
+    // --- New Newgate Prison - again! (Suspicion) ---
+    ml('suspicion', 'The Repentant Forger', 'Strike up a friendship', { w: ['Suspicion −2', 'Wounds −1', 'Nightmares −1'], lock: 'Uncovering Secrets Framed in Gold 54' }),
+    ml('suspicion', 'The Repentant Forger', 'Forgive, or forget (20 FATE)', { w: ['Suspicion −2', 'Forger +1', 'Wounds −1', 'Nightmares −1'] }),
+    ml('suspicion', 'The screaming prisoner', 'Ask around', { w: ['Suspicion −1', 'Nightmares +1'], get: 'Mystery of the Elder Continent ×1, Tale of Terror!! ×1' }),
+    ml('suspicion', 'The screaming prisoner', 'Keep your head down', { w: ['Suspicion −1'] }),
+
+    // --- The Mirror-Marches (Nightmares) ---
+    ml('mirror', 'The seductive forest', 'Follow the sound of water', { luck: 50, w: ['Nightmares −5'], f: ['Nightmares +2'] }),
+    ml('mirror', 'The seductive forest', 'Follow the scent of roses', { w: ['Nightmares −1'] }),
+
+    // --- New Newgate Prison - again! (Suspicion) ---
+    ml('suspicion', 'The Stuttering Fence', 'Connections', { w: ['Suspicion −3'], pay: 'Favours: Criminals ×1', needs: 'Favours: Criminals 1 x' }),
+    ml('suspicion', 'The Stuttering Fence', 'Look after him', { w: ['Suspicion −1'], needs: 'Dangerous 10' }),
+    ml('suspicion', 'The talkative gaoler', 'Listen to his woes', { w: ['Suspicion −1', 'Persuasive −2'], get: 'Whispered Hint ×5' }),
+    ml('suspicion', 'The talkative gaoler', 'A grass', { get: 'A Turncoat ×1', needs: 'Favours: Criminals 1 x', lock: 'Suspicion > Favours: Criminals' }),
+
+    // --- The Mirror-Marches (Nightmares) ---
+    ml('mirror', 'The temple complex', 'Be enticed by the temples', { b: ['Watchful', 100], w: ['Nightmares −1', 'Falling Cities +5', 'Icarus +5'] }),
+    ml('mirror', 'The temple complex', 'Stay away from the ruins', { w: ['Nightmares +1', 'Fingerwork +5'] }),
+
+    // --- New Newgate Prison - again! (Suspicion) ---
+    ml('suspicion', 'The Troubled Undertaker', 'Helping with the dead', { b: ['Persuasive', 5], w: ['Suspicion −1'], f: ['Suspicion +1'] }),
+
+    // --- A state of some confusion (Nightmares) ---
+    ml('conf', 'The view from your room', 'Think on the city', { w: ['Nightmares −3', 'Icarus +5'] }),
+    ml('conf', 'The view from your room', 'Imagine there were weather', { w: ['Nightmares −3', 'Stormy-Eyed −1'], needs: 'Stormy-Eyed 1' }),
+    ml('conf', 'The view from your room', 'Pretend it’s not there', { w: ['Nightmares −1'] }),
+    ml('conf', 'The view from your room', 'A star!', { w: ['Nightmares −1', 'Stormy-Eyed −1'], needs: 'Stormy-Eyed 1' }),
+    ml('conf', 'The view from your room', 'Watch', { w: ['Nightmares −3', 'Falling Cities +5'], get: 'Relic of the Fourth City ×1' }),
+    ml('conf', 'The view from your room', 'Plot', { w: ['Nightmares +1'], needs: 'Having Recurring Dreams: A Game of Chess 5' }),
+    ml('conf', 'The view from your room', 'Wait for it to rain', { w: ['Nightmares −3', 'Stormy-Eyed −1'], needs: 'Stormy-Eyed 1' }),
+
+    // --- New Newgate Prison - again! (Suspicion) ---
+    ml('suspicion', 'The Warden', 'The Snuffer', { b: ['Dangerous', 40], w: ['Suspicion −2'], get: 'Tale of Terror!! ×1', getf: 'Tale of Terror!! ×1' }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'Unexpected advances', '’Naturally I seized the opportunity to extend my experience’', { w: ['Hedonist +3', 'Austere −3'], get: 'Confident Smile ×1' }),
+    ml('scandal', 'Unexpected advances', '’Naturally I refused her overtures’', { w: ['Scandal −2'] }),
+
+    // --- New Newgate Prison - again! (Suspicion) ---
+    ml('suspicion', 'University of Crime', 'Learn what you can', { w: ['Shadowy +15'], pay: 'Favours: Criminals ×1' }),
+    ml('suspicion', 'University of Crime', 'Avoid bad company', { luck: 60, w: ['Suspicion −1'] }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'Unorthodox technologies', '’That said, lilac is a pleasant scent’', { w: ['Scandal +1', 'Hedonist +3', 'Nightmares +1', 'Austere −3'], get: 'Mourning Candle ×1' }),
+    ml('scandal', 'Unorthodox technologies', '’I politely rejected the gift’', { w: ['Scandal −1', 'Austere +3', 'Hedonist −3'] }),
+    ml('scandal', 'Unorthodox technologies', '’I took a candle to light my way upstairs’', { w: ['Scandal −1', 'Stairs −18'], needs: 'Haunted by Stairs, Transformed by Stairs 20-29' }),
+    ml('scandal', 'Visit an old friend', 'Spend a long evening talking', { w: ['Scandal −1'], needs: 'Myrrh-Scented Rose exactly 3 x' }),
+    ml('scandal', 'Visit an old friend', 'Spend a long evening not talking', { w: ['Scandal +2'], get: 'Cryptic Clue ×25', needs: 'Myrrh-Scented Rose exactly 3 x' }),
+    ml('scandal', 'Visit an old friend', 'Assuage your guilt', { w: ['Scandal −1'], get: 'Myrrh-Scented Rose ×1', needs: 'Myrrh-Scented Rose exactly 2 x' }),
+
+    // --- a slow boat passing a dark beach on a silent river (Wounds) ---
+    ml('wounds', '"Take a message to the living world!"', 'Accept her commission', { w: ['Wounds −3', 'Approaching +5'] }),
+
+    // --- New Newgate Prison - again! (Suspicion) ---
+    ml('suspicion', 'A Note in the Gruel', 'A Note in the Gruel', { lock: 'The Protégé of a Mysterious Benefactor, A Bag of Fierce Mint Humbugs, Unobtrusive Bowler Hat, Brass Knuckledusters, Pair of Mirror-Polished Shoes' }),
+
+    // --- The Mirror-Marches (Nightmares) ---
+    ml('mirror', 'A black cat', 'A black cat', { w: ['Nightmares −3', 'Shadowy +2'] }),
+    ml('mirror', 'A forest fire', 'A forest fire', { w: ['Nightmares +1', 'Approaching +5', 'Wounds −1'] }),
+
+    // --- A state of some confusion (Nightmares) ---
+    ml('conf', 'A fungal bloom', 'A fungal bloom', { w: ['Manager +3'] }),
+
+    // --- The Mirror-Marches (Nightmares) ---
+    ml('mirror', 'A glimpse of a cat', 'A glimpse of a cat', { w: ['Nightmares −3'] }),
+    ml('mirror', 'A glimpse of a church', 'A glimpse of a church', { w: ['Nightmares −3'] }),
+    ml('mirror', 'A glimpse of a clock', 'A glimpse of a clock', { w: ['Nightmares −2', 'Dangerous +4'] }),
+    ml('mirror', 'A glimpse of a devil’s tea-time', 'A glimpse of a devil’s tea-time', { w: ['Nightmares −3'] }),
+    ml('mirror', 'A glimpse of a dressing-room', 'A glimpse of a dressing-room', { w: ['Nightmares −2'] }),
+    ml('mirror', 'A glimpse of a king', 'A glimpse of a king', { w: ['Nightmares −2', 'Watchful +4'] }),
+    ml('mirror', 'A glimpse of a kiss', 'A glimpse of a kiss', { w: ['Nightmares −3', 'Hedonist +3'] }),
+    ml('mirror', 'A glimpse of a sea', 'A glimpse of a sea', { w: ['Nightmares −2'] }),
+    ml('mirror', 'A glimpse of a tavern', 'A glimpse of a tavern', { w: ['Nightmares −4'] }),
+    ml('mirror', 'A glimpse of amber', 'A glimpse of amber', { w: ['Nightmares −2'] }),
+    ml('mirror', 'A glimpse of brass', 'A glimpse of brass', { w: ['Nightmares −1'] }),
+    ml('mirror', 'A glimpse of debauchery', 'A glimpse of debauchery', { w: ['Nightmares −3'] }),
+    ml('mirror', 'A glimpse of flowers', 'A glimpse of flowers', { w: ['Nightmares −3', 'Heartless −1'] }),
+    ml('mirror', 'A glimpse of silver', 'A glimpse of silver', { w: ['Nightmares −5', 'Shadowy +5'] }),
+    ml('mirror', 'A golden cat', 'A golden cat', { w: ['Nightmares −3', 'Watchful +2'] }),
+
+    // --- A state of some confusion (Nightmares) ---
+    ml('conf', 'A lizard of distinction', 'A lizard of distinction', { w: ['Manager +1'], alt: { w: ['Nightmares −1', 'Fingerwork +5'] }, note: 'Two pages carry this title, for different states of your character; the badge gives both.', a: ['A lizard of distinction 1'] }),
+
+    // --- The Mirror-Marches (Nightmares) ---
+    ml('mirror', 'A spotted cat', 'A spotted cat', { w: ['Nightmares −3', 'Shadowy +4'] }),
+    ml('mirror', 'A striped cat', 'A striped cat', { w: ['Nightmares −3', 'Persuasive +2'] }),
+
+    // --- A state of some confusion (Nightmares) ---
+    ml('conf', 'A white cat!', 'A white cat!', { w: ['Manager +1'], alt: { w: ['Nightmares −3'] }, note: 'Two pages carry this title, for different states of your character; the badge gives both.', a: ['A white cat! 1'] }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'An anonymous note', 'An anonymous note', { lock: 'The Protégé of a Mysterious Benefactor, A Bag of Fierce Mint Humbugs, Unobtrusive Bowler Hat, Brass Knuckledusters, Pair of Mirror-Polished Shoes' }),
+
+    // --- A state of some confusion (Nightmares) ---
+    ml('conf', 'Ceiling cracks', 'Ceiling cracks', { w: ['Nightmares −1', 'Watchful +1', 'Approaching +5', 'Icarus +5'], get: 'Appalling Secret ×1' }),
+
+    // --- The Mirror-Marches (Nightmares) ---
+    ml('mirror', 'Night is falling', 'Night is falling', { w: ['Nightmares −3', 'Fingerwork +5'] }),
+
+    // --- a slow boat passing a dark beach on a silent river (Wounds) ---
+    ml('wounds', 'Recall glad times at the Singing Mandrake', 'Recall glad times at the Singing Mandrake', { w: ['Wounds −2'] }),
+    ml('wounds', 'Recall scenes from Ladybones Road', 'Recall scenes from Ladybones Road', { w: ['Wounds −2'] }),
+    ml('wounds', 'Recall the glitter of the Shuttered Palace', 'Recall the glitter of the Shuttered Palace', { w: ['Wounds −1'] }),
+    ml('wounds', 'Recall the noise and life of Spite', 'Recall the noise and life of Spite', { w: ['Wounds −2'] }),
+    ml('wounds', 'Recall the rough camaraderie of Watchmaker’s Hill', 'Recall the rough camaraderie of Watchmaker’s Hill', { w: ['Wounds −2'] }),
+    ml('wounds', 'Remember a certain hunger...', 'Remember a certain hunger...', { w: ['Wounds +3', 'Watchful +1'] }),
+    ml('wounds', 'Remember the Flit', 'Remember the Flit', { w: ['Wounds −1'] }),
+    ml('wounds', 'Remember the Forgotten Quarter', 'Remember the Forgotten Quarter', { w: ['Wounds −1'] }),
+    ml('wounds', 'Remember the Regretful Soldier', 'Remember the Regretful Soldier', { w: ['Wounds −1', 'Dangerous +1'] }),
+    ml('wounds', 'Remember the Repentant Forger', 'Remember the Repentant Forger', { w: ['Wounds −1', 'Persuasive +1'] }),
+
+    // --- New Newgate Prison - again! (Suspicion) ---
+    ml('suspicion', 'Scratched on the cell wall', 'Scratched on the cell wall', { w: ['Suspicion −2', 'Nightmares +1'], get: 'Cryptic Clue ×14' }),
+    ml('suspicion', 'Sent to the treadmill', 'Sent to the treadmill', { w: ['Suspicion −1', 'Dangerous +1', 'Docks +2', 'Criminals +2', 'Shadowy −1'] }),
+
+    // --- A state of some confusion (Nightmares) ---
+    ml('conf', 'Singing with the dead maid', 'Singing with the dead maid', { w: ['Nightmares +1'] }),
+    ml('conf', 'Skeins of blood', 'Skeins of blood', { w: ['Nightmares −1', 'Dangerous +1', 'Waves +1'] }),
+
+    // --- a slow boat passing a dark beach on a silent river (Wounds) ---
+    ml('wounds', 'Stare at the shore of the living world', 'Stare at the shore of the living world', { w: ['Wounds −2', 'Approaching +5'] }),
+
+    // --- New Newgate Prison - again! (Suspicion) ---
+    ml('suspicion', 'The new cell', 'The new cell', { a: ['The new cell 1'] }),
+    ml('suspicion', 'The passing dirigible', 'The passing dirigible', { get: 'Rope of Knotted Rags ×1' }),
+
+    // --- a slow boat passing a dark beach on a silent river (Wounds) ---
+    ml('wounds', 'Trail your fingers in the water', 'Trail your fingers in the water', { w: ['Wounds −2', 'Approaching +5'] }),
+
+    // --- New Newgate Prison - again! (Suspicion) ---
+    ml('suspicion', 'Voice from the oubliette', 'Voice from the oubliette', { w: ['Suspicion −1'], get: 'Appalling Secret ×2' }),
+
+    // --- Disgraced exile in the Tomb-Colonies (Scandal) ---
+    ml('scandal', 'With friends like these...', 'With friends like these...', { w: ['Scandal −1', 'Persuasive −5'] }),
+
+    // --- a slow boat passing a dark beach on a silent river (Wounds) ---
+    ml('wounds', 'You loved someone once', 'You loved someone once', { w: ['Wounds −3'] }),
+    ml('wounds', 'You remember the tomb-colonists, and shudder', 'You remember the tomb-colonists, and shudder', { w: ['Wounds −1', 'Approaching +5'] }),
+    ml('wounds', 'You’ve unfinished business in the world of the living (Fascinating)', 'You’ve unfinished business in the world of the living (Fascinating)', { w: ['Wounds −2'] }),
+    ml('wounds', 'You’ve unfinished business in the world of the living (Running Battle)', 'You’ve unfinished business in the world of the living (Running Battle)', { w: ['Wounds −2'] }),
+  ];
+
+  const ML_CARD_LIST = [
+    { loc: 'scandal', name: '\'...I have attended a ball...\'' },
+    { loc: 'scandal', name: '\'I Met a Curious Creature.\'' },
+    { loc: 'wounds', name: '...or you could just give up' },
+    { loc: 'mirror', name: 'A bird-of-paradise' },
+    { loc: 'scandal', name: 'A Chilly Infestation' },
+    { loc: 'suspicion', name: 'A Favour for an Old Friend' },
+    { loc: 'scandal', name: 'A friend of sorts' },
+    { loc: 'conf', name: 'A friendly visage' },
+    { loc: 'mirror', name: 'A green vine' },
+    { loc: 'conf', name: 'A lamentable affair' },
+    { loc: 'scandal', name: 'A letter from an old acquaintance - Artist\'s Model' },
+    { loc: 'scandal', name: 'A letter from an old acquaintance - Artist' },
+    { loc: 'scandal', name: 'A letter from the Comtessa\'s Father' },
+    { loc: 'scandal', name: 'A letter from the Palace' },
+    { loc: 'conf', name: 'A lost secret' },
+    { loc: 'scandal', name: 'A moment of joy' },
+    { loc: 'suspicion', name: 'A Pile of Stinking Rags' },
+    { loc: 'conf', name: 'A plan occurs' },
+    { loc: 'scandal', name: 'A repairer of reputations (Hallowmas)' },
+    { loc: 'mirror', name: 'A shining beetle' },
+    { loc: 'conf', name: 'A shining nest' },
+    { loc: 'conf', name: 'A single-minded gentleman' },
+    { loc: 'scandal', name: 'A Smuggler scorned' },
+    { loc: 'mirror', name: 'A snatch of music' },
+    { loc: 'mirror', name: 'A thunderstorm' },
+    { loc: 'scandal', name: 'A tiny square of paper...' },
+    { loc: 'mirror', name: 'A tree of scars' },
+    { loc: 'suspicion', name: 'A visit from a priest' },
+    { loc: 'scandal', name: 'Among the dead' },
+    { loc: 'conf', name: 'An Abrupt Door' },
+    { loc: 'scandal', name: 'An unexplained disappearance' },
+    { loc: 'scandal', name: 'An Unusual Remedy' },
+    { loc: 'suspicion', name: 'Bilge duty' },
+    { loc: 'scandal', name: 'Burial of the Dead: Still Haunted by Stairs' },
+    { loc: 'scandal', name: 'Causing a scene' },
+    { loc: 'scandal', name: 'Flowers for Peter' },
+    { loc: 'mirror', name: 'Heavenly fruits' },
+    { loc: 'wounds', name: 'How much can you see of the far bank?' },
+    { loc: 'scandal', name: 'Lamentable tastes' },
+    { loc: 'wounds', name: 'Looking upwards' },
+    { loc: 'scandal', name: 'Musings on the Causes of Exile' },
+    { loc: 'mirror', name: 'Orange lilies' },
+    { loc: 'wounds', name: 'Pilfer a few breaths from another passenger' },
+    { loc: 'suspicion', name: 'Promises of revenge' },
+    { loc: 'mirror', name: 'Purple orchids' },
+    { loc: 'wounds', name: 'Recall pitched battle against the Starved Men' },
+    { loc: 'wounds', name: 'Remember a ruddy set of armour' },
+    { loc: 'wounds', name: 'Remember where you fell' },
+    { loc: 'scandal', name: 'Remnants' },
+    { loc: 'suspicion', name: 'Scratched on the wall' },
+    { loc: 'conf', name: 'See Yourself Wholly Changed' },
+    { loc: 'wounds', name: 'Speak of Replacing Him' },
+    { loc: 'suspicion', name: 'Start a brawl' },
+    { loc: 'suspicion', name: 'Starvation day' },
+    { loc: 'scandal', name: 'The construction of the \'Grand Sanatoria\'' },
+    { loc: 'suspicion', name: 'The Governor' },
+    { loc: 'suspicion', name: 'The new cell' },
+    { loc: 'suspicion', name: 'The Repentant Forger' },
+    { loc: 'suspicion', name: 'The screaming prisoner' },
+    { loc: 'suspicion', name: 'The Stuttering Fence' },
+    { loc: 'suspicion', name: 'The talkative gaoler' },
+    { loc: 'suspicion', name: 'The Troubled Undertaker' },
+    { loc: 'conf', name: 'The view from your room' },
+    { loc: 'suspicion', name: 'The Warden' },
+    { loc: 'scandal', name: 'Unexpected advances' },
+    { loc: 'suspicion', name: 'University of Crime' },
+    { loc: 'scandal', name: 'Unorthodox technologies' },
+    { loc: 'scandal', name: 'Visit an old friend' },
+    { loc: 'wounds', name: '"Take a message to the living world!"' },
+    { loc: 'suspicion', name: 'A Note in the Gruel', red: true },
+    { loc: 'mirror', name: 'A black cat', red: true },
+    { loc: 'mirror', name: 'A forest fire', red: true },
+    { loc: 'conf', name: 'A fungal bloom', red: true },
+    { loc: 'mirror', name: 'A glimpse of a cat', red: true },
+    { loc: 'mirror', name: 'A glimpse of a church', red: true },
+    { loc: 'mirror', name: 'A glimpse of a clock', red: true },
+    { loc: 'mirror', name: 'A glimpse of a devil\'s tea-time', red: true },
+    { loc: 'mirror', name: 'A glimpse of a dressing-room', red: true },
+    { loc: 'mirror', name: 'A glimpse of a king', red: true },
+    { loc: 'mirror', name: 'A glimpse of a kiss', red: true },
+    { loc: 'mirror', name: 'A glimpse of a sea', red: true },
+    { loc: 'mirror', name: 'A glimpse of a tavern', red: true },
+    { loc: 'mirror', name: 'A glimpse of amber', red: true },
+    { loc: 'mirror', name: 'A glimpse of brass', red: true },
+    { loc: 'mirror', name: 'A glimpse of debauchery', red: true },
+    { loc: 'mirror', name: 'A glimpse of flowers', red: true },
+    { loc: 'mirror', name: 'A glimpse of silver', red: true },
+    { loc: 'mirror', name: 'A golden cat', red: true },
+    { loc: 'conf', name: 'A lizard of distinction', red: true },
+    { loc: 'mirror', name: 'A spotted cat', red: true },
+    { loc: 'mirror', name: 'A striped cat', red: true },
+    { loc: 'conf', name: 'A white cat!', red: true },
+    { loc: 'scandal', name: 'An anonymous note', red: true },
+    { loc: 'conf', name: 'Ceiling cracks', red: true },
+    { loc: 'mirror', name: 'Night is falling', red: true },
+    { loc: 'wounds', name: 'Recall glad times at the Singing Mandrake', red: true },
+    { loc: 'wounds', name: 'Recall scenes from Ladybones Road', red: true },
+    { loc: 'wounds', name: 'Recall the glitter of the Shuttered Palace', red: true },
+    { loc: 'wounds', name: 'Recall the noise and life of Spite', red: true },
+    { loc: 'wounds', name: 'Recall the rough camaraderie of Watchmaker\'s Hill', red: true },
+    { loc: 'wounds', name: 'Remember a certain hunger...', red: true },
+    { loc: 'wounds', name: 'Remember the Flit', red: true },
+    { loc: 'wounds', name: 'Remember the Forgotten Quarter', red: true },
+    { loc: 'wounds', name: 'Remember the Regretful Soldier', red: true },
+    { loc: 'wounds', name: 'Remember the Repentant Forger', red: true },
+    { loc: 'suspicion', name: 'Scratched on the cell wall', red: true },
+    { loc: 'suspicion', name: 'Sent to the treadmill', red: true },
+    { loc: 'conf', name: 'Singing with the dead maid', red: true },
+    { loc: 'conf', name: 'Skeins of blood', red: true },
+    { loc: 'wounds', name: 'Stare at the shore of the living world', red: true },
+    { loc: 'suspicion', name: 'The passing dirigible', red: true },
+    { loc: 'wounds', name: 'Trail your fingers in the water', red: true },
+    { loc: 'suspicion', name: 'Voice from the oubliette', red: true },
+    { loc: 'scandal', name: 'With friends like these...', red: true },
+    { loc: 'wounds', name: 'You loved someone once', red: true },
+    { loc: 'wounds', name: 'You remember the tomb-colonists, and shudder', red: true },
+    { loc: 'wounds', name: 'You\'ve unfinished business in the world of the living (Fascinating)', red: true },
+    { loc: 'wounds', name: 'You\'ve unfinished business in the world of the living (Running Battle)', red: true },
+  ];
+
+  // The guide's remarks, by option title, for the tooltip.
+  const ML_GUIDE_CHESS = 'Better than dice while your chance of success is above 63%; it also raises The Boatman’s Opponent, and is offered only below Wounds 15. Wear Wounds-decreasing items to soften a failure.';
+  const ML_GUIDE = {
+    'Rattling the dice in your cupped hands...': 'About −0.5 Wounds an action. Wear Wounds-decreasing items to soften a failure.',
+    'Your move...': 'With The Boatman’s Opponent at 40 the check is Watchful 300 and both outcomes add Nightmares, so it is never menace-negative; worth it only at 70% or better.',
+    'Lie back and close your eyes': 'Not recommended.',
+    'You can almost see details.': 'Not recommended.',
+    'Pen a letter': 'Averages −0.5 Suspicion an action.',
+    'Write instead to the Ambitious Barrister': 'Averages −1 Suspicion an action.',
+    'Follow the sound of water': 'Averages −1.5 Nightmares an action.',
+    'Search for your missing secret': 'Fail it on purpose; with a Weasel of Woe equipped it is the most efficient card here.',
+    'Reminisce about Fallen London': 'A challenge you want to FAIL: even at high Nightmares success is about 10%.',
+    'Take a deep gulp': 'A challenge you want to FAIL: even at high Nightmares success is about 10%.',
+    'Immerse yourself in the fountain': 'Generally inadvisable: Stormy-Eyed is hard to get back.',
+    'Keep your nose clean': 'Better than Observing New Newgate if you can spare the Persuasive: 8 to 0 this way costs 18.',
+    'A grass': 'Gets you out if you hold at least as many Criminals Favours as remaining Suspicion; it uses them all.',
+  };
+  ['He’s done this before...', 'A smile of recognition', 'A nod of respect', 'A friendly greeting', 'A grin of sorts',
+    'A silent inclination of the skull', 'Play to lose as well as to win'].forEach(function (n) { ML_GUIDE[n.replace('’', '\'')] = ML_GUIDE_CHESS; });
+
+  // The first figure of a move like "Wounds −3", "Suspicion −1–2", "Scandal +0–1": the middle of its range, signed.
+  function mlAmount(move) {
+    const m = /([+−])(\d+(?:\.\d+)?)(?:–(\d+(?:\.\d+)?))?/.exec(move || '');
+    if (!m) return null;
+    const v = m[3] === undefined ? Number(m[2]) : (Number(m[2]) + Number(m[3])) / 2;
+    return m[1] === '−' ? -v : v;
+  }
+
+  function mlSigned(x) {
+    const r = Math.round(x * 10) / 10;
+    return r === 0 ? '0' : (r < 0 ? '−' : '+') + Math.abs(r);
+  }
+
+  function mlPrimary(list, menace) {
+    return (list || []).filter(function (m) { return m.indexOf(menace + ' ') === 0; })[0] || null;
+  }
+
+  // The menace a Luck option is worth on average, from its two outcomes.
+  function mlExpected(e) {
+    const menace = ML_LOCATIONS[e.loc].menace;
+    const w = mlAmount(mlPrimary(e.w, menace));
+    const f = mlAmount(mlPrimary(e.f, menace));
+    if (!e.luck || w === null || f === null) return null;
+    return e.luck / 100 * w + (1 - e.luck / 100) * f;
+  }
+
+  function mlItems(list) {
+    const parts = String(list).split(', ');
+    return parts.length > 2 ? parts[0] + ' +' + (parts.length - 1) + ' more' : parts.join(', ');
+  }
+
+  function mlLabel(e) {
+    const menace = ML_LOCATIONS[e.loc].menace;
+    const mark = (e.n || e.b) ? CAROUSEL_MARK_CHALLENGE : e.luck ? CAROUSEL_MARK_EXPECTED : '';
+    const moves = (e.w || []).slice(0, 3);
+    const ev = mlExpected(e);
+    if (ev !== null) {
+      const at = moves.map(function (m) { return m.indexOf(menace + ' ') === 0; }).indexOf(true);
+      if (at !== -1) moves[at] = menace + ' ' + CAROUSEL_MARK_EXPECTED + mlSigned(ev);
+    } else if (e.luck && moves.length) moves[0] += ' (' + e.luck + '%)';
+    else if (mark && moves.length) moves[0] += mark;
+    const parts = moves.slice();
+    if (e.get) parts.push(mlItems(e.get));
+    if (e.pay) parts.push('−' + mlItems(e.pay));
+    const failing = (e.f || []).filter(function (m) { return (e.w || []).indexOf(m) === -1 && !(ev !== null && m.indexOf(menace + ' ') === 0); });
+    if (failing.length) parts.push('fail ' + failing.slice(0, 2).join(', '));
+    let text = parts.join(' · ') || (mark ? mark : 'no menace change');
+    if (e.alt) text += ' or ' + mlLabel(Object.assign({ loc: e.loc }, e.alt));
+    return text;
+  }
+
+  // Teal when the option cuts the menace, brick when it raises it, grey otherwise. The brick is the risk
+  // colour of the carousels further down the file, restated here because that constant is declared after this block.
+  const ML_COLOR_RISK = '#9a4a2f';
+
+  function mlColor(e) {
+    const ev = mlExpected(e);
+    const amount = ev !== null ? ev : mlAmount(mlPrimary(e.w, ML_LOCATIONS[e.loc].menace));
+    if (amount === null || amount === 0) return CAROUSEL_COLOR_NEUTRAL;
+    return amount < 0 ? CAROUSEL_COLOR_PROGRESS : ML_COLOR_RISK;
+  }
+
+  function mlTitle(e) {
+    const lines = [e.name, e.storylet + ', ' + ML_LOCATIONS[e.loc].area, ''];
+    const ch = [];
+    if (e.luck) ch.push('Luck ' + e.luck + '%');
+    if (e.n) ch.push(e.n[0] + ' ' + e.n[1] + ' (narrow)');
+    if (e.b) ch.push(e.b[0] + ' ' + e.b[1] + ' (broad)');
+    if (ch.length) lines.push('Challenge: ' + ch.join(' and ') + '.');
+    const ev = mlExpected(e);
+    if (ev !== null) lines.push('On average: ' + ML_LOCATIONS[e.loc].menace + ' ' + mlSigned(ev) + ' an action.');
+    if (e.w && e.w.length) lines.push((ch.length ? 'On a success: ' : 'Does: ') + e.w.join(', ') + '.');
+    if (e.get) lines.push('Gives: ' + e.get + '.');
+    if (e.r && e.r.length) lines.push('On a rare success: ' + e.r.join(', ') + '.');
+    if (e.f && e.f.length) lines.push('On a failure: ' + e.f.join(', ') + (e.getf ? ', ' + e.getf : '') + '.');
+    if (e.pay) lines.push('Costs: ' + e.pay + '.');
+    if (e.needs) lines.push('Needs: ' + e.needs + '.');
+    if (e.lock) lines.push('Not offered with: ' + e.lock + '.');
+    if (e.alt) lines.push('The second page: ' + mlLabel(Object.assign({ loc: e.loc }, e.alt)) + '.');
+    const g = ML_GUIDE[e.name.replace('’', '\'')];
+    if (g) lines.push('The guide: ' + g);
+    if (e.note) lines.push(e.note);
+    lines.push('', ML_CFG.rules);
+    return lines.join('\n');
+  }
+
+  ML_OPTIONS.forEach(function (e) {
+    e.label = mlLabel(e);
+    e.color = mlColor(e);
+    e.title = mlTitle(e);
+  });
+
+  // The deepest cut any option of a card or storylet makes, for its heading and its card.
+  function mlBest(name, loc) {
+    const key = normalizeName(name);
+    const menace = ML_LOCATIONS[loc].menace;
+    const own = ML_OPTIONS.filter(function (e) { return normalizeName(e.storylet) === key; });
+    const cuts = own.map(function (e) {
+      const ev = mlExpected(e);
+      return ev !== null ? ev : mlAmount(mlPrimary(e.w, menace));
+    }).filter(function (v) { return v !== null && v < 0; });
+    return cuts.length ? menace + ' ' + mlSigned(Math.min.apply(null, cuts)) : null;
+  }
+
+  const ML_STORYLETS = ML_OPTIONS.map(function (e) { return e.storylet; }).filter(function (s, i, a) { return a.indexOf(s) === i; });
+  const ML_STORYLET_LOC = {};
+  ML_OPTIONS.forEach(function (e) { ML_STORYLET_LOC[normalizeName(e.storylet)] = e.loc; });
+  const ML_SUMMARY = {};
+  ML_STORYLETS.forEach(function (s) {
+    const best = mlBest(s, ML_STORYLET_LOC[normalizeName(s)]);
+    ML_SUMMARY[normalizeName(s)] = best ? 'best ' + best : 'no cut';
+  });
+
+  const ML_CARDS = ML_CARD_LIST.map(function (c) {
+    const own = ML_OPTIONS.filter(function (e) { return normalizeName(e.storylet) === normalizeName(c.name); });
+    const stripped = c.name.replace(/ \([^)]*\)$/, '');
+    if (stripped !== c.name) c.also = [stripped];
+    if (c.red && own.length) {
+      c.badge = own[0].label;
+      c.color = own[0].color;
+    } else {
+      const best = mlBest(c.name, c.loc);
+      c.badge = best ? 'best ' + best : 'no cut';
+      c.color = best ? CAROUSEL_COLOR_PROGRESS : CAROUSEL_COLOR_NEUTRAL;
+    }
+    c.lines = [(c.red ? 'A red card: it plays for no action.' : 'A white card: its options cost an action.') + ' ' + ML_LOCATIONS[c.loc].area + '.'];
+    return c;
+  });
+  const ML_HAND = [];
+  ML_CARDS.forEach(function (c) {
+    [c.name].concat(c.also || []).forEach(function (n) {
+      ML_HAND.push(Object.assign({}, c, { name: n, canon: c.name }));
+    });
+  });
+  const ML_MATCHERS = ML_CARDS.map(function (c) {
+    return { key: normalizeName(c.name), match: [c.name].concat(c.also || []).map(carouselMatcher) };
+  });
+
+  function mlCanonical(key) {
+    const hit = ML_MATCHERS.filter(function (m) { return m.match.some(function (f) { return f(key); }); })[0];
+    return hit ? hit.key : null;
+  }
+
+  const ML_INDEX = carouselIndex(ML_OPTIONS);
+  const ML_DEF = {
+    cfg: ML_CFG, options: ML_OPTIONS, index: ML_INDEX, storylets: ML_STORYLETS, cards: ML_HAND, cardKeys: [],
+    aliases: mlCanonical, summary: ML_SUMMARY,
+    cls: 'fl-ux-ml', flag: 'flUxMl', branchCls: 'fl-ux-ml-branch', branchFlag: 'flUxMlBranch',
+    cardCls: 'fl-ux-ml-card', cardFlag: 'flUxMlCard',
+  };
+
+  // Which of the five places the greeting names, if any.
+  function mlPlace() {
+    const area = normalizeName(currentArea() || '');
+    if (!area) return null;
+    return Object.keys(ML_LOCATIONS).filter(function (k) { return area.indexOf(normalizeName(ML_LOCATIONS[k].area)) !== -1; })[0] || null;
+  }
+
+  function mlRatings() {
+    const loc = mlPlace();
+    pqRatings(Object.assign({}, ML_DEF, { cards: loc ? ML_HAND.filter(function (c) { return c.loc === loc; }) : [] }));
+  }
+
+  // === feature: Iron Republic Streets =====================================
+  //
+  // Iron Republic Street Map: the days of the Republic are a graph. Each Day
+  // storylet has one to three options, and each sends you on to another day
+  // (on a success, or on a failure of its challenge) until Day 99 unsets Iron
+  // Republic Days and lets you out through A Day for Reading. The guide's whole
+  // point is which door leads where, so that is what the badge says.
+  //
+  // **What the badge says.** Where the option takes you and what it costs or
+  // pays on the way: `→ Day 12 · Wounds +5, Scandal +2 · fail → Day 8 ·
+  // Nightmares +3, Suspicion +3`. `?` after the day is a challenge. "set to 3"
+  // is a menace the day pins to that level, the guide's wording for a change
+  // the page shows as a bare gain. `back → Day 8` is the one door that sends you
+  // back. The Changed by the Iron Republic points each step adds (+1 to +5) are
+  // in the tooltip, with what the guide printed in bold as of particular
+  // interest (a Pocketful of Loose Change, 75 Proscribed Material, Hedonist and
+  // Austere, and the 200 Soul a failed killing in trade costs).
+  //
+  // Transcribed from the option pages (fetched through the API, 2026-09-26)
+  // with Iron Republic Street Map as the cross-check; the guide is marked
+  // needing work, and the option pages win. Where they disagree the tooltip
+  // quotes the guide: the challenge of Municipal amenities, Talk them down, A
+  // lucky number and the Revolutionaries favour differ from the guide's
+  // figure by one, and An exchange of knowledge adds Nightmares +2 where the
+  // guide says none. Left out: Take this demagogue for tea and muffins (its
+  // page is empty), the Nemesis ambition's extra storylets, and the day
+  // titled CENSORED, which the guide keeps as a spoiler. Corrections go in
+  // IR_OPTIONS and nowhere else.
+
+  const IR_CFG = {
+    quality: 'Days in the Iron Republic', short: 'Day',
+    rules: 'Days in the Iron Republic is a graph: each option names the day it leads to. Every step adds Changed by the Iron '
+      + 'Republic, and Day 99 lets you out through A Day for Reading.',
+  };
+  const IR_DAY_99 = 'Day 99';
+
+  // `to` and `toF` are the days a success and a failure lead to; `w` and `f` what each does on the way.
+  function ir(storylet, name, more) {
+    return Object.assign({ storylet: storylet, name: name }, more);
+  }
+
+  const IR_OPTIONS = [
+    ir('Day 1, Hurled from High Places', 'Looking backwards', { to: 12, w: ['Wounds +5', 'Scandal +2'], toF: 8, f: ['Nightmares +3', 'Suspicion +3'],
+      n: ['Committed:', 0], changed: '+1 either way' }),
+    ir('Day 8, Looking Back for Ever', 'Enjoy your facelessness', { to: 12, w: ['Scandal +5', 'Nightmares set to 3', 'Hedonist +3 (up to 10)'],
+      needs: 'Hedonist 4', changed: '+2', bold: 'Hedonist +3' }),
+    ir('Day 8, Looking Back for Ever', 'An exchange of knowledge', { to: 15, w: ['Nightmares +2'], toF: 17, f: ['Scandal +3', 'Suspicion +3'],
+      n: ['An Admirer of Beauty -', 0], changed: '+2, or +1 on a failure',
+      guide: 'The guide gives no consequence on a success; the page adds Nightmares +2.' }),
+    ir('Day 8, Looking Back for Ever', 'Poking about (2 FATE)', { to: 12, w: ['Hedonist +3 (up to 10)'], fate: 2, changed: '+5', bold: 'Hedonist +3' }),
+    ir('Day 12, Font of Disobedience', 'The forbidding of subtraction, a sudden rain of unbecoming thoughts...', { to: 19, w: ['Wounds +2', 'Scandal +2'],
+      toF: 17, f: ['Nightmares set to 3'], n: ['Steadfast', 2], changed: '+1, or +2 on a failure' }),
+    ir('Day 15, Sinking into Freedom', 'One must also consider the nature of the speaker', { to: 32, toF: 23, f: ['Scandal set to 6'],
+      b: ['Favours: Revolutionaries', 4], changed: '+2, or +1 on a failure', guide: 'The guide gives Favours: Revolutionaries 3.' }),
+    ir('Day 17, Burning the Ashes', 'Run for it', { to: 19, w: ['Nightmares set to 2'], changed: '+4' }),
+    ir('Day 17, Burning the Ashes', 'In the thick', { to: 27, w: ['Scandal set to 2'], toF: 32, f: ['Wounds set to 2'], b: ['Persuasive', 130], changed: '+2 either way' }),
+    ir('Day 19, Omens of Alarm', 'Talk them down', { to: 27, w: ['Suspicion set to 2'], toF: 32, f: ['Suspicion set to 3'], n: ['Gang of Hoodlums', 0],
+      changed: '+1, or +2 on a failure', guide: 'The guide gives Gang of Hoodlums 1.' }),
+    ir('Day 23, Screaming against Regret', 'Arguments in the street', { to: 30, w: ['Scandal +4', 'Wounds +5'], changed: '+2' }),
+    ir('Day 23, Screaming against Regret', 'Nod and walk', { to: 38, w: ['Nightmares +2'], changed: '+1' }),
+    ir('Day 27, Nobler Hunger', 'Municipal amenities', { to: 34, w: ['Suspicion +1', 'Austere +5 (up to 15)'], toF: 34, f: ['Nightmares +5', 'Scandal −2'],
+      n: ['Wounds', 4], changed: '+2 either way', bold: 'Austere +5', guide: 'The guide gives Wounds 5.' }),
+    ir('Day 30, The Golden Interval', 'A lucky number', { to: 32, w: ['Wounds set to 2'], toF: 38, f: ['Scandal +3'], n: ['Respectable', 3],
+      changed: '+2, or +1 on a failure', guide: 'The guide gives Respectable 4.' }),
+    ir('Day 32, Blood Like Tar', 'Stuck in', { to: 34, w: ['Wounds +1'], changed: '+1', lock: 'Sympathetic about Ratly Concerns 281' }),
+    ir('Day 32, Blood Like Tar', 'Remaining safe', { to: 38, w: ['Suspicion +1'], changed: '+1' }),
+    ir('Day 34, Crowns Without Number', 'A firm hand', { to: 38, w: ['Nightmares set to 6'], changed: '+1' }),
+    ir('Day 34, Crowns Without Number', 'The hand of mercy', { to: 40, w: ['Wounds +5'], changed: '+2' }),
+    ir('Day 38, Hope Failing', 'The wall', { to: 40, w: ['Wounds set to 6', 'A Pocketful of Loose Change +4'], changed: '+3', bold: 'A Pocketful of Loose Change +4' }),
+    ir('Day 40, Talons Marking Solitude', 'Express your disapproval', { to: 42, w: ['Suspicion +5'], changed: '+1' }),
+    ir('Day 40, Talons Marking Solitude', 'Look closer', { to: 48, w: ['Scandal set to 2'], changed: '+3', aliases: ['Look closer 1'] }),
+    ir('Day 40, Talons Marking Solitude', 'Debate the Republic’s law', { to: 51, w: ['Wounds +2'], toF: 55, f: ['Wounds +1'], b: ['Shadowy', 130],
+      changed: '+2, or +1 on a failure' }),
+    ir('Day 42, Forgotten Bronze Drum', 'Three devils', { back: 8, changed: '+2', note: 'Sends you back to Day 8, so the loop 8, 15, 17 … 40, 42, 8 can be walked again.' }),
+    ir('Day 48, Above Eagles', 'A killing in trade', { to: 55, w: ['Nightmares +1'], toF: 61, f: ['Wounds −1', 'Soul −200'], n: ['An Admirer of Art -', 0],
+      changed: '+2, or +1 on a failure', bold: 'Soul −200 on a failure' }),
+    ir('Day 51, Eternity of Clarity', 'Off to the party', { to: 64, w: ['Scandal set to 3'], toF: 71, f: ['Nightmares +1'], n: ['Heartless', 2],
+      changed: '+1, or +2 on a failure' }),
+    ir('Day 55, Screaming Alone', 'Half a thought', { to: 61, w: ['Scandal +1'], changed: '+1' }),
+    ir('Day 55, Screaming Alone', 'Looking back', { to: 64, w: ['Suspicion +1'], changed: '+2', lock: 'Your very own Infernal Contract' }),
+    ir('Day 61, Seven and Seven', 'Taking a look, carefully', { to: 64, w: ['Wounds +1'], toF: 81, f: ['Nightmares set to 4'], n: ['Steadfast', 2],
+      changed: '+1, or +2 on a failure' }),
+    ir('Day 64, Clasped in Thunder', 'Opening a hole', { to: 78, w: ['Proscribed Material ×75'], toF: 81, f: ['Wounds +1'], n: ['Brass Ring', 0],
+      changed: '+2 on a failure', bold: 'Proscribed Material ×75', note: 'The guide prints the 75 Proscribed Material in bold.' }),
+    ir('Day 71, Hurtling to the Uncaring', 'Going elsewhere', { to: 78, w: ['Suspicion +3'], changed: '+2' }),
+    ir('Day 71, Hurtling to the Uncaring', 'The Forest', { to: 88, w: ['Wounds +2'], changed: '+2' }),
+    ir('Day 78, Stars Barely Remembered', 'Packed in', { to: IR_DAY_99, w: ['Scandal set to 3'], changed: '+2' }),
+    ir('Day 78, Stars Barely Remembered', 'Enough! (2 FATE)', { to: IR_DAY_99, w: ['Austere +5 (up to 15)'], fate: 2, changed: '+5', bold: 'Austere +5' }),
+    ir('Day 81, The Day Numbers Stopped Working', 'Righting alarm', { to: IR_DAY_99, w: ['Suspicion set to 3'], changed: '+2', aliases: [] }),
+    ir('Day 88, Glories of the Earth', 'Out and about', { to: IR_DAY_99, w: ['Nightmares set to 3'], changed: '+2' }),
+
+    // --- the way out ---
+    ir('A Day for Reading', 'Back to zee', { label: 'leaves the Republic · your cabin',
+      note: 'You can return to the Republic once you have completed your voyage. Gives A Survivor of the Iron Republic.' }),
+    ir('A Day for Reading', '"Oh dear, oh dear"', { label: 'all four menaces −5 · Changed −5', needs: 'Changed by the Iron Republic 3' }),
+    ir('A Day for Reading', 'Still after Scathewick', { label: '→ Day 1 · stay for Scathewick', needs: 'Ambition: Nemesis 32 to 36',
+      note: 'Lets you stay in the Republic to find him without spending Fate.' }),
+    ir('A Day for Reading', 'Looking at your writing', { label: 'Changed −15 → Iron Republic Journal', needs: 'Changed by the Iron Republic 5' }),
+    ir('A Day for Reading', 'Staying here (3 FATE)', { label: '→ Day 1 · Fate 3', fate: 3 }),
+    ir('A Day for Reading', 'Hardened (10 FATE)', { label: 'Changed −10 → Daring, Forceful, Ruthless, Austere +8', fate: 10 }),
+    ir('A Day for Reading', 'Softened (10 FATE)', { label: 'Changed −10 → Hedonist, Subtle, Magnanimous, Melancholy +8', fate: 10 }),
+    ir('A Day for Reading', 'The approaching thunder of hooves...', { label: 'Übergoat ×7 + Impossible Theorem ▼ → Heptagoat',
+      note: 'The guide lists Übergoat and Impossible Theorem as the inputs and Heptagoat as an output of the activity.' }),
+    ir('A Day Outside of Days', 'Open the gate', { label: 'Favours: Hell ×7 ▼ → Infernal Vinification Apparatus', needs: 'Renown: Hell 40, Favours: Hell 7',
+      note: 'The Renown: Hell 40 item. Have seven Hell Favours before you come to the Republic.' }),
+  ];
+
+  function irDay(d) { return typeof d === 'number' ? 'Day ' + d : d; }
+
+  function irLabel(e) {
+    if (e.label) return e.label;
+    const mark = (e.n || e.b) ? CAROUSEL_MARK_CHALLENGE : '';
+    if (e.back !== undefined) return 'back → ' + irDay(e.back) + ' · Changed ' + e.changed;
+    const parts = ['→ ' + irDay(e.to) + mark];
+    (e.w || []).forEach(function (m) { parts.push(m); });
+    if (e.toF !== undefined) parts.push('fail → ' + irDay(e.toF) + (e.f && e.f.length ? ' · ' + e.f.join(', ') : ''));
+    if (e.fate) parts.push('Fate ' + e.fate);
+    return parts.join(' · ');
+  }
+
+  function irTitle(e) {
+    const lines = [e.name, e.storylet, ''];
+    if (e.back !== undefined) lines.push('Sends you back to ' + irDay(e.back) + '.');
+    else if (e.to !== undefined) lines.push('Leads to ' + irDay(e.to) + (e.toF !== undefined ? ' on a success and ' + irDay(e.toF) + ' on a failure' : '') + '.');
+    const ch = [];
+    if (e.n) ch.push(e.n[0] + ' ' + e.n[1] + ' (narrow)');
+    if (e.b) ch.push(e.b[0] + ' ' + e.b[1] + ' (broad)');
+    if (ch.length) lines.push('Challenge: ' + ch.join(' and ') + '.');
+    if (e.w && e.w.length) lines.push((ch.length ? 'On a success: ' : 'Does: ') + e.w.join(', ') + '.');
+    if (e.f && e.f.length) lines.push('On a failure: ' + e.f.join(', ') + '.');
+    if (e.changed) lines.push('Changed by the Iron Republic: ' + e.changed + '.');
+    if (e.bold) lines.push('The guide prints ' + e.bold + ' in bold, as of particular interest.');
+    if (e.fate) lines.push('Costs ' + e.fate + ' FATE.');
+    if (e.needs) lines.push('Needs: ' + e.needs + '.');
+    if (e.lock) lines.push('Not offered with: ' + e.lock + '.');
+    if (e.guide) lines.push('The guide: ' + e.guide);
+    if (e.note) lines.push(e.note);
+    lines.push('', IR_CFG.rules);
+    return lines.join('\n');
+  }
+
+  IR_OPTIONS.forEach(function (e) {
+    e.label = irLabel(e);
+    e.title = irTitle(e);
+  });
+
+  const IR_STORYLETS = IR_OPTIONS.map(function (e) { return e.storylet; }).filter(function (s, i, a) { return a.indexOf(s) === i; });
+  // A heading names the days its doors lead to.
+  const IR_SUMMARY = {};
+  IR_STORYLETS.forEach(function (s) {
+    const own = IR_OPTIONS.filter(function (e) { return e.storylet === s; });
+    const days = [];
+    own.forEach(function (e) {
+      [e.to, e.toF, e.back].forEach(function (d) { if (d !== undefined && days.indexOf(d) === -1) days.push(d); });
+    });
+    IR_SUMMARY[normalizeName(s)] = days.length ? '→ ' + days.map(function (d) { return typeof d === 'number' ? d : d.replace('Day ', ''); }).join(' / ') : 'the way out';
+  });
+
+  const IR_INDEX = carouselIndex(IR_OPTIONS);
+  const IR_DEF = {
+    cfg: IR_CFG, options: IR_OPTIONS, index: IR_INDEX, storylets: IR_STORYLETS, cards: [], cardKeys: [],
+    // The wiki files Day 81 under its bare title.
+    aliases: { 'the day numbers stopped working': normalizeName('Day 81, The Day Numbers Stopped Working') },
+    summary: IR_SUMMARY,
+    cls: 'fl-ux-ir', flag: 'flUxIr', branchCls: 'fl-ux-ir-branch', branchFlag: 'flUxIrBranch',
+  };
+
+  function irRatings() { pqRatings(IR_DEF); }
+
+  // === feature: Firmament =================================================
+  //
+  // Firmament (Guide): the Roof story, nine parts long, played once. Its
+  // choices set qualities that later parts read, some of them hidden, so the
+  // guide's chief service is to say what each choice sets. That is what the
+  // badge says, and only where the guide says it.
+  //
+  // **What the badge says.** What the option does to the story's qualities, in
+  // the guide's own terms: `+Duchess 1 · Tyranny =3` gives a point of The
+  // Admiration of a Duchess and sets Tyranny of Burgundy to 3 (`+` gives, `−`
+  // takes, `=` sets, `→` raises to), `Vulgatis =2`, `+Flammier`. `no reputation
+  // change` and `narrative only` are the guide saying a choice matters to
+  // nothing. A `⚠` is the guide itself unsure of the line ("needs confirmed",
+  // "appears to", a hidden quality): the story is playable once, so some of it
+  // was never confirmed. The tooltip has the guide's sentence and the part of
+  // the story. The crew's favour qualities are abbreviated: Duchess (The
+  // Admiration of a Duchess), Dawnseeker (The Regard of the Dawnseeker),
+  // Shepherd (The Hopes of a Shepherd), Summer (A Dream of Summer), Valentine
+  // (The Last Day of Valentine), Service (The Quality of Service).
+  //
+  // **Spoilers are on purpose** (decided): every choice names what it sets,
+  // including the endings' deciding qualities.
+  //
+  // Transcribed from Firmament (Guide) and the option pages it links to
+  // (fetched through the API, 2026-09-26): a link counts only when its page is
+  // an option and the guide says something about what it does. Where the
+  // guide's sentence and the badge differ in wording the sentence is the
+  // source. Left out: the options the guide only names as steps ("Enter the
+  // catacombs", "Look for the Performer"), the requirement lists that open each
+  // part, the tables of endings (Immanence, the Victor in Burgundy: they turn
+  // on qualities rather than options), and the parts other guides own (the
+  // Stacks, Ecdysis, the Kinetoculus, the High Sancta, Risen Burgundy, the Sous
+  // Catacombs, the Midnight Trade). Corrections go in FIR_OPTIONS and nowhere
+  // else.
+
+  const FIR_CFG = {
+    quality: 'Firmament', short: 'Firmament',
+    rules: 'Firmament can be played once, and some of what it sets is hidden. The badge is the guide’s reading of the option, '
+      + 'and a ⚠ means the guide is unsure of it.',
+  };
+
+  function fr(part, storylet, name, label, tip, unsure) {
+    return { part: part, storylet: storylet, name: name, label: label, tip: tip, unsure: !!unsure };
+  }
+
+  const FIR_OPTIONS = [
+    fr('Prologue · The Rain', 'Firmament: A Choice of Commissions', 'Give the order for your airship to be built', 'Firmament =35 · airship built in a week', 'Once you’ve decided what your airship will be, you can Give the order for your airship to be built, which activates a living story with a countdown of 1 week and sets Firmament to 35'),
+    fr('Part 1 · Hallow’s Throat', 'A Yawning Grave', 'Visit', 'Duchess =1', '* Visit sets The Admiration of a Duchess to 1'),
+    fr('Part 1 · Hallow’s Throat', 'A Yawning Grave', 'Fly on', 'Dawnseeker =1', '* Fly on sets The Regard of the Dawnseeker to 1'),
+    fr('Part 1 · Hallow’s Throat', 'Exploring the Throat', 'Go looking for a bar', 'Lung and Spleen →2 · unlocks Searching for the Rain', 'raises Lung and Spleen to 2, unlocking Searching for the Rain and will allow you to hire the Forlorn Shepherd, eventually entering the Gullet to continue the story. What happens may make more sense once you play through Firmament Part 3'),
+    fr('Part 1 · Hallow’s Throat', 'Searching for the Rain', 'Accept the Forlorn Shepherd with open arms', '+Shepherd 1 · Accepted the help of a Shepherd =1', '* Accept the Forlorn Shepherd with open arms gives The Hopes of a Shepherd ×1 and sets Accepted the help of a Shepherd to 1'),
+    fr('Part 1 · Hallow’s Throat', 'Searching for the Rain', 'Provisionally accept the Shepherd’s offer', 'Accepted the help of a Shepherd =2', '* Provisionally accept the Shepherd’s offer sets Accepted the help of a Shepherd to 2'),
+    fr('Part 1 · Hallow’s Throat', 'Searching for the Rain', 'Approve Tatterdemalion’s plan', '+Dawnseeker 1 · Tatterdemalion’s Plan =1', '* Approve Tatterdemalion’s plan gives The Regard of the Dawnseeker ×1 now and another The Regard of the Dawnseeker ×1 later, setting Tatterdemalion’s Plan to 1'),
+    fr('Part 1 · Hallow’s Throat', 'Searching for the Rain', 'Decline Tatterdemalion’s plan', '+Duchess 1 · Tatterdemalion’s Plan =2', '* Decline Tatterdemalion’s plan gives The Admiration of a Duchess ×1 later, setting Tatterdemalion’s Plan to 2'),
+    fr('Part 1 · Hallow’s Throat', 'Ascending the Gullet', 'Trust the Duchess’ command', '+Duchess 1 · Menial Decision =1', '* Trust the Duchess’ command gives The Admiration of a Duchess ×1 and sets Menial Decision to 1'),
+    fr('Part 1 · Hallow’s Throat', 'Ascending the Gullet', 'Override the Last Duchess', '+Service 1 · Menial Decision =2', '* Override the Last Duchess gives The Quality of Service ×1 and sets Menial Decision to 2'),
+    fr('Part 1 · Hallow’s Throat', 'Spirefall', 'Convince the Vulgate to escape', 'Vulgatis =1', '* Convince the Vulgate to escape sets Vulgatis to 1 and will allow the Vulgate to return in Chapter 6. This allows you some greater flexibility in the resolution of that Chapter'),
+    fr('Part 1 · Hallow’s Throat', 'Spirefall', 'Leave the Vulgate', 'Vulgatis =2', '* Leave the Vulgate sets Vulgatis to 2 and prevents the Vulgate’s return in Chapter 6'),
+    fr('Part 1 · Hallow’s Throat', 'The Essential End', 'The Forlorn Shepherd', '+Shepherd 1', '* The Forlorn Shepherd gives The Hopes of a Shepherd ×1'),
+    fr('Part 2 · Midnight Moon', 'A Drink Off Midnight’s Edge', 'Dive off', '+Dawnseeker 3', 'In A Drink Off Midnight’s Edge, passing a Broad, Dangerous 190 challenge Dive off gives The Regard of the Dawnseeker ×3'),
+    fr('Part 2 · Midnight Moon', 'Return to the Yawning Grave', 'Reach out to Tatterdemalion', '+Dawnseeker 1', 'In Return to the Yawning Grave, Reach out to Tatterdemalion gives The Regard of the Dawnseeker ×1'),
+    fr('Part 2 · Midnight Moon', 'The Cup and the Moon', 'Draw on your experience at Port Carnelian', '+Duchess 1', '* Draw on your experience at Port Carnelian (unlocked with Successful Terms as Governor -) or Draw on your experience as head of the Great Hellbound Railway Board (unlocked with Charter of the Great Hellbound Railway) or Draw on your experience as a citizen (unlocked with Hinterland City - Chosen Site) only gives The Admiration of a Duchess ×1'),
+    fr('Part 2 · Midnight Moon', 'The Cup and the Moon', 'Draw on your experience as head of the Great Hellbound Railway Board', '+Duchess 1', '* Draw on your experience at Port Carnelian (unlocked with Successful Terms as Governor -) or Draw on your experience as head of the Great Hellbound Railway Board (unlocked with Charter of the Great Hellbound Railway) or Draw on your experience as a citizen (unlocked with Hinterland City - Chosen Site) only gives The Admiration of a Duchess ×1'),
+    fr('Part 2 · Midnight Moon', 'The Cup and the Moon', 'Draw on your experience as a citizen', '+Duchess 1', '* Draw on your experience at Port Carnelian (unlocked with Successful Terms as Governor -) or Draw on your experience as head of the Great Hellbound Railway Board (unlocked with Charter of the Great Hellbound Railway) or Draw on your experience as a citizen (unlocked with Hinterland City - Chosen Site) only gives The Admiration of a Duchess ×1'),
+    fr('Part 2 · Midnight Moon', 'The Cup and the Moon', 'Drink with her in company', '+Duchess 1', '* Later, Drink with her in company to gain The Admiration of a Duchess ×1 and The Quality of Service ×1, as the other options do not offer these qualities'),
+    fr('Part 2 · Midnight Moon', 'Open the Belly of Leviathan', 'Open the breach in the Leviathan', 'opens the way to the Stacks', 'Open the breach in the Leviathan grants access to the Stacks'),
+    fr('Part 2 · Midnight Moon', 'Drunken Whalers', 'Greet the lost miners of the Midnight Moon', 'On the trail of Ambergris =4', 'It’s only possible to raise On the trail of Ambergris on Time Passing in Naples 4, so you must loop through the day at least 3 times. Once it reaches 3, Make contact with the ambergris miners. Greet the lost miners of the Midnight Moon, which will set On the trail of Ambergris to 4'),
+    fr('Part 2 · Midnight Moon', 'Summer in Naples', 'Tell her that you’ve found her crew', 'Via Madonna =4', 'Return to Summer and Tell her that you’ve found her crew, which will set Via Madonna to 4. Next, go back to the miners and Reveal you’ve found their captain, which sets Via Madonna to 5'),
+    fr('Part 2 · Midnight Moon', 'Sink or Swim', 'Request the Last Duchess to sing of other than what she would.', '−Duchess 3 · Whalerise', '* Request the Last Duchess to sing of other than what she would. (costs The Admiration of a Duchess ×3)'),
+    fr('Part 2 · Midnight Moon', 'Sink or Swim', 'Request Tatterdemalion to sing of other than what he would', '−Dawnseeker 3 · Whalefall', '* Request Tatterdemalion to sing of other than what he would (costs The Regard of the Dawnseeker ×3)'),
+    fr('Part 2 · Midnight Moon', 'Sink or Swim', 'Sing to the Midnight Whale of the sun', 'Leviathan’s Call =1 · Whalerise', 'To witness Whalerise, Sing to the Midnight Whale of the sun (sets The Leviathan’s Call to 1)'),
+    fr('Part 2 · Midnight Moon', 'Sink or Swim', 'Sing to the Midnight Whale of the zee', 'Leviathan’s Call =2 · Whalefall', 'To witness Whalefall, Sing to the Midnight Whale of the zee (sets The Leviathan’s Call to 2)'),
+    fr('Part 2 · Midnight Moon', 'Time and the Gods', 'Hold out a hand to the Shepherd', '+Shepherd 1', '* Hold out a hand to the Shepherd gives The Hopes of a Shepherd ×1 and The Admiration of a Duchess ×1'),
+    fr('Part 2 · Midnight Moon', 'Time and the Gods', 'Reprimand him', '−Shepherd 1 · +Dawnseeker 1', '* Reprimand him loses The Hopes of a Shepherd ×1 and gives The Regard of the Dawnseeker ×1'),
+    fr('Part 3 · Zenith', 'Fires from Zenith', 'Heed the flame', '+Flammier', '*Heed the flame grants you a point of Flammier'),
+    fr('Part 3 · Zenith', 'Fires from Zenith', 'Force the fire to speak', '+Lucifer', '*Force the fire to speak grants you a point of Lucifer'),
+    fr('Part 3 · Zenith', 'The Illuminated of Zenith', 'Approach with the Forlorn Shepherd', '−Shepherd 1', '*Approach with the Forlorn Shepherd costs The Hopes of a Shepherd ×1'),
+    fr('Part 3 · Zenith', 'The Illuminated of Zenith', 'Let him hang back', '+Shepherd 1', '*Let him hang back gives The Hopes of a Shepherd ×1'),
+    fr('Part 3 · Zenith', 'Miser-Bonding', 'Present your Moon-Miser', 'Miser =8', 'At Moon-Miser Readiness 7 and The Lost Shepherd at least 20, you can Present your Moon-Miser and set Moon-Miser Readiness to 8. At which point, you can tell the Drover to start the Ritual'),
+    fr('Part 3 · Zenith', 'The Pools of Breaking and Mending', 'Reveal what you have seen', 'Hollowed =1', '*Reveal what you have seen, which will set Hollowed to 1'),
+    fr('Part 3 · Zenith', 'The Pools of Breaking and Mending', 'Keep your peace', 'Hollowed =2', '*Keep your peace, which sets Hollowed to 2 and ensure the Shepherd will act against the teachings of the Illuminated for future decisions'),
+    fr('Part 3 · Zenith', 'Silence in Zenith', 'Let Tatterdemalion cause a distraction', '+Dawnseeker 1', '* Let Tatterdemalion cause a distraction gives 1 x The Regard of the Dawnseeker'),
+    fr('Part 3 · Zenith', 'Silence in Zenith', 'Choose Summer instead', '+Summer 1', '* Choose Summer instead gives 1 x A Dream of Summer'),
+    fr('Part 4 · Burgundy: The Feastmen', 'Sogs and Inversions', 'Reveal what you’ve learned', '+Duchess 1', 'Choose Reveal what you’ve learned in Sogs and Inversions to gain The Admiration of a Duchess ×1'),
+    fr('Part 4 · Burgundy: The Feastmen', 'The Blessed State', 'Perhaps there’s something in it', '+Duchess 1', 'Choose Suggest she disregard it or Perhaps there’s something in it in The Blessed State to gain The Admiration of a Duchess ×1'),
+    fr('Part 4 · Burgundy: The Feastmen', 'The Other Duchess', 'Praise the other other Duchess', '+Tyranny 1', 'raises Tyranny of Burgundy by 1, or'),
+    fr('Part 4 · Burgundy: The Feastmen', 'The Great Hall', 'Feast!', 'starts the feast · up to +5 Prestige a stage', 'Once The Prestige of the Court is at least 4, play Feast! to start the feast. The feast has 3 stages, each stage can raise The Prestige of the Court by up to 5 depending on the chosen option'),
+    fr('Part 4 · Burgundy: The Feastmen', 'The Masque', 'Play the Good Duke', '+Prestige 5', '# During The Masque, you can Play the Good Duke to raise The Prestige of the Court by 5, or Play the truth to raise it by 3'),
+    fr('Part 4 · Burgundy: The Feastmen', 'The Masque', 'Play the truth', '+Prestige 3', '# During The Masque, you can Play the Good Duke to raise The Prestige of the Court by 5, or Play the truth to raise it by 3'),
+    fr('Part 4 · Burgundy: The Feastmen', 'The Great Hall', 'Conclude a dreadful feast', '+Tyranny 1', '* With The Prestige of the Court < 5: Conclude a dreadful feast, giving Tyranny of Burgundy ×1'),
+    fr('Part 4 · Burgundy: The Feastmen', 'The Great Hall', 'Conclude an adequate feast', '+Tyranny 3', '* With The Prestige of the Court 5 - 9: Conclude an adequate feast, giving Tyranny of Burgundy ×3'),
+    fr('Part 4 · Burgundy: The Feastmen', 'The Great Hall', 'Conclude a thrilling feast', '+Tyranny 5', '* With The Prestige of the Court 10: Conclude a thrilling feast, giving Tyranny of Burgundy ×5'),
+    fr('Part 4 · Burgundy: The Feastmen', 'The Duchess in Extremis', 'Blame the Other Duchess instead', '+Tyranny 1 · Displeasure =1', '* Blame the Other Duchess instead (if you have chosen Tell the Duchess about the Other Duchess’ Misrule), giving Tyranny of Burgundy ×1 and setting At the Duchess’ Displeasure to 1'),
+    fr('Part 4 · Burgundy: The Feastmen', 'The Duchess in Extremis', 'Fall upon your own sword', '+Tyranny 3 · Displeasure =2 · +Service 1', '* Fall upon your own sword (with The Quality of Service), giving Tyranny of Burgundy ×3 and setting At the Duchess’ Displeasure to 2. This action lowers The Admiration of a Duchess ×1 and gives The Quality of Service ×1'),
+    fr('Part 4 · Burgundy: The Feastmen', 'The Duchess in Extremis', 'Let matters play out', '+Tyranny 5 · Displeasure =3', '* Let matters play out, giving Tyranny of Burgundy ×5 and setting At the Duchess’ Displeasure to 3'),
+    fr('Part 4 · Burgundy: The Feastmen', 'Summer Storm', 'Look for a deeper insight', '+Summer 1 · Chthonosophy check', 'In Summer Storm, either Accept Summer’s explanation at face value or succeed the Chthonosophy check on Look for a deeper insight to gain A Dream of Summer ×1. Pinning the butterflies does not affect the game mechanically'),
+    fr('Part 4 · Burgundy: The Feastmen', 'The Duchess in her Bower', 'Tell the Duchess what she sees', '+Duchess 1 · The Duchess in Her Bower =10', '* Tell the Duchess what she sees to inform the truth and gain The Admiration of a Duchess ×1, setting The Duchess in Her Bower to 10'),
+    fr('Part 4 · Burgundy: The Feastmen', 'The Duchess in her Bower', 'Let her be', '+Duchess 2 · The Duchess in Her Bower =15', '* Let her be to leave her blindly happy and gain The Admiration of a Duchess ×2, setting The Duchess in Her Bower to 15'),
+    fr('Part 4 · Burgundy: The Feastmen', 'Last of Its Kind', 'Save Iron', '+Wrong Months 1 · Stones die', '* Save Iron offers Iron a seat in the Calendar and grants you Wrong Months ×1. Stones die in the process, and in your vision Iron kills you – if that is what you care about'),
+    fr('Part 4 · Burgundy: The Feastmen', 'Stella Splendens', 'Replace Burgundian June with Summer', '+Summer 3', '* Replace Burgundian June with Summer grants you A Dream of Summer ×3 and Wrong Months ×1'),
+    fr('Part 4 · Burgundy: The Feastmen', 'Stella Splendens', 'Combine June and Summer', 'no reputation change', '* Combine June and Summer grants no change in reputation'),
+    fr('Part 4 · Burgundy: The Feastmen', 'A Dream of Burgundy', 'Kneel', '+Duchess 1', '* Kneel to gain The Admiration of a Duchess ×1 and Tyranny of Burgundy ×1'),
+    fr('Part 4 · Burgundy: The Feastmen', 'A Dream of Burgundy', 'Remain standing', '−Tyranny 1', '* Remain standing to lose Tyranny of Burgundy ×1'),
+    fr('Part 4 · Burgundy: The Feastmen', 'A Dream of Burgundy', 'Make a face', '−Tyranny 2', '* Make a face to lose Tyranny of Burgundy ×2'),
+    fr('Part 5 · Burgundy: A Grand Hunt', 'Firmament: To Court Burgundy', 'Appeal to the Duke', 'narrative only', 'You must make an Appeal to the Duke. Your conversation with him will vary depending on whether you supported him or The Last Duchess at the end of the previous chapter, but there are no mechanically relevant choices here'),
+    fr('Part 5 · Burgundy: A Grand Hunt', 'The Calendar in (Almost) Triumph', 'Ask whom Max would prefer', '+Doubts 1', 'you will gain Ducal Doubts ×1. After this, your suggestions are not mechanically relevant, as, in the end, The Only Possible Choice is effectively made for you'),
+    fr('Part 5 · Burgundy: A Grand Hunt', 'The Merry Boughs of May', 'Follow a song', '+1 progress · +Summer 1', 'You also have the opportunity to Follow a song if you did not choose to have Summer sing in Lost Naples; this allows you to gain one progress of either type and A Dream of Summer ×1, or (probably) lose A Dream of Summer ×1 if Another June is 2 and you wish to help the Duchess (this result is yet to be recorded, but requires A Dream of Summer ×2 so it seems reasonable to assume that it spends it)', true),
+    fr('Part 6 · Sousward, Ho!', 'Call the Ships to Port', 'Turn your fire on the Vulgate', '+The Calendar, Spared', '* Turn your fire on the Vulgate to aid the Calendar and gain The Calendar, Spared'),
+    fr('Part 6 · Sousward, Ho!', 'Call the Ships to Port', 'Hold fire', 'Calendrical Remnants =1', '* Hold fire to sacrifice the Calendar as bait, setting Calendrical Remnants to 1'),
+    fr('Part 6 · Sousward, Ho!', 'The Fire of the Dove', 'Ask that the Vulgate redact Tatterdemalion’s spite', 'Icarus in Flames =3', '* With Icarus in Flames 1 (Summer piloting), there is the option to Ask that the Vulgate redact Tatterdemalion’s spite, setting this value to 3, which allows you to make the subsequent choice in Choirs Ignite below'),
+    fr('Part 6 · Sousward, Ho!', 'Choirs Ignite', 'Let such as are left surrender', 'The Vulgate in defeat =1', '* Choosing to Let such as are left surrender will set The Vulgate in defeat to 1 and lead to The Field of Victory'),
+    fr('Part 6 · Sousward, Ho!', 'Choirs Ignite', 'Destroy the Vulgate', 'The Vulgate in defeat =2', '* Choosing to Destroy the Vulgate will set The Vulgate in defeat to 2 and also appears to inflict heavy losses on the Feastmen and cause whichever members of the Calendar survived the initial push to flee the field. This leads to The Field of Carnage', true),
+    fr('Part 7 · Queeneater’s Castle', 'Scarlet Letters', 'Reprimand them', '+Dawnseeker 1', '* Reprimand them grants The Regard of the Dawnseeker ×1'),
+    fr('Part 7 · Queeneater’s Castle', 'Scarlet Letters', 'Let matters slide', '+Summer 1', '* Let matters slide grants A Dream of Summer ×1'),
+    fr('Part 7 · Queeneater’s Castle', 'Firmament: Dinner with Valentine', 'Agree, and invite him aboard', '+Valentine 1 · First Officer: Valentine', '* Agree, and invite him aboard gains you First Officer: St Valentine’s Day and The Last Day of Valentine ×1'),
+    fr('Part 7 · Queeneater’s Castle', 'Firmament: Dinner with Valentine', 'Keep silent', 'no reputation change', '* Keep silent grants no change in reputation'),
+    fr('Part 7 · Queeneater’s Castle', 'Firmament: Dinner with Valentine', 'Refuse', 'no reputation change', '* Refuse grants no change in reputation'),
+    fr('Part 7 · Queeneater’s Castle', 'A Feast of Fasting', 'Do not feast', '−Peckish 1', 'From Ritual to Restitution tracks progress in the story here. During A Feast of Fasting, choosing to Feast will grant you Unaccountably Peckish ×1; if you Do not feast, you will lose Unaccountably Peckish ×1'),
+    fr('Part 7 · Queeneater’s Castle', 'The Perfumed Choragus', 'Embrace the opportunity', 'From Ritual to Restitution =10', 'While speaking with The Perfumed Choragus, whether you Commit yourself to the bare minimum or Embrace the opportunity, the effect is the same, setting From Ritual to Restitution to 10 and continuing the story'),
+    fr('Part 7 · Queeneater’s Castle', 'Find a Place to Sleep', 'Dream with Summer', '+Summer 1', '* to Dream with Summer and gain A Dream of Summer ×1'),
+    fr('Part 7 · Queeneater’s Castle', 'Firmament: In a Castle Inside a Castle', 'Enjoy a quiet moment', 'Wounds, Nightmares =0 · choose a companion', 'by yourself'),
+    fr('Part 7 · Queeneater’s Castle', 'Tatters in Tatters', 'Reassure Tatterdemalion', '+Dawnseeker 3', '* Reassure Tatterdemalion grants The Regard of the Dawnseeker ×3'),
+    fr('Part 7 · Queeneater’s Castle', 'Tatters in Tatters', 'Demand answers', '−Dawnseeker 3', '* Demand answers causes you to lose The Regard of the Dawnseeker ×3'),
+    fr('Part 7 · Queeneater’s Castle', 'Tatters in Tatters', 'Leave him be', '+Dawnseeker 1', '* Leave him be grants The Regard of the Dawnseeker ×1'),
+    fr('Part 7 · Queeneater’s Castle', 'The Assembly', 'Object', 'narrative only', 'If you aren’t a supporter of this plan, you can also Object, which is narrative but has no mechanical effect'),
+    fr('Part 7 · Queeneater’s Castle', 'The Assembly', 'Blow it up', 'Let There Be Light · ends the Assembly · Wounds, Nightmares =7', 'gain a unique quality: Let There Be Light. Doing this will end the Assembly early and forfeit the subsequent choice (described in the next paragraph) - it sets Permitted to Intervene to 2 (You did not - or were not able to - help Summer) and Trials of Summer to 35 (Summer has Claimed June). It also sets your Wounds and Nightmares both to 7'),
+    fr('Part 7 · Queeneater’s Castle', 'The Trial of the Phoenix', 'Support Summer', 'Trials =35', '* Support Summer, which sets Trials of Summer to 35 (Summer has Claimed June)'),
+    fr('Part 7 · Queeneater’s Castle', 'The Trial of the Phoenix', 'Betray Summer', 'Trials =40', '* Betray Summer, which sets Trials of Summer to 40 (June was always Summer)'),
+    fr('Part 7 · Queeneater’s Castle', 'Lost Script: the Performance', 'Request Comedy', 'no reputation change', '* Choosing Request Comedy grants no reputation change'),
+    fr('Part 7 · Queeneater’s Castle', 'Lost Script: the Performance', 'Request Tragedy', '+Summer 3', '* Choosing Request Tragedy grants A Dream of Summer ×3'),
+    fr('Part 7 · Queeneater’s Castle', 'Lost Script: the Performance', 'Play History', '+Summer 1', '* Choosing Play History grants A Dream of Summer ×1'),
+    fr('Part 7 · Queeneater’s Castle', 'Missing Mask: the Performance', 'Play Comedy', '+Dawnseeker 3', '* Choosing Play Comedy grants The Regard of the Dawnseeker ×3'),
+    fr('Part 7 · Queeneater’s Castle', 'Missing Mask: the Performance', 'Play Tragedy', '+Dawnseeker 1', '* Choosing Play Tragedy grants The Regard of the Dawnseeker ×1'),
+    fr('Part 7 · Queeneater’s Castle', 'Missing Mask: the Performance', 'Play History', 'no reputation change', '* Choosing Play History grants no reputation change'),
+    fr('Part 7 · Queeneater’s Castle', 'Consummate Performer, Performing', 'Play Comedy', '+Valentine 1', '* Choosing Play Comedy grants The Last Day of Valentine ×1'),
+    fr('Part 7 · Queeneater’s Castle', 'Consummate Performer, Performing', 'Play Tragedy', 'no reputation change', '* Choosing Play Tragedy grants no reputation change'),
+    fr('Part 7 · Queeneater’s Castle', 'Consummate Performer, Performing', 'Play History', '+Valentine 3', '* Choosing Play History grants The Last Day of Valentine ×3'),
+    fr('Part 7 · Queeneater’s Castle', 'The Empty Stage', 'Tell the story of a friend', '+Shepherd 3', '* Choosing Tell the story of a friend grants The Hopes of a Shepherd ×3'),
+    fr('Part 7 · Queeneater’s Castle', 'The Empty Stage', 'Tell the story of a warrior', '+Shepherd 3', '* Choosing Tell the story of a warrior, available for the Illuminated Shepherd, grants The Hopes of a Shepherd ×3'),
+    fr('Part 7 · Queeneater’s Castle', 'The Empty Stage', 'Tell the story of a Miser-herder', '+Shepherd 3', '* Choosing Tell the story of a Miser-herder, available for the Forlorn Shepherd, grants The Hopes of a Shepherd ×3'),
+    fr('Part 7 · Queeneater’s Castle', 'The Empty Stage', 'Walk away', 'no reputation', '* Choosing Walk away grants no reputation'),
+    fr('Part 7 · Queeneater’s Castle', 'Whomsoever Shall Be Slaughtered', 'Select Summer', '+Summer 1 · On the Slab =1', '* Select Summer to gain A Dream of Summer ×1 and set On the Slab to 1 - Summer'),
+    fr('Part 7 · Queeneater’s Castle', 'Whomsoever Shall Be Slaughtered', 'Select Valentine', 'On the Slab =2 · needs Valentine 3', '* Select Valentine (requires The Last Day of Valentine ×3) sets On the Slab to 2 - Valentine. If Valentine succeeds at the Rites, and you choose to have the Queen return him to you, Summer will leave your crew and Valentine will stay with you'),
+    fr('Part 7 · Queeneater’s Castle', 'The Butcher’s Block', 'Play the Knave', 'narrative only', 'The Rites then conclude. You find yourself upon The Butcher’s Block and must choose whether to Play the King, Play the Queen, or Play the Knave - though this appears to be only a narrative choice. Following your discussion with The Red Queen, your value of Slaughtered will determine your ability to save the sacrifice in She Who Smiles Without a Face', true),
+    fr('Part 7 · Queeneater’s Castle', 'She Who Smiles Without a Face', 'Request your companion back', '+Summer 3 · Chief Engineer: Summer =1', '** Choosing to request the return of Summer grants you A Dream of Summer ×3 and sets Chief Engineer: Summer to 1'),
+    fr('Part 7 · Queeneater’s Castle', 'She Who Smiles Without a Face', 'Leave Summer', 'Chief Engineer: Summer =1', '** Choosing to Leave Summer also sees Summer released and sets Chief Engineer: Summer to 1, but with no reputation gain (this may require a certain level of reputation, but it has been reported several times)', true),
+    fr('Part 7 · Queeneater’s Castle', 'She Who Smiles Without a Face', 'Offer yourself', 'narrative only', 'Your final choice to Consume her or Offer yourself is a narrative one with no noticeable mechanical effect'),
+    fr('Part 7 · Queeneater’s Castle', 'The Keep Called Queeneater’s', 'Seek out the repertory’s dramaturg', 'opens the Old Resurrection outpost', '* Pursuing The Playwright’s Hands through Seek out the repertory’s dramaturg allows you to establish this location’s outpost for Old Resurrection and grants a bit of extra lore with Entwined in the Intrigues of the Clathermont Family at 30'),
+    fr('Part 8 · Into the Breach, Again', 'A Hero’s Speech', 'Condemn everyone', 'narrative only', '* Praise your Board, Praise yourself, and Condemn everyone all grant no reputation change'),
+    fr('Part 8 · Into the Breach, Again', 'A Hero’s Speech', 'Praise your Officers', '+Dawnseeker 1', '* Praise your Officers grants The Regard of the Dawnseeker ×1 and The Hopes of a Shepherd ×1'),
+    fr('Part 8 · Into the Breach, Again', 'The Night Before', 'Sleep', '+Flammier', '* Choosing Sleep grants a point of Flammier'),
+    fr('Part 8 · Into the Breach, Again', 'The Night Before', 'Refuse to dream. Stay awake.', '+Lucifer', '* Choosing Refuse to dream. Stay awake. grants a point of Lucifer'),
+    fr('Part 8 · Into the Breach, Again', 'The Flame Enchained', 'Beseech the flame', '+Flammier', '* Choosing Beseech the flame grants a point of Flammier'),
+    fr('Part 8 · Into the Breach, Again', 'The Flame Enchained', 'Make your demand', '+Lucifer', '* Choosing Make your demand grants a point of Lucifer'),
+    fr('Part 8 · Into the Breach, Again', 'Approaching the Cliffs', 'Call him in line', 'no reputation', '** Call him in line grants you no reputation'),
+    fr('Part 8 · Into the Breach, Again', 'Summer’s Storm', 'Leave it be', '+Summer 1', '** Leave it be grants you A Dream of Summer ×1'),
+    fr('Part 8 · Into the Breach, Again', 'Bloody Amputations', 'Leave it be', '+Valentine 1', '** Leave it be grants you The Last Day of Valentine ×1'),
+    fr('Part 8 · Into the Breach, Again', 'The Quartz’s Roots', 'Push Tatterdemalion', 'no reputation', '** Push Tatterdemalion grants you no reputation'),
+    fr('Part 8 · Into the Breach, Again', 'The Quartz’s Roots', 'Stand back', '+Dawnseeker 1', '** Stand back grants you The Regard of the Dawnseeker ×1'),
+    fr('Part 8 · Into the Breach, Again', 'The Machine in Splendour', 'Search for traces of Tatterdemalion', '+Encountered: Tatterdemalion', 'grants Encountered: Tatterdemalion. These choices are optional before choosing'),
+    fr('Part 8 · Into the Breach, Again', 'Unburdening Yourself', 'Give your guilts to the Gift', 'Kataleptic Toxicology +1 · less Suspicion buildup', 'This Boon gives Kataleptic Toxicology +1, reduces Suspicion buildup, and gives you Crystallised Euphoria every day - but will kill you within a number of days tracked by Guilt’s Return. It costs'),
+    fr('Part 9 · Fire in the Looking Glass', 'Wined and Dined in Burgundy', 'Reveal what you know', 'Intrigue in Burgundy =1 · +Duchess 1', '* Choosing Reveal what you know sets Intrigue in Burgundy to 1 and grants The Admiration of a Duchess ×1'),
+    fr('Part 9 · Fire in the Looking Glass', 'Wined and Dined in Burgundy', 'Reveal a little', 'Intrigue in Burgundy =2', '* Choosing Reveal a little sets Intrigue in Burgundy to 2'),
+    fr('Part 9 · Fire in the Looking Glass', 'Wined and Dined in Burgundy', 'Deny everything', 'Intrigue in Burgundy =2', '* Choosing Deny everything also sets Intrigue in Burgundy to 2'),
+    fr('Part 9 · Fire in the Looking Glass', 'Wined and Dined in Burgundy', 'Indicate your affections for the Duchess alone have drawn you', 'Intrigue in Burgundy =2', '* Choosing Indicate your affections for the Duchess alone have drawn you sets Intrigue in Burgundy to 2'),
+    fr('Part 9 · Fire in the Looking Glass', 'Wined and Dined in Burgundy', 'Confess to Maximilian', 'Intrigue in Burgundy =? · +?', '* Choosing Confess to Maximilian sets Intrigue in Burgundy to ? and grants ?'),
+    fr('Part 9 · Fire in the Looking Glass', 'A Final Farewell?', 'Muster your strength', 'Dreamwrought Dirigible mirrors your vessel', 'to voyage onward. Your Dreamwrought Dirigible will be set to mirror the vessel you command in the waking world. Raise On Dawny Tides to 7 using your available options to proceed. Airs of the Dawnseeker varies the resulting success text of the choices, but each choice grants 1 progress. For those seeking to experience all options, there appear to be three variations each of the "Chart a course" and'),
+    fr('Part 9 · Fire in the Looking Glass', 'Redder Favour', 'Accept under duress', 'The Reddest of Debts =1', '* To Accept freely or Accept under duress will set The Reddest of Debts to 1'),
+    fr('Part 9 · Fire in the Looking Glass', 'The Shepherd’s Lament', 'Deny his fears', '+Shepherd 3', '* While finding the Shepherd, in The Shepherd’s Lament, all choices set Revealing the Shepherd to 5, but Deny his fears also grants The Hopes of a Shepherd ×3'),
+    fr('Part 9 · Fire in the Looking Glass', 'Duchess of Nothing', 'You share her dream', '+Duchess 3', '* While finding the Duchess, in Duchess of Nothing, all choices set Locating the Lost Duchess to 5, but You share her dream also grants The Admiration of a Duchess ×3'),
+    fr('Part 9 · Fire in the Looking Glass', 'Firmament: The Ashes are Burgundy', 'Make ready to depart for Procession', '+Discovered: The Depression, Procession', 'Then complete the Chthonosophy challenge in the Firmament storylet and you can Make ready to depart for Procession. You will gain Discovered: The Depression and Discovered: Procession to facilitate this flight'),
+    fr('Part 9 · Fire in the Looking Glass', 'Firmament: Awaiting the End', 'Dine with your officers', 'moves Firmament on', '* Dine with your officers to progress the story of Firmament. This will be necessary to complete the story, but can be completed before proceeding to the Temple. The cost is'),
+    fr('Part 9 · Fire in the Looking Glass', 'It Eats Worlds', 'Consume what is not there', '+An Unwatchable Sight', '* Once you have A Scar Near the Eye, change your form again via The Skeleton of the Sky, and choose Conduct charge. Select the card It Eats Worlds; the option Consume what is not there should be unlocked - choose it to gain the quality An Unwatchable Sight'),
+    fr('Part 9 · Fire in the Looking Glass', 'The Tears of Judgement', 'Be tested', '+Transform', '* Be tested: grants Transform'),
+    fr('Part 9 · Fire in the Looking Glass', 'The Tears of Judgement', 'Be tested for Tatterdemalion', '+Cessate', '* Be tested for Tatterdemalion: grants Cessate'),
+    fr('Part 9 · Fire in the Looking Glass', 'The Tears of Judgement', 'Ask Tatterdemalion his reasons', '+Transform', '* Ask Tatterdemalion his reasons: grants Transform'),
+    fr('Part 9 · Fire in the Looking Glass', 'The Tears of Judgement', 'Bring evidence from Storm’s Bones to reveal Storm’s alteration', '+Cessate', '* Bring evidence from Storm’s Bones to reveal Storm’s alteration: grants Cessate'),
+    fr('Part 9 · Fire in the Looking Glass', 'The Tears of Judgement', 'Reach out to Tatterdemalion', '+Transform on success, Cessate on failure', '* Reach out to Tatterdemalion (a The Regard of the Dawnseeker challenge): grants Transform on success, Cessate on failure'),
+    fr('Part 9 · Fire in the Looking Glass', 'The Tears of Judgement', 'Cede to Tatterdemalion', '+Cessate', '* Cede to Tatterdemalion: grants Cessate'),
+    fr('Part 9 · Fire in the Looking Glass', 'The Tears of Judgement', 'Reveal Tatterdemalion’s crimes', '+Transform', '* Reveal Tatterdemalion’s crimes (requires A Final Orientation of the Captain’s Heart = 2): grants Transform'),
+    fr('Part 9 · Fire in the Looking Glass', 'The Tears of Judgement', 'Reveal what Tatterdemalion is', '+Transform', '* Reveal what Tatterdemalion is: grants Transform'),
+    fr('Part 9 · Fire in the Looking Glass', 'The Tears of Judgement', 'Reveal your Apocryphal status', '+Transform', '* Reveal your Apocryphal status (requires Twice-Born): grants Transform'),
+    fr('Part 9 · Fire in the Looking Glass', 'The Tears of Judgement', 'Recall Storm’s Guilt and argue for his death', '+Cessate', '* Recall Storm’s Guilt and argue for his death (requires Discovered: Stonegift’s Roots): grants Cessate'),
+    fr('Part 9 · Fire in the Looking Glass', 'The Tears of Judgement', 'Recall Storm’s Guilt and argue for his change', '+Transform', '* Recall Storm’s Guilt and argue for his change (requires Discovered: Stonegift’s Roots): grants Transform'),
+    fr('Part 9 · Fire in the Looking Glass', 'The Tears of Judgement', 'Show the root of things to condemn Tatterdemalion', '+Transform on success, Cessate on failure', '* Show the root of things to condemn Tatterdemalion (a Chthonosophy challenge): grants Transform on success, Cessate on failure'),
+    fr('Part 9 · Fire in the Looking Glass', 'The Tears of Judgement', 'Show the root of things to condemn Storm', '+Cessate on success, Transform on failure', '* Show the root of things to condemn Storm (a Chthonosophy challenge): grants Cessate on success, Transform on failure'),
+    fr('Part 2 · Midnight Moon', 'Napoli, 1899', 'Swim', '+Tantalising Possibility 10', ''),
+    fr('Part 2 · Midnight Moon', 'Napoli, 1899', 'Siesta', '+Via Madonna 1 (up to 3) · Memory of Distant Shores, or +Solacefruit 1', 'The three Siesta pages differ by the time of day: Via Madonna and a Memory of Distant Shores on day 1, Solacefruit on days 2 and 3'),
+    fr('Part 2 · Midnight Moon', 'Napoli, 1899', 'Breakfast', '+Solacefruit 1', ''),
+    fr('Part 2 · Midnight Moon', 'Napoli, 1899', 'Explore the city', '+Memory of Light 1', ''),
+    fr('Part 2 · Midnight Moon', 'Napoli, 1899', 'Visit the Royal Palace', '+Via Madonna 1 (up to 3) · Memory of Distant Shores', ''),
+    fr('Part 2 · Midnight Moon', 'Napoli, 1899', 'Dine', '+Via Madonna 1 (up to 3) · Tantalising Possibility 10', ''),
+    fr('Part 2 · Midnight Moon', 'Napoli, 1899', 'Take a boat', '+Memory of Light 1', ''),
+    fr('Part 2 · Midnight Moon', 'Napoli, 1899', 'Visit the Gran Caffè Gambrinus', '+On the trail of Ambergris 1 (up to 3) · Peppercaps', ''),
+    fr('Part 2 · Midnight Moon', 'Napoli, 1899', 'Visit the Locanda del Cerriglio', '+On the trail of Ambergris 1 (up to 3) · Morelways 1872', ''),
+    fr('Part 2 · Midnight Moon', 'Napoli, 1899', 'Visit the Caffè dell’Epoca', '+On the trail of Ambergris 1 (up to 3) · Withered Tentacle', ''),
+    fr('Part 2 · Midnight Moon', 'The Cup and the Moon', 'Say nothing', '+Duchess 3', 'The guide: the best of the four options here'),
+    fr('Part 2 · Midnight Moon', 'Summer in Naples', 'Reveal you’ve found their captain', 'Via Madonna =5', ''),
+    fr('Part 4 · Burgundy: The Feastmen', 'A Feast of Burgundy', 'Sit at the high table', '+Prestige 5', ''),
+    fr('Part 4 · Burgundy: The Feastmen', 'A Feast of Burgundy', 'Sit with your officers', '+Prestige 3', ''),
+    fr('Part 4 · Burgundy: The Feastmen', 'A Feast of Burgundy', 'Sit below the salt', '+Prestige 1', ''),
+    fr('Part 4 · Burgundy: The Feastmen', 'Last of Its Kind', 'Spare Stones', 'no Wrong Months · Iron dies', ''),
+    fr('Part 7 · Queeneater’s Castle', 'A Feast of Fasting', 'Feast', '+Peckish 1', ''),
+    fr('Part 7 · Queeneater’s Castle', 'The Perfumed Choragus', 'Commit yourself to the bare minimum', 'From Ritual to Restitution =10', ''),
+  ];
+
+  FIR_OPTIONS.forEach(function (e) {
+    e.rawLabel = e.label;
+    e.label = e.label + (e.unsure ? ' ⚠' : '');
+    e.color = CAROUSEL_COLOR_SETUP;
+    const lines = [e.name, e.storylet + ', ' + e.part, '', 'The guide: ' + (e.tip || e.rawLabel + '.')];
+    if (e.unsure) lines.push('The guide is not sure of this one: the story can be played only once and some of it was never confirmed.');
+    lines.push('', FIR_CFG.rules);
+    e.title = lines.join('\n');
+  });
+
+  const FIR_STORYLETS = FIR_OPTIONS.map(function (e) { return e.storylet; }).filter(function (s, i, a) { return a.indexOf(s) === i; });
+  const FIR_SUMMARY = {};
+  FIR_STORYLETS.forEach(function (s) {
+    const n = FIR_OPTIONS.filter(function (e) { return e.storylet === s; }).length;
+    FIR_SUMMARY[normalizeName(s)] = n + (n === 1 ? ' choice' : ' choices');
+  });
+  // The wiki prefixes some storylets with "Firmament: " to tell them from others; the game shows them without.
+  const FIR_KEYS = FIR_STORYLETS.map(normalizeName);
+  function firCanonical(key) {
+    if (FIR_KEYS.indexOf(key) !== -1) return key;
+    return FIR_KEYS.indexOf('firmament ' + key) !== -1 ? 'firmament ' + key : null;
+  }
+
+  const FIR_INDEX = carouselIndex(FIR_OPTIONS);
+  const FIR_DEF = {
+    cfg: FIR_CFG, options: FIR_OPTIONS, index: FIR_INDEX, storylets: FIR_STORYLETS, cards: [], cardKeys: [],
+    aliases: firCanonical, summary: FIR_SUMMARY,
+    cls: 'fl-ux-fir', flag: 'flUxFir', branchCls: 'fl-ux-fir-branch', branchFlag: 'flUxFirBranch',
+  };
+
+  function firRatings() { pqRatings(FIR_DEF); }
+
+  // === feature: Discordant Studies ========================================
+  //
+  // The Hurlers (Guide), Discordant Studies - Costs and Rewards and Deeper
+  // Discordant Studies: the long road from the Encampment to Steward of the
+  // Discordance 10. It is walked by two qualities, Crystalline Knowledge (1 to
+  // 10) and Cold Comfort (up to 7), through a web of storylets in the Hurlers
+  // and the Adulterine Castle, and the option that raises each is easy to miss.
+  //
+  // **What the badge says.** What the option raises, to which level, in the
+  // guide's order of play: `Knowledge → 2 · Cold Comfort → 5`. `Trust → 0` is
+  // the Steward's Trust the option spends. The tooltip has the step number, the
+  // requirements, and the guide's remarks; on the options of Deeper Discordant
+  // Studies it has the guide's own three tiers **in order, Hint 1, Hint 2, then
+  // the answer**, so a reader can stop after the hint. **Spoilers are on
+  // purpose** (decided). The costs of the first deep step (the stats lost, the
+  // menaces gained, the rewards) are in the tooltip of that option, from the
+  // Costs and Rewards guide.
+  //
+  // Transcribed from the option pages (fetched through the API, 2026-09-26)
+  // with the three guides as the cross-check; the pages win. Left out: the
+  // options of Digging in the Hurlers and of Hurling (their own features), the
+  // Cave of the Nadir's ripping out of the Discordant Law (also Digging's), the
+  // Discordant Law table (three laws, a comparison, not an option), and the
+  // castle's cards, which the Costs and Rewards guide tabulates by picture.
+  // Corrections go in HS_OPTIONS and nowhere else.
+
+  const HS_CFG = {
+    quality: 'Discordant Studies', short: 'Knowledge',
+    rules: 'The road runs on Crystalline Knowledge and Cold Comfort. It is a major spoiler: the guides keep it behind hints, '
+      + 'and the tooltips here keep their order.',
+  };
+  const HS_COSTS = 'The first deep step costs, by the Costs and Rewards guide: a stat challenge (a narrow 8 on Chess, Red Science, '
+    + 'Glasswork, Kataleptic Toxicology, Mithridacy, Monstrous Anatomy or Shapeling Arts; a broad 300 on Watchful, Dangerous, Persuasive '
+    + 'or Shadowy), the current level of several skills or 100 points of the four attributes, up to 15 Memories of Discordance and a few '
+    + 'items, and menaces (Nightmares +10, and trips to the menace places at 8). It pays Crystalline Knowledge +4 (level 6 to 10), Discordant '
+    + 'Studies 1 to 2, Steward of the Discordance +9, Acquaintance: the Anchoress, Advancing the Liberation of Night +110, Anticandle ×3, '
+    + 'a Discordance Stone, Immaterial Material, and a spread of secondary items.';
+
+  function hs(step, storylet, name, label, more) {
+    return Object.assign({ step: step, storylet: storylet, name: name, label: label }, more);
+  }
+
+  const HS_OPTIONS = [
+    // --- The Hurlers ---
+    hs(1, 'Around the Embers', 'Speak with the Caprine Vagabond', 'Knowledge → 1',
+      { needs: 'Steward of the Discordance 1 (the guide advises 3, from a Discordant Missive)', note: 'Unlocks Crystalline Knowledge.' }),
+    hs(2, 'Desolation', 'Approach the Hurlers', 'count both circles',
+      { note: 'Count both circles here. The guide advises re-counting if the two figures add up wrong by 3 to 5 in all: a low pair or a high pair is best for the card game later.' }),
+    hs(3, 'Speaking with the Steward', 'Discuss the Hurlers', 'Cold Comfort → 3 · Trust → 0',
+      { aliases: ['Discuss the Hurlers 2'], needs: 'Cold Comfort 2, both circles counted, Steward’s Trust 3',
+        note: 'Cold Comfort 2 to 3 comes from rounds of cards with the Steward: each costs a Crystallised Curio and gives 3 Trust on a success, 2 on a failure. Gives Jasmine Leaves ×22.' }),
+    hs(4, 'Speaking with the Steward', 'Discuss the Disembarked Deviless’ research', 'Cold Comfort → 4 · Trust → 0',
+      { needs: 'Cold Comfort 3, Breaking the Ice 4, Steward’s Trust 5', note: 'Gives Extraordinary Implication ×2.' }),
+    hs(5, 'The Steward’s Oath', 'Swear the oath', 'Knowledge → 2 · Cold Comfort → 5 · Nightmares +11?',
+      { needs: 'A Scholar of the Correspondence 15 (higher is easier), Steward of the Discordance',
+        note: 'A broad Scholar of the Correspondence 15 and a narrow Steward of the Discordance 3. Gives Steward of the Discordance +1, and Nightmares and Wounds by the outcome.' }),
+    hs(6, 'Speaking with the Steward', 'Discuss the Discordance', 'Cold Comfort → 6',
+      { needs: 'Cold Comfort 5, Crystalline Knowledge 2', note: 'Gives Extraordinary Implication ×2.' }),
+    hs(6, 'Speaking with the Steward', 'Discuss the Hurlers again', 'Knowledge → 3',
+      { aliases: ['Discuss the Hurlers again 2'], needs: 'Crystalline Knowledge 2, both circles counted', note: 'Gives Whispered Hint ×11 and Incisive Observation ×11.' }),
+    hs(7, 'On the Ice', 'Open your eyes', 'enter the Adulterine Castle · Nightmares +1',
+      { aliases: ['Open your eyes (On the Ice)', 'Open your eyes 0'], needs: 'Crystalline Knowledge 3 to 6 (with Wounds under 8)',
+        note: 'Bring about 3000 Drops of Prisoner’s Honey, a Memory of Discordance and a Crystallised Euphoria. Once in the castle you can leave only through the Mirror-Marches or Parabola. '
+          + 'The game shows this title at two levels: at Crystalline Knowledge 7, with Nightmares at 0, the Number That’s Not In Your Head at 0 and the scream that is not stuck in your throat like a stone, it is the final seal '
+          + 'instead: Nonexistent Seal, Steward of the Discordance +1 and Advancing the Liberation of Night +10, and it uses the scream up.' }),
+    hs(7, 'The Castle That Isn’t Here', 'Establish a route to your Parabolan Base-Camp', 'route to Parabola · honey ×3000 + Euphoria ▼',
+      { needs: 'Access to a Parabolan Base-Camp, Drop of Prisoner’s Honey 3000, Crystallised Euphoria', note: 'Afterwards leaving through your camp costs 20 Drops each time. Do not leave yet.' }),
+    hs(8, 'Not Observing Anything', 'Don’t talk about the game', 'Knowledge → 4 · Steward +1',
+      { note: 'Offered only below Crystalline Knowledge 4.' }),
+    hs(8, 'Not Observing Anything', 'Don’t place a wager on the game', 'play a full game (Hurling)',
+      { needs: 'Crystalline Knowledge 4', note: 'Not offered while Hurlyburly is running. Hurling (Guide) may help.' }),
+    hs(9, 'The Adulterine Castle', 'Approach the Anchoress', 'Knowledge → 5 · Memory of Discordance −1',
+      { aliases: ['Approach the Anchoress 2'], needs: 'Crystalline Knowledge 4, Memory of Discordance ×1', note: 'Gives Apostate’s Psalm and Maniac’s Prayer ×111. Then leave through your Parabolan camp.' }),
+    hs(10, 'Speaking with the Steward', 'Discuss the Adulterine Castle', 'Cold Comfort → 7',
+      { aliases: ['Discuss the Adulterine Castle (The Steward)'], needs: 'Cold Comfort 6, Route: The Adulterine Castle', note: 'Gives Rumour of the Upper River ×2 and Dubious Testimony ×1.' }),
+    hs(10, 'Speaking with the Steward', 'Discuss the Anchoress', 'Knowledge → 6',
+      { needs: 'Crystalline Knowledge 5, Cold Comfort 7, a Discordant Law', note: 'Gives Memory of a Much Lesser Self ×2. Then Rip out the Discordant Law at the Cave of the Nadir, and Discordant Studies begins.' }),
+
+    // --- Deeper Discordant Studies ---
+    hs(11, 'Speaking with the Steward', 'Unlock deeper Discordant Studies', 'Discordant Studies open · Trust → 0',
+      { needs: 'Crystalline Knowledge 6, Discordant Studies, Steward’s Trust 3', note: 'Gives Appalling Secret ×22.',
+        hints: ['First you will need to consult with someone who knows more about the Discordance.',
+          'This is someone that you have talked to before at the Hurlers. Make sure to bring some knowledge.',
+          'Approach the Steward at the Adulterine Ruins to unlock deeper Discordant Studies and reflect upon a Memory of Discordance. You will need a Memory of Discordance.'] }),
+    hs(11, 'Discordant Studies', 'Reflect upon a Memory of Discordance', 'Knowledge +1 · Steward +2 · Nightmares +11?',
+      { needs: 'a Memory of Discordance ×1, Mithridacy', note: 'A narrow Mithridacy 8 challenge; costs your base Mithridacy level and the Memory. ' + HS_COSTS }),
+    hs(12, 'On the Ice', 'Close your eyes', 'raise Nightmares to match the number',
+      { note: 'Make the Number That’s Not In Your Head match your Nightmares, then Open your eyes.',
+        hints: ['The stewardess should have another topic now that should give you a hint on how to proceed.',
+          'You’ll need to enter the Adulterine Castle multiple times through the same method as you first entered.',
+          'Make sure that the Number That’s Not In Your Head aligns with your current Nightmares. You can always raise your Nightmares out on the Ice with Close your eyes. Then Open your eyes and enter the castle, unlocking a seal.'],
+        more: [
+          ['What to do with what you found', ['You should find something new in the Castle now.', 'You may have to move up or down in order to find it.',
+            'The seal is a storylet with a specific sacrifice and a difficult challenge. Completing it will open the seal, setting the seal’s value to two.']],
+          ['From there', ['Consider the seal number you found and what it might imply.', 'What values are possible when you miscount the stones? What values are possible with Nightmares?',
+            'You’ll want to miscount the stones for each of the seals 2 to 8 and then open the seal in the castle.']]] }),
+    hs(13, 'The Anchorhold', 'Meditate upon the Lower Principles', 'first seal · miscount of the 2nd stone → 0',
+      { aliases: ['Meditate upon the Lower Principles (The Anchorhold)'], needs: 'the upper seals 5 to 8 at 2, Crystalline Knowledge 10 (the page), a Memory of an Anchorhold, Memory of Discordance ×4',
+        note: 'Gives Memory of a Much Lesser Self ×4 and Lump of Lamplighter Beeswax ×4444.',
+        hints: ['Have you unlocked all seals available to you? Surely there are more.', 'When you’ve learned enough, someone in the castle might have the answer.',
+          'Unlocking all of the upper seals (5 to 8) will grant a Memory of an Anchorhold, which you can use when you Approach the Anchoress to Meditate upon the Lower Principles and set the miscounting of the 2nd stone to 0. That will allow you to get the 1st seal.'] }),
+    hs(14, 'The Anchorhold', 'Meditate upon the Upper Principles', 'final seal · miscount of the 1st stone → 0',
+      { aliases: ['Meditate upon the Upper Principles (The Anchorhold)'], needs: 'the lower seals 1 to 4 at 2, a Memory of an Anchorhold, Memory of Discordance ×4',
+        note: 'Gives Touching Love Story ×4 and Romantic Notion ×444.',
+        hints: ['Think about how you acquired the first seal.', 'When you’ve opened the first seal, someone in the castle might have the answer.',
+          'Unlocking all of the lower seals (1 to 4) will grant a Memory of an Anchorhold, which you can use when you Approach the Anchoress to Meditate upon the Upper Principles and set the miscounting of the 1st stone to 0. That will allow you to get the final seal. It is already open when you Open your eyes.'] }),
+  ];
+
+  const HS_STEPS = Math.max.apply(null, HS_OPTIONS.map(function (e) { return e.step; }));
+  HS_OPTIONS.forEach(function (e) {
+    e.color = CAROUSEL_COLOR_SETUP;
+    const lines = [e.name, e.storylet + ' (step ' + e.step + ' of ' + HS_STEPS + ')', ''];
+    if (e.needs) lines.push('Needs: ' + e.needs + '.');
+    if (e.note) lines.push(e.note);
+    if (e.hints) {
+      lines.push('', 'The guide’s hints, in its order (stop when you have enough):');
+      const tiers = ['Hint 1', 'Hint 2', 'Answer'];
+      e.hints.forEach(function (h, i) { lines.push('  ' + tiers[i] + ': ' + h); });
+    }
+    (e.more || []).forEach(function (sec) {
+      lines.push('', 'The guide’s next step, ' + sec[0] + ':');
+      sec[1].forEach(function (h, i) { lines.push('  ' + ['Hint 1', 'Hint 2', 'Answer'][i] + ': ' + h); });
+    });
+    lines.push('', HS_CFG.rules);
+    e.title = lines.join('\n');
+  });
+
+  const HS_STORYLETS = HS_OPTIONS.map(function (e) { return e.storylet; }).filter(function (s, i, a) { return a.indexOf(s) === i; });
+  const HS_SUMMARY = {};
+  HS_STORYLETS.forEach(function (s) {
+    const own = HS_OPTIONS.filter(function (e) { return e.storylet === s; });
+    HS_SUMMARY[normalizeName(s)] = 'step ' + own.map(function (e) { return e.step; }).filter(function (x, i, a) { return a.indexOf(x) === i; }).join(', ');
+  });
+  const HS_INDEX = carouselIndex(HS_OPTIONS);
+  const HS_DEF = {
+    cfg: HS_CFG, options: HS_OPTIONS, index: HS_INDEX, storylets: HS_STORYLETS, cards: [], cardKeys: [],
+    // The wiki files the first deep storylet as "Discordant Studies (Storylet)".
+    aliases: { 'discordant studies': normalizeName('Discordant Studies') }, summary: HS_SUMMARY,
+    cls: 'fl-ux-hs', flag: 'flUxHs', branchCls: 'fl-ux-hs-branch', branchFlag: 'flUxHsBranch',
+  };
+
+  function hsRatings() { pqRatings(HS_DEF); }
 
   // === feature: Forgotten Quarter Expeditions ============================
   //
@@ -34794,6 +36449,11 @@
     { name: 'risen-burgundy', run: rbgRatings },
     { name: 'station-developments', run: sdRatings },
     { name: 'city-of-the-tracklayers', run: tlcRatings },
+    { name: 'station-statues', run: stRatings },
+    { name: 'menace-locations', run: mlRatings },
+    { name: 'iron-republic', run: irRatings },
+    { name: 'firmament', run: firRatings },
+    { name: 'discordant-studies', run: hsRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a

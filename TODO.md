@@ -1,6 +1,8 @@
 # ToDo
 
-Fallen London wiki links trigger Anubis - direct page should work better, possibly
+- Fallen London wiki links trigger Anubis - direct page should work better, possibly
+
+- Optimize equipment button
 
 Fallen London:
   Carousels: https://fallenlondon.wiki/wiki/Guides#Location-Specif  Sorted by each guide's {{Audience}} stage, in the order of
@@ -50,20 +52,13 @@ Fallen London:
   helper, THiO + Running Battle first, Casing, Fascinating + Inspired, Investigating,
   Someone Is Coming, real carousels, statues + economy panel, menace locations,
   Iron Republic / Hurlers / Firmament).
-    - https://fallenlondon.wiki/wiki/Menace_Locations_(Guide) (Early MYN) [Special]
     - https://fallenlondon.wiki/wiki/Dramatic_Tension_(Guide) (Early PoSI) [progress quality] (nothing new: covered by War of Assassins, Missing Woman, Wilmot's End)
-    - https://fallenlondon.wiki/wiki/Iron_Republic_Street_Map (Early Zailing) [Iron Republic Streets] (needs work; a day graph: badge = destination day)
-    - https://fallenlondon.wiki/wiki/Firmament_(Guide) (Early Railway) [Firmament overview]
     - https://fallenlondon.wiki/wiki/Railway_(Guide) (Early Railway) [Railway overview] (overview: covered by railway-board; steel per station goes in the economy panel)
     - https://fallenlondon.wiki/wiki/Railway_Beginning_(Guide) (Early Railway) [Railway overview] (overview: covered by railway-board and university-laboratory)
     - https://fallenlondon.wiki/wiki/Bessemer_Steel_Ingot_(Guide) (Early Railway) [Railway overview] (sources are all implemented; steel per station goes in the economy panel)
     - https://fallenlondon.wiki/wiki/Hinterland_Scrip-Making (Early Railway) [Railway overview] (re-ranks activities already badged; nothing new)
-    - https://fallenlondon.wiki/wiki/Statues_at_the_GHR_Stations_(Guide) (Early Railway) [Railway overview]
-    - https://fallenlondon.wiki/wiki/The_Hurlers_(Guide) (Post-Railway) [The Hurlers]
-    - https://fallenlondon.wiki/wiki/Discordant_Studies_-_Costs_and_Rewards_(Guide) (Post-Railway) [The Hurlers]
-    - https://fallenlondon.wiki/wiki/Roof_Economy_(Guide) (Early Firmament) [Firmament overview] (needs work; economy panel)
-    - https://fallenlondon.wiki/wiki/Stuiver_Grinding_(Guide) (Early Firmament) [Firmament overview] (needs work; economy panel)
-    - https://fallenlondon.wiki/wiki/Deeper_Discordant_Studies_(Guide) (no stage tag) [The Hurlers]
+    - https://fallenlondon.wiki/wiki/Roof_Economy_(Guide) (Early Firmament) [Firmament overview] (needs work; economy panel, not built: no badge surface)
+    - https://fallenlondon.wiki/wiki/Stuiver_Grinding_(Guide) (Early Firmament) [Firmament overview] (needs work; economy panel, not built: no badge surface)
     - https://fallenlondon.wiki/wiki/Weddings_(Guide) (no stage tag) [Your Social Engagements] (replaces the Marriage (Guide) stub)
     - https://fallenlondon.wiki/wiki/Spouses_(Guide) (no stage tag) [Your Social Engagements] (replaces the Marriage (Guide) stub)
 
@@ -262,9 +257,16 @@ Fallen London:
       - https://fallenlondon.wiki/wiki/Marigold_Station_(Guide) [Marigold Station] (implemented)
 
     Late Firmament:
-      - https://fallenlondon.wiki/wiki/Risen_Burgundy_(Guide) [Risen Burgundy] (no stage tag; card-based carousels, unlocked at Firmament 370; moved from Reference) (implemented; no panel)
+      - https://fallenlondon.wiki/wiki/Risen_Burgundy_(Guide) [Risen Burgundy] (no stage tag; card-based carousels, unlocked at Firmament 370; moved from Reference) (implemented; no panel; 25 of its 67 cards are badged, the rest of the deck is still open: the dreams, the Ducal-court and Firmament-story cards, the counter-raising cards for Beneficence and Against Time and Kings, the Joyous Entry, As Above and Glory's Fire cards, the eighteen steeds on Whoso List to Hunt, the Weaver's investments; the wiki category `Cards - Risen Burgundy` lists them)
 
     Reference (not carousels):
+      - https://fallenlondon.wiki/wiki/Firmament_(Guide) (Early Railway) [Firmament overview] (implemented; no panel: the choices the guide says what they set; its sub-guides below stay separate)
+      - https://fallenlondon.wiki/wiki/The_Hurlers_(Guide) (Post-Railway) [The Hurlers] (implemented as `discordant-studies`; no panel)
+      - https://fallenlondon.wiki/wiki/Discordant_Studies_-_Costs_and_Rewards_(Guide) (Post-Railway) [The Hurlers] (implemented as `discordant-studies`: the costs are on the first deep step)
+      - https://fallenlondon.wiki/wiki/Deeper_Discordant_Studies_(Guide) (no stage tag) [The Hurlers] (implemented as `discordant-studies`: the hints in order in the tooltip)
+      - https://fallenlondon.wiki/wiki/Iron_Republic_Street_Map (Early Zailing) [Iron Republic Streets] (needs work; a day graph: badge = destination day) (implemented; no panel: the doors of every day)
+      - https://fallenlondon.wiki/wiki/Menace_Locations_(Guide) (Early MYN) [Special] (implemented; no panel: the five places, the cards and the storylets)
+      - https://fallenlondon.wiki/wiki/Statues_at_the_GHR_Stations_(Guide) (Early Railway) [Railway overview] (implemented; no panel: the ratings and card options; Balmoral, Station VIII and the Marigold story options are labels only)
       - https://fallenlondon.wiki/wiki/The_City_of_the_Tracklayers_(Guide) (Post-Railway) [The City of the Tracklayers] (implemented; no panel: the deck and its options; the four Fate-locked vignettes are not, their titles are not on the wiki)
       - https://fallenlondon.wiki/wiki/Railway_Station_Developments_(Guide) (Early Railway) [Railway overview] (implemented; no panel: 22 conversions whose pages name no storylet are not)
       - https://fallenlondon.wiki/wiki/Location-specific_cards_in_the_Hinterlands_(Guide) (Early Railway) [Railway overview] (considered, nothing to badge: a matrix of which card is dealt at which station)
@@ -301,6 +303,25 @@ Fallen London:
       - https://fallenlondon.wiki/wiki/The_Inorganic_Sciences_Wing [1 text] (in choice-helper)
       - https://fallenlondon.wiki/wiki/The_Natural_History_Wing [1 text] (in choice-helper)
       - https://fallenlondon.wiki/wiki/The_Rewards_of_Intrigue [1 text] (in choice-helper)
+
+    Left out of implemented reference guides (pick up later; the reasons are in PLAN-reference-guides.md and each
+    feature's AGENTS.md entry):
+      - Economy panel (Roof Economy, Stuiver Grinding, steel per station from Railway (Guide), Scrip conversions,
+        the statue table): not built by decision ("no panel for now"); the spec is under WP-8 in the plan
+      - City of the Tracklayers: the four Fate-locked vignettes and their eight cards (no wiki pages, so no titles
+        to match); the Scheme of a Phoenix and Exploration storylets
+      - Station Developments: the 22 conversions whose pages name no storylet (Ealing butchery, Postal and Notary
+        Office, Sapphire, Hurlers hot spring)
+      - Station Statues: Marigold's all-statues options (Statuesque Deviless, honey-dream, Reclaim the Inescapable
+        Ubiquity); Balmoral and Station VIII statues are labels only
+      - Menace Locations: the Conflagration storylet, ambition-story storylets set in the places, Offer the Boatman
+        a sacrifice (its page lists no option)
+      - Iron Republic: Take this demagogue for tea and muffins (empty page), the Nemesis ambition's storylets
+      - Firmament: options the guide only names as steps, the endings tables (Immanence, Victor in Burgundy)
+      - Discordant Studies: the Adulterine Castle's cards (tabulated by picture, titles unknown), the three Discordant
+        Laws table
+      - Hinterland Efficiency (City of the Tracklayers badges say `Eff`) is not read: check whether the Myself tab
+        shows it
 
 # Done
 
