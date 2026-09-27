@@ -34,7 +34,7 @@ Fallen London:
       option-name match, not a heading -- the real donation-card heading is still unconfirmed)
 
   Late Firmament:
-    - https://fallenlondon.wiki/wiki/Upon_a_Red_Stage_(Guide) [Queeneater's Castle]
+    - https://fallenlondon.wiki/wiki/Upon_a_Red_Stage_(Guide) [Queeneater's Castle] (implemented)
     - https://fallenlondon.wiki/wiki/To_Make_a_Moth_(Guide) [Risen Burgundy] (no stage tag; placed with the Firmament's late content)
     - https://fallenlondon.wiki/wiki/Scaling_the_Quartz_(Guide) [Stonegift]
     - https://fallenlondon.wiki/wiki/The_Marrow_Behind_(Guide) [no area]

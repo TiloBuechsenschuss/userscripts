@@ -37365,6 +37365,182 @@
     });
   }
 
+  // === feature: Upon a Red Stage ==========================================
+  //
+  // Queeneater's Castle, late-game, a 15-action fixed-length opened storylet:
+  // "On a Red, Red Stage" (2 free setup choices + 3 acts x 5 scenes), ending
+  // in "Catastrophe: An Ending" (one final check, gated on Starring Role).
+  // Badged like Port Carnelian: rank each visible option in the current scene
+  // by Scarlet Applause, on `.branch__title` -- there is no "the storylet"
+  // badge, only the options.
+  //
+  // **What the badge says.** This script has no way to read a live success
+  // chance (grepped: no such mechanism anywhere in this file), so the badge
+  // is the SUCCESS value marked `?` -- never a fabricated expected value --
+  // with the failure value and (for the Finale) the exact menace spent on
+  // each outcome in the tooltip. The Finale's success/failure menace are NOT
+  // mirrored: a Dangerous-check row gives Wounds on success and Nightmares on
+  // failure, a Persuasive-check row the reverse -- carried as two separate
+  // fields, never one shared "menace" bucket, since two Finale rows can tie
+  // on Scarlet Applause and only the menace choice tells them apart.
+  //
+  // Scene 5 Act II ("The Hazard") deals its own hand of 10 cards, all paying
+  // the identical flat 650/250 SA -- the only differentiator is which of six
+  // stats the drawn card uses, a Myself-tab comparison that is the PLAYER'S
+  // own business, not a fixed ranking this script can make. Badged via
+  // `eachCardName`, informational only.
+  //
+  // Setup (genre/role) and the Scene 5 Act I auto-pick ("The Audience
+  // Hungers") are narrative, not a rankable choice -- not badged.
+  //
+  // Generic option names ("Rule", "Plot", "Yearn", "Exposit") are gated
+  // implicitly by only ever matching while their OWN storylet heading is the
+  // open one -- never an area guess, since this activity only ever runs
+  // inside an opened storylet.
+  //
+  // Transcribed from the guide's own tables (fetched through the API,
+  // 2026-09-27), spot-checked against the option page for "Usurp the role of
+  // King" (exact match) -- see
+  // docs/superpowers/research/2026-09-27-late-firmament.md section 1.
+  // Corrections go in RED_STAGE_MAIN / RED_STAGE_FINALE / RED_STAGE_HAZARD
+  // and nowhere else.
+
+  const RED_STAGE_STORYLET = 'On a Red, Red Stage';
+  const RED_STAGE_FINALE_STORYLET = 'Catastrophe: An Ending';
+  const RED_STAGE_STORYLETS = [RED_STAGE_STORYLET, RED_STAGE_FINALE_STORYLET];
+
+  function rsMain(name, ch, succSA, failSA, gate) {
+    return { storylet: RED_STAGE_STORYLET, name: name, ch: ch, succSA: succSA, failSA: failSA, gate: gate };
+  }
+
+  const RED_STAGE_MAIN = [
+    rsMain('Exposit', { stat: 'Persuasive', diff: 180 }, 400, 350, 'Act 1, Crimson Airs 1-50'),
+    rsMain('Improvise an inciting incident', { stat: 'Dangerous', diff: 180 }, 400, 350, 'Act 1, Crimson Airs 51-100'),
+    rsMain('Soliloquise', { stat: 'Persuasive', diff: 250 }, 530, 250, 'Crimson Airs 1-50'),
+    rsMain('Embody the role of the (Role)', { stat: 'Dangerous', diff: 250 }, 530, 250, 'Crimson Airs 51-100'),
+    rsMain('Showboat in dialogue with the Ravenous Thespian', { stat: 'Dangerous+Persuasive', diff: 250 }, 550, 0, 'Crimson Airs 1-20, Fate'),
+    rsMain('Confer with a ghost', { stat: 'Persuasive', diff: 285 }, 580, 200, 'Crimson Airs 38-62, Tragedy'),
+    rsMain('Rule', { stat: 'Dangerous+Persuasive', diff: 235 }, 500, 270, 'Act 1-2, King, Crimson Airs 26-75'),
+    rsMain('Plot', { stat: 'Dangerous', diff: 215 }, 500, 270, 'Act 1-2, Queen, Crimson Airs 26-75'),
+    rsMain('Yearn', { stat: 'Persuasive', diff: 215 }, 500, 270, 'Act 1-2, Knave, Crimson Airs 26-75'),
+    rsMain('Condemn a shocking murder', { stat: 'Persuasive+Dangerous', diff: 270 }, 550, 200, 'King, Crimson Airs 33-67, Tragedy'),
+    rsMain('Perform a shocking murder', { stat: 'Dangerous', diff: 250 }, 550, 200, 'Queen, Crimson Airs 33-67, Tragedy'),
+    rsMain('Mourn a shocking murder', { stat: 'Persuasive', diff: 250 }, 550, 200, 'Knave, Crimson Airs 33-67, Tragedy'),
+    rsMain('Threaten a promising union', { stat: 'Dangerous+Persuasive', diff: 270 }, 550, 200, 'King, Crimson Airs 33-67, Comedy'),
+    rsMain('Seethe over a promising union', { stat: 'Dangerous', diff: 215 }, 550, 200, 'Queen, Crimson Airs 33-67, Comedy'),
+    rsMain('Pursue a promising union', { stat: 'Persuasive', diff: 250 }, 550, 200, 'Knave, Crimson Airs 33-67, Comedy'),
+    rsMain('Disguise yourself utterly', { stat: 'Persuasive', diff: 285 }, 580, 190, 'Crimson Airs 38-62, Comedy'),
+    rsMain('Follow the directions of the Chorus', { stat: 'Persuasive', diff: 285 }, 580, 190, 'Crimson Airs 38-62, Firmament-history'),
+    rsMain('Feign madness', { stat: 'Dangerous', diff: 285 }, 580, 200, 'Act 2-3, Crimson Airs 1-12/89-100, Tragedy'),
+    rsMain('Kill a supporting character', { stat: 'Dangerous', diff: 250 }, 570, 350, 'Crimson Airs 1-12'),
+    rsMain('Seduce a supporting character', { stat: 'Persuasive', diff: 250 }, 570, 350, 'Crimson Airs 89-100'),
+    rsMain('Uncover a case of mistaken identity', { stat: 'Dangerous', diff: 285 }, 580, 190, 'Act 2-3, Crimson Airs 1-12/89-100, Comedy'),
+    rsMain("Challenge a rival's legitimacy", { stat: 'Dangerous', diff: 285 }, 580, 190, 'Crimson Airs 1-12/89-100, Firmament-history'),
+    rsMain('Deliver a poetic monologue', { stat: 'Persuasive', diff: 215 }, 500, 270, 'Act 2, Crimson Airs 1-50'),
+    rsMain('Raise the stakes', { stat: 'Dangerous', diff: 215 }, 500, 270, 'Act 2, Crimson Airs 51-100'),
+    rsMain('Engineer a moment of anagnorisis', { stat: 'Persuasive', diff: 285 }, 580, 200, 'Act 3, Crimson Airs 1-50'),
+    rsMain("Exploit the (Character)'s hamartia", { stat: 'Dangerous', diff: 285 }, 580, 200, 'Act 3, Crimson Airs 51-100'),
+    rsMain('Leave the stage for a scene', { stat: 'Persuasive', diff: 215 }, 500, 270, 'Crimson Airs 1-50'),
+    rsMain("Intrude on a scene you're not meant to be in", { stat: 'Dangerous', diff: 215 }, 500, 270, 'Crimson Airs 51-100'),
+  ];
+
+  function rsFinale(name, ch, red, role, succSA, succMenace, failSA, failMenace) {
+    return {
+      storylet: RED_STAGE_FINALE_STORYLET, name: name, ch: ch, red: red, role: role,
+      succSA: succSA, succMenace: succMenace, failSA: failSA, failMenace: failMenace,
+    };
+  }
+
+  const RED_STAGE_FINALE = [
+    rsFinale('Usurp the role of King', { stat: 'Dangerous', diff: 320 }, 'Red Rapture', 'not King', 675, ['Wounds', 3], 220, ['Nightmares', 4]),
+    rsFinale('Usurp the role of Queen', { stat: 'Dangerous', diff: 320 }, 'Red Thirst', 'not Queen', 675, ['Wounds', 3], 220, ['Nightmares', 4]),
+    rsFinale('Usurp the role of Knave', { stat: 'Dangerous', diff: 320 }, 'Red Hunger', 'not Knave', 675, ['Wounds', 3], 220, ['Nightmares', 4]),
+    rsFinale('Resist the temptation of bloodshed', { stat: 'Persuasive', diff: 200 }, 'Red Rapture', 'King', 450, ['Nightmares', 1], 250, ['Wounds', 2]),
+    rsFinale('Resist the temptation of bloodshed', { stat: 'Persuasive', diff: 200 }, 'Red Thirst', 'Queen', 450, ['Nightmares', 1], 250, ['Wounds', 2]),
+    rsFinale('Resist the temptation of bloodshed', { stat: 'Persuasive', diff: 200 }, 'Red Hunger', 'Knave', 450, ['Nightmares', 1], 250, ['Wounds', 2]),
+    rsFinale('Deliver a final epilogue', { stat: 'Persuasive', diff: 320 }, 'Red Rapture', 'King', 675, ['Nightmares', 3], 220, ['Wounds', 4]),
+    rsFinale('Deliver a final epilogue', { stat: 'Persuasive', diff: 320 }, 'Red Thirst', 'Queen', 675, ['Nightmares', 3], 220, ['Wounds', 4]),
+    rsFinale('Deliver a final epilogue', { stat: 'Persuasive', diff: 320 }, 'Red Hunger', 'Knave', 675, ['Nightmares', 3], 220, ['Wounds', 4]),
+    rsFinale('Abandon your part', { stat: 'Dangerous', diff: 200 }, 'Red Rapture', 'King', 450, ['Wounds', 1], 250, ['Wounds', 2]),
+    rsFinale('Abandon your part', { stat: 'Dangerous', diff: 200 }, 'Red Thirst', 'Queen', 450, ['Wounds', 1], 250, ['Wounds', 2]),
+    rsFinale('Abandon your part', { stat: 'Dangerous', diff: 200 }, 'Red Hunger', 'Knave', 450, ['Wounds', 1], 250, ['Wounds', 2]),
+  ];
+
+  const RED_STAGE_INDEX = carouselIndex(RED_STAGE_MAIN.concat(RED_STAGE_FINALE));
+
+  const RED_STAGE_HAZARD = [
+    { name: 'Intermission: A Flash of Bone', stat: 'Shapeling Arts' },
+    { name: 'Intermission: A Smile from the Mirror', stat: 'Glasswork' },
+    { name: 'Intermission: A Twist in the Gut', stat: 'Kataleptic Toxicology' },
+    { name: 'Intermission: Death from the Machine', stat: 'Artisan of the Red Science' },
+    { name: 'Intermission: A Chorus in Opposition', stat: 'A Player of Chess' },
+    { name: 'Intermission: A Stain on the Boards', stat: 'Watchful', gate: 'Comedy' },
+    { name: 'Intermission: A Steel Compulsion', stat: 'Shadowy', gate: 'Tragedy' },
+    { name: 'Intermission: Presentiments of Usurpation', stat: 'Respectable', gate: 'King' },
+    { name: 'Intermission: Red Suspicion', stat: 'Dreaded', gate: 'Queen' },
+    { name: 'Intermission: Covetous Heirs', stat: 'Bizarre', gate: 'Knave' },
+  ];
+
+  const RED_STAGE_CLASS = 'fl-ux-red-stage';
+  const RED_STAGE_FLAG = 'flUxRedStage';
+  const RED_STAGE_BRANCH_CLASS = 'fl-ux-red-stage-branch';
+  const RED_STAGE_BRANCH_FLAG = 'flUxRedStageBranch';
+
+  function redStageSpec(e) {
+    const lines = [
+      e.name, 'Upon a Red Stage, Queeneater\'s Castle', '',
+      'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.',
+      'Gate: ' + e.gate + '.',
+      'Success: ' + e.succSA + ' SA.',
+      'Failure: ' + e.failSA + ' SA.',
+    ];
+    return { text: e.succSA + ' SA' + CAROUSEL_MARK_CHALLENGE, color: CAROUSEL_COLOR_PAYOUT, title: lines.join('\n') };
+  }
+
+  function redStageFinaleSpec(e) {
+    const lines = [
+      e.name + ' (' + e.role + ', ' + e.red + ')', 'Catastrophe: An Ending, Queeneater\'s Castle', '',
+      'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.',
+      'Success: ' + e.succSA + ' SA, ' + e.succMenace[0] + ' +' + e.succMenace[1] + '.',
+      'Failure: ' + e.failSA + ' SA, ' + e.failMenace[0] + ' +' + e.failMenace[1] + '.',
+      'Not symmetric -- success and failure spend DIFFERENT menaces here.',
+    ];
+    return {
+      text: e.succSA + ' SA' + CAROUSEL_MARK_CHALLENGE + ' ▲' + e.succMenace[0] + '+' + e.succMenace[1],
+      color: CAROUSEL_COLOR_PAYOUT, title: lines.join('\n'),
+    };
+  }
+
+  function redStageOptionSpec(entry) {
+    return entry.storylet === RED_STAGE_FINALE_STORYLET ? redStageFinaleSpec(entry) : redStageSpec(entry);
+  }
+
+  function redStageHazardSpec(e) {
+    return {
+      text: e.stat + ' (drawn)', color: CAROUSEL_COLOR_LABEL,
+      title: e.name + '\nThe Hazard, Upon a Red Stage\n\nChallenge stat: ' + e.stat + '.'
+        + (e.gate ? ' Only offered as ' + e.gate + '.' : '')
+        + '\n650 SA on success, 250 on failure -- same as every card in this hand. The only '
+        + 'differentiator is which of six stats the drawn card uses; compare against your own '
+        + 'Myself tab, not a fixed ranking.',
+    };
+  }
+
+  function redStageRatings() {
+    carouselRatings({
+      storylets: RED_STAGE_STORYLETS, index: RED_STAGE_INDEX,
+      storyletSpec: function () { return null; }, optionSpec: redStageOptionSpec,
+      cls: RED_STAGE_CLASS, flag: RED_STAGE_FLAG, branchCls: RED_STAGE_BRANCH_CLASS, branchFlag: RED_STAGE_BRANCH_FLAG,
+    });
+    eachCardName(function (host, name, place, style) {
+      const card = RED_STAGE_HAZARD.find(function (e) { return e.name === name; });
+      attachBadge(host, {
+        cls: RED_STAGE_CLASS, flag: RED_STAGE_FLAG, value: name,
+        spec: card ? redStageHazardSpec(card) : null, place: place, style: style,
+      });
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -37618,6 +37794,7 @@
     { name: 'high-sancta', run: highSanctaRatings },
     { name: 'moon-miser-herding', run: moonMiserRatings },
     { name: 'sous-catacombs', run: sousCatacombsRatings },
+    { name: 'upon-a-red-stage', run: redStageRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
