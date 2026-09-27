@@ -37541,6 +37541,143 @@
     });
   }
 
+  // === feature: To Make a Moth ============================================
+  //
+  // Risen Burgundy. The storylet "To Make a Moth" is a single fixed storylet,
+  // not tied to any card in the Risen Burgundy deck.
+  //
+  // CRITICAL SCOPE BOUNDARY: `risen-burgundy` (RBG_OPTIONS, above) ALREADY
+  // badges nine storylets' branches as this same guide's menace-farming
+  // prerequisite -- A Gloomy Summer, A Duchess' Disapproval, A Disturbance at
+  // the Market, A Night in Ghent, A Stranger Out of Time, Echoes of Storms
+  // Past, The Honours of the Court, Glories and Half-Lives, Heralds from
+  // Elsewhere. This feature covers ONLY the "To Make a Moth" storylet's own
+  // 14-row branch table below -- none of those nine names or their branch
+  // text may be added here, or it collides with `risen-burgundy`'s table and
+  // fails the "no name in two tables" rule this file already enforces.
+  //
+  // **What the badge says.** Not an expected-value ranking -- most tiers have
+  // exactly one real option, so this is a Port Carnelian-style running total:
+  // each branch's own action cost (Stuiver, challenge, what menace/item/
+  // quality it consumes) and what it gives. Tiers 14 and 20 are the only real
+  // either/or choices, and in both cases the two options spend NON-comparable
+  // currencies (a menace CP vs. a different progress quality at 14; a menace
+  // CP vs. a hard-to-get item set at 20) -- the skill's "one field must not
+  // collapse two different claims" trap -- so both tooltips spell this out in
+  // words rather than reducing it to a single comparable number.
+  //
+  // Transcribed from the guide and the storylet's own wiki page (fetched
+  // through the API, 2026-09-27, storylet page confirms the branch names
+  // exactly) -- see
+  // docs/superpowers/research/2026-09-27-late-firmament.md section 2. Tier
+  // 0-11's failure text is the guide's own SUMMARY rule ("Wounds/Scandal
+  // trading gives Scandal +2, Nightmares/Suspicion trading gives Wounds +2"),
+  // not four separately confirmed per-option numbers -- flagged here rather
+  // than treated as beyond doubt. Corrections go in MOTH_STEPS and nowhere
+  // else.
+
+  const MOTH_STORYLET = 'To Make a Moth';
+  const MOTH_STORYLETS = [MOTH_STORYLET];
+
+  function mothE(level, name, more) {
+    return Object.assign({ storylet: MOTH_STORYLET, level: level, name: name }, more);
+  }
+
+  const MOTH_STEPS = [
+    mothE([0, 11], 'Make dye from your aches and pains', { stuiver: 1250, ch: { stat: 'Kataleptic Toxicology + Neathproofed', diff: 5 },
+      consumes: ['Wounds', 10], gives: 'Silk Scrap x3000' }),
+    mothE([0, 11], 'Make dye from your fears and nightmares', { stuiver: 1250, ch: { stat: 'Kataleptic Toxicology + Neathproofed', diff: 5 },
+      consumes: ['Nightmares', 10], gives: 'Silk Scrap x3000', failMenace: ['Wounds', 2] }),
+    mothE([0, 11], 'Make pigment from your social missteps', { stuiver: 1250, ch: { stat: 'Kataleptic Toxicology + Neathproofed', diff: 5 },
+      consumes: ['Scandal', 10], gives: 'Silk Scrap x3000', failMenace: ['Scandal', 2] }),
+    mothE([0, 11], 'Make dye from your guilt and mischief', { stuiver: 1250, ch: { stat: 'Kataleptic Toxicology + Neathproofed', diff: 5 },
+      consumes: ['Suspicion', 10], gives: 'Silk Scrap x3000', failMenace: ['Wounds', 2] }),
+    mothE([12, 13], 'Pulp your own good name', { stuiver: 1250, ch: { stat: 'Kataleptic Toxicology + Neathproofed', diff: 15 },
+      consumes: ['Notability', 1], needsAtLeast: 5, gives: 'Silk Scrap x3000', failMenace: ['Scandal', 2] }),
+    mothE([14], 'Create a ducal dye', { stuiver: 5625, ch: { stat: 'Kataleptic Toxicology + Neathproofed', diff: 16 },
+      consumes: ['Burgundian Beneficence', 5], gives: 'Silk Scrap x9000', failMenace: ['Scandal', 2],
+      note: 'Tier 14\'s two options are NOT comparable by value -- this spends a different progress quality than '
+        + 'Extract a rebellious dye; pick by which you have 5 of.' }),
+    mothE([14], 'Extract a rebellious dye', { stuiver: 5625, ch: { stat: 'Kataleptic Toxicology + Neathproofed', diff: 16 },
+      consumes: ['Against Time and Kings', 5], gives: 'Silk Scrap x9000', failMenace: ['Wounds', 2],
+      note: 'Tier 14\'s two options are NOT comparable by value -- this spends a different progress quality than '
+        + 'Create a ducal dye; pick by which you have 5 of.' }),
+    mothE([15], 'Create a pigment of absence', { stuiver: 5625, ch: { stat: 'Kataleptic Toxicology + Neathproofed', diff: 19 },
+      consumes: ['Irrigo (consumed)', 1], gives: 'Silk Scrap x3000', failMenace: ['Wounds', 2] }),
+    mothE([16], "Affix the city's judgement in colour", { stuiver: 5625, ch: { stat: 'Kataleptic Toxicology + Neathproofed', diff: 21 },
+      consumes: ['Judged by the Duchy (not consumed)', 1], gives: 'Silk Scrap x3000', failMenace: ['Scandal', 2] }),
+    mothE([17], 'Offer hues of all that you could have been, and are no longer', { stuiver: 3250,
+      ch: { stat: 'Kataleptic Toxicology + Neathproofed', diff: 24 },
+      needsItem: 'Memory of a Much Lesser Self x10, Memory of a Much Stranger Self x10', gives: 'Silk Scrap x9000', failMenace: ['Wounds', 2] }),
+    mothE([18], 'Provide a concentrate of purest self-assurance', { stuiver: 5625, needsItem: 'Concentrate of Self x1', gives: 'Silk Scrap x9000' }),
+    mothE([19], 'Ask what he means', { stuiver: 0, gives: 'flavour only, advances to level 20' }),
+    mothE([20], 'Offer a body that is you and is not', { stuiver: 31250,
+      needsQuality: 'Discordant Law: Someone Following You = 1, Discordant Studies (level)', consumes: ['A Bringer of Death', 1],
+      gives: 'A Metamorphosed Moth-Self',
+      note: "Tier 20's two options spend NON-comparable currencies: this costs a Bringer of Death CP, the other "
+        + 'needs a hard-to-get item set (Soothe & Cooper Long-Box needs Against Time and Kings; Wings of Change '
+        + 'needs a failed Counterlight check in The High Sancta).' }),
+    mothE([20], 'Offer a substitute body, and the promise of your transformation', { stuiver: 31250,
+      needsItem: 'Soothe & Cooper Long-Box x1, Wings of Change (consumed)', gives: 'A Metamorphosed Moth-Self (no Bringer of Death)',
+      note: "Tier 20's two options spend NON-comparable currencies: this needs a hard-to-get item set (Soothe & "
+        + 'Cooper Long-Box needs Against Time and Kings; Wings of Change needs a failed Counterlight check in '
+        + 'The High Sancta), the other costs a Bringer of Death CP.' }),
+  ];
+
+  const MOTH_INDEX = carouselIndex(MOTH_STEPS);
+
+  const MOTH_CLASS = 'fl-ux-moth';
+  const MOTH_FLAG = 'flUxMoth';
+  const MOTH_BRANCH_CLASS = 'fl-ux-moth-branch';
+  const MOTH_BRANCH_FLAG = 'flUxMothBranch';
+
+  function mothCost(e) {
+    if (e.consumes) return e.consumes[0] + ' -' + e.consumes[1];
+    if (e.needsItem) return 'needs items';
+    if (e.needsQuality) return 'needs quality';
+    return 'free';
+  }
+
+  function mothColor(e) {
+    return e.failMenace ? CAROUSEL_COLOR_SETUP : CAROUSEL_COLOR_NEUTRAL;
+  }
+
+  function mothSpec(e) {
+    const text = (e.stuiver ? e.stuiver + 's · ' : '') + mothCost(e);
+    const lines = [
+      e.name + ' (Autolepidopterist ' + e.level.join('-') + ')', 'To Make a Moth, Risen Burgundy', '',
+      e.stuiver ? 'Costs ' + e.stuiver + ' Stuiver.' : 'No Stuiver cost.',
+      e.ch ? 'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.' : 'No challenge.',
+      e.consumes ? 'Spends: ' + e.consumes[0] + ' ' + e.consumes[1] + ' CP.' : null,
+      e.needsAtLeast ? 'Requires at least ' + e.needsAtLeast + '.' : null,
+      e.needsItem ? 'Requires items: ' + e.needsItem + '.' : null,
+      e.needsQuality ? 'Requires: ' + e.needsQuality + '.' : null,
+      'Gives: ' + e.gives + '.',
+      e.failMenace ? 'Failure: ' + e.failMenace[0] + ' +' + e.failMenace[1] + '.' : null,
+      e.note || null,
+    ].filter(Boolean).join('\n');
+    return { text: text, color: mothColor(e), title: lines };
+  }
+
+  function mothStoryletSpec(key) {
+    if (key !== normalizeName(MOTH_STORYLET)) return null;
+    return {
+      text: 'To Make a Moth', color: CAROUSEL_COLOR_LABEL,
+      title: MOTH_STORYLET + ', Risen Burgundy\n\n21 actions, 74,550 Stuiver total across the whole '
+        + 'run -- not a profitable endeavour, its value is the Best-in-Slot Neathproofed equipment '
+        + 'reward, not Stuiver. The menace-farming prerequisites for this storylet are badged '
+        + 'separately by risen-burgundy (A Gloomy Summer and others), not here.\n'
+        + 'Open the storylet and every option is badged in its own right.',
+    };
+  }
+
+  function toMakeAMothRatings() {
+    carouselRatings({
+      storylets: MOTH_STORYLETS, index: MOTH_INDEX, storyletSpec: mothStoryletSpec, optionSpec: mothSpec,
+      cls: MOTH_CLASS, flag: MOTH_FLAG, branchCls: MOTH_BRANCH_CLASS, branchFlag: MOTH_BRANCH_FLAG,
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -37795,6 +37932,7 @@
     { name: 'moon-miser-herding', run: moonMiserRatings },
     { name: 'sous-catacombs', run: sousCatacombsRatings },
     { name: 'upon-a-red-stage', run: redStageRatings },
+    { name: 'to-make-a-moth', run: toMakeAMothRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
