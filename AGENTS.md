@@ -3723,6 +3723,29 @@ Confirmed live by the author:
   worked out from the next storylet’s unlock, and that the four cards (*Sartorial squeamishness*, *The Departed*,
   *Rat Melancholy*, *The Albino Rat’s story*) are titled so.
 
+- The **eight Firmament guide badges** (Ecdysis, The Midnight Trade, The High Sancta, Moon-Miser
+  Herding, The Sous Catacombs, Upon a Red Stage, To Make a Moth, Scaling the Quartz -- added
+  2026-09-27). Nothing seen in the game. Report first: **(1) The Sous Catacombs donation
+  heading.** The wiki's own page title, *(Catacombs Chamber)*, is a disambiguator, not what the
+  game shows -- this feature currently matches bone names anywhere on the page rather than gate
+  on a heading, precisely because that heading is unknown; report what `.storylet__heading` or
+  `.branch__title` actually reads there. **(2) Which of Scaling the Quartz's three guide-named
+  titles** (*The Heights of the Gift*, *Parietals and the Light*, *Preparing for a Climb*) is the
+  one that hosts the action list -- they are currently aliased onto one, which is wrong if two of
+  them turn out to be genuinely different screens. Also report whether the current *Airs of the
+  Antipelago*, or Momentum/Flexibility/Static Charge, are shown anywhere on that screen -- if they
+  are, the badge can move from a base-value estimate to a real one. **(3) "Root yourself in
+  place"** in Ecdysis -- confirm it is really the same option at both Preparing for Ecdysis tiers
+  2-3 and 4-5 (this script merges the two tiers' numbers into one row on that assumption), and
+  whether the guide's table continues past tier 4-5. **(4) To Make a Moth's tier 0-11 failure
+  text** -- the guide gives one summary rule for all four options rather than four confirmed
+  per-option numbers; report what each option's own page or a real failure actually shows. **(5)
+  Upon a Red Stage and Scaling the Quartz's badges show the SUCCESS value only**, marked `?`,
+  because this script has no way to read a live success chance -- if that ever changes, say so.
+  **(6) The High Sancta's Lost in the Black card** -- whether the current Towards a Violant Sky or
+  Counterlight value is shown anywhere on that card; if so, its badge can become a real per-round
+  number instead of the static reference it is now.
+
 - The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
   table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
   looking at the screen can confirm: a wrong number renders exactly as well as a right one. They
@@ -4415,6 +4438,42 @@ Current tests:
   most worth having a test for), that a banked `Full Fathom Five` of 0 is "not diving" rather
   than a depth, `depthSourceText`'s wording per source, and the in-page control's gate and its
   one-button cycle. Update it when you touch any of the `FOTZ_*` tables.
+- `tests/choice-ecdysis.test.mjs` — every Preparing for Ecdysis tier's success/failure CP and
+  menace, that "Root yourself in place" is merged into one row (it is offered under the same name
+  at two different tiers, which `carouselLookup` cannot tell apart), that the table does not
+  extend past tier 4-5, the safe option's lower CP and its tooltip wording, and no title in
+  another feature's table.
+- `tests/choice-midnight-trade.test.mjs` — every option's challenge/failure-menace pair, the two
+  checkless companion options and their stated requirement, the 200-difficulty tooltip warning,
+  that every option's tooltip states the shared Peligin Work progress, and no title in another
+  feature's table.
+- `tests/choice-high-sancta.test.mjs` — the 28-card tiered hand (10+9+9) with the guide's `~`
+  estimate on 27 cards and the one exact figure (Unsigned in Triplicate), that none of the eight
+  Sound of Wings burden cards are in this table, and the Lost in the Black reference badge's
+  static risk-table content rather than a fabricated live number.
+- `tests/choice-moon-miser-herding.test.mjs` — the two risky High-Urgency branches (their tooltip
+  states in capitals that failure REMOVES an already-held quality), that a risky option only
+  matches while its own card is open, the three gold cards' guide-verified EPA (5 / 5.01 / 5.67),
+  and no title in another feature's table.
+- `tests/choice-sous-catacombs.test.mjs` — the guide's Total Value for all 40 bones across five
+  categories, that Panoptical Skull and Ivory Femur are flagged as paying less than their raw
+  skeleton value, that Forgo the donation always reads worst, that A Labyrinth of Roof and Bone is
+  never badged, and that an unrelated page attaches nothing and throws nothing (the real donation
+  heading is still unconfirmed, so this feature matches by option name, not by heading).
+- `tests/choice-red-stage.test.mjs` — the 28 main-table and 12 finale rows, that every badge shows
+  the success value marked `?` rather than a fabricated expected value, that the Finale's
+  success/failure menace are NOT mirrored (verified both directions on the King rows), that the
+  ten Hazard cards never receive a computed ranking, and that generic option names only badge
+  under their own storylet heading.
+- `tests/choice-to-make-a-moth.test.mjs` — that none of `risen-burgundy`'s nine storylet names or
+  their branch text appear in this feature's table (checked directly against the live
+  `RBG_OPTIONS`, with a sanity check on the exclusion list itself), the 14-row Autolepidopterist
+  table, and tiers 14 and 20's tooltips spelling out their non-comparable currencies.
+- `tests/choice-scaling-quartz.test.mjs` — the 11 climbing actions against the guide and a
+  spot-checked option page, that the badge shows the base value marked `?` rather than a
+  live-quality-dependent number this script cannot read, the growth mark and compounding-value
+  note on Accelerate and Stretch yourself beyond your limits, and that a page matching none of the
+  three guessed storylet titles attaches nothing and throws nothing.
 - `tests/fl-shared-helpers.test.mjs` — asserts what `ux-enhancers.js` and
   `choice-helper.js` share now that they are two files, which no other suite can see because
   every other suite loads one of the two. First the **copies**: every top-level declaration the

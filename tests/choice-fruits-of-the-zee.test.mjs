@@ -1865,7 +1865,7 @@ check('the feature list, in order',
     'church-in-the-wild', 'law-hunting', 'moulin-expeditions', 'writing-monograph', 'kitchen-artists',
     'alchemy-station-viii', 'cornelius', 'clay-highwayman',
     'hurling', 'chthonic-communication', 'digging-hurlers', 'marigold-station',
-    'airs-of-london', 'the-hunt-is-on', 'running-battle', 'casing', 'fascinating', 'inspired', 'investigating', 'someone-is-coming', 'hellworm', 'risen-burgundy', 'station-developments', 'city-of-the-tracklayers', 'station-statues', 'menace-locations', 'iron-republic', 'firmament', 'discordant-studies', 'plaster-face']);
+    'airs-of-london', 'the-hunt-is-on', 'running-battle', 'casing', 'fascinating', 'inspired', 'investigating', 'someone-is-coming', 'hellworm', 'risen-burgundy', 'station-developments', 'city-of-the-tracklayers', 'station-statues', 'menace-locations', 'iron-republic', 'firmament', 'discordant-studies', 'plaster-face', 'ecdysis', 'midnight-trade', 'high-sancta', 'moon-miser-herding', 'sous-catacombs', 'upon-a-red-stage', 'to-make-a-moth', 'scaling-quartz']);
 
 check('the panel list, in order',
   api.PANELS.map((p) => p.id),

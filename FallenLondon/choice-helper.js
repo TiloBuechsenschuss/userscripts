@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.30
+// @version      1.31
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -585,6 +585,16 @@
  *     Firmament badges what each choice of the Roof story sets, in the guide's words, marking what it is unsure of.
  *     Discordant Studies badges the road to Steward of the Discordance 10 step by step, hints in the guide's order.
  *     Plaster Face badges the Big Rat story in the Flit step by step, from the rats' investigations to the endings.
+ *     (17) Eight Firmament guides, all storylet-and-option or card markup with no panel: Ecdysis badges
+ *     Hallow's Throat's Preparing for Ecdysis carousel, marking the always-safe option and Bodily Tendency drift.
+ *     The Midnight Trade badges the Midnight Moon's smuggling carousel by challenge difficulty and failure menace,
+ *     since every option pays the same progress. The High Sancta badges its three card tiers' item value and gives
+ *     an informational reading of the Stumble onwards risk table. Moon-Miser Herding badges the two risky
+ *     Zenith branches that can cost you an already-banked quality, and its three gold cash-out cards' EPA.
+ *     The Sous Catacombs badges the value of whichever bone is offered for donation that week. Upon a Red Stage
+ *     badges Queeneater's Castle's play scene by scene and its ending, by Scarlet Applause. To Make a Moth badges
+ *     the Autolepidopterist steps of its own storylet only, since its menace-farming prerequisites are Risen
+ *     Burgundy's. Scaling the Quartz badges Stonegift's climb by base Crystalline Fecundity per action.
  *     Built as a feature registry so further advice can be added as entries.
  */
 
