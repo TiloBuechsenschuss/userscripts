@@ -37225,6 +37225,146 @@
     });
   }
 
+  // === feature: The Sous Catacombs ========================================
+  //
+  // Part of Firmament Chapter VI, "The Sous" -- the guide names no outer
+  // area. A fixed 10-action activity: 5x a purely cosmetic labyrinth walk
+  // ("A Labyrinth of Roof and Bone" -- the guide states it "has no effect",
+  // one linear path, nothing to badge) interleaved with 5x bone donation,
+  // which is what this feature rates.
+  //
+  // Donating a bone gives Osseous Offerings worth its "Total Value" in
+  // Stuiver/Echoes (the guide's own combined figure -- used directly here).
+  // Only 5 bones per category (Skulls/Arms/Ribcages/Legs/Appendages) are ever
+  // offered in a given week, plus the two constants (Human Ribcage, forgoing
+  // the donation) -- so this feature looks up WHATEVER NAME IS ACTUALLY ON
+  // THE RENDERED OPTION rather than assuming a fixed subset is visible.
+  //
+  // **The real in-game heading for the donation card is unknown** -- the
+  // wiki's own page title, "(Catacombs Chamber)", is a disambiguator, not
+  // what the game shows (confirmed by its parenthesised form, the same
+  // pattern the skill's `strict`-gating guidance warns is not a real title).
+  // Rather than guess a heading and risk gating this feature off entirely if
+  // the guess is wrong, it matches option NAMES anywhere `.branch__title`
+  // appears on the page -- a name that isn't in the table returns null (no
+  // badge, no throw), which is the safe direction to be wrong in. See
+  // AGENTS.md's "Not verified in-game" list for the open capture this needs.
+  //
+  // **What the badge says.** The Total Value in Echoes (a value ramp, since
+  // it genuinely varies from ~5 to 325 across the table and the number itself
+  // is printed on the badge). Panoptical Skull and Ivory Femur are flagged
+  // explicitly: both PAY LESS than their raw skeleton value despite a large
+  // face number, the same misleading-raw-total trap `pcColor` hit ranking
+  // nine identical +5 rows by shade -- here it's the raw Osseous Offerings
+  // integer (tens of thousands to millions) that would mislead if shown
+  // instead of the pre-computed Total Value, so the badge never shows that
+  // raw number at all. Forgoing the donation always reads as the worst
+  // option: 0 value, Nightmares +5.
+  //
+  // Transcribed from the guide's own per-category tables (fetched through the
+  // API, 2026-09-27; see
+  // docs/superpowers/research/2026-09-27-mid-firmament.md section 3).
+  // Corrections go in SOUS_BONES and nowhere else.
+
+  function sbC(name, category, echo, more) {
+    return Object.assign({ name: name, category: category, echo: echo }, more);
+  }
+
+  const SOUS_BONES = [
+    // Skulls
+    sbC('Rubbery Skull', 'Skulls', 6),
+    sbC('Horned Skull', 'Skulls', 17.88),
+    sbC('Pentagrammic Skull', 'Skulls', 12.88),
+    sbC('Eyeless Skull', 'Skulls', 30.76),
+    sbC('Sabre-Toothed Skull', 'Skulls', 69.90),
+    sbC('Panoptical Skull', 'Skulls', 40.14, { warn: true }),
+    sbC('Doubled Skull', 'Skulls', 64.40),
+    sbC('Skull in Coral', 'Skulls', 17.88),
+    sbC('Plated Skull', 'Skulls', 30.76),
+    // Arms
+    sbC('Knotted Humerus', 'Arms', 7.20),
+    sbC('Crustacean Pincer', 'Arms', 7.20, { note: 'skeleton value is 0, so the % bonus is undefined' }),
+    sbC('Fossilised Forelimb', 'Arms', 30.76),
+    sbC('Ivory Humerus', 'Arms', 17.88),
+    sbC('Human Arm', 'Arms', 7.20),
+    // Ribcages
+    sbC('Human Ribcage', 'Ribcages', 17.88, { alwaysAvailable: true }),
+    sbC('Skeleton with Seven Necks', 'Ribcages', 69.90),
+    sbC('Glim-Encrusted Carapace', 'Ribcages', 69.90),
+    sbC('Segmented Ribcage', 'Ribcages', 7.20),
+    sbC('Prismatic Frame', 'Ribcages', 325),
+    sbC('Mammoth Ribcage', 'Ribcages', 69.90),
+    sbC('Ribcage with a Bouquet of Eight Spines', 'Ribcages', 322),
+    sbC('Thorned Ribcage', 'Ribcages', 17.88),
+    sbC('Five-Pointed Ribcage', 'Ribcages', 322),
+    sbC('Flourishing Ribcage', 'Ribcages', 17.88),
+    sbC('Leviathan Frame', 'Ribcages', 325),
+    // Legs
+    sbC('Holy Relic of the Thigh of Saint Fiacre', 'Legs', 17.88),
+    sbC('Ivory Femur', 'Legs', 64.40, { warn: true }),
+    sbC('Femur of a Surface Deer', 'Legs', 5.1),
+    sbC('Helical Thighbone', 'Legs', 7.20),
+    sbC('Femur of a Jurassic Beast', 'Legs', 7.20),
+    // Appendages
+    sbC("Tomb-Lion's Tail", 'Appendages', 7.20),
+    sbC('Plaster Tail Bones', 'Appendages', 7.20),
+    sbC('Albatross Wing', 'Appendages', 17.88),
+    sbC('Fin Bones, Collected', 'Appendages', 5.5),
+    sbC('Amber-Crusted Fin', 'Appendages', 17.88),
+    sbC('Withered Tentacle', 'Appendages', 5.5),
+    sbC('Jet Black Stinger', 'Appendages', 5.5),
+    sbC('Obsidian Chitin Tail', 'Appendages', 7.20),
+    sbC('Bat Wing', 'Appendages', 5.01),
+    sbC('Wing of a Young Terror Bird', 'Appendages', 7.20),
+  ];
+
+  const SOUS_FORGO = { name: 'Forgo the donation', echo: 0, penalty: 'Nightmares +5' };
+
+  const SOUS_CLASS = 'fl-ux-sous';
+  const SOUS_FLAG = 'flUxSous';
+
+  function sousBoneColor(echo, warn) {
+    if (warn) return '#8a3b3b';
+    if (echo >= 60) return '#9ab73c';
+    if (echo >= 15) return '#7a733a';
+    return '#8a6d3b';
+  }
+
+  function sousBoneSpec(e) {
+    if (e === SOUS_FORGO) {
+      return {
+        text: '0 · always worst', color: '#8a3b3b',
+        title: e.name + '\nThe Sous Catacombs\n\n0 Osseous Offerings, ' + e.penalty
+          + '. Always the worst option available.',
+      };
+    }
+    const lines = [
+      e.name + ' (' + e.category + ')', 'The Sous Catacombs', '',
+      'Value: {{e}}' + e.echo + '.',
+      e.warn ? 'WARNING: pays LESS than its raw skeleton value despite a large Osseous Offerings '
+        + 'number -- do not rank this by the raw Offerings figure.' : null,
+      e.alwaysAvailable ? 'Always available (not subject to the weekly rotation).'
+        : 'Only offered in some weeks -- this badge reflects whatever is actually on the card.',
+      e.note || null,
+    ].filter(Boolean).join('\n');
+    return { text: '{{e}}' + e.echo, color: sousBoneColor(e.echo, e.warn), title: lines };
+  }
+
+  function lookupSousOption(name) {
+    if (name === SOUS_FORGO.name) return SOUS_FORGO;
+    return SOUS_BONES.find(function (e) { return e.name === name; }) || null;
+  }
+
+  function sousCatacombsRatings() {
+    document.querySelectorAll('.branch__title').forEach(function (head) {
+      const name = headingName(head);
+      const entry = name ? lookupSousOption(name) : null;
+      attachBadge(head, {
+        cls: SOUS_CLASS, flag: SOUS_FLAG, value: name, spec: entry ? sousBoneSpec(entry) : null, place: 'after',
+      });
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -37477,6 +37617,7 @@
     { name: 'midnight-trade', run: midnightTradeRatings },
     { name: 'high-sancta', run: highSanctaRatings },
     { name: 'moon-miser-herding', run: moonMiserRatings },
+    { name: 'sous-catacombs', run: sousCatacombsRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
