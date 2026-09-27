@@ -37114,6 +37114,117 @@
     });
   }
 
+  // === feature: Moon-Miser Herding ========================================
+  //
+  // Zenith, unlocked at Firmament 360. Entry storylet "The Gate of Misers".
+  // Fixed-length: a hand-size-2 (later 3) card draw, every card clearing the
+  // hand and raising "Stations of the Herd" by 1 regardless of option, until
+  // it hits 7 and the activity auto-ends. All of it deals OPPORTUNITY CARDS,
+  // not storylet branches -- an opened card's own name is what
+  // `.storylet-root__heading` shows, same mechanism `eachCardName` already
+  // reads for the hand.
+  //
+  // Two of the nine High-Urgency stations (1 and 2 -- the guide names five in
+  // total, but three of those five have no real choice: every option on them
+  // just raises a different flavour quality with no challenge) offer a SECOND
+  // option that is a genuine risk/reward branch: pass a challenge to gain
+  // "Opening Another Eye", but FAILING REMOVES a quality the player already
+  // banked from an earlier run (Seeing a new Frame of Reference / A Mouthful
+  // of Light). Everything else on the High-Urgency table is flavour with
+  // nothing to rank -- not badged.
+  //
+  // Once "Seeing More than Two Paths" is held, three Gold cards appear that
+  // cash out ALL banked Latent Recollections at once, each with its own
+  // guide-verified EPA.
+  //
+  // **What the badge says.** A risky branch: a shape mark (`?`), never a
+  // colour ramp -- this is a binary risk/no-risk choice, not a quantity --
+  // with the challenge and, stated in the tooltip in capitals, that failure
+  // REMOVES the quality rather than merely missing the gain. A Gold card: its
+  // EPA plus a reminder that cashing out spends every banked Recollection at
+  // once.
+  //
+  // A risky option's own text ("I kept my eyes open") is looked up scoped to
+  // the CURRENTLY OPEN card, not matched globally -- the guide's activity
+  // reuses generic option text elsewhere ("We made camp" on two different
+  // cards, "I sent out my old friend" on two different Silver cards), so
+  // scoping by card name is the same defence `carouselLookup` already applies
+  // elsewhere in this file, even though neither risky option text this
+  // feature tracks happens to collide with those reused ones.
+  //
+  // Transcribed from the guide's own tables (fetched through the API,
+  // 2026-09-27; see
+  // docs/superpowers/research/2026-09-27-mid-firmament.md section 2).
+  // Corrections go in MOON_MISER_RISKY / MOON_MISER_GOLD and nowhere else.
+
+  const MOON_MISER_RISKY = [
+    { card: 'Crag Path', option: 'I kept my eyes open', ch: { stat: 'Chthonosophy', diff: 2 },
+      needs: 'Seeing a new Frame of Reference', gives: 'Opening Another Eye +1', removes: 'Seeing a new Frame of Reference' },
+    { card: 'Grazing Field', option: 'I tasted the nectar', ch: { stat: 'Kataleptic Toxicology', diff: 5 },
+      needs: 'A Mouthful of Light', gives: 'Opening Another Eye +1', removes: 'A Mouthful of Light' },
+  ];
+
+  const MOON_MISER_GOLD = [
+    { name: 'Blood of the Stone', option: 'I tasted the stone', epa: 5,
+      gives: 'Sample of Roof-Drip x100, Antique Mystery x2, Stone-Hearted +1 CP' },
+    { name: "Fearful Symmetry (Zenith's Gate)", option: 'I made a map of what I saw', epa: 5.01,
+      gives: 'Roof-Chart x4, Direful Reflection x2, Salt-Veined +1 CP (Roof-Chart sells at Roof markets)' },
+    { name: 'Peal of Thunder', option: 'I took the time to hear the thunder', epa: 5.67,
+      gives: 'Tempestuous Tale x20, Storm-Threnody x2, Stormy-Eyed +1 CP up to 6 (highest direct payout, guide recommendation)' },
+  ];
+
+  const MOON_MISER_CLASS = 'fl-ux-moon-miser';
+  const MOON_MISER_FLAG = 'flUxMoonMiser';
+  const MOON_MISER_BRANCH_CLASS = 'fl-ux-moon-miser-branch';
+  const MOON_MISER_BRANCH_FLAG = 'flUxMoonMiserBranch';
+
+  function moonMiserRiskySpec(e) {
+    const lines = [
+      e.card + ' -- ' + e.option, 'Moon-Miser Herding, Zenith', '',
+      'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.',
+      'Requires: ' + e.needs + '.',
+      'Success: ' + e.gives + '.',
+      'Failure REMOVES ' + e.removes + ' -- not a harmless miss, you lose a quality you already hold.',
+    ];
+    return { text: '? risky', color: CAROUSEL_COLOR_SETUP, title: lines.join('\n') };
+  }
+
+  function moonMiserGoldSpec(e) {
+    const lines = [
+      e.name + ' -- ' + e.option, 'Moon-Miser Herding, Zenith', '',
+      'Reward: ' + e.gives + '.',
+      'Cashes out ALL banked Latent Recollections at once -- time this against your progress '
+        + 'toward Stone-Hearted, Salt-Veined or Stormy-Eyed.',
+    ];
+    return { text: e.epa + ' EPA', color: CAROUSEL_COLOR_PAYOUT, title: lines.join('\n') };
+  }
+
+  function moonMiserRatings() {
+    eachCardName(function (host, name, place, style) {
+      const gold = MOON_MISER_GOLD.find(function (g) { return g.name === name; });
+      attachBadge(host, {
+        cls: MOON_MISER_CLASS, flag: MOON_MISER_FLAG, value: name,
+        spec: gold ? moonMiserGoldSpec(gold) : null, place: place, style: style,
+      });
+    });
+
+    let openCard = null;
+    document.querySelectorAll('.storylet-root__heading').forEach(function (head) {
+      const name = headingName(head);
+      if (MOON_MISER_RISKY.some(function (r) { return r.card === name; })) openCard = name;
+    });
+    document.querySelectorAll('.branch__title').forEach(function (head) {
+      const name = headingName(head);
+      const entry = openCard
+        ? MOON_MISER_RISKY.find(function (r) { return r.card === openCard && r.option === name; })
+        : null;
+      attachBadge(head, {
+        cls: MOON_MISER_BRANCH_CLASS, flag: MOON_MISER_BRANCH_FLAG, value: name + '@' + (openCard || '-'),
+        spec: entry ? moonMiserRiskySpec(entry) : null, place: 'after',
+      });
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -37365,6 +37476,7 @@
     { name: 'ecdysis', run: ecdysisRatings },
     { name: 'midnight-trade', run: midnightTradeRatings },
     { name: 'high-sancta', run: highSanctaRatings },
+    { name: 'moon-miser-herding', run: moonMiserRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a

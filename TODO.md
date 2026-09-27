@@ -29,7 +29,7 @@ Fallen London:
   Mid Firmament:
     - https://fallenlondon.wiki/wiki/The_High_Sancta_(Guide) [Zenith] (implemented; Sound of Wings
       burden cards in eight other locations are a follow-up, not badged here)
-    - https://fallenlondon.wiki/wiki/Moon-Miser_Herding_(Guide) [Zenith]
+    - https://fallenlondon.wiki/wiki/Moon-Miser_Herding_(Guide) [Zenith] (implemented)
     - https://fallenlondon.wiki/wiki/The_Sous_Catacombs_(Guide) [no area]
 
   Late Firmament:
