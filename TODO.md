@@ -15,8 +15,16 @@ Fallen London:
   Early Firmament:
     - https://fallenlondon.wiki/wiki/Ecdysis_(Guide) [Hallow's Throat]
     - https://fallenlondon.wiki/wiki/The_Midnight_Trade_(Guide) [The Midnight Moon]
-    - https://fallenlondon.wiki/wiki/The_Stacks_(Guide) [The Stacks]
-    - https://fallenlondon.wiki/wiki/The_Kinetoculus_(Guide) [no area]
+    - https://fallenlondon.wiki/wiki/The_Stacks_(Guide) [The Stacks] (deferred: ~25 cards,
+      Fate/companion-locked content, a hidden state machine gating which cards appear, and the
+      guide's own EPA figures disagree by section (5.27 / 9.94 / 6.2-6.3) -- needs its own
+      research pass fetching the ~25 option pages before a badge-meaning decision can be made,
+      same as discordant-studies and airs-of-london got; see
+      docs/superpowers/research/2026-09-27-early-firmament.md section 4)
+    - https://fallenlondon.wiki/wiki/The_Kinetoculus_(Guide) [no area] (implemented; nothing to
+      badge: purely narrative, every emulsion costs the same 200 Stuivers and gives a fixed
+      non-competing flavour item, no economic or comparable reward across the 16 lens/location
+      combinations)
 
   Mid Firmament:
     - https://fallenlondon.wiki/wiki/The_High_Sancta_(Guide) [Zenith]
