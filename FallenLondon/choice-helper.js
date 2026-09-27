@@ -37678,6 +37678,119 @@
     });
   }
 
+  // === feature: Scaling the Quartz ========================================
+  //
+  // Stonegift. An opened-storylet climbing activity gated by a rolling
+  // quality "Airs of the Antipelago" (0-100, changes every action). Pays
+  // "Crystalline Fecundity" per action, spends "Grip Strength" per action;
+  // both the Grip cost and the Fecundity/Height gained on non-rest actions
+  // depend on the player's OWN progress qualities (Momentum, Flexibility,
+  // Static Charge), which reset every climb.
+  //
+  // The guide names three different storylet titles without saying which one
+  // hosts the action list itself ("The Heights of the Gift", "Parietals and
+  // the Light", "Preparing for a Climb") -- all three are tried as the gate;
+  // whichever is not the real one simply never becomes the open storylet, so
+  // a wrong guess costs nothing.
+  //
+  // **What the badge says.** This script has no live read of the player's
+  // Momentum/Flexibility/Static Charge -- the one quality scrape in this file
+  // is a Myself-tab snapshot that can be arbitrarily stale, and these three
+  // reset every climb and change every action, so presenting a stale number
+  // as live would be actively misleading (the same caution as Upon a Red
+  // Stage's missing success-chance read). The badge is therefore the BASE
+  // success Fecundity (at Momentum = Flexibility = Static Charge = 0), marked
+  // `?`, with the tooltip stating the real formula and that it scales with
+  // qualities this script does not read. "Accelerate" and "Stretch yourself
+  // beyond your limits" carry a growth mark (`▲`) since their Momentum/
+  // Flexibility gain compounds over the rest of the climb and the flat base
+  // number underrates them. "An opportunity to rest" and "A moment of
+  // stillness" have no challenge and are excluded from the challenge mark.
+  //
+  // Transcribed from the guide's own action table (fetched through the API,
+  // 2026-09-27), spot-checked against the option page for "Haul yourself over
+  // a steep overhang" (exact match) -- see
+  // docs/superpowers/research/2026-09-27-late-firmament.md section 3.
+  // Corrections go in QUARTZ_ACTIONS and nowhere else.
+
+  const QUARTZ_STORYLETS = ['The Heights of the Gift', 'Parietals and the Light', 'Preparing for a Climb'];
+  // All three guide-named titles are believed to be names for the SAME climb
+  // screen (which one the game actually shows is unconfirmed), so the other
+  // two are aliased onto the first rather than treated as three different
+  // storylets -- otherwise every option below would need tagging under
+  // whichever title turns out to be real, which nobody can do yet.
+  const QUARTZ_ALIASES = {};
+  QUARTZ_ALIASES[normalizeName(QUARTZ_STORYLETS[1])] = normalizeName(QUARTZ_STORYLETS[0]);
+  QUARTZ_ALIASES[normalizeName(QUARTZ_STORYLETS[2])] = normalizeName(QUARTZ_STORYLETS[0]);
+
+  function qzA(name, ch, succFec, failFec, more) {
+    return Object.assign({ storylet: QUARTZ_STORYLETS[0], name: name, ch: ch, succFec: succFec, failFec: failFec }, more);
+  }
+
+  const QUARTZ_ACTIONS = [
+    qzA('Haul yourself over a steep overhang', { stat: 'Dangerous', diff: 235, mod: '+25xFlexibility' }, 575, 400, { failWounds: 2 }),
+    qzA('Scrabble up a sheer rockface', { stat: 'Watchful', diff: 235, mod: '+25xFlexibility' }, 575, 400, { failWounds: 2 }),
+    qzA('Test your weight against the foliage', { stat: 'Shadowy', diff: 235, mod: '+25xFlexibility' }, 575, 400, { failWounds: 2 }),
+    qzA('Accelerate', { stat: 'Dangerous', diff: 210, mod: '+25xFlexibility+15xInerrant' }, 600, 420,
+      { failWounds: 2, growth: 'Momentum +1 (both outcomes)' }),
+    qzA('Stretch yourself beyond your limits', { stat: 'Shadowy', diff: 210, mod: '+25xFlexibility+15xInsubstantial' }, 550, 420,
+      { failWounds: 2, growth: 'Flexibility +1 (both outcomes)' }),
+    qzA('Follow the mist', { stat: 'Kataleptic Toxicology', diff: 9, mod: '+Flexibility+Neathproofed' }, 600, 420,
+      { succWounds: 2, failWounds: 3, growth: 'Static Charge +2, Tempestuous Tale +1 (both outcomes)' }),
+    Object.assign({ storylet: QUARTZ_STORYLETS[0], name: 'A moment of stillness', succFec: 350,
+      note: 'Resets Momentum/Flexibility/Static Charge. No challenge -- not a rankable choice.' }),
+    qzA('Grab hold of something', { stat: 'Dangerous', diff: 260, mod: '+25xFlexibility-20xMomentum' }, 600, 400, { failWounds: 2 }),
+    qzA('Hold yourself still', { stat: 'Dangerous', diff: 260, mod: '-10xFlexibility' }, 600, 400, { failWounds: 2 }),
+    qzA('Hide yourself', { stat: 'Shadowy', diff: 260, mod: '-10xStaticCharge' }, 600, 400, { failWounds: 2 }),
+    Object.assign({ storylet: QUARTZ_STORYLETS[0], name: 'An opportunity to rest', succFec: null,
+      note: 'Grip Strength +31-46, Wounds -5 CP. No challenge -- not a rankable choice.' }),
+  ];
+
+  const QUARTZ_INDEX = carouselIndex(QUARTZ_ACTIONS);
+
+  const QUARTZ_CLASS = 'fl-ux-quartz';
+  const QUARTZ_FLAG = 'flUxQuartz';
+  const QUARTZ_BRANCH_CLASS = 'fl-ux-quartz-branch';
+  const QUARTZ_BRANCH_FLAG = 'flUxQuartzBranch';
+
+  function quartzSpec(e) {
+    if (!e.ch) {
+      return { text: 'no challenge', color: CAROUSEL_COLOR_LABEL, title: e.name + '\nScaling the Quartz, Stonegift\n\n' + e.note };
+    }
+    const growthMark = e.growth ? ' ▲' : '';
+    const lines = [
+      e.name, 'Scaling the Quartz, Stonegift', '',
+      'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + ' ' + e.ch.mod + '.',
+      'Success: Fecundity x' + e.succFec + (e.succWounds ? ', Wounds +' + e.succWounds + ' CP' : '') + '.',
+      'Failure: Fecundity x' + e.failFec + (e.failWounds ? ', Wounds +' + e.failWounds + ' CP' : '') + '.',
+      e.growth ? e.growth + ' -- this compounds over the rest of the climb; the flat number on the badge underrates it.' : null,
+      'This script does not read your current Momentum/Flexibility/Static Charge (the one quality '
+        + 'scrape in this file is a Myself-tab snapshot that can be arbitrarily stale, and these reset '
+        + 'every climb). The badge shows the BASE value at Momentum=Flexibility=Static Charge=0 -- your '
+        + 'real Grip cost and Fecundity/Height gained scale with your own current qualities.',
+    ].filter(Boolean).join('\n');
+    return { text: 'Fecundity x' + e.succFec + CAROUSEL_MARK_CHALLENGE + growthMark, color: CAROUSEL_COLOR_PAYOUT, title: lines };
+  }
+
+  function quartzStoryletSpec(key) {
+    if (QUARTZ_STORYLETS.map(normalizeName).indexOf(key) === -1) return null;
+    return {
+      text: 'Scaling the Quartz', color: CAROUSEL_COLOR_LABEL,
+      title: 'Scaling the Quartz, Stonegift\n\nA climbing activity gated by Airs of the Antipelago '
+        + '(0-100, changes every action). Grip and Fecundity per action scale with your Momentum, '
+        + 'Flexibility and Static Charge -- not read live by this script.\n'
+        + 'Open the storylet and every option is badged in its own right.',
+    };
+  }
+
+  function scalingQuartzRatings() {
+    carouselRatings({
+      storylets: QUARTZ_STORYLETS, index: QUARTZ_INDEX, storyletSpec: quartzStoryletSpec, optionSpec: quartzSpec,
+      cls: QUARTZ_CLASS, flag: QUARTZ_FLAG, branchCls: QUARTZ_BRANCH_CLASS, branchFlag: QUARTZ_BRANCH_FLAG,
+      aliases: QUARTZ_ALIASES,
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -37933,6 +38046,7 @@
     { name: 'sous-catacombs', run: sousCatacombsRatings },
     { name: 'upon-a-red-stage', run: redStageRatings },
     { name: 'to-make-a-moth', run: toMakeAMothRatings },
+    { name: 'scaling-quartz', run: scalingQuartzRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a

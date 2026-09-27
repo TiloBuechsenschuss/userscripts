@@ -36,7 +36,9 @@ Fallen London:
   Late Firmament:
     - https://fallenlondon.wiki/wiki/Upon_a_Red_Stage_(Guide) [Queeneater's Castle] (implemented)
     - https://fallenlondon.wiki/wiki/To_Make_a_Moth_(Guide) [Risen Burgundy] (no stage tag; placed with the Firmament's late content) (implemented; scoped strictly to the storylet's own 14-row table -- its menace-farming prerequisites are risen-burgundy's, not duplicated here)
-    - https://fallenlondon.wiki/wiki/Scaling_the_Quartz_(Guide) [Stonegift]
+    - https://fallenlondon.wiki/wiki/Scaling_the_Quartz_(Guide) [Stonegift] (implemented; badge is
+      the base value at Momentum/Flexibility/Static Charge 0, not live-read; gated by trying all
+      three guide-named storylet titles, the real one is still unconfirmed)
     - https://fallenlondon.wiki/wiki/The_Marrow_Behind_(Guide) [no area]
 
   Fate-locked (same order: stage, then area):
