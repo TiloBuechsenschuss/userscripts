@@ -36981,6 +36981,139 @@
     });
   }
 
+  // === feature: The High Sancta ===========================================
+  //
+  // Zenith, unlocked at Firmament 300. Entry storylet "Sneaking into the High
+  // Sancta" (one-time per run, spends {{e}}30, not badge material) redirects
+  // to "The Violant Threshold", a two-state cycle gated by "Blindfolded, For
+  // Your Own Good":
+  //
+  //   State 1 (Blindfolded 1): a 3-card opportunity hand drawn from a pool
+  //     keyed to "Towards a Violant Sky" (1-12, three 9-card tiers below).
+  //   State 2 (Blindfolded 2): three identical copies of the card "Lost in
+  //     the Black", single option "Stumble onwards" -- odds of success are
+  //     the current Counterlight, which degrades as the run continues.
+  //
+  // Both states deal OPPORTUNITY CARDS, not storylet branches -- there is no
+  // `.branch__title` involved anywhere in this feature.
+  //
+  // **What the badge says.** On a tier card: its echo value, marked `~` for
+  // the guide's rounded estimate (every card but one) or plain for the one
+  // card the guide states exactly. On Lost in the Black: not a per-round
+  // number (this script cannot read the current Towards a Violant Sky or
+  // Counterlight value -- inventing that selector is exactly what this file
+  // does not do), but a static reference: the guide's average EPA and a
+  // pointer to check Counterlight before continuing, since risk grows as
+  // the run goes on.
+  //
+  // OUT OF SCOPE: the "Sound of Wings (...)" burden cards this activity can
+  // spawn in eight OTHER locations on a failed Stumble onwards (Nadir, The
+  // Fifth City, Laboratory, Upper River, Tracklayers' City, Unterzee, The
+  // Stacks, Burgundy) -- badging those means touching potentially eight other
+  // features' card pools, several of which already exist as separate
+  // features in this file. Follow-up, not silently dropped -- see AGENTS.md.
+  // The Counterlight Source currency choice (Anticandle / Memory of Light /
+  // Khaganian Lightbulb) is also left unbadged: ranking it needs each
+  // currency's acquisition cost, which this file does not price anywhere,
+  // and inventing an exchange rate is not this script's business.
+  //
+  // Transcribed from the guide's own three tier tables (fetched through the
+  // API, 2026-09-27; see
+  // docs/superpowers/research/2026-09-27-mid-firmament.md section 1). The
+  // guide states cards are "~{{e}}12.50 each" without a per-card echo total,
+  // with ONE named exception (Unsigned in Triplicate, {{e}}12.60) -- the
+  // same "guide names one real exception" shape as `twFail` elsewhere in this
+  // file. Do not promote the ~{{e}}12.50 estimate to a hard number without
+  // fetching all 28 option pages first; corrections go in HIGH_SANCTA_CARDS
+  // and nowhere else.
+
+  function hsC(name, tier, gives, more) {
+    return Object.assign({ name: name, tier: tier, echo: 12.5, approx: true, gives: gives }, more);
+  }
+
+  const HIGH_SANCTA_CARDS = [
+    // Towards a Violant Sky 1-4
+    hsC('Bleeding In', 1, 'Unprovenanced Artefact x1, Extraordinary Implication x2, An Identity Uncovered! x2'),
+    hsC('Borrowed Scripts', 1, 'Caustic Apocryphon x1'),
+    hsC('Drowsy Exile', 1, 'Bazaar Permit x1'),
+    hsC('First and Last', 1, 'Blackmail Material x1', { needs: 'Family and Law 300-350' }),
+    hsC('Laws Unwritten', 1, 'Nevercold Brass Sliver x1250'),
+    hsC('Lost Cheer', 1, 'Blackmail Material x1', { needs: 'Family and Law exactly 300 or 400' }),
+    hsC('Molten Forests', 1, 'Emetic Revelation x1'),
+    hsC('Pungent Sorrows', 1, 'Puzzle-Damask Scrap x1'),
+    hsC('Statuary', 1, 'Touching Love Story x5', { needs: 'A Finder of Heiresses' }),
+    hsC('Stolen Marble', 1, 'Memory of Distant Shores x25'),
+    // Towards a Violant Sky 5-8
+    hsC('Chained', 2, 'Unlawful Device x1', { note: 'worth up to {{e}}16.5 at The Rat Market' }),
+    hsC('Consortion', 2, 'Scrap of Incendiary Gossip x25'),
+    hsC('Coronation', 2, 'Nodule of Trembling Amber x1'),
+    hsC('Scarred Memories', 2, 'Skyglass Knife x1, Appalling Secret x62'),
+    hsC('Undying Wish', 2, 'An Identity Uncovered! x1, Mystery of the Elder Continent x20'),
+    hsC('Unsigned in Triplicate', 2, 'Infernal Contract x63',
+      { echo: 12.60, approx: false, note: 'pick this one first when drawn (guide)' }),
+    hsC('Velvet Dark', 2, 'Hillmover x1'),
+    hsC("Void's Breath", 2, 'Relic of the Second City x80, Bone Fragments x50'),
+    hsC('Waning', 2, 'Memory of Moonlight x1'),
+    // Towards a Violant Sky 9-12
+    hsC('Black Ice', 3, 'Magnificent Diamond x1'),
+    hsC('Discarded Hearts', 3, 'Ostentatious Diamond x25'),
+    hsC('Drowned Wars', 3, 'Tempestuous Tale x12, Zee-Ztory x13'),
+    hsC('Hands and Blades', 3, 'Relic of the Fifth City x5'),
+    hsC('Love and Tombstones', 3, 'Silent Soul x1'),
+    hsC('Months Passing', 3, 'Mourning Candle x5'),
+    hsC('Reliquaries', 3, 'Cave-Aged Code of Honour x1'),
+    hsC('Rescued Hungers', 3, 'Sausage About Which No One Complains x1'),
+    hsC('Sloughing', 3, 'Justificande Coin x5'),
+    // Not a tier card -- the State 2 draw, reference-only (see comment above).
+    {
+      name: 'Lost in the Black', reference: true,
+      note: 'Odds of Stumble onwards = current Counterlight, which degrades as the run continues '
+        + '(100% at Sky 1-2, down to 62-65% by Sky 9-11, forced exit at Sky 12). Guide\'s bottom '
+        + 'line: expected profit {{e}}166.57 in 16.5 actions (10.10 EPA), or {{e}}161.63 / 9.79 EPA '
+        + 'if Firmament < 780. Failing costs the burden Wings of Change and forces you to leave.',
+    },
+  ];
+
+  const HIGH_SANCTA_CLASS = 'fl-ux-high-sancta';
+  const HIGH_SANCTA_FLAG = 'flUxHighSancta';
+
+  function highSanctaSpec(e) {
+    if (e.reference) {
+      return {
+        text: 'Stumble onwards', color: CAROUSEL_COLOR_LABEL,
+        title: e.name + '\nThe High Sancta, Zenith\n\n' + e.note
+          + '\n\nInformational only -- this script cannot read your current Towards a Violant Sky '
+          + 'or Counterlight, so there is no per-round number to show; check the Counterlight '
+          + 'reading in the storylet text before continuing.',
+      };
+    }
+    const valueText = '{{e}}' + e.echo;
+    const text = e.approx ? '~' + valueText : valueText;
+    const lines = [
+      e.name, 'The High Sancta, Zenith (Towards a Violant Sky ' + e.tier + ')', '',
+      'Gives: ' + e.gives + '.',
+      e.approx ? 'Value is the guide estimate, not fetched per-card (~{{e}}12.50 for most of the 28 cards).'
+        : 'Value is the guide\'s one stated exact figure for this card.',
+      e.needs ? 'Requires: ' + e.needs + '.' : null,
+      e.note || null,
+    ].filter(Boolean).join('\n');
+    return { text: text, color: CAROUSEL_COLOR_PROGRESS, title: lines };
+  }
+
+  function lookupHighSanctaCard(name) {
+    return HIGH_SANCTA_CARDS.find(function (e) { return e.name === name; }) || null;
+  }
+
+  function highSanctaRatings() {
+    eachCardName(function (host, name, place, style) {
+      const card = lookupHighSanctaCard(name);
+      attachBadge(host, {
+        cls: HIGH_SANCTA_CLASS, flag: HIGH_SANCTA_FLAG, value: name,
+        spec: card ? highSanctaSpec(card) : null, place: place, style: style,
+      });
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -37231,6 +37364,7 @@
     // markup, no panel.
     { name: 'ecdysis', run: ecdysisRatings },
     { name: 'midnight-trade', run: midnightTradeRatings },
+    { name: 'high-sancta', run: highSanctaRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
