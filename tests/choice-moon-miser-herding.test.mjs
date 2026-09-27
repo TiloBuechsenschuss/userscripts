@@ -191,6 +191,18 @@ check('wiring: a gold card badges in the hand by name',
   })(),
   '5 EPA');
 
+check('the bare "Fearful Symmetry" name (without the wiki\'s "(Zenith\'s Gate)" disambiguator, which '
+    + 'the guide never confirms the game actually shows) also badges',
+  (() => {
+    const bare = makeHandCard('Fearful Symmetry');
+    handCards = [bare];
+    api.moonMiserRatings();
+    const b = bare.children.find((c) => c.classList.contains(api.MOON_MISER_CLASS));
+    handCards = [];
+    return b && b.textContent;
+  })(),
+  '5.01 EPA');
+
 check('no Moon-Miser Herding name is in another feature\'s table',
   (() => {
     const own = [...api.MOON_MISER_RISKY.map((e) => e.card), ...api.MOON_MISER_RISKY.map((e) => e.option),

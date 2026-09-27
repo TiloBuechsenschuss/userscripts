@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.31
+// @version      1.32
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -8428,10 +8428,12 @@
   // a weasel", and Risen Burgundy's hunting card "(Roof Prey)", the quarry it
   // names. The City of the Tracklayers adds twelve: "(the City)", "(Pub)", "(Inhabitant)", "(Chosen Site)",
   // "(Alignment)" and "(loved one)" in option titles, the three ideologies in card titles, and three
-  // leader-card phrases, and the Station Statues add "(subject)" and "(Subject)". Only these fifty: a bracket like "(3 FATE)" is part of a real
-  // title.
+  // leader-card phrases, and the Station Statues add "(subject)" and "(Subject)". Upon a Red Stage
+  // adds "(Role)", the Starring Role the storylet fills in, and "(Character)", the supporting
+  // character a hamartia option names. Only these fifty-two: a bracket like "(3 FATE)" is part of
+  // a real title.
   const CAROUSEL_PLACEHOLDER =
-    /\((?:growth|growth type|work leader|first option|second option|a level|a hole|a mirror|direction|somewhere|the workshop|the warzone|the mansion|the jungle|department|campaign focus|skeleton type|garment|Zee-Beast Location|Zee-Beast|Parabolan Quarry|Quarry Home|its lair|your saint|Bounty|a railway passenger|a defendant|defendant|crime|type|your dish|dish|Number|City Name|gendertitle|Roof Prey|the City|Pub|Inhabitant|Chosen Site|Alignment|loved one|Emancipationist|Liberationist|Prehistoricist|a no-Prehistoricists city|a no-Liberationists city|no-Emancipationist|subject|Subject)\)/;
+    /\((?:growth|growth type|work leader|first option|second option|a level|a hole|a mirror|direction|somewhere|the workshop|the warzone|the mansion|the jungle|department|campaign focus|skeleton type|garment|Zee-Beast Location|Zee-Beast|Parabolan Quarry|Quarry Home|its lair|your saint|Bounty|a railway passenger|a defendant|defendant|crime|type|your dish|dish|Number|City Name|gendertitle|Roof Prey|the City|Pub|Inhabitant|Chosen Site|Alignment|loved one|Emancipationist|Liberationist|Prehistoricist|a no-Prehistoricists city|a no-Liberationists city|no-Emancipationist|subject|Subject|Role|Character)\)/;
 
   function carouselMatcher(title) {
     const pieces = String(title).split(CAROUSEL_PLACEHOLDER);
@@ -36815,7 +36817,7 @@
 
     // Cash-out, always available.
     ecdysisE('Emerge as a freshly-made self', { label: 'cash out',
-      value: '{{e}}320 + {{e}}37.5 of items ({{e}}53.5 total)',
+      value: '320 Stuiver + 37.5 E of items (53.5 E total)',
       gives: 'Memory of a Much Stranger Self x1 (unsellable), Direful Reflection x1, Emetic Revelation x1 '
         + '(convertible to Cryptic Clue), Antique Mystery x1, Tempestuous Tale x7 (unsellable), Wounds -1, Nightmares +1 (cap 7)' }),
 
@@ -36977,7 +36979,7 @@
       text: 'Midnight Trade', color: CAROUSEL_COLOR_LABEL,
       title: MIDNIGHT_TRADE_STORYLET + ', The Midnight Moon\n\nA repeatable carousel: raise Peligin '
         + 'Work to 5, then end your shift for Memory of Moonlight, Ascended Ambergris, Crate of '
-        + 'Incorruptible Biscuits, Basket of Rubbery Pies, Zee-Ztory and Memory of Light (~{{e}}27.05, '
+        + 'Incorruptible Biscuits, Basket of Rubbery Pies, Zee-Ztory and Memory of Light (~27.05 E, '
         + '4.51 EPA by the guide -- mostly item value, Stuiver-poor).\n'
         + 'Open the storylet and every option is badged in its own right.',
     };
@@ -36994,7 +36996,7 @@
   // === feature: The High Sancta ===========================================
   //
   // Zenith, unlocked at Firmament 300. Entry storylet "Sneaking into the High
-  // Sancta" (one-time per run, spends {{e}}30, not badge material) redirects
+  // Sancta" (one-time per run, spends 30 E, not badge material) redirects
   // to "The Violant Threshold", a two-state cycle gated by "Blindfolded, For
   // Your Own Good":
   //
@@ -37030,12 +37032,19 @@
   // Transcribed from the guide's own three tier tables (fetched through the
   // API, 2026-09-27; see
   // docs/superpowers/research/2026-09-27-mid-firmament.md section 1). The
-  // guide states cards are "~{{e}}12.50 each" without a per-card echo total,
-  // with ONE named exception (Unsigned in Triplicate, {{e}}12.60) -- the
+  // guide states cards are "~12.50 E each" without a per-card echo total,
+  // with ONE named exception (Unsigned in Triplicate, 12.60 E) -- the
   // same "guide names one real exception" shape as `twFail` elsewhere in this
-  // file. Do not promote the ~{{e}}12.50 estimate to a hard number without
+  // file. Do not promote the ~12.50 E estimate to a hard number without
   // fetching all 28 option pages first; corrections go in HIGH_SANCTA_CARDS
   // and nowhere else.
+  //
+  // Seven of the 28 card names are single ordinary English words or short
+  // generic phrases (Chained, Coronation, Waning, Black Ice, Statuary,
+  // Sloughing, Reliquaries) -- real collision risk with a card or storylet
+  // named that anywhere else in the game. Marked `strict: true`, they only
+  // badge on a confirmed "High Sancta" greeting; the other 21 (distinctive
+  // titles) badge unconditionally, per the skill's step 9.
 
   function hsC(name, tier, gives, more) {
     return Object.assign({ name: name, tier: tier, echo: 12.5, approx: true, gives: gives }, more);
@@ -37051,35 +37060,35 @@
     hsC('Lost Cheer', 1, 'Blackmail Material x1', { needs: 'Family and Law exactly 300 or 400' }),
     hsC('Molten Forests', 1, 'Emetic Revelation x1'),
     hsC('Pungent Sorrows', 1, 'Puzzle-Damask Scrap x1'),
-    hsC('Statuary', 1, 'Touching Love Story x5', { needs: 'A Finder of Heiresses' }),
+    hsC('Statuary', 1, 'Touching Love Story x5', { needs: 'A Finder of Heiresses', strict: true }),
     hsC('Stolen Marble', 1, 'Memory of Distant Shores x25'),
     // Towards a Violant Sky 5-8
-    hsC('Chained', 2, 'Unlawful Device x1', { note: 'worth up to {{e}}16.5 at The Rat Market' }),
+    hsC('Chained', 2, 'Unlawful Device x1', { note: 'worth up to 16.5 E at The Rat Market', strict: true }),
     hsC('Consortion', 2, 'Scrap of Incendiary Gossip x25'),
-    hsC('Coronation', 2, 'Nodule of Trembling Amber x1'),
+    hsC('Coronation', 2, 'Nodule of Trembling Amber x1', { strict: true }),
     hsC('Scarred Memories', 2, 'Skyglass Knife x1, Appalling Secret x62'),
     hsC('Undying Wish', 2, 'An Identity Uncovered! x1, Mystery of the Elder Continent x20'),
     hsC('Unsigned in Triplicate', 2, 'Infernal Contract x63',
       { echo: 12.60, approx: false, note: 'pick this one first when drawn (guide)' }),
     hsC('Velvet Dark', 2, 'Hillmover x1'),
     hsC("Void's Breath", 2, 'Relic of the Second City x80, Bone Fragments x50'),
-    hsC('Waning', 2, 'Memory of Moonlight x1'),
+    hsC('Waning', 2, 'Memory of Moonlight x1', { strict: true }),
     // Towards a Violant Sky 9-12
-    hsC('Black Ice', 3, 'Magnificent Diamond x1'),
+    hsC('Black Ice', 3, 'Magnificent Diamond x1', { strict: true }),
     hsC('Discarded Hearts', 3, 'Ostentatious Diamond x25'),
     hsC('Drowned Wars', 3, 'Tempestuous Tale x12, Zee-Ztory x13'),
     hsC('Hands and Blades', 3, 'Relic of the Fifth City x5'),
     hsC('Love and Tombstones', 3, 'Silent Soul x1'),
     hsC('Months Passing', 3, 'Mourning Candle x5'),
-    hsC('Reliquaries', 3, 'Cave-Aged Code of Honour x1'),
+    hsC('Reliquaries', 3, 'Cave-Aged Code of Honour x1', { strict: true }),
     hsC('Rescued Hungers', 3, 'Sausage About Which No One Complains x1'),
-    hsC('Sloughing', 3, 'Justificande Coin x5'),
+    hsC('Sloughing', 3, 'Justificande Coin x5', { strict: true }),
     // Not a tier card -- the State 2 draw, reference-only (see comment above).
     {
       name: 'Lost in the Black', reference: true,
       note: 'Odds of Stumble onwards = current Counterlight, which degrades as the run continues '
         + '(100% at Sky 1-2, down to 62-65% by Sky 9-11, forced exit at Sky 12). Guide\'s bottom '
-        + 'line: expected profit {{e}}166.57 in 16.5 actions (10.10 EPA), or {{e}}161.63 / 9.79 EPA '
+        + 'line: expected profit 166.57 E in 16.5 actions (10.10 EPA), or 161.63 E / 9.79 EPA '
         + 'if Firmament < 780. Failing costs the burden Wings of Change and forces you to leave.',
     },
   ];
@@ -37097,12 +37106,12 @@
           + 'reading in the storylet text before continuing.',
       };
     }
-    const valueText = '{{e}}' + e.echo;
+    const valueText = e.echo + ' E';
     const text = e.approx ? '~' + valueText : valueText;
     const lines = [
       e.name, 'The High Sancta, Zenith (Towards a Violant Sky ' + e.tier + ')', '',
       'Gives: ' + e.gives + '.',
-      e.approx ? 'Value is the guide estimate, not fetched per-card (~{{e}}12.50 for most of the 28 cards).'
+      e.approx ? 'Value is the guide estimate, not fetched per-card (~12.50 E for most of the 28 cards).'
         : 'Value is the guide\'s one stated exact figure for this card.',
       e.needs ? 'Requires: ' + e.needs + '.' : null,
       e.note || null,
@@ -37114,12 +37123,22 @@
     return HIGH_SANCTA_CARDS.find(function (e) { return e.name === name; }) || null;
   }
 
+  // Confirm-only: `currentArea()` reads the greeting, and this may say "yes,
+  // definitely here" but must never say "no" -- no verbatim greeting has been
+  // captured for The High Sancta yet.
+  function inHighSancta(doc) {
+    const area = currentArea(doc);
+    return !!area && /high sancta/i.test(area);
+  }
+
   function highSanctaRatings() {
+    const confirmed = inHighSancta(document);
     eachCardName(function (host, name, place, style) {
       const card = lookupHighSanctaCard(name);
+      const spec = card && (confirmed || !card.strict) ? highSanctaSpec(card) : null;
       attachBadge(host, {
-        cls: HIGH_SANCTA_CLASS, flag: HIGH_SANCTA_FLAG, value: name,
-        spec: card ? highSanctaSpec(card) : null, place: place, style: style,
+        cls: HIGH_SANCTA_CLASS, flag: HIGH_SANCTA_FLAG, value: name + (confirmed ? '@in' : '@out'),
+        spec: spec, place: place, style: style,
       });
     });
   }
@@ -37177,7 +37196,10 @@
   const MOON_MISER_GOLD = [
     { name: 'Blood of the Stone', option: 'I tasted the stone', epa: 5,
       gives: 'Sample of Roof-Drip x100, Antique Mystery x2, Stone-Hearted +1 CP' },
-    { name: "Fearful Symmetry (Zenith's Gate)", option: 'I made a map of what I saw', epa: 5.01,
+    // The wiki page title carries "(Zenith's Gate)"; the guide never confirms whether the game
+    // shows it bare or with that suffix, so both are matched (same caution as the Sous Catacombs'
+    // own disambiguator note above).
+    { name: "Fearful Symmetry (Zenith's Gate)", aliases: ['Fearful Symmetry'], option: 'I made a map of what I saw', epa: 5.01,
       gives: 'Roof-Chart x4, Direful Reflection x2, Salt-Veined +1 CP (Roof-Chart sells at Roof markets)' },
     { name: 'Peal of Thunder', option: 'I took the time to hear the thunder', epa: 5.67,
       gives: 'Tempestuous Tale x20, Storm-Threnody x2, Stormy-Eyed +1 CP up to 6 (highest direct payout, guide recommendation)' },
@@ -37211,7 +37233,9 @@
 
   function moonMiserRatings() {
     eachCardName(function (host, name, place, style) {
-      const gold = MOON_MISER_GOLD.find(function (g) { return g.name === name; });
+      const gold = MOON_MISER_GOLD.find(function (g) {
+        return g.name === name || (g.aliases && g.aliases.indexOf(name) !== -1);
+      });
       attachBadge(host, {
         cls: MOON_MISER_CLASS, flag: MOON_MISER_FLAG, value: name,
         spec: gold ? moonMiserGoldSpec(gold) : null, place: place, style: style,
@@ -37350,14 +37374,17 @@
     }
     const lines = [
       e.name + ' (' + e.category + ')', 'The Sous Catacombs', '',
-      'Value: {{e}}' + e.echo + '.',
+      'Value: ' + e.echo + ' E.',
       e.warn ? 'WARNING: pays LESS than its raw skeleton value despite a large Osseous Offerings '
         + 'number -- do not rank this by the raw Offerings figure.' : null,
       e.alwaysAvailable ? 'Always available (not subject to the weekly rotation).'
         : 'Only offered in some weeks -- this badge reflects whatever is actually on the card.',
       e.note || null,
     ].filter(Boolean).join('\n');
-    return { text: '{{e}}' + e.echo, color: sousBoneColor(e.echo, e.warn), title: lines };
+    // The warning is carried in words on the badge FACE too (▼skel), never colour alone -- the
+    // same raw-total trap `pcColor` hit ranking nine same-value rows by shade, here it's the
+    // WARN colour itself that would be the only signal without this mark.
+    return { text: e.echo + ' E' + (e.warn ? ' ▼skel' : ''), color: sousBoneColor(e.echo, e.warn), title: lines };
   }
 
   function lookupSousOption(name) {
@@ -37461,19 +37488,27 @@
     };
   }
 
+  // Each of "Usurp the role of X" is a distinct name per role, so all three
+  // stay separate rows. "Resist the temptation of bloodshed", "Deliver a
+  // final epilogue" and "Abandon your part" are the SAME option text on all
+  // three Starring Roles (only the Red quality it reads and gates on
+  // differs -- the numbers are identical across roles) -- `carouselLookup`
+  // refuses an ambiguous match, so three identically-named rows per option
+  // would leave all of them permanently unbadged. Collapsed to one row each,
+  // same merge the ledger already made for Ecdysis's "Root yourself in place".
   const RED_STAGE_FINALE = [
     rsFinale('Usurp the role of King', { stat: 'Dangerous', diff: 320 }, 'Red Rapture', 'not King', 675, ['Wounds', 3], 220, ['Nightmares', 4]),
     rsFinale('Usurp the role of Queen', { stat: 'Dangerous', diff: 320 }, 'Red Thirst', 'not Queen', 675, ['Wounds', 3], 220, ['Nightmares', 4]),
     rsFinale('Usurp the role of Knave', { stat: 'Dangerous', diff: 320 }, 'Red Hunger', 'not Knave', 675, ['Wounds', 3], 220, ['Nightmares', 4]),
-    rsFinale('Resist the temptation of bloodshed', { stat: 'Persuasive', diff: 200 }, 'Red Rapture', 'King', 450, ['Nightmares', 1], 250, ['Wounds', 2]),
-    rsFinale('Resist the temptation of bloodshed', { stat: 'Persuasive', diff: 200 }, 'Red Thirst', 'Queen', 450, ['Nightmares', 1], 250, ['Wounds', 2]),
-    rsFinale('Resist the temptation of bloodshed', { stat: 'Persuasive', diff: 200 }, 'Red Hunger', 'Knave', 450, ['Nightmares', 1], 250, ['Wounds', 2]),
-    rsFinale('Deliver a final epilogue', { stat: 'Persuasive', diff: 320 }, 'Red Rapture', 'King', 675, ['Nightmares', 3], 220, ['Wounds', 4]),
-    rsFinale('Deliver a final epilogue', { stat: 'Persuasive', diff: 320 }, 'Red Thirst', 'Queen', 675, ['Nightmares', 3], 220, ['Wounds', 4]),
-    rsFinale('Deliver a final epilogue', { stat: 'Persuasive', diff: 320 }, 'Red Hunger', 'Knave', 675, ['Nightmares', 3], 220, ['Wounds', 4]),
-    rsFinale('Abandon your part', { stat: 'Dangerous', diff: 200 }, 'Red Rapture', 'King', 450, ['Wounds', 1], 250, ['Wounds', 2]),
-    rsFinale('Abandon your part', { stat: 'Dangerous', diff: 200 }, 'Red Thirst', 'Queen', 450, ['Wounds', 1], 250, ['Wounds', 2]),
-    rsFinale('Abandon your part', { stat: 'Dangerous', diff: 200 }, 'Red Hunger', 'Knave', 450, ['Wounds', 1], 250, ['Wounds', 2]),
+    rsFinale('Resist the temptation of bloodshed', { stat: 'Persuasive', diff: 200 },
+      'Red Rapture (King) / Red Thirst (Queen) / Red Hunger (Knave)', 'King, Queen or Knave',
+      450, ['Nightmares', 1], 250, ['Wounds', 2]),
+    rsFinale('Deliver a final epilogue', { stat: 'Persuasive', diff: 320 },
+      'Red Rapture (King) / Red Thirst (Queen) / Red Hunger (Knave)', 'King, Queen or Knave',
+      675, ['Nightmares', 3], 220, ['Wounds', 4]),
+    rsFinale('Abandon your part', { stat: 'Dangerous', diff: 200 },
+      'Red Rapture (King) / Red Thirst (Queen) / Red Hunger (Knave)', 'King, Queen or Knave',
+      450, ['Wounds', 1], 250, ['Wounds', 2]),
   ];
 
   const RED_STAGE_INDEX = carouselIndex(RED_STAGE_MAIN.concat(RED_STAGE_FINALE));
@@ -37495,6 +37530,15 @@
   const RED_STAGE_FLAG = 'flUxRedStage';
   const RED_STAGE_BRANCH_CLASS = 'fl-ux-red-stage-branch';
   const RED_STAGE_BRANCH_FLAG = 'flUxRedStageBranch';
+  // Its own class/flag, distinct from the storylet-heading pair above: an
+  // opened Hazard card's heading is a `.storylet-root__heading`, the SAME
+  // node `carouselRatings`' storylet loop also visits every scan. That loop's
+  // `storyletSpec` always returns null for it (Hazard cards are not in
+  // RED_STAGE_STORYLETS), which would clear a same-class badge the card pass
+  // just drew -- and the card pass would then redraw it, forever, once per
+  // scan, since each redraw's DOM write reschedules the next scan.
+  const RED_STAGE_CARD_CLASS = 'fl-ux-red-stage-card';
+  const RED_STAGE_CARD_FLAG = 'flUxRedStageCard';
 
   function redStageSpec(e) {
     const lines = [
@@ -37545,7 +37589,7 @@
     eachCardName(function (host, name, place, style) {
       const card = RED_STAGE_HAZARD.find(function (e) { return e.name === name; });
       attachBadge(host, {
-        cls: RED_STAGE_CLASS, flag: RED_STAGE_FLAG, value: name,
+        cls: RED_STAGE_CARD_CLASS, flag: RED_STAGE_CARD_FLAG, value: name,
         spec: card ? redStageHazardSpec(card) : null, place: place, style: style,
       });
     });
@@ -37595,7 +37639,7 @@
 
   const MOTH_STEPS = [
     mothE([0, 11], 'Make dye from your aches and pains', { stuiver: 1250, ch: { stat: 'Kataleptic Toxicology + Neathproofed', diff: 5 },
-      consumes: ['Wounds', 10], gives: 'Silk Scrap x3000' }),
+      consumes: ['Wounds', 10], gives: 'Silk Scrap x3000', failMenace: ['Scandal', 2] }),
     mothE([0, 11], 'Make dye from your fears and nightmares', { stuiver: 1250, ch: { stat: 'Kataleptic Toxicology + Neathproofed', diff: 5 },
       consumes: ['Nightmares', 10], gives: 'Silk Scrap x3000', failMenace: ['Wounds', 2] }),
     mothE([0, 11], 'Make pigment from your social missteps', { stuiver: 1250, ch: { stat: 'Kataleptic Toxicology + Neathproofed', diff: 5 },
@@ -37615,18 +37659,19 @@
     mothE([15], 'Create a pigment of absence', { stuiver: 5625, ch: { stat: 'Kataleptic Toxicology + Neathproofed', diff: 19 },
       consumes: ['Irrigo (consumed)', 1], gives: 'Silk Scrap x3000', failMenace: ['Wounds', 2] }),
     mothE([16], "Affix the city's judgement in colour", { stuiver: 5625, ch: { stat: 'Kataleptic Toxicology + Neathproofed', diff: 21 },
-      consumes: ['Judged by the Duchy (not consumed)', 1], gives: 'Silk Scrap x3000', failMenace: ['Scandal', 2] }),
+      needsQuality: 'Judged by the Duchy (not consumed)', gives: 'Silk Scrap x3000', failMenace: ['Scandal', 2] }),
     mothE([17], 'Offer hues of all that you could have been, and are no longer', { stuiver: 3250,
       ch: { stat: 'Kataleptic Toxicology + Neathproofed', diff: 24 },
       needsItem: 'Memory of a Much Lesser Self x10, Memory of a Much Stranger Self x10', gives: 'Silk Scrap x9000', failMenace: ['Wounds', 2] }),
     mothE([18], 'Provide a concentrate of purest self-assurance', { stuiver: 5625, needsItem: 'Concentrate of Self x1', gives: 'Silk Scrap x9000' }),
     mothE([19], 'Ask what he means', { stuiver: 0, gives: 'flavour only, advances to level 20' }),
     mothE([20], 'Offer a body that is you and is not', { stuiver: 31250,
-      needsQuality: 'Discordant Law: Someone Following You = 1, Discordant Studies (level)', consumes: ['A Bringer of Death', 1],
-      gives: 'A Metamorphosed Moth-Self',
-      note: "Tier 20's two options spend NON-comparable currencies: this costs a Bringer of Death CP, the other "
-        + 'needs a hard-to-get item set (Soothe & Cooper Long-Box needs Against Time and Kings; Wings of Change '
-        + 'needs a failed Counterlight check in The High Sancta).' }),
+      needsQuality: 'Discordant Law: Someone Following You = 1, Discordant Studies (level)',
+      gainsMenace: ['A Bringer of Death', 1], gives: 'A Metamorphosed Moth-Self',
+      note: "Tier 20's two options spend NON-comparable currencies: this GAINS a Bringer of Death CP "
+        + '(a cost to carry afterward, not a price paid now), the other needs a hard-to-get item set '
+        + '(Soothe & Cooper Long-Box needs Against Time and Kings; Wings of Change needs a failed '
+        + 'Counterlight check in The High Sancta).' }),
     mothE([20], 'Offer a substitute body, and the promise of your transformation', { stuiver: 31250,
       needsItem: 'Soothe & Cooper Long-Box x1, Wings of Change (consumed)', gives: 'A Metamorphosed Moth-Self (no Bringer of Death)',
       note: "Tier 20's two options spend NON-comparable currencies: this needs a hard-to-get item set (Soothe & "
@@ -37643,6 +37688,7 @@
 
   function mothCost(e) {
     if (e.consumes) return e.consumes[0] + ' -' + e.consumes[1];
+    if (e.gainsMenace) return e.gainsMenace[0] + ' +' + e.gainsMenace[1];
     if (e.needsItem) return 'needs items';
     if (e.needsQuality) return 'needs quality';
     return 'free';
@@ -37653,12 +37699,13 @@
   }
 
   function mothSpec(e) {
-    const text = (e.stuiver ? e.stuiver + 's · ' : '') + mothCost(e);
+    const text = (e.stuiver ? e.stuiver + 's · ' : '') + mothCost(e) + (e.ch ? CAROUSEL_MARK_CHALLENGE : '');
     const lines = [
       e.name + ' (Autolepidopterist ' + e.level.join('-') + ')', 'To Make a Moth, Risen Burgundy', '',
       e.stuiver ? 'Costs ' + e.stuiver + ' Stuiver.' : 'No Stuiver cost.',
       e.ch ? 'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.' : 'No challenge.',
       e.consumes ? 'Spends: ' + e.consumes[0] + ' ' + e.consumes[1] + ' CP.' : null,
+      e.gainsMenace ? 'Gains: ' + e.gainsMenace[0] + ' +' + e.gainsMenace[1] + ' CP (a cost carried afterward).' : null,
       e.needsAtLeast ? 'Requires at least ' + e.needsAtLeast + '.' : null,
       e.needsItem ? 'Requires items: ' + e.needsItem + '.' : null,
       e.needsQuality ? 'Requires: ' + e.needsQuality + '.' : null,

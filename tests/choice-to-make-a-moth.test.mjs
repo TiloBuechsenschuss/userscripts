@@ -152,6 +152,34 @@ check('every step names its Stuiver cost and what it gives',
   row('Make dye from your aches and pains').stuiver === 1250 && row('Make dye from your aches and pains').gives === 'Silk Scrap x3000',
   true);
 
+check('the four tier 0-11 options pair up by the guide\'s stated rule ("Wounds/Scandal trading gives '
+    + 'Scandal +2, Nightmares/Suspicion trading gives Wounds +2") -- consuming Wounds or Scandal both '
+    + 'fail into Scandal, consuming Nightmares or Suspicion both fail into Wounds',
+  ['Make dye from your aches and pains', 'Make pigment from your social missteps', 'Make dye from your fears and nightmares',
+    'Make dye from your guilt and mischief'].map((n) => row(n).failMenace),
+  [['Scandal', 2], ['Scandal', 2], ['Wounds', 2], ['Wounds', 2]]);
+
+check('tier 20\'s "Offer a body" option GAINS a Bringer of Death CP (part of its reward, carried '
+    + 'afterward) rather than spending one -- the badge must not show it as a cost ("-1")',
+  (() => {
+    const e = row('Offer a body that is you and is not');
+    const s = api.mothSpec(e);
+    return [e.gainsMenace, e.consumes || null, s.text.includes('+1'), s.text.includes('-1')];
+  })(),
+  [['A Bringer of Death', 1], null, true, false]);
+
+check('"Affix the city\'s judgement in colour" gates on Judged by the Duchy without consuming it -- '
+    + 'the badge must not show it as a spent CP ("-1")',
+  (() => {
+    const e = row("Affix the city's judgement in colour");
+    const s = api.mothSpec(e);
+    return [e.consumes || null, e.needsQuality, s.text.includes('-1')];
+  })(),
+  [null, 'Judged by the Duchy (not consumed)', false]);
+
+check('every step with a challenge shows the challenge mark on its badge',
+  api.MOTH_STEPS.filter((e) => e.ch).every((e) => api.mothSpec(e).text.includes('?')), true);
+
 check('wiring: badges only appear while "To Make a Moth" is the open storylet',
   (() => {
     const dye = makeHeading('Make dye from your aches and pains');

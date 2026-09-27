@@ -82,6 +82,7 @@ function makeHandCard(name) {
 let handCards = [];
 let compactHeadings = [];
 let storyletRootHeadings = [];
+let greeting = null;
 const fakeDoc = {
   body: makeEl('body'),
   querySelectorAll: (sel) => {
@@ -90,7 +91,14 @@ const fakeDoc = {
     if (sel === '.storylet-root__heading') return storyletRootHeadings;
     return [];
   },
-  querySelector: () => null,
+  querySelector: (sel) => {
+    if (sel === '#accessible-sidebar .welcome' && greeting != null) {
+      const el = makeEl('p');
+      el.textContent = 'Welcome to ' + greeting + ', delicious friend!';
+      return el;
+    }
+    return null;
+  },
   getElementById: () => null,
   createElement: (tag) => makeEl(tag),
   createTextNode: (t) => ({ nodeType: 3, nodeValue: String(t), text: String(t) }),
@@ -104,7 +112,7 @@ const TABLES = ['ARBOR_OPTIONS', 'LBI_OPTIONS', 'DME_OPTIONS', 'VH_OPTIONS', 'FQ
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { HIGH_SANCTA_CARDS, highSanctaSpec, highSanctaRatings, HIGH_SANCTA_CLASS, ' + TABLES.join(', ')
+    'return { HIGH_SANCTA_CARDS, highSanctaSpec, highSanctaRatings, HIGH_SANCTA_CLASS, inHighSancta, ' + TABLES.join(', ')
     + ', ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS, LAB_CARDS, PC_OPTIONS, VSD_OPTIONS,'
     + ' normalizeName, BADGE_CLASS, FEATURES }; })();');
 const api = new Function(
@@ -140,10 +148,13 @@ check('every approximate card carries the ~ marker in its badge text',
 
 check('Unsigned in Triplicate does NOT carry the ~ marker, and is the guide\'s one stated exact figure',
   (() => { const e = row('Unsigned in Triplicate'); return [e.echo, api.highSanctaSpec(e).text]; })(),
-  [12.60, '{{e}}12.6']);
+  [12.60, '12.6 E']);
 
-check('every approximate card is valued at {{e}}12.5',
-  api.HIGH_SANCTA_CARDS.filter((e) => e.approx).every((e) => e.echo === 12.5), true);
+check('every approximate card is valued at 12.5 E, in the file\'s own "N E" convention, never a literal wiki template',
+  [api.HIGH_SANCTA_CARDS.filter((e) => e.approx).every((e) => e.echo === 12.5),
+    api.HIGH_SANCTA_CARDS.every((e) => api.highSanctaSpec(e).text.indexOf('{{') === -1
+      && api.highSanctaSpec(e).title.indexOf('{{') === -1)],
+  [true, true]);
 
 check('the three tiers are all present (28 cards: 10 + 9 + 9, per the guide\'s own tables)',
   [1, 2, 3].map((t) => api.HIGH_SANCTA_CARDS.filter((e) => e.tier === t).length), [10, 9, 9]);
@@ -172,7 +183,39 @@ check('wiring: the wide (image-only) hand layout badges a known card and ignores
     handCards = [];
     return out;
   })(),
-  ['~{{e}}12.5', null]);
+  ['~12.5 E', null]);
+
+check('7 generic single-word card names are marked strict; the other 21 are not',
+  api.HIGH_SANCTA_CARDS.filter((e) => e.strict).map((e) => e.name).sort(),
+  ['Black Ice', 'Chained', 'Coronation', 'Reliquaries', 'Sloughing', 'Statuary', 'Waning'].sort());
+
+check('a strict card only badges on a confirmed "High Sancta" greeting; a non-strict one badges regardless',
+  (() => {
+    const badgeText = (host) => {
+      const b = host.children.find((c) => c.classList.contains(api.HIGH_SANCTA_CLASS));
+      return b ? b.textContent : null;
+    };
+    const out = [];
+    greeting = null;
+    let coronation = makeHandCard('Coronation');
+    let bleeding = makeHandCard('Bleeding In');
+    handCards = [coronation, bleeding];
+    api.highSanctaRatings();
+    out.push([badgeText(coronation), badgeText(bleeding)]);
+    greeting = 'The High Sancta';
+    coronation = makeHandCard('Coronation');
+    bleeding = makeHandCard('Bleeding In');
+    handCards = [coronation, bleeding];
+    api.highSanctaRatings();
+    out.push([badgeText(coronation), badgeText(bleeding)]);
+    handCards = []; greeting = null;
+    return out;
+  })(),
+  [[null, '~12.5 E'], ['~12.5 E', '~12.5 E']]);
+
+check('inHighSancta never says yes on an unrelated greeting, and never says yes with none',
+  [api.inHighSancta(fakeDoc), (() => { greeting = 'Somewhere Else'; const r = api.inHighSancta(fakeDoc); greeting = null; return r; })()],
+  [false, false]);
 
 check('no High Sancta card name is in another card-based feature\'s table',
   (() => { const others = otherNames(null);

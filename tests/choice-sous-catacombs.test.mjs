@@ -142,9 +142,17 @@ check('the guide\'s exact Total Value for one bone per category',
   ['Rubbery Skull', 'Human Arm', 'Prismatic Frame', 'Femur of a Surface Deer', 'Bat Wing'].map((n) => row(n).echo),
   [6, 7.20, 325, 5.1, 5.01]);
 
-check('Panoptical Skull and Ivory Femur are flagged as paying LESS than skeleton value',
-  ['Panoptical Skull', 'Ivory Femur'].map((n) => [row(n).warn, api.sousBoneSpec(row(n)).title.includes('WARNING')]),
-  [[true, true], [true, true]]);
+check('Panoptical Skull and Ivory Femur are flagged as paying LESS than skeleton value, IN WORDS ON '
+    + 'THE BADGE FACE ITSELF (a "▼skel" mark) -- not colour alone, which a red-green-weak reader '
+    + 'cannot use to tell them from any other bone',
+  ['Panoptical Skull', 'Ivory Femur'].map((n) => {
+    const r = row(n);
+    return [r.warn, api.sousBoneSpec(r).title.includes('WARNING'), api.sousBoneSpec(r).text.includes('▼skel')];
+  }),
+  [[true, true, true], [true, true, true]]);
+
+check('a normal bone\'s badge text carries no warning mark',
+  api.sousBoneSpec(row('Rubbery Skull')).text.includes('▼'), false);
 
 check('a normal bone is NOT flagged',
   row('Rubbery Skull').warn, undefined);
@@ -163,7 +171,7 @@ check('wiring: an option name that matches a bone badges anywhere on the page, n
     branches = [];
     return out;
   })(),
-  ['{{e}}6', null]);
+  ['6 E', null]);
 
 check('A Labyrinth of Roof and Bone is never badged (cosmetic, no reward difference)',
   (() => {

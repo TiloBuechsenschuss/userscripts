@@ -161,8 +161,17 @@ check('"Root yourself in place" is ONE row (reused across two tiers under the sa
   (() => { const e = row('Root yourself in place'); return [e.cp, e.failCp, e.safe]; })(),
   [[1, 2], 1, true]);
 
-check('the table does not extend past tier 4-5 -- no row for a tier-6+-only option',
-  api.ECDYSIS_OPTIONS.some((e) => /tier 6|tier 7|tier 8/i.test(e.name || '')), false);
+check('the table does not extend past tier 4-5 -- exactly 16 rows, this exact name list '
+    + '(a regex on option NAMES could never catch a future tier-6+ row; pin the count and names instead)',
+  [api.ECDYSIS_OPTIONS.length, api.ECDYSIS_OPTIONS.map((e) => e.name)],
+  [16, ['Will your heart to slow', 'Close your eyes', 'Feel your breathing', 'Allow your blood to cool',
+    'Listen to your humours', "Assert the mind's dominance over the body", 'Reimagine yourself as something alarming',
+    'Reimagine yourself as something unpredictable', 'Reimagine yourself as something malleable',
+    'Root yourself in place', 'Emerge as a freshly-made self', 'Open your eyes', 'Sharpen yourself',
+    'Obscure some of your bones', 'Smile', 'Refashion yourself into something more malleable']]);
+
+check('the cash-out value is Stuiver + Echoes, not Echoes for both (320 Stuiver, not 320 Echoes)',
+  row('Emerge as a freshly-made self').value, '320 Stuiver + 37.5 E of items (53.5 E total)');
 
 check('badge text: tier 1 (no challenge, no mark), a tier 2-3 risk option (challenge + tendency mark), '
     + 'the safe option (range + safe word, still marked since it also has a challenge)',

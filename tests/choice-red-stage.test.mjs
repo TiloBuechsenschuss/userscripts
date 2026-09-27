@@ -118,7 +118,7 @@ const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
     'return { RED_STAGE_MAIN, RED_STAGE_FINALE, RED_STAGE_HAZARD, redStageSpec, redStageFinaleSpec,'
-    + ' redStageRatings, RED_STAGE_CLASS, RED_STAGE_BRANCH_CLASS, ' + TABLES.join(', ')
+    + ' redStageRatings, RED_STAGE_CLASS, RED_STAGE_BRANCH_CLASS, RED_STAGE_CARD_CLASS, ' + TABLES.join(', ')
     + ', ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS, LAB_CARDS, HIGH_SANCTA_CARDS, MOON_MISER_RISKY, MOON_MISER_GOLD,'
     + ' SOUS_BONES, PC_OPTIONS, VSD_OPTIONS, normalizeName, BADGE_CLASS, FEATURES }; })();');
 const api = new Function(
@@ -136,7 +136,7 @@ function check(label, got, expected) {
 }
 const key = api.normalizeName;
 const mainRow = (name) => api.RED_STAGE_MAIN.find((e) => e.name === name);
-const finaleRow = (name) => api.RED_STAGE_FINALE.find((e) => e.name === name && e.role.indexOf('King') !== -1);
+const finaleRow = (name) => api.RED_STAGE_FINALE.find((e) => e.name === name);
 const badgeOf = (head, cls) => {
   for (let n = head.nextElementSibling; n && n.classList.contains(api.BADGE_CLASS); n = n.nextElementSibling) {
     if (n.classList.contains(cls)) return n;
@@ -155,8 +155,14 @@ function allNames() {
   ].map(key);
 }
 
-check('28 main-table rows, 12 finale rows, 10 hazard cards',
-  [api.RED_STAGE_MAIN.length, api.RED_STAGE_FINALE.length, api.RED_STAGE_HAZARD.length], [28, 12, 10]);
+check('28 main-table rows, 6 finale rows (3 "Usurp" rows, one per role, stay distinct; "Resist the '
+    + 'temptation of bloodshed"/"Deliver a final epilogue"/"Abandon your part" collapse from 3 '
+    + 'role-copies each to 1 -- the option text is IDENTICAL across roles, and carouselLookup '
+    + 'refuses an ambiguous match, so 3 identically-named rows would leave all of them dead), '
+    + '10 hazard cards',
+  [api.RED_STAGE_MAIN.length, api.RED_STAGE_FINALE.length, api.RED_STAGE_HAZARD.length,
+    new Set(api.RED_STAGE_FINALE.map((e) => e.name)).size],
+  [28, 6, 10, 6]);
 
 check('a spot-checked main row exactly matches the option page',
   (() => { const e = mainRow('Usurp the role of King'); return e ? null : 'not in main table (expected: finale only)'; })(),
@@ -174,10 +180,28 @@ check('Finale success/failure menace are NOT mirrored -- a Dangerous row gives W
     + 'Nightmares on failure; the reverse for the matching Persuasive row',
   (() => {
     const usurpKing = finaleRow('Usurp the role of King');
-    const epilogueKing = api.RED_STAGE_FINALE.find((e) => e.name === 'Deliver a final epilogue' && e.role === 'King');
-    return [usurpKing.succMenace[0], usurpKing.failMenace[0], epilogueKing.succMenace[0], epilogueKing.failMenace[0]];
+    const epilogue = finaleRow('Deliver a final epilogue');
+    return [usurpKing.succMenace[0], usurpKing.failMenace[0], epilogue.succMenace[0], epilogue.failMenace[0]];
   })(),
   ['Wounds', 'Nightmares', 'Nightmares', 'Wounds']);
+
+check('every finale row can actually be looked up through carouselLookup\'s real matching path '
+    + '(not just the spec function called directly) -- this is what would have caught the dead '
+    + 'duplicate-name rows before the fix',
+  (() => {
+    const out = [];
+    ['Usurp the role of King', 'Resist the temptation of bloodshed', 'Deliver a final epilogue', 'Abandon your part']
+      .forEach((n) => {
+        const h = makeHeading(n);
+        branches = [h];
+        roots = [makeHeading('Catastrophe: An Ending')];
+        api.redStageRatings();
+        out.push(text(h, api.RED_STAGE_BRANCH_CLASS) !== null);
+        roots = []; branches = [];
+      });
+    return out;
+  })(),
+  [true, true, true, true]);
 
 check('a finale badge names both menaces, never a shared bucket',
   api.redStageFinaleSpec(finaleRow('Usurp the role of King')).text, '675 SA? ▲Wounds+3');
@@ -185,6 +209,43 @@ check('a finale badge names both menaces, never a shared bucket',
 check('all 10 Hazard cards pay the identical flat 650/250 SA and carry no computed ranking',
   [new Set(api.RED_STAGE_HAZARD.map((e) => e.name)).size, api.RED_STAGE_HAZARD.every((e) => e.stat)],
   [10, true]);
+
+check('an opened Hazard card badges via its own class, and a second scan does not redraw or clear it '
+    + '(the carousel storylet-loop and the card loop must use DIFFERENT classes, or the storylet-'
+    + 'loop\'s null spec clears what the card loop just drew, and the card loop redraws it every '
+    + 'scan forever -- a real infinite-rescan bug this pins)',
+  (() => {
+    const opened = makeHeading('Intermission: A Flash of Bone');
+    // The opened Hazard card renders as a `.storylet-root__heading`, same as any opened card;
+    // eachCardName inserts its badge with `after()`, as a sibling, not a child.
+    roots = [opened];
+    branches = [];
+    api.redStageRatings();
+    const firstBadge = badgeOf(opened, api.RED_STAGE_CARD_CLASS);
+    api.redStageRatings();
+    const secondBadge = badgeOf(opened, api.RED_STAGE_CARD_CLASS);
+    roots = [];
+    // Same node, not a new one -- attachBadge's own idempotency guard took the
+    // early return on the second call, which is only possible if nothing
+    // upstream (the storylet-loop's null spec) wrote a conflicting dataset
+    // value for the SAME class first.
+    return [firstBadge !== null, firstBadge === secondBadge];
+  })(),
+  [true, true]);
+
+check('the (Role) and (Character) placeholders match, so "Embody the role of the (Role)" and '
+    + '"Exploit the (Character)\'s hamartia" can badge at all',
+  (() => {
+    const embody = makeHeading('Embody the role of the King');
+    const exploit = makeHeading("Exploit the Duchess's hamartia");
+    branches = [embody, exploit];
+    roots = [makeHeading('On a Red, Red Stage')];
+    api.redStageRatings();
+    const out = [text(embody, api.RED_STAGE_BRANCH_CLASS) !== null, text(exploit, api.RED_STAGE_BRANCH_CLASS) !== null];
+    roots = []; branches = [];
+    return out;
+  })(),
+  [true, true]);
 
 check('wiring: a generic option name ("Rule") only badges while "On a Red, Red Stage" is open',
   (() => {
