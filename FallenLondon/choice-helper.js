@@ -36732,6 +36732,162 @@
     mountDepthRow(at, floor);
   }
 
+  // === feature: Ecdysis ===================================================
+  //
+  // A repeatable Firmament carousel in Hallow's Throat, storylet "Ecdysis: One
+  // More Lesson". One-time unlock chain (roof access, Lung and Spleen,
+  // Ascended Ambergris) is narrative, not badge material. Each round raises
+  // "Preparing for Ecdysis" (0->21); "Bodily Tendency" (1-100) is a randomiser
+  // that decides which Boon is reachable at the end.
+  //
+  // **What the badge says.** Net CP progress per action: the success CP shown
+  // plain, marked `?` where a challenge exists (these are stat challenges, not
+  // Luck ones -- show the value, don't guess a win chance). "Root yourself in
+  // place" gets "(safe)" in words, never colour alone, since it is the only
+  // always-available option with no menace risk -- at a real cost, fewer CP
+  // than the risk options at its tier. Bodily Tendency drift is a secondary
+  // mark: ▲ up, ▼ down, ↻ randomised.
+  //
+  // Menace gain here is CAPPED at 7 (Nightmares/Wounds), and the guide itself
+  // recommends tanking rather than avoiding it -- so menace is noted in the
+  // tooltip, never subtracted from the badge's colour.
+  //
+  // Transcribed from the guide's own tables (fetched through the API,
+  // 2026-09-27; individual option pages not yet cross-checked -- treat as a
+  // first draft, per docs/superpowers/research/2026-09-27-early-firmament.md
+  // section 1). The guide does not tabulate tiers past Preparing for Ecdysis
+  // 4-5; this table stops there rather than extrapolate a pattern from four
+  // rows, and the badge says so on the storylet heading.
+  //
+  // "Root yourself in place" is offered at BOTH tier 2-3 and tier 4-5 under
+  // the exact same name -- `carouselLookup` cannot tell the two apart from the
+  // option text alone (it declines to badge an ambiguous match), so its two
+  // tiers' success CP are merged into one row as a range; its failure CP (1)
+  // happens to be the same at both tiers, so that field stays flat.
+  //
+  // Corrections go in ECDYSIS_OPTIONS and nowhere else.
+
+  const ECDYSIS_STORYLET = 'Ecdysis: One More Lesson';
+  const ECDYSIS_STORYLETS = [ECDYSIS_STORYLET];
+
+  function ecdysisE(name, more) {
+    return Object.assign({ storylet: ECDYSIS_STORYLET, name: name }, more);
+  }
+
+  const ECDYSIS_OPTIONS = [
+    // Tier 1 (Preparing for Ecdysis 0): no challenge, always +2 CP, always
+    // randomises Bodily Tendency. At most one is ever offered at a time (they
+    // gate on disjoint-in-practice Bodily Tendency bands), so there is nothing
+    // to rank between them.
+    ecdysisE('Will your heart to slow', { tendencyGate: [1, 41], cp: 2, tendency: 'random' }),
+    ecdysisE('Close your eyes', { tendencyGate: [20, 80], cp: 2, tendency: 'random' }),
+    ecdysisE('Feel your breathing', { tendencyGate: [70, 100], cp: 2, tendency: 'random' }),
+
+    // Tier 2-3 risk options.
+    ecdysisE('Allow your blood to cool', { tendencyGate: [1, 40],
+      ch: { stat: 'Shapeling Arts + Chthonosophy', diff: 16 }, cp: 2, tendency: 'down', failCp: 2, menace: ['Nightmares', 1] }),
+    ecdysisE('Listen to your humours', { ch: { stat: 'Shapeling Arts + Watchful/50', diff: 16 },
+      cp: 2, tendency: 'random', failCp: 2, menace: ['Nightmares', 1] }),
+    ecdysisE("Assert the mind's dominance over the body", { tendencyGate: [60, 100],
+      ch: { stat: 'Shapeling Arts + Dreaded/2', diff: 16 }, cp: 2, tendency: 'up', failCp: 2, menace: ['Nightmares', 1] }),
+
+    // Tier 4-5 risk options.
+    ecdysisE('Reimagine yourself as something alarming', { tendencyGate: [1, 51],
+      ch: { stat: 'Monstrous Anatomy + Shapeling Arts', diff: 18 }, cp: 3, tendency: 'down', failCp: 3, menace: ['Wounds', 1] }),
+    ecdysisE('Reimagine yourself as something unpredictable', { tendencyGate: [20, 80],
+      ch: { stat: 'Kataleptic Toxicology + Shapeling Arts', diff: 18 }, cp: 3, tendency: 'random', failCp: 3, menace: ['Wounds', 1] }),
+    ecdysisE('Reimagine yourself as something malleable', { tendencyGate: [50, 100],
+      ch: { stat: 'Shapeling Arts', diff: 14 }, cp: 3, tendency: 'up', failCp: 3, menace: ['Wounds', 1] }),
+
+    // Always available, both tiers merged (see comment above).
+    ecdysisE('Root yourself in place', { ch: { stat: 'Chthonosophy', diff: 8 }, safe: true, cp: [1, 2], failCp: 1,
+      note: 'Success CP is 1 at Preparing for Ecdysis 2-3, 2 at tier 4-5; failure is 1 CP at both.' }),
+
+    // Cash-out, always available.
+    ecdysisE('Emerge as a freshly-made self', { label: 'cash out',
+      value: '{{e}}320 + {{e}}37.5 of items ({{e}}53.5 total)',
+      gives: 'Memory of a Much Stranger Self x1 (unsellable), Direful Reflection x1, Emetic Revelation x1 '
+        + '(convertible to Cryptic Clue), Antique Mystery x1, Tempestuous Tale x7 (unsellable), Wounds -1, Nightmares +1 (cap 7)' }),
+
+    // Boons, alternative to cashing out, gated on Bodily Tendency + Bodily
+    // Reshaping. Which is worth taking depends on the player's own goal (the
+    // game does not say), so these are informational, never ranked.
+    ecdysisE('Open your eyes', { label: 'Boon', boon: 'Wide-Eyed',
+      gate: 'Bodily Tendency 1-20, Bodily Reshaping <3', gives: 'Watchful +5, Reshaping +1' }),
+    ecdysisE('Sharpen yourself', { label: 'Boon', boon: 'Sharpened',
+      gate: 'Bodily Tendency 21-40, Bodily Reshaping <2', gives: 'Dangerous +5, Dreaded +1, Reshaping +2' }),
+    ecdysisE('Obscure some of your bones', { label: 'Boon', boon: 'Partially Boneless',
+      gate: 'Bodily Tendency 41-60, Bodily Reshaping <2', gives: 'Shadowy +5, Insubstantial +1, Reshaping +2' }),
+    ecdysisE('Smile', { label: 'Boon', boon: 'Radiant Bearing',
+      gate: 'Bodily Tendency 61-80, Bodily Reshaping <3', gives: 'Persuasive +5, Reshaping +1' }),
+    ecdysisE('Refashion yourself into something more malleable', { label: 'Boon', boon: 'Hallow Vessel',
+      gate: 'Bodily Tendency 81-100, Bodily Reshaping 0', gives: 'Shapeling Arts +1, Reshaping +3, Nightmares +1' }),
+  ];
+
+  const ECDYSIS_INDEX = carouselIndex(ECDYSIS_OPTIONS);
+
+  const ECDYSIS_CLASS = 'fl-ux-ecdysis';
+  const ECDYSIS_FLAG = 'flUxEcdysis';
+  const ECDYSIS_BRANCH_CLASS = 'fl-ux-ecdysis-branch';
+  const ECDYSIS_BRANCH_FLAG = 'flUxEcdysisBranch';
+
+  function ecdysisBadgeText(e) {
+    if (e.label === 'cash out') return 'cash out';
+    if (e.label === 'Boon') return 'Boon: ' + e.boon;
+    const cpText = Array.isArray(e.cp) ? carouselRange(e.cp) : carouselSigned(e.cp);
+    const tendencyMark = { down: ' ▼', up: ' ▲', random: ' ↻' }[e.tendency] || '';
+    return cpText + ' CP' + (e.safe ? ' (safe)' : '') + (e.ch ? CAROUSEL_MARK_CHALLENGE : '') + tendencyMark;
+  }
+
+  function ecdysisColor(e) {
+    if (e.label) return CAROUSEL_COLOR_LABEL;
+    return e.safe ? CAROUSEL_COLOR_NEUTRAL : CAROUSEL_COLOR_PROGRESS;
+  }
+
+  function ecdysisSpec(e) {
+    const lines = [e.name, ECDYSIS_STORYLET + ", Hallow's Throat", ''];
+    if (e.label === 'cash out') {
+      lines.push('Always available. Value: ' + e.value + '.');
+      lines.push('Gives: ' + e.gives + '.');
+    } else if (e.label === 'Boon') {
+      lines.push('Alternative to cashing out. Gate: ' + e.gate + '.');
+      lines.push('Grants ' + e.boon + ': ' + e.gives + '.');
+      lines.push('Lasts until the next Season (Time, the Healer). Cannot hold two of the same, '
+        + 'cannot exceed Bodily Reshaping 3. Which Boon is worth taking depends on your own goal, '
+        + 'not ranked against the others or against cashing out.');
+    } else {
+      lines.push(e.ch ? 'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.' : 'No challenge.');
+      lines.push('Success: ' + (Array.isArray(e.cp) ? carouselRange(e.cp) : carouselSigned(e.cp)) + ' CP'
+        + (e.tendency ? ', Bodily Tendency ' + e.tendency : '') + '.');
+      if (e.failCp != null) {
+        lines.push('Failure: ' + carouselSigned(e.failCp) + ' CP'
+          + (e.menace ? ', ' + e.menace[0] + ' ' + carouselSigned(e.menace[1]) + ' (cap 7)' : '') + '.');
+      }
+      if (e.safe) lines.push('The only always-available option with no menace risk -- at a real cost: '
+        + 'fewer CP than the risk options at this tier.');
+      if (e.note) lines.push(e.note);
+    }
+    return { text: ecdysisBadgeText(e), color: ecdysisColor(e), title: lines.join('\n') };
+  }
+
+  function ecdysisStoryletSpec(key) {
+    if (key !== normalizeName(ECDYSIS_STORYLET)) return null;
+    return {
+      text: 'Ecdysis', color: CAROUSEL_COLOR_LABEL,
+      title: ECDYSIS_STORYLET + ", Hallow's Throat\n\nA repeatable carousel: raise Preparing for "
+        + 'Ecdysis to 21, then cash out or take a Boon.\nNot read past Preparing for Ecdysis tier '
+        + '4-5 -- higher tiers are not in the source guide and are not guessed at.\nOpen the '
+        + 'storylet and every option is badged in its own right.',
+    };
+  }
+
+  function ecdysisRatings() {
+    carouselRatings({
+      storylets: ECDYSIS_STORYLETS, index: ECDYSIS_INDEX, storyletSpec: ecdysisStoryletSpec, optionSpec: ecdysisSpec,
+      cls: ECDYSIS_CLASS, flag: ECDYSIS_FLAG, branchCls: ECDYSIS_BRANCH_CLASS, branchFlag: ECDYSIS_BRANCH_FLAG,
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -36978,6 +37134,9 @@
     { name: 'firmament', run: firRatings },
     { name: 'discordant-studies', run: hsRatings },
     { name: 'plaster-face', run: pfRatings },
+    // The Firmament shelf's own guide-carousel batch, all card-and-storylet
+    // markup, no panel.
+    { name: 'ecdysis', run: ecdysisRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a

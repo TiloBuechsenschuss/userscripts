@@ -13,7 +13,7 @@ Fallen London:
   Early MYN:
 
   Early Firmament:
-    - https://fallenlondon.wiki/wiki/Ecdysis_(Guide) [Hallow's Throat]
+    - https://fallenlondon.wiki/wiki/Ecdysis_(Guide) [Hallow's Throat] (implemented)
     - https://fallenlondon.wiki/wiki/The_Midnight_Trade_(Guide) [The Midnight Moon]
     - https://fallenlondon.wiki/wiki/The_Stacks_(Guide) [The Stacks] (deferred: ~25 cards,
       Fate/companion-locked content, a hidden state machine gating which cards appear, and the
