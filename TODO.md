@@ -14,7 +14,7 @@ Fallen London:
 
   Early Firmament:
     - https://fallenlondon.wiki/wiki/Ecdysis_(Guide) [Hallow's Throat] (implemented)
-    - https://fallenlondon.wiki/wiki/The_Midnight_Trade_(Guide) [The Midnight Moon]
+    - https://fallenlondon.wiki/wiki/The_Midnight_Trade_(Guide) [The Midnight Moon] (implemented)
     - https://fallenlondon.wiki/wiki/The_Stacks_(Guide) [The Stacks] (deferred: ~25 cards,
       Fate/companion-locked content, a hidden state machine gating which cards appear, and the
       guide's own EPA figures disagree by section (5.27 / 9.94 / 6.2-6.3) -- needs its own

@@ -36888,6 +36888,99 @@
     });
   }
 
+  // === feature: The Midnight Trade ========================================
+  //
+  // A repeatable Firmament carousel in The Midnight Moon, storylet "The
+  // Midnight Trade". Progress quality "Peligin Work" (0->5 ends a shift).
+  // Two randomisers, "Airs of the Leviathan" and "Smuggled Airs" (both 0-100,
+  // rerolled by every option played), decide which 2 of the 8 options below
+  // are on offer at any time -- not fully player-controlled round to round,
+  // and not the Airs of London quality (no alias/CAROUSEL_PLACEHOLDER
+  // concern).
+  //
+  // **What the badge says.** Every option gives the SAME Peligin Work
+  // progress on success AND failure -- the guide gives one flat number, not a
+  // per-option payout -- so there is nothing to rank by reward, only by
+  // challenge difficulty and which menace a failure risks. The badge is the
+  // challenge stat and difficulty, marked `?`, then the failure menace as a
+  // word mark (`▲Wounds` / `▲Nightmares`); the two Font-Rose companion
+  // options are marked "always succeeds" and state their companion
+  // requirement in the tooltip rather than being ranked as free wins the
+  // player may not be able to take.
+  //
+  // Transcribed from the guide's own single flat table (fetched through the
+  // API, 2026-09-27; see
+  // docs/superpowers/research/2026-09-27-early-firmament.md section 2).
+  // Corrections go in MIDNIGHT_TRADE_OPTIONS and nowhere else.
+
+  const MIDNIGHT_TRADE_STORYLET = 'The Midnight Trade';
+  const MIDNIGHT_TRADE_STORYLETS = [MIDNIGHT_TRADE_STORYLET];
+
+  function mtE(name, more) {
+    return Object.assign({ storylet: MIDNIGHT_TRADE_STORYLET, name: name }, more);
+  }
+
+  const MIDNIGHT_TRADE_OPTIONS = [
+    mtE('Haul supplies to the Midnight Moon', { randomiser: ['Airs of the Leviathan', 0, 33], ch: { stat: 'Dangerous', diff: 200 }, fail: 'Wounds' }),
+    mtE('Maintain the candle-guides', { randomiser: ['Airs of the Leviathan', 34, 67], ch: { stat: 'Watchful', diff: 200 }, fail: 'Nightmares' }),
+    mtE('Offload your duties onto the Once-Dashing Smuggler', { randomiser: ['Airs of the Leviathan', 50, 70], needs: 'a Rose companion', checkless: true }),
+    mtE('Shuttle contraband through the stalactite', { randomiser: ['Airs of the Leviathan', 68, 100], ch: { stat: 'Zeefaring', diff: 13 }, fail: 'Nightmares' }),
+    mtE('Load contraband onto departing dirigibles', { randomiser: ['Smuggled Airs', 0, 33], ch: { stat: 'Dangerous', diff: 200 }, fail: 'Nightmares' }),
+    mtE("Conduct Old Resurrection's personal work", { randomiser: ['Smuggled Airs', 20, 40], needs: 'a Rose companion and Fate', checkless: true }),
+    mtE('Negotiate with visiting captains', { randomiser: ['Smuggled Airs', 34, 67], ch: { stat: 'Mithridacy', diff: 11 }, fail: 'Wounds' }),
+    mtE('Perform maintenance', { randomiser: ['Smuggled Airs', 68, 100], ch: { stat: 'Watchful', diff: 200 }, fail: 'Nightmares' }),
+  ];
+
+  const MIDNIGHT_TRADE_INDEX = carouselIndex(MIDNIGHT_TRADE_OPTIONS);
+
+  const MIDNIGHT_TRADE_CLASS = 'fl-ux-midnight-trade';
+  const MIDNIGHT_TRADE_FLAG = 'flUxMidnightTrade';
+  const MIDNIGHT_TRADE_BRANCH_CLASS = 'fl-ux-midnight-trade-branch';
+  const MIDNIGHT_TRADE_BRANCH_FLAG = 'flUxMidnightTradeBranch';
+
+  function midnightTradeBadgeText(e) {
+    if (e.checkless) return 'always succeeds';
+    return e.ch.stat + ' ' + e.ch.diff + CAROUSEL_MARK_CHALLENGE + ' ▲' + e.fail;
+  }
+
+  function midnightTradeColor(e) {
+    return e.checkless ? CAROUSEL_COLOR_NEUTRAL : CAROUSEL_COLOR_PROGRESS;
+  }
+
+  function midnightTradeSpec(e) {
+    const lines = [e.name, MIDNIGHT_TRADE_STORYLET + ', The Midnight Moon', ''];
+    lines.push('Offered while ' + e.randomiser[0] + ' is ' + e.randomiser[1] + '-' + e.randomiser[2] + '.');
+    if (e.checkless) {
+      lines.push('Requires: ' + e.needs + '. No challenge -- always succeeds.');
+    } else {
+      lines.push('Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.');
+      lines.push('Failure also costs ' + e.fail + ' +1.');
+      if (e.ch.diff >= 200) lines.push('This is a very high broad check; likely to fail without heavy stat investment.');
+    }
+    lines.push('Peligin Work progress on success AND failure -- same as every option here.');
+    return { text: midnightTradeBadgeText(e), color: midnightTradeColor(e), title: lines.join('\n') };
+  }
+
+  function midnightTradeStoryletSpec(key) {
+    if (key !== normalizeName(MIDNIGHT_TRADE_STORYLET)) return null;
+    return {
+      text: 'Midnight Trade', color: CAROUSEL_COLOR_LABEL,
+      title: MIDNIGHT_TRADE_STORYLET + ', The Midnight Moon\n\nA repeatable carousel: raise Peligin '
+        + 'Work to 5, then end your shift for Memory of Moonlight, Ascended Ambergris, Crate of '
+        + 'Incorruptible Biscuits, Basket of Rubbery Pies, Zee-Ztory and Memory of Light (~{{e}}27.05, '
+        + '4.51 EPA by the guide -- mostly item value, Stuiver-poor).\n'
+        + 'Open the storylet and every option is badged in its own right.',
+    };
+  }
+
+  function midnightTradeRatings() {
+    carouselRatings({
+      storylets: MIDNIGHT_TRADE_STORYLETS, index: MIDNIGHT_TRADE_INDEX, storyletSpec: midnightTradeStoryletSpec,
+      optionSpec: midnightTradeSpec, cls: MIDNIGHT_TRADE_CLASS, flag: MIDNIGHT_TRADE_FLAG,
+      branchCls: MIDNIGHT_TRADE_BRANCH_CLASS, branchFlag: MIDNIGHT_TRADE_BRANCH_FLAG,
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -37137,6 +37230,7 @@
     // The Firmament shelf's own guide-carousel batch, all card-and-storylet
     // markup, no panel.
     { name: 'ecdysis', run: ecdysisRatings },
+    { name: 'midnight-trade', run: midnightTradeRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
