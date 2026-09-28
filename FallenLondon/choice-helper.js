@@ -38854,6 +38854,112 @@
     });
   }
 
+  // === feature: A Dream of a Burning City ==================================
+  //
+  // Redirected from "Overwhelmed by Smoke and Heat" (not itself covered by
+  // any feature -- follow-up if a feature ever reaches it). Progress
+  // quality "Fie to the Wyrm" (0->1, then 2+). Every option's own redirect
+  // sends the player straight back into this same storylet -- a repeatable
+  // loop, not a one-shot dream, on both outcomes.
+  //
+  // **What the badge says.** Direction of Fie to the Wyrm is the real
+  // story: the four tier-0-1 options ALWAYS gain a tier regardless of
+  // outcome; the four tier-2+ options gain on success but LOSE a tier on
+  // failure -- a real setback, the opposite direction. Marked with a
+  // downward shape mark on the tier-2+ rows, never a flat reward-size
+  // number alone, which would hide that these four are riskier in a way
+  // size doesn't capture. The wiki's own `?` mark on "Well-Placed Pawn
+  // 31-37?"/"27-37?" and "Map Scrap 10-37?"/"10?" is carried verbatim -- the
+  // wiki's stated uncertainty, not this script's guess. "Nightmares +1 on
+  // every failure" is stated once in the storylet-level tooltip rather than
+  // repeated per row.
+  //
+  // Transcribed from the storylet's own page and all 8 option pages
+  // (fetched through the API, full re-fetch 2026-09-28 after an earlier
+  // pass truncated several reward blocks) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-b.md
+  // section 3. "Well-Placed Pawn" is also `war-of-assassins`' own currency
+  // name -- confirmed name-identical only, not a shared table row: it is a
+  // general-purpose item this game reuses across many unrelated storylines
+  // already in this file (also in `fascinating`, `chessboard`, and several
+  // more), so there is nothing to fold into `war-of-assassins`' own table.
+  // Corrections go in BURNING_CITY_OPTIONS and nowhere else.
+
+  const BURNING_CITY_STORYLET = 'A Dream of a Burning City';
+
+  function bcRow(name, tier, airs, gives, failWyrm, failGives) {
+    return { storylet: BURNING_CITY_STORYLET, name: name, tier: tier, airs: airs, gives: gives,
+      failWyrm: failWyrm, failGives: failGives };
+  }
+
+  const BURNING_CITY_OPTIONS = [
+    bcRow('Fight for breath', '0-1', [0, 50],
+      'Inkling of Identity 27-48, Fie to the Wyrm +1-2, loses 1 Overwhelmed by Smoke and Heat',
+      1, 'Inkling of Identity 7, Fie to the Wyrm +1, loses 1 Overwhelmed by Smoke and Heat, Nightmares +1'),
+    bcRow('Flee over melting cobbles', '0-1', [0, 50],
+      'Map Scrap 10-37?, Fie to the Wyrm +2, loses 1 Overwhelmed by Smoke and Heat',
+      1, 'Map Scrap 10?, Fie to the Wyrm +1, loses 1 Overwhelmed by Smoke and Heat, Nightmares +1'),
+    bcRow('Watch the Tower', '0-1', [51, 100],
+      'Sighting of a Parabolan Landmark 31, Fie to the Wyrm +1, loses 1 Overwhelmed by Smoke and Heat',
+      1, 'Sighting of a Parabolan Landmark 48, Fie to the Wyrm +1, loses 1 Overwhelmed by Smoke and Heat, Nightmares +1'),
+    bcRow('Cower', '0-1', [51, 100],
+      "Maniac's Prayer 7-27, Fie to the Wyrm +2, loses 1 Overwhelmed by Smoke and Heat",
+      1, "Maniac's Prayer 10, Fie to the Wyrm +1, loses 1 Overwhelmed by Smoke and Heat, Nightmares +1"),
+    bcRow('Man the cannons', '2+', [51, 100],
+      'Well-Placed Pawn 31-37?, Fie to the Wyrm +1, loses 1 Overwhelmed by Smoke and Heat',
+      -1, 'Well-Placed Pawn 27-37?, Fie to the Wyrm -1, Overwhelmed by Smoke and Heat set to 0, Nightmares +1'),
+    bcRow('Tend to wounded dreamers', '2+', [51, 100],
+      'Inkling of Identity 31, Fie to the Wyrm +1, loses 1 Overwhelmed by Smoke and Heat',
+      -1, 'Inkling of Identity 48, Fie to the Wyrm -1, loses 1 Overwhelmed by Smoke and Heat, Nightmares +1'),
+    bcRow('Form a bucket chain', '2+', [1, 50],
+      'Well-Placed Pawn 31-37?, Fie to the Wyrm +1, loses 1 Overwhelmed by Smoke and Heat',
+      -1, 'Well-Placed Pawn 27-37?, Fie to the Wyrm -1, loses 1 Overwhelmed by Smoke and Heat, Nightmares +1'),
+    bcRow('Save a fellow dreamer', '2+', [1, 50],
+      "Maniac's Prayer 48, Fie to the Wyrm +1, loses 1 Overwhelmed by Smoke and Heat",
+      -1, "Maniac's Prayer 48, Fie to the Wyrm -1, loses 1 Overwhelmed by Smoke and Heat, Nightmares +1"),
+  ];
+
+  const BURNING_CITY_INDEX = carouselIndex(BURNING_CITY_OPTIONS);
+
+  const BURNING_CITY_CLASS = 'fl-ux-burning-city';
+  const BURNING_CITY_FLAG = 'flUxBurningCity';
+  const BURNING_CITY_BRANCH_CLASS = 'fl-ux-burning-city-branch';
+  const BURNING_CITY_BRANCH_FLAG = 'flUxBurningCityBranch';
+
+  function burningCitySpec(e) {
+    const mark = e.failWyrm < 0 ? ' ▼ risk' : '';
+    const lines = [
+      e.name, BURNING_CITY_STORYLET + ' (Fie to the Wyrm ' + e.tier + ')', '',
+      'Airs of London ' + e.airs[0] + '-' + e.airs[1] + '.',
+      'Success: ' + e.gives + '.',
+      'Failure: ' + e.failGives + '.',
+      e.failWyrm < 0
+        ? 'Failure LOSES a Fie to the Wyrm tier here -- a real setback, the opposite of the '
+          + 'tier-0-1 options, which always gain regardless of outcome.'
+        : 'Gains Fie to the Wyrm regardless of outcome at this tier.',
+      'Nightmares +1 on every failure.',
+    ].filter(Boolean).join('\n');
+    return { text: 'Fie to the Wyrm +1' + mark, color: CAROUSEL_COLOR_PROGRESS, title: lines };
+  }
+
+  function burningCityStoryletSpec(key) {
+    if (key !== normalizeName(BURNING_CITY_STORYLET)) return null;
+    return {
+      text: 'Burning City', color: CAROUSEL_COLOR_LABEL,
+      title: BURNING_CITY_STORYLET + '\n\nNightmares +1 on every failure. Every option redirects '
+        + 'straight back into this same storylet -- a repeatable loop.\n'
+        + 'Open the storylet and every option is badged in its own right.',
+    };
+  }
+
+  function burningCityRatings() {
+    carouselRatings({
+      storylets: [BURNING_CITY_STORYLET], index: BURNING_CITY_INDEX, storyletSpec: burningCityStoryletSpec,
+      optionSpec: burningCitySpec, cls: BURNING_CITY_CLASS, flag: BURNING_CITY_FLAG,
+      branchCls: BURNING_CITY_BRANCH_CLASS, branchFlag: BURNING_CITY_BRANCH_FLAG,
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -39117,6 +39223,7 @@
     { name: 'festive-fir', run: festiveFirRatings },
     { name: 'cheery-man-constable', run: cheeryManConstableRatings },
     { name: 'time-in-bed', run: timeInBedRatings },
+    { name: 'burning-city', run: burningCityRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
