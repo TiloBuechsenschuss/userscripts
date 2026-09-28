@@ -38527,6 +38527,113 @@
     });
   }
 
+  // === feature: Up Close with a Festive Fir ===============================
+  //
+  // A storylet at "Fallen London" (no location gate), unlocked by a redirect
+  // plus the seasonal world qualities "A Tree in Hastings Place" and "Days
+  // of Advent 1-7" -- time-boxed to 8 days every December. Raises
+  // Heartiness or Beauty of a SHARED, SERVER-WIDE Christmas tree; every
+  // option trades one for the other in a FIXED direction. Every option pays
+  // Arborist's Gratitude (the real per-action badge number, personal),
+  // which the cash-out options convert into the actual Heartiness/Beauty
+  // world-quality changes (everyone's actions move those together).
+  //
+  // **What the badge says.** Every reward is a FORMULA -- "<=576
+  // (highway-stat-capped) + a flat per-option bonus" -- never a guessed
+  // flat number. Every badge states its trade-off direction (which of
+  // Heartiness/Beauty goes up, which goes down) since a player cannot
+  // otherwise tell which of the 16 pushes which way. Four rows have a REAL
+  // failure branch that still pays 7/12 of the success value (not the usual
+  // "less or nothing" shape) -- carried as the literal fraction.
+  //
+  // Transcribed from the storylet's own page and all 16 Airs-gated option
+  // pages (fetched through the API, 2026-09-27) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-a.md
+  // section 4. The research doc's own "Traps" prose says "three" rows carry
+  // the 7/12 failure fraction, but its own transcribed table marks it on
+  // FOUR rows (Adjust the sentiment balance of the soil, Haul well water to
+  // the roots, Rearrange existing decorations, Sneak up on thieving
+  // urchins) -- the table is the real data, followed here. Corrections go
+  // in FFIR_OPTIONS and nowhere else.
+
+  const FFIR_STORYLET = 'Up Close with a Festive Fir';
+
+  function firRow(name, airs, gain, bonus, unlock, ch, more) {
+    const loss = gain === 'Heartiness' ? 'Beauty' : 'Heartiness';
+    return Object.assign({ storylet: FFIR_STORYLET, name: name, airs: airs, gain: gain, loss: loss,
+      bonus: bonus, unlock: unlock, ch: ch }, more);
+  }
+
+  const FFIR_OPTIONS = [
+    firRow('Adjust the sentiment balance of the soil', [0, 25], 'Heartiness', 0, null,
+      { stat: 'Kataleptic Toxicology', narrow: true }, { realFailFraction: true }),
+    firRow('Whisper secrets to the tree', [1, 25], 'Heartiness', 500, 'Whispered Hint x500', null),
+    firRow('Hang baubles of scintillack', [1, 25], 'Beauty', 500, 'Knob of Scintillack x2', null),
+    firRow('Fertilise the soil', [76, 100], 'Heartiness', 1250, 'Nightsoil of the Bazaar x25', null),
+    firRow('Release a cloud of scarabs', [26, 50], 'Beauty', 500, 'Phosphorescent Scarab x50', null),
+    firRow('Plant peppercaps in the root system', [26, 50], 'Heartiness', 500, 'Hand-picked Peppercaps x10', null),
+    firRow('Ferry some state-sanctioned sunlight', [41, 45], 'Heartiness', 100, 'Mirrorcatch Box x1 (not consumed)', null),
+    firRow("Take inspiration from the very best", [46, 50], 'Beauty', 100, "Murgatroyd's Patented Fungal Christmas 'Tree'", null),
+    firRow('Place blossoms on the boughs with the Wizened Botanist', [56, 60], 'Beauty', 50, 'Engaged in Rooftop Horticulture 2', null),
+    firRow("Call upon the Sneering Horticulturalist's knowledge", [51, 55], 'Heartiness', 50, 'Engaged in Rooftop Horticulture 2', null),
+    firRow('Impale a Parabolan Orange-Apple', [51, 75], 'Beauty', 1250, 'Parabolan Orange-apple x1', null),
+    firRow('Treat the bark with amber', [51, 75], 'Heartiness', 1000, 'Nodule of Warm Amber x100', null),
+    firRow('Haul well water to the roots', [51, 100], 'Heartiness', 0, null,
+      { stat: 'Dangerous', narrow: false }, { realFailFraction: true }),
+    firRow('Adorn the boughs with candles', [76, 100], 'Beauty', 1000, 'Foxfire Candle Stub x1000', null),
+    firRow('Rearrange existing decorations', [76, 100], 'Beauty', 0, null,
+      { stat: 'Mithridacy', narrow: true }, { realFailFraction: true }),
+    firRow('Sneak up on thieving urchins', [0, 50], 'Beauty', 0, null,
+      { stat: 'Shadowy', narrow: false }, { realFailFraction: true }),
+  ];
+
+  const FFIR_INDEX = carouselIndex(FFIR_OPTIONS);
+
+  const FFIR_CLASS = 'fl-ux-festive-fir';
+  const FFIR_FLAG = 'flUxFestiveFir';
+  const FFIR_BRANCH_CLASS = 'fl-ux-festive-fir-branch';
+  const FFIR_BRANCH_FLAG = 'flUxFestiveFirBranch';
+
+  function festiveFirBadgeText(e) {
+    const mark = e.ch ? CAROUSEL_MARK_CHALLENGE : '';
+    return 'Gratitude <=576+' + e.bonus + mark + ' (' + e.gain + '/-' + e.loss + ')';
+  }
+
+  function festiveFirSpec(e) {
+    const lines = [
+      e.name, FFIR_STORYLET, '',
+      'Airs of London ' + e.airs[0] + '-' + e.airs[1] + '.',
+      e.ch ? 'Challenge: ' + (e.ch.narrow ? 'Narrow ' : 'Broad ') + e.ch.stat + ' (scales with your highway stats).'
+        : 'No challenge (checkless).',
+      'Trade-off: ' + e.gain + ' up, ' + e.loss + ' down.',
+      'Gives: Arborist\'s Gratitude <=576 (capped, scaled by your own highway stats) + ' + e.bonus + '.',
+      e.unlock ? 'Also gives: ' + e.unlock + '.' : null,
+      e.realFailFraction ? 'Failure still pays 7/12 of the success value -- not the usual "less or nothing" shape.' : null,
+      'Arborist\'s Gratitude is personal (what you can cash in); Heartiness/Beauty are a SHARED, '
+        + 'GLOBAL tree state everyone\'s actions move together, not your own tree\'s stats.',
+    ].filter(Boolean).join('\n');
+    return { text: festiveFirBadgeText(e), color: CAROUSEL_COLOR_PROGRESS, title: lines };
+  }
+
+  function festiveFirStoryletSpec(key) {
+    if (key !== normalizeName(FFIR_STORYLET)) return null;
+    return {
+      text: 'Festive Fir', color: CAROUSEL_COLOR_LABEL,
+      title: FFIR_STORYLET + '\n\nA SHARED, GLOBAL Christmas tree -- every option trades Heartiness '
+        + 'against Beauty in a fixed direction. Time-boxed to 8 days every December (until noon on '
+        + 'the 8th). Pay a visit to the Lachrymose Arborist / Step back convert your banked Gratitude '
+        + 'into the actual world-quality changes (amounts unstated on the wiki).\n'
+        + 'Open the storylet and every option is badged in its own right.',
+    };
+  }
+
+  function festiveFirRatings() {
+    carouselRatings({
+      storylets: [FFIR_STORYLET], index: FFIR_INDEX, storyletSpec: festiveFirStoryletSpec, optionSpec: festiveFirSpec,
+      cls: FFIR_CLASS, flag: FFIR_FLAG, branchCls: FFIR_BRANCH_CLASS, branchFlag: FFIR_BRANCH_FLAG,
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -38787,6 +38894,7 @@
     { name: 'rattus-faber', run: rattusFaberRatings },
     { name: 'tower-of-eyes', run: towerOfEyesRatings },
     { name: 'feast-of-the-rose', run: feastOfTheRoseRatings },
+    { name: 'festive-fir', run: festiveFirRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
