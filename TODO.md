@@ -75,7 +75,7 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Coffee_with_the_Last_Constable [14 unlock] (implemented)
     - https://fallenlondon.wiki/wiki/A_drink_with_the_Cheery_Man [13 unlock] (implemented; same
       feature as Coffee with the Last Constable, the two halves of one storyline)
-    - https://fallenlondon.wiki/wiki/Pursuing_a_Mutually-Agreed_Divorce [12 unlock]
+    - https://fallenlondon.wiki/wiki/Pursuing_a_Mutually-Agreed_Divorce [12 unlock] (implemented)
     - https://fallenlondon.wiki/wiki/The_Rewards_of_Ambition [12 text] (considered, nothing to
       badge: one-time post-Ambition epilogue clicks, reward is an unitemised "mix," the
       Airs-of-London variance is flavour text not option titles -- see

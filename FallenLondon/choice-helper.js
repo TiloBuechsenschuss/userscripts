@@ -39156,6 +39156,109 @@
     });
   }
 
+  // === feature: Pursuing a Mutually-Agreed Divorce ========================
+  //
+  // Your Lodgings, `Unlocked with: Pursuing a divorce`. Game Instructions:
+  // both spouses must raise "Pursuing a divorce" to 100 to finalize.
+  //
+  // **What the badge says.** Net "Pursuing a divorce" progress per action
+  // is the ranking number for the 8 flat rows -- "Provide a notice from
+  // higher authorities" (+16-25) is the clear standout, marked as such
+  // rather than buried in a uniform list. The 2 CONTEST rows (opposed
+  // challenges against the player's own spouse, base difficulty 100) show a
+  // Winner/Loser split, never a normal success/failure pair. The 2
+  // Social-Action-Auto rows have no directly itemised reward on their own
+  // page (the gain happens via the spouse's acceptance flow, off-page) --
+  // informational only. "Is all this really necessary?" is gated on the
+  // player holding FEWER than 2 "A Person of Some Importance" -- an
+  // inverted lock, stated precisely rather than as a normal `needs`.
+  //
+  // Fetched directly through the API during planning (not in any research
+  // doc -- the group-b research pass's own summary table claimed this
+  // storylet was complete but never wrote its section). Corrections go in
+  // DIVORCE_OPTIONS and nowhere else.
+
+  const DIVORCE_STORYLET = 'Pursuing a Mutually-Agreed Divorce';
+
+  function divRow(name, airs, needs, gives, more) {
+    return Object.assign({ storylet: DIVORCE_STORYLET, name: name, airs: airs, needs: needs, gives: gives }, more);
+  }
+
+  const DIVORCE_OPTIONS = [
+    divRow('Present proof of infidelity!', [0, 49], 'Stolen Kiss x1 (spent)', 'Pursuing a divorce +6-7'),
+    divRow('Is all this really necessary?', [0, 50], 'A Person of Some Importance BELOW 2 (an inverted lock)',
+      'Pursuing a divorce +2-3', { invertedLock: true }),
+    divRow("Seek the Court's pity", [0, 25], 'Melancholy 4', 'Pursuing a divorce +5, Scandal +2'),
+    divRow('Appear before the court with your spouse', [0, 25], 'Espoused to (you)',
+      'Social Action (cooperate) -- reward happens via the spouse\'s acceptance flow, not itemised on this page',
+      { social: true }),
+    divRow('Share Tales of Terror about your spouse with the Court', [25, 50],
+      'Tale of Terror!! x1 (spent), Espoused to (friend), Pursuing a divorce 1',
+      'CONTEST (base Persuasive 100)', { contest: 'Persuasive', winGives: 'Pursuing a divorce +7', loseGives: 'Pursuing a divorce +2-3' }),
+    divRow('Death till you part?', [40, 50], "The Boatman's Opponent", 'Pursuing a divorce +4-5, Scandal +2'),
+    divRow('Provide a notice from higher authorities', [50, 100], 'Bazaar Permit x1 (spent)',
+      'Pursuing a divorce +16-25', { standout: true }),
+    divRow('Testify that love has faded', [50, 100], 'Touching Love Story x1 (spent)', 'Pursuing a divorce +6-7'),
+    divRow("It simply isn't for you", [50, 75], 'Hedonist 4', 'Pursuing a divorce +5, Scandal +2'),
+    divRow('Present your spouse\'s inadequacies to the court', [50, 75], 'Espoused to (friend), Pursuing a divorce 1',
+      'CONTEST (base Watchful 100)', { contest: 'Watchful', winGives: 'Pursuing a divorce +7', loseGives: 'Pursuing a divorce +2-3' }),
+    divRow('Request that a friend assassinate your spouse before the Court', [75, 100],
+      'Locked with: Requesting a Friend\'s Testimony',
+      'Social Action -- reward happens via the friend\'s acceptance flow, not itemised on this page',
+      { social: true }),
+    divRow('You have another love', [90, 100], 'Rat on a String x5000 (spends 5)', 'Pursuing a divorce +4-5, Scandal +2'),
+  ];
+
+  const DIVORCE_INDEX = carouselIndex(DIVORCE_OPTIONS);
+
+  const DIVORCE_CLASS = 'fl-ux-divorce';
+  const DIVORCE_FLAG = 'flUxDivorce';
+  const DIVORCE_BRANCH_CLASS = 'fl-ux-divorce-branch';
+  const DIVORCE_BRANCH_FLAG = 'flUxDivorceBranch';
+
+  function mutuallyAgreedDivorceSpec(e) {
+    if (e.social) {
+      return {
+        text: 'Social Action', color: CAROUSEL_COLOR_LABEL,
+        title: e.name + '\n' + DIVORCE_STORYLET + '\n\nAirs of London ' + e.airs[0] + '-' + e.airs[1] + '.\n'
+          + 'Requires: ' + e.needs + '.\n' + e.gives + '.',
+      };
+    }
+    if (e.contest) {
+      return {
+        text: 'Contest: ' + e.contest, color: CAROUSEL_COLOR_PAYOUT,
+        title: e.name + '\n' + DIVORCE_STORYLET + '\n\nAirs of London ' + e.airs[0] + '-' + e.airs[1] + '.\n'
+          + 'Requires: ' + e.needs + '.\nOpposed ' + e.contest + ' contest against your own spouse (base '
+          + 'difficulty 100).\nWinner: ' + e.winGives + '.\nLoser: ' + e.loseGives + '.',
+      };
+    }
+    const lines = [
+      e.name, DIVORCE_STORYLET, '',
+      'Airs of London ' + e.airs[0] + '-' + e.airs[1] + '.',
+      'Requires: ' + e.needs + (e.invertedLock ? ' -- available only BELOW this threshold.' : '.'),
+      'Gives: ' + e.gives + '.',
+      e.standout ? 'The standout of this table -- highest Pursuing a divorce gain by a wide margin.' : null,
+    ].filter(Boolean).join('\n');
+    return { text: e.gives, color: CAROUSEL_COLOR_PAYOUT, title: lines };
+  }
+
+  function mutuallyAgreedDivorceStoryletSpec(key) {
+    if (key !== normalizeName(DIVORCE_STORYLET)) return null;
+    return {
+      text: 'Divorce', color: CAROUSEL_COLOR_LABEL,
+      title: DIVORCE_STORYLET + '\n\nBoth you and your spouse must raise Pursuing a divorce to 100. '
+        + 'Open the storylet and every option is badged in its own right.',
+    };
+  }
+
+  function mutuallyAgreedDivorceRatings() {
+    carouselRatings({
+      storylets: [DIVORCE_STORYLET], index: DIVORCE_INDEX, storyletSpec: mutuallyAgreedDivorceStoryletSpec,
+      optionSpec: mutuallyAgreedDivorceSpec, cls: DIVORCE_CLASS, flag: DIVORCE_FLAG,
+      branchCls: DIVORCE_BRANCH_CLASS, branchFlag: DIVORCE_BRANCH_FLAG,
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -39422,6 +39525,7 @@
     { name: 'burning-city', run: burningCityRatings },
     { name: 'university-creatures', run: universityCreaturesRatings },
     { name: 'clay-quarters', run: clayQuartersRatings },
+    { name: 'mutually-agreed-divorce', run: mutuallyAgreedDivorceRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
