@@ -39062,6 +39062,100 @@
     });
   }
 
+  // === feature: The Clay Quarters (Storylet) ==============================
+  //
+  // The Clay Quarters area. Base options (Emancipate a Clay Man, Recruit
+  // Clay Man labour, Visit Bernard) are NOT Airs-related and out of scope
+  // here -- left to a future pass if this area ever gets fuller coverage.
+  //
+  // **What the badge says.** Primary named reward + count (no common
+  // currency to convert to, unlike the Sous Catacombs), Watchful difficulty
+  // (20-24, all close together) as a secondary mark since it's not the real
+  // differentiator here (reward size is). The Jasper-and-Frank redirect
+  // (Ambition: Nemesis-locked, 0-cost, purely narrative) is informational
+  // only, not ranked -- matches Upon a Red Stage's Parabasis "setup note"
+  // pattern from the Firmament batch. The 5-Fate option is excluded from
+  // ranking, kept in the tooltip.
+  //
+  // Transcribed from the storylet's own page and all 8 option pages
+  // (fetched through the API, 2026-09-27; two originally-truncated failure
+  // cells fixed in the 2026-09-28 follow-up pass -- both confirmed no
+  // reward on failure) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-b.md
+  // section 6. Corrections go in CLAY_QUARTERS_OPTIONS and nowhere else.
+
+  const CLAY_QUARTERS_STORYLET = 'The Clay Quarters';
+
+  function cqRow(name, airs, needs, ch, gives, more) {
+    return Object.assign({ storylet: CLAY_QUARTERS_STORYLET, name: name, airs: airs, needs: needs, ch: ch, gives: gives }, more);
+  }
+
+  const CLAY_QUARTERS_OPTIONS = [
+    cqRow('Assist at a mud-surgery', [0, 25], null, { stat: 'Watchful', diff: 21 },
+      'Jade Fragment 16-24, Piece of Rostygold 17-25', { fail: 'No reward.' }),
+    cqRow('Track down a recidivist', [0, 33], null, { stat: 'Watchful', diff: 24 },
+      'Piece of Rostygold 46-55', { fail: 'No reward (two failure variants, both no reward).' }),
+    cqRow('Assist a Ragged-Sleeved Academic', [26, 50], null, { stat: 'Watchful', diff: 20 },
+      'Moon-Pearl 37-42, Making Waves +2 CP', { fail: 'No reward.' }),
+    cqRow('Coax society secrets from the Clay Men', [34, 66], null, { stat: 'Watchful', diff: 22 },
+      'Cryptic Clue 19-25', { fail: 'No reward.' }),
+    cqRow('Decipher Loamsprach poetry', [51, 75], null, { stat: 'Watchful', diff: 24 },
+      'Appalling Secret 1, Romantic Notion 1, Cryptic Clue 6-15', { fail: 'No reward.' }),
+    cqRow('Take a stroll through the Quarter', [76, 100], null, { stat: 'Watchful', diff: 22 },
+      'Cryptic Clue 17-23 (rare "Fabrication" variant: Cryptic Clue 19-23)', { fail: 'No reward.' }),
+    cqRow('You cross paths with Jasper and Frank', [0, 33], 'A Complication: Jasper and Frank', null,
+      'Opens: A Complication: Jasper and Frank (Ambition: Nemesis storyline)',
+      { open: 'A Complication: Jasper and Frank' }),
+    cqRow('Even the odds in a clay dispute', [67, 100], null, null,
+      'Intriguing Snippet 5, Moon-Pearl 100, Dangerous +20 CP, Steadfast +3 CP (cap 10)', { fate: 5 }),
+  ];
+
+  const CLAY_QUARTERS_INDEX = carouselIndex(CLAY_QUARTERS_OPTIONS);
+
+  const CLAY_QUARTERS_CLASS = 'fl-ux-clay-quarters';
+  const CLAY_QUARTERS_FLAG = 'flUxClayQuarters';
+  const CLAY_QUARTERS_BRANCH_CLASS = 'fl-ux-clay-quarters-branch';
+  const CLAY_QUARTERS_BRANCH_FLAG = 'flUxClayQuartersBranch';
+
+  function clayQuartersSpec(e) {
+    if (e.open) {
+      return {
+        text: '-> ' + e.open, color: CAROUSEL_COLOR_LABEL,
+        title: e.name + '\n' + CLAY_QUARTERS_STORYLET + '\n\n' + e.gives + '.\nAmbition: Nemesis-locked, '
+          + '0-cost, purely narrative -- informational only, not ranked.',
+      };
+    }
+    const mark = e.ch ? CAROUSEL_MARK_CHALLENGE : '';
+    const lines = [
+      e.name, CLAY_QUARTERS_STORYLET, '',
+      'Airs of London ' + e.airs[0] + '-' + e.airs[1] + '.',
+      e.ch ? 'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.' : 'No challenge.',
+      e.needs ? 'Requires: ' + e.needs + '.' : null,
+      'Gives: ' + e.gives + '.',
+      e.fail ? 'Failure: ' + e.fail : null,
+      e.fate ? 'Costs ' + e.fate + ' Fate -- excluded from any free-to-play ranking.' : null,
+    ].filter(Boolean).join('\n');
+    return { text: e.gives.split(',')[0] + mark, color: CAROUSEL_COLOR_PAYOUT, title: lines };
+  }
+
+  function clayQuartersStoryletSpec(key) {
+    if (key !== normalizeName(CLAY_QUARTERS_STORYLET)) return null;
+    return {
+      text: 'Clay Quarters', color: CAROUSEL_COLOR_LABEL,
+      title: CLAY_QUARTERS_STORYLET + '\n\nOpen the storylet and every Airs-gated option is badged '
+        + 'in its own right. Base options (Emancipate a Clay Man, Recruit Clay Man labour, Visit '
+        + 'Bernard) are not Airs-related and are out of scope here.',
+    };
+  }
+
+  function clayQuartersRatings() {
+    carouselRatings({
+      storylets: [CLAY_QUARTERS_STORYLET], index: CLAY_QUARTERS_INDEX, storyletSpec: clayQuartersStoryletSpec,
+      optionSpec: clayQuartersSpec, cls: CLAY_QUARTERS_CLASS, flag: CLAY_QUARTERS_FLAG,
+      branchCls: CLAY_QUARTERS_BRANCH_CLASS, branchFlag: CLAY_QUARTERS_BRANCH_FLAG,
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -39327,6 +39421,7 @@
     { name: 'time-in-bed', run: timeInBedRatings },
     { name: 'burning-city', run: burningCityRatings },
     { name: 'university-creatures', run: universityCreaturesRatings },
+    { name: 'clay-quarters', run: clayQuartersRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a

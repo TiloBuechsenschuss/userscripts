@@ -85,7 +85,7 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Consider_your_Aquaria [8 unlock] (implemented)
     - https://fallenlondon.wiki/wiki/Search_your_Terraria [8 unlock] (implemented; same feature
       as Consider your Aquaria)
-    - https://fallenlondon.wiki/wiki/The_Clay_Quarters_(Storylet) [8 unlock]
+    - https://fallenlondon.wiki/wiki/The_Clay_Quarters_(Storylet) [8 unlock] (implemented)
     - https://fallenlondon.wiki/wiki/A_Jaunt_in_the_(Weather) [5 unlock, 2 text] (considered,
       nothing to badge: purely narrative, only sets a counter toward "Look up at the sky", no
       items or Stuiver anywhere in the chain -- see
