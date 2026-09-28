@@ -38011,6 +38011,191 @@
     });
   }
 
+  // === feature: The Tower of Eyes =========================================
+  //
+  // A card, unlocked by a Key to a Handsome Townhouse. NOT a simple Airs-
+  // gated option list -- a two-track reputation-management mini-game gated
+  // behind choosing ONE of two mutually exclusive Affiliations (a Salon XOR
+  // an Orphanage, each set up via a large one-time resource cost). Once set
+  // up, "Pursue a Scheme" options build a spendable progress quality
+  // (Engaged in a Scheme: a Salon / an Orphanage), which "guest of honour" /
+  // "acquaintance" payout options spend for Making Waves (this card's real
+  // currency) plus flavour items.
+  //
+  // **Mutually exclusive tracks.** Setting up a Salon locks out the
+  // Orphanage and vice versa -- the storylet-level tooltip states this in
+  // words; never present both as simultaneously available.
+  //
+  // **What the badge says.** Making Waves gained (a range, never a guessed
+  // midpoint) is the primary number for the ranked sub-options. Four Social
+  // Action rows (each needs a friend with a specific Profession quality)
+  // are marked gated, not ranked in. "Your Salon: invite the Duchess" is the
+  // one row whose own page never itemises a reward beyond its unlock cost --
+  // flagged `guide`-uncertain rather than inventing a number.
+  //
+  // Transcribed from the card's own page and all 21 sub-option pages
+  // (fetched through the API, 2026-09-27) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-a.md
+  // section 2. That research doc's own summary line undercounts the Salon
+  // table ("11 total, 9 Airs-gated, 2 not") against its own listed 12 rows
+  // (3 non-Airs: the two Scheme-builders and Invite an Author acquaintance)
+  // -- the listed table is the real data and is what this file follows (27
+  // rows total: 5 + 12 + 10). Corrections go in TOWER_OF_EYES_OPTIONS and
+  // nowhere else.
+
+  const TOWER_OF_EYES_STORYLET = 'The Tower of Eyes: Behind Closed Doors at a Handsome Townhouse';
+
+  function toeTop(name, ch, gives, fail, more) {
+    return Object.assign({ storylet: TOWER_OF_EYES_STORYLET, track: 'top', name: name, ch: ch, gives: gives, fail: fail }, more);
+  }
+  function toeSalon(name, airs, gate, gives, more) {
+    return Object.assign({ storylet: TOWER_OF_EYES_STORYLET, track: 'salon', name: name, airs: airs, gate: gate, gives: gives }, more);
+  }
+  function toeOrphanage(name, airs, gate, gives, more) {
+    return Object.assign({ storylet: TOWER_OF_EYES_STORYLET, track: 'orphanage', name: name, airs: airs, gate: gate, gives: gives }, more);
+  }
+
+  const TOWER_OF_EYES_OPTIONS = [
+    // --- Top-level (5, no Airs) ---
+    toeTop('Do a little promenading yourself', { stat: 'Persuasive', diff: 60 }, 'Certifiable Scrap x2', 'Scandal +1'),
+    toeTop('Secure an invitation to a scandalous party', { stat: 'Persuasive', diff: 80 },
+      'Scandal +2, Hedonist +3 (cap 10), Favours: Bohemians 0-1, Favours: Society 0-1', 'Scandal +1',
+      { needs: 'Scandal 1, Hedonist 4' }),
+    toeTop('Scheme: Set up a Salon', null, 'A Salon x1, Making Waves +20 -- LOCKS OUT the Orphanage', null,
+      { needs: 'Renown/Favours/Connected thresholds, Penny 5000, items (see the guide for the full list)',
+        note: 'One-time, checkless.' }),
+    toeTop('Scheme: Set up an Orphanage', null, 'An Orphanage x1 -- LOCKS OUT the Salon', null,
+      { needs: 'A Person of Some Importance, Bazaar Permit, Legal Document, Alluring Accomplice x2, '
+        + 'Grubby Urchin x4, Winsome Dispossessed Orphan x2, Penny 11000',
+        note: 'One-time, checkless.' }),
+    toeTop('Put your Townhouse under the care of a Resolute Governess', null,
+      'Removes the card from the deck until retrieved (housekeeping, not a reward)', null, { note: 'Checkless.' }),
+
+    // --- Salon sub-options (12: 3 non-Airs, 9 Airs-gated) ---
+    toeSalon('Pursue a Scheme: encourage the great and the good', null, 'Favours: Society 3, A Salon, Favour in High Places 1',
+      'Engaged in a Scheme: a Salon +2-11 (checkless)'),
+    toeSalon('Pursue a Scheme: encourage the wise and the wicked', null, 'A Salon, Stolen Kiss 4, Favours: Bohemians 3',
+      'Engaged in a Scheme: a Salon +? (less predictable, no range given on the page) (checkless)'),
+    toeSalon('Invite an Author acquaintance', null, 'Profession: Author friend',
+      'Social Action; host: Making Waves +150; friend (once accepted): +20, Persuasive +5, Confident Smile x1',
+      { social: true }),
+    toeSalon('Your Salon: invite the Sardonic Music-Hall Singer', [0, 25], 'Acquaintance',
+      'Making Waves +121-180, Memory of Light x1, Scrap of Incendiary Gossip x1, Scheme -15 (checkless)',
+      { makingWaves: [121, 180] }),
+    toeSalon('Your Salon: invite the Captivating Princess', [0, 25], 'Acquaintance, Scheme 20, 1 Fate',
+      'Making Waves +1501-2500, Scandal +1, Zee-Ztory x1, Scheme -200 (checkless, Fate-locked)',
+      { makingWaves: [1501, 2500], fate: true }),
+    toeSalon('Your Salon: invite the Duchess', [25, 50], 'Scheme 12, Connected: The Duchess 10, Midnight Matriarch x1 (may be lost)',
+      'Action cost 2, checkless, Scheme -15',
+      { guide: 'The option page does not itemise a reward beyond the unlock cost -- likely omitted on '
+        + 'the wiki rather than truly reward-less; do not invent a Making Waves figure for this row.' }),
+    toeSalon('Your Salon: invite the Mercies', [25, 50], 'Acquaintance',
+      'Narrow check on Engaged in a Scheme: a Salon itself (diff 5, min 6). Success: Making Waves +150 '
+      + '(+10 with Lettice), Tale of Terror!! x1, Scheme -15. Failure: Making Waves +50 (+10 with '
+      + 'Lettice), Tale of Terror!! x1, Scheme -15, Scandal +3, Penny -4000'),
+    toeSalon('Your Salon: Present your Lyrebird Educated in Three Schools', [25, 50], 'needs a Lyrebird item',
+      'Making Waves +150, Scheme -15 (checkless)', { makingWaves: [150, 150] }),
+    toeSalon('Your Salon: invite Silas the Showman', [50, 75], 'Acquaintance, Scheme 6',
+      'Luck 80%. Success: Making Waves +121-190, Intriguing Snippet x1, Cryptic Clue x50, Scheme -15. '
+      + 'Failure: Scheme -1', { luck: 0.8, makingWaves: [121, 190] }),
+    toeSalon('Your Salon: invite the Repentant Forger', [75, 100], 'Acquaintance, Scheme 6',
+      'Luck 80%. Success: Making Waves +101-220, Scheme -15. Failure: Making Waves +10, Scandal +1, Scheme -1',
+      { luck: 0.8, makingWaves: [101, 220] }),
+    toeSalon('Your Salon: invite a Presbyterate Diplomat', [75, 100], 'needs a Presbyterate Diplomat item, Scheme 8',
+      'Making Waves +201-360, Mystery of the Elder Continent x3, Scheme -28 (checkless)', { makingWaves: [201, 360] }),
+    toeSalon('Invite a Crooked-Cross to address your Salon', [80, 100], 'Profession: Crooked-Cross friend, Scheme 6',
+      'Social Action; host: Scandal +2, Scheme -15; friend (accepts): Making Waves +200, or +20, '
+      + 'Intriguing Snippet x10, Romantic Notion x10 (friend\'s own copy)', { social: true }),
+
+    // --- Orphanage sub-options (10: 1 non-Airs, 9 Airs-gated) ---
+    toeOrphanage('Invite a Conjuror acquaintance to... perform', null, 'Profession: Conjurer friend, Scheme 6',
+      'Social Action, a "sinister option" (risks losing an orphan to the Brass Embassy); host: Scheme '
+      + '-12 to -21; friend (accepts, orphan lost): Making Waves +150, or +5, Favours: Hell +1, Rostygold x500',
+      { social: true }),
+    toeOrphanage('Invite a Midnighter acquaintance to honour St Joshua', [0, 20], 'Profession: Midnighter friend, Scheme 6',
+      'Social Action; host: Scheme -15; friend (accepts): Making Waves +200, or +5, Favours: The Great Game '
+      + '+1, Scrap of Incendiary Gossip x15', { social: true }),
+    toeOrphanage('Scheme: Reunite a Dispossessed Orphan with loving parents', [0, 60], 'Scheme 10',
+      'Making Waves +101-200, Mystery of the Elder Continent x1 OR Memory of Distant Shores x1 (two '
+      + 'randomised success variants), Scheme -15 (checkless)', { makingWaves: [101, 200] }),
+    toeOrphanage('Pursue a Scheme: Admit your Winsome Orphan', [0, 30], 'Penny 1000, Winsome Dispossessed Orphan x1',
+      'Engaged in a Scheme: an Orphanage +1-12, Penny -1000, orphan consumed (checkless)'),
+    toeOrphanage('Introduce your Warm-Hearted Amber Iguana as a Pet', [0, 30], 'Penny 4000, item',
+      'Engaged in a Scheme: an Orphanage +3-10, Penny -4000 (checkless)'),
+    toeOrphanage('Pursue a Scheme: offer some Urchins a place', [31, 70], 'Penny 3000, Favours: Urchins 5',
+      'Engaged in a Scheme: an Orphanage +4-8, Penny -3000, Favours: Urchins -5 (checkless)'),
+    toeOrphanage('Scheme: Graduation', [50, 100], 'Scheme 6',
+      'Making Waves +101-200, Watchful +5, Favours: Criminals +1, Scheme -15 (rare: Memory of Light x1 '
+      + 'instead of Watchful) (checkless, no failure branch)', { makingWaves: [101, 200] }),
+    toeOrphanage('Look after your Orphanage', [71, 100],
+      'Tincture of Vigour x5, Sober Dress x5, Workman\'s Clothes x5, Foxfire Candle Stub x250, Penny 5000',
+      'Engaged in a Scheme: an Orphanage +4-9, Rat on a String +0-2, all listed items consumed (checkless)'),
+    toeOrphanage('Invite a Correspondent acquaintance to educate the orphans', [80, 100], 'Profession: Correspondent friend, Scheme 6',
+      'Social Action; host: Scheme -15; friend (accepts): Making Waves +200, or +5, Correspondence '
+      + 'Plaque x15, Favours: Urchins +1', { social: true }),
+    toeOrphanage('Recruit a Laconic Prodigy as your assistant', [90, 100], 'Scheme 15, 20 Fate',
+      'Laconic Prodigy companion x1 (Dangerous/Shadowy/Watchful +10 each), Scheme -110 (checkless)',
+      { fate: true }),
+  ];
+
+  const TOWER_OF_EYES_INDEX = carouselIndex(TOWER_OF_EYES_OPTIONS);
+
+  const TOWER_OF_EYES_CLASS = 'fl-ux-tower-of-eyes';
+  const TOWER_OF_EYES_FLAG = 'flUxTowerOfEyes';
+  const TOWER_OF_EYES_BRANCH_CLASS = 'fl-ux-tower-of-eyes-branch';
+  const TOWER_OF_EYES_BRANCH_FLAG = 'flUxTowerOfEyesBranch';
+
+  function towerOfEyesBadgeText(e) {
+    if (e.social) return 'Social Action';
+    if (e.guide) return 'value unstated';
+    if (e.makingWaves) {
+      const mark = e.luck ? CAROUSEL_MARK_EXPECTED : e.ch ? CAROUSEL_MARK_CHALLENGE : '';
+      return 'Making Waves ' + carouselRange(e.makingWaves) + mark;
+    }
+    if (e.ch) return e.ch.stat + ' ' + e.ch.diff + CAROUSEL_MARK_CHALLENGE;
+    return e.track === 'top' ? 'setup' : 'checkless';
+  }
+
+  function towerOfEyesSpec(e) {
+    const lines = [
+      e.name, TOWER_OF_EYES_STORYLET, '',
+      e.airs ? 'Airs of London ' + e.airs[0] + '-' + e.airs[1] + '.' : null,
+      e.ch ? 'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.' : null,
+      e.luck ? 'Luck ' + Math.round(e.luck * 100) + '%.' : null,
+      e.gate ? 'Requires: ' + e.gate + '.' : null,
+      e.needs ? 'Requires: ' + e.needs + '.' : null,
+      'Gives: ' + e.gives + '.',
+      e.fail ? 'Failure: ' + e.fail + '.' : null,
+      e.social ? 'Social Action -- requires a friend with the stated Profession quality; unavailable '
+        + 'without one, not ranked in with the checkless options.' : null,
+      e.fate ? 'Fate-locked -- excluded from any free-to-play ranking.' : null,
+      e.guide ? 'guide: ' + e.guide : null,
+      e.note || null,
+      e.name.indexOf('Scheme: Set up') === 0
+        ? 'Setting up a Salon and an Orphanage are MUTUALLY EXCLUSIVE -- choosing one LOCKS OUT the other.'
+        : null,
+    ].filter(Boolean).join('\n');
+    return { text: towerOfEyesBadgeText(e), color: e.track === 'top' ? CAROUSEL_COLOR_SETUP : CAROUSEL_COLOR_PAYOUT, title: lines };
+  }
+
+  function towerOfEyesStoryletSpec(key) {
+    if (key !== normalizeName(TOWER_OF_EYES_STORYLET)) return null;
+    return {
+      text: 'Tower of Eyes', color: CAROUSEL_COLOR_LABEL,
+      title: TOWER_OF_EYES_STORYLET + '\n\nTwo mutually exclusive tracks: a Salon LOCKS OUT the '
+        + 'Orphanage, and vice versa -- only one is ever live for a given player.\n'
+        + 'Open the storylet and every option is badged in its own right.',
+    };
+  }
+
+  function towerOfEyesRatings() {
+    carouselRatings({
+      storylets: [TOWER_OF_EYES_STORYLET], index: TOWER_OF_EYES_INDEX, storyletSpec: towerOfEyesStoryletSpec,
+      optionSpec: towerOfEyesSpec, cls: TOWER_OF_EYES_CLASS, flag: TOWER_OF_EYES_FLAG,
+      branchCls: TOWER_OF_EYES_BRANCH_CLASS, branchFlag: TOWER_OF_EYES_BRANCH_FLAG,
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -38269,6 +38454,7 @@
     { name: 'scaling-quartz', run: scalingQuartzRatings },
     // Airs of London storylets (no guide) shelf: card-and-storylet markup, no panel.
     { name: 'rattus-faber', run: rattusFaberRatings },
+    { name: 'tower-of-eyes', run: towerOfEyesRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
