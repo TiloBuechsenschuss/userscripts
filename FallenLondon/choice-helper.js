@@ -37848,6 +37848,169 @@
     });
   }
 
+  // === feature: A Bad Case of Rattus Faber ================================
+  //
+  // Your Lodgings. Reduce the progress quality "Troubled by Vermin" to 0
+  // (it counts DOWN). Seven headed groups, each gated on a Vermin BAND, and
+  // within most bands the 2-3 offered options are further split by an Airs
+  // of London window -- both this file's own carouselOpen/carouselLookup
+  // machinery and the storylet's own page confirm "the options on this
+  // storylet may change as you play them." Two options are checkless
+  // redirects into their own sub-storylets, both fully priced below.
+  //
+  // **What the badge says.** Net Vermin reduction per action -- the thing
+  // that actually varies (1-5, or half) -- marked `?` for the 18 stat
+  // challenges, `~` for the two Luck challenges (70%/50%, stated odds,
+  // ranked by expected value per the skill's rule). No "safe" option exists
+  // here: every real option costs at least Vermin -1 on failure, stated once
+  // on the storylet heading rather than per row. A hidden `Troubled by
+  // Vermin: Ratkiller +1` on most rows is `hidden=yes` on the wiki --
+  // cosmetic tracking, never on the badge.
+  //
+  // Transcribed from the storylet's own page and all 20 main-table option
+  // pages, plus both redirect sub-storylets' 6 option pages (fetched through
+  // the API, 2026-09-27) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-a.md
+  // section 1. Corrections go in RATTUS_FABER_OPTIONS and nowhere else.
+
+  const RATTUS_FABER_STORYLET = 'A Bad Case of Rattus Faber';
+  const RATTUS_FABER_DOTTORE = 'Employ the poisons of Dottore Rappacini';
+  const RATTUS_FABER_SHOWDOWN = 'A showdown with the Rattus Faber Chief';
+  const RATTUS_FABER_STORYLETS = [RATTUS_FABER_STORYLET, RATTUS_FABER_DOTTORE, RATTUS_FABER_SHOWDOWN];
+
+  function rfMain(name, band, airs, ch, succVermin, gives, failVermin, failGives, more) {
+    return Object.assign({ storylet: RATTUS_FABER_STORYLET, name: name, band: band, airs: airs, ch: ch,
+      succVermin: succVermin, gives: gives, failVermin: failVermin, failGives: failGives }, more);
+  }
+
+  const RATTUS_FABER_OPTIONS = [
+    rfMain('Opening salvoes: launch an early offensive', '36-49', [0, 40], { stat: 'Dangerous', diff: 20 },
+      -2, 'Rat on a String 16-25, Vermin -2', -1, 'Vermin -1'),
+    rfMain('Opening salvoes: shore up your defences', '36-49', [0, 40], { stat: 'Watchful', diff: 20 },
+      -2, 'Rat on a String 16-25, Vermin -2', -1, 'Vermin -1'),
+    rfMain('Opening salvoes: the pipes, the pipes', '36-49', [0, 40], { stat: 'Dangerous', diff: 30 },
+      -2, 'Vermin -2, Rostygold -10', -1, 'Vermin -1, Rostygold -10, Nightmares +1'),
+    rfMain('Battling the footsoldiers: concentrate on the collared rats', '18-35', [0, 40], { stat: 'Dangerous', diff: 22 },
+      -2, 'Rostygold 16-25, Vermin -2 (rare: Whisper-Satin Scrap x1, Vermin -2)', -1, 'Vermin -1'),
+    rfMain('Battling the footsoldiers: bait a trap with rostygold', '18-35', [0, 40], { stat: 'Shadowy', diff: 22 },
+      -2, 'Rat on a String 16-25, Vermin -2', -1, 'Rostygold -2, Vermin -1', { needs: 'Piece of Rostygold x10' }),
+    rfMain('Battling the footsoldiers: sow disinformation', '18-35', [0, 40], { stat: 'Dangerous', diff: 30 },
+      -2, 'Vermin -2, Whispered Hint -10', -1, 'Vermin -1, Whispered Hint -10', { needs: 'Whispered Hint x10' }),
+    rfMain('Duel the ringleaders: attempt to survive unscathed', '5-17', [0, 40], { stat: 'Dangerous', diff: 24 },
+      -2, 'Vermin -2, Venge-Rat Corpse x1 (rare: Vermin -2, Baptised Rattus Faber Corpse x1)', -1, 'Vermin -1'),
+    rfMain('Duel the ringleaders: take on a gang of them at once!', '5-17', [0, 40], { stat: 'Dangerous', diff: 36 },
+      -2, 'Vermin -2, Rat on a String 36-45 (rare: Vermin -3, Baptised Rattus Faber Corpse x1)', -1, 'Vermin -1'),
+    rfMain('Duel the ringleaders: employ subterfuge', '5-17', [0, 40], { stat: 'Shadowy', diff: 36 },
+      -3, 'Vermin -3', -1, 'Vermin -1, Scandal +1'),
+    rfMain('The battle for the pantry: starve them out!', '5-49', [41, 70], { stat: 'Dangerous', diff: 25 },
+      -3, 'Rat on a String 16-25, Vermin -3', -1, 'Vermin -1'),
+    rfMain('The battle of the pantry: defend it against all comers!', '5-49', [41, 70], { stat: 'Dangerous', diff: 21 },
+      -2, 'Rat on a String 16-25, Vermin -2', -1, 'Vermin -1'),
+    rfMain('The battle for the pantry: employ unconventional (war)fare!', '5-49', [41, 70], { stat: 'Dangerous', diff: 30 },
+      -3, 'Vermin -3, Penny -10', -1, 'Vermin -1, Penny -10', { needs: 'Penny x10; guide: no rats harmed' }),
+    rfMain('A lull in hostilities: try to negotiate with the rats.', '5-49', [67, 100], { stat: 'Persuasive', diff: null },
+      -2, 'Whispered Hint 21-30, Dangerous +2 CP, Vermin -2', null, 'Dangerous +1 CP',
+      { formula: '44 - Troubled by Vermin/2' }),
+    rfMain('A lull in hostilities: redouble your efforts', '5-49', [67, 100], { stat: 'Dangerous', diff: 23 },
+      -2, 'Rat on a String 16-25, Vermin -2', -1, 'Vermin -1'),
+    rfMain('A tactical opportunity: a game of cricket', '5-49', [0, 5], { stat: 'Dangerous', diff: 25 },
+      null, 'Rostygold x50, Nightmares -2, Wounds -2', null, 'Silk Scrap x1'),
+    rfMain('A tactical opportunity: employ a rat-catcher', '6-49', [6, 35], { luck: 0.7 },
+      -5, 'Vermin -5', -3, 'Vermin -3', { needs: 'Rostygold x50 (always spent either way)' }),
+    rfMain('A tactical opportunity: unleash the Thing from the Wardrobe', '8-49', [36, 60], { luck: 0.5 },
+      -0.5, 'Unaccountably Peckish x2, Scandal +2, Vermin -half', -2, 'Vermin -2',
+      { needs: 'Starveling Cat x1 (needed and spent)' }),
+    rfMain('A tactical opportunity: hire a specialist', '11-49', [61, 90], null,
+      null, null, null, null, { open: RATTUS_FABER_DOTTORE }),
+    rfMain('A tactical opportunity: locate an L.B. hoard', '5-49', [91, 100], { stat: 'Dangerous', diff: 30 },
+      -1, 'Vermin -1, bundle <=60 (rare: bigger bundle, unstated)', null, 'none stated'),
+    rfMain('The final battle: face the Rattus Faber Chief', '1-4', null, null,
+      null, null, null, null, { open: RATTUS_FABER_SHOWDOWN }),
+
+    // --- Employ the poisons of Dottore Rappacini (opened by "hire a specialist") ---
+    { storylet: RATTUS_FABER_DOTTORE, name: 'Unleash the smokes of unmercy', band: null, airs: null, ch: null,
+      succVermin: -10, gives: 'Rostygold -100, Wounds +2, Vermin -10', failVermin: null, failGives: null,
+      needs: 'Piece of Rostygold x100' },
+    { storylet: RATTUS_FABER_DOTTORE, name: "Don't pay the piper", band: null, airs: null, ch: null,
+      succVermin: -10, gives: 'Wounds +10, Vermin -10', failVermin: null, failGives: null },
+    { storylet: RATTUS_FABER_DOTTORE, name: 'Have second thoughts', band: null, airs: null, ch: null,
+      succVermin: null, gives: 'returns to A Bad Case of Rattus Faber, no effect', failVermin: null, failGives: null,
+      note: 'Action cost 0.' },
+
+    // --- A showdown with the Rattus Faber Chief (opened by "the final battle") ---
+    { storylet: RATTUS_FABER_SHOWDOWN, name: 'Go for the kill', band: null, airs: null, ch: { stat: 'Dangerous', diff: 25 },
+      succVermin: null, gives: 'Vermin-free (ends activity), Dangerous +300 CP, Partial Map x1, '
+        + "Pair of Savage Hob-Nailed Boots x1, activates the Living Story \"A Legend Among Ratkind\"",
+      failVermin: null, failGives: 'Vermin +10' },
+    { storylet: RATTUS_FABER_SHOWDOWN, name: 'Try to take him alive', band: null, airs: null, ch: { stat: 'Dangerous', diff: 30 },
+      succVermin: null, gives: 'Vermin-free (ends activity), Dangerous +300 CP, Partial Map x1, '
+        + 'Disgraced Rattus Faber Bandit-Chief x1 (a companion), same Living Story',
+      failVermin: null, failGives: 'Vermin +10' },
+    { storylet: RATTUS_FABER_SHOWDOWN, name: 'Accept his surrender', band: null, airs: null, ch: null,
+      succVermin: null, gives: 'Vermin-free (ends activity), Dangerous +300 CP, Partial Map x1, '
+        + 'Disgraced Rattus Faber Bandit-Chief x1, same Living Story -- always succeeds',
+      failVermin: null, failGives: null, needs: 'the hidden Ratkiller quality (enough vermin-band options played)' },
+  ];
+
+  const RATTUS_FABER_INDEX = carouselIndex(RATTUS_FABER_OPTIONS);
+
+  const RATTUS_FABER_CLASS = 'fl-ux-rattus-faber';
+  const RATTUS_FABER_FLAG = 'flUxRattusFaber';
+  const RATTUS_FABER_BRANCH_CLASS = 'fl-ux-rattus-faber-branch';
+  const RATTUS_FABER_BRANCH_FLAG = 'flUxRattusFaberBranch';
+
+  function rattusFaberBadgeText(e) {
+    if (e.open) return '-> ' + e.open;
+    if (e.succVermin == null) return e.gives || '';
+    const mark = e.ch && e.ch.luck ? CAROUSEL_MARK_EXPECTED : e.ch ? CAROUSEL_MARK_CHALLENGE : '';
+    const succ = e.ch && e.ch.luck ? Math.round((e.succVermin * e.ch.luck + (e.failVermin || 0) * (1 - e.ch.luck)) * 10) / 10 : e.succVermin;
+    return 'Vermin ' + carouselSigned(succ) + mark;
+  }
+
+  function rattusFaberSpec(e) {
+    if (e.open) {
+      return {
+        text: rattusFaberBadgeText(e), color: CAROUSEL_COLOR_LABEL,
+        title: e.name + '\n' + e.storylet + ', Your Lodgings\n\nOpens: ' + e.open + '.',
+      };
+    }
+    const chText = e.ch
+      ? (e.ch.luck ? 'Luck ' + Math.round(e.ch.luck * 100) + '%' : e.ch.diff != null ? e.ch.stat + ' ' + e.ch.diff
+        : e.ch.stat + ' (formula: ' + e.formula + ')')
+      : 'No challenge.';
+    const lines = [
+      e.name, e.storylet + ', Your Lodgings' + (e.band ? ' (Vermin ' + e.band + ')' : ''), '',
+      e.airs ? 'Airs of London ' + e.airs[0] + '-' + e.airs[1] + '.' : null,
+      'Challenge: ' + chText + '.',
+      e.gives ? 'Success: ' + e.gives + '.' : null,
+      e.failGives ? 'Failure: ' + e.failGives + '.' : null,
+      e.needs ? 'Requires: ' + e.needs + '.' : null,
+      e.note || null,
+      e.storylet === RATTUS_FABER_STORYLET
+        ? 'No zero-risk option exists on this storylet -- every real option costs at least Vermin -1 on failure.'
+        : null,
+    ].filter(Boolean).join('\n');
+    return { text: rattusFaberBadgeText(e), color: CAROUSEL_COLOR_PROGRESS, title: lines };
+  }
+
+  function rattusFaberStoryletSpec(key) {
+    if (RATTUS_FABER_STORYLETS.map(normalizeName).indexOf(key) === -1) return null;
+    return {
+      text: 'Rattus Faber', color: CAROUSEL_COLOR_LABEL,
+      title: 'A Bad Case of Rattus Faber, Your Lodgings\n\nReduce Troubled by Vermin to 0. Every '
+        + 'option costs at least Vermin -1 on failure -- there is no zero-risk pick.\n'
+        + 'Open the storylet and every option is badged in its own right.',
+    };
+  }
+
+  function rattusFaberRatings() {
+    carouselRatings({
+      storylets: RATTUS_FABER_STORYLETS, index: RATTUS_FABER_INDEX, storyletSpec: rattusFaberStoryletSpec,
+      optionSpec: rattusFaberSpec, cls: RATTUS_FABER_CLASS, flag: RATTUS_FABER_FLAG,
+      branchCls: RATTUS_FABER_BRANCH_CLASS, branchFlag: RATTUS_FABER_BRANCH_FLAG,
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -38104,6 +38267,8 @@
     { name: 'upon-a-red-stage', run: redStageRatings },
     { name: 'to-make-a-moth', run: toMakeAMothRatings },
     { name: 'scaling-quartz', run: scalingQuartzRatings },
+    // Airs of London storylets (no guide) shelf: card-and-storylet markup, no panel.
+    { name: 'rattus-faber', run: rattusFaberRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
