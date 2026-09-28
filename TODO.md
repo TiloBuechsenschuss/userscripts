@@ -72,8 +72,9 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/The_Tower_of_Eyes:_Behind_Closed_Doors_at_a_Handsome_Townhouse [18 unlock] (implemented)
     - https://fallenlondon.wiki/wiki/The_Feast_of_the_Rose! [16 unlock] (implemented)
     - https://fallenlondon.wiki/wiki/Up_Close_with_a_Festive_Fir [16 unlock] (implemented)
-    - https://fallenlondon.wiki/wiki/Coffee_with_the_Last_Constable [14 unlock]
-    - https://fallenlondon.wiki/wiki/A_drink_with_the_Cheery_Man [13 unlock]
+    - https://fallenlondon.wiki/wiki/Coffee_with_the_Last_Constable [14 unlock] (implemented)
+    - https://fallenlondon.wiki/wiki/A_drink_with_the_Cheery_Man [13 unlock] (implemented; same
+      feature as Coffee with the Last Constable, the two halves of one storyline)
     - https://fallenlondon.wiki/wiki/Pursuing_a_Mutually-Agreed_Divorce [12 unlock]
     - https://fallenlondon.wiki/wiki/The_Rewards_of_Ambition [12 text] (considered, nothing to
       badge: one-time post-Ambition epilogue clicks, reward is an unitemised "mix," the

@@ -38634,6 +38634,124 @@
     });
   }
 
+  // === feature: Coffee with the Last Constable / A drink with the Cheery Man
+  //
+  // Two opened CARDS, the two halves of one storyline ("The Cheery Man and
+  // the Last Constable: Favouring the Constable/the Cheery Man"). Built
+  // together as one feature, `side: 'constable' | 'cheery'` distinguishing
+  // the two tables.
+  //
+  // **What the badge says.** Almost every option is checkless (guaranteed)
+  // -- badge is the item/Favour list text, no ranking arithmetic. The two
+  // real challenges per card show the success value marked `?`. Fate-locked
+  // and Acquaintance-gated rows (3 "She's/He's not alone" each, 1 "Tell her
+  // your own story") state their requirement in the tooltip.
+  //
+  // Transcribed from both cards' own pages and every option page (fetched
+  // through the API, 2026-09-27) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-a.md
+  // sections 5 and 6. Corrections go in CHEERY_CONSTABLE_OPTIONS and
+  // nowhere else.
+
+  const CONSTABLE_STORYLET = 'Coffee with the Last Constable';
+  const CHEERY_STORYLET = 'A drink with the Cheery Man';
+
+  function ccRow(side, name, airs, needs, ch, gives, more) {
+    return Object.assign({ storylet: side === 'constable' ? CONSTABLE_STORYLET : CHEERY_STORYLET,
+      side: side, name: name, airs: airs, needs: needs, ch: ch, gives: gives }, more);
+  }
+
+  const CHEERY_CONSTABLE_OPTIONS = [
+    // --- Coffee with the Last Constable (14) ---
+    ccRow('constable', 'Ask her what she\'s working on 1', [1, 33], null, null,
+      'Favours: Constables +1, Watchful +5, Appalling Secret x2, Touched by Fingerwork +5'),
+    ccRow('constable', 'Ask her what she\'s working on 2', [34, 66], null, null,
+      'Watchful +5, Favours: Constables +1, Vision of the Surface x1'),
+    ccRow('constable', 'Ask her what she\'s working on 3', [67, 100], null, null,
+      'Watchful +5, Favours: Constables +1, Having Recurring Dreams: The Burial of the Dead +1, Walking the Falling Cities +5'),
+    ccRow('constable', 'Talk about the other Special Constables', [1, 50], null, null, 'Appalling Secret x3, Favours: Constables +1'),
+    ccRow('constable', 'Ask her about the other Special Constables', [51, 100], null, null, 'Appalling Secret x2, Favours: Constables +1'),
+    ccRow('constable', 'Talk about the Cheery Man', [1, 50], null, { stat: 'Persuasive', diff: 50 },
+      'Cryptic Clue x20, Intriguing Snippet x1, Favours: Constables +1', { fail: 'Nothing extra.' }),
+    ccRow('constable', 'Ask her about the Cheery Man', [51, 100], null, null, 'Tale of Terror!! x1, Favours: Constables +1'),
+    ccRow('constable', 'Just chat 1', [1, 50], null, null, 'Magnanimous +1 (cap 5), Favours: Constables +1'),
+    ccRow('constable', 'Just chat 2', [51, 100], null, null, 'Magnanimous +1 (cap 5), Favours: Constables +1'),
+    ccRow('constable', 'Invite her home with you', [90, 100], null, { stat: 'Persuasive', diff: 100 },
+      'Favours: Constables +1 (rare: +Touching Love Story x1)', { fail: 'Nothing.' }),
+    ccRow('constable', "She's not alone 1", [40, 59], 'Acquaintance: the Honey-Addled Detective 1', null,
+      'Touched by Fingerwork +5, Watchful +20, Favours: Constables +1'),
+    ccRow('constable', "She's not alone 2", [70, 89], 'Acquaintance: the Mercies 1', null,
+      'Favours: Constables 0-1, Favours: Tomb-Colonies 0-1'),
+    ccRow('constable', "She's not alone 3", [10, 29], 'Acquaintance: the Repentant Forger 1', null,
+      'Favours: Bohemians 0-1, Favours: Constables 0-1, Nightmares -1'),
+    ccRow('constable', 'Tell her your own story', [70, 100], 'Family and Law 3, A Daughter in the Shadows x1 (Fate-locked)', null,
+      'Favours: Constables +1, Extraordinary Implication x1, Nightmares -1, Magnanimous +1 (cap 5)', { fate: true }),
+
+    // --- A drink with the Cheery Man (13) ---
+    ccRow('cheery', 'His operations around the Hill', [1, 33], null, null,
+      'Appalling Secret x2, Touched by Fingerwork +5, Shadowy +10, Favours: Criminals +1'),
+    ccRow('cheery', 'His operations on the Docks', [34, 66], null, null,
+      'Vision of the Surface x1, Shadowy +5, Favours: Criminals +1'),
+    ccRow('cheery', 'His contacts with the tomb-colonies', [67, 100], null, null,
+      'Having Recurring Dreams: The Burial of the Dead +1, Walking the Falling Cities +5, Shadowy +5, '
+      + 'Favours: Criminals +1, Favours: Tomb-Colonies +1'),
+    ccRow('cheery', 'The other players in his world', [1, 50], null, null, 'Inkling of Identity x4, Favours: Criminals +1'),
+    ccRow('cheery', 'His enemies', [51, 100], null, null, 'Inkling of Identity x6, Favours: Criminals +1'),
+    ccRow('cheery', 'The Last Constable 1', [1, 50], 'Family and Law 3', { stat: 'Persuasive', diff: 50 },
+      'Tale of Terror!! x1, Favours: Criminals +1', { fail: 'Nothing.' }),
+    ccRow('cheery', 'The Last Constable 2', [51, 100], 'Family and Law 3', null,
+      'Tale of Terror!! x1, Appalling Secret x3, Favours: Criminals +1'),
+    ccRow('cheery', "Whatever's on his mind (Low Airs)", [1, 50], null, null, 'Favours: Criminals +1, Intriguing Snippet x1'),
+    ccRow('cheery', "Whatever's on his mind (High Airs)", [51, 100], null, null,
+      'Favours: Criminals +1, Tale of Terror!! x1, Vision of the Surface x1'),
+    ccRow('cheery', 'Hint that you might want to stay the night', [90, 100], null, { stat: 'Persuasive', diff: 99 },
+      'Favours: Criminals +1 (rare: +Blackmail Material x1)', { fail: 'Nothing.' }),
+    ccRow('cheery', "He's not alone 1", [10, 29], 'Acquaintance: the Regretful Soldier 1', null,
+      'Favours: Criminals +1, Nightmares +1, Dangerous +10, Persuasive +10, Tale of Terror!! x1'),
+    ccRow('cheery', "He's not alone 2", [40, 59], "Implacable Detective's Business Card", null,
+      "Watchful +20, Favours: Criminals +1, Implacable Detective's Business Card x1"),
+    ccRow('cheery', "He's not alone 3", [70, 89], 'Intimate with a Secular Missionary 3', null,
+      'Favours: Criminals +1, Inkling of Identity x5, Cryptic Clue x20'),
+  ];
+
+  const CHEERY_CONSTABLE_INDEX = carouselIndex(CHEERY_CONSTABLE_OPTIONS);
+
+  const CHEERY_CONSTABLE_CLASS = 'fl-ux-cheery-constable';
+  const CHEERY_CONSTABLE_FLAG = 'flUxCheeryConstable';
+  const CHEERY_CONSTABLE_BRANCH_CLASS = 'fl-ux-cheery-constable-branch';
+  const CHEERY_CONSTABLE_BRANCH_FLAG = 'flUxCheeryConstableBranch';
+
+  function cheeryManConstableSpec(e) {
+    const mark = e.ch ? CAROUSEL_MARK_CHALLENGE : '';
+    const lines = [
+      e.name, e.storylet, '',
+      e.airs ? 'Airs of London ' + e.airs[0] + '-' + e.airs[1] + '.' : null,
+      e.ch ? 'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.' : 'No challenge (checkless).',
+      e.needs ? 'Requires: ' + e.needs + '.' : null,
+      'Gives: ' + e.gives + '.',
+      e.fail ? 'Failure: ' + e.fail : null,
+      e.fate ? 'Fate-locked -- excluded from any free-to-play ranking.' : null,
+    ].filter(Boolean).join('\n');
+    return { text: (e.ch ? e.ch.stat + ' ' + e.ch.diff + mark : 'guaranteed'), color: CAROUSEL_COLOR_PROGRESS, title: lines };
+  }
+
+  function cheeryManConstableStoryletSpec(key) {
+    if ([CONSTABLE_STORYLET, CHEERY_STORYLET].map(normalizeName).indexOf(key) === -1) return null;
+    return {
+      text: key === normalizeName(CONSTABLE_STORYLET) ? 'Last Constable' : 'Cheery Man', color: CAROUSEL_COLOR_LABEL,
+      title: 'Open the storylet and every option is badged in its own right.',
+    };
+  }
+
+  function cheeryManConstableRatings() {
+    carouselRatings({
+      storylets: [CONSTABLE_STORYLET, CHEERY_STORYLET], index: CHEERY_CONSTABLE_INDEX,
+      storyletSpec: cheeryManConstableStoryletSpec, optionSpec: cheeryManConstableSpec,
+      cls: CHEERY_CONSTABLE_CLASS, flag: CHEERY_CONSTABLE_FLAG,
+      branchCls: CHEERY_CONSTABLE_BRANCH_CLASS, branchFlag: CHEERY_CONSTABLE_BRANCH_FLAG,
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -38895,6 +39013,7 @@
     { name: 'tower-of-eyes', run: towerOfEyesRatings },
     { name: 'feast-of-the-rose', run: feastOfTheRoseRatings },
     { name: 'festive-fir', run: festiveFirRatings },
+    { name: 'cheery-man-constable', run: cheeryManConstableRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
