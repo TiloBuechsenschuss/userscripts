@@ -38752,6 +38752,108 @@
     });
   }
 
+  // === feature: Time in bed ===============================================
+  //
+  // Your Social Engagements. Redirected from "Attend to Matters of Danger
+  // and Wounds" (not itself covered by any feature -- follow-up if a
+  // feature ever reaches it). All options cost 3 actions except the Fate
+  // one, and all reroll The Airs of London.
+  //
+  // **What the badge says.** Net Wounds change is the primary number (this
+  // is explicitly a convalescing/rest storylet), Nightmares change a
+  // secondary mark. Six Luck-challenge rows with stated odds (60-80%) rank
+  // by expected value, marked with the approximation mark. Four
+  // "Acquaintance: X level 5" rows have NO challenge at all -- marked
+  // "always succeeds" in words, their Acquaintance requirement stated.
+  // "A remarkable tincture" is Fate-locked -- excluded from ranking, kept
+  // in the tooltip.
+  //
+  // Transcribed from the storylet's own page, where the reward data is
+  // already fully inline (fetched through the API, 2026-09-27; spot-checked
+  // rather than separately re-fetched per option page -- the one exception
+  // to the "option pages win" rule this batch otherwise follows, verified
+  // directly against the storylet page) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-b.md
+  // section 1. The research doc's own "Traps" prose says "three"
+  // Acquaintance-gated always-succeed rows, but its own transcribed table
+  // lists FOUR (Repentant Forger, Sardonic Music-Hall Singer, Regretful
+  // Soldier, Wry Functionary) -- the table is the real data, followed here,
+  // same undercounted-prose pattern already seen in this batch's earlier
+  // tasks. Corrections go in TIME_IN_BED_OPTIONS and nowhere else.
+
+  const TIME_IN_BED_STORYLET = 'Time in bed';
+
+  function tibRow(name, airs, needs, ch, succ, fail, more) {
+    return Object.assign({ storylet: TIME_IN_BED_STORYLET, name: name, airs: airs, needs: needs, ch: ch,
+      succ: succ, fail: fail }, more);
+  }
+
+  const TIME_IN_BED_OPTIONS = [
+    tibRow('Spend a day in bed', [0, 24], null, { luck: 0.8 }, 'Wounds -3, Nightmares -2', 'No change.'),
+    tibRow('A visit from the Repentant Forger', [0, 24], 'Acquaintance: the Repentant Forger 5', null,
+      'Wounds -3, Seeing through the Eyes of Icarus +1, Jade Fragment +50', null),
+    tibRow('A succession of visitors', [25, 49], null, { luck: 0.6 }, 'Wounds -4, Bottle of Morelways 1872 +1', 'Wounds -3.'),
+    tibRow('Curled up with a book', [25, 49], 'Journal of Infamy x1', { luck: 0.6 }, 'Wounds -5, Nightmares -2',
+      'Wounds -3, Nightmares +1, Appalling Secret +2.'),
+    tibRow('A visit from the Sardonic Music-Hall Singer', [25, 49], 'Acquaintance: the Sardonic Music-Hall Singer 5', null,
+      'Wounds -1, Nightmares -3, Bottle of Strangling Willow Absinthe +1', null),
+    tibRow('A disturbance outside', [50, 74], null, { luck: 0.6 }, 'Wounds -3, Nightmares -1, Intriguing Snippet +1', 'Wounds -2.'),
+    tibRow('Visions in the mirror', [50, 74], 'Touched by Fingerwork 5', { luck: 0.6 }, 'Wounds -3, Nightmares -4', 'Nightmares +3.'),
+    tibRow('A visit from the Regretful Soldier', [50, 74], 'Acquaintance: the Regretful Soldier 5', null, 'Wounds -6', null),
+    tibRow('The red herald', [75, 99], null, { luck: 0.6 }, 'Wounds -4, Nightmares -2', 'Wounds -2, Nightmares +1.'),
+    tibRow('Surface-dreams', [75, 99], 'Vision of the Surface x1', { luck: 0.6 }, 'Wounds -3, Nightmares -4, Vision of the Surface -1',
+      'Wounds -3, Nightmares +1.'),
+    tibRow('A visit from the Wry Functionary', [75, 99], 'Acquaintance: the Wry Functionary 5', null,
+      'Wounds -3, Intriguing Snippet +2, Scrap of Incendiary Gossip +1', null),
+    tibRow('A dreamless sleep', [90, 100], null, null, 'Wounds -7, Nightmares -2', null),
+    tibRow('A remarkable tincture', null, null, null, 'Wounds 0, Nightmares -1, Approaching the Gates of the Garden +5', null,
+      { fate: 8 }),
+  ];
+
+  const TIME_IN_BED_INDEX = carouselIndex(TIME_IN_BED_OPTIONS);
+
+  const TIME_IN_BED_CLASS = 'fl-ux-time-in-bed';
+  const TIME_IN_BED_FLAG = 'flUxTimeInBed';
+  const TIME_IN_BED_BRANCH_CLASS = 'fl-ux-time-in-bed-branch';
+  const TIME_IN_BED_BRANCH_FLAG = 'flUxTimeInBedBranch';
+
+  function timeInBedBadgeText(e) {
+    if (!e.ch) return 'Wounds ' + carouselSigned(Number((/Wounds (-?\d+)/.exec(e.succ) || [0, 0])[1])) + ' -- always succeeds';
+    const mark = e.ch.luck ? CAROUSEL_MARK_EXPECTED : CAROUSEL_MARK_CHALLENGE;
+    return 'Wounds' + mark;
+  }
+
+  function timeInBedSpec(e) {
+    const lines = [
+      e.name, TIME_IN_BED_STORYLET, '',
+      e.airs ? 'Airs of London ' + e.airs[0] + '-' + e.airs[1] + '.' : null,
+      e.ch ? 'Challenge: ' + (e.ch.luck ? 'Luck ' + Math.round(e.ch.luck * 100) + '%' : 'stat') + '.'
+        : 'No challenge -- always succeeds.',
+      e.needs ? 'Requires: ' + e.needs + '.' : null,
+      'Success: ' + e.succ + '.',
+      e.fail ? 'Failure: ' + e.fail : null,
+      e.fate ? 'Costs ' + e.fate + ' Fate -- excluded from any free-to-play ranking.' : null,
+    ].filter(Boolean).join('\n');
+    return { text: timeInBedBadgeText(e), color: CAROUSEL_COLOR_PROGRESS, title: lines };
+  }
+
+  function timeInBedStoryletSpec(key) {
+    if (key !== normalizeName(TIME_IN_BED_STORYLET)) return null;
+    return {
+      text: 'Time in bed', color: CAROUSEL_COLOR_LABEL,
+      title: TIME_IN_BED_STORYLET + '\n\nConvalescing: reduces Wounds. Open the storylet and every '
+        + 'option is badged in its own right.',
+    };
+  }
+
+  function timeInBedRatings() {
+    carouselRatings({
+      storylets: [TIME_IN_BED_STORYLET], index: TIME_IN_BED_INDEX, storyletSpec: timeInBedStoryletSpec,
+      optionSpec: timeInBedSpec, cls: TIME_IN_BED_CLASS, flag: TIME_IN_BED_FLAG,
+      branchCls: TIME_IN_BED_BRANCH_CLASS, branchFlag: TIME_IN_BED_BRANCH_FLAG,
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -39014,6 +39116,7 @@
     { name: 'feast-of-the-rose', run: feastOfTheRoseRatings },
     { name: 'festive-fir', run: festiveFirRatings },
     { name: 'cheery-man-constable', run: cheeryManConstableRatings },
+    { name: 'time-in-bed', run: timeInBedRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a

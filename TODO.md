@@ -80,7 +80,7 @@ Fallen London:
       badge: one-time post-Ambition epilogue clicks, reward is an unitemised "mix," the
       Airs-of-London variance is flavour text not option titles -- see
       docs/superpowers/research/2026-09-27-airs-of-london-group-b.md section 2)
-    - https://fallenlondon.wiki/wiki/Time_in_bed [12 unlock]
+    - https://fallenlondon.wiki/wiki/Time_in_bed [12 unlock] (implemented)
     - https://fallenlondon.wiki/wiki/A_Dream_of_a_Burning_City [9 unlock, 1 text]
     - https://fallenlondon.wiki/wiki/Consider_your_Aquaria [8 unlock]
     - https://fallenlondon.wiki/wiki/Search_your_Terraria [8 unlock]
