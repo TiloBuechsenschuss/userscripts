@@ -38196,6 +38196,337 @@
     });
   }
 
+  // === feature: The Feast of the Rose! ====================================
+  //
+  // A card, Ubiquitous frequency, unlocked by the seasonal world quality
+  // "London's Season: The Feast of the Exceptional Rose". `Game
+  // Instructions`: these options raise Masquing to 20; rose-gifts raise it
+  // further; later in the feast Masquing trades for special companions.
+  //
+  // **Shape.** Every one of 16 Airs-gated top-level options is itself a
+  // checkless, actionless (0-cost) REDIRECT into its own sub-storylet, most
+  // with 1-9 options of their own -- the same two-layer shape as the
+  // existing `airs-of-london` feature's 6 core storylets. One redirect,
+  // "Try to secure a table at Dante's Grill", is offered across TWO
+  // non-adjacent Airs windows (51-75 and 76-100) -- merged into one row
+  // carrying both windows, the same multi-window shape Ecdysis's "Root
+  // yourself in place" already established; its sub-storylet's two options
+  // are priced once, not duplicated per window.
+  //
+  // **What the badge says.** Masquing gained is the real badge-worthy
+  // currency (caps at 20, trades for companions later in the feast) --
+  // never the flavour items, which live in the tooltip. `?` for a stat
+  // challenge's success value, `~` for a Luck option ranked by expected
+  // value where the page states odds.
+  //
+  // **Disambiguator trap.** Several option pages are filed under a title
+  // with a trailing wiki disambiguator not shown to the player -- "Bluff
+  // your way in" is a disambiguation page whose real target here is "Bluff
+  // your way in 2"; "The Duchess' banquet" is filed as "The Duchess' banquet
+  // 0". This table uses each option's real DISPLAY text as its `name`
+  // (never the disambiguator suffix), confirmed by direct probe on three
+  // separate cases (see the research doc).
+  //
+  // "A masked revel!" (this redirect's own target) is also separately
+  // listed in TODO.md's open list at `[1 unlock]` as "A masked revel for
+  // the Feast of the Rose!" -- its "Cast aside your mask!" sub-row below IS
+  // that entry; do not build a second feature for it.
+  //
+  // Seasonal -- a festival-only card badged year-round simply never fires
+  // outside the season, which is harmless, not a bug.
+  //
+  // Transcribed from the card's own page and every redirect/leaf option
+  // page (fetched through the API, 2026-09-27) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-a.md
+  // section 3. Corrections go in FEAST_OPTIONS and nowhere else.
+
+  const FEAST_STORYLET = 'The Feast of the Rose!';
+
+  function feastRedirect(name, airs, target, needs) {
+    return { storylet: FEAST_STORYLET, name: name, airs: airs, open: target, needs: needs || null };
+  }
+  function feastLeaf(storylet, name, ch, masquing, rare, gives, more) {
+    return Object.assign({ storylet: storylet, name: name, ch: ch, masquing: masquing, rare: rare, gives: gives }, more);
+  }
+
+  const FEAST_MASKED_REVEL = 'A masked revel!';
+  const FEAST_DANCE_DEVILS = 'A dance with devils!';
+  const FEAST_LOVERS_TRYST = "A lovers' tryst";
+  const FEAST_SEASONAL_MISCHIEF = 'Seasonal mischief';
+  const FEAST_GEBRANDT = 'Mrs Gebrandt requests assistance';
+  const FEAST_THEATRICAL = 'Enjoy a theatrical entertainment';
+  const FEAST_LONG_LOST_LOVE = 'A long-lost love';
+  const FEAST_SINNING_JENNY = 'Buy a kiss from Sinning Jenny';
+  const FEAST_MRS_PLENTYS = "Mrs Plenty's Perfumed Pleasure Garden";
+  const FEAST_DUCHESS_BANQUET = "The Duchess' banquet";
+  const FEAST_MYSTERIOUS_ENVELOPE = 'A mysterious envelope';
+  const FEAST_DANTES_GRILL = "Try to secure a table at Dante's Grill";
+  const FEAST_MADAME_SHOSHANA = 'Seek advice from Madame Shoshana';
+  const FEAST_SCANDAL_INTRIGUE = 'Scandal and intrigue!';
+  const FEAST_FACE_FROM_PAST = 'A face from the past';
+  const FEAST_SWEETS = 'Sweets to the sweet';
+
+  const FEAST_OPTIONS = [
+    // --- Top-level redirects (16) ---
+    feastRedirect(FEAST_MASKED_REVEL, [0, 25], FEAST_MASKED_REVEL, 'Mask of the Rose x1'),
+    feastRedirect(FEAST_DANCE_DEVILS, [0, 25], FEAST_DANCE_DEVILS),
+    feastRedirect(FEAST_LOVERS_TRYST, [0, 25], FEAST_LOVERS_TRYST),
+    feastRedirect(FEAST_SEASONAL_MISCHIEF, [0, 25], FEAST_SEASONAL_MISCHIEF),
+    feastRedirect(FEAST_GEBRANDT, [26, 50], FEAST_GEBRANDT),
+    feastRedirect(FEAST_THEATRICAL, [26, 50], FEAST_THEATRICAL),
+    feastRedirect(FEAST_LONG_LOST_LOVE, [26, 50], FEAST_LONG_LOST_LOVE),
+    feastRedirect(FEAST_SINNING_JENNY, [26, 50], FEAST_SINNING_JENNY),
+    feastRedirect(FEAST_MRS_PLENTYS, [51, 75], FEAST_MRS_PLENTYS, 'Carnival Ticket x1-2 per sub-option'),
+    feastRedirect(FEAST_DUCHESS_BANQUET, [51, 75], FEAST_DUCHESS_BANQUET),
+    feastRedirect(FEAST_MYSTERIOUS_ENVELOPE, [51, 75], FEAST_MYSTERIOUS_ENVELOPE),
+    Object.assign(feastRedirect(FEAST_DANTES_GRILL, [51, 75], FEAST_DANTES_GRILL),
+      { airs: [[51, 75], [76, 100]], note: 'Offered across two non-adjacent Airs windows; its options are priced once below.' }),
+    feastRedirect(FEAST_MADAME_SHOSHANA, [51, 75], FEAST_MADAME_SHOSHANA),
+    feastRedirect(FEAST_SCANDAL_INTRIGUE, [76, 100], FEAST_SCANDAL_INTRIGUE),
+    feastRedirect(FEAST_FACE_FROM_PAST, [76, 100], FEAST_FACE_FROM_PAST),
+    feastRedirect(FEAST_SWEETS, [76, 100], FEAST_SWEETS),
+
+    // --- A masked revel! (9 leaf options) ---
+    feastLeaf(FEAST_MASKED_REVEL, 'Dance with an acquaintance', null, 4, null,
+      'Social Action, Fate. Host: Romantic Notion 3, Confident Smile x3, Persuasive +5, Making Waves +1. '
+      + 'Friend (once accepted): Making Waves +3, Confident Smile x3, Scrap of Incendiary Gossip x1.', { fate: true }),
+    feastLeaf(FEAST_MASKED_REVEL, 'An assignation in the garden with a friend', null, 2, null,
+      'Social Action, Fate. Host: Romantic Notion 3, Confident Smile x3, Persuasive +4, Making Waves +2, '
+      + 'Scandal +2, Romantic Notion +3 more. Friend: Confident Smile x5, Scandal +2.', { fate: true }),
+    feastLeaf(FEAST_MASKED_REVEL, 'Dance with your Spouse', null, 1, null,
+      'Romantic Notion 3, Nightmares -10, Scandal -10 (title/text vary with poly-relationship qualities, reward is flat).',
+      { needs: 'Masquing 1, a Committed relationship' }),
+    feastLeaf(FEAST_MASKED_REVEL, 'Dance with a mysterious stranger', { stat: 'Persuasive', diff: 20 }, 1, 2,
+      'Persuasive +4 bonus, Confident Smile x1 (rare: +5 bonus, Confident Smile x3, Romantic Notion x1, '
+      + 'Antique Mystery x1, Alight with Passion mood).', { fail: 'Masquing +1 still.' }),
+    feastLeaf(FEAST_MASKED_REVEL, 'An assignation in the garden with a stranger', { luck: 0.7 }, 1, 1,
+      'Hedonist +1 (cap 5), Romantic Notion 2 (rare: Hedonist +3 cap 10, Romantic Notion 5, Vision of '
+      + 'the Surface x1, Extraordinary Implication x2).', { fail: 'Scandal +2, Persuasive -4, Masquing +1 still.' }),
+    feastLeaf(FEAST_MASKED_REVEL, 'Cast aside your mask!', { luck: 0.5 }, 2, 2,
+      'Persuasive +15 (rare: +Confident Smile x5, Making Waves +2).',
+      { needs: 'Airs 90+, consumes Mask of the Rose', failMasquing: 1, fail: 'Melancholy +3 (cap 10), Persuasive +3.' }),
+    feastLeaf(FEAST_MASKED_REVEL, "Remove a mysterious stranger's mask", { stat: 'Watchful', diff: 20 }, 1, 1,
+      'Confident Smile x1, An Identity Uncovered! x1 (rare: +Intimate of Devils +1 cap 4, Ostentatious '
+      + 'Diamond x1, Venge-Rat Corpse x1).', { fail: 'Scandal +2, Masquing +1 still.' }),
+    feastLeaf(FEAST_MASKED_REVEL, 'Spy on conversations', { stat: 'Shadowy', diff: 20 }, null, null,
+      'Whispered Hint x(Shadowy) (rare: Cryptic Clue x(Shadowy/2), Drop of Prisoner\'s Honey 1-10, '
+      + 'Surface-Silk Scrap 1-10).', { fail: 'Scandal +1, Suspicion +1.' }),
+    feastLeaf(FEAST_MASKED_REVEL, "Partake of Mr Wines' hospitality", { luck: 0.5 }, 2, 3,
+      'Bottle of Greyfields 1868 First Sporing x1 (rare: x2, +Romantic Notion 3).',
+      { fate: true, needs: 'Occasionally Seen at Mr Wines\' Revels 1, Mask of the Rose x1; locked out once '
+        + 'you hold 2x each of two specific wine items', failMasquing: 2, fail: 'Bottle of Black Wings Absinthe x1.' }),
+
+    // --- A dance with devils! (3 leaf options) ---
+    feastLeaf(FEAST_DANCE_DEVILS, 'Bluff your way in 2', { stat: 'Watchful', diff: 40 }, 1, 1,
+      'Cryptic Clue 12, or Appalling Secret 5.', { fail: 'Nightmares +2.',
+        note: 'The bare title "Bluff your way in" is a disambiguation page; this is the real target.' }),
+    feastLeaf(FEAST_DANCE_DEVILS, 'Attend as an invited guest', { stat: 'Watchful', diff: 30 }, 1, null,
+      'Stolen Correspondence 22, Appalling Secret 3 (rare: +Compromising Document x3, Walking the '
+      + 'Falling Cities +10, Extraordinary Implication x1).', { fail: 'Scandal +2.' }),
+    feastLeaf(FEAST_DANCE_DEVILS, "Actually, you'll be meeting someone there", { luck: 0.6 }, 1, null,
+      'An Intimate of Devils +2, Romantic Notion 10 (rare: +Stolen Kiss x1).',
+      { needs: 'An Intimate of Devils 3', fail: 'Scandal +1, Intimate -1.' }),
+
+    // --- A lovers' tryst (2 leaf options) ---
+    feastLeaf(FEAST_LOVERS_TRYST, 'Choose an out-of-the-way spot', { stat: 'Persuasive', diff: 75 }, 1, null,
+      "Fascinating... +10 (if present), Touching Love Story x1.", { fail: 'Nightmares +1.' }),
+    feastLeaf(FEAST_LOVERS_TRYST, 'Arrange to meet by the silver fountain', { stat: 'Persuasive', diff: 100 }, 2, null,
+      "Fascinating... +10 (if >0), Touching Love Story x1, Stolen Kiss x1.", { fail: 'Scandal +1.' }),
+
+    // --- Seasonal mischief (4 leaf options) ---
+    feastLeaf(FEAST_SEASONAL_MISCHIEF, 'Disrupt an inconvenient romance', { stat: 'Persuasive', diff: 50 }, 1, 5,
+      'Whispered Hint 30, Scrap of Incendiary Gossip x1, Intriguing Snippet x1 (rare: +Stolen Kiss x1).', { fail: 'Scandal +1.' }),
+    feastLeaf(FEAST_SEASONAL_MISCHIEF, 'Rid yourself of that irritating suitor', { luck: 0.5 }, 1, 5,
+      'Romantic Notion 5 (rare: Touching Love Story x1).', { fail: 'Persuasive +1, Scandal +2.' }),
+    feastLeaf(FEAST_SEASONAL_MISCHIEF, "Take advantage of others' distraction", { stat: 'Shadowy', diff: 40 }, null, null,
+      'Nodule of Deep Amber 51-150, Romantic Notion x1 (rare: Brilliant Soul x2, Touching Love Story x1, '
+      + 'Puzzle-Damask Scrap x1, Masquing +2).', { fail: 'Suspicion +2.' }),
+    feastLeaf(FEAST_SEASONAL_MISCHIEF, 'Make a profit', { luck: 0.5 }, 1, 4,
+      "Drop of Prisoner's Honey 35, Romantic Notion x3 (rare: Touching Love Story x1).", { fail: 'Wounds +1.' }),
+
+    // --- Mrs Gebrandt requests assistance (3 leaf options) ---
+    feastLeaf(FEAST_GEBRANDT, 'Be sympathetic', { stat: 'Persuasive', diff: 50 }, 1, null,
+      "Jade Fragment (Watchful/2), F.F. Gebrandt's Tincture of Vigour x1.", { fail: 'Scandal +2.' }),
+    feastLeaf(FEAST_GEBRANDT, 'Be cruel to be kind', { stat: 'Persuasive', diff: 75 }, 1, null,
+      "F.F. Gebrandt's Tincture of Vigour x10.", { fail: 'Scandal +2.' }),
+    feastLeaf(FEAST_GEBRANDT, 'Take cold-blooded advantage', { stat: 'Shadowy', diff: 80 }, null, null,
+      'Whisper-Satin Scrap x1, Thirsty Bombazine Scrap x1, Drop of Prisoner\'s Honey 30.', { fail: 'Suspicion +2.' }),
+
+    // --- Enjoy a theatrical entertainment (2 leaf options) ---
+    feastLeaf(FEAST_THEATRICAL, "Suggest a children's puppet show", { luck: 0.4 }, 2, 4,
+      "Inkling of Identity, Intriguing Snippet, Tale of Terror!! (rare adds Appalling Secret, Maniac's Prayer).",
+      { fail: 'Nightmares +2.' }),
+    feastLeaf(FEAST_THEATRICAL, 'Suggest a magic lantern show', { luck: 0.6 }, 1, null,
+      'Nightmares -2, Romantic Notion 10 (rare: Touching Love Story x1).', { fail: 'Nightmares +2, Making Waves -2.' }),
+
+    // --- A long-lost love (2 leaf options) ---
+    feastLeaf(FEAST_LONG_LOST_LOVE, 'Help to console the gentleman', { stat: 'Persuasive', diff: 30 }, 1, null,
+      "Drop of Prisoner's Honey 15, Magnanimous +3 (cap 10), Romantic Notion 4, Cryptic Clue x2 (rare: "
+      + 'Mystery of the Elder Continent x2, Memory of Distant Shores x1, Appalling Secret x3 instead of '
+      + 'the Honey/Notion).', { fail: 'Melancholy +3 (cap 10), Scandal +2.' }),
+    feastLeaf(FEAST_LONG_LOST_LOVE, 'Offer to help find the lady', { stat: 'Watchful', diff: 30 }, 1, null,
+      'Magnanimous +3 (cap 10), Nodule of Deep Amber 10, Romantic Notion 7, Cryptic Clue x2 (rare: '
+      + 'Touching Love Story x1 instead of Amber/Notion).', { fail: 'Melancholy +3 (cap 10).' }),
+
+    // --- Buy a kiss from Sinning Jenny (2 leaf options) ---
+    feastLeaf(FEAST_SINNING_JENNY, 'Pay the asking price', { luck: 0.6 }, 1, 4,
+      'Romantic Notion 5, Stolen Kiss x1 (rare: Romantic Notion 10).',
+      { needs: "Prisoner's Honey 100", fail: 'Persuasive +1, Scandal +2.' }),
+    feastLeaf(FEAST_SINNING_JENNY, 'Negotiate a little first', { stat: 'Persuasive', diff: 60 }, 2, 1,
+      'Romantic Notion 2, Stolen Kiss x1 (rare: Wounds +2, Scandal +2 instead -- a poisoned-lipstick twist).',
+      { needs: 'Deep Amber 50', fail: 'Scandal +2.' }),
+
+    // --- Mrs Plenty's Perfumed Pleasure Garden (6 leaf options) ---
+    feastLeaf(FEAST_MRS_PLENTYS, 'The Exceptional Rose', { stat: 'Watchful', diff: 70 }, null, null,
+      'A Connoisseur of Neathy Delights +1 (cap 3), Carnival Ticket +10, Tale of Terror!! x1 (rare: '
+      + 'Carnival Ticket +20, Romantic Notion 3, Extraordinary Implication x1).',
+      { needs: 'Carnival Ticket x2', fail: 'Persuasive +1, Carnival Ticket -2, Connoisseur +1.' }),
+    feastLeaf(FEAST_MRS_PLENTYS, "Mr Hearts' Devilled Hearts", { luck: 0.5 }, 1, null,
+      "Watchful +1, Persuasive +1, Vision of the Surface x1, Cryptic Clue 20, Inspired...+5 (if present), "
+      + 'Connoisseur +1 (cap 4) (rare only: Alight with Passion mood, Extraordinary Implication x1, '
+      + 'Connoisseur +1 cap 3 instead).',
+      { needs: 'Carnival Ticket x1', fail: 'Scandal +1, Watchful +1.', note: 'Masquing is rare-success only.' }),
+    feastLeaf(FEAST_MRS_PLENTYS, 'The Wheel of Affection', { luck: 0.8 }, 1, null,
+      'Romantic Notion 10, Persuasive +3 (rare only, cap 20: Connoisseur +1 cap 4, Memory of Light x1, '
+      + 'Antique Mystery x1 instead).',
+      { needs: 'Carnival Ticket x1', fail: 'Persuasive -1, Gift of Scorn x1.', note: 'Masquing is rare-success only.' }),
+    feastLeaf(FEAST_MRS_PLENTYS, 'Join the dancers', { stat: 'Persuasive', diff: 150 }, 3, null,
+      'Scandal +2 (cap 4), Scrap of Incendiary Gossip x3 (rare only, if Scandal <=17: Puzzle-Damask Scrap '
+      + 'x1 instead of Scandal/Gossip).',
+      { needs: 'Carnival Ticket x1', fail: 'Scandal +3.', note: 'Masquing is rare-success only.' }),
+    feastLeaf(FEAST_MRS_PLENTYS, 'Enjoy the decadence', { luck: 0.7 }, null, null,
+      'Connoisseur +1 (cap 6), Hedonist +3 (cap 10), Nightmares -3, Romantic Notion 6-10 (rare: Hedonist '
+      + '+5 cap 15, Memory of Light x1, Having Recurring Dreams +1, Nightmares -5, Extraordinary '
+      + 'Implication x1).',
+      { needs: 'Carnival Ticket x1', fail: 'Hedonist +3, Scandal +1.' }),
+    feastLeaf(FEAST_MRS_PLENTYS, 'Follow the scent of the wild rose', { stat: 'Watchful', diff: 25 }, null, null,
+      'Sets On the Scent of the Exceptional Rose to 3, Scrap of Incendiary Gossip x2.',
+      { needs: 'Carnival Ticket x1, On the Scent of the Exceptional Rose exactly 2', fail: 'Carnival Ticket -1.' }),
+
+    // --- The Duchess' banquet (4 leaf options) ---
+    feastLeaf(FEAST_DUCHESS_BANQUET, 'Catch the attention of the Duchess', { stat: 'Shadowy', diff: 90 }, null, null,
+      'Relic of the Second City x3, Nightmares +1, Connected: The Duchess +2 (cap 20), Tale of Terror!! '
+      + 'x1 (rare: Connected +10, Relic x2, Touching Love Story x1, Antique Mystery x1 instead).',
+      { fail: 'No penalty beyond the miss itself.',
+        note: 'The wiki page is filed as "The Duchess\' banquet 0"; this is the real display text.' }),
+    feastLeaf(FEAST_DUCHESS_BANQUET, "What's going on in the wine cellars?", { luck: 0.5 }, null, null,
+      'Appalling Secret x1, Tale of Terror!! x1 (rare: +Extraordinary Implication x1).', { fail: 'Scandal +2, Suspicion +2.' }),
+    feastLeaf(FEAST_DUCHESS_BANQUET, 'Share a little honey with the Captivating Princess', { stat: 'Persuasive', diff: 160 }, null, null,
+      'Scandal +1, Dreadful Surmise x1, Acquaintance +1, a Connoisseur of Neathy Delights +1 (cap 21), '
+      + 'One Who Has Indulged in Unknown Pleasures +1, Masquing -15 (same on rare).',
+      { needs: 'Masquing 15, Acquaintance: the Captivating Princess', fail: 'Scandal +2, Nightmares +4.' }),
+    feastLeaf(FEAST_DUCHESS_BANQUET, 'Joke with His Amused Lordship', { luck: 0.5 }, null, null,
+      'Scandal +1, Cryptic Clue 20, Tale of Terror!! x1, Favours: Society +1 (rare: +Appalling Secret x3, '
+      + 'Memory of Distant Shores x1, Extraordinary Implication x2).',
+      { needs: 'Masquing 11', fail: 'Scandal +2, Making Waves -20.', strict: true }),
+
+    // --- A mysterious envelope (1 leaf option) ---
+    feastLeaf(FEAST_MYSTERIOUS_ENVELOPE, 'Open it', { luck: 0.5 }, 2, 1,
+      'Romantic Notion 1-10, Persuasive +20 (rare: Watchful +30, Appalling Secret x1, Tale of Terror!! '
+      + 'x1, Unaccountably Peckish +2, Freed from the Name -1 instead).',
+      { failMasquing: 1, fail: 'Watchful +10.' }),
+
+    // --- Try to secure a table at Dante's Grill (2 leaf options, priced once for both Airs windows) ---
+    feastLeaf(FEAST_DANTES_GRILL, 'Try your luck', { luck: 0.5 }, 2, 2,
+      "Hedonist +3 (cap 10), Austere -3, Fascinating...+8 (if present), Unaccountably Peckish -2, "
+      + 'Nightmares -3, Romantic Notion 3 (rare: Fascinating...+2 instead of +8, Scrap of Incendiary '
+      + 'Gossip x1, Touching Love Story x1, Making Waves +?).',
+      { fail: "Fascinating...-10, Unaccountably Peckish +3." }),
+    feastLeaf(FEAST_DANTES_GRILL, "Bribe the maître d'", null, 5, null,
+      "Hedonist +5 (cap 15), Fascinating...+10 (if present), Scandal -5, Nightmares -5, Wounds -5, "
+      + 'Unaccountably Peckish -5, Romantic Notion 5, Touching Love Story x1.', { fate: true }),
+
+    // --- Seek advice from Madame Shoshana (2 leaf options) ---
+    feastLeaf(FEAST_MADAME_SHOSHANA, 'Have your horoscope cast', { stat: 'Watchful', diff: 20 }, 1, null,
+      'Whispered Hint 51-150 (rare: Nightmares +3 instead); Moon-Pearl -5 either way.',
+      { needs: 'Moon-Pearl 5', fail: 'Nightmares +2.' }),
+    feastLeaf(FEAST_MADAME_SHOSHANA, 'Ask for an extispicy', { luck: 0.7 }, 1, null,
+      'Persuasive +2, Romantic Notion 6-15 (rare: Touching Love Story x1); Moon-Pearl -20 either way.',
+      { needs: 'Moon-Pearl 20', fail: 'Nightmares +1, Persuasive +1.' }),
+
+    // --- Scandal and intrigue! (2 leaf options) ---
+    feastLeaf(FEAST_SCANDAL_INTRIGUE, 'Send a romantic note to one you admire', null, 1, null,
+      "Social Action; Fascinating... +10, Making Waves +2 (cap 20) either side.", { needs: 'Fascinating... 1' }),
+    feastLeaf(FEAST_SCANDAL_INTRIGUE, 'Take the opportunity to find out some secrets', { stat: 'Watchful', diff: 50 }, 1, null,
+      'Appalling Secret 3, Intriguing Snippet 5, Inkling of Identity x2.', { fail: 'Suspicion +1.' }),
+
+    // --- A face from the past (2 leaf options, both checkless) ---
+    feastLeaf(FEAST_FACE_FROM_PAST, "Don't remind yourself", null, 2, null,
+      "Melancholy +1 (cap 5), Hard-Earned Lesson x1 (cap 6), Watchful +3, Romantic Notion 6-15."),
+    feastLeaf(FEAST_FACE_FROM_PAST, 'An intriguing resemblance', null, 1, null,
+      'Subtle +1 (cap 5), Melancholy +3 (cap 10), Watchful +4, Touching Love Story x1.'),
+
+    // --- Sweets to the sweet (1 leaf option) ---
+    feastLeaf(FEAST_SWEETS, 'Eat one', { luck: 0.5 }, 2, 2,
+      'Unaccountably Peckish -2, Wounds -2, Nightmares -2, Prisoner\'s Honey 5 (rare: +Magnificent Diamond x1).',
+      { fail: 'Unaccountably Peckish +2, Wounds +2, Nightmares +2.' }),
+  ];
+
+  const FEAST_INDEX = carouselIndex(FEAST_OPTIONS);
+
+  const FEAST_CLASS = 'fl-ux-feast-rose';
+  const FEAST_FLAG = 'flUxFeastRose';
+  const FEAST_BRANCH_CLASS = 'fl-ux-feast-rose-branch';
+  const FEAST_BRANCH_FLAG = 'flUxFeastRoseBranch';
+
+  function feastBadgeText(e) {
+    if (e.open) return '-> ' + e.open;
+    if (e.masquing == null) return 'Masquing +0';
+    const mark = e.ch && e.ch.luck ? CAROUSEL_MARK_EXPECTED : e.ch ? CAROUSEL_MARK_CHALLENGE : '';
+    const val = e.ch && e.ch.luck ? Math.round((e.masquing * e.ch.luck + (e.failMasquing || 0) * (1 - e.ch.luck)) * 10) / 10 : e.masquing;
+    return 'Masquing +' + val + mark;
+  }
+
+  function feastAirsText(airs) {
+    if (!airs) return null;
+    if (Array.isArray(airs[0])) return airs.map((w) => w[0] + '-' + w[1]).join(', ');
+    return airs[0] + '-' + airs[1];
+  }
+
+  function feastOfTheRoseSpec(e) {
+    if (e.open) {
+      return {
+        text: feastBadgeText(e), color: CAROUSEL_COLOR_LABEL,
+        title: e.name + '\n' + FEAST_STORYLET + '\n\nAirs of London ' + feastAirsText(e.airs) + '.\n'
+          + 'Opens: ' + e.open + '.' + (e.needs ? '\nRequires: ' + e.needs + '.' : '') + (e.note ? '\n' + e.note : ''),
+      };
+    }
+    const chText = e.ch ? (e.ch.luck ? 'Luck ' + Math.round(e.ch.luck * 100) + '%' : e.ch.stat + ' ' + e.ch.diff) : 'No challenge.';
+    const lines = [
+      e.name, e.storylet + ', from The Feast of the Rose!', '',
+      'Challenge: ' + chText + '.',
+      e.needs ? 'Requires: ' + e.needs + '.' : null,
+      'Gives: ' + e.gives,
+      e.rare ? 'Rare success: Masquing +' + e.rare + '.' : null,
+      e.fail ? 'Failure: ' + e.fail : null,
+      e.fate ? 'Fate-locked or Fate-priced -- excluded from any free-to-play ranking.' : null,
+      e.strict ? 'A generic short name -- gated to this exact sub-storylet only.' : null,
+      e.note || null,
+    ].filter(Boolean).join('\n');
+    return { text: feastBadgeText(e), color: CAROUSEL_COLOR_PAYOUT, title: lines };
+  }
+
+  function feastStoryletSpec(key) {
+    if (key !== normalizeName(FEAST_STORYLET)) return null;
+    return {
+      text: 'Feast of the Rose', color: CAROUSEL_COLOR_LABEL,
+      title: FEAST_STORYLET + '\n\nMasquing caps at 20 and later trades for special companions. '
+        + 'Seasonal -- unlocked only during the Feast of the Exceptional Rose.\n'
+        + 'Open the storylet and every option is badged in its own right.',
+    };
+  }
+
+  function feastOfTheRoseRatings() {
+    carouselRatings({
+      storylets: [FEAST_STORYLET, FEAST_MASKED_REVEL, FEAST_DANCE_DEVILS, FEAST_LOVERS_TRYST, FEAST_SEASONAL_MISCHIEF,
+        FEAST_GEBRANDT, FEAST_THEATRICAL, FEAST_LONG_LOST_LOVE, FEAST_SINNING_JENNY, FEAST_MRS_PLENTYS,
+        FEAST_DUCHESS_BANQUET, FEAST_MYSTERIOUS_ENVELOPE, FEAST_DANTES_GRILL, FEAST_MADAME_SHOSHANA,
+        FEAST_SCANDAL_INTRIGUE, FEAST_FACE_FROM_PAST, FEAST_SWEETS],
+      index: FEAST_INDEX, storyletSpec: feastStoryletSpec, optionSpec: feastOfTheRoseSpec,
+      cls: FEAST_CLASS, flag: FEAST_FLAG, branchCls: FEAST_BRANCH_CLASS, branchFlag: FEAST_BRANCH_FLAG,
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -38455,6 +38786,7 @@
     // Airs of London storylets (no guide) shelf: card-and-storylet markup, no panel.
     { name: 'rattus-faber', run: rattusFaberRatings },
     { name: 'tower-of-eyes', run: towerOfEyesRatings },
+    { name: 'feast-of-the-rose', run: feastOfTheRoseRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a

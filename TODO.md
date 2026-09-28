@@ -70,7 +70,7 @@ Fallen London:
   and reading the current Airs off the unlock tooltip (needs a DOM capture).
     - https://fallenlondon.wiki/wiki/A_Bad_Case_of_Rattus_Faber [19 unlock] (implemented)
     - https://fallenlondon.wiki/wiki/The_Tower_of_Eyes:_Behind_Closed_Doors_at_a_Handsome_Townhouse [18 unlock] (implemented)
-    - https://fallenlondon.wiki/wiki/The_Feast_of_the_Rose! [16 unlock]
+    - https://fallenlondon.wiki/wiki/The_Feast_of_the_Rose! [16 unlock] (implemented)
     - https://fallenlondon.wiki/wiki/Up_Close_with_a_Festive_Fir [16 unlock]
     - https://fallenlondon.wiki/wiki/Coffee_with_the_Last_Constable [14 unlock]
     - https://fallenlondon.wiki/wiki/A_drink_with_the_Cheery_Man [13 unlock]
@@ -135,6 +135,8 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Visiting_the_Person_who_Was_your_Spouse [2 unlock]
     - https://fallenlondon.wiki/wiki/A_Marksmanship_Competition_for_a_Prize_of_Jade! [1 unlock]
     - https://fallenlondon.wiki/wiki/A_masked_revel_for_the_Feast_of_the_Rose! [1 unlock]
+      (implemented; the "Cast aside your mask!" option is already inside the feast-of-the-rose
+      feature's own "A masked revel!" redirect chain, not a second feature)
     - https://fallenlondon.wiki/wiki/A_Public_Lecture [1 text] (considered, nothing to badge: the
       /Fads subpage is a red herring, gated by Palaeontological Fads not Airs of London -- see
       docs/superpowers/research/2026-09-27-airs-of-london-group-d.md section H4)
