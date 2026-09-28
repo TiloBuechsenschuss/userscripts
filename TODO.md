@@ -13,32 +13,16 @@ Fallen London:
   Early MYN:
 
   Early Firmament:
-    - https://fallenlondon.wiki/wiki/Ecdysis_(Guide) [Hallow's Throat] (implemented)
-    - https://fallenlondon.wiki/wiki/The_Midnight_Trade_(Guide) [The Midnight Moon] (implemented)
     - https://fallenlondon.wiki/wiki/The_Stacks_(Guide) [The Stacks] (deferred: ~25 cards,
       Fate/companion-locked content, a hidden state machine gating which cards appear, and the
       guide's own EPA figures disagree by section (5.27 / 9.94 / 6.2-6.3) -- needs its own
       research pass fetching the ~25 option pages before a badge-meaning decision can be made,
       same as discordant-studies and airs-of-london got; see
       docs/superpowers/research/2026-09-27-early-firmament.md section 4)
-    - https://fallenlondon.wiki/wiki/The_Kinetoculus_(Guide) [no area] (implemented; nothing to
-      badge: purely narrative, every emulsion costs the same 200 Stuivers and gives a fixed
-      non-competing flavour item, no economic or comparable reward across the 16 lens/location
-      combinations)
 
   Mid Firmament:
-    - https://fallenlondon.wiki/wiki/The_High_Sancta_(Guide) [Zenith] (implemented; Sound of Wings
-      burden cards in eight other locations are a follow-up, not badged here)
-    - https://fallenlondon.wiki/wiki/Moon-Miser_Herding_(Guide) [Zenith] (implemented)
-    - https://fallenlondon.wiki/wiki/The_Sous_Catacombs_(Guide) [no area] (implemented; gated by
-      option-name match, not a heading -- the real donation-card heading is still unconfirmed)
 
   Late Firmament:
-    - https://fallenlondon.wiki/wiki/Upon_a_Red_Stage_(Guide) [Queeneater's Castle] (implemented)
-    - https://fallenlondon.wiki/wiki/To_Make_a_Moth_(Guide) [Risen Burgundy] (no stage tag; placed with the Firmament's late content) (implemented; scoped strictly to the storylet's own 14-row table -- its menace-farming prerequisites are risen-burgundy's, not duplicated here)
-    - https://fallenlondon.wiki/wiki/Scaling_the_Quartz_(Guide) [Stonegift] (implemented; badge is
-      the base value at Momentum/Flexibility/Static Charge 0, not live-read; gated by trying all
-      three guide-named storylet titles, the real one is still unconfirmed)
     - https://fallenlondon.wiki/wiki/The_Marrow_Behind_(Guide) [no area]
 
   Fate-locked (same order: stage, then area):
@@ -261,8 +245,28 @@ Fallen London:
       - https://fallenlondon.wiki/wiki/Digging_in_the_Hurlers_(Guide) [The Hurlers] (implemented)
       - https://fallenlondon.wiki/wiki/Marigold_Station_(Guide) [Marigold Station] (implemented)
 
+    Early Firmament:
+      - https://fallenlondon.wiki/wiki/Ecdysis_(Guide) [Hallow's Throat] (implemented)
+      - https://fallenlondon.wiki/wiki/The_Midnight_Trade_(Guide) [The Midnight Moon] (implemented)
+      - https://fallenlondon.wiki/wiki/The_Kinetoculus_(Guide) [no area] (considered, nothing to
+        badge: purely narrative, every emulsion costs the same 200 Stuivers and gives a fixed
+        non-competing flavour item, no economic or comparable reward across the 16 lens/location
+        combinations)
+
+    Mid Firmament:
+      - https://fallenlondon.wiki/wiki/The_High_Sancta_(Guide) [Zenith] (implemented; Sound of Wings
+        burden cards in eight other locations are a follow-up, not badged here)
+      - https://fallenlondon.wiki/wiki/Moon-Miser_Herding_(Guide) [Zenith] (implemented)
+      - https://fallenlondon.wiki/wiki/The_Sous_Catacombs_(Guide) [no area] (implemented; gated by
+        option-name match, not a heading -- the real donation-card heading is still unconfirmed)
+
     Late Firmament:
       - https://fallenlondon.wiki/wiki/Risen_Burgundy_(Guide) [Risen Burgundy] (no stage tag; card-based carousels, unlocked at Firmament 370; moved from Reference) (implemented; no panel; the whole deck is badged except the eighteen steeds on Whoso List to Hunt, the Weaver's investments and shop, the Ducal Mint, and The Sound of Wings (Burgundy))
+      - https://fallenlondon.wiki/wiki/Upon_a_Red_Stage_(Guide) [Queeneater's Castle] (implemented)
+      - https://fallenlondon.wiki/wiki/To_Make_a_Moth_(Guide) [Risen Burgundy] (no stage tag; placed with the Firmament's late content) (implemented; scoped strictly to the storylet's own 14-row table -- its menace-farming prerequisites are risen-burgundy's, not duplicated here)
+      - https://fallenlondon.wiki/wiki/Scaling_the_Quartz_(Guide) [Stonegift] (implemented; badge is
+        the base value at Momentum/Flexibility/Static Charge 0, not live-read; gated by trying all
+        three guide-named storylet titles, the real one is still unconfirmed)
 
     Reference (not carousels):
       - https://fallenlondon.wiki/wiki/Seeking_the_Meaning_of_the_Plaster_Face_(Guide) [Big Rat storyline] (found 2026-09-24 while analysing Running Battle; its Running Battle options are already in `running-battle` -- skip those) (implemented as `plaster-face`; no panel: the investigation, the steps, the endings and the cards; Running Battle keeps its own options)
