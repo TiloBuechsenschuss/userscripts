@@ -38960,6 +38960,108 @@
     });
   }
 
+  // === feature: Consider your Aquaria / Search your Terraria ==============
+  //
+  // Two opportunity cards at University Laboratory (Place), confirmed NOT
+  // in the existing `university-laboratory` feature's `LAB_CARDS` table.
+  // Combined into one feature, `card: 'aquaria' | 'terraria'`, since they
+  // are the same mechanic (consume a base creature for flat Research, or
+  // risk an Airs-gated one at a Watchful challenge for the same creature
+  // back) at the same location.
+  //
+  // **What the badge says.** Research given is the obvious ranking number;
+  // the base always-available options are marked "always available,
+  // consumes the creature". The 8+8 Airs-gated options are marked with
+  // their window and Watchful difficulty -- the real differentiator, since
+  // reward barely varies (same "rank by risk" shape as `midnight-trade`).
+  // Terraria's bonus-quality rows (Shapeling Arts, Parabolan Research CP
+  // alongside the Research number) show that bonus in the tooltip --
+  // Rubbery Dragon (Shapeling Arts +2, the highest bonus) must not read as
+  // merely "mid-pack" from its Research number alone, the same
+  // "don't-let-the-raw-number-mislead" caution as the Sous Catacombs'
+  // skeleton-value warning. Ocular Toadbeast is Fate-gated -- excluded from
+  // ranking, kept in the tooltip.
+  //
+  // Transcribed from each card's own inline reference table (no separate
+  // option-page fetch needed, confirmed complete on the card page itself;
+  // fetched through the API, 2026-09-27) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-b.md
+  // sections 4 and 5. The exact in-game OPTION TEXT for the base
+  // always-available rows (the research doc names only one example, "Study
+  // a Goldfish", for Aquaria's four base rows and "Study a Lizard" for
+  // Terraria's one) was not independently confirmed per row -- this table
+  // uses each row's own creature name as its option text, which may need
+  // correcting once captured in-game; see AGENTS.md's "Not verified
+  // in-game" list. Corrections go in UNIVERSITY_CREATURE_OPTIONS and
+  // nowhere else.
+
+  function ucRow(card, name, research, more) {
+    return Object.assign({ card: card, name: name, research: research }, more);
+  }
+
+  const UNIVERSITY_CREATURE_OPTIONS = [
+    // --- Consider your Aquaria (12) ---
+    ucRow('aquaria', 'Cheerful Goldfish', 2, { consumes: true }),
+    ucRow('aquaria', 'Possessed Goldfish', 2, { consumes: true, note: 'Also gives Parabolan Research x4.' }),
+    ucRow('aquaria', 'Live Specimen', 25, { consumes: true }),
+    ucRow('aquaria', 'Deep-zee Catch', 10, { consumes: true }),
+    ucRow('aquaria', 'Mostly Stuffed Bound Shark', 25, { ch: { stat: 'Watchful', diff: 220 } }),
+    ucRow('aquaria', 'Unerring Elver', 25, { ch: { stat: 'Watchful', diff: 220 } }),
+    ucRow('aquaria', 'Haunted Goldfish', 4, { ch: { stat: 'Watchful', diff: 220 } }),
+    ucRow('aquaria', 'Prismatic Squidling', 25, { ch: { stat: 'Watchful', diff: 215 } }),
+    ucRow('aquaria', 'Dark-Carapaced Crustacean', 25, { ch: { stat: 'Watchful', diff: 220 } }),
+    ucRow('aquaria', 'Gilded Crustacean', 50, { ch: { stat: 'Watchful', diff: 250 } }),
+    ucRow('aquaria', 'Copper-Speckled Crustacean', 25, { ch: { stat: 'Watchful', diff: 220 } }),
+    ucRow('aquaria', 'Voracious Lamp-Eye', 25, { ch: { stat: 'Watchful', diff: 220 } }),
+
+    // --- Search your Terraria (9) ---
+    ucRow('terraria', 'Reprehensible Lizard', 3, { consumes: true, research: 'Amphibian' }),
+    ucRow('terraria', 'Partisan Messenger Tortoise', 15, { ch: { stat: 'Watchful', diff: 210 } }),
+    ucRow('terraria', 'Mycological Bullfrog', 25, { ch: { stat: 'Watchful', diff: 220 } }),
+    ucRow('terraria', 'Ocular Toadbeast', 25, { ch: { stat: 'Watchful', diff: 220 }, fate: true }),
+    ucRow('terraria', 'Amber Iguana', 10, { ch: { stat: 'Watchful', diff: 220 }, bonus: 'Shapeling Arts +1 CP' }),
+    ucRow('terraria', 'Viric Lizard', 25, { ch: { stat: 'Watchful', diff: 230 }, bonus: 'Parabolan Research +10x' }),
+    ucRow('terraria', 'Warm-hearted Amber Iguana', 10, { ch: { stat: 'Watchful', diff: 230 }, bonus: 'Shapeling Arts +1 CP' }),
+    ucRow('terraria', 'Rubbery Dragon', 10, { ch: { stat: 'Watchful', diff: 230 }, bonus: 'Shapeling Arts +2 CP' }),
+    ucRow('terraria', 'Hound of Heaven', 15, { ch: { stat: 'Watchful', diff: 210 } }),
+  ];
+
+  const UNIVERSITY_CREATURES_CLASS = 'fl-ux-university-creatures';
+  const UNIVERSITY_CREATURES_FLAG = 'flUxUniversityCreatures';
+
+  function universityCreaturesResearchName(e) {
+    return e.research === 'Amphibian' ? 'Amphibian Research' : 'Piscine Research';
+  }
+
+  function universityCreaturesSpec(e) {
+    const research = universityCreaturesResearchName(e);
+    const mark = e.consumes ? '' : CAROUSEL_MARK_CHALLENGE;
+    const lines = [
+      e.name, e.card === 'aquaria' ? 'Consider your Aquaria' : 'Search your Terraria', ', University Laboratory', '',
+      'Gives: ' + research + ' x' + e.research + '.',
+      e.consumes ? 'Always available -- consumes the creature from inventory.'
+        : 'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '. Does not consume the creature on success.',
+      e.bonus ? 'Also gives: ' + e.bonus + '.' : null,
+      e.note || null,
+      e.fate ? 'Fate-gated -- excluded from any free-to-play ranking.' : null,
+    ].filter(Boolean).join('\n');
+    return { text: research + ' x' + e.research + mark, color: CAROUSEL_COLOR_PROGRESS, title: lines };
+  }
+
+  function lookupUniversityCreature(name) {
+    return UNIVERSITY_CREATURE_OPTIONS.find(function (e) { return e.name === name; }) || null;
+  }
+
+  function universityCreaturesRatings() {
+    eachCardName(function (host, name, place, style) {
+      const card = lookupUniversityCreature(name);
+      attachBadge(host, {
+        cls: UNIVERSITY_CREATURES_CLASS, flag: UNIVERSITY_CREATURES_FLAG, value: name,
+        spec: card ? universityCreaturesSpec(card) : null, place: place, style: style,
+      });
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -39224,6 +39326,7 @@
     { name: 'cheery-man-constable', run: cheeryManConstableRatings },
     { name: 'time-in-bed', run: timeInBedRatings },
     { name: 'burning-city', run: burningCityRatings },
+    { name: 'university-creatures', run: universityCreaturesRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
