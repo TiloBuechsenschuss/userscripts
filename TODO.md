@@ -75,60 +75,113 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Coffee_with_the_Last_Constable [14 unlock]
     - https://fallenlondon.wiki/wiki/A_drink_with_the_Cheery_Man [13 unlock]
     - https://fallenlondon.wiki/wiki/Pursuing_a_Mutually-Agreed_Divorce [12 unlock]
-    - https://fallenlondon.wiki/wiki/The_Rewards_of_Ambition [12 text]
+    - https://fallenlondon.wiki/wiki/The_Rewards_of_Ambition [12 text] (considered, nothing to
+      badge: one-time post-Ambition epilogue clicks, reward is an unitemised "mix," the
+      Airs-of-London variance is flavour text not option titles -- see
+      docs/superpowers/research/2026-09-27-airs-of-london-group-b.md section 2)
     - https://fallenlondon.wiki/wiki/Time_in_bed [12 unlock]
     - https://fallenlondon.wiki/wiki/A_Dream_of_a_Burning_City [9 unlock, 1 text]
     - https://fallenlondon.wiki/wiki/Consider_your_Aquaria [8 unlock]
     - https://fallenlondon.wiki/wiki/Search_your_Terraria [8 unlock]
     - https://fallenlondon.wiki/wiki/The_Clay_Quarters_(Storylet) [8 unlock]
-    - https://fallenlondon.wiki/wiki/A_Jaunt_in_the_(Weather) [5 unlock, 2 text]
+    - https://fallenlondon.wiki/wiki/A_Jaunt_in_the_(Weather) [5 unlock, 2 text] (considered,
+      nothing to badge: purely narrative, only sets a counter toward "Look up at the sky", no
+      items or Stuiver anywhere in the chain -- see
+      docs/superpowers/research/2026-09-27-airs-of-london-group-c.md section 1)
     - https://fallenlondon.wiki/wiki/Attract_a_Visitor_at_Hallowmas [7 unlock]
     - https://fallenlondon.wiki/wiki/A_Jaunt_in_the_(Weather)_(The_Waswood) [5 unlock, 1 text]
+      (considered, nothing to badge: purely narrative, only sets a counter toward "Indulge your
+      doubts", no items or Stuiver anywhere in the chain -- see
+      docs/superpowers/research/2026-09-27-airs-of-london-group-c.md section 3)
     - https://fallenlondon.wiki/wiki/A_long_conversation_with_the_Functionary [6 unlock]
+      (considered, nothing to badge: every option, Airs-gated or not, is pure flavour text with
+      no item/Stuiver/CP reward -- see
+      docs/superpowers/research/2026-09-27-airs-of-london-group-c.md section 4)
     - https://fallenlondon.wiki/wiki/Investigate_Clathermont%27s_Tattoo_Parlour [6 unlock]
     - https://fallenlondon.wiki/wiki/Shifting_Streets_(Storylet) [6 unlock]
     - https://fallenlondon.wiki/wiki/Candlefinder:_Canvassing_the_Clay_Men [5 unlock]
     - https://fallenlondon.wiki/wiki/Literary_Ambitions [5 unlock]
     - https://fallenlondon.wiki/wiki/On_the_Trail_(Storylet) [5 unlock]
     - https://fallenlondon.wiki/wiki/Send_a_Christmas_Card [5 unlock]
-    - https://fallenlondon.wiki/wiki/Wolfstack_in_the_fog [4 unlock]
+    - https://fallenlondon.wiki/wiki/Wolfstack_in_the_fog [4 unlock] (considered, nothing to
+      badge: retired content, no longer in the game)
     - https://fallenlondon.wiki/wiki/The_Flit_and_its_King [3 unlock]
     - https://fallenlondon.wiki/wiki/A_Neathy_Education [2 unlock]
-    - https://fallenlondon.wiki/wiki/Candlefinder:_Canvassing_the_Dockers [2 unlock]
-    - https://fallenlondon.wiki/wiki/Candlefinder:_Canvassing_the_Servants [2 unlock]
+    - https://fallenlondon.wiki/wiki/Candlefinder:_Canvassing_the_Dockers [2 unlock] (considered,
+      nothing to badge yet: one step of a larger "Candlefinder" investigation storyline nothing
+      in this file touches -- needs its own dedicated research pass before badging any single
+      location, same treatment Someone Is Coming and Menace Locations got -- see
+      docs/superpowers/research/2026-09-27-airs-of-london-group-d.md section G)
+    - https://fallenlondon.wiki/wiki/Candlefinder:_Canvassing_the_Servants [2 unlock] (considered,
+      nothing to badge yet: same Candlefinder storyline as Canvassing the Dockers above)
     - https://fallenlondon.wiki/wiki/Duty_Calls [2 unlock]
-    - https://fallenlondon.wiki/wiki/Read_incoming_mail [2 text]
-    - https://fallenlondon.wiki/wiki/SNOWBOUND! [2 unlock]
+    - https://fallenlondon.wiki/wiki/Read_incoming_mail [2 text] (considered, nothing to badge:
+      of 19 options only 2 mention Airs, both pure text-retitle on item-gated formula actions
+      with no reward variance -- see
+      docs/superpowers/research/2026-09-27-airs-of-london-group-d.md section H2)
+    - https://fallenlondon.wiki/wiki/SNOWBOUND! [2 unlock] (considered, nothing to badge: a
+      30-Fate one-off behind an item lock in a once-a-year seasonal card -- see
+      docs/superpowers/research/2026-09-27-airs-of-london-group-d.md section H2)
     - https://fallenlondon.wiki/wiki/The_Alleys_of_Spite [2 unlock]
     - https://fallenlondon.wiki/wiki/The_Capering_Relicker_and_Gulliver_are_Outside_in_the_Street [2 unlock]
     - https://fallenlondon.wiki/wiki/The_Coquettish_Relicker_and_Mathilde_are_Making_the_Rounds [2 unlock]
     - https://fallenlondon.wiki/wiki/The_Curt_Relicker_and_Montgomery_are_Moving_Quietly_Past [2 unlock]
     - https://fallenlondon.wiki/wiki/The_Shivering_Relicker_and_Pinnock_are_Trundling_By [2 unlock]
-    - https://fallenlondon.wiki/wiki/The_Usual_Glut_of_Weather [2 text]
+    - https://fallenlondon.wiki/wiki/The_Usual_Glut_of_Weather [2 text] (considered, nothing to
+      badge yet: pure retitle of "Take a stroll in the (Weather)"/storylet heading, per the
+      skill's own step-5 precedent -- alias the day a feature reaches A Jaunt in the (Weather),
+      not before)
     - https://fallenlondon.wiki/wiki/Visiting_the_Person_who_Was_your_Lover [2 unlock]
     - https://fallenlondon.wiki/wiki/Visiting_the_Person_who_Was_your_Spouse [2 unlock]
     - https://fallenlondon.wiki/wiki/A_Marksmanship_Competition_for_a_Prize_of_Jade! [1 unlock]
     - https://fallenlondon.wiki/wiki/A_masked_revel_for_the_Feast_of_the_Rose! [1 unlock]
-    - https://fallenlondon.wiki/wiki/A_Public_Lecture [1 text]
+    - https://fallenlondon.wiki/wiki/A_Public_Lecture [1 text] (considered, nothing to badge: the
+      /Fads subpage is a red herring, gated by Palaeontological Fads not Airs of London -- see
+      docs/superpowers/research/2026-09-27-airs-of-london-group-d.md section H4)
     - https://fallenlondon.wiki/wiki/An_Invitation_to_the_Bazaar [1 text]
     - https://fallenlondon.wiki/wiki/An_opportunity_for_profit [1 unlock]
     - https://fallenlondon.wiki/wiki/Bones_in_the_River [1 unlock]
     - https://fallenlondon.wiki/wiki/Celebrate_the_Feast_of_the_Exceptional_Rose! [1 unlock]
+      (considered, nothing to badge: one clean option in a low-traffic annual event card, not
+      worth a dedicated feature -- see
+      docs/superpowers/research/2026-09-27-airs-of-london-group-d.md section H2)
     - https://fallenlondon.wiki/wiki/Deal_with_Unfinished_Men [1 unlock]
     - https://fallenlondon.wiki/wiki/Donate_your_body_to_science_for_an_hour_or_two [1 unlock]
     - https://fallenlondon.wiki/wiki/Fallen_London,_where_everything_is_as_it_should_be [1 text]
+      (considered, nothing to badge: its one Airs-adjacent option is just a narrative link into
+      the already-noted Usual Glut of Weather mechanic -- see
+      docs/superpowers/research/2026-09-27-airs-of-london-group-d.md section H4)
     - https://fallenlondon.wiki/wiki/Guard_duty_at_the_Observatory [1 unlock]
-    - https://fallenlondon.wiki/wiki/Mrs_Gebrandt_asks_for_your_help [1 unlock]
-    - https://fallenlondon.wiki/wiki/Perusal_of_Forgotten_Pages [1 text]
+    - https://fallenlondon.wiki/wiki/Mrs_Gebrandt_asks_for_your_help [1 unlock] (retired: {{Retired}}
+      on the wiki, a 2011 one-off)
+    - https://fallenlondon.wiki/wiki/Perusal_of_Forgotten_Pages [1 text] (considered, nothing to
+      badge: the Airs connection is cosmetic flavour text on a single fixed-reward action,
+      redirect target is The Censored Census of 1862#Item Actions -- see
+      docs/superpowers/research/2026-09-27-airs-of-london-group-d.md section H2)
     - https://fallenlondon.wiki/wiki/Provide_Training_at_the_Department_of_Menace_Eradication [1 unlock]
     - https://fallenlondon.wiki/wiki/Rescue_Shipwrecked_Clay_Men [1 unlock]
-    - https://fallenlondon.wiki/wiki/Rob_a_drunk [1 unlock]
+    - https://fallenlondon.wiki/wiki/Rob_a_drunk [1 unlock] (implemented: already covered by
+      `someone-is-coming`'s existing "A furious and incoherent drunken rat" option -- its OTHER
+      Airs-gated option's window is still unknown, a follow-up if full coverage is ever wanted --
+      see docs/superpowers/research/2026-09-27-airs-of-london-group-d.md section A)
     - https://fallenlondon.wiki/wiki/The_Chandleress%27_Complaint [1 unlock]
-    - https://fallenlondon.wiki/wiki/The_Prussian_Salon [1 unlock]
-    - https://fallenlondon.wiki/wiki/The_Seeking_Road [1 unlock]
-    - https://fallenlondon.wiki/wiki/The_Usual_Glut_of_Weather_(The_Waswood) [1 text]
-    - https://fallenlondon.wiki/wiki/This_Morning%27s_Gazette [1 text]
-    - https://fallenlondon.wiki/wiki/Work_in_your_Cabinet_Noir [1 text]
+    - https://fallenlondon.wiki/wiki/The_Prussian_Salon [1 unlock] (not Airs of London: its
+      options are gated by Airs of Ealing Gardens, a different randomiser -- likely a wiki
+      miscategorisation; see docs/superpowers/research/2026-09-27-airs-of-london-group-d.md
+      section B)
+    - https://fallenlondon.wiki/wiki/The_Seeking_Road [1 unlock] (considered, nothing to badge:
+      full page carries zero "Airs of London" mentions, every gate is Seeking Mr Eaten's Name
+      content instead -- see docs/superpowers/research/2026-09-27-airs-of-london-group-d.md
+      section H4)
+    - https://fallenlondon.wiki/wiki/The_Usual_Glut_of_Weather_(The_Waswood) [1 text] (considered,
+      nothing to badge yet: same pure-retitle case as The Usual Glut of Weather above -- alias
+      the day a feature reaches A Jaunt in the (Weather) (The Waswood), not before)
+    - https://fallenlondon.wiki/wiki/This_Morning%27s_Gazette [1 text] (considered, nothing to
+      badge: full page carries zero "Airs of London" mentions -- see
+      docs/superpowers/research/2026-09-27-airs-of-london-group-d.md section H4)
+    - https://fallenlondon.wiki/wiki/Work_in_your_Cabinet_Noir [1 text] (implemented: already
+      covered by the existing `deciphering` and `disappearing` features -- see
+      docs/superpowers/research/2026-09-27-airs-of-london-group-d.md section H3)
 
   Implemented (grouped as above; the Airs storylets are those an existing feature badges):
     Early MYN:
