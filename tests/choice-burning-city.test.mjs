@@ -180,6 +180,11 @@ check('no Burning City name is in another feature\'s table',
   (() => { const others = allNames();
     return api.BURNING_CITY_OPTIONS.map((e) => e.name).filter((n) => others.includes(key(n))); })(), []);
 
+check('a success shows what it adds to Fie to the Wyrm: +2 on Flee and Cower, +1-2 on Fight, +1 elsewhere',
+  ['Fight for breath', 'Flee over melting cobbles', 'Cower', 'Watch the Tower', 'Man the cannons']
+    .map((n) => api.burningCitySpec(row(n)).text.replace(/ ▼ risk$/, '')),
+  ['Fie to the Wyrm +1-2', 'Fie to the Wyrm +2', 'Fie to the Wyrm +2', 'Fie to the Wyrm +1', 'Fie to the Wyrm +1']);
+
 check('the feature is registered', api.FEATURES.some((f) => f.name === 'burning-city'), true);
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall good');

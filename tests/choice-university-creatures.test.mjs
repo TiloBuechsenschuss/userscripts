@@ -78,12 +78,15 @@ function makeHandCard(name) {
 }
 
 let handCards = [];
+let roots = [];
+let branches = [];
 const fakeDoc = {
   body: makeEl('body'),
   querySelectorAll: (sel) => {
     if (sel === '.hand__card-container') return handCards;
     if (sel === '.hand .small-card__body .media__heading') return [];
-    if (sel === '.storylet-root__heading') return [];
+    if (sel === '.storylet-root__heading' || sel === '.storylet__heading, .storylet-root__heading') return roots;
+    if (sel === '.branch__title') return branches;
     return [];
   },
   querySelector: () => null,
@@ -98,7 +101,8 @@ const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
     'return { UNIVERSITY_CREATURE_OPTIONS, universityCreaturesSpec, universityCreaturesRatings,'
-    + ' UNIVERSITY_CREATURES_CLASS, LAB_CARDS, BURNING_CITY_OPTIONS, TIME_IN_BED_OPTIONS,'
+    + ' UNIVERSITY_CREATURES_CLASS, UNIVERSITY_CREATURES_BRANCH_CLASS, UNIVERSITY_CREATURES_CARD_CLASS, carouselLookup, UNIVERSITY_CREATURES_INDEX,'
+    + ' UNIVERSITY_CREATURES_BRANCH_CLASS, LAB_CARDS, BURNING_CITY_OPTIONS, TIME_IN_BED_OPTIONS,'
     + ' CHEERY_CONSTABLE_OPTIONS, FFIR_OPTIONS, FEAST_OPTIONS, TOWER_OF_EYES_OPTIONS,'
     + ' RATTUS_FABER_OPTIONS, AOL_OPTIONS, ECDYSIS_OPTIONS, MIDNIGHT_TRADE_OPTIONS, ZEE_CARDS,'
     + ' SPITE_CARDS, FOTZ_CARDS, HIGH_SANCTA_CARDS, MOON_MISER_RISKY, MOON_MISER_GOLD, SOUS_BONES,'
@@ -152,16 +156,59 @@ check('the Fate-gated Ocular Toadbeast is excluded from ranking but present',
 check('neither card is in the existing university-laboratory feature\'s LAB_CARDS',
   api.LAB_CARDS.some((c) => c.name === 'Consider your Aquaria' || c.name === 'Search your Terraria'), false);
 
-check('wiring: a known Aquaria card badges by name in the hand',
+function makeHeading(text) {
+  const parent = makeEl('div');
+  const el = makeEl('h2');
+  el.childNodes.push({ nodeType: 3, nodeValue: text });
+  el.textContent = text;
+  parent.appendChild(el);
+  return el;
+}
+const badgeAfter = (head, cls) => {
+  for (let n = head.nextElementSibling; n && n.classList.contains(api.BADGE_CLASS); n = n.nextElementSibling) {
+    if (n.classList.contains(cls)) return n.textContent;
+  }
+  return null;
+};
+
+check('wiring: the creatures are OPTIONS of the opened card, so they badge by branch title inside it',
   (() => {
-    const gold = makeHandCard('Cheerful Goldfish');
-    handCards = [gold];
+    const gold = makeHeading('Cheerful Goldfish');
+    const lizard = makeHeading('Reprehensible Lizard');
+    const tort = makeHeading('Unerring Elver');
+    const out = [];
+    roots = [makeHeading('Consider your Aquaria')];
+    branches = [gold, tort];
     api.universityCreaturesRatings();
-    const b = gold.children.find((c) => c.classList.contains(api.UNIVERSITY_CREATURES_CLASS));
+    out.push(badgeAfter(gold, api.UNIVERSITY_CREATURES_BRANCH_CLASS));
+    out.push(badgeAfter(tort, api.UNIVERSITY_CREATURES_BRANCH_CLASS));
+    roots = [makeHeading('Search your Terraria')];
+    branches = [lizard];
+    api.universityCreaturesRatings();
+    out.push(badgeAfter(lizard, api.UNIVERSITY_CREATURES_BRANCH_CLASS));
+    roots = [makeHeading('Some Other Storylet')];
+    api.universityCreaturesRatings();
+    out.push(badgeAfter(lizard, api.UNIVERSITY_CREATURES_BRANCH_CLASS));
+    roots = []; branches = [];
+    return out;
+  })(),
+  ['Piscine Research x2', 'Piscine Research x25?', 'Amphibian Research x3', null]);
+
+check('every Terraria row pays Amphibian Research and every Aquaria row Piscine Research, as a currency word not a count',
+  [api.UNIVERSITY_CREATURE_OPTIONS.filter((e) => e.card === 'terraria').every((e) => e.currency === 'Amphibian Research' && typeof e.research === 'number'),
+    api.UNIVERSITY_CREATURE_OPTIONS.filter((e) => e.card === 'aquaria').every((e) => e.currency === 'Piscine Research' && typeof e.research === 'number')],
+  [true, true]);
+
+check('wiring: a card in the hand gets the summary badge',
+  (() => {
+    const c = makeHandCard('Search your Terraria');
+    handCards = [c];
+    api.universityCreaturesRatings();
+    const b = c.children.find((x) => x.classList.contains(api.UNIVERSITY_CREATURES_CARD_CLASS));
     handCards = [];
     return b && b.textContent;
   })(),
-  'Piscine Research x2');
+  'Amphibian Research');
 
 check('no University Creatures name is in another feature\'s table',
   (() => { const others = allNames();

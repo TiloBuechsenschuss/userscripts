@@ -4,7 +4,7 @@
 // There's no test runner in this repo (see AGENTS.md). Standalone Node script: evaluates the
 // userscript's IIFE against a stub DOM and pulls out the internals.
 //
-// What's worth pinning here: 14 + 13 = 27 rows with a `side` field telling the two cards apart,
+// What's worth pinning here: 9 + 9 = 18 rows (one per DISPLAY text; the wiki's numbered page titles are merged into variants) with a `side` field telling the two cards apart,
 // that both cards' two real challenges each show the challenge mark, that all 6
 // Fate/Acquaintance-gated rows state their requirement, and that the two storylets never
 // cross-badge each other's options.
@@ -92,7 +92,7 @@ class FakeObserver { observe() {} }
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { CHEERY_CONSTABLE_OPTIONS, cheeryManConstableSpec, cheeryManConstableRatings,'
+    'return { carouselLookup, CHEERY_CONSTABLE_INDEX, CHEERY_CONSTABLE_OPTIONS, cheeryManConstableSpec, cheeryManConstableRatings,'
     + ' CHEERY_CONSTABLE_CLASS, CHEERY_CONSTABLE_BRANCH_CLASS, FFIR_OPTIONS, FEAST_OPTIONS,'
     + ' TOWER_OF_EYES_OPTIONS, RATTUS_FABER_OPTIONS, AOL_OPTIONS, ECDYSIS_OPTIONS,'
     + ' MIDNIGHT_TRADE_OPTIONS, ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS, LAB_CARDS, HIGH_SANCTA_CARDS,'
@@ -136,27 +136,42 @@ function allNames() {
   ].map(key);
 }
 
-check('14 + 13 = 27 rows, side field correct', [
+check('9 + 9 = 18 rows, side field correct', [
   api.CHEERY_CONSTABLE_OPTIONS.filter((e) => e.side === 'constable').length,
   api.CHEERY_CONSTABLE_OPTIONS.filter((e) => e.side === 'cheery').length,
-], [14, 13]);
+], [9, 9]);
 
 check('both cards\' two real challenges show the challenge mark',
-  ['Talk about the Cheery Man', 'Invite her home with you', 'The Last Constable 1', 'Hint that you might want to stay the night']
+  ['Talk about the Cheery Man', 'Invite her home with you', 'The Last Constable', 'Hint that you might want to stay the night']
     .every((n) => api.cheeryManConstableSpec(row(n)).text.includes('?')),
   true);
 
-check('all 6 Fate/Acquaintance-gated rows state their requirement',
-  ["She's not alone 1", "She's not alone 2", "She's not alone 3", 'Tell her your own story',
-    "He's not alone 1", "He's not alone 2"].every((n) => {
+check('all 4 Fate/Acquaintance/item-gated rows state their requirement',
+  ["She's not alone", 'Tell her your own story', "He's not alone", 'The Last Constable'].every((n) => {
     const e = row(n);
     return api.cheeryManConstableSpec(e).title.toLowerCase().includes('requires');
   }),
   true);
 
+check('merged display texts are reachable by the bare text AND the numbered wiki title, and nothing else is ambiguous',
+  (() => {
+    const at = (n, st) => api.carouselLookup(api.CHEERY_CONSTABLE_INDEX, n, key(st)) !== null;
+    const C = 'Coffee with the Last Constable';
+    const H = 'A drink with the Cheery Man';
+    return [at('Just chat', C), at('Just chat 1', C), at('Just chat 2', C), at("Ask her what she's working on", C),
+      at("Ask her what she's working on 3", C), at("She's not alone", C), at("She's not alone 2", C),
+      at('The Last Constable', H), at('The Last Constable 2', H), at("Whatever's on his mind", H),
+      at("Whatever's on his mind (High Airs)", H), at("He's not alone", H), at("He's not alone 3", H),
+      at('Just chat', H)];
+  })(), [true, true, true, true, true, true, true, true, true, true, true, true, true, false]);
+
+check('a merged row lists every Airs window in its tooltip and says the text is shared',
+  (() => { const t = api.cheeryManConstableSpec(row('Just chat')).title; return [t.includes('1-50'), t.includes('51-100'), t.includes('different Airs')]; })(),
+  [true, true, true]);
+
 check('wiring: a Constable-side option only badges while Coffee with the Last Constable is open',
   (() => {
-    const chat = makeHeading('Just chat 1');
+    const chat = makeHeading('Just chat');
     branches = [chat];
     const out = [];
     roots = [makeHeading('Coffee with the Last Constable')];

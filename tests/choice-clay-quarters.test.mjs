@@ -168,6 +168,10 @@ check('no Clay Quarters name is in another feature\'s table',
   (() => { const others = allNames();
     return api.CLAY_QUARTERS_OPTIONS.map((e) => e.name).filter((n) => others.includes(key(n))); })(), []);
 
+check('the headline is the main reward: Cryptic Clue for the poetry, Moon-Pearl for the Fate option',
+  ['Decipher Loamsprach poetry', 'Even the odds in a clay dispute'].map((n) => api.clayQuartersSpec(row(n)).text),
+  ['Cryptic Clue 6-15?', 'Fate 5: Moon-Pearl 100']);
+
 check('the feature is registered', api.FEATURES.some((f) => f.name === 'clay-quarters'), true);
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall good');

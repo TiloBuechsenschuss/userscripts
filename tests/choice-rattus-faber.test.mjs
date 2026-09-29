@@ -196,6 +196,11 @@ check('no Rattus Faber name is in another feature\'s table',
   (() => { const others = allNames();
     return api.RATTUS_FABER_OPTIONS.map((e) => e.name).filter((n) => others.includes(key(n))); })(), []);
 
+check('the Thing from the Wardrobe halves your CURRENT Vermin: no number on the badge, the dependency in words',
+  (() => { const s = api.rattusFaberSpec(row('A tactical opportunity: unleash the Thing from the Wardrobe'));
+    return [/^Vermin ÷2/.test(s.text), /[0-9]/.test(s.text.replace('÷2', '')), s.title.includes('CURRENT')]; })(),
+  [true, false, true]);
+
 check('the feature is registered', api.FEATURES.some((f) => f.name === 'rattus-faber'), true);
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall good');

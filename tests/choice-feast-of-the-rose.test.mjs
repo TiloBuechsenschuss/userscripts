@@ -154,7 +154,8 @@ check('every leaf option carries a Masquing figure (or null where the page gives
 check('the disambiguator trap: "Bluff your way in" resolves to its real target page '
     + '"Bluff your way in 2", and "The Duchess\' banquet" options are filed under the redirect '
     + 'name without the disambiguator suffix leaking into the badge',
-  row('Bluff your way in 2') !== undefined, true);
+  row('Bluff your way in') !== undefined && (row('Bluff your way in').aliases || []).includes('Bluff your way in 2')
+    && row('Bluff your way in 2') === undefined, true);
 
 check('"A masked revel!"\'s own "Cast aside your mask!" sub-row exists in this table',
   row('Cast aside your mask!') !== undefined, true);

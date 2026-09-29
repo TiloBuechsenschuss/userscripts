@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.33
+// @version      1.34
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -16588,6 +16588,8 @@
   // `broadCertainAt` of every difficulty, and its Average Gain is the success
   // and the rare success at the 25% its calculator assumes. The pages and the
   // guide agree throughout. Corrections go in SPIDER_OPTIONS and nowhere else.
+  // The Singing Mandrake's second storylet, Literary Ambitions, is folded into this feature's registered
+  // pass below (LITERARY_OPTIONS), as its own table: different storylet, different mechanic.
 
   const SPIDER_STORYLET = 'Propose a Pertinent Point';
   const SPIDER_RARE_ODDS = 0.25;
@@ -37934,6 +37936,15 @@
     });
   }
 
+  // The wiki titles a Fate-priced option "Name (N FATE)"; the game may or may not show the suffix, so both
+  // spellings answer (the file's precedent: aolE's 'Books and papers (3 FATE)').
+  function fateAliases(rows, prices) {
+    rows.forEach(function (e) {
+      if (prices[e.name] == null) return;
+      e.aliases = (e.aliases || []).concat(e.name + ' (' + prices[e.name] + ' FATE)');
+    });
+  }
+
   // === feature: A Bad Case of Rattus Faber ================================
   //
   // Your Lodgings. Reduce the progress quality "Troubled by Vermin" to 0
@@ -38004,8 +38015,8 @@
     rfMain('A tactical opportunity: employ a rat-catcher', '6-49', [6, 35], { luck: 0.7 },
       -5, 'Vermin -5', -3, 'Vermin -3', { needs: 'Rostygold x50 (always spent either way)' }),
     rfMain('A tactical opportunity: unleash the Thing from the Wardrobe', '8-49', [36, 60], { luck: 0.5 },
-      -0.5, 'Unaccountably Peckish x2, Scandal +2, Vermin -half', -2, 'Vermin -2',
-      { needs: 'Starveling Cat x1 (needed and spent)' }),
+      null, 'Unaccountably Peckish x2, Scandal +2, Vermin -half', -2, 'Vermin -2',
+      { needs: 'Starveling Cat x1 (needed and spent)', half: true }),
     rfMain('A tactical opportunity: hire a specialist', '11-49', [61, 90], null,
       null, null, null, null, { open: RATTUS_FABER_DOTTORE }),
     rfMain('A tactical opportunity: locate an L.B. hoard', '5-49', [91, 100], { stat: 'Dangerous', diff: 30 },
@@ -38047,6 +38058,8 @@
 
   function rattusFaberBadgeText(e) {
     if (e.open) return '-> ' + e.open;
+    // Halves your CURRENT Vermin, which this script cannot read: no number is computed.
+    if (e.half) return 'Vermin ÷2' + (e.ch && e.ch.luck ? CAROUSEL_MARK_EXPECTED : '');
     if (e.succVermin == null) return e.gives || '';
     const mark = e.ch && e.ch.luck ? CAROUSEL_MARK_EXPECTED : e.ch ? CAROUSEL_MARK_CHALLENGE : '';
     const succ = e.ch && e.ch.luck ? Math.round((e.succVermin * e.ch.luck + (e.failVermin || 0) * (1 - e.ch.luck)) * 10) / 10 : e.succVermin;
@@ -38071,9 +38084,10 @@
       e.gives ? 'Success: ' + e.gives + '.' : null,
       e.failGives ? 'Failure: ' + e.failGives + '.' : null,
       e.needs ? 'Requires: ' + e.needs + '.' : null,
+      e.half ? 'Halves your CURRENT Troubled by Vermin, so the gain depends on it (at least 4 from Vermin 8 up); no number is computed here.' : null,
       e.note || null,
       e.storylet === RATTUS_FABER_STORYLET
-        ? 'No zero-risk option exists on this storylet -- every real option costs at least Vermin -1 on failure.'
+        ? 'No zero-risk option exists on this storylet: every real option can fail.'
         : null,
     ].filter(Boolean).join('\n');
     return { text: rattusFaberBadgeText(e), color: CAROUSEL_COLOR_PROGRESS, title: lines };
@@ -38084,7 +38098,7 @@
     return {
       text: 'Rattus Faber', color: CAROUSEL_COLOR_LABEL,
       title: 'A Bad Case of Rattus Faber, Your Lodgings\n\nReduce Troubled by Vermin to 0. Every '
-        + 'option costs at least Vermin -1 on failure -- there is no zero-risk pick.\n'
+        + 'real option can fail -- there is no zero-risk pick.\n'
         + 'Open the storylet and every option is badged in its own right.',
     };
   }
@@ -38224,6 +38238,7 @@
       { fate: true }),
   ];
 
+  fateAliases(TOWER_OF_EYES_OPTIONS, { 'Your Salon: invite the Captivating Princess': 1, 'Recruit a Laconic Prodigy as your assistant': 20 });
   const TOWER_OF_EYES_INDEX = carouselIndex(TOWER_OF_EYES_OPTIONS);
 
   const TOWER_OF_EYES_CLASS = 'fl-ux-tower-of-eyes';
@@ -38403,9 +38418,9 @@
         + 'you hold 2x each of two specific wine items', failMasquing: 2, fail: 'Bottle of Black Wings Absinthe x1.' }),
 
     // --- A dance with devils! (3 leaf options) ---
-    feastLeaf(FEAST_DANCE_DEVILS, 'Bluff your way in 2', { stat: 'Watchful', diff: 40 }, 1, 1,
-      'Cryptic Clue 12, or Appalling Secret 5.', { fail: 'Nightmares +2.',
-        note: 'The bare title "Bluff your way in" is a disambiguation page; this is the real target.' }),
+    feastLeaf(FEAST_DANCE_DEVILS, 'Bluff your way in', { stat: 'Watchful', diff: 40 }, 1, 1,
+      'Cryptic Clue 12, or Appalling Secret 5.', { fail: 'Nightmares +2.', aliases: ['Bluff your way in 2'],
+        note: 'The wiki files this under "Bluff your way in 2" (the bare title is a disambiguation page); the game shows the bare text.' }),
     feastLeaf(FEAST_DANCE_DEVILS, 'Attend as an invited guest', { stat: 'Watchful', diff: 30 }, 1, null,
       'Stolen Correspondence 22, Appalling Secret 3 (rare: +Compromising Document x3, Walking the '
       + 'Falling Cities +10, Extraordinary Implication x1).', { fail: 'Scandal +2.' }),
@@ -38548,6 +38563,7 @@
       { fail: 'Unaccountably Peckish +2, Wounds +2, Nightmares +2.' }),
   ];
 
+  fateAliases(FEAST_OPTIONS, { 'Dance with an acquaintance': 2, 'An assignation in the garden with a friend': 3, "Partake of Mr Wines' hospitality": 2, "Bribe the maître d'": 2 });
   const FEAST_INDEX = carouselIndex(FEAST_OPTIONS);
 
   const FEAST_CLASS = 'fl-ux-feast-rose';
@@ -38747,29 +38763,40 @@
       side: side, name: name, airs: airs, needs: needs, ch: ch, gives: gives }, more);
   }
 
+  // One row per DISPLAY text. The wiki files same-named options at different Airs windows under numbered
+  // page titles ("Just chat 1", "Just chat 2"), which the player never sees, so those become variants of one
+  // row (carouselLookup returns null on two rows of the same name) and the numbered titles stay as aliases.
+  function ccMerged(side, name, variants, aliases) {
+    const numbered = aliases || variants.map(function (v, i) { return name + ' ' + (i + 1); });
+    return Object.assign(ccRow(side, name, null, null, null, null), { variants: variants, aliases: numbered });
+  }
+
   const CHEERY_CONSTABLE_OPTIONS = [
     // --- Coffee with the Last Constable (14) ---
-    ccRow('constable', 'Ask her what she\'s working on 1', [1, 33], null, null,
-      'Favours: Constables +1, Watchful +5, Appalling Secret x2, Touched by Fingerwork +5'),
-    ccRow('constable', 'Ask her what she\'s working on 2', [34, 66], null, null,
-      'Watchful +5, Favours: Constables +1, Vision of the Surface x1'),
-    ccRow('constable', 'Ask her what she\'s working on 3', [67, 100], null, null,
-      'Watchful +5, Favours: Constables +1, Having Recurring Dreams: The Burial of the Dead +1, Walking the Falling Cities +5'),
+    ccMerged('constable', "Ask her what she's working on", [
+      { airs: [1, 33], gives: 'Favours: Constables +1, Watchful +5, Appalling Secret x2, Touched by Fingerwork +5' },
+      { airs: [34, 66], gives: 'Watchful +5, Favours: Constables +1, Vision of the Surface x1' },
+      { airs: [67, 100], gives: 'Watchful +5, Favours: Constables +1, Having Recurring Dreams: The Burial of the Dead +1, '
+        + 'Walking the Falling Cities +5' },
+    ]),
     ccRow('constable', 'Talk about the other Special Constables', [1, 50], null, null, 'Appalling Secret x3, Favours: Constables +1'),
     ccRow('constable', 'Ask her about the other Special Constables', [51, 100], null, null, 'Appalling Secret x2, Favours: Constables +1'),
     ccRow('constable', 'Talk about the Cheery Man', [1, 50], null, { stat: 'Persuasive', diff: 50 },
       'Cryptic Clue x20, Intriguing Snippet x1, Favours: Constables +1', { fail: 'Nothing extra.' }),
     ccRow('constable', 'Ask her about the Cheery Man', [51, 100], null, null, 'Tale of Terror!! x1, Favours: Constables +1'),
-    ccRow('constable', 'Just chat 1', [1, 50], null, null, 'Magnanimous +1 (cap 5), Favours: Constables +1'),
-    ccRow('constable', 'Just chat 2', [51, 100], null, null, 'Magnanimous +1 (cap 5), Favours: Constables +1'),
+    ccMerged('constable', 'Just chat', [
+      { airs: [1, 50], gives: 'Magnanimous +1 (cap 5), Favours: Constables +1' },
+      { airs: [51, 100], gives: 'Magnanimous +1 (cap 5), Favours: Constables +1' },
+    ]),
     ccRow('constable', 'Invite her home with you', [90, 100], null, { stat: 'Persuasive', diff: 100 },
       'Favours: Constables +1 (rare: +Touching Love Story x1)', { fail: 'Nothing.' }),
-    ccRow('constable', "She's not alone 1", [40, 59], 'Acquaintance: the Honey-Addled Detective 1', null,
-      'Touched by Fingerwork +5, Watchful +20, Favours: Constables +1'),
-    ccRow('constable', "She's not alone 2", [70, 89], 'Acquaintance: the Mercies 1', null,
-      'Favours: Constables 0-1, Favours: Tomb-Colonies 0-1'),
-    ccRow('constable', "She's not alone 3", [10, 29], 'Acquaintance: the Repentant Forger 1', null,
-      'Favours: Bohemians 0-1, Favours: Constables 0-1, Nightmares -1'),
+    ccMerged('constable', "She's not alone", [
+      { airs: [40, 59], needs: 'Acquaintance: the Honey-Addled Detective 1',
+        gives: 'Touched by Fingerwork +5, Watchful +20, Favours: Constables +1' },
+      { airs: [70, 89], needs: 'Acquaintance: the Mercies 1', gives: 'Favours: Constables 0-1, Favours: Tomb-Colonies 0-1' },
+      { airs: [10, 29], needs: 'Acquaintance: the Repentant Forger 1',
+        gives: 'Favours: Bohemians 0-1, Favours: Constables 0-1, Nightmares -1' },
+    ]),
     ccRow('constable', 'Tell her your own story', [70, 100], 'Family and Law 3, A Daughter in the Shadows x1 (Fate-locked)', null,
       'Favours: Constables +1, Extraordinary Implication x1, Nightmares -1, Magnanimous +1 (cap 5)', { fate: true }),
 
@@ -38783,21 +38810,25 @@
       + 'Favours: Criminals +1, Favours: Tomb-Colonies +1'),
     ccRow('cheery', 'The other players in his world', [1, 50], null, null, 'Inkling of Identity x4, Favours: Criminals +1'),
     ccRow('cheery', 'His enemies', [51, 100], null, null, 'Inkling of Identity x6, Favours: Criminals +1'),
-    ccRow('cheery', 'The Last Constable 1', [1, 50], 'Family and Law 3', { stat: 'Persuasive', diff: 50 },
-      'Tale of Terror!! x1, Favours: Criminals +1', { fail: 'Nothing.' }),
-    ccRow('cheery', 'The Last Constable 2', [51, 100], 'Family and Law 3', null,
-      'Tale of Terror!! x1, Appalling Secret x3, Favours: Criminals +1'),
-    ccRow('cheery', "Whatever's on his mind (Low Airs)", [1, 50], null, null, 'Favours: Criminals +1, Intriguing Snippet x1'),
-    ccRow('cheery', "Whatever's on his mind (High Airs)", [51, 100], null, null,
-      'Favours: Criminals +1, Tale of Terror!! x1, Vision of the Surface x1'),
+    ccMerged('cheery', 'The Last Constable', [
+      { airs: [1, 50], needs: 'Family and Law 3', ch: { stat: 'Persuasive', diff: 50 },
+        gives: 'Tale of Terror!! x1, Favours: Criminals +1', fail: 'Nothing.' },
+      { airs: [51, 100], needs: 'Family and Law 3', gives: 'Tale of Terror!! x1, Appalling Secret x3, Favours: Criminals +1' },
+    ]),
+    ccMerged('cheery', "Whatever's on his mind", [
+      { airs: [1, 50], gives: 'Favours: Criminals +1, Intriguing Snippet x1' },
+      { airs: [51, 100], gives: 'Favours: Criminals +1, Tale of Terror!! x1, Vision of the Surface x1' },
+    ], ["Whatever's on his mind (Low Airs)", "Whatever's on his mind (High Airs)"]),
     ccRow('cheery', 'Hint that you might want to stay the night', [90, 100], null, { stat: 'Persuasive', diff: 99 },
       'Favours: Criminals +1 (rare: +Blackmail Material x1)', { fail: 'Nothing.' }),
-    ccRow('cheery', "He's not alone 1", [10, 29], 'Acquaintance: the Regretful Soldier 1', null,
-      'Favours: Criminals +1, Nightmares +1, Dangerous +10, Persuasive +10, Tale of Terror!! x1'),
-    ccRow('cheery', "He's not alone 2", [40, 59], "Implacable Detective's Business Card", null,
-      "Watchful +20, Favours: Criminals +1, Implacable Detective's Business Card x1"),
-    ccRow('cheery', "He's not alone 3", [70, 89], 'Intimate with a Secular Missionary 3', null,
-      'Favours: Criminals +1, Inkling of Identity x5, Cryptic Clue x20'),
+    ccMerged('cheery', "He's not alone", [
+      { airs: [10, 29], needs: 'Acquaintance: the Regretful Soldier 1',
+        gives: 'Favours: Criminals +1, Nightmares +1, Dangerous +10, Persuasive +10, Tale of Terror!! x1' },
+      { airs: [40, 59], needs: "Implacable Detective's Business Card",
+        gives: "Watchful +20, Favours: Criminals +1, Implacable Detective's Business Card x1" },
+      { airs: [70, 89], needs: 'Intimate with a Secular Missionary 3',
+        gives: 'Favours: Criminals +1, Inkling of Identity x5, Cryptic Clue x20' },
+    ]),
   ];
 
   const CHEERY_CONSTABLE_INDEX = carouselIndex(CHEERY_CONSTABLE_OPTIONS);
@@ -38808,6 +38839,17 @@
   const CHEERY_CONSTABLE_BRANCH_FLAG = 'flUxCheeryConstableBranch';
 
   function cheeryManConstableSpec(e) {
+    if (e.variants) {
+      // The same option text is offered at several Airs windows, each paying differently.
+      const lines = [e.name, e.storylet, '', 'The same option text at different Airs of London windows:']
+        .concat(e.variants.map(function (v) {
+          return 'Airs ' + v.airs[0] + '-' + v.airs[1] + ': ' + v.gives
+            + (v.ch ? ' (' + v.ch.stat + ' ' + v.ch.diff + ', a challenge)' : '')
+            + (v.needs ? ' [requires ' + v.needs + ']' : '') + (v.fail ? ' Failure: ' + v.fail : '') + '.';
+        })).join('\n');
+      return { text: 'varies by Airs' + (e.variants.some(function (v) { return v.ch; }) ? CAROUSEL_MARK_CHALLENGE : ''),
+        color: CAROUSEL_COLOR_PROGRESS, title: lines };
+    }
     const mark = e.ch ? CAROUSEL_MARK_CHALLENGE : '';
     const lines = [
       e.name, e.storylet, '',
@@ -38896,6 +38938,7 @@
       { fate: 8 }),
   ];
 
+  fateAliases(TIME_IN_BED_OPTIONS, { 'A remarkable tincture': 8 });
   const TIME_IN_BED_INDEX = carouselIndex(TIME_IN_BED_OPTIONS);
 
   const TIME_IN_BED_CLASS = 'fl-ux-time-in-bed';
@@ -38903,10 +38946,22 @@
   const TIME_IN_BED_BRANCH_CLASS = 'fl-ux-time-in-bed-branch';
   const TIME_IN_BED_BRANCH_FLAG = 'flUxTimeInBedBranch';
 
+  // The Wounds a text gives (0 when it names none).
+  function timeInBedWounds(text) {
+    return Number((/Wounds (-?\d+)/.exec(text || '') || [0, 0])[1]);
+  }
+
+  // The expected Wounds change of a Luck row at its stated odds, the way the file ranks every Luck option.
+  function timeInBedExpected(e) {
+    const p = e.ch.luck;
+    return Math.round((p * timeInBedWounds(e.succ) + (1 - p) * timeInBedWounds(e.fail)) * 10) / 10;
+  }
+
   function timeInBedBadgeText(e) {
-    if (!e.ch) return 'Wounds ' + carouselSigned(Number((/Wounds (-?\d+)/.exec(e.succ) || [0, 0])[1])) + ' -- always succeeds';
-    const mark = e.ch.luck ? CAROUSEL_MARK_EXPECTED : CAROUSEL_MARK_CHALLENGE;
-    return 'Wounds' + mark;
+    const fate = e.fate ? 'Fate ' + e.fate + ': ' : '';
+    if (!e.ch) return fate + 'Wounds ' + carouselSigned(timeInBedWounds(e.succ)) + ' -- always succeeds';
+    if (e.ch.luck) return 'Wounds ' + carouselSigned(timeInBedExpected(e)) + CAROUSEL_MARK_EXPECTED;
+    return 'Wounds' + CAROUSEL_MARK_CHALLENGE;
   }
 
   function timeInBedSpec(e) {
@@ -39025,7 +39080,9 @@
         : 'Gains Fie to the Wyrm regardless of outcome at this tier.',
       'Nightmares +1 on every failure.',
     ].filter(Boolean).join('\n');
-    return { text: 'Fie to the Wyrm +1' + mark, color: CAROUSEL_COLOR_PROGRESS, title: lines };
+    // What a success adds differs by option (+1, +2, or +1-2), which is the only real difference at tier 0-1.
+    const gain = (/Fie to the Wyrm (\+\d+(?:-\d+)?)/.exec(e.gives) || [0, '+1'])[1];
+    return { text: 'Fie to the Wyrm ' + gain + mark, color: CAROUSEL_COLOR_PROGRESS, title: lines };
   }
 
   function burningCityStoryletSpec(key) {
@@ -39081,8 +39138,11 @@
   // in-game" list. Corrections go in UNIVERSITY_CREATURE_OPTIONS and
   // nowhere else.
 
+  const UCR_STORYLETS = { aquaria: 'Consider your Aquaria', terraria: 'Search your Terraria' };
+
   function ucRow(card, name, research, more) {
-    return Object.assign({ card: card, name: name, research: research }, more);
+    return Object.assign({ card: card, storylet: UCR_STORYLETS[card], name: name, research: research,
+      currency: card === 'terraria' ? 'Amphibian Research' : 'Piscine Research' }, more);
   }
 
   const UNIVERSITY_CREATURE_OPTIONS = [
@@ -39101,7 +39161,7 @@
     ucRow('aquaria', 'Voracious Lamp-Eye', 25, { ch: { stat: 'Watchful', diff: 220 } }),
 
     // --- Search your Terraria (9) ---
-    ucRow('terraria', 'Reprehensible Lizard', 3, { consumes: true, research: 'Amphibian' }),
+    ucRow('terraria', 'Reprehensible Lizard', 3, { consumes: true }),
     ucRow('terraria', 'Partisan Messenger Tortoise', 15, { ch: { stat: 'Watchful', diff: 210 } }),
     ucRow('terraria', 'Mycological Bullfrog', 25, { ch: { stat: 'Watchful', diff: 220 } }),
     ucRow('terraria', 'Ocular Toadbeast', 25, { ch: { stat: 'Watchful', diff: 220 }, fate: true }),
@@ -39115,15 +39175,11 @@
   const UNIVERSITY_CREATURES_CLASS = 'fl-ux-university-creatures';
   const UNIVERSITY_CREATURES_FLAG = 'flUxUniversityCreatures';
 
-  function universityCreaturesResearchName(e) {
-    return e.research === 'Amphibian' ? 'Amphibian Research' : 'Piscine Research';
-  }
-
   function universityCreaturesSpec(e) {
-    const research = universityCreaturesResearchName(e);
+    const research = e.currency;
     const mark = e.consumes ? '' : CAROUSEL_MARK_CHALLENGE;
     const lines = [
-      e.name, e.card === 'aquaria' ? 'Consider your Aquaria' : 'Search your Terraria', ', University Laboratory', '',
+      e.name, e.storylet + ', University Laboratory', '',
       'Gives: ' + research + ' x' + e.research + '.',
       e.consumes ? 'Always available -- consumes the creature from inventory.'
         : 'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '. Does not consume the creature on success.',
@@ -39134,16 +39190,37 @@
     return { text: research + ' x' + e.research + mark, color: CAROUSEL_COLOR_PROGRESS, title: lines };
   }
 
-  function lookupUniversityCreature(name) {
-    return UNIVERSITY_CREATURE_OPTIONS.find(function (e) { return e.name === name; }) || null;
+  const UNIVERSITY_CREATURES_INDEX = carouselIndex(UNIVERSITY_CREATURE_OPTIONS);
+  const UNIVERSITY_CREATURES_CARD_CLASS = 'fl-ux-university-creatures-card';
+  const UNIVERSITY_CREATURES_CARD_FLAG = 'flUxUniversityCreaturesCard';
+  const UNIVERSITY_CREATURES_BRANCH_CLASS = 'fl-ux-university-creatures-branch';
+  const UNIVERSITY_CREATURES_BRANCH_FLAG = 'flUxUniversityCreaturesBranch';
+
+  function universityCreaturesStoryletSpec(key) {
+    const card = Object.keys(UCR_STORYLETS).filter(function (k) { return normalizeName(UCR_STORYLETS[k]) === key; })[0];
+    if (!card) return null;
+    return {
+      text: card === 'terraria' ? 'Amphibian Research' : 'Piscine Research', color: CAROUSEL_COLOR_LABEL,
+      title: UCR_STORYLETS[card] + ', University Laboratory.\nEach creature is an option: consume a base one for flat Research, '
+        + 'or risk an Airs-gated one at a Watchful challenge for the same creature back.',
+    };
   }
 
+  // The creatures are OPTIONS inside the opened card, so this reads the card's own branch titles; the hand card
+  // and the opened card's heading carry the summary badge.
   function universityCreaturesRatings() {
+    carouselRatings({
+      storylets: [UCR_STORYLETS.aquaria, UCR_STORYLETS.terraria], index: UNIVERSITY_CREATURES_INDEX,
+      storyletSpec: universityCreaturesStoryletSpec, optionSpec: universityCreaturesSpec,
+      cls: UNIVERSITY_CREATURES_CLASS, flag: UNIVERSITY_CREATURES_FLAG,
+      branchCls: UNIVERSITY_CREATURES_BRANCH_CLASS, branchFlag: UNIVERSITY_CREATURES_BRANCH_FLAG,
+    });
     eachCardName(function (host, name, place, style) {
-      const card = lookupUniversityCreature(name);
+      // The opened card is the carousel's own heading badge.
+      if (host.classList && host.classList.contains('storylet-root__heading')) return;
       attachBadge(host, {
-        cls: UNIVERSITY_CREATURES_CLASS, flag: UNIVERSITY_CREATURES_FLAG, value: name,
-        spec: card ? universityCreaturesSpec(card) : null, place: place, style: style,
+        cls: UNIVERSITY_CREATURES_CARD_CLASS, flag: UNIVERSITY_CREATURES_CARD_FLAG, value: name,
+        spec: universityCreaturesStoryletSpec(normalizeName(name)), place: place, style: style,
       });
     });
   }
@@ -39186,16 +39263,17 @@
     cqRow('Coax society secrets from the Clay Men', [34, 66], null, { stat: 'Watchful', diff: 22 },
       'Cryptic Clue 19-25', { fail: 'No reward.' }),
     cqRow('Decipher Loamsprach poetry', [51, 75], null, { stat: 'Watchful', diff: 24 },
-      'Appalling Secret 1, Romantic Notion 1, Cryptic Clue 6-15', { fail: 'No reward.' }),
+      'Appalling Secret 1, Romantic Notion 1, Cryptic Clue 6-15', { fail: 'No reward.', head: 'Cryptic Clue 6-15' }),
     cqRow('Take a stroll through the Quarter', [76, 100], null, { stat: 'Watchful', diff: 22 },
       'Cryptic Clue 17-23 (rare "Fabrication" variant: Cryptic Clue 19-23)', { fail: 'No reward.' }),
     cqRow('You cross paths with Jasper and Frank', [0, 33], 'A Complication: Jasper and Frank', null,
       'Opens: A Complication: Jasper and Frank (Ambition: Nemesis storyline)',
       { open: 'A Complication: Jasper and Frank' }),
     cqRow('Even the odds in a clay dispute', [67, 100], null, null,
-      'Intriguing Snippet 5, Moon-Pearl 100, Dangerous +20 CP, Steadfast +3 CP (cap 10)', { fate: 5 }),
+      'Intriguing Snippet 5, Moon-Pearl 100, Dangerous +20 CP, Steadfast +3 CP (cap 10)', { fate: 5, head: 'Moon-Pearl 100' }),
   ];
 
+  fateAliases(CLAY_QUARTERS_OPTIONS, { 'Even the odds in a clay dispute': 5 });
   const CLAY_QUARTERS_INDEX = carouselIndex(CLAY_QUARTERS_OPTIONS);
 
   const CLAY_QUARTERS_CLASS = 'fl-ux-clay-quarters';
@@ -39221,7 +39299,8 @@
       e.fail ? 'Failure: ' + e.fail : null,
       e.fate ? 'Costs ' + e.fate + ' Fate -- excluded from any free-to-play ranking.' : null,
     ].filter(Boolean).join('\n');
-    return { text: e.gives.split(',')[0] + mark, color: CAROUSEL_COLOR_PAYOUT, title: lines };
+    // The headline is the main reward, not always the first item listed.
+    return { text: (e.fate ? 'Fate ' + e.fate + ': ' : '') + (e.head || e.gives.split(',')[0]) + mark, color: CAROUSEL_COLOR_PAYOUT, title: lines };
   }
 
   function clayQuartersStoryletSpec(key) {
@@ -39377,8 +39456,9 @@
     hwRow('Burn your promises', [26, 50], 'Steadfast 2 (spent, -3 CP), Making Waves <11', null,
       'Steadfast -3, Nightmares +1, Making Waves +1 or +3 (random), Subtle +3 (cap 10)'),
     hwRow("Attend a lecture on 'spiritual hygiene'", [30, 35],
-      '7 Fate, Renown: Hell 5; blocked by holding an Infernal Contract or a Peculiar Personal Enhancement',
-      { stat: 'Watchful', diff: 200 },
+      '7 Fate, Watchful 200 (a lock, not the challenge), Renown: Hell 5; blocked by holding an Infernal Contract or a '
+      + 'Peculiar Personal Enhancement',
+      { stat: 'Persuasive', diff: 1 },
       'Your very own Infernal Contract x1, Hedonist +5 (cap 15) AND a choice of 1 of 4 items, Favours: Hell +1',
       { fate: 7, fail: 'Wounds +1, same item choice (redirects either way).' }),
     hwRow('Serve wine with bitter herbs', [51, 75], 'Hedonist 1, Penny x100 (spent), Making Waves <11', null,
@@ -39394,6 +39474,16 @@
       + 'Extraordinary Implication x1',
       { fail: 'Watchful CP, same quality progress, Making Waves +1-3?, Nightmares +5.' }),
   ];
+
+  const HALLOWMAS_BADGES = {
+    "Light the candle in the horse's skull.": 'Making Waves +1-3',
+    'Burn your promises': 'Making Waves +1 or +3',
+    "Attend a lecture on 'spiritual hygiene'": 'Infernal Contract',
+    'Serve wine with bitter herbs': 'Making Waves +1-5',
+    'Whisper secrets to mirrors': 'Making Waves +1-4',
+    'Echoes of Christmas': 'Making Waves +2',
+    'Feeding the River': 'Making Waves +1-5',
+  };
 
   const HALLOWMAS_INDEX = carouselIndex(HALLOWMAS_OPTIONS);
 
@@ -39414,7 +39504,9 @@
       e.fate ? 'Costs ' + e.fate + ' Fate -- excluded from any free-to-play ranking.' : null,
       e.note || null,
     ].filter(Boolean).join('\n');
-    return { text: e.gives.split(',')[0] + mark, color: CAROUSEL_COLOR_PROGRESS, title: lines };
+    // The headline is the Making Waves gain (what the storylet is for), not the first cost or item in the list.
+    return { text: (e.fate ? 'Fate ' + e.fate + ': ' : '') + (HALLOWMAS_BADGES[e.name] || e.gives.split(',')[0]) + mark,
+      color: CAROUSEL_COLOR_PROGRESS, title: lines };
   }
 
   function hallowmasVisitorStoryletSpec(key) {
@@ -40166,6 +40258,8 @@
 
   const BONES_IN_RIVER_CLASS = 'fl-ux-bones-river';
   const BONES_IN_RIVER_FLAG = 'flUxBonesRiver';
+  const BONES_IN_RIVER_CARD_CLASS = 'fl-ux-bones-river-card';
+  const BONES_IN_RIVER_CARD_FLAG = 'flUxBonesRiverCard';
   const BONES_IN_RIVER_BRANCH_CLASS = 'fl-ux-bones-river-branch';
   const BONES_IN_RIVER_BRANCH_FLAG = 'flUxBonesRiverBranch';
 
@@ -40201,7 +40295,7 @@
       // The opened card is the carousel's own heading badge.
       if (host.classList && host.classList.contains('storylet-root__heading')) return;
       attachBadge(host, {
-        cls: BONES_IN_RIVER_CLASS + '-card', flag: BONES_IN_RIVER_FLAG + 'Card', value: name,
+        cls: BONES_IN_RIVER_CARD_CLASS, flag: BONES_IN_RIVER_CARD_FLAG, value: name,
         spec: normalizeName(name) === normalizeName(BONES_IN_RIVER_STORYLET) ? bonesInRiverStoryletSpec(normalizeName(BONES_IN_RIVER_STORYLET)) : null,
         place: place, style: style,
       });

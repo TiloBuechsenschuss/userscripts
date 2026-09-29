@@ -173,6 +173,10 @@ check('no Time in bed name is in another feature\'s table',
   (() => { const others = allNames();
     return api.TIME_IN_BED_OPTIONS.map((e) => e.name).filter((n) => others.includes(key(n))); })(), []);
 
+check('a Luck row badges the expected Wounds change at its stated odds; the Fate row says its price',
+  ['Spend a day in bed', 'The red herald', 'A remarkable tincture'].map((n) => api.timeInBedSpec(row(n)).text),
+  ['Wounds −2.4≈', 'Wounds −3.2≈', 'Fate 8: Wounds 0 -- always succeeds']);
+
 check('the feature is registered', api.FEATURES.some((f) => f.name === 'time-in-bed'), true);
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall good');

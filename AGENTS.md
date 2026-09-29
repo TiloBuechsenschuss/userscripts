@@ -3764,9 +3764,11 @@ Confirmed live by the author:
   variants share one display text and are one merged row), and *Literary Ambitions*. **(3) The two
   "Race a/Across the Flit" spellings** in The Flit and its King -- they normalise to one name, so
   the redirect row lives under *The Flit and its King* and the leaf rows under the storylet; check
-  both appear as written. **(4) The University creatures' five base options**, whose in-game text
-  the research did not give: each row uses its creature's name as the option text and silently
-  does not badge if that is wrong. **(5) Moon-Pearl "Up to 24"** on *An opportunity for profit*'s
+  both appear as written. **(4) The University creatures' option text.** The creatures are options
+  inside the opened *Consider your Aquaria* / *Search your Terraria* card and all 21 rows use the
+  creature's name as the option text; the research names only "Study a Goldfish" and "Study a
+  Lizard" for the five base rows, so a row whose text differs silently does not badge (the hand
+  card and the opened card's heading carry a summary badge either way). **(5) Moon-Pearl "Up to 24"** on *An opportunity for profit*'s
   *Eavesdrop*: the page says x60 with a "Bundle: Up to 24" marker; the badge shows the ceiling
   and the count is unconfirmed. **(6) Airs windows in words.** Shifting Streets and the Watchmaker's
   Hill storylets state their windows in the tooltip; nothing reads the Airs. **(7) The Cabinet Noir,
@@ -4512,7 +4514,9 @@ Current tests:
   - `tests/choice-feast-of-the-rose.test.mjs` — the 16 redirects and their leaf rows.
   - `tests/choice-festive-fir.test.mjs` — 16 rows, the shared server-wide tree, and the four rows
     with the 7/12 real-failure fraction (the guide's prose said three).
-  - `tests/choice-cheery-man-constable.test.mjs` — 27 rows.
+  - `tests/choice-cheery-man-constable.test.mjs` — 18 rows, one per DISPLAY text: the wiki's numbered page
+    titles ("Just chat 1/2", "She's not alone 1-3", ...) are merged into variants with the numbered titles
+    as aliases, since `carouselLookup` cannot tell two same-named rows apart.
   - `tests/choice-time-in-bed.test.mjs` — 13 rows, the four Acquaintance-gated always-succeed rows
     (the guide's prose said three), Fate cost stored as its number.
   - `tests/choice-burning-city.test.mjs`, `tests/choice-university-creatures.test.mjs`,

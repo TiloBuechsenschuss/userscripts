@@ -173,6 +173,16 @@ check('no Hallowmas name is in another feature\'s table',
   (() => { const others = allNames();
     return api.HALLOWMAS_OPTIONS.map((e) => e.name).filter((n) => others.includes(key(n))); })(), []);
 
+check('badges headline the Making Waves gain (or the item), never the first cost in the gives list',
+  api.HALLOWMAS_OPTIONS.map((e) => api.hallowmasVisitorSpec(e).text),
+  ['Making Waves +1-3', 'Making Waves +1 or +3', 'Fate 7: Infernal Contract?', 'Making Waves +1-5', 'Making Waves +1-4?',
+    'Making Waves +2', 'Making Waves +1-5?']);
+
+check('the lecture\'s challenge is Persuasive 1; Watchful 200 is a lock stated in its requirements',
+  (() => { const e = row("Attend a lecture on 'spiritual hygiene'");
+    return [e.ch.stat, e.ch.diff, e.needs.includes('Watchful 200')]; })(),
+  ['Persuasive', 1, true]);
+
 check('the feature is registered', api.FEATURES.some((f) => f.name === 'hallowmas-visitor'), true);
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall good');
