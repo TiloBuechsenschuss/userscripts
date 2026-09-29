@@ -2476,8 +2476,11 @@ navigation. Two consequences:
   carousel of its own: Unfinished Business ×4 (Duelling the Black Ribbon and Hunting Dangerous Prey
   went to `running-battle` and `the-hunt-is-on`, below); and the options that only *re-roll* Airs
   without being gated on it (*Sample prisoner’s honey*).
-  **Not done: reading the current Airs.** Fallen London shows it only in an unlock tooltip whose
-  markup has never been captured; `aolAirsFrom` parses the text and nothing calls it.
+  **Reading the current Airs (2026-09-30).** Fallen London prints it as the aria-label of the requirement icon of any Airs-gated
+  option on offer (`.quality-requirement [aria-label]`: "You unlocked this with The Airs of London 88 (you needed 76)"); an option
+  outside its window is not drawn. `aolCurrentAirs` reads it, the storylet heading says `Airs 88` and its tooltip marks each option
+  ● offered now or ○ not, and an option's tooltip says whether the Airs is inside its window; the value of every Airs badge carries
+  the Airs, so a re-roll redraws it. With no Airs-gated option on screen nothing is read and nothing changes.
 
   **Progress qualities: The Hunt is On! and Running Battle** (`the-hunt-is-on`, `THIO_OPTIONS`,
   `running-battle`, `RUNB_OPTIONS`, both on the shared `pq*` helper): the first two features from the
@@ -2628,6 +2631,21 @@ navigation. Two consequences:
   three "White as ..." cards, the exit, the shop and the airship upgrades. Research:
   `docs/superpowers/research/2026-09-29-the-marrow-behind.md`.
 
+  **Economy** (panel `economy`, `ECON_*`, `renderEconomyPanel`; the sixth behind the ⚙ UX launcher): Roof Economy (Guide) and Stuiver
+  Grinding (Guide) are prices, shops and Stuiver-only items with **no storylet options**, so this is a panel and no badge. Ten
+  filterable tables: the Roof shops' buy / sell matrix (16 items × five markets), the Zenith and Risen Burgundy trading posts, what only
+  Stuivers buy (14 items, by price), the Stuiver grinds (StPA, EPA, all in), the Bone Market skeletons, Railway Steel per station,
+  Making Steel, where Bessemer Steel Ingots come from (12 sources), Hinterland Scrip an action and the station statues. **Everything
+  in Stuivers, by decision:** a figure the source gives in another unit is converted only through a ratio the guides state (1 Echo =
+  20 s, from Tantalising Possibility s2 or E0.10; 1 Tempestuous Tale = 10 s; 1 Scrip ≈ 0.5 E = 10 s), shown "≈ s…" with the source in
+  the tooltip; an item priced in another item with no printed equivalent stays as the item, and a "-" cell is "not traded", not zero.
+  **The panel checks itself:** the Echo ratio is confirmed three times (Tantalising Possibility, Fifth City Relic, Glimpse of Anathema),
+  the Tale ratio at the Sous, Ecdysis's "5.4 EPA if converted" is 3.8 + 32 ÷ 20, the Sous's 41.67 is 500 ÷ 12. **Where a guide is
+  wrong:** Roof Economy files the Burgundian Doublet and Gown as Hats (the item pages and Stuiver Grinding say Clothing), and the Steel
+  table's printed floors (94 Steel, 2115 BSI) are below what its rows add up to (96, 2163) while the ceilings agree, so the panel shows
+  both totals. The statue table is DERIVED from `ST_OPTIONS`, not transcribed again. Both Firmament guides carry a "needs work" banner
+  (no trading posts for the Sous, Queeneater's and Stonegift). Research: `docs/superpowers/research/2026-09-30-economy.md`.
+
   **Hellworm** (`hellworm`, `HW_OPTIONS`, on the `pq*` helper; WP-7, the first of the carousels filed as
   reference): one card, *Your Very Own Hellworm*, in the Upper River deck once a Miniature Hellworm is equipped.
   Its options raise The Disposition of your Hellworm (`Disp +1 · Nightmares −1–8` playing, `Disp +1–2 · Scandal
@@ -2748,10 +2766,10 @@ navigation. Two consequences:
   statues share the title *Call in favours from the Church*, so they are one entry; *Have this statue removed* is
   the game’s wording where the Hurlers page says melted and each page appends its Fate cost (3 at Station VIII, 10
   elsewhere). **Left out:** Balmoral has no card, so its three statues are labelled and not weighed, and Station
-  VIII’s fourteen are cosmetic; the Marigold card’s all-statues and self-statue options (*Meet with a Statuesque
-  Deviless*, *Share a honey-dream*, *Reclaim the Inescapable Ubiquity*); the guide’s analysis text and its
-  cross-reference table of Favours by type. The economy panel the plan once held (Roof Economy, Stuiver Grinding, the
-  statue table) is NOT built, and those two guides stay open in TODO with no badge surface.
+  VIII’s fourteen are cosmetic; the guide’s analysis text and its cross-reference table of Favours by type. The Marigold
+  card’s three all-statues and self-statue options (*Meet with a Statuesque Deviless*, *Reclaim the Inescapable Ubiquity of your
+  Countenance*, *Share a honey-dream with the Bohemian Sculptress*) were added 2026-09-30, each with its requirement and gain; the
+  price of the last self-statue is the guide’s, on the first one’s tooltip. The economy panel the plan once held is built (2026-09-30, `economy`, below).
 
   **Menace Locations** (`menace-locations`, `ML_OPTIONS`, `ML_CARD_LIST`, on the `pq*` helper; WP-9, no panel by
   decision): the five places you are sent to when Wounds, Scandal, Suspicion or Nightmares reaches 8 (a slow boat
@@ -2771,9 +2789,10 @@ navigation. Two consequences:
   trailing numeral is dropped and two pages that share a title AND an option are one entry with `alt` (the badge
   gives both); *Play Chess with the Boatman* is eight options of different levels of The Boatman's Opponent, and
   each is its own entry; the shared helper gained an optional `color` on an entry and on a card, because the
-  colour here depends on the direction, not the kind. **Left out:** the *Conflagration* storylet (Parabola's own
-  way out of Nightmares), the ambition-story storylets that only happen to be set in these places, and
-  *Offer the Boatman a sacrifice*, whose page lists no option.
+  colour here depends on the direction, not the kind. **Left out:** the ambition-story storylets that only happen to be set in
+  these places. *Offer the Boatman a sacrifice* was added 2026-09-30 (its page has grown three options, and a fourth is filed under
+  the Coilheart Games): 246 options now. The *Conflagration* storylet (Parabola's own way out of Nightmares) is not this feature's:
+  the `parabola` feature already badges its *Cry to the storm-bird*.
 
   **Iron Republic** (`iron-republic`, `IR_OPTIONS`, on the `pq*` helper; WP-10 part 1, no panel by decision): the
   Iron Republic Streets are a graph of days, each Day storylet with one to three options that lead on to another
@@ -2801,10 +2820,13 @@ navigation. Two consequences:
   tooltip. Effect clauses were compressed by a script and then hand-corrected (the overrides are the labels in the
   table). **Traps:** the wiki files some storylets as *Firmament: A Choice of Commissions*, so the storylet keeps the
   prefix and an alias function finds it under the game’s bare heading; where two options share a title the guide’s
-  display text is the game title, not the page title. **Left out:** the options the guide only names as steps
-  (*Enter the catacombs*, *Look for the Performer*), the requirement lists that open each part, the tables of
-  endings (Immanence, the Victor in Burgundy, which turn on qualities rather than options), and the parts other
-  guides own (the Stacks, Ecdysis, the Kinetoculus, the High Sancta, Risen Burgundy, the Sous Catacombs, the
+  display text is the game title, not the page title. **Added 2026-09-30:** *Enter the catacombs* and *Look for the
+  Performer* (the two options the guide only named as steps) and *Resolve to remove only one memory*, and the guide’s four
+  Immanence endings in the tooltips of the three options that feed them (Reveal what you have seen, Keep your peace, and
+  that one); 161 options. **Left out:** the requirement lists that open each part, the Victor in Burgundy table (it turns on
+  the two progress qualities, and the three *Conclude the hunt* options are filed with parentheticals, *Duchess Lead*, *Duke
+  Lead*, *Duke and Duchess equal*, that the game probably does not show, so they could not be told apart by title), and the
+  parts other guides own (the Stacks, Ecdysis, the Kinetoculus, the High Sancta, Risen Burgundy, the Sous Catacombs, the
   Midnight Trade, Upon a Red Stage), all still open in TODO.
 
   **Discordant Studies** (`discordant-studies`, `HS_OPTIONS`, on the `pq*` helper; WP-10 part 3, no panel by decision,
@@ -3640,9 +3662,8 @@ Confirmed live by the author:
   wiki filing this one as “Accept a commission 2”.
 
 - The **Airs of London badges** (added 2026-09-24). Nothing seen in the game. Report first, in order:
-  **(1) Where the current Airs is shown.** Open any Airs-gated option and copy the requirement’s HTML —
-  the unlock line that says “The Airs of London 47” — so `aolAirsFrom` can be wired to it and the
-  badges can say which options are on offer *now*. **(2) The redirect titles.** That each redirecting
+  **(1) The current Airs (wired 2026-09-30).** Check that the heading’s `Airs N` matches the number on an
+  option’s requirement icon, and that the ● / ○ marks in its tooltip agree with what is drawn. **(2) The redirect titles.** That each redirecting
   option opens a storylet headed with the wiki’s redirect target (*Weasel-fanciers are abroad*,
   *Advise on a Tattooed Corpse*, *Uncover Society Indiscretions*, …), and that the option itself is
   listed under the title the table carries; the Great Game’s *Fascinate* options are carried under
@@ -3845,6 +3866,13 @@ Confirmed live by the author:
   **(4) The page-over-guide figures**: the option pages say the borehole option pays 10 and asks Watchful 300, the guide is silent
   on the difficulties; every difficulty here is a page fact, not a screen fact. **(5) A locked option** -- whether the Apostate
   and Fate options are drawn greyed or not at all.
+
+- The **Economy panel** (added 2026-09-30). Nothing seen in the game; every table is transcribed from the wiki
+  (`docs/superpowers/research/2026-09-30-economy.md`). Report first: **(1) The menu** -- whether ⚙ UX docks a sixth panel entry
+  without crowding, on the wide and the phone layout. **(2) The tables on a phone** -- ten tables of up to six columns; say which
+  ones need to scroll sideways. **(3) A price that has moved** -- Stuiver Grinding is marked as going stale, so any figure that
+  differs from the game (a shop price, the Burgundy 125 StPA, a trading-post cost) is a report worth making. **(4) The statue
+  table** -- that it lists every statue you can build.
 
 - The **Marrow Behind** (`the-marrow`, added 2026-09-29). Nothing seen in the game; every table is transcribed from the wiki
   (`docs/superpowers/research/2026-09-29-the-marrow-behind.md`) and gates on the opened card's own heading. Report first: **(1) The
@@ -4583,6 +4611,10 @@ Current tests:
   live-quality-dependent number this script cannot read, the growth mark and compounding-value
   note on Accelerate and Stretch yourself beyond your limits, and that a page matching none of the
   three guessed storylet titles attaches nothing and throws nothing.
+- `tests/choice-economy.test.mjs` — the panel built whole (a few hundred nodes, ten tables), the price matrix and the three ratios the
+  conversion rests on (each confirmed against the guide's own second figure), that a converted figure says "≈" and keeps its source, the
+  guides' arithmetic (Ecdysis 5.4, the Stacks 116, the Sous 41.67), the one place the printed steel totals do not add up, the statue table
+  derived from `ST_OPTIONS`, and the filter (a section hides once its rows all went).
 - `tests/choice-the-marrow.test.mjs` — 61 rows; the Tempestuous Tale figure computed through the page's formula and the formula's weights
   against the guide's conversion table (Dendritic Spark the one exception); the two page-over-guide figures; a story step never a
   number; the wiring keyed by the open card with the two wiki-only "(The Empty Corpse)" headings and both form storylet headings;

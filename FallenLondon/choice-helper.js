@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.37
+// @version      1.42
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -624,6 +624,12 @@
  *     carries "?" in front, a stat check "?" after. A story step (a scar, a sight, the location unlocks) is a label with its
  *     requirement, never a number, and a form says which corpse it leads to and which aspect it strains. The page pays
  *     Decipher the message more than the guide's "best card"; the badge follows the page and the tooltip says so.
+ *     (22) The Economy panel, the sixth behind the ⚙ UX launcher, holds what the Firmament's two shop guides (Roof Economy and
+ *     Stuiver Grinding) say -- what the Roof shops buy and sell, the trading posts, what only Stuivers buy, what each grind
+ *     pays -- and what the Railway and Scrip guides say about Railway Steel per station, where Bessemer Steel Ingots come from
+ *     and Hinterland Scrip an action, and a table of the station statues taken from the Station Statues badges. No badge: those
+ *     two guides have no storylet options. Everything is in Stuivers, and a figure the source gives in Echoes, Tales or Scrip
+ *     is converted only at a ratio the guides state, marked "≈", with its source in the tooltip. Filterable.
  *     Built as a feature registry so further advice can be added as entries.
  */
 
@@ -8533,7 +8539,7 @@
     document.querySelectorAll('.storylet__heading, .storylet-root__heading').forEach(function (head) {
       const name = headingName(head);
       attachBadge(head, {
-        cls: def.cls, flag: def.flag, value: name,
+        cls: def.cls, flag: def.flag, value: name + (def.salt || ''),
         spec: name ? def.storyletSpec(carouselCanonical(normalizeName(name), def.aliases)) : null, place: 'after',
       });
     });
@@ -9269,10 +9275,13 @@
   // rests on a hue. The Airs window is in the tooltip, with whether the option
   // re-rolls Airs, which is the other half of choosing one.
   //
-  // NOT DONE: reading the CURRENT Airs. Fallen London shows it only in an
-  // unlock tooltip whose markup has never been captured here, and inventing a
-  // selector is exactly what this file does not do; `aolAirsFrom` parses the
-  // text once someone captures where it sits.
+  // The CURRENT Airs is read from the requirement icon of any Airs-gated
+  // option that is on offer (its aria-label states "The Airs of London 88"; a
+  // capture of 2026-09-30). The storylet heading then says "Airs 88" and its
+  // tooltip marks each option ● offered now or ○ not, and an option's tooltip
+  // says whether the Airs is inside its window. An option outside its window
+  // is not drawn, so a badge on a screen never contradicts itself; with no
+  // Airs-gated option on screen there is nothing to read and nothing changes.
   //
   // Transcribed from the option pages and the redirect targets' storylet pages
   // (fetched through the API, 2026-09-24) with The Airs of London and its
@@ -9620,7 +9629,10 @@
 
   function aolLines(e) {
     const lines = [e.name, e.storylet + (e.airs ? ', The Airs of London ' + aolWindows(e.airs) : ''), ''];
-    if (e.airs) lines.push(aolRerolls(e));
+    if (e.airs) {
+      lines.push(aolRerolls(e));
+      if (aolNow !== null) lines.push('The Airs of London is ' + aolNow + ' now, ' + (aolInWindow(e) ? 'inside' : 'outside') + ' this window.');
+    }
     lines.push(aolChallenge(e));
     if (e.bundle) lines.push('Success: a random bundle of up to ' + e.bundle.replace('≤', '') + ', not itemised on the page.');
     const win = [aolGives(e.g), aolMoves(e.q).join(', '), aolMoves(e.f).join(', ')].filter(Boolean).join('; ');
@@ -9691,27 +9703,46 @@
     if (!own.length) return key === normalizeName(AOL_HONEY) ? { text: 'Airs', color: CAROUSEL_COLOR_LABEL, title: aolDreamLines().join('\n') } : null;
     const lines = [own[0].storylet, ''];
     own.forEach(function (e) {
-      lines.push('  • ' + e.name + (e.airs ? ' [Airs ' + aolWindows(e.airs) + ']' : '') + ' — '
+      lines.push((e.airs && aolNow !== null ? (aolInWindow(e) ? '● ' : '○ ') : '  • ') + e.name + (e.airs ? ' [Airs ' + aolWindows(e.airs) + ']' : '') + ' — '
         + (e.open ? 'opens ' + e.open : aolBadgeText(e)));
     });
     if (AOL_TOP.indexOf(own[0].storylet) !== -1) {
       lines.push('', 'The Airs of London is re-rolled by most of these options; the Myself tab does not show it.');
     }
+    if (aolNow !== null) lines.push('', 'The Airs of London is ' + aolNow + ' now. ● is offered now, ○ is not: the game hides an option outside its window.');
     lines.push('', 'Open the storylet and every option is badged in its own right.');
     // No figure: a redirecting option can hold better than any option beside it.
-    return { text: 'Airs', color: CAROUSEL_COLOR_LABEL, title: lines.join('\n') };
+    return { text: aolNow !== null ? 'Airs ' + aolNow : 'Airs', color: CAROUSEL_COLOR_LABEL, title: lines.join('\n') };
   }
 
-  // The Airs of London a piece of requirement text states, or null. Nothing
-  // calls this yet: where Fallen London puts that text has not been captured.
+  // The Airs of London a piece of requirement text states, or null.
   function aolAirsFrom(text) {
     const m = /The Airs of London\D{0,12}?(\d{1,3})\b/i.exec(String(text || ''));
     return m && +m[1] <= 100 ? +m[1] : null;
   }
 
+  // The Airs now, or null. Fallen London prints it on the requirement icon of an Airs-gated option that is on offer, as the
+  // aria-label "You unlocked this with The Airs of London 88 (you needed 76)" (captured 2026-09-30). An option outside its window is
+  // not drawn at all, so with none on screen there is nothing to read and the answer is null.
+  let aolNow = null;
+
+  function aolCurrentAirs() {
+    const icons = document.querySelectorAll('.quality-requirement [aria-label]');
+    for (let i = 0; i < icons.length; i++) {
+      const n = aolAirsFrom(icons[i].getAttribute('aria-label'));
+      if (n !== null) return n;
+    }
+    return null;
+  }
+
+  function aolInWindow(e) {
+    return aolNow !== null && !!e.airs && e.airs.some(function (w) { return aolNow >= w[0] && aolNow <= w[1]; });
+  }
+
   function aolRatings() {
+    aolNow = aolCurrentAirs();
     carouselRatings({
-      storylets: AOL_STORYLETS, index: AOL_INDEX, storyletSpec: aolStoryletSpec,
+      salt: '@airs' + (aolNow === null ? '-' : aolNow), storylets: AOL_STORYLETS, index: AOL_INDEX, storyletSpec: aolStoryletSpec,
       optionSpec: function (e) { return aolSpec(e); },
       cls: AOL_CLASS, flag: AOL_FLAG, branchCls: AOL_BRANCH_CLASS, branchFlag: AOL_BRANCH_FLAG,
     });
@@ -12748,6 +12779,19 @@
       { statue: 'the Marigold Devils', rate: '1–2', worth: 30.4, note: 'Also Flawed Diamond ×45.' }),
     st(ST_CARDS.marigold, 'Sit by your statue', 'Criminals ×4 ▼ → Unlawful Device ×1 +2 more',
       { statue: 'yourself, a Respectable Industrialist', rate: '1', worth: 30, note: 'Also Cave-Aged Code of Honour ×1 and Compromising Document ×10.' }),
+    // The three options of the card that belong to the all-statues and self-statue stories (the guide's Reward for Building All
+    // Statues and All Self Statues); the option pages give the requirements and the gains, the guide the cost of the last statue.
+    st(ST_CARDS.marigold, 'Meet with a Statuesque Deviless', 'a self-statue story · once',
+      { needs: 'a statue of yourself at all nine stations, no Stain on Your Soul, and not Ecclesiastes 1:2 or An Offer from the Statuesque Deviless',
+        note: 'Gives An Offer from the Statuesque Deviless, a story quality (“Will you patronize the raising of yet another statue of yourself?”) '
+          + 'that unlocks a storylet to build a final statue. The guide gives that statue’s price as Soul ×7,000, Hinterland Scrip ×700, Memory of a '
+          + 'Much Lesser Self ×70 and Direful Reflection ×7.' }),
+    st(ST_CARDS.marigold, 'Reclaim the Inescapable Ubiquity of your Countenance', 'Affiliation: Respectable +4 · Persuasive +2 · Shadowy −10 · Bizarre −2',
+      { needs: 'the final statue built (Ecclesiastes 1:2) and every station’s statue of yourself at 20 (the Hurlers at 5), and not yet The Inescapable Ubiquity of your Countenance',
+        note: 'Gives The Inescapable Ubiquity of your Countenance, an Affiliation: Shadowy −10, Persuasive +2, Respectable +4, Bizarre −2.' }),
+    st(ST_CARDS.marigold, 'Share a honey-dream with the Bohemian Sculptress', 'Home Comfort: Watchful +6 · Bizarre +1 · Shapeling Arts +1 · Zeefaring +1',
+      { needs: 'a statue at every station, and not yet the Amber Vision of the Sea of Spines',
+        note: 'Once. Moves you to your Lodgings and gives the Amber Vision of the Sea of Spines, a Home Comfort: Watchful +6, Bizarre +1, Shapeling Arts +1, Zeefaring +1.' }),
     stRemove(ST_CARDS.marigold, 10),
   ];
 
@@ -12812,8 +12856,10 @@
   // Transcribed from the card and option pages (fetched through the API,
   // 2026-09-26) with Menace Locations (Guide) as the cross-check; the pages
   // win, and the guide's notes go in the tooltips. Left out: the storylets and
-  // cards of ambition stories that only happen to be set in these places, and
-  // the Conflagration storylet (Parabola's own way out of Nightmares).
+  // cards of ambition stories that only happen to be set in these places. The
+  // Conflagration storylet (Parabola's own way out of Nightmares) is Parabola's,
+  // in `parabola`; Offer the Boatman a sacrifice was added 2026-09-30, when its
+  // page had grown its three options (and a fourth, filed under the Coilheart Games).
   // **The card badge is confirm-only:** the
   // decks are full of ordinary names (The Governor, Remnants), so a card in the
   // hand is badged only while the sidebar greeting names one of the five
@@ -12850,6 +12896,18 @@
     ml('wounds', '...or you could just give up', 'Lie back and have a friendly chat', { w: ['Wounds −5', 'Nightmares +2'], needs: 'Associating with a Youthful Naturalist exactly 800' }),
     ml('wounds', '...or you could just give up', 'Lie back and meditate', { w: ['Wounds −5', 'Nightmares +2'], needs: 'Associating with a Youthful Naturalist exactly 900' }),
     ml('wounds', '...or you could just give up', 'Lie back and daydream', { w: ['Wounds −5', 'Nightmares −2'], needs: 'Associating with a Youthful Naturalist exactly 1000' }),
+
+    // --- a slow boat passing a dark beach on a silent river (Wounds): the sacrifice ---
+    ml('wounds', 'Offer the Boatman a sacrifice', 'Surrender any Lucky Weasels you’re carrying', { w: ['Wounds −2', 'Approaching +5'], pay: 'every Lucky Weasel you carry',
+      needs: 'a Lucky Weasel', note: 'It takes ALL of the animal for one cut of 2. The guide: unless you carry only one, this option is bad.' }),
+    ml('wounds', 'Offer the Boatman a sacrifice', 'Surrender any Sulky Bats you’re carrying', { w: ['Wounds −2', 'Approaching +5'], pay: 'every Sulky Bat you carry',
+      needs: 'a Sulky Bat', note: 'It takes ALL of the animal for one cut of 2. The guide: unless you carry only one, this option is bad.' }),
+    ml('wounds', 'Offer the Boatman a sacrifice', 'Surrender your electric charge', { w: ['Wounds −3'], needs: 'Death by Guilt’s Return',
+      note: 'Spends the hidden Death by Guilt’s Return.' }),
+    ml('wounds', 'Offer the Boatman a sacrifice', 'Surrender a single goldfish for information about the Labyrinth', { w: ['Wounds −2', 'Bearing Valuable Leads +1'],
+      get: 'Lead: For Whom the Boat Rows', pay: 'Cheerful Goldfish ×1', lock: 'Lead: For Whom the Boat Rows',
+      needs: 'The Coilheart Games 2 (a world quality), Of Stripes, and Coils 100–299, Coilheart Tomb-Colonists 10 and a Cheerful Goldfish',
+      note: 'The wiki files this option under The Coilheart Games on the sacrifice storylet.' }),
 
     // --- The Mirror-Marches (Nightmares) ---
     ml('mirror', 'A bird-of-paradise', 'Follow it', { w: ['Nightmares −2', 'Fingerwork +5'] }),
@@ -13767,6 +13825,14 @@
     return { part: part, storylet: storylet, name: name, label: label, tip: tip, unsure: !!unsure };
   }
 
+  // The four endings of Part 3, from the guide's table. They turn on qualities (Revelations against Rejections, Hollowed, which memories are
+  // destroyed), not on one option, so they are carried in the tooltips of the options that feed them.
+  const FIR_IMMANENCE = ' The guide’s four endings (Immanence): 1, the Immanent joins the Shepherd and keeps the memories of Love and Death, and the Illuminated '
+    + 'Shepherd navigates (Revelations above Rejections, Reveal what you have seen, and only the memory of the Stars destroyed); 2, all three memories go to the irrigo, '
+    + 'the Immanent stays prisoner to Zenith and the Forlorn Shepherd navigates (destroy all three); 3, the Immanent escapes Zenith losing two memories and the Forlorn '
+    + 'Shepherd navigates (Rejections above Revelations and/or Keep your peace, and destroy any two); 4, the Immanent joins the Shepherd having lost two memories and the '
+    + 'Illuminated Shepherd navigates (Revelations above Rejections, Reveal what you have seen, and destroy any two).';
+
   const FIR_OPTIONS = [
     fr('Prologue · The Rain', 'Firmament: A Choice of Commissions', 'Give the order for your airship to be built', 'Firmament =35 · airship built in a week', 'Once you’ve decided what your airship will be, you can Give the order for your airship to be built, which activates a living story with a countdown of 1 week and sets Firmament to 35'),
     fr('Part 1 · Hallow’s Throat', 'A Yawning Grave', 'Visit', 'Duchess =1', '* Visit sets The Admiration of a Duchess to 1'),
@@ -13801,8 +13867,10 @@
     fr('Part 3 · Zenith', 'The Illuminated of Zenith', 'Approach with the Forlorn Shepherd', '−Shepherd 1', '*Approach with the Forlorn Shepherd costs The Hopes of a Shepherd ×1'),
     fr('Part 3 · Zenith', 'The Illuminated of Zenith', 'Let him hang back', '+Shepherd 1', '*Let him hang back gives The Hopes of a Shepherd ×1'),
     fr('Part 3 · Zenith', 'Miser-Bonding', 'Present your Moon-Miser', 'Miser =8', 'At Moon-Miser Readiness 7 and The Lost Shepherd at least 20, you can Present your Moon-Miser and set Moon-Miser Readiness to 8. At which point, you can tell the Drover to start the Ritual'),
-    fr('Part 3 · Zenith', 'The Pools of Breaking and Mending', 'Reveal what you have seen', 'Hollowed =1', '*Reveal what you have seen, which will set Hollowed to 1'),
-    fr('Part 3 · Zenith', 'The Pools of Breaking and Mending', 'Keep your peace', 'Hollowed =2', '*Keep your peace, which sets Hollowed to 2 and ensure the Shepherd will act against the teachings of the Illuminated for future decisions'),
+    fr('Part 3 · Zenith', 'The Pools of Breaking and Mending', 'Reveal what you have seen', 'Hollowed =1', '*Reveal what you have seen, which will set Hollowed to 1' + FIR_IMMANENCE),
+    fr('Part 3 · Zenith', 'The Pools of Breaking and Mending', 'Keep your peace', 'Hollowed =2', '*Keep your peace, which sets Hollowed to 2 and ensure the Shepherd will act against the teachings of the Illuminated for future decisions' + FIR_IMMANENCE),
+    fr('Part 3 · Zenith', 'Escaping Oneself', 'Resolve to remove only one memory', 'one chance · only the Stars go for Immanence 1',
+      'Choose Resolve to remove only one memory: destroy the memory of the Stars and only the memory of the Stars, and the game gives you one chance at it.' + FIR_IMMANENCE),
     fr('Part 3 · Zenith', 'Silence in Zenith', 'Let Tatterdemalion cause a distraction', '+Dawnseeker 1', '* Let Tatterdemalion cause a distraction gives 1 x The Regard of the Dawnseeker'),
     fr('Part 3 · Zenith', 'Silence in Zenith', 'Choose Summer instead', '+Summer 1', '* Choose Summer instead gives 1 x A Dream of Summer'),
     fr('Part 4 · Burgundy: The Feastmen', 'Sogs and Inversions', 'Reveal what you’ve learned', '+Duchess 1', 'Choose Reveal what you’ve learned in Sogs and Inversions to gain The Admiration of a Duchess ×1'),
@@ -13834,6 +13902,8 @@
     fr('Part 6 · Sousward, Ho!', 'The Fire of the Dove', 'Ask that the Vulgate redact Tatterdemalion’s spite', 'Icarus in Flames =3', '* With Icarus in Flames 1 (Summer piloting), there is the option to Ask that the Vulgate redact Tatterdemalion’s spite, setting this value to 3, which allows you to make the subsequent choice in Choirs Ignite below'),
     fr('Part 6 · Sousward, Ho!', 'Choirs Ignite', 'Let such as are left surrender', 'The Vulgate in defeat =1', '* Choosing to Let such as are left surrender will set The Vulgate in defeat to 1 and lead to The Field of Victory'),
     fr('Part 6 · Sousward, Ho!', 'Choirs Ignite', 'Destroy the Vulgate', 'The Vulgate in defeat =2', '* Choosing to Destroy the Vulgate will set The Vulgate in defeat to 2 and also appears to inflict heavy losses on the Feastmen and cause whichever members of the Calendar survived the initial push to flee the field. This leads to The Field of Carnage', true),
+    fr('Part 6 · Sousward, Ho!', 'The Bones Above the Sous', 'Enter the catacombs', 'Beneath the Utmost Grave +1 · begins the catacomb carousel',
+      'Enter the catacombs via The Bones Above the Sous and perform the catacomb carousel; at the end you can Force a way to the Machine. The guide has you enter them again later, to track the Enemy of Burgundy. It needs Beneath the Utmost Grave 11.'),
     fr('Part 7 · Queeneater’s Castle', 'Scarlet Letters', 'Reprimand them', '+Dawnseeker 1', '* Reprimand them grants The Regard of the Dawnseeker ×1'),
     fr('Part 7 · Queeneater’s Castle', 'Scarlet Letters', 'Let matters slide', '+Summer 1', '* Let matters slide grants A Dream of Summer ×1'),
     fr('Part 7 · Queeneater’s Castle', 'Firmament: Dinner with Valentine', 'Agree, and invite him aboard', '+Valentine 1 · First Officer: Valentine', '* Agree, and invite him aboard gains you First Officer: St Valentine’s Day and The Last Day of Valentine ×1'),
@@ -13842,6 +13912,8 @@
     fr('Part 7 · Queeneater’s Castle', 'A Feast of Fasting', 'Do not feast', '−Peckish 1', 'From Ritual to Restitution tracks progress in the story here. During A Feast of Fasting, choosing to Feast will grant you Unaccountably Peckish ×1; if you Do not feast, you will lose Unaccountably Peckish ×1'),
     fr('Part 7 · Queeneater’s Castle', 'The Perfumed Choragus', 'Embrace the opportunity', 'From Ritual to Restitution =10', 'While speaking with The Perfumed Choragus, whether you Commit yourself to the bare minimum or Embrace the opportunity, the effect is the same, setting From Ritual to Restitution to 10 and continuing the story'),
     fr('Part 7 · Queeneater’s Castle', 'Find a Place to Sleep', 'Dream with Summer', '+Summer 1', '* to Dream with Summer and gain A Dream of Summer ×1'),
+    fr('Part 7 · Queeneater’s Castle', 'Firmament: In a Castle Inside a Castle', 'Look for the Performer', 'The Consummate Performer +1',
+      'To Look for the Performer (as tracked by The Consummate Performer) you again must Take to the stage yourself and Perform a history; after the play, Divest yourself of mask and role to advance the plot. Upon finding the performer you watch the Queensmen enact the history of Valentine. Needs From Ritual to Restitution 10 and The Consummate Performer 1 to 5.'),
     fr('Part 7 · Queeneater’s Castle', 'Firmament: In a Castle Inside a Castle', 'Enjoy a quiet moment', 'Wounds, Nightmares =0 · choose a companion', 'by yourself'),
     fr('Part 7 · Queeneater’s Castle', 'Tatters in Tatters', 'Reassure Tatterdemalion', '+Dawnseeker 3', '* Reassure Tatterdemalion grants The Regard of the Dawnseeker ×3'),
     fr('Part 7 · Queeneater’s Castle', 'Tatters in Tatters', 'Demand answers', '−Dawnseeker 3', '* Demand answers causes you to lose The Regard of the Dawnseeker ×3'),
@@ -41259,6 +41331,444 @@
     });
   }
 
+  // === panel: Economy =====================================================
+  //
+  // The Firmament's two shop-and-price guides, Roof Economy and Stuiver
+  // Grinding, have no storylet options to badge: they are prices, shops, items
+  // only Stuivers buy, and what each grind pays. So this is a PANEL behind the
+  // ⚙ UX launcher and nothing else -- no badge, no gate, no greeting. It also
+  // holds what the Railway and Scrip guides say about steel, Bessemer Steel
+  // Ingots and Hinterland Scrip, and a table of the station statues.
+  //
+  // **Everything in Stuivers, by decision.** A figure the source gives in
+  // another unit is converted only through a ratio the guides themselves state
+  // -- 1 Echo = 20 Stuivers (Tantalising Possibility: s2 or E0.10), 1
+  // Tempestuous Tale = 10 s (Roof Economy's own price), 1 Hinterland Scrip
+  // about 0.5 E = 10 s (Hinterland Scrip-Making) -- and is shown as "≈ s…" with the
+  // source figure in its tooltip, never alone. A price paid in another ITEM
+  // with no Echo or Stuiver equivalent printed by the source stays as the item.
+  // Where a cell is "-" the shop does not trade it, which is not zero.
+  //
+  // Transcribed from Roof Economy (Guide), Stuiver Grinding (Guide), Bessemer
+  // Steel Ingot (Guide) and Hinterland Scrip-Making (fetched through the API,
+  // 2026-09-30) and the item pages for the slots -- see
+  // docs/superpowers/research/2026-09-30-economy.md. Where they differ the item
+  // page is followed: Roof Economy files the Burgundian Doublet and Gown as
+  // Hats, Stuiver Grinding and the item pages say Clothing. Both Firmament guides
+  // carry a "needs work" banner and the panel says so. The statue table is
+  // DERIVED from ST_OPTIONS, not transcribed again. Corrections go in the ECON_*
+  // tables and nowhere else.
+
+  const ECON_S_PER_E = 20;
+  const ECON_S_PER_TALE = 10;
+  const ECON_S_PER_SCRIP = 10;
+  const ECON_MARKETS = ['The Echo Bazaar', 'Hallow’s Throat', 'The Midnight Moon', 'Risen Burgundy', 'The Sous'];
+
+  // A market row: the item and, for each market, [buy, sell]. A cell is null (not traded), { s } (Stuivers), { e } (Echoes)
+  // or { item, n, s | e } (paid in n of another item, with the equivalent the guide prints).
+  function econPrice(item, short, cells) {
+    return { item: item, short: short, cells: cells };
+  }
+
+  const ECON_PRICES = [
+    econPrice("Nodule of Warm Amber", "Warm Amber", [[null, null], [null, { s: 1 }], [null, null], [null, null], [null, null]]),
+    econPrice("Sample of Roof-Drip", "Roof-Drip", [[null, null], [{ s: 4 }, { s: 2 }], [null, { s: 2 }], [{ s: 4 }, { s: 2 }], [null, { s: 2 }]]),
+    econPrice("Tantalising Possibility", "Tant. Possibility", [[null, { e: 0.1 }], [null, { s: 2 }], [null, { s: 2 }], [null, { s: 2 }], [null, { s: 2 }]]),
+    econPrice("Starved Expression", "Starved Expr.", [[null, null], [{ s: 20 }, { s: 10 }], [null, { s: 10 }], [null, { s: 10 }], [{ s: 20 }, { s: 10 }]]),
+    econPrice("Tempestuous Tale", "Tempt. Tale", [[null, null], [null, { s: 10 }], [{ s: 20 }, { s: 10 }], [{ s: 20 }, { s: 10 }], [null, { s: 10 }]]),
+    econPrice("Bessemer Steel Ingot", "BSI", [[null, null], [null, null], [null, null], [null, null], [null, { item: "Tempestuous Tale", n: 1, s: 10 }]]),
+    econPrice("Ascended Ambergris", "Ambergris", [[null, null], [null, { s: 51 }], [{ s: 100 }, { s: 50 }], [null, { s: 50 }], [{ s: 100 }, { s: 50 }]]),
+    econPrice("Relic of the Fifth City", "5th City Relic", [[null, { e: 2.5 }], [null, null], [null, { s: 50 }], [null, { s: 50 }], [{ s: 100 }, { s: 50 }]]),
+    econPrice("Roof-Chart", "Roof-Chart", [[null, null], [{ s: 100 }, { s: 50 }], [null, { item: "Moon-Pearl", n: 253, e: 2.53 }], [null, { s: 50 }], [null, { s: 50 }]]),
+    econPrice("Anticandle", "Anticandle", [[null, null], [null, null], [null, null], [null, null], [null, { item: "Bone Fragments", n: 250, e: 2.5 }]]),
+    econPrice("Memory of a Much Stranger Self", "Mem. Stranger", [[null, null], [null, { s: 250 }], [null, { s: 250 }], [{ s: 500 }, { s: 250 }], [null, { item: "Bone Fragments", n: 1288, e: 12.88 }]]),
+    econPrice("Memory of Moonlight", "Mem. Moonlight", [[null, null], [null, { s: 250 }], [{ s: 500 }, { s: 250 }], [null, { s: 250 }], [null, { s: 250 }]]),
+    econPrice("Caustic Apocryphon", "Apocryphon", [[null, null], [null, { s: 250 }], [null, { s: 250 }], [{ s: 500 }, { s: 254 }], [null, { s: 250 }]]),
+    econPrice("Ratwork Mechanism", "Ratwork Mechanism", [[null, null], [null, null], [null, null], [null, { item: "Moon-Pearl", n: 1250, e: 12.5 }], [null, { s: 250 }]]),
+    econPrice("Glim-Encrusted Carapace", "Glim Carapace", [[null, null], [{ s: 3000 }, { s: 1250 }], [null, { s: 1250 }], [null, { s: 1250 }], [{ s: 3000 }, { s: 1250 }]]),
+    econPrice("Glimpse of Anathema", "Anathema", [[null, { e: 312.5 }], [null, { s: 6250 }], [null, { s: 6250 }], [null, { s: 6250 }], [null, { s: 6250 }]]),
+  ];
+
+  // Trading posts. `options` are what the post trades once open: [what you give, what you get].
+  const ECON_POSTS = [
+    { post: 'Zenith', level: 1, needs: 'A Crabbed List of Contacts, Leads and Likely Opportunities' },
+    { post: 'Zenith', level: 2, needs: 'Costs s5,000', options: [
+      ['Interpret a roof-chart in relation to the ground below', '2 Roof-Chart', 'Survey of the Neath’s Bones ×18–24?'],
+      ['Transpose a roof-chart onto the geography of dream', '5 Roof-Chart', 'Glass Gazette ×7'],
+    ] },
+    { post: 'Zenith', level: 3, needs: 'Costs 8 Ratwork Mechanism, 5 Memory of Moonlight and 5 Hillmover', options: [
+      ['Interpret a roof-chart in relation to the ground below', '2 Roof-Chart', 'Survey of the Neath’s Bones ×18–24?'],
+      ['Transpose a roof-chart onto the geography of dream', '5 Roof-Chart', 'Glass Gazette ×7'],
+      ['Soak an Eyeless Skull in violant', '1 Eyeless Skull', 'Panoptical Skull ×1'],
+      ['Submerge some Relics of the Fifth City', '10 Relic of the Fifth City', 'Nightsoil of the Bazaar ×30, London Street Sign ×6'],
+      ['Drown a Memory of Moonlight', '1 Memory of Moonlight', 'Rumour of the Upper River ×2, Hillmover ×1'],
+    ] },
+    { post: 'Zenith', level: 4, needs: 'Talk to Old Resurrection in The Midnight Moon (she gives you the Crabbed List)' },
+    { post: 'Risen Burgundy', level: 1, needs: 'A Crabbed List of Contacts, Leads and Likely Opportunities, and Fuel for Glory’s Fire 3 on a standard-frequency card' },
+    { post: 'Risen Burgundy', level: 2, needs: 'Talk to the Gall-Eyed Weaver, in The Gall-Eyed Weaver, Guildless' },
+    { post: 'Risen Burgundy', level: 10, needs: 'Costs s3,500; gives Puzzle-Damask Scrap ×1 and sets The Weaver’s Visions to 1–4; each vision opens one option, which sets A Modified Loom to the number of rewards you will get', options: [
+      ['Supply her with a Crackling Device (vision 1)', '1 Crackling Device', 'A Modified Loom 4: Puzzle-Damask Scrap ×2 each time'],
+      ['Supply her with a mountain of Ratwork Mechanisms (vision 2)', '13 Ratwork Mechanism', 'A Modified Loom 3: Parabola-Linen Scrap ×1 each time'],
+      ['Supply her with Whirring Contraptions (vision 3)', '4 Whirring Contraption', 'A Modified Loom 4: Thirsty Bombazine Scrap ×5 each time'],
+      ['Supply her with an Unlawful Device (vision 4)', '2 Unlawful Device', 'A Modified Loom 2: Whisper-Satin Scrap ×27 each time'],
+    ] },
+    { post: 'Risen Burgundy', level: 20, needs: 'Talk to Old Resurrection in The Midnight Moon' },
+  ];
+
+  // What only Stuivers buy (and the three equipment items the two guides list beside them). `price` is { s } or { item, n }.
+  function econItem(shop, name, slot, price, stats, note) {
+    return { shop: shop, name: name, slot: slot, price: price, stats: stats, note: note || '' };
+  }
+
+  const ECON_ITEMS = [
+    econItem('The Cenobitic Outfitter', 'Gentleman’s Self-Similar Carryall', 'Luggage', { s: 1500 }, 'Shadowy +6, Insubstantial +1',
+      'Best in slot for Shadowy and the only non-Fate Shadowy luggage.'),
+    econItem('Old Whaler’s Unlicensed Imports', 'Leviathan-Leather Valise', 'Luggage', { s: 1500 }, 'Zeefaring +1, Inerrant +1',
+      'Best in slot for Zeefaring and the only Zeefaring luggage.'),
+    econItem('The Cenobitic Outfitter', 'Celestial Cinnabar Compass', 'Home Comfort', { s: 2000 }, 'Watchful +6, Inerrant +1',
+      'Shared best in slot for an Inerrant Home Comfort; its peer needs an access code.'),
+    econItem('Old Whaler’s Unlicensed Imports', 'A Conspiracy of Smugglers', 'Crew', { s: 2000 }, 'Shadowy +4',
+      'Best in slot for Shadowy and the only non-Fate Shadowy crew.'),
+    econItem('Hortus Conclusus', 'Moth-Eaten Tapestry', 'Home Comfort', { s: 2500 }, 'Respectable +1, Mithridacy +1'),
+    econItem('The Ossuary', 'Vertebral Bludgeon', 'Weapon', { s: 2500 }, 'Dangerous +7, Persuasive +7, Neathproofed +1',
+      'The only non-seasonal Neathproofed weapon; its peer also needs Amber Ha’penny ×3.'),
+    econItem('Slaughterhall Wholesalers', 'Carmine Escoffion', 'Hat', { s: 4000 }, 'Persuasive +7, Respectable +3, Dreaded −1, Inerrant +1',
+      'The only Inerrant hat; also shared best in slot for BDR.'),
+    econItem('The Ossuary', 'Supracranial Skull', 'Hat', { s: 4200 }, 'Dangerous +6, Monstrous Anatomy +1',
+      'Its peers are ambition-locked or cost Curator’s Gratitude ×50,000 (about s10,000).'),
+    econItem('The Ossuary', 'Six-by-Two Carryall', 'Luggage', { s: 7500 }, 'Dangerous +6, Neathproofed +1; raises Suspicion build-up',
+      'The only Dangerous luggage, and the only one that raises Suspicion.'),
+    econItem('Slaughterhall Wholesalers', 'Burgundian Doublet', 'Clothing', { s: 17500 }, 'Persuasive +7, Respectable +2, Chthonosophy +1',
+      'With the Gown the only Chthonosophy clothes. Roof Economy files it as a Hat; the item page says Clothing.'),
+    econItem('Slaughterhall Wholesalers', 'Burgundian Gown', 'Clothing', { s: 17500 }, 'Persuasive +7, Respectable +2, Chthonosophy +1',
+      'With the Doublet the only Chthonosophy clothes. Roof Economy files it as a Hat; the item page says Clothing.'),
+    econItem('Fuel for Glory’s Fire (To Make a Moth)', 'A Metamorphosed Moth-Self', 'Affiliation', { s: 74500 }, 'best in slot for Neathproofed',
+      'A price of s74,500 among other costs; see To Make a Moth (Guide).'),
+    econItem('The Cenobitic Outfitter', 'Always-Returning Glim Earring', 'Adornment', { item: 'Ascended Ambergris', n: 20 }, 'Chthonosophy +1, Inerrant +1',
+      'Not bought with Stuivers; listed in Roof Economy.'),
+    econItem('Hortus Conclusus', 'Burgundian Breviary', 'Weapon', { item: 'Palimpsest Scrap', n: 500 }, 'Watchful +7, Persuasive +7, Bizarre +1, Scandal −1',
+      'Not bought with Stuivers; listed in Roof Economy.'),
+  ];
+
+  // What each grind pays: Stuivers per action and Echoes per action as the guide gives them (null when it does not).
+  function econGrind(method, where, stpa, epa, note) {
+    return { method: method, where: where, stpa: stpa, epa: epa, note: note || '' };
+  }
+
+  const ECON_GRINDS = [
+    econGrind('The Stacks: Index of Banned Works', 'The Stacks', 116, null, 'Caustic Apocryphon ×9 and Tantalising Possibility ×35, at 20 actions a run. Some checks are hard, so runs vary.'),
+    econGrind('The Stacks: Annal of Lost Stars, carcass', 'The Stacks', 112, null, 'Glim-Encrusted Carapace, Tantalising Possibility ×495 and Shard of Glim ×400, at 20 actions a run.'),
+    econGrind('The Stacks: Annal of Lost Stars, ledgers', 'The Stacks', 100, null, 'Roof-Chart ×40, at 20 actions a run.'),
+    econGrind('The Midnight Trade', 'The Midnight Moon', 50, 2, 'Memory of Moonlight and Ascended Ambergris per carousel; the rest is worth E12.'),
+    econGrind('Ecdysis', 'Hallow’s Throat', 32, 3.8, 'Memory of a Much Stranger Self and Tempestuous Tale ×7 per carousel; 5.4 EPA if the Stuivers are converted.'),
+    econGrind('Lab: a few samples from a Starved citadel', 'University Laboratory', 0, 3.6, 'Spends Starved Expression ×5 and Laboratory Research 550; pays Tempestuous Tale ×5, Emetic Revelation ×2, Extraordinary Implication ×15.'),
+    econGrind('Lab: a cartographical study of the ceiling', 'University Laboratory', 27.1, 1.1, 'Spends Tempestuous Tale ×5 and Laboratory Research 550; pays Roof-Chart ×14, Extraordinary Implication ×11.'),
+    econGrind('Lab: the geochemical properties of Roof drippings', 'University Laboratory', 8, 1.7, 'Spends Sample of Roof-Drip and Laboratory Research 100; pays Tempestuous Tale ×5, Extraordinary Implication ×4.'),
+    econGrind('Burgundian Beneficence, traded for a carapace', 'Risen Burgundy', 125, null, 'Ten actions to a Glim-Encrusted Carapace.'),
+    econGrind('The High Sancta', 'Zenith', 146, null, 'A once-a-week carousel.'),
+    econGrind('Upon a Red Stage', 'Queeneater’s Castle', 100, null, 'About; cycles are always 15 actions and Wounds or Nightmares always rise at the end.'),
+    econGrind('The Bones Above the Sous', 'The Sous', 41.67, null, 'A flat s500 over 12 actions (Memory of a Much Stranger Self ×2), plus a bonus by the bones you give.'),
+  ];
+
+  // The Bone Market skeletons the Stuiver guide recommends, and the week to sell each in.
+  const ECON_SKELETONS = [
+    ['Bipes biporus', 'Reptile week', 'Segmented Ribcage, Bright Brass Skull, Femur of a Jurassic Beast ×2, Tomb-Lion’s Tail; declare it a Reptile', 'The most efficient Echo-to-Stuiver conversion.'],
+    ['Beelzebufo', 'Amphibian week', 'Thorned Ribcage, Bright Brass Skull, Femur of a Jurassic Beast ×4; no tail; declare it an Amphibian', 'Slower than the Reptile; Thorned Ribcages are easier to get.'],
+    ['Brass bird', 'Bird week', 'Skeleton with Seven Necks, Bright Brass Skull and Sabre-toothed Skull, an Albatross Wing; declare it a Bird', 'The most efficient time to convert Skeleton Value to other currencies.'],
+    ['Tiktaalik', 'Fish week', 'Segmented Ribcage, Bright Brass Skull, Amber-Crusted Fin or Fin Bones, Collected, Tomb-Lion’s Tail; declare it a Fish', 'Fish weeks give the larger 15% bonus.'],
+    ['Ivory trilobite', 'Insect week', 'Flourishing Ribcage, Bright Brass Skull, Carved Ball of Stygian Ivory, 3–5 Ivory Femur; no tail; declare it an Insect', 'Only worth it with at least three Ivory Femurs.'],
+    ['Ungoliant', 'Spider week', 'Glim-Encrusted Carapace, Carved Ball of Stygian Ivory, 4–7 Ivory Femur; declare it a Spider', 'No Brass Skull bonus in a Spider week.'],
+  ];
+
+  // Railway Steel per station and the Bessemer Steel Ingots it takes; `steel` and `bsi` are as printed (a slash is two choices).
+  const ECON_STEEL = [
+    ['Ealing Gardens', '9 / 12', '203–276', '9 if you have an Impossible Theorem'],
+    ['Jericho Locks', '9 / 12', '203–276', '12 if you lay track through marsh and keep watch for buried bones'],
+    ['The Magistracy of the Evenlode', '12 / 20', '270–460', '12 with a plains route, 20 with a hills route'],
+    ['Balmoral', '20', '450–460', ''],
+    ['Station VIII', '10', '225–230', ''],
+    ['Burrow-infra-Mump', '9', '203–207', ''],
+    ['Moulin', '9', '203–207', ''],
+    ['The Hurlers', '9', '203–207', ''],
+    ['Marigold', '9', '203–207', ''],
+  ];
+  // The two ways to make Steel: BSI and Justificande Coins spent, Steel made.
+  const ECON_STEEL_MAKING = [
+    { name: 'Make tracks', bsi: 90, coins: 1, steel: 4 },
+    { name: 'Make a lot of tracks', bsi: 345, coins: 3, steel: 15 },
+  ];
+  // The total the guide prints, and the one its rows add up to: the ceilings agree, the floors do not (96 and 2163 against 94 and 2115).
+  const ECON_STEEL_TOTAL = { steel: '94–110', bsi: '2115–2530' };
+  function econSteelSum() {
+    const sum = function (col) {
+      return ECON_STEEL.reduce(function (acc, r) {
+        const n = r[col].match(/\d+/g).map(Number);
+        return [acc[0] + Math.min.apply(null, n), acc[1] + Math.max.apply(null, n)];
+      }, [0, 0]);
+    };
+    return { steel: sum(1), bsi: sum(2) };
+  }
+
+  // Where Bessemer Steel Ingots come from: BSI a go, BSI an action where the guide gives it.
+  function econBsi(source, bsi, perAction, needs) {
+    return { source: source, bsi: bsi, perAction: perAction, needs: needs || '' };
+  }
+
+  const ECON_BSI = [
+    econBsi('Hearts’ Game: a consignment of steel', 100, 6.67, 'Gamekeeper’s Cottage, for 14 Hearts’ Game: Exploits. The most efficient source early on.'),
+    econBsi('Sell a skeleton to an Enthusiast of the Ancient World', null, 6.19, 'A skeleton for a Licentiate: (value + bonus) ÷ 50 BSI.'),
+    econBsi('Professional Activities: Payment for Services Rendered', 25, 5.44, 'For another tier-3 profession; 1250 Approximate Value of Outstanding Invoices.'),
+    econBsi('Brawling: the Bone Market crates, femurs sold on', null, 5.22, '5.22 solo at Dangerous 292 and Brawling 110; 4.74 in a group at Dangerous 209 and Brawling 80.'),
+    econBsi('Brawling: the Iron and Misery crates', null, 5, '5 solo at Dangerous 292 and Brawling 40; 4 in a group at Dangerous 209 and Brawling 30.'),
+    econBsi('Sell him an Aged Egg', 10, 5, 'Only at Whitsun.'),
+    econBsi('Steal from Mr Iron’s warehouse', 100, null, 'A Parabola heist: Shadowy 200 and 15 An Identity Uncovered!.'),
+    econBsi('Smuggle in industrial materials', 130, null, 'Costs 24 Preserved Surface Blooms on a high Shadowy challenge.'),
+    econBsi('Request Bessemer Steel Ingots as pay (L. B. Industries)', 8, 2, 'Foreman’s Favour 60; half your actions go on starting and cashing out.'),
+    econBsi('Enter an agreement for the production of steel', 20, null, 'The Museum of Prelapsarian History: 1000 Curator’s Gratitude.'),
+    econBsi('The huge fossil ribcage (Hearts’ Game)', null, null, 'Shadowy Gains 20 and 65 Hearts’ Game: Exploits; a skeleton of a Leviathan Frame, a Bright Brass Skull and Fin Bones.'),
+    econBsi('Search the Cloud (a Parabolan hunt)', 5, 1, 'At most 1 BSI an action.'),
+  ];
+
+  // Hinterland Scrip an action by method, [least, most].
+  const ECON_SCRIP = [
+    ['Cedar-Sap (The City of the Tracklayers)', 9.25, 9.6],
+    ['Verse of Counter-Creed at Burrow', 10.59, 10.75],
+    ['Verse of Counter-Creed elsewhere', 10.29, 10.47],
+    ['Vital Intelligence at Balmoral', 10.42, 10.64],
+    ['Vital Intelligence elsewhere', 10, 10.25],
+  ];
+
+  // --- conversions ---------------------------------------------------------------------------------------------------
+
+  // 1500 -> "1,500"; 50.6 -> "50.6"; no trailing zero.
+  function econGroup(n) {
+    return String(Math.round(n * 10) / 10).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  function econS(n) {
+    return 's' + econGroup(n);
+  }
+
+  // A market cell as { text, title }. Only a plain Stuiver figure is shown bare; anything converted says "≈" and keeps its source in the tooltip.
+  function econCell(c) {
+    if (!c) return { text: '–', title: 'The shop does not trade it.' };
+    if (c.item) {
+      const value = c.s != null ? c.s : c.e * ECON_S_PER_E;
+      const src = c.n + ' ' + c.item + (c.e != null ? ' (E' + c.e + ' at ' + ECON_S_PER_E + ' s to the Echo)' : ' (' + econS(c.s) + ' each way)');
+      return { text: '≈ ' + econS(value), title: 'Paid in ' + src + '.' };
+    }
+    if (c.e != null) return { text: '≈ ' + econS(c.e * ECON_S_PER_E), title: 'E' + c.e + ' at ' + ECON_S_PER_E + ' s to the Echo.' };
+    return { text: econS(c.s), title: '' };
+  }
+
+  function econPair(pair) {
+    const buy = econCell(pair[0]);
+    const sell = econCell(pair[1]);
+    return { text: buy.text + ' / ' + sell.text, title: 'Buy ' + buy.text + ', sell ' + sell.text + '. ' + [buy.title, sell.title].filter(Boolean).join(' ') };
+  }
+
+  // The Stuivers an action is worth in all: Stuivers plus Echoes at 20 s to the Echo. Null when neither is known.
+  function econAllIn(g) {
+    if (g.stpa == null && g.epa == null) return null;
+    return (g.stpa || 0) + (g.epa || 0) * ECON_S_PER_E;
+  }
+
+  // A price as text: "s1,500" or "20 Ascended Ambergris".
+  function econPriceText(p) {
+    return p.item ? p.n + ' ' + p.item : econS(p.s);
+  }
+
+  // The statue table, derived from the Station Statues feature: one row for every statue-building option it rates.
+  function econStatues() {
+    return ST_OPTIONS.filter(function (e) { return /^rated /.test(e.label) && e.rate != null && e.worth != null; }).map(function (e) {
+      const worth = typeof e.worth === 'number' ? e.worth : String(e.worth);
+      const range = typeof worth === 'number' ? [worth, worth] : String(worth).split(/\s+to\s+/).map(Number);
+      return { station: e.storylet, statue: e.name, rate: e.rate, worth: worth, s: range.every(isFinite) ? range.map(function (n) { return n * ECON_S_PER_E; }) : null };
+    });
+  }
+
+  // --- the panel -----------------------------------------------------------------------------------------------------
+
+  // Hides the rows a term does not reach and a whole section once none of its rows shows.
+  function econApplyFilter(sections, term) {
+    const t = String(term || '').trim().toLowerCase();
+    sections.forEach(function (sec) {
+      let shown = 0;
+      sec.rows.forEach(function (row) {
+        row.hidden = !!t && row.dataset.econSearch.indexOf(t) === -1;
+        if (!row.hidden) shown++;
+      });
+      sec.node.hidden = shown === 0;
+    });
+  }
+
+  function econRow(cells, search) {
+    const tr = h('tr', null, cells);
+    tr.dataset.econSearch = String(search).toLowerCase();
+    return tr;
+  }
+
+  function renderEconomyPanel() {
+    const sections = [];
+    const dim = 'color:' + UI.dim + ';';
+    const right = 'text-align:right;white-space:nowrap;';
+    const td = function (children, extra) { return h('td', { css: TD + (extra || '') }, children); };
+    const note = function (text) { return h('div', { css: 'margin-top:5px;' + dim + 'font-size:11px;line-height:1.6;' }, [text]); };
+
+    // One titled table; `rows` are the tr elements the filter reaches.
+    const section = function (title, heads, rows, after) {
+      const node = h('div', { css: 'margin-top:14px;' }, [
+        h('div', {
+          css: 'font:bold 11px ' + UI.font + ';letter-spacing:.06em;text-transform:uppercase;color:' + UI.accent + ';margin-bottom:5px;',
+        }, [title]),
+        h('table', { css: 'width:100%;border-collapse:collapse;' }, [
+          h('thead', null, [h('tr', null, heads.map(function (head) {
+            return h('th', { css: TH + (head.right ? 'text-align:right;' : ''), title: head.title || '' }, [head.text]);
+          }))]),
+          h('tbody', null, rows),
+        ]),
+        after || null,
+      ]);
+      sections.push({ node: node, rows: rows });
+      return node;
+    };
+
+    // --- 1. what the Roof shops trade ---------------------------------------------------------------------------
+    const priceRows = ECON_PRICES.map(function (p) {
+      const cells = p.cells.map(econPair);
+      return econRow([td([wikiLink(p.item, p.item)])].concat(cells.map(function (c) {
+        return h('td', { css: TD + right, title: c.title }, [c.text]);
+      })), [p.item, p.short].concat(cells.map(function (c) { return c.text; }), ECON_MARKETS).join(' '));
+    });
+
+    // --- 2. trading posts ------------------------------------------------------------------------------------------
+    const postRows = ECON_POSTS.map(function (p) {
+      const opts = (p.options || []).map(function (o) { return o[0] + ': ' + o[1] + ' → ' + o[2]; });
+      return econRow([
+        td([p.post]),
+        td([String(p.level)], right),
+        td([h('div', null, [p.needs]), opts.map(function (o) { return h('div', { css: dim + 'font-size:11px;' }, [o]); })]),
+      ], [p.post, 'level ' + p.level, p.needs].concat(opts).join(' '));
+    });
+
+    // --- 3. what only Stuivers buy ----------------------------------------------------------------------------------
+    const items = ECON_ITEMS.slice().sort(function (a, b) {
+      const av = a.price.item ? Infinity : a.price.s;
+      const bv = b.price.item ? Infinity : b.price.s;
+      return av - bv;
+    });
+    const itemRows = items.map(function (e) {
+      return econRow([
+        td([wikiLink(e.name, e.name), e.note ? h('div', { css: dim + 'font-size:11px;' }, [e.note]) : null]),
+        td([e.shop], dim),
+        td([e.slot], dim),
+        td([econPriceText(e.price)], right),
+        td([e.stats], dim),
+      ], [e.name, e.shop, e.slot, econPriceText(e.price), e.stats, e.note].join(' '));
+    });
+
+    // --- 4. Stuiver grinds ------------------------------------------------------------------------------------------
+    const grindRows = ECON_GRINDS.map(function (g) {
+      const all = econAllIn(g);
+      return econRow([
+        td([g.method, h('div', { css: dim + 'font-size:11px;' }, [g.where + (g.note ? ' — ' + g.note : '')])]),
+        td([g.stpa == null ? '–' : econGroup(g.stpa)], right),
+        td([g.epa == null ? '–' : econGroup(g.epa)], right),
+        h('td', { css: TD + right, title: g.epa == null ? 'The guide gives no Echoes here.' : econGroup(g.stpa) + ' + ' + g.epa + ' × ' + ECON_S_PER_E }, [all == null ? '–' : '≈ ' + econS(all)]),
+      ], [g.method, g.where, g.note].join(' '));
+    });
+    const skeletonRows = ECON_SKELETONS.map(function (s) {
+      return econRow([
+        td([s[0]]), td([s[1]], dim), td([s[2], h('div', { css: dim + 'font-size:11px;' }, [s[3]])]),
+      ], s.join(' '));
+    });
+
+    // --- 5. Railway steel -------------------------------------------------------------------------------------------
+    const steelSum = econSteelSum();
+    const steelRows = ECON_STEEL.map(function (r) {
+      return econRow([td([r[0]]), td([r[1]], right), td([r[2]], right), td([r[3]], dim)], r.join(' ') + ' railway steel bessemer');
+    }).concat([
+      econRow([td(['Total, as the guide prints it']), td([ECON_STEEL_TOTAL.steel], right), td([ECON_STEEL_TOTAL.bsi], right), td([''])], 'total railway steel bessemer'),
+      econRow([td(['Total, the rows added up']), td([steelSum.steel.join('–')], right), td([steelSum.bsi.join('–')], right),
+        td(['The ceilings agree with the guide; its floors (94 and 2115) are lower than the rows give.'], dim)], 'total railway steel bessemer'),
+    ]);
+    const makingRows = ECON_STEEL_MAKING.map(function (m) {
+      return econRow([
+        td([wikiLink(m.name, m.name)]), td([String(m.bsi)], right), td([String(m.coins)], right), td([String(m.steel)], right),
+        h('td', { css: TD + right, title: 'BSI per Steel: ' + m.bsi + ' ÷ ' + m.steel }, [econGroup(m.bsi / m.steel)]),
+      ], m.name + ' make tracks railway steel justificande');
+    });
+
+    // --- 6. where BSI comes from ---------------------------------------------------------------------------------------
+    const bsiRows = ECON_BSI.map(function (b) {
+      return econRow([
+        td([b.source, h('div', { css: dim + 'font-size:11px;' }, [b.needs])]),
+        td([b.bsi == null ? '–' : String(b.bsi)], right),
+        td([b.perAction == null ? '–' : String(b.perAction)], right),
+        h('td', { css: TD + right, title: 'A BSI is worth one Tempestuous Tale at the Mausoleum Stalls, ' + econS(ECON_S_PER_TALE) + '.' }, [b.perAction == null ? '–' : '≈ ' + econS(b.perAction * ECON_S_PER_TALE)]),
+      ], [b.source, b.needs, 'bessemer steel ingot bsi'].join(' '));
+    });
+
+    // --- 7. Hinterland Scrip ------------------------------------------------------------------------------------------
+    const scripRows = ECON_SCRIP.map(function (r) {
+      return econRow([
+        td([r[0]]),
+        td([r[1] + '–' + r[2]], right),
+        h('td', { css: TD + right, title: '1 Scrip is about 0.5 Echoes, ' + econS(ECON_S_PER_SCRIP) + '.' }, ['≈ ' + econS(r[1] * ECON_S_PER_SCRIP) + '–' + econS(r[2] * ECON_S_PER_SCRIP).slice(1)]),
+      ], r[0] + ' hinterland scrip');
+    });
+
+    // --- 8. the statues, from the Station Statues feature -------------------------------------------------------------
+    const statueRows = econStatues().map(function (s) {
+      return econRow([
+        td([s.statue, h('div', { css: dim + 'font-size:11px;' }, [s.station])]),
+        td([String(s.rate) + '/4'], right),
+        td([String(s.worth) + ' E'], right),
+        h('td', { css: TD + right, title: 'At ' + ECON_S_PER_E + ' s to the Echo.' }, [s.s ? '≈ ' + econS(s.s[0]) + (s.s[1] !== s.s[0] ? '–' + econS(s.s[1]).slice(1) : '') : '–']),
+      ], [s.statue, s.station, 'statue'].join(' '));
+    });
+
+    section('What the Roof shops trade', [{ text: 'Item' }].concat(ECON_MARKETS.map(function (m) {
+      return { text: m, right: true, title: 'Buy / sell, in Stuivers. A dash: the shop does not trade it.' };
+    })), priceRows, note('Buy / sell. A dash means the shop does not trade it, which is not zero. “≈” is converted at ' + ECON_S_PER_E + ' s to the Echo, the ratio Roof Economy’s own Tantalising Possibility row gives (s2 or E0.10); the source figure is in the tooltip.'));
+    section('Trading posts', [{ text: 'Post' }, { text: 'Level', right: true }, { text: 'What it takes, and what it trades' }], postRows,
+      note('Roof Economy has no trading posts yet for the Sous, Queeneater’s Castle and Stonegift, and no shops in Queeneater’s or Stonegift; its authors say so.'));
+    section('What only Stuivers buy', [{ text: 'Item' }, { text: 'Shop' }, { text: 'Slot' }, { text: 'Price', right: true }, { text: 'Stats' }], itemRows,
+      note('By price. The Earring costs Ascended Ambergris and the Breviary Palimpsest Scrap, so they sort last. A Knight of the Order of the Golden Carapace, a numbered Accomplishment, costs 1,000,000 Stuivers at Burgundy.'));
+    section('Stuiver grinds', [{ text: 'Method' }, { text: 'StPA', right: true, title: 'Stuivers per action, as the guide gives it.' },
+      { text: 'EPA', right: true, title: 'Echoes per action of what does not convert to Stuivers, as the guide gives it.' },
+      { text: 'All in', right: true, title: 'StPA plus EPA at 20 s to the Echo.' }], grindRows,
+      note('Figures are the guides’, not this script’s; Stuiver Grinding is marked as waiting for Firmament Part 5 and as going stale. “All in” adds the Echoes at ' + ECON_S_PER_E + ' s each.'));
+    section('Bone Market skeletons for Stuivers', [{ text: 'Skeleton' }, { text: 'Sell in' }, { text: 'Parts' }], skeletonRows);
+    section('Railway Steel per station', [{ text: 'Station' }, { text: 'Steel', right: true }, { text: 'BSI', right: true }, { text: 'Note' }], steelRows,
+      note('A Steel costs about 22.5–23 Bessemer Steel Ingots. You also need one Steel to raise Watchful to 224 and 15 Steel with 200 BSI in the later Firmament storyline.'));
+    section('Making Steel', [{ text: 'Option' }, { text: 'BSI', right: true }, { text: 'Coins', right: true, title: 'Justificande Coins.' },
+      { text: 'Steel', right: true }, { text: 'BSI per Steel', right: true }], makingRows);
+    section('Where Bessemer Steel Ingots come from', [{ text: 'Source' }, { text: 'BSI', right: true, title: 'BSI a go.' }, { text: 'BSI/action', right: true },
+      { text: '≈ Stuivers', right: true, title: 'BSI per action at ' + econS(ECON_S_PER_TALE) + ' each, its price as a Tempestuous Tale at the Mausoleum Stalls.' }], bsiRows);
+    section('Hinterland Scrip an action', [{ text: 'Method' }, { text: 'Scrip/action', right: true }, { text: '≈ Stuivers', right: true }], scripRows,
+      note('1 Scrip is worth about half an Echo by the guide’s reckoning, so about ' + econS(ECON_S_PER_SCRIP) + '. Scrip cannot be bought directly.'));
+    section('Station statues', [{ text: 'Statue' }, { text: 'Rating', right: true }, { text: 'Worth', right: true }, { text: '≈ Stuivers', right: true }], statueRows,
+      note('Taken from the Station Statues badges, not transcribed again.'));
+
+    const search = h('input', {
+      type: 'text', placeholder: 'filter shops, items, grinds, stations…',
+      css: 'flex:1;min-width:140px;box-sizing:border-box;padding:3px 7px;background:' + UI.bgAlt + ';color:' + UI.text
+        + ';border:1px solid ' + UI.line + ';border-radius:3px;font:12px ' + UI.font + ';',
+      on: { input: function (e) { econApplyFilter(sections, e.currentTarget.value); } },
+    });
+
+    return h('div', { css: 'padding:0 12px 12px;' }, [
+      h('div', {
+        css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.line + ';background:' + UI.bgAlt + ';color:' + UI.dim
+          + ';font-size:12px;line-height:1.5;',
+      }, ['Everything here in Stuivers. A figure the source gives in Echoes, Tempestuous Tales or Scrip is converted at the ratio the guides state '
+        + '(1 Echo = ' + ECON_S_PER_E + ' s, 1 Tale = ' + ECON_S_PER_TALE + ' s, 1 Scrip ≈ ' + ECON_S_PER_SCRIP + ' s) and marked “≈”.']),
+      h('div', { css: 'display:flex;margin:10px 0 0;' }, [search]),
+      sections.map(function (s) { return s.node; }),
+    ]);
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -41588,6 +42098,13 @@
       hint: 'Your Equipment, staff and project, what a draft would pay now, every lab card, '
         + 'and the projects, equipment and experts',
       render: renderLabPanel,
+    },
+    {
+      id: 'economy',
+      icon: '💰',
+      label: 'Economy',
+      hint: 'What the Roof shops pay, what only Stuivers buy, and what each grind is worth, all in Stuivers',
+      render: renderEconomyPanel,
     },
   ];
 

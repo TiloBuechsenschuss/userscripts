@@ -217,5 +217,21 @@ check('no option is filed under the same storylet in another feature’s table',
 
 check('the feature is registered', api.FEATURES.some((f) => f.name === 'firmament'), true);
 
+
+// --- the Immanence endings and the two options the guide names as steps (added 2026-09-30) ------------------------------
+
+const POOLS = 'The Pools of Breaking and Mending';
+check('the three options that feed the Immanence endings carry the guide’s four endings in their tooltips',
+  [[POOLS, 'Reveal what you have seen'], [POOLS, 'Keep your peace'], ['Escaping Oneself', 'Resolve to remove only one memory']]
+    .map(([c, n]) => [opt(c, n).title.includes('The guide’s four endings (Immanence): 1,'), opt(c, n).title.includes('destroy any two).')]),
+  [[true, true], [true, true], [true, true]]);
+check('an option that does not feed them does not carry the endings', opt('A Yawning Grave', 'Visit').title.includes('four endings'), false);
+check('Enter the catacombs and Look for the Performer are badged, with the guide’s sentence and what each asks',
+  [lab('The Bones Above the Sous', 'Enter the catacombs'), lab('Firmament: In a Castle Inside a Castle', 'Look for the Performer'),
+    opt('The Bones Above the Sous', 'Enter the catacombs').title.includes('Beneath the Utmost Grave 11'),
+    opt('Firmament: In a Castle Inside a Castle', 'Look for the Performer').title.includes('From Ritual to Restitution 10')],
+  ['Beneath the Utmost Grave +1 · begins the catacomb carousel', 'The Consummate Performer +1', true, true]);
+check('the storylet of a new row is headed with its summary (the wiki’s Firmament: prefix still finds it)',
+  [api.FIR_DEF.storylets.includes('The Bones Above the Sous'), api.FIR_DEF.storylets.includes('Escaping Oneself')], [true, true]);
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall good');
 process.exit(failures ? 1 : 0);

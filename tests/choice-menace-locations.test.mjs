@@ -156,7 +156,7 @@ check('every entry names its place, storylet and option, has a badge and a toolt
 
 check('the five places, and the count of entries and of red cards',
   [Object.keys(api.ML_LOCATIONS).length, api.ML_OPTIONS.length, api.ML_CARDS.filter((c) => c.red).length],
-  [5, 242, 49]);
+  [5, 246, 49]);
 
 check('every card in the list holds an option or is a red card with its one effect',
   (() => {
@@ -291,5 +291,21 @@ check('no option is filed under the same storylet in another feature’s table',
 
 check('the feature is registered', api.FEATURES.some((f) => f.name === 'menace-locations'), true);
 
+
+// --- Offer the Boatman a sacrifice (added 2026-09-30) ---------------------------------------------------------------
+
+const SACRIFICE = 'Offer the Boatman a sacrifice';
+check('the sacrifice storylet has its four options, each a cut of the Wounds and asking what it needs',
+  ['Surrender any Lucky Weasels you’re carrying', 'Surrender any Sulky Bats you’re carrying', 'Surrender your electric charge',
+    'Surrender a single goldfish for information about the Labyrinth'].map((n) => [label(SACRIFICE, n), /^Wounds −/.test(label(SACRIFICE, n)), !!opt(SACRIFICE, n).needs]),
+  [['Wounds −2 · Approaching +5 · −every Lucky Weasel you carry', true, true],
+    ['Wounds −2 · Approaching +5 · −every Sulky Bat you carry', true, true],
+    ['Wounds −3', true, true],
+    ['Wounds −2 · Bearing Valuable Leads +1 · Lead: For Whom the Boat Rows · −Cheerful Goldfish ×1', true, true]]);
+check('the animal options say they take ALL of it, with the guide’s verdict; the electric charge says what it spends',
+  [opt(SACRIFICE, 'Surrender any Lucky Weasels you’re carrying').note.includes('ALL'), opt(SACRIFICE, 'Surrender any Sulky Bats you’re carrying').note.includes('this option is bad'),
+    opt(SACRIFICE, 'Surrender your electric charge').note.includes('hidden')], [true, true, true]);
+check('the sacrifice storylet is in the wounds place and gets a heading summary',
+  [api.ML_OPTIONS.filter((e) => e.storylet === SACRIFICE).every((e) => e.loc === 'wounds'), api.ML_DEF.summary[key(SACRIFICE)]], [true, 'best Wounds −3']);
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall good');
 process.exit(failures ? 1 : 0);

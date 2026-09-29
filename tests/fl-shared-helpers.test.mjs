@@ -201,7 +201,7 @@ const CHOICE_NAMES = ['PANELS', 'registerPanels', 'shareFrame', 'PC_CACHE_KEY', 
 
 // --- the panel registry ----------------------------------------------------
 
-const CHOICE_PANELS = ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory'];
+const CHOICE_PANELS = ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory', 'economy'];
 
 for (const first of [UX, CHOICE]) {
   const page = makePage(true);

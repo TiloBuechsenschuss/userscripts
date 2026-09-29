@@ -306,5 +306,20 @@ check('no option is filed under the same storylet in another feature’s table',
 
 check('the feature is registered', api.FEATURES.some((f) => f.name === 'station-statues'), true);
 
+
+// --- the three Marigold options that belong to the all-statues and self-statue stories (2026-09-30) -----------------
+
+const MARI = 'Under the Statue at Marigold Station';
+check('the Marigold card also carries its three all-statues and self-statue options, each badged with its gain and asking its requirement',
+  ['Meet with a Statuesque Deviless', 'Reclaim the Inescapable Ubiquity of your Countenance', 'Share a honey-dream with the Bohemian Sculptress']
+    .map((n) => [label(MARI, n), /Needs: /.test(title(MARI, n))]),
+  [['a self-statue story · once', true],
+    ['Affiliation: Respectable +4 · Persuasive +2 · Shadowy −10 · Bizarre −2', true],
+    ['Home Comfort: Watchful +6 · Bizarre +1 · Shapeling Arts +1 · Zeefaring +1', true]]);
+check('the self-statue story states the guide’s price for the last statue, and the honey-dream that it is a one-off',
+  [/Soul ×7,000, Hinterland Scrip ×700, Memory of a Much Lesser Self ×70 and Direful Reflection ×7/.test(title(MARI, 'Meet with a Statuesque Deviless')),
+    title(MARI, 'Share a honey-dream with the Bohemian Sculptress').includes('Once.')], [true, true]);
+check('the card now holds seven options besides the removal',
+  api.ST_OPTIONS.filter((e) => key(e.storylet) === key(MARI)).length, 8);
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall good');
 process.exit(failures ? 1 : 0);

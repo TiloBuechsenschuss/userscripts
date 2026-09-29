@@ -526,7 +526,7 @@ check('the zee ratings are registered alongside the other features',
     'airs-of-london', 'the-hunt-is-on', 'running-battle', 'casing', 'fascinating', 'inspired', 'investigating', 'someone-is-coming', 'hellworm', 'risen-burgundy', 'station-developments', 'city-of-the-tracklayers', 'station-statues', 'menace-locations', 'iron-republic', 'firmament', 'discordant-studies', 'plaster-face', 'ecdysis', 'midnight-trade', 'high-sancta', 'moon-miser-herding', 'sous-catacombs', 'upon-a-red-stage', 'to-make-a-moth', 'scaling-quartz', 'rattus-faber', 'tower-of-eyes', 'feast-of-the-rose', 'festive-fir', 'cheery-man-constable', 'time-in-bed', 'burning-city', 'university-creatures', 'clay-quarters', 'mutually-agreed-divorce', 'hallowmas-visitor', 'clathermont-tattoo', 'shifting-streets', 'candlefinder-clay-men', 'on-the-trail', 'christmas-card', 'watchmakers-hill-airs', 'opportunity-for-profit', 'alleys-of-spite', 'flit-and-its-king', 'bones-in-river', 'chandleress-complaint', 'relickers', 'the-stacks', 'the-marrow']);
 
 check('the Zailing panel is in the launcher menu',
-  api.PANELS.map((p) => p.id), ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory']);
+  api.PANELS.map((p) => p.id), ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory', 'economy']);
 
 console.log(failures ? '\n' + failures + ' FAILURE(S)' : '\nAll checks passed.');
 process.exit(failures ? 1 : 0);

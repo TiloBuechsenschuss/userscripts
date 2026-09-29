@@ -368,6 +368,21 @@ Fallen London:
         docs/superpowers/research/2026-09-27-airs-of-london-group-d.md section H3)
 
 
+  Panels:
+    - https://fallenlondon.wiki/wiki/Roof_Economy_(Guide) (Early Firmament) [Firmament overview] (implemented 2026-09-30 as the `economy` panel: no badge surface; see docs/superpowers/research/2026-09-30-economy.md)
+    - https://fallenlondon.wiki/wiki/Stuiver_Grinding_(Guide) (Early Firmament) [Firmament overview] (implemented 2026-09-30 as the `economy` panel, together with steel per station, BSI sources, Hinterland Scrip an action and the statue table)
+
+  Statues: the Marigold card's three all-statues and self-statue options (Statuesque Deviless, honey-dream, Reclaim the Inescapable
+  Ubiquity) added to `station-statues` 2026-09-30.
+
+  Menace Locations: Offer the Boatman a sacrifice (four options) added to `menace-locations` 2026-09-30; the Conflagration storylet was already
+  badged by `parabola` (its old "left out" note was stale).
+
+  Firmament: Enter the catacombs, Look for the Performer, Resolve to remove only one memory, and the Immanence endings in the tooltips of the options
+  that feed them, added to `firmament` 2026-09-30 (161 options).
+
+  Airs: the current Airs of London is read off the requirement icon's aria-label (captured 2026-09-30) and shown on the storylet heading and in tooltips.
+
 # Done
 
 Generic:

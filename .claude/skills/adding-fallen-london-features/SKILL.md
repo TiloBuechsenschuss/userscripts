@@ -220,8 +220,8 @@ Work in this order. **TRAP** marks the ones that get skipped.
 16. **TRAP — you just broke three other suites.** `choice-crowds-of-spite`,
     `choice-fruits-of-the-zee` and `choice-zailing` each assert the **whole** `FEATURES` and
     `PANELS` roster by hand. Adding one entry fails all three, in suites for features you
-    never touched. A new **panel** breaks one more: `ux-launcher-docking` pins the four panel
-    ids Choice Helper registers. `check.mjs` in this directory finds the first three.
+    never touched. A new **panel** breaks two more: `ux-launcher-docking` and `fl-shared-helpers` pin the
+    panel ids Choice Helper registers (six since the Economy panel). `check.mjs` in this directory finds the first three.
 
 17. **Metadata and docs.** Bump `@version` in `FallenLondon/choice-helper.js` **and** the
     loader's `@version` in `all-in-one/fallen-london.js` by hand (`bump-loaders.mjs` skips a

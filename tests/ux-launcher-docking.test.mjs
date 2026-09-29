@@ -701,9 +701,9 @@ check('the card is light, and every colour written on it is readable against it'
     button().dispatch('click');
   };
 
-  check('Choice Helper registered its five panels on the page, in order',
+  check('Choice Helper registered its six panels on the page, in order',
     (win.__flUxPanels || []).map((p) => p.id),
-    ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory']);
+    ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory', 'economy']);
 
   open();
   check('the menu lists them after the launcher\'s own Factions panel',

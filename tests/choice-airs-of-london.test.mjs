@@ -98,12 +98,14 @@ function makeHeading(text) {
 let roots = [];
 let list = [];
 let branches = [];
+let icons = [];
 const fakeDoc = {
   body: makeEl('body'),
   querySelectorAll: (sel) => {
     if (sel === '.storylet-root__heading') return roots;
     if (sel === '.storylet__heading, .storylet-root__heading') return list.concat(roots);
     if (sel === '.branch__title') return branches;
+    if (sel === '.quality-requirement [aria-label]') return icons;
     return [];
   },
   querySelector: () => null,
@@ -120,7 +122,7 @@ const wrapped = src
     'return { carouselMatcher, carouselLookup, CAROUSEL_COLOR_NEUTRAL, CAROUSEL_COLOR_LABEL,'
     + ' AOL_OPTIONS, AOL_DREAMS, AOL_PRICE, AOL_UNPRICED, AOL_TOP, AOL_STORYLETS, AOL_INDEX, AOL_BANDS,'
     + ' AOL_CLASS, AOL_BRANCH_CLASS, AOL_DREAM, AOL_SPITE, AOL_LADY, AOL_HILL, AOL_GAME, AOL_WIDOW, AOL_HONEY,'
-    + ' aolEpa, aolBadgeText, aolSpec, aolStoryletSpec, aolAirsFrom, aolRatings, aolWindows, aolColor,'
+    + ' aolEpa, aolBadgeText, aolSpec, aolStoryletSpec, aolAirsFrom, aolCurrentAirs, aolRatings, aolWindows, aolColor,'
     + ' LBI_STORYLETS, VH_STORYLET, LBI_OPTIONS, VH_OPTIONS, DME_OPTIONS, ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS,'
     + ' LAB_CARDS, ARBOR_OPTIONS, PC_OPTIONS, VSD_OPTIONS,'
     + ' normalizeName, BADGE_CLASS, FEATURES }; })();');
@@ -435,5 +437,36 @@ check('a top-level storylet in the list gets its summary with nothing open',
 check('the feature is registered',
   api.FEATURES.some((f) => f.name === 'airs-of-london'), true);
 
+
+// === the current Airs, read off the requirement icon (captured 2026-09-30) ===============================
+
+const icon = (label) => ({ getAttribute: () => label });
+check('with no Airs-gated option on screen there is nothing to read', api.aolCurrentAirs(), null);
+icons = [icon('You unlocked this with A Name Whispered in Darkness 7 (you needed 3)'),
+  icon('You unlocked this with The Airs of London 88 (you needed 76)')];
+check('the Airs is read off the requirement icon’s label, skipping other qualities', api.aolCurrentAirs(), 88);
+check('the heading says the Airs now, and its tooltip marks what is offered now and what is not',
+  (() => {
+    const head = makeHeading('Opportunism in Spite');
+    roots = [head]; branches = [];
+    api.aolRatings();
+    const b = badgeOf(head, api.AOL_CLASS);
+    roots = [];
+    return [b.textContent, b.title.includes('● Christen Jack for a Stuttering Fence [Airs 0–12 and 88–100]'),
+      b.title.includes('○ Assist the Fisher-Kings [Airs 0–25]'), b.title.includes('The Airs of London is 88 now.')];
+  })(), ['Airs 88', true, true, true]);
+check('an option says the Airs is inside its window, and a changed Airs redraws the badge (the value carries it)',
+  (() => {
+    const fence = makeHeading('Christen Jack for a Stuttering Fence');
+    roots = [makeHeading('Opportunism in Spite')]; branches = [fence];
+    api.aolRatings();
+    const a = badgeOf(fence, api.AOL_BRANCH_CLASS).title.includes('The Airs of London is 88 now, inside this window.');
+    icons = [icon('You unlocked this with The Airs of London 5 (you needed 0)')];
+    api.aolRatings();
+    const b = badgeOf(fence, api.AOL_BRANCH_CLASS).title.includes('The Airs of London is 5 now, inside this window.');
+    roots = []; branches = []; icons = [];
+    api.aolRatings();
+    return [a, b];
+  })(), [true, true]);
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall good');
 process.exit(failures ? 1 : 0);
