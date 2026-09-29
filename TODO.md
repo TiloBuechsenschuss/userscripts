@@ -2,7 +2,7 @@
 
 Finished work is in `TODO Done.md`.
 
-Fallen London:
+Fallen London Choice Helper:
   Carousels: https://fallenlondon.wiki/wiki/Guides#Location-Specif  Sorted by each guide's {{Audience}} stage, in the order of
   h  https://fallenlondon.wiki/wiki/Template:Audience (top is earlier in the game);
   within a stage by area [in brackets], as the Guides page sorts locations
