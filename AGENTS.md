@@ -2578,6 +2578,56 @@ navigation. Two consequences:
   *Rob a drunk* and the oracle. Left out: the thirteen Conflict Cards (each wants two Favours; the guide gives
   only a rate), cards that raise it but are not in the guide’s table, and the other options of these cards.
 
+  **The Relickers** (`relickers`, `RELICKER_OPTIONS`, `RELICKER_TIERS`, on `carouselRatings`; no panel by decision): four
+  opportunity cards, each unlocked by one stat at 25, on which a rag-and-bone man trades Certifiable Scrap for goods --
+  the Capering (Persuasive), Coquettish (Dangerous), Curt (Shadowy) and Shivering Relicker (Watchful). Each has the same
+  eight trades (25 to 200 of its stat, 5 to 3200 scraps), three recertify gambles and one or two extras, 49 options in all.
+  **The badge is the ware and the quantity, by decision** (`Soul ×62.5≈`, `Brass Ring ×3`): tiers 1-4 are a 50% Luck
+  challenge whose failure pays a quarter, so the expected quantity is quoted with `≈` and the rare success stays in the
+  tooltip (its odds are not on the page); a trade the Airs of London hides carries `▾`. A recertify gamble says
+  `Scrap +5 / −4 ≈ +0.5`, never the advertised gain alone. The guide’s Echoes per scrap are in the trade tooltips as the
+  guide’s estimate, not on the badge. **Traps:** *Recertify an armful of scraps* and *Recertify a double-armful of scraps*
+  are on two cards (the wiki disambiguates them `1`/`2`), so the lookup is keyed by the OPENED CARD, and the two entries
+  differ (the Capering double-armful also pays Walking the Falling Cities +10 CP); no option is retitled by the Airs (three
+  variant tables on these pages retitle result text only). Whisper-Satin asks Dangerous 70 on its page and 75 in the
+  guide; the page is followed. Research: `docs/superpowers/research/2026-09-29-relickers.md`.
+
+  **The Stacks** (`the-stacks`, `STACKS_OPTIONS`, `STACKS_BOOKS`, `STACKS_FINALES`, on `carouselRatings`; no panel by decision): the
+  Firmament's library, played from the OPPORTUNITY DECK: choose a book on *A Card Catalogue*, play cards to 40 progress, *Claim
+  the book*, play cards to 40 again, *The Reading Room*, read the book (a finale storylet), thread back out. 56 card options over
+  the standard and violet cards, the eight-book chooser and eight finale options. Nearly every option pays 5 progress, so the
+  figure that varies is what an option **costs and risks**: `P +5? · fail N +6`. The badge is the progress (or what the option pays
+  instead), a `▼` for a resource spent, `?` for a stat check (the success value is quoted) or `≈` for a Luck challenge (the
+  expected progress), what it always adds, then the failure's menace **in the headline**: Noises in the Library fires *WE WILL HAVE
+  SILENCE* at 8 (Wounds 8, the Boatman) and eight options add 6 on a failure, so those take `CAROUSEL_COLOR_RISK`. The script
+  cannot read Noises: it states the risk and never gates on the level. **No EPA anywhere** (the guide gives 5.27, 9.94 and 6.2-6.3).
+  A book and a finale carry the guide's Echo and Stuiver totals, labelled its estimate (the Anticandles need the Mausoleum Stalls,
+  the Ratwork Mechanisms Risen Burgundy). **Traps:** every option is keyed by the OPEN CARD, because *Take the opposite door*, *Move
+  on quickly*, *Keep going*, *Climb*, *Use a key*, *Go up* and *Go down* are ordinary phrases and *Take a moment to regroup* is already
+  a row of the Seven of Loins feature; the wiki disambiguates five titles with a parenthesis (`Climb (A Discarded Ladder)`), the game
+  shows the plain text; the Chained Volume has two wiki titles and one game heading (`STACKS_ALIASES`); `Course correct`, the whole
+  *An Index* card and four more options are stage-only. Left out: the two Clamorous Cartographer cards (pictures only on the wiki),
+  the exit storylets, *Within the Hollow* (its page records no option) and the Codex's finale. Research:
+  `docs/superpowers/research/2026-09-29-the-stacks.md`.
+
+  **The Marrow Behind** (`the-marrow`, `MARROW_OPTIONS`, `MARROW_TALE`, on `carouselRatings`; no panel by decision): the Late-Firmament
+  activity in Procession. A trip is three moves: on *The Skeleton of the Sky* pick one of ten forms (each strains one of four aspects,
+  and the aspect just strained is locked for the next move), each form deals a hand of three from its corpse's cards, and *Return to
+  your mooring* (no action) turns the currencies into Tempestuous Tales by a formula printed on its page. **The badge is that figure**,
+  computed from the option page's quantities through the formula (`TT 10`, `TT 10–14`), so every card sits on one axis; a range the
+  page itself marks unsure carries `?` in front (`TT ?5.2–8.6`), a stat check `?` after. What does not convert (Moonlit, Moon-Pearl,
+  Amber, Memory of Light) is named after it. The guide's half-Echo per Tale is in the tooltip as the guide's figure. **No EPA.** A
+  **story step** (the scars, the sights, the location unlocks) pays a quality, so it is a label with its requirement and never a
+  number; a **form** is a label naming the corpse and the aspect it strains. 61 rows: 33 that pay currencies, 2 items, 15 story steps,
+  11 forms. **Traps:** *Decipher the message* pays Mote 1 and Spark 5-9, 10-14 Tales, above the guide's "best card" (*Dare to look upon
+  him*, 10) -- the badge follows the page and the tooltip says the guide disagrees; *Crush them* pays Scrap 35-56 on the page, the
+  guide's Stuivers imply 40-56; the guide lists Dendritic Spark at 0 Echoes while the formula gives it a Tale; two cards go by another
+  heading in the game than on the wiki (*The Hunger*, *The Oath*: the wiki adds "(The Empty Corpse)"; `MARROW_ALIASES`), and the forms
+  sit on two storylet headings; every option is keyed by the open card because *Forget*, *Escape*, *Follow her*, *Negotiate* and
+  *Defy* are ordinary phrases; *Consume what is not there* is a row of the Firmament guide feature and is left to it. Left out: the
+  three "White as ..." cards, the exit, the shop and the airship upgrades. Research:
+  `docs/superpowers/research/2026-09-29-the-marrow-behind.md`.
+
   **Hellworm** (`hellworm`, `HW_OPTIONS`, on the `pq*` helper; WP-7, the first of the carousels filed as
   reference): one card, *Your Very Own Hellworm*, in the Upper River deck once a Miniature Hellworm is equipped.
   Its options raise The Disposition of your Hellworm (`Disp +1 · Nightmares −1–8` playing, `Disp +1–2 · Scandal
@@ -3776,6 +3826,35 @@ Confirmed live by the author:
   Every option table here is transcribed from wiki pages, not from the screen, so a wrong number
   renders as well as a right one.
 
+- The **four Relicker cards** (`relickers`, added 2026-09-29). Nothing seen in the game; every table is transcribed from the
+  wiki (`docs/superpowers/research/2026-09-29-relickers.md`) and gates on the opened card's own heading. Report first: **(1) The
+  four card headings** -- whether each opened card shows the wiki's full title (*The Capering Relicker and Gulliver are Outside
+  in the Street* and so on); a heading that reads differently attaches nothing. **(2) The option texts** -- the eight trades read
+  "Hand over a … for X"; a text that differs does not badge, and the two shared names (*Recertify an armful of scraps*,
+  *…a double-armful of scraps*) must read alike on the Capering and the Coquettish card. **(3) A locked option** -- whether the
+  Airs-gated trades (`▾`, seven of them) are drawn greyed or not at all. **(4) The rare success** -- how often it happens, which
+  would let the tooltip give a real expectation instead of leaving it out.
+
+- The **Stacks** (`the-stacks`, added 2026-09-29). Nothing seen in the game; every table is transcribed from the wiki
+  (`docs/superpowers/research/2026-09-29-the-stacks.md`) and gates on the opened card's own heading. Report first: **(1) The card
+  headings** -- whether each opened card shows the wiki title (*A Dead End?*, *A Librarian's Office*, *(Apocrypha Found)*, and
+  which of the Chained Volume's titles); a heading that reads differently attaches nothing. **(2) The five disambiguated option
+  texts** -- *Climb*, *Open a black door*, *Don't go anywhere*, *Take a moment to regroup*, *Grab whatever you can carry*: the
+  wiki adds a parenthesis, and this script assumes the game does not. **(3) Noises in the Library** -- whether the menace is shown
+  anywhere the script could read, since a badge that reacted to the level would be worth more than one that states the risk.
+  **(4) The page-over-guide figures**: the option pages say the borehole option pays 10 and asks Watchful 300, the guide is silent
+  on the difficulties; every difficulty here is a page fact, not a screen fact. **(5) A locked option** -- whether the Apostate
+  and Fate options are drawn greyed or not at all.
+
+- The **Marrow Behind** (`the-marrow`, added 2026-09-29). Nothing seen in the game; every table is transcribed from the wiki
+  (`docs/superpowers/research/2026-09-29-the-marrow-behind.md`) and gates on the opened card's own heading. Report first: **(1) The
+  card headings** -- whether *The Hunger* and *The Oath* show without the wiki's "(The Empty Corpse)", and which of *The Skeleton of
+  the Sky* / *Entering the Skeleton of the Sky* the form choice shows. **(2) Decipher the message** -- its real range (the page says
+  Mote 1 and Spark 5-9); if it is lower, the guide's "best card" claim stands and the badge is too high. **(3) The formula** -- what
+  Return to your mooring actually gives against the badge's figure for a few cards. **(4) The ranges marked "?"** on the pages
+  (*Judge the contract*, *Devour the condemned*, *Reflect*, *Dare to dance with the King*). **(5) A locked option** -- whether the
+  story options are drawn greyed or not at all.
+
 - The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
   table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
   looking at the screen can confirm: a wrong number renders exactly as well as a right one. They
@@ -4504,6 +4583,20 @@ Current tests:
   live-quality-dependent number this script cannot read, the growth mark and compounding-value
   note on Accelerate and Stretch yourself beyond your limits, and that a page matching none of the
   three guessed storylet titles attaches nothing and throws nothing.
+- `tests/choice-the-marrow.test.mjs` — 61 rows; the Tempestuous Tale figure computed through the page's formula and the formula's weights
+  against the guide's conversion table (Dendritic Spark the one exception); the two page-over-guide figures; a story step never a
+  number; the wiring keyed by the open card with the two wiki-only "(The Empty Corpse)" headings and both form storylet headings;
+  *Consume what is not there* left to the Firmament feature; and the two ordinary phrases and the one shared card as the only names
+  another table also carries.
+- `tests/choice-the-stacks.test.mjs` — 56 card options, 8 books, 8 finale options; every progress figure one of 5, 10 or 15; the
+  eight options that add Noises +6 on a failure say so in the badge and take the risk colour; the book totals against the
+  totals their finale option carries; the wiring keyed by the open card (an ordinary phrase is badged under its own card only,
+  the Seven of Loins' *Take a moment to regroup* is not); both wiki titles of the Chained Volume; and that no card title is a
+  quoted string anywhere else in the file.
+- `tests/choice-relickers.test.mjs` — 49 rows over four cards, the guide's ladder and its Echoes-per-scrap column against its own
+  sell values (Whisper-Satin's 70 against 75 the one exception), the marks (`≈` on the four Luck tiers, `▾` on exactly the seven
+  Airs-gated options), the two shared option names resolving by CARD in the wiring, both apostrophes and the "certifiable"
+  spelling, and that no name of the feature is a quoted string anywhere else in the file.
 - The **Airs of London storylet suites** (2026-09-28), one per feature, all with the same shape --
   the row count, what each badge shows, that the open storylet gates the wiring (`roots` and
   `branches` stubbed), that no option name is in another feature's table, and that the feature is

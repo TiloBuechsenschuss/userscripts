@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.34
+// @version      1.37
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -604,6 +604,26 @@
  *     for profit, The Alleys of Spite, The Flit and its King, Bones in the River and The Chandleress' Complaint
  *     do the same, stating what the script cannot read (the case stage, which card art) instead of guessing it.
  *     Literary Ambitions joins the Spider Symposium, and four visiting storylets join Someone Is Coming.
+ *     (19) The four Relicker cards (the Capering, Coquettish, Curt and Shivering Relicker), markup only, no panel,
+ *     each badged only while its own card is open. Every trade shows the ware and the quantity -- the expected
+ *     quantity, marked "≈", on the four 50% Luck tiers, whose failure pays a quarter -- and a trade the Airs of
+ *     London hides carries "▾" and the requirement in words. A recertify gamble shows both outcomes and their
+ *     expectation ("Scrap +5 / −4 ≈ +0.5"); the menace options and the Fate Face-Tailor are badged too. The guide's
+ *     Echoes per scrap are in the tooltips, labelled as its estimate. Two option names sit on two cards, so
+ *     every lookup is keyed by the open card.
+ *     (20) The Stacks, the Firmament library played from the opportunity deck, markup only, no panel: 56 card options,
+ *     the book chooser and the reading-room finales, each shown only while its own card is open (the option names are
+ *     ordinary phrases, so the open card is the key). An option shows its progress ("P +5"), or what it pays when it
+ *     pays none, then a spent resource, "?" for a stat check or "≈" for a Luck challenge, and last the risk -- "fail N +6"
+ *     -- because eight options add 6 Noises on a failure and Noises in the Library fires WE WILL HAVE SILENCE at 8.
+ *     A book carries the guide's Echo and Stuiver totals, labelled its estimate. No EPA is quoted: the guide's figures
+ *     disagree.
+ *     (21) The Marrow Behind, the Late-Firmament activity in Procession, markup only, no panel. Every option that pays
+ *     currencies shows its Tempestuous Tales ("TT 10", "TT 10–14"), computed from the option page's quantities through
+ *     the formula printed on Return to your mooring, so all the cards sit on one axis; a range the page itself marks unsure
+ *     carries "?" in front, a stat check "?" after. A story step (a scar, a sight, the location unlocks) is a label with its
+ *     requirement, never a number, and a form says which corpse it leads to and which aspect it strains. The page pays
+ *     Decipher the message more than the guide's "best card"; the badge follows the page and the tooltip says so.
  *     Built as a feature registry so further advice can be added as entries.
  */
 
@@ -40373,6 +40393,872 @@
     });
   }
 
+  // === feature: The Relickers ==============================================
+  //
+  // Four opportunity cards, each "Very Infrequent" and each unlocked by one
+  // stat at 25, on which the rag-and-bone men of Mr Cups trade Certifiable
+  // Scrap for goods: the Capering (Persuasive, infernal goods), Coquettish
+  // (Dangerous, cloth), Curt (Shadowy, gossip and blackmail) and Shivering
+  // Relicker (Watchful, screams and secret things). Each card has the same
+  // eight trades, three recertify gambles and one or two extras. Nothing
+  // else in this file touches them: `someone-is-coming` badges a different
+  // card, A Gift from the Capering Relicker.
+  //
+  // **What the badge says.** The ware and the quantity, nothing else on
+  // the badge. Tiers 1-4 are a 50% Luck challenge whose failure pays a
+  // quarter of the goods, so the badge quotes the expected quantity, marked
+  // "≈" (the rare success adds one item of the next tier's ware at odds the
+  // page does not state, so it stays out of the number and in the tooltip);
+  // tiers 5-8 are fixed and carry no mark. A trade the Airs of London hides
+  // ("The Airs of London 3+" or "1+") carries "▾" and the requirement in the
+  // tooltip, because the script cannot read the Airs. A recertify gamble
+  // quotes both outcomes and their expectation ("Scrap +5 / −4 ≈ +0.5"),
+  // never the advertised gain alone. The guide's Echo value per scrap for
+  // each tier is in the trade tooltips as the GUIDE'S estimate, not a page
+  // fact; the badge does not carry it.
+  //
+  // Transcribed from the four card pages and all 47 option pages (fetched
+  // through the API, 2026-09-29), with Certifiable Scraps (Guide)/Table as
+  // the cross-check -- see docs/superpowers/research/2026-09-29-relickers.md.
+  // Where they differ the page is followed and the guide quoted:
+  //   Whisper-Satin   the page asks Dangerous 70, the guide's ladder says 75
+  // Two option names are on two cards (Recertify an armful of scraps and
+  // Recertify a double-armful of scraps, on the Capering and the Coquettish
+  // card), so every lookup is keyed by the OPENED CARD; no option was
+  // retitled by the Airs (the three variant tables on these pages retitle
+  // result text only). Corrections go in RELICKER_OPTIONS and nowhere else.
+
+  const RELICKER_CARDS = {
+    capering: { card: 'The Capering Relicker and Gulliver are Outside in the Street', stat: 'Persuasive', who: 'Capering', deals: 'infernal goods' },
+    coquettish: { card: 'The Coquettish Relicker and Mathilde are Making the Rounds', stat: 'Dangerous', who: 'Coquettish', deals: 'cloth' },
+    curt: { card: 'The Curt Relicker and Montgomery are Moving Quietly Past', stat: 'Shadowy', who: 'Curt', deals: 'gossip and blackmail' },
+    shivering: { card: 'The Shivering Relicker and Pinnock are Trundling By', stat: 'Watchful', who: 'Shivering', deals: 'screams and secret things' },
+  };
+
+  // The guide's ladder, the same on all four cards: the scraps a trade costs, the stat it asks, whether it is the 50%
+  // Luck challenge, and the guide's sell value in Echoes per scrap (its estimate).
+  const RELICKER_TIERS = [
+    { tier: 1, scraps: 5, stat: 25, luck: true, eps: 0.24 },
+    { tier: 2, scraps: 15, stat: 50, luck: true, eps: 0.33 },
+    { tier: 3, scraps: 30, stat: 75, luck: true, eps: 0.43 },
+    { tier: 4, scraps: 100, stat: 100, luck: true, eps: 0.32 },
+    { tier: 5, scraps: 120, stat: 125, luck: false, eps: 0.31 },
+    { tier: 6, scraps: 160, stat: 150, luck: false, eps: 0.38 },
+    { tier: 7, scraps: 680, stat: 175, luck: false, eps: 0.46 },
+    { tier: 8, scraps: 3200, stat: 200, luck: false, eps: 0.49 },
+  ];
+
+  // A trade. `w` is [ware, quantity on success, quantity on failure] for tiers 1-4 and [ware, quantity] above; `more` may
+  // carry `rare` (the extra item of a rare success), `stat` (the page's own level where it differs from the ladder), `gate`
+  // (the Airs of London window that must be open), `airs` (what the option does to the Airs) and `extra` (a further gain).
+  function rkTrade(card, tier, name, w, more) {
+    const t = RELICKER_TIERS[tier - 1];
+    return Object.assign({ storylet: RELICKER_CARDS[card].card, card: card, kind: 'trade', tier: tier, name: name,
+      scraps: t.scraps, stat: t.stat, luck: t.luck, ware: w[0], win: w[1], fail: t.luck ? w[2] : null, airs: 'random' }, more);
+  }
+
+  // A recertify gamble: 50% Luck, gain `win` scraps or lose `lose`.
+  function rkRecert(card, name, scraps, win, lose, airs, more) {
+    return Object.assign({ storylet: RELICKER_CARDS[card].card, card: card, kind: 'recertify', name: name, scraps: scraps,
+      win: win, lose: lose, airs: airs }, more);
+  }
+
+  // A menace-lowering option: Luck 60, 3 CP of `menace` off on success, +1 CP on failure.
+  function rkMenace(card, name, menace, needs) {
+    return { storylet: RELICKER_CARDS[card].card, card: card, kind: 'menace', name: name, menace: menace, cut: 3, needs: needs };
+  }
+
+  const RELICKER_OPTIONS = [
+    // --- The Capering Relicker (Persuasive) ------------------------------------------------------------------------------
+    rkTrade('capering', 1, 'Hand over a paltry few creditable scraps for Souls', ['Soul', 100, 25], { rare: 'Amanita Sherry' }),
+    rkTrade('capering', 2, 'Hand over a small collection of scraps for Amanita Sherry', ['Amanita Sherry', 80, 20], { rare: 'Brilliant Soul' }),
+    rkTrade('capering', 3, 'Hand over a box of scraps for Brilliant Souls', ['Brilliant Soul', 42, 10], { rare: 'Muscaria Brandy' }),
+    rkTrade('capering', 4, 'Hand over a sack of scraps for Muscaria Brandy', ['Muscaria Brandy', 20, 5],
+      { rare: 'Brass Ring', extra: 'Approaching the Gates of the Garden +5 CP on a success or a rare success' }),
+    rkTrade('capering', 5, 'Hand over all the scraps you can carry for Brass Rings', ['Brass Ring', 3], { airs: null }),
+    rkTrade('capering', 6, 'Hand over a cartload of scraps for a Bright Brass Skull', ['Bright Brass Skull', 1], { airs: null }),
+    rkTrade('capering', 7, 'Hand over a roomful of scraps for a Coruscating Soul', ['Coruscating Soul', 1], { airs: null, gate: '3+' }),
+    rkTrade('capering', 8, 'Hand over a multitude of scraps for... something secret',
+      ['Reported Location of a One-Time Prince of Hell', 1], { gate: '3+', short: 'Prince of Hell’s location' }),
+    rkRecert('capering', 'Have the Capering Relicker recertify some scraps', 5, 5, 4, 'Airs of London +3, on either outcome'),
+    rkRecert('capering', 'Recertify an armful of scraps', 10, 10, 8, 'Airs of London +3, on either outcome'),
+    rkRecert('capering', 'Recertify a double-armful of scraps', 20, 20, 18, 'Airs of London re-rolled',
+      { extra: 'Walking the Falling Cities +10 CP on a success' }),
+    { storylet: RELICKER_CARDS.capering.card, card: 'capering', kind: 'pastime', name: 'A droll pastime' },
+
+    // --- The Coquettish Relicker (Dangerous) -----------------------------------------------------------------------------
+    rkTrade('coquettish', 1, 'Hand over a paltry few creditable scraps for Silk', ['Silk Scrap', 200, 50], { rare: 'Surface-Silk Scrap' }),
+    rkTrade('coquettish', 2, 'Hand over a small collection of scraps for Surface-Silk', ['Surface-Silk Scrap', 80, 20],
+      { rare: 'Whisper-Satin Scrap', gate: '3+' }),
+    rkTrade('coquettish', 3, 'Hand over a box of scraps for Whisper-Satin', ['Whisper-Satin Scrap', 42, 10],
+      { rare: 'Thirsty Bombazine Scrap', stat: 70, guideStat: 75 }),
+    rkTrade('coquettish', 4, 'Hand over a sack of scraps for Thirsty Bombazine', ['Thirsty Bombazine Scrap', 20, 5],
+      { rare: 'Puzzle-Damask Scrap', gate: '3+' }),
+    rkTrade('coquettish', 5, 'Hand over all the scraps you can carry for Puzzle-Damask', ['Puzzle-Damask Scrap', 3]),
+    rkTrade('coquettish', 6, 'Hand over a cartload of scraps for Parabola-Linen', ['Parabola-Linen Scrap', 1]),
+    rkTrade('coquettish', 7, 'Hand over a roomful of scraps for Ivory Organza', ['Scrap of Ivory Organza', 1]),
+    rkTrade('coquettish', 8, 'Hand over a multitude of scraps for Veils-Velvet', ['Veils-Velvet Scrap', 1]),
+    rkRecert('coquettish', 'Have the Coquettish Relicker recertify some scraps', 5, 5, 4, 'Airs of London re-rolled'),
+    rkRecert('coquettish', 'Recertify an armful of scraps', 10, 10, 8, 'Airs of London re-rolled'),
+    rkRecert('coquettish', 'Recertify a double-armful of scraps', 20, 20, 18, 'Airs of London re-rolled'),
+    rkMenace('coquettish', 'Tell the Coquettish Relicker your woes', 'Scandal', 'Scandal 3'),
+
+    // --- The Curt Relicker (Shadowy) -------------------------------------------------------------------------------------
+    rkTrade('curt', 1, 'Hand over a paltry few creditable scraps for Proscribed Materials', ['Proscribed Material', 50, 12],
+      { rare: 'Inkling of Identity' }),
+    rkTrade('curt', 2, 'Hand over a small collection of scraps for Inklings of Identity', ['Inkling of Identity', 80, 20],
+      { rare: 'Scrap of Incendiary Gossip' }),
+    rkTrade('curt', 3, 'Hand over a box of scraps for Incendiary Gossip', ['Scrap of Incendiary Gossip', 42, 10],
+      { rare: 'An Identity Uncovered!', gate: '3+' }),
+    rkTrade('curt', 4, 'Hand over a sack of scraps for Uncovered Identities', ['An Identity Uncovered!', 20, 5],
+      { rare: 'Blackmail Material' }),
+    rkTrade('curt', 5, 'Hand over all the scraps you can carry for Blackmail Material', ['Blackmail Material', 3], { airs: null }),
+    rkTrade('curt', 6, 'Hand over a cartload of scraps for a Diary of the Dead', ['Diary of the Dead', 1], { airs: null }),
+    rkTrade('curt', 7, 'Hand over a roomful of scraps for an Intriguer’s Compendium', ['Intriguer’s Compendium', 1], { airs: '+3' }),
+    rkTrade('curt', 8, 'Hand over a multitude of scraps for a Rumourmonger’s Network', ['Rumourmonger’s Network', 1], { airs: null }),
+    rkRecert('curt', 'Ask the Curt Relicker to recertify some scraps', 5, 5, 4, 'Airs of London +5 on a success, +3 on a failure'),
+    rkRecert('curt', 'Ask the Curt Relicker to recertify a whole armful of scraps', 10, 10, 8,
+      'Airs of London re-rolled on a success, +3 on a failure'),
+    rkRecert('curt', 'Ask the Curt Relicker to recertify a double-armful of scraps', 20, 20, 18, 'Airs of London +3, on either outcome'),
+    rkMenace('curt', 'Ask the Curt Relicker to help with matters of law and suspicion', 'Suspicion', 'Suspicion 3'),
+    { storylet: RELICKER_CARDS.curt.card, card: 'curt', kind: 'facetailor', name: 'Meet the Face-Tailor on his rounds' },
+
+    // --- The Shivering Relicker (Watchful) -------------------------------------------------------------------------------
+    // The guide's comment calls the tier-1 option "certifiable", the card page "creditable"; both are matched.
+    rkTrade('shivering', 1, 'Hand over a paltry few creditable scraps for Primordial Shrieks', ['Primordial Shriek', 100, 25],
+      { rare: 'Maniac’s Prayer', aliases: ['Hand over a paltry few certifiable scraps for Primordial Shrieks'] }),
+    rkTrade('shivering', 2, 'Hand over a small collection of scraps for Maniac’s Prayers', ['Maniac’s Prayer', 80, 20],
+      { rare: 'Correspondence Plaque', gate: '1+' }),
+    rkTrade('shivering', 3, 'Hand over a box of scraps for Correspondence Plaques', ['Correspondence Plaque', 42, 10],
+      { rare: 'Aeolian Scream' }),
+    rkTrade('shivering', 4, 'Hand over a sack of scraps for Aeolian Screams', ['Aeolian Scream', 20, 5],
+      { rare: 'Storm-Threnody', airs: null }),
+    rkTrade('shivering', 5, 'Hand over all the scraps you can carry for Storm-Threnodies', ['Storm-Threnody', 3], { airs: null }),
+    rkTrade('shivering', 6, 'Hand over a cartload of scraps for a Night-Whisper', ['Night-Whisper', 1], { airs: null }),
+    rkTrade('shivering', 7, 'Hand over a roomful of scraps for a Starstone Demark', ['Starstone Demark', 1], { airs: null }),
+    rkTrade('shivering', 8, 'Hand over a multitude of scraps for a Breath of the Void', ['Breath of the Void', 1], { airs: null }),
+    rkRecert('shivering', 'Ask the Shivering Relicker to recertify a few scraps', 5, 5, 4, 'Airs of London +1 on a success, unchanged on a failure'),
+    rkRecert('shivering', 'Ask the Shivering Relicker to recertify an armful of scraps', 10, 10, 8, 'Airs of London re-rolled', { gate: '1+' }),
+    rkRecert('shivering', 'Ask the Shivering Relicker to recertify a double armful of scraps', 20, 20, 18, 'Airs of London re-rolled'),
+    rkMenace('shivering', 'Invite the Shivering Relicker in for a chat', 'Nightmares',
+      'A Scholar of the Correspondence 1 and Nightmares 3'),
+  ];
+
+  const RELICKER_INDEX = carouselIndex(RELICKER_OPTIONS);
+
+  const RELICKER_CLASS = 'fl-ux-relickers';
+  const RELICKER_FLAG = 'flUxRelickers';
+  const RELICKER_BRANCH_CLASS = 'fl-ux-relickers-branch';
+  const RELICKER_BRANCH_FLAG = 'flUxRelickersBranch';
+
+  // "62.5", "12.5", "26": one decimal at most, no trailing zero.
+  function relickerNumber(n) {
+    return String(Math.round(n * 10) / 10);
+  }
+
+  // What a Luck challenge at `p` is worth in expectation: the success value at p, the failure value at 1 - p.
+  function relickerExpected(p, win, lose) {
+    return p * win + (1 - p) * lose;
+  }
+
+  function relickerTradeText(e) {
+    const hidden = e.gate ? ' ' + CAROUSEL_MARK_HIDDEN : '';
+    const ware = e.short || e.ware;
+    if (!e.luck) return ware + ' ×' + e.win + hidden;
+    return ware + ' ×' + relickerNumber(relickerExpected(0.5, e.win, e.fail)) + CAROUSEL_MARK_EXPECTED + hidden;
+  }
+
+  function relickerRecertText(e) {
+    const hidden = e.gate ? ' ' + CAROUSEL_MARK_HIDDEN : '';
+    return 'Scrap +' + e.win + ' / −' + e.lose + ' ' + CAROUSEL_MARK_EXPECTED + ' '
+      + carouselSigned(Math.round(relickerExpected(0.5, e.win, -e.lose) * 10) / 10)
+      + (e.extra ? ' · ' + e.extra.replace(' on a success', '') : '') + hidden;
+  }
+
+  function relickerMenaceText(e) {
+    return e.menace + ' −' + e.cut + ' / +1 CP ' + CAROUSEL_MARK_EXPECTED + ' '
+      + carouselSigned(Math.round(relickerExpected(0.6, -e.cut, 1) * 10) / 10);
+  }
+
+  function relickerBadgeSpec(e) {
+    const c = RELICKER_CARDS[e.card];
+    const head = [e.name, c.card, ''];
+    const airsGate = e.gate ? CAROUSEL_MARK_HIDDEN + ' Needs The Airs of London ' + e.gate
+      + ' (the script cannot read the Airs; the game hides or greys the option).' : null;
+    if (e.kind === 'trade') {
+      const t = RELICKER_TIERS[e.tier - 1];
+      const lines = head.concat([
+        'Costs ' + e.scraps + ' Certifiable Scrap. Needs ' + c.stat + ' ' + e.stat + '.',
+        airsGate,
+        e.luck ? 'A 50% Luck challenge. Success: ' + e.ware + ' ×' + e.win + '. Failure: ' + e.ware + ' ×' + e.fail
+          + '. The badge shows the expected ' + relickerNumber(relickerExpected(0.5, e.win, e.fail))
+          + '; a rare success (odds not stated on the page) adds one ' + e.rare + '.'
+          : 'No challenge: ' + e.ware + ' ×' + e.win + '.',
+        e.extra ? 'Also: ' + e.extra + '.' : null,
+        e.airs ? 'Changes the Airs of London (' + (e.airs === 'random' ? 're-rolled' : e.airs) + ').' : null,
+        e.guideStat ? 'The guide’s ladder says ' + c.stat + ' ' + e.guideStat + '; the option page says ' + e.stat
+          + ', which is followed here.' : null,
+        'The guide values this tier at about ' + t.eps + ' Echoes per scrap (its estimate, not a page fact).',
+      ]).filter(Boolean).join('\n');
+      return { text: relickerTradeText(e), color: CAROUSEL_COLOR_PAYOUT, title: lines };
+    }
+    if (e.kind === 'recertify') {
+      const lines = head.concat([
+        'Needs ' + e.scraps + ' Certifiable Scrap in hand.',
+        airsGate,
+        'A 50% Luck challenge: gain ' + e.win + ' scraps or lose ' + e.lose + ' (an expected '
+          + carouselSigned(relickerExpected(0.5, e.win, -e.lose)) + ' per try). The guide reads the armful and the '
+          + 'double-armful as about +1 scrap per action, the small one +0.5.',
+        e.extra ? 'Also: ' + e.extra + '.' : null,
+        e.airs + '.',
+      ]).filter(Boolean).join('\n');
+      return { text: relickerRecertText(e), color: CAROUSEL_COLOR_PROGRESS, title: lines };
+    }
+    if (e.kind === 'menace') {
+      const lines = head.concat([
+        'Needs ' + e.needs + '. A 60% Luck challenge: ' + e.menace + ' −' + e.cut + ' CP on a success, +1 CP on a failure.',
+        'The badge shows the expected change per try.',
+      ]).join('\n');
+      return { text: relickerMenaceText(e), color: CAROUSEL_COLOR_NEUTRAL, title: lines };
+    }
+    if (e.kind === 'pastime') {
+      const lines = head.concat([
+        'A 60% Luck challenge: a Dark-Dewed Cherry on a success, Wounds +2 CP on a failure.',
+        'Changes the Airs of London (re-rolled).',
+        'The badge shows the expected Cherry and the expected Wounds per try.',
+      ]).join('\n');
+      return { text: 'Dark-Dewed Cherry ×0.6 · Wounds +0.8 CP ' + CAROUSEL_MARK_EXPECTED, color: CAROUSEL_COLOR_NEUTRAL, title: lines };
+    }
+    const lines = head.concat([
+      'A Fate option: needs The Face Trade exactly 29 (a particular choice in A Trade in Faces).',
+      'Gives Certifiable Scrap 1–4 and Suspicion −3 CP. No challenge.',
+    ]).join('\n');
+    return { text: 'Scrap +1–4 · Suspicion −3 CP', color: CAROUSEL_COLOR_NEUTRAL, title: lines };
+  }
+
+  function relickerCardSpec(key) {
+    const hit = Object.keys(RELICKER_CARDS).find(function (k) { return normalizeName(RELICKER_CARDS[k].card) === key; });
+    if (!hit) return null;
+    const c = RELICKER_CARDS[hit];
+    return {
+      text: c.who + ' Relicker: scraps → ' + c.deals, color: CAROUSEL_COLOR_LABEL,
+      title: c.card + '\n\nTrades Certifiable Scrap for ' + c.deals + '. Eight trades (' + c.stat + ' 25 to 200), three recertify '
+        + 'gambles and the extras; every option is badged in its own right.',
+    };
+  }
+
+  function relickerRatings() {
+    carouselRatings({
+      storylets: Object.keys(RELICKER_CARDS).map(function (k) { return RELICKER_CARDS[k].card; }),
+      index: RELICKER_INDEX, storyletSpec: relickerCardSpec, optionSpec: relickerBadgeSpec,
+      cls: RELICKER_CLASS, flag: RELICKER_FLAG, branchCls: RELICKER_BRANCH_CLASS, branchFlag: RELICKER_BRANCH_FLAG,
+    });
+  }
+
+  // === feature: The Stacks =================================================
+  //
+  // The Firmament's library, entered from The Bone Gate (and its five sister
+  // gates) and played from the OPPORTUNITY DECK, not a storylet: choose a book
+  // on A Card Catalogue, play cards until Perusing the Stacks is 40, play
+  // (Apocrypha Found) (Claim the book), play cards until Finding the Centre is
+  // 40, play The Reading Room, read the book (one of six finale storylets),
+  // then thread back out. Nearly every option pays 5 progress, so the figure
+  // that varies from card to card is what the option COSTS and RISKS -- Noises
+  // in the Library, Wounds, Nightmares; Routes, Ontologies and Keys spent --
+  // and what it hands you besides.
+  //
+  // **What the badge says.** The option's PROGRESS first ("P +5", "P +10",
+  // "P +15"); an option that pays none says what it pays instead ("Routes
+  // +1–2 · TP ×50"). Then, in this order: a spent resource ("▼ Route"), "?" for
+  // a stat check (the success value is quoted, the difficulty is the
+  // player's business) or "≈" for a Luck challenge at its stated odds (the
+  // expected progress), what the option always adds ("N +2"), and last the
+  // RISK, "fail N +6": Noises in the Library carries an autofire at 8
+  // (WE WILL HAVE SILENCE: Wounds 8, the Boatman), and eight options add 6 on a
+  // failure, so the menace is in the headline, not only the tooltip. The
+  // script cannot read Noises, so it states the risk and never gates on the
+  // level. No EPA is quoted anywhere: the guide's three figures (5.27, 9.94,
+  // 6.2–6.3) are strategy-dependent and disagree.
+  //
+  // A book on A Card Catalogue and a reading-room finale carry the guide's Echo
+  // and Stuiver totals ("≈116 E · s2320"), labelled the guide's estimate: they
+  // are its own conversions, several need a place (the Mausoleum Stalls, Risen
+  // Burgundy, the Markets of Burgundy) to be realised, and the item lists
+  // are the option pages'.
+  //
+  // Transcribed from the guide's card tables and 124 card, option and
+  // storylet pages (fetched through the API, 2026-09-29) -- see
+  // docs/superpowers/research/2026-09-29-the-stacks.md. Where the pages and
+  // the guide differ the pages are followed (research §3). Every option is
+  // keyed by the OPEN CARD's heading, never by name alone: Take the opposite
+  // door, Move on quickly, Keep going, Climb, Use a key, Go up and Go down are
+  // ordinary phrases, and Take a moment to regroup is already a row of the
+  // Seven of Loins feature. The two Clamorous Cartographer cards have only
+  // pictures on the wiki and are not badged; the exit storylets and Within the
+  // Hollow (its page records no option) are left out. Corrections go in
+  // STACKS_OPTIONS and nowhere else.
+
+  const STACKS_CATALOGUE = 'A Card Catalogue';
+  const STACKS_NOISES_NOTE = 'Noises in the Library carries an autofire at 8: WE WILL HAVE SILENCE sets Wounds to 8 and sends '
+    + 'you to the Boatman. The script cannot read Noises, so this states the risk and does not gate on the level.';
+
+  // A card option. `p`: progress on a success; `pf`: progress on a failure (0 when omitted). `luck`: the Luck odds of
+  // a Luck challenge; `ch`: a stat check in words. `spend`: the short name of what it spends; `cost`: the full cost.
+  // `gain`: what it pays instead of progress; `also`: what it always adds; `risk`: the failure's menace, in the badge.
+  function stk(card, name, o) {
+    return Object.assign({ storylet: card, name: name, kind: 'card' }, o);
+  }
+
+  const STACKS_OPTIONS = [
+    // --- An Atrium ------------------------------------------------------------------------------------------------
+    stk('An Atrium', 'Continue on the same heading', { p: 5, spend: 'Route', cost: '1 Route Traced through the Library',
+      ch: 'Broad Watchful 220 (each Inerrant and each Route adds 15)', risk: 'N +6' }),
+    stk('An Atrium', 'Course correct', { p: 5, pf: 1, spend: 'Ont', cost: '1 Fragmentary Ontology', only: 1,
+      ch: 'Broad Watchful 300 (each Ontology adds 15)', okAlso: 'Routes 1–2', risk: 'N +1' }),
+    stk('An Atrium', 'Open a black door', { p: 10, spend: 'Key', cost: '1 Library Key', apostate: true,
+      okAlso: 'TP ×50, the hour set to 10 (which deals A Solonacean Gallery)' }),
+
+    // --- A Dead End? ----------------------------------------------------------------------------------------------
+    stk('A Dead End?', 'Tie a rope to the railing and descend', { p: 5, pf: 5, clears: true,
+      ch: 'Broad Shadowy 148 (each Watchful adds 1)', risk: 'Wounds +2 · N +1–6' }),
+    stk('A Dead End?', 'Take advantage of the vantage point', { gain: 'Routes +2 · TP ×50', ch: 'Broad Watchful 350 (each Chthonosophy adds 15)',
+      fail: 'One Route', note: 'Always gives at least one Route.' }),
+    stk('A Dead End?', 'See through the Cartographer’s eyes', { gain: 'Tale ×10', fate: true,
+      needs: 'Acquaintance: The Clamorous Cartographer (10 Fate)', okLong: 'Tempestuous Tale ×10.' }),
+    stk('A Dead End?', 'Make a lot of noise', { gain: 'N +4? · Routes', apostate: true, needs: 'Noises 3 and Exploring with the Apostate',
+      note: 'Always raises Noises (about 4, the page marks it) and gives Routes that scale with the new level.' }),
+
+    // --- A Discarded Ladder ---------------------------------------------------------------------------------------
+    stk('A Discarded Ladder', 'Climb', { gain: 'Routes +1–2', ch: 'Broad Watchful 200', risk: 'Wounds +1 · N +6' }),
+
+    // --- A Grand Staircase ----------------------------------------------------------------------------------------
+    stk('A Grand Staircase', 'Make an informed decision', { p: 5, spend: 'Route', cost: '1 Route Traced through the Library', clears: true }),
+    stk('A Grand Staircase', 'Go up', { p: 5, pf: 1, luck: 0.5, clears: true, needs: 'no Route in hand (the option is locked while you hold one)',
+      risk: 'N +2' }),
+    stk('A Grand Staircase', 'Go down', { p: 5, pf: 1, luck: 0.5, clears: true, needs: 'no Route in hand (the option is locked while you hold one)',
+      risk: 'N +2' }),
+
+    // --- A Locked Gate --------------------------------------------------------------------------------------------
+    stk('A Locked Gate', 'Use a key', { p: 15, spend: 'Key', cost: '1 Library Key' }),
+
+    // --- A Map Room -----------------------------------------------------------------------------------------------
+    stk('A Map Room', 'Look for maps of the library', { gain: 'Routes +1–2 · TP ×50', ch: 'Broad Watchful 220', pf: 1,
+      risk: 'N +1–2', failLong: 'Progress 1, Nightmares +1, Noises +1–2.' }),
+    stk('A Map Room', 'Look for maps of the Neath', { gain: 'Partial Map ×2', ch: 'Broad Watchful 250', pf: 1, risk: 'N +1',
+      rare: 'Puzzling Map ×1', failLong: 'Progress 1, Nightmares +1, Noises +1.' }),
+    stk('A Map Room', 'Get a lead from the Cartographer', { p: 5, also: 'N +2', fate: true, needs: 'Acquaintance: The Clamorous Cartographer (10 Fate)' }),
+    stk('A Map Room', 'Paint new routes upon maps of the library', { gain: 'Routes +1–2 · TP ×50', needs: 'a Palette of Revealing Pigments' }),
+
+    // --- A Poison-Gallery -----------------------------------------------------------------------------------------
+    stk('A Poison-Gallery', 'Use furniture as stepping stones', { p: 5, ch: 'Broad Shadowy 240 (each Neathproofed adds 15)', risk: 'Wounds +3 · N +6' }),
+    stk('A Poison-Gallery', 'Prepare an antidote', { p: 5, pf: 1, spend: 'Flask', cost: '1 Flask of Abominable Salts',
+      ch: 'Narrow Kataleptic Toxicology 10', risk: 'Wounds +2 · N +1' }),
+
+    // --- A Stone Gallery ------------------------------------------------------------------------------------------
+    stk('A Stone Gallery', 'Make your way through the silent gallery', { p: 5, pf: 5, luck: 0.5, risk: 'Nightmares +2' }),
+    stk('A Stone Gallery', 'Stop and examine the ancient volumes', { gain: 'Ont +1–2', ch: 'Narrow Chthonosophy 7', pf: 1, risk: 'N +1–2' }),
+    stk('A Stone Gallery', 'Follow a borehole through the back of a bookcase', { p: 10, pf: 5, spend: 'Routes', cost: '2 Routes Traced through the Library',
+      ch: 'Broad Watchful 300 (each Dangerous adds 1)', when: 'only in an Hour of Dim Pale Moonlight or of Darkness', risk: 'N +6' }),
+
+    // --- The Grey Cardinal ----------------------------------------------------------------------------------------
+    stk('The Grey Cardinal', 'Offer the cardinal a furry lunch', { p: 5, spend: 'Rat', cost: '1 Rat on a String', okAlso: 'Disposition of the Cardinal +1',
+      needs: 'Acquaintance: The Grey Cardinal' }),
+    stk('The Grey Cardinal', 'Offer the cardinal a tin of something fishy', { p: 5, spend: 'Catch', cost: '1 Deep-zee Catch',
+      okAlso: 'Disposition of the Cardinal +1–2', needs: 'Acquaintance: The Grey Cardinal' }),
+    stk('The Grey Cardinal', 'Engage the Cardinal in conversation', { gain: 'Disposition +1 · TP ×50', ch: 'Broad Persuasive 250 (each Bizarre adds 10)',
+      fail: 'TP ×40', needs: 'Acquaintance: The Grey Cardinal' }),
+
+    // --- An Index (stage 1) ---------------------------------------------------------------------------------------
+    stk('An Index', 'Search for a reference card', { gain: 'Routes +1–3', ch: 'Broad Watchful 200 (each Inerrant adds 15)', pf: 1, only: 1,
+      risk: 'N +2', failLong: 'Progress 1, one Route, Noises +2.' }),
+    stk('An Index', 'Try to understand the organisation of the library', { gain: 'Ont +1–3', ch: 'Narrow Chthonosophy 7', pf: 1, only: 1,
+      risk: 'N +1–2', failLong: 'Progress 1, one Ontology, Noises +1–2.' }),
+    stk('An Index', 'Situate yourself within the greater whole', { p: 5, spend: 'Ont', cost: '1 Fragmentary Ontology', only: 1, needs: 'Chthonosophy 3' }),
+
+    // --- A Librarian's Office (stage 2) ---------------------------------------------------------------------------
+    stk('A Librarian’s Office', 'Pick through the drawers', { gain: 'TP ×40 · Key, Route or Ont', luck: 0.9, only: 2,
+      fail: 'Fin Bones, Collected or Deep-zee Catch ×1–10', note: 'The one of Library Key, Route or Ontology is chosen by the game.' }),
+    stk('A Librarian’s Office', 'Take the opposite door', { p: 5, only: 2 }),
+    stk('A Librarian’s Office', 'Unlock the cart', { p: 15, spend: 'Key', cost: '1 Library Key', only: 2 }),
+
+    // --- A Flowering Gallery (hours 1-2) --------------------------------------------------------------------------
+    stk('A Flowering Gallery', 'Keep going', { p: 5, ch: 'Narrow Neathproofed 0 (each Inerrant adds 1)', when: 'only in an Hour of Weak or Sickly Pale Sunlight',
+      risk: 'Nightmares +? · N +6' }),
+    stk('A Flowering Gallery', 'Eat the fruit of knowledge', { gain: 'Ont +2', ch: 'Narrow Kataleptic Toxicology 12', pf: 1,
+      when: 'only in an Hour of Weak or Sickly Pale Sunlight', risk: 'Wounds +2 · N +1' }),
+
+    // --- A Black Gallery (hours 3-5) ------------------------------------------------------------------------------
+    stk('A Black Gallery', 'Light a lantern', { p: 5, pf: 5, ch: 'Broad Shadowy 240 (each Insubstantial adds 15)',
+      when: 'only in the Hours of Dim Moonlight, Darkness or Cold Moonlight', risk: 'N +2' }),
+    stk('A Black Gallery', 'Navigate by alternate senses', { p: 5, pf: 1, ch: 'Broad Watchful 240 (each Monstrous Anatomy adds 10)',
+      when: 'only in the Hours of Dim Moonlight, Darkness or Cold Moonlight', risk: 'N +2' }),
+
+    // --- A Gaoler-Librarian (Noises 1+) ---------------------------------------------------------------------------
+    stk('A Gaoler-Librarian', 'Hide and hope it passes you by', { gain: 'no reward', ch: 'Broad Shadowy 200', pf: 1, risk: 'Wounds +4? · N +1',
+      note: 'A success gives nothing.' }),
+    stk('A Gaoler-Librarian', 'Try to lift one of its keys', { gain: 'Key +1', ch: 'Broad Shadowy 250 (each Insubstantial adds 15)', risk: 'N +6' }),
+    stk('A Gaoler-Librarian', 'An intervention from the Grey Cardinal', { p: 5, spend: 'Disposition', cost: '1 Disposition of the Cardinal' }),
+
+    // --- A Terrible Shushing (Noises 4+) --------------------------------------------------------------------------
+    stk('A Terrible Shushing', 'Find a hiding place', { gain: 'N −3', ch: 'Broad Shadowy 220', fail: 'N −1' }),
+    stk('A Terrible Shushing', 'Hurry along', { p: 5, pf: 5, ch: 'Broad Shadowy 295', also: 'N +2', risk: 'N +4' }),
+    stk('A Terrible Shushing', 'Quiet the Cartographer', { gain: 'N −1 to −10?', fate: true, needs: 'Acquaintance: The Clamorous Cartographer (10 Fate)' }),
+
+    // --- A Gallery of Faces (the Graven Apostate) -----------------------------------------------------------------
+    stk('A Gallery of Faces', 'Sneak through the gallery', { p: 5, pf: 1, ch: 'Broad Shadowy 210', also: 'N +1–2', apostate: true,
+      rare: 'A rare success pays 10 progress', risk: 'N +1' }),
+    stk('A Gallery of Faces', 'Distract the volumes', { gain: 'Routes +1–3 · N +1–3', ch: 'Broad Persuasive 230 (each Monstrous Anatomy adds 15)',
+      apostate: true, risk: 'N +6' }),
+
+    // --- A Solonacean Gallery (the Graven Apostate, after Open a black door) --------------------------------------
+    stk('A Solonacean Gallery', 'Do not read the titles', { p: 10, ch: 'Narrow Steward of the Discordance 5', apostate: true, risk: 'Wounds +2 · N +6' }),
+    stk('A Solonacean Gallery', 'Don’t go anywhere', { p: 15, spend: 'Routes', cost: '3 Routes Traced through the Library', also: 'the hour re-rolled', apostate: true }),
+
+    // --- A God's Eye View (An Interloper in the Library 3, Ontology 5) --------------------------------------------
+    stk('A God’s Eye View', 'Try to hold it all in your mind at once', { gain: 'Chthonosophy +1–2 · TP ×60', luck: 0.4, spend: 'Ont', pf: 1,
+      cost: 'up to 6 Fragmentary Ontology', risk: 'Nightmares +2–4 · N +1–2', fail: 'Progress 1, TP ×40, Nightmares +2–4, Noises +1–2' }),
+    stk('A God’s Eye View', 'Focus on the path ahead', { p: 15, spend: 'Ont', cost: '5 Fragmentary Ontology', needs: 'Chthonosophy 5' }),
+
+    // --- The Shape of the Labyrinth (stage 2, 6+ Routes) ----------------------------------------------------------
+    stk('The Shape of the Labyrinth', 'Rethink your movements', { p: 10, spend: 'Routes', cost: '2–5 Routes Traced through the Library', clears: true, only: 2 }),
+    stk('The Shape of the Labyrinth', 'Reject the significance of shape', { p: 5, pf: 1, spend: 'Ont', cost: '1 Fragmentary Ontology',
+      ch: 'Narrow Chthonosophy 5', only: 2, needs: 'Chthonosophy 5', risk: 'N +1' }),
+
+    // --- the violet cards ------------------------------------------------------------------------------------------
+    stk('A Glimpse through a Window', 'Stop and look through', { gain: 'TP ×50', when: 'not in the Hour of Darkness' }),
+    stk('A Glimpse through a Window', 'Move on quickly', { p: 5 }),
+    stk('A Glimpse through a Window', 'Try to recall—', { gain: 'TP ×50', needs: 'An Absence equipped', when: 'not in the Hour of Darkness' }),
+    stk('A Tea Room?', 'Take a moment to regroup', { gain: 'N −1 · Nightmares −1 · Wounds −1', note: 'Nightmares and Wounds come down to 4 and no lower.' }),
+    stk('A Tea Room?', 'Consult your maps of the library', { p: 10, pf: 5, spend: 'Route', cost: '1 Route Traced through the Library',
+      ch: 'Narrow Routes Traced through the Library (five or more make it certain)' }),
+    stk('A Tea Room?', 'Try to make sense of what you’ve seen', { gain: 'Chthonosophy +1 · TP ×50', spend: 'Ont', cost: '1 Fragmentary Ontology',
+      ch: 'Narrow Fragmentary Ontology 2', fail: 'The Ontology is given back' }),
+
+    // --- the two stage cards --------------------------------------------------------------------------------------
+    stk('(Apocrypha Found)', 'Claim the book', { label: 'ends stage 1: claim the book' }),
+    stk('A Chained Volume', 'Unchain it', { label: 'Glimpse of Anathema ≈312.5 E · s6250', spend: 'Key', cost: '1 Library Key', also: 'N +5–8',
+      needs: 'Noises below 7, Anathema Unchained 0 and A True Denizen of the Neath',
+      note: 'You abandon the book you set out for and carry this one to the reading room: the rest of stage 1 is skipped.' }),
+  ];
+
+  // The book chooser and the reading-room finales carry the guide's totals; `est` is its Echo total, `stuiver` its Stuiver one.
+  function stkBook(name, o) {
+    return Object.assign({ storylet: STACKS_CATALOGUE, name: name, kind: 'book' }, o);
+  }
+
+  function stkFinale(storylet, name, pay, est, o) {
+    return Object.assign({ storylet: storylet, name: name, kind: 'finale', pay: pay, est: est }, o);
+  }
+
+  const STACKS_BOOKS = [
+    stkBook('Look for a copy of the Index of Banned Works, 1899 Edition', { code: 201, est: '≈116 E', stuiver: 's2320',
+      pay: 'Caustic Apocryphon ×9, Tantalising Possibility ×35' }),
+    stkBook('Look for a copy of the Annal of Lost Stars', { code: 202, est: '≈113.5 E or ≈100 E', stuiver: 's2240 or s2000',
+      pay: 'Glim-Encrusted Carapace, TP ×495, Shard of Glim ×400; or Roof-Chart ×40', needs: 'Firmament 200 and An Interloper in the Library',
+      aliases: ['Look for a copy of the Annal of Lost Stars (no Shepherd)'] }),
+    stkBook('Look for a copy of Le Précipice de la Tombée', { code: 203, est: '≈116 E', stuiver: 's570 (+87.5 E non-convertible)',
+      pay: 'Anticandle ×10 with Fragment, Relic and TP, or with Tempestuous Tale, Diamond, Relic and TP', needs: 'Firmament 200 and An Interloper in the Library 4',
+      note: 'The Anticandles need the Mausoleum Stalls to sell.' }),
+    stkBook('Look for a copy of A Codex of Unreal Places', { code: 204, est: '≈116 E', stuiver: 's20 (+115 E non-convertible)', fate: true,
+      pay: 'Oneiromantic Revelation, Storm-Threnody ×2, Puzzling Map, Volume of Collated Research ×6, TP ×10',
+      needs: 'Acquaintance: The Clamorous Cartographer (10 Fate)' }),
+    stkBook('Look for a copy of The Book of Proper Speech', { code: 205, est: '≈116.1 E', stuiver: 's1000',
+      pay: 'Crackling Device, Ratwork Mechanism ×4, Devilbone Die ×4', needs: 'An Interloper in the Library and Firmament 365',
+      note: 'The Ratwork Mechanisms need Risen Burgundy to sell.' }),
+    stkBook('Look for a copy of All of God’s Faces', { code: 206, est: '≈116 E', stuiver: 's570', apostate: true,
+      pay: 'Night-Whisper, Memory of a Much Stranger Self, Caustic Apocryphon, An Identity Uncovered! ×10, TP ×35',
+      needs: 'Acquaintance: The Graven Apostate 6 and Exploring with the Apostate' }),
+    stkBook('Look for a volume of the Encyclopedia Nicatoridae', { code: 207, est: '≈116 E', stuiver: 's0',
+      pay: 'Mystery of the Elder Continent ×7, Nicatorean Relic ×20, Chimerical Archive', needs: 'In Procession 20',
+      note: 'All of it sells for Echoes at the Bazaar.' }),
+    stkBook('Look for the Liber Animarum', { code: 99, est: '≈75 E (+ up to 312.5 E to sell your soul again)', stuiver: '-',
+      pay: 'Judgements’ Egg, Storm-Threnody; you lose Your very own Infernal Contract', needs: 'Your very own Infernal Contract and In Search of Lost Souls',
+      note: 'A rare opportunity that disappears if it is not your very next run.' }),
+  ];
+
+  const STACKS_FINALES = [
+    stkFinale('Wolfstack Docks?', 'Walk in', 'Caustic Apocryphon ×9 · TP ×35', '≈116 E · s2320'),
+    stkFinale('A Dim Fate', 'Return with one of the carcasses', 'Carapace ×1 · TP ×495 · Glim ×400', '≈113.5 E · s2240',
+      { note: '60 E of it is tied up with the Bone Market.' }),
+    stkFinale('A Dim Fate', 'Return with the lighthouse-keeper’s ledgers and charts', 'Roof-Chart ×40', '≈100 E · s2000'),
+    stkFinale('The Precipice', 'Help those you can', 'Anticandle ×10 · Fragment ×1 · Relic ×10 · TP ×35', '≈116 E · s570 (+87.5 E non-convertible)',
+      { note: 'The Anticandles need the Mausoleum Stalls to sell.' }),
+    stkFinale('The Precipice', 'Grab whatever you can carry', 'Anticandle ×10 · Tale ×25 · Diamond ×5 · Relic ×6 · TP ×10',
+      '≈116 E · s570 (+87.5 E non-convertible)', { note: 'The Anticandles need the Mausoleum Stalls to sell.' }),
+    stkFinale('The Twin Cities', 'Explore while you can', 'Crackling Device · Ratwork ×4 · Devilbone Die ×4', '≈116.1 E · s1000',
+      { note: 'The Ratwork Mechanisms need Risen Burgundy to sell.' }),
+    stkFinale('A Shattered Door', 'Approach the monument', 'Night-Whisper · Memory of a Much Stranger Self · Caustic ×1 · Identity ×10 · TP ×35',
+      '≈116 E · s570', { needs: 'Acquaintance: The Graven Apostate exactly 6', apostate: true }),
+    stkFinale('A Shattered Door', 'Approach the monument once more', 'Night-Whisper · Memory of a Much Stranger Self · Caustic ×1 · Identity ×10 · TP ×35',
+      '≈116 E · s570', { needs: 'Acquaintance: The Graven Apostate 7', apostate: true }),
+  ];
+
+  const STACKS_ALL = STACKS_OPTIONS.concat(STACKS_BOOKS, STACKS_FINALES);
+  // The wiki files The Chained Volume under two titles; the game shows one heading.
+  const STACKS_ALIASES = { 'a chained volume first time': 'a chained volume', 'a chained volume repeated': 'a chained volume' };
+  const STACKS_INDEX = carouselIndex(STACKS_ALL);
+  const STACKS_STORYLETS = Array.from(new Set(STACKS_ALL.map(function (e) { return e.storylet; })));
+
+  const STACKS_CLASS = 'fl-ux-the-stacks';
+  const STACKS_FLAG = 'flUxTheStacks';
+  const STACKS_BRANCH_CLASS = 'fl-ux-the-stacks-branch';
+  const STACKS_BRANCH_FLAG = 'flUxTheStacksBranch';
+
+  function stacksNumber(n) {
+    return String(Math.round(n * 10) / 10);
+  }
+
+  // The expected progress of an option: the success value at its Luck odds, the failure value the rest of the time.
+  function stacksExpected(e) {
+    return e.luck * e.p + (1 - e.luck) * (e.pf || 0);
+  }
+
+  function stacksText(e) {
+    if (e.kind === 'book') return e.stuiver === '-' ? e.est : e.est + ' · ' + e.stuiver;
+    if (e.kind === 'finale') return e.est;
+    let lead;
+    if (e.label) {
+      lead = e.label;
+    } else if (e.p != null) {
+      lead = e.luck && (e.pf || 0) !== e.p ? 'P +' + stacksNumber(stacksExpected(e)) + CAROUSEL_MARK_EXPECTED : 'P +' + e.p;
+    } else {
+      lead = e.gain + (e.luck ? CAROUSEL_MARK_EXPECTED : '');
+    }
+    const parts = [lead + (e.spend ? ' ' + CAROUSEL_MARK_USES + ' ' + e.spend : '') + (e.ch ? CAROUSEL_MARK_CHALLENGE : '')];
+    if (e.also) parts.push(e.also);
+    if (e.fate) parts.push('Fate');
+    if (e.apostate) parts.push('Apostate');
+    if (e.risk) parts.push('fail ' + e.risk);
+    return parts.join(' · ');
+  }
+
+  function stacksColor(e) {
+    if (e.kind !== 'card') return CAROUSEL_COLOR_PAYOUT;
+    if (e.label) return CAROUSEL_COLOR_NEUTRAL;
+    if (e.risk && /N \+6/.test(e.risk)) return CAROUSEL_COLOR_RISK;
+    if (e.p != null) return CAROUSEL_COLOR_PROGRESS;
+    return e.gain === 'no reward' ? CAROUSEL_COLOR_NEUTRAL : CAROUSEL_COLOR_SETUP;
+  }
+
+  function stacksSpec(e) {
+    const lines = [e.name, e.storylet, ''];
+    if (e.kind === 'book') {
+      lines.push('Sets Apocrypha Sought: ' + e.code + '. Reading it pays ' + e.pay + '.',
+        'The guide’s total: ' + e.est + ', ' + e.stuiver + ' (its estimate, not a page fact).',
+        e.needs ? 'Needs: ' + e.needs + '.' : null, e.fate ? 'A Fate option.' : null, e.note || null,
+        'Every book costs one action to choose, one to claim, two to read and at least two to leave.');
+    } else if (e.kind === 'finale') {
+      lines.push('Reading it pays ' + e.pay + '.', 'The guide’s total: ' + e.est + ' (its estimate, not a page fact).',
+        e.needs ? 'Needs: ' + e.needs + '.' : null, e.note || null);
+    } else {
+      const prog = e.p != null || e.pf != null;
+      lines.push(
+        e.when ? 'Dealt ' + e.when + '.' : null,
+        e.only ? 'Dealt only in stage ' + e.only + '.' : null,
+        e.needs ? 'Needs: ' + e.needs + '.' : null,
+        e.fate ? 'A Fate option: excluded from any free-to-play ranking.' : null,
+        e.apostate ? 'Needs the Graven Apostate (Exploring with the Apostate).' : null,
+        e.cost ? 'Costs ' + e.cost + '.' : null,
+        e.ch ? 'Challenge: ' + e.ch + '. The badge quotes the success value; the difficulty is yours to judge.' : null,
+        e.luck ? 'A Luck challenge at ' + Math.round(e.luck * 100) + '%: the badge quotes the expected '
+          + (e.p != null ? 'progress' : 'result') + '.' : null,
+        e.p != null ? 'Success: ' + e.p + ' progress' + (e.okAlso ? ', ' + e.okAlso : '') + '.' : null,
+        e.gain ? 'Pays: ' + e.gain + '.' : null,
+        e.rare ? 'Rare success: ' + e.rare + '.' : null,
+        e.failLong ? 'Failure: ' + e.failLong : (e.fail ? 'Failure: ' + e.fail + '.' : (e.pf ? 'Failure: ' + e.pf + ' progress.' : null)),
+        e.clears ? 'Clears your hand.' : null,
+        e.note || null,
+        prog ? 'Progress goes into Perusing the Stacks in stage 1 and Finding the Centre in stage 2.' : null,
+        (e.risk && /N /.test(e.risk)) || (e.also && /N /.test(e.also)) ? STACKS_NOISES_NOTE : null);
+    }
+    return { text: stacksText(e), color: stacksColor(e), title: lines.filter(function (l) { return l !== null; }).join('\n') };
+  }
+
+  function stacksCardSpec(key) {
+    const rows = STACKS_ALL.filter(function (e) { return normalizeName(e.storylet) === key; });
+    if (!rows.length) return null;
+    const name = rows[0].storylet;
+    if (name === STACKS_CATALOGUE) {
+      return { text: 'Choose a book', color: CAROUSEL_COLOR_LABEL,
+        title: name + '\n\nEvery book pays about 116 Echoes by the guide’s reckoning; what differs is the Stuiver share, the place '
+          + 'needed to sell it and what it asks. Each option is badged in its own right.' };
+    }
+    return {
+      text: 'The Stacks: ' + rows.length + (rows.length === 1 ? ' option' : ' options'), color: CAROUSEL_COLOR_LABEL,
+      title: name + '\n\n' + rows.map(function (e) { return e.name + ': ' + stacksText(e); }).join('\n'),
+    };
+  }
+
+  function stacksRatings() {
+    carouselRatings({
+      storylets: STACKS_STORYLETS, index: STACKS_INDEX, storyletSpec: stacksCardSpec, optionSpec: stacksSpec,
+      aliases: STACKS_ALIASES, cls: STACKS_CLASS, flag: STACKS_FLAG, branchCls: STACKS_BRANCH_CLASS, branchFlag: STACKS_BRANCH_FLAG,
+    });
+  }
+
+  // === feature: The Marrow Behind ==========================================
+  //
+  // The Late-Firmament activity in Procession. A trip is three moves: on The
+  // Skeleton of the Sky you pick one of ten FORMS (each strains one of four
+  // aspects, and the aspect just strained is locked for the next move), each
+  // form puts you in a corpse and deals a hand of three from that corpse's
+  // three cards, and Return to your mooring (no action) turns everything you
+  // gathered into Tempestuous Tales by a formula printed on its page:
+  //   TT = 5 × Caligin Scale + 1 × Dendritic Spark + 1 × Fragmentary
+  //        Transgression + 1 × Ossified Hunger + 0.02 × Unlived Second
+  //        + 5 × Mote of Intent + 0.2 × Scrap of Tattered Void, rounded.
+  //
+  // **What the badge says.** That figure: the Tempestuous Tales an option is
+  // worth, computed here from the option page's own quantities through the
+  // page's own formula ("TT 10", "TT 10–14"), so every card sits on one axis.
+  // A range the page itself marks as unsure carries the "?" in front ("TT
+  // ?5.2–8.6"); a stat check the "?" after ("TT 8?"). What does not convert
+  // (Moonlit, Moon-Pearl, Amber, Memory of Light) is named after it. The
+  // guide values a Tale at about 0.5 Echoes (its own figure, in the tooltip,
+  // never on the badge). No EPA is quoted: the guide's ceiling of about 5.0 was
+  // worked out on a best-card claim the pages do not bear out (below).
+  //
+  // A STORY option (the scars, the sights, the thought, the want, the light:
+  // the unlocks of the Marrow's locations and its shop) pays a quality, not a
+  // Tale, so it is a label with its requirement in words and never a number;
+  // a FORM is a label naming the corpse it leads to and the aspect it strains.
+  //
+  // Transcribed from the guide's card tables and 103 card, option and
+  // storylet pages (fetched through the API, 2026-09-29) -- see
+  // docs/superpowers/research/2026-09-29-the-marrow-behind.md. Where the pages
+  // and the guide differ the pages are followed:
+  //   Crush them           the page pays Scrap 35–56, the guide's Stuivers imply 40–56
+  //   Decipher the message the page pays Mote 1 and Spark 5–9, 10–14 Tales, above the
+  //                        guide's "best card", Dare to look upon him at 10 Tales;
+  //                        the badge follows the page and the tooltip says the guide
+  //                        disagrees (unconfirmed in the game)
+  // Every option is keyed by the OPEN CARD, because Forget, Escape, Follow her,
+  // Negotiate and Defy are ordinary phrases other features use. Two cards go by
+  // another heading in the game than on the wiki, The Hunger and The Oath (the
+  // wiki adds "(The Empty Corpse)"). "Consume what is not there" is already a row
+  // of the Firmament guide feature and is left to it. The three "White as ..."
+  // cards, the exit and the shop are not badged. Corrections go in
+  // MARROW_OPTIONS and nowhere else.
+
+  const MARROW_FORMS = 'The Skeleton of the Sky';
+
+  // The Tempestuous Tale worth of one unit of each Marrow currency, from the Return to your mooring page.
+  const MARROW_TALE = {
+    'Caligin Scale': 5, 'Dendritic Spark': 1, 'Fragmentary Transgression': 1, 'Ossified Hunger': 1,
+    'Unlived Second': 0.02, 'Mote of Intent': 5, 'Scrap of Tattered Void': 0.2,
+  };
+  const MARROW_ECHOES_PER_TALE = 0.5;
+
+  // A card option that pays currencies. `g` maps a currency to [least, most]; `unsure` marks a range the page itself marks with a "?".
+  function mar(card, name, g, o) {
+    return Object.assign({ storylet: card, name: name, kind: 'tale', g: g }, o);
+  }
+
+  // A story option: a label that names what it unlocks and what it asks.
+  function marStory(card, name, gives, needs, o) {
+    return Object.assign({ storylet: card, name: name, kind: 'story', gives: gives, needs: needs }, o);
+  }
+
+  // A form: the corpse it leads to and the aspect it strains.
+  function marForm(name, corpse, aspect, o) {
+    return Object.assign({ storylet: MARROW_FORMS, name: name, kind: 'form', corpse: corpse, aspect: aspect }, o);
+  }
+
+  const ESTUARIES = 'Discovered: The Intuition of the Estuaries';
+  // The four aspects a form strains, as the guide names them, and the short word the badge uses.
+  const MARROW_ASPECT = { 'your body’s enormity': 'enormity', 'your conductivity': 'conductivity', 'your permeability': 'permeability',
+    'every fibre of your being': 'every fibre' };
+
+  const MARROW_OPTIONS = [
+    // --- the cards that pay currencies -----------------------------------------------------------------------------
+    mar('The Light that Hides Behind a Mask', 'Dare to look upon him', { 'Mote of Intent': [2, 2] }),
+    mar('A Missive Connoting Dissolution', 'Decipher the message', { 'Mote of Intent': [1, 1], 'Dendritic Spark': [5, 9] },
+      { note: 'The guide calls Dare to look upon him, at 10 Tales, the best card; this page pays more (10–14). The range is unconfirmed in the game.' }),
+    mar('A Missive Connoting Dissolution', 'Decipher the Messenger', { 'Dendritic Spark': [7, 9] },
+      { ch: 'Narrow Kataleptic Toxicology 12 (each Chthonosophy adds 1)', needs: 'a Sample of Lacreous Affection and ' + ESTUARIES,
+        fail: 'Dendritic Spark ×1 and Wounds +2 CP' }),
+    mar('A Conclave of Bodies', 'Measure your kin', { 'Caligin Scale': [1, 1], 'Fragmentary Transgression': [1, 5] }),
+    mar('A Conclave of Clients', 'Assert your right to know', { 'Fragmentary Transgression': [5, 5], 'Unlived Second': [163, 239] }),
+    mar('A Conclave of Duties', 'Judge the contract', { 'Mote of Intent': [1, 1], 'Dendritic Spark': [1, 2] }, { unsure: true }),
+    mar('A Conclave of Duties', 'Scale yourself in moonlight', { 'Mote of Intent': [1, 1], 'Unlived Second': [100, 100] },
+      { other: 'Moonlit ×2, Moon-Pearl ×50', needs: 'a Sun-Blazoned Cuirass and ' + ESTUARIES,
+        note: 'The guide calls it the best repeatable source of Moonlit for Painting in Balmoral.' }),
+    mar('A Missive Connoting Desperation', 'Focus your attentions', { 'Fragmentary Transgression': [6, 8] }),
+    mar('A Missive Connoting Threat', 'Set terms', { 'Dendritic Spark': [6, 8] }),
+    mar('A Silvered Self', 'Plummet through the depth of dreaming', { 'Caligin Scale': [1, 1], 'Fragmentary Transgression': [3, 3] }),
+    mar('A Skyless Self', 'Search for escape', { 'Ossified Hunger': [4, 4], 'Fragmentary Transgression': [1, 5] }),
+    mar('A Stonebuilt Self', 'Construct yourself from prison bars', { 'Caligin Scale': [1, 1] }, { other: 'Nodule of Warm Amber ×14–26' }),
+    mar('Between the Bars of the Permitted', 'Resist the temptation of nothingness', { 'Fragmentary Transgression': [3, 3], 'Caligin Scale': [1, 1] }),
+    mar('Between the Sky’s Roots', 'Bathe in peace', { 'Dendritic Spark': [3, 4], 'Unlived Second': [200, 200] }),
+    mar('Between the Stars’ Kingdoms', 'Direct your endless stare', { 'Scrap of Tattered Void': [15, 23], 'Ossified Hunger': [3, 3] }),
+    mar('It Eats Worlds', 'Devour the condemned', { 'Scrap of Tattered Void': [26, 43] }, { unsure: true }),
+    mar('It Shatters Ships', 'Crush them', { 'Scrap of Tattered Void': [35, 56] },
+      { note: 'The guide’s Stuiver figures imply Scrap 40–56; the page says 35–56 and is followed.' }),
+    mar('It Watches Watchers', 'Scrutinise the high and glittering wilds', { 'Mote of Intent': [1, 1] }),
+    mar('Kin-Killer', 'Finish the act', { 'Caligin Scale': [1, 1], 'Scrap of Tattered Void': [1, 19] }),
+    mar('Sky-Sieger', 'Assay the field', { 'Fragmentary Transgression': [1, 6], 'Ossified Hunger': [1, 5] }),
+    mar('Star-Survivor', 'Reflect', { 'Unlived Second': [28, 394], 'Dendritic Spark': [3, 3] }, { unsure: true }),
+    mar('The Cage in Crimson', 'Devour the half-grown landscape', { 'Fragmentary Transgression': [4, 4], 'Unlived Second': [86, 314] }),
+    mar('The Creche in Crimson', 'Look upon yourself', { 'Caligin Scale': [1, 1], 'Unlived Second': [3, 185] }),
+    mar('The Hunger', 'Introspect', { 'Ossified Hunger': [5, 10] }),
+    mar('The Lack', 'Banish doubts', { 'Ossified Hunger': [4, 4], 'Scrap of Tattered Void': [20, 20] },
+      { ch: 'Narrow Mithridacy 12 (each Chthonosophy adds 1)', needs: ESTUARIES, fail: 'Dendritic Spark ×1 and Wounds +2 CP' }),
+    mar('The Lack', 'Identify the lack', { 'Scrap of Tattered Void': [10, 10], 'Ossified Hunger': [1, 10] }),
+    mar('The Light Around Which Dancers Dance', 'Enter the whirling dance alone', { 'Mote of Intent': [1, 1], 'Fragmentary Transgression': [3, 3] }),
+    mar('The Light Around Which Dancers Dance', 'Dare to dance with the King', { 'Mote of Intent': [1, 1] },
+      { other: 'Memory of Light ×3–4?', ch: 'Narrow A Player of Chess 11 (each Chthonosophy adds 1)',
+        needs: 'Having Recurring Dreams: Betwixt Us and the Sun and ' + ESTUARIES, fail: 'Dendritic Spark ×1 and Wounds +2 CP' }),
+    mar('The Light that Coaxes Forth a Love', 'Pretend at fealty', { 'Mote of Intent': [1, 1], 'Dendritic Spark': [2, 5] }),
+    mar('The Oath', 'Bask in the shadow of your image', { 'Ossified Hunger': [6, 7] }),
+    mar('The Queen in Crimson', 'Wrap yourself around her light', { 'Mote of Intent': [1, 1], 'Scrap of Tattered Void': [1, 20] }),
+    mar('The Shame of Deceit', 'Shuck your thoughts from your body', { 'Dendritic Spark': [8, 8] }),
+    mar('The Shame of the Fugue', 'Attempt to remember', { 'Caligin Scale': [1, 1], 'Unlived Second': [124, 181] }),
+
+    // --- items that do not convert to Tales -----------------------------------------------------------------------
+    marStory('The Shame of Distant Enemies', 'Look to the castle', 'Salt-Veined +3 CP · Memory of Distant Shores ×1–11', 'Salt-Veined 1',
+      { items: true }),
+    marStory('The Shame of Distant Enemies', 'Bellow at the light', 'Stone-Hearted +3 CP · Mystery of the Elder Continent ×5–10', 'Stone-Hearted 1',
+      { items: true }),
+
+    // --- story options: they pay a quality, so a label with the requirement, never a number ---------------------------
+    marStory('The Light that Coaxes Forth a Love', 'Defy', 'A Scar Near the Eye', 'Defiant', { ch: 'Narrow Artisan of the Red Science (difficulty not recorded)' }),
+    marStory('Between the Bars of the Permitted', 'Obey your reflection', 'A Scar Near the Eye', 'Twice-Born and ' + ESTUARIES,
+      { ch: 'Narrow Glasswork (difficulty not recorded)', fail: 'Dendritic Spark ×1 and Wounds +2 CP' }),
+    marStory('Star-Survivor', 'Remake yourself', 'A Scar Near the Eye', 'Remade and ' + ESTUARIES,
+      { ch: 'Narrow Monstrous Anatomy 12 (each Chthonosophy adds 1)', fail: 'Dendritic Spark ×1 and Wounds +2 CP' }),
+    marStory('Kin-Killer', 'Cut yourself out of category', 'A Scar Near the Heart', 'Chirurgical Touch and ' + ESTUARIES,
+      { ch: 'Narrow Monstrous Anatomy 12 (each Chthonosophy adds 1)', fail: 'Dendritic Spark ×1 and Wounds +2 CP' }),
+    marStory('Between the Sky’s Roots', 'Listen to the stillness of the wind', 'A Scar Near the Heart', 'Aeolian Sensitivity and ' + ESTUARIES,
+      { ch: 'Narrow Mithridacy 12 (each Chthonosophy adds 1)', fail: 'Dendritic Spark ×1 and Wounds +?' }),
+    marStory('It Shatters Ships', 'Negotiate', 'A Scar in the Skull', ESTUARIES,
+      { ch: 'Narrow Mithridacy 12 (each Chthonosophy adds 1)', fail: 'Dendritic Spark ×1 and Wounds +2 CP' }),
+    marStory('A Missive Connoting Desperation', 'Consider your own diminishment', 'An Unthinkable Thought', 'A Scar in the Skull and ' + ESTUARIES,
+      { ch: 'Narrow Chthonosophy 50 (each Cracked Vigilance adds 1); the page says you cannot fail it' }),
+    marStory('The Oath', 'Follow her', 'An Untenable Want', 'A Scar Near the Heart and ' + ESTUARIES,
+      { ch: 'Narrow Chthonosophy 50 (each Cracked Vigilance adds 1)', fail: 'Dendritic Spark ×1 and Wounds +2 CP' }),
+    marStory('The Queen in Crimson', 'Never let her go', 'A Yearning for the Other Side of the Boundary', 'Prayer of Perihelion and ' + ESTUARIES),
+    marStory('A Skyless Self', 'Catch the boundary in your teeth', 'The Feeling of a Tooth on the Doors of Glass', 'Stormy-Eyed and ' + ESTUARIES),
+    marStory('The Shame of the Fugue', 'Forget', 'The Comfort of Knowing Naught But Hunger', 'Irrigo and ' + ESTUARIES),
+    marStory('A Conclave of Clients', 'Remember the truth', 'An Unknowable Light', 'a Glimpse of Anathema (spent) and ' + ESTUARIES),
+    marStory('A Silvered Self', 'Illuminate yourself with lightning', 'Stormy-Eyed +1 CP', 'What Might Be A Thunderbolt'),
+    marStory('The Cage in Crimson', 'Escape', 'Blood in the Skies', 'Liturgy of Metes and Bounds and ' + ESTUARIES),
+    marStory('White on Black', 'Meet your employer', 'Shadows in the Snow (Irrigo, Chthonosophy −7 CP)', 'An Absence equipped and no Irrigo'),
+
+    // --- the ten forms ---------------------------------------------------------------------------------------------
+    marForm('Unfold yourself', 'The Myrmidon’s Corpse', 'your body’s enormity'),
+    marForm('Collapse your form', 'The Itinerant Corpse', 'your body’s enormity'),
+    marForm('Become minuscule', 'The Corpse, Newborn', 'your body’s enormity', { needs: 'An Untenable Want' }),
+    marForm('Conduct charge', 'The Devourer’s Corpse', 'your conductivity'),
+    marForm('Insulate yourself', 'The Empty Corpse', 'your conductivity'),
+    marForm('Reflect current', 'The Corpse, Reflected', 'your conductivity', { needs: 'An Unwatchable Sight' }),
+    marForm('Become permeable', 'The Equerry’s Corpse', 'your permeability'),
+    marForm('Make yourself impervious', 'The Intercessor’s Corpse', 'your permeability'),
+    marForm('Become insubstantial', 'The Illicit Corpse', 'your permeability', { needs: 'An Unthinkable Thought' }),
+    marForm('Embody everything the bones desire', 'The Corpse in Conclave', 'every fibre of your being', { needs: 'Knowledge of the Corpse’s Nature 6' }),
+    marForm('Disappear entirely', 'The Corpse Miscreated', 'every fibre of your being',
+      { needs: 'Knowledge of the Corpse’s Nature 10, An Untenable Want, An Unthinkable Thought, An Unwatchable Sight and An Unknowable Light' }),
+  ];
+
+  // The wiki titles two cards "(The Empty Corpse)"; the game shows the plain name. The forms sit on two storylet headings.
+  const MARROW_ALIASES = {
+    'the hunger the empty corpse': 'the hunger', 'the oath the empty corpse': 'the oath',
+    'entering the skeleton of the sky': 'the skeleton of the sky',
+  };
+  const MARROW_INDEX = carouselIndex(MARROW_OPTIONS);
+  const MARROW_STORYLETS = Array.from(new Set(MARROW_OPTIONS.map(function (e) { return e.storylet; })));
+
+  const MARROW_CLASS = 'fl-ux-the-marrow';
+  const MARROW_FLAG = 'flUxTheMarrow';
+  const MARROW_BRANCH_CLASS = 'fl-ux-the-marrow-branch';
+  const MARROW_BRANCH_FLAG = 'flUxTheMarrowBranch';
+
+  function marrowNumber(n) {
+    return String(Math.round(n * 10) / 10);
+  }
+
+  // [least, most] Tempestuous Tales of an option, through the page's formula.
+  function marrowTales(e) {
+    let lo = 0;
+    let hi = 0;
+    Object.keys(e.g).forEach(function (k) {
+      lo += e.g[k][0] * MARROW_TALE[k];
+      hi += e.g[k][1] * MARROW_TALE[k];
+    });
+    return [lo, hi];
+  }
+
+  function marrowPay(e) {
+    return Object.keys(e.g).map(function (k) {
+      const r = e.g[k];
+      return k + ' ×' + (r[0] === r[1] ? r[0] : r[0] + '–' + r[1]);
+    }).join(', ');
+  }
+
+  function marrowText(e) {
+    if (e.kind === 'form') return '→ ' + e.corpse + ' · strains ' + MARROW_ASPECT[e.aspect];
+    if (e.kind === 'story') return e.items ? e.gives : 'story step: ' + e.gives + (e.ch ? CAROUSEL_MARK_CHALLENGE : '');
+    const t = marrowTales(e);
+    const range = t[0] === t[1] ? marrowNumber(t[0]) : marrowNumber(t[0]) + '–' + marrowNumber(t[1]);
+    return 'TT ' + (e.unsure ? '?' : '') + range + (e.ch ? CAROUSEL_MARK_CHALLENGE : '') + (e.other ? ' · + ' + e.other : '');
+  }
+
+  function marrowColor(e) {
+    if (e.kind === 'tale') return CAROUSEL_COLOR_PAYOUT;
+    if (e.kind === 'form') return CAROUSEL_COLOR_LABEL;
+    return e.items ? CAROUSEL_COLOR_NEUTRAL : CAROUSEL_COLOR_SETUP;
+  }
+
+  function marrowSpec(e) {
+    const lines = [e.name, e.storylet, ''];
+    if (e.kind === 'tale') {
+      const t = marrowTales(e);
+      lines.push(
+        'Pays: ' + marrowPay(e) + (e.other ? ', and ' + e.other : '') + '.',
+        'At Return to your mooring (no action) that is ' + (t[0] === t[1] ? marrowNumber(t[0]) : marrowNumber(t[0]) + '–' + marrowNumber(t[1]))
+          + ' Tempestuous Tales by the page’s formula.',
+        'The guide values a Tale at about ' + MARROW_ECHOES_PER_TALE + ' Echoes, so about ' + marrowNumber(t[0] * MARROW_ECHOES_PER_TALE)
+          + (t[0] === t[1] ? '' : '–' + marrowNumber(t[1] * MARROW_ECHOES_PER_TALE)) + ' Echoes (its figure, not a page fact).',
+        e.unsure ? 'The page itself marks this range with a “?”.' : null,
+        e.needs ? 'Needs: ' + e.needs + '.' : null,
+        e.ch ? 'Challenge: ' + e.ch + '. The badge quotes the success value.' : null,
+        e.fail ? 'Failure: ' + e.fail + '.' : null,
+        e.note || null);
+    } else if (e.kind === 'story') {
+      lines.push(
+        e.items ? 'Pays ' + e.gives + '; it does not convert to Tempestuous Tales.' : 'A story step: it gives ' + e.gives + ', which unlocks a location, an item or the ending — not a Tempestuous Tale value.',
+        'Needs: ' + e.needs + '.',
+        e.ch ? 'Challenge: ' + e.ch + '.' : null,
+        e.fail ? 'Failure: ' + e.fail + '.' : null);
+    } else {
+      lines.push(
+        'A form: it leads to ' + e.corpse + ' and strains ' + e.aspect + '.',
+        'Each trip is exactly three moves and then Re-emerge. The aspect you have just strained is locked for the next move.',
+        e.needs ? 'Needs: ' + e.needs + '.' : null);
+    }
+    return { text: marrowText(e), color: marrowColor(e), title: lines.filter(function (l) { return l !== null; }).join('\n') };
+  }
+
+  function marrowCardSpec(key) {
+    const rows = MARROW_OPTIONS.filter(function (e) { return normalizeName(e.storylet) === key; });
+    if (!rows.length) return null;
+    const name = rows[0].storylet;
+    if (name === MARROW_FORMS) {
+      return { text: 'Choose a form', color: CAROUSEL_COLOR_LABEL,
+        title: name + '\n\nTen forms, each leading to a corpse and straining one aspect; every option is badged in its own right.' };
+    }
+    return {
+      text: 'The Marrow: ' + rows.length + (rows.length === 1 ? ' option' : ' options'), color: CAROUSEL_COLOR_LABEL,
+      title: name + '\n\n' + rows.map(function (e) { return e.name + ': ' + marrowText(e); }).join('\n'),
+    };
+  }
+
+  function marrowRatings() {
+    carouselRatings({
+      storylets: MARROW_STORYLETS, index: MARROW_INDEX, storyletSpec: marrowCardSpec, optionSpec: marrowSpec,
+      aliases: MARROW_ALIASES, cls: MARROW_CLASS, flag: MARROW_FLAG, branchCls: MARROW_BRANCH_CLASS, branchFlag: MARROW_BRANCH_FLAG,
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -40652,6 +41538,9 @@
     { name: 'flit-and-its-king', run: flitAndItsKingRatings },
     { name: 'bones-in-river', run: bonesInRiverRatings },
     { name: 'chandleress-complaint', run: chandleressComplaintRatings },
+    { name: 'relickers', run: relickerRatings },
+    { name: 'the-stacks', run: stacksRatings },
+    { name: 'the-marrow', run: marrowRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
