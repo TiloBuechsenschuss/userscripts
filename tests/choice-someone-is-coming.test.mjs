@@ -282,6 +282,41 @@ check('a card of another feature is left alone',
     return out;
   })(), null);
 
+// === the four visiting storylets (Airs-gated tea / walk pairs) =======================================
+// Data: docs/superpowers/research/2026-09-27-airs-of-london-group-d.md section D, from each
+// storylet's option pages on fallenlondon.wiki (fetched through the API, 2026-09-27).
+
+const VISITS = [
+  ['A Neathy Education', 'Conduct your lesson', 'Go for a walk'],
+  ['Duty Calls', 'Take tea', 'Go for a walk'],
+  ['Visiting the Person who Was your Spouse', 'Take tea', 'Go for a walk'],
+  ['Visiting the Person who Was your Lover', 'Take tea', 'Go for a walk'],
+];
+
+check('visiting storylets: all eight rows are present and storylet-scoped',
+  VISITS.flatMap(([s, a, b]) => [sic(s, a) !== undefined, sic(s, b) !== undefined]), Array(8).fill(true));
+
+check('visiting storylets: every row raises the counter by 1 and states its Airs window',
+  VISITS.flatMap(([s, a, b]) => [[a, [1, 50]], [b, [51, 100]]].map(([n, w]) => {
+    const e = sic(s, n);
+    return e.win === 1 && JSON.stringify(e.airs) === JSON.stringify([w]) && api.pqSpec(e, api.SIC_CFG).title.includes(w[0] + '–' + w[1]);
+  })), Array(8).fill(true));
+
+check('visiting storylets: the tea rows pay Confident Smile, the walk rows Sudden Insight',
+  VISITS.flatMap(([s, a, b]) => [st(s, a).includes('Confident Smile'), st(s, b).includes('Sudden Insight')]), Array(8).fill(true));
+
+check('visiting storylets: "Take tea" under Duty Calls does NOT match while A Neathy Education is open',
+  [api.carouselLookup(api.SIC_INDEX, 'Take tea', key('Duty Calls')) !== null,
+    api.carouselLookup(api.SIC_INDEX, 'Take tea', key('A Neathy Education')) !== null,
+    api.carouselLookup(api.SIC_INDEX, 'Conduct your lesson', key('Duty Calls')) !== null], [true, false, false]);
+
+check('visiting storylets: the game\'s parenthetical wording answers too',
+  [api.carouselLookup(api.SIC_INDEX, 'Take tea (with your Brother)', key('Duty Calls')) !== null,
+    api.carouselLookup(api.SIC_INDEX, 'Go for a walk (with your Daughter)', key('A Neathy Education')) !== null,
+    api.carouselLookup(api.SIC_INDEX, 'Take tea (with your Lover)', key('Visiting the Person who Was your Lover')) !== null,
+    api.carouselLookup(api.SIC_INDEX, 'Take tea (with your Lover)', key('Visiting the Person who Was your Spouse')) !== null],
+  [true, true, true, false]);
+
 // === the tables ======================================================================================
 
 check('every entry is filed under a storylet, named, and has a non-empty badge, and no storylet holds a title twice',

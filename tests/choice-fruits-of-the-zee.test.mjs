@@ -1865,7 +1865,7 @@ check('the feature list, in order',
     'church-in-the-wild', 'law-hunting', 'moulin-expeditions', 'writing-monograph', 'kitchen-artists',
     'alchemy-station-viii', 'cornelius', 'clay-highwayman',
     'hurling', 'chthonic-communication', 'digging-hurlers', 'marigold-station',
-    'airs-of-london', 'the-hunt-is-on', 'running-battle', 'casing', 'fascinating', 'inspired', 'investigating', 'someone-is-coming', 'hellworm', 'risen-burgundy', 'station-developments', 'city-of-the-tracklayers', 'station-statues', 'menace-locations', 'iron-republic', 'firmament', 'discordant-studies', 'plaster-face', 'ecdysis', 'midnight-trade', 'high-sancta', 'moon-miser-herding', 'sous-catacombs', 'upon-a-red-stage', 'to-make-a-moth', 'scaling-quartz']);
+    'airs-of-london', 'the-hunt-is-on', 'running-battle', 'casing', 'fascinating', 'inspired', 'investigating', 'someone-is-coming', 'hellworm', 'risen-burgundy', 'station-developments', 'city-of-the-tracklayers', 'station-statues', 'menace-locations', 'iron-republic', 'firmament', 'discordant-studies', 'plaster-face', 'ecdysis', 'midnight-trade', 'high-sancta', 'moon-miser-herding', 'sous-catacombs', 'upon-a-red-stage', 'to-make-a-moth', 'scaling-quartz', 'rattus-faber', 'tower-of-eyes', 'feast-of-the-rose', 'festive-fir', 'cheery-man-constable', 'time-in-bed', 'burning-city', 'university-creatures', 'clay-quarters', 'mutually-agreed-divorce', 'hallowmas-visitor', 'clathermont-tattoo', 'shifting-streets', 'candlefinder-clay-men', 'on-the-trail', 'christmas-card', 'watchmakers-hill-airs', 'opportunity-for-profit', 'alleys-of-spite', 'flit-and-its-king', 'bones-in-river', 'chandleress-complaint']);
 
 check('the panel list, in order',
   api.PANELS.map((p) => p.id),

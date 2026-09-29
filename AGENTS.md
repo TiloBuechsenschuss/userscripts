@@ -3746,6 +3746,34 @@ Confirmed live by the author:
   Counterlight value is shown anywhere on that card; if so, its badge can become a real per-round
   number instead of the static reference it is now.
 
+- The **twenty-two Airs of London storylet and card badges** (rattus-faber, tower-of-eyes,
+  feast-of-the-rose, festive-fir, cheery-man-constable, time-in-bed, burning-city,
+  university-creatures, clay-quarters, mutually-agreed-divorce, hallowmas-visitor,
+  clathermont-tattoo, shifting-streets, candlefinder-clay-men, on-the-trail, christmas-card,
+  watchmakers-hill-airs, opportunity-for-profit, alleys-of-spite, flit-and-its-king,
+  bones-in-river, chandleress-complaint -- added 2026-09-28), plus Literary Ambitions folded into
+  `spider-symposium` and four visiting storylets folded into `someone-is-coming`. Nothing seen in
+  the game; the plan is `docs/superpowers/plans/2026-09-28-airs-of-london-remainder.md` and the
+  data is in the four `docs/superpowers/research/2026-09-27-airs-of-london-group-*.md` files. All
+  of them gate on the open storylet's own heading, so a heading that reads differently in the game
+  simply attaches nothing. Report first: **(1) Parentheticals.** Whether the four visiting
+  storylets (A Neathy Education, Duty Calls, Visiting the Person who Was your Spouse / Lover) keep
+  the wiki's "(with your Brother)" wording on *Take tea* and *Go for a walk*; both spellings are
+  aliased, so drop the wrong one. **(2) Storylet headings guessed from the wiki page title:**
+  *Shifting Streets* (the wiki says *(Storylet)*), *Send a Christmas Card* (the four card-art
+  variants share one display text and are one merged row), and *Literary Ambitions*. **(3) The two
+  "Race a/Across the Flit" spellings** in The Flit and its King -- they normalise to one name, so
+  the redirect row lives under *The Flit and its King* and the leaf rows under the storylet; check
+  both appear as written. **(4) The University creatures' five base options**, whose in-game text
+  the research did not give: each row uses its creature's name as the option text and silently
+  does not badge if that is wrong. **(5) Moon-Pearl "Up to 24"** on *An opportunity for profit*'s
+  *Eavesdrop*: the page says x60 with a "Bundle: Up to 24" marker; the badge shows the ceiling
+  and the count is unconfirmed. **(6) Airs windows in words.** Shifting Streets and the Watchmaker's
+  Hill storylets state their windows in the tooltip; nothing reads the Airs. **(7) The Cabinet Noir,
+  deciphering and disappearing cross-references** that Task 0 of the plan ruled "already covered".
+  Every option table here is transcribed from wiki pages, not from the screen, so a wrong number
+  renders as well as a right one.
+
 - The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
   table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
   looking at the screen can confirm: a wrong number renders exactly as well as a right one. They
@@ -4474,6 +4502,46 @@ Current tests:
   live-quality-dependent number this script cannot read, the growth mark and compounding-value
   note on Accelerate and Stretch yourself beyond your limits, and that a page matching none of the
   three guessed storylet titles attaches nothing and throws nothing.
+- The **Airs of London storylet suites** (2026-09-28), one per feature, all with the same shape --
+  the row count, what each badge shows, that the open storylet gates the wiring (`roots` and
+  `branches` stubbed), that no option name is in another feature's table, and that the feature is
+  registered -- and each pinning what is particular to its own storylet:
+  - `tests/choice-rattus-faber.test.mjs` — 26 rows over 3 storylets.
+  - `tests/choice-tower-of-eyes.test.mjs` — 27 rows (5 top-level, 12 Salon, 10 Orphanage); the
+    research doc's own summary counted 26 and 11, the table is followed.
+  - `tests/choice-feast-of-the-rose.test.mjs` — the 16 redirects and their leaf rows.
+  - `tests/choice-festive-fir.test.mjs` — 16 rows, the shared server-wide tree, and the four rows
+    with the 7/12 real-failure fraction (the guide's prose said three).
+  - `tests/choice-cheery-man-constable.test.mjs` — 27 rows.
+  - `tests/choice-time-in-bed.test.mjs` — 13 rows, the four Acquaintance-gated always-succeed rows
+    (the guide's prose said three), Fate cost stored as its number.
+  - `tests/choice-burning-city.test.mjs`, `tests/choice-university-creatures.test.mjs`,
+    `tests/choice-clay-quarters.test.mjs`, `tests/choice-mutually-agreed-divorce.test.mjs` (both
+    contest rows are a Winner/Loser split, the inverted lock is in words) and
+    `tests/choice-hallowmas-visitor.test.mjs` (two overlapping windows, each row live on its own).
+  - `tests/choice-clathermont-tattoo.test.mjs` — the two same-window pairs, and the item count
+    equal to the Watchful difficulty on five rows.
+  - `tests/choice-shifting-streets.test.mjs` — the base reward per row, the tier-4/8 bonus stated
+    as not computed, the shared Pedestrian Peregrinations line only in the storylet tooltip.
+  - `tests/choice-candlefinder-clay-men.test.mjs` — the five Airs-gated rows, the two non-Airs
+    options absent.
+  - `tests/choice-on-the-trail.test.mjs` — both case-stage windows shown, both Goat-Demon
+    outcomes, and zero shared names with `clay-highwayman`.
+  - `tests/choice-christmas-card.test.mjs` — one merged informational row listing all four gains.
+  - `tests/choice-watchmakers-hill-airs.test.mjs` — six storylet headings with their windows, four
+    ranked rows (Jade count is NOT always the difficulty: 45 at 48), no fabricated ranking on the
+    informational four, and no clash with the Department of Menace Eradication.
+  - `tests/choice-opportunity-for-profit.test.mjs` — the "<=24" ceiling, the faction result after
+    the badge text, and the pipe-trick "Eavesdrop" alias.
+  - `tests/choice-alleys-of-spite.test.mjs` — the inverted "Locked with A Name Whispered in
+    Darkness" said in words rather than as a requirement.
+  - `tests/choice-flit-and-its-king.test.mjs` — the redirect/leaf layers, the moves to Spite and
+    Watchmaker's Hill, and both spellings of "Race across the Flit" gating.
+  - `tests/choice-bones-in-river.test.mjs`, `tests/choice-chandleress-complaint.test.mjs` (the
+    narrow 96-100 window is exact, the exit row names the Department).
+  - Extended, not new: `tests/choice-spider-symposium.test.mjs` (the five Literary Ambitions
+    rows, the two HOJOTOHO!-gated) and `tests/choice-someone-is-coming.test.mjs` (the eight visiting
+    rows, storylet scoping between the four identical pairs).
 - `tests/fl-shared-helpers.test.mjs` — asserts what `ux-enhancers.js` and
   `choice-helper.js` share now that they are two files, which no other suite can see because
   every other suite loads one of the two. First the **copies**: every top-level declaration the

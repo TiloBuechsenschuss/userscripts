@@ -88,11 +88,11 @@ class FakeObserver { observe() {} }
 
 const TABLES = ['ARBOR_OPTIONS', 'LBI_OPTIONS', 'DME_OPTIONS', 'VH_OPTIONS', 'FQ_OPTIONS', 'CM_OPTIONS', 'SOUP_OPTIONS',
   'MIND_OPTIONS', 'CASE_OPTIONS', 'EMB_OPTIONS', 'LAW_OPTIONS', 'MUS_OPTIONS', 'HEIST_OPTIONS', 'SPIDER_OPTIONS',
-  'STORY_OPTIONS', 'FLASH_OPTIONS', 'SOCIAL_OPTIONS'];
+  'STORY_OPTIONS', 'FLASH_OPTIONS', 'SOCIAL_OPTIONS', 'LITERARY_OPTIONS'];
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { SPIDER_STORYLET, SPIDER_CLASS, SPIDER_BRANCH_CLASS, spiderAverage, spiderBadgeText, spiderSpec, spiderRatings,'
+    'return { LITERARY_STORYLET, LITERARY_CLASS, LITERARY_BRANCH_CLASS, literarySpec, SPIDER_STORYLET, SPIDER_CLASS, SPIDER_BRANCH_CLASS, spiderAverage, spiderBadgeText, spiderSpec, spiderRatings,'
     + ' broadCertainAt, ' + TABLES.join(', ')
     + ', ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS, LAB_CARDS, PC_OPTIONS, VSD_OPTIONS, normalizeName, BADGE_CLASS, FEATURES }; })();');
 const api = new Function(
@@ -161,6 +161,44 @@ check('the registered pass',
 check('no Spider Symposium name is in another feature\'s table',
   (() => { const others = otherNames('SPIDER_OPTIONS');
     return rows.map((e) => e.name).filter((n) => others.includes(key(n))); })(), []);
+
+// --- Literary Ambitions: a second Singing Mandrake storylet, folded into this feature ------------
+// Data: docs/superpowers/research/2026-09-27-airs-of-london-group-c.md section 8 (all 5 option pages,
+// fetched through the API on 2026-09-27).
+const lit = api.LITERARY_OPTIONS;
+const litRow = (name) => lit.find((e) => e.name === name);
+
+check('Literary Ambitions: 5 rows', lit.map((e) => e.name),
+  ['A quick commission: Ode to the Empress', 'A quick commission: Hymns to Sobriety', 'A quick commission: Poetry in the Dark',
+    'A quick commission: Songs of Old', 'An especial appetite']);
+
+check('Literary Ambitions: the two HOJOTOHO!-gated rows state that requirement',
+  ['A quick commission: Poetry in the Dark', 'A quick commission: Songs of Old']
+    .map((n) => api.literarySpec(litRow(n)).title.includes('HOJOTOHO!')), [true, true]);
+
+check('Literary Ambitions: the 61-90 pair are both present and resolve independently',
+  lit.filter((e) => e.airs[0] === 61 && e.airs[1] === 90).map((e) => api.literarySpec(e).text),
+  ['Jade Fragment x36?', 'Romantic Notion x1']);
+
+check('Literary Ambitions: badges only appear while Literary Ambitions is the open storylet',
+  (() => {
+    const ode = makeHeading('A quick commission: Ode to the Empress');
+    branches = [ode];
+    const out = [];
+    roots = [makeHeading('Literary Ambitions')];
+    api.spiderRatings();
+    out.push(text(ode, api.LITERARY_BRANCH_CLASS));
+    roots = [makeHeading('Some Other Storylet')];
+    api.spiderRatings();
+    out.push(text(ode, api.LITERARY_BRANCH_CLASS));
+    roots = []; branches = [];
+    return out;
+  })(),
+  ['Shard of Glim x30?', null]);
+
+check('Literary Ambitions: no name collides with another feature\'s table',
+  (() => { const others = otherNames('LITERARY_OPTIONS');
+    return lit.map((e) => e.name).filter((n) => others.includes(key(n))); })(), []);
 
 check('the feature is registered', api.FEATURES.some((f) => f.name === 'spider-symposium'), true);
 

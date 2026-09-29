@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.32
+// @version      1.33
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -595,6 +595,15 @@
  *     badges Queeneater's Castle's play scene by scene and its ending, by Scarlet Applause. To Make a Moth badges
  *     the Autolepidopterist steps of its own storylet only, since its menace-farming prerequisites are Risen
  *     Burgundy's. Scaling the Quartz badges Stonegift's climb by base Crystalline Fecundity per action.
+ *     (18) Twenty-two Airs of London storylets and cards, all markup with no panel, each gated on its own open
+ *     storylet so a same-named option elsewhere is left alone. Rattus Faber, The Tower of Eyes, The Feast of the Rose,
+ *     Festive Fir, the Cheery Man's constable, Time in bed, A Dream of a Burning City, the University creatures,
+ *     the Clay Quarters, a Mutually-Agreed Divorce and the Hallowmas visitor badge what each option pays and which
+ *     Airs of London window offers it. Clathermont's Tattoo Parlour, Shifting Streets, Candlefinder's Clay Men,
+ *     On the Trail, Send a Christmas Card, the Watchmaker's Hill "Name Scrawled in Blood" storylets, An opportunity
+ *     for profit, The Alleys of Spite, The Flit and its King, Bones in the River and The Chandleress' Complaint
+ *     do the same, stating what the script cannot read (the case stage, which card art) instead of guessing it.
+ *     Literary Ambitions joins the Spider Symposium, and four visiting storylets join Someone Is Coming.
  *     Built as a feature registry so further advice can be added as entries.
  */
 
@@ -11065,6 +11074,13 @@
     return sicE(storylet, name, Object.assign({ win: 1, pay: pay }, more));
   }
 
+  // A visiting-storylet option: tea in the low Airs, a walk in the high, SiC +1 and an Airs re-roll either way.
+  function sicVisit(storylet, name, window, kind, with_) {
+    const tea = kind === 'tea';
+    return sicGain(storylet, name, tea ? 'Confident Smile ×1 · Distant Shores ×5' : 'Sudden Insight ×1 · Dubious Testimony ×5',
+      { airs: [window], re: 'both', aliases: with_ ? [name + ' (' + with_ + ')'] : [] });
+  }
+
   // A Relicker payout: a level and 21 CP.
   function sicPayout(name, pay, g, epa, more) {
     return sicE(SIC_RELICKER, name, Object.assign({ need: 4, cost: 21, pay: pay, g: g,
@@ -11169,6 +11185,19 @@
     sicGain('Bringing the revolution', 'Follow your conscience', 'Watchful +5', { x: [['Melancholy', 1], ['Ruthless', -1]] }),
     sicGain('Bringing the revolution', 'Don’t ask me', 'Shadowy +5', { x: [['Ruthless', 1], ['Steadfast', -1]] }),
 
+    // --- four Ambition: Nemesis visiting storylets, Airs-gated tea / walk pairs ----------------------------------
+    // Rows use the bare option names; the game may or may not keep the wiki's "(with your Brother)" parenthetical,
+    // so both spellings are listed as aliases (confirm in game, then drop the wrong one). Storylet scoping keeps
+    // the four "Take tea" / "Go for a walk" pairs apart. All eight re-roll Airs and raise SiC by 1.
+    sicVisit('A Neathy Education', 'Conduct your lesson', [1, 50], 'tea', null),
+    sicVisit('A Neathy Education', 'Go for a walk', [51, 100], 'walk', 'with your Daughter'),
+    sicVisit('Duty Calls', 'Take tea', [1, 50], 'tea', 'with your Brother'),
+    sicVisit('Duty Calls', 'Go for a walk', [51, 100], 'walk', 'with your Brother'),
+    sicVisit('Visiting the Person who Was your Spouse', 'Take tea', [1, 50], 'tea', 'with your Spouse'),
+    sicVisit('Visiting the Person who Was your Spouse', 'Go for a walk', [51, 100], 'walk', 'with your Spouse'),
+    sicVisit('Visiting the Person who Was your Lover', 'Take tea', [1, 50], 'tea', 'with your Lover'),
+    sicVisit('Visiting the Person who Was your Lover', 'Go for a walk', [51, 100], 'walk', 'with your Lover'),
+
     // --- the zee cards keep the Zailing heading badge; only their SiC option is here -------------------------------
     sicGain('A Huge Terrible Beast of the Unterzee!', 'Delicious, delicious lumps', 'Tale of Terror ×4',
       { ch: { stat: 'Dangerous', diff: 100, varies: 'the Zee Peril level' }, xf: [['Troubled Waters', 10]],
@@ -11196,7 +11225,9 @@
     cardKeys: SIC_CARDS.map(function (c) { return normalizeName(c.name); }), aliases: null,
     // The zee cards keep the Zailing feature's badge; Rob a drunk and the oracle are storylets with many other options.
     noHeading: [normalizeName('A Huge Terrible Beast of the Unterzee!'), normalizeName('Creaking from Above'),
-      normalizeName(SIC_DRUNK), normalizeName('The oracle of the weasel-fights')],
+      normalizeName(SIC_DRUNK), normalizeName('The oracle of the weasel-fights'),
+      normalizeName('A Neathy Education'), normalizeName('Duty Calls'),
+      normalizeName('Visiting the Person who Was your Spouse'), normalizeName('Visiting the Person who Was your Lover')],
     cls: 'fl-ux-sic', flag: 'flUxSic', branchCls: 'fl-ux-sic-branch', branchFlag: 'flUxSicBranch',
     cardCls: 'fl-ux-sic-card', cardFlag: 'flUxSicCard',
   };
@@ -16624,10 +16655,65 @@
       title: carouselSummary('The Spider Symposium', SPIDER_STORYLET, SPIDER_OPTIONS, spiderBadgeText, SPIDER_RULES) };
   }
 
+  // Literary Ambitions is a SECOND Singing Mandrake storylet, folded into this
+  // feature: a different mechanic (Persuasive commissions paid in items, not
+  // Applause), so it has its own table, spec and classes, and only shares the
+  // registered pass. Airs of London windows, HOJOTOHO! (a seasonal crossover
+  // quality) gates two of the five.
+  // Transcribed from all 5 option pages (fetched through the API, 2026-09-27) --
+  // see docs/superpowers/research/2026-09-27-airs-of-london-group-c.md section 8.
+  // Corrections go in LITERARY_OPTIONS and nowhere else.
+
+  const LITERARY_STORYLET = 'Literary Ambitions';
+
+  function litRow(name, airs, needs, ch, gives, fail) {
+    return { storylet: LITERARY_STORYLET, name: name, airs: airs, needs: needs, ch: ch, gives: gives, fail: fail };
+  }
+
+  const LITERARY_OPTIONS = [
+    litRow('A quick commission: Ode to the Empress', [0, 30], null, { stat: 'Persuasive', diff: 5 }, 'Shard of Glim x30', 'nothing'),
+    litRow('A quick commission: Hymns to Sobriety', [31, 60], null, { stat: 'Persuasive', diff: 5 }, 'Shard of Glim x32', 'nothing'),
+    litRow('A quick commission: Poetry in the Dark', [61, 90], 'HOJOTOHO! 1251', { stat: 'Persuasive', diff: 5 },
+      'Jade Fragment x36', 'Piece of Rostygold x3'),
+    litRow('A quick commission: Songs of Old', [61, 90], 'HOJOTOHO! 1500', null, 'Romantic Notion x1, Nightmares -2', null),
+    litRow('An especial appetite', [91, 100], null, { stat: 'Persuasive', diff: 7 }, 'Piece of Rostygold x35', 'nothing'),
+  ];
+
+  const LITERARY_INDEX = carouselIndex(LITERARY_OPTIONS);
+
+  const LITERARY_CLASS = 'fl-ux-literary';
+  const LITERARY_FLAG = 'flUxLiterary';
+  const LITERARY_BRANCH_CLASS = 'fl-ux-literary-branch';
+  const LITERARY_BRANCH_FLAG = 'flUxLiteraryBranch';
+
+  function literarySpec(e) {
+    const lines = [
+      e.name, LITERARY_STORYLET, '',
+      'Airs of London ' + e.airs[0] + '-' + e.airs[1] + '.',
+      e.ch ? 'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.' : 'No challenge.',
+      e.needs ? 'Requires: ' + e.needs + '.' : null,
+      'Gives: ' + e.gives + '.',
+      e.ch ? 'Failure: ' + e.fail + '.' : null,
+    ].filter(Boolean).join('\n');
+    return { text: e.gives.split(',')[0] + (e.ch ? CAROUSEL_MARK_CHALLENGE : ''), color: CAROUSEL_COLOR_PAYOUT, title: lines };
+  }
+
+  function literaryStoryletSpec(key) {
+    if (key !== normalizeName(LITERARY_STORYLET)) return null;
+    return {
+      text: 'Commissions', color: CAROUSEL_COLOR_LABEL,
+      title: LITERARY_STORYLET + '\n\nSinging Mandrake. Open the storylet and every Airs-gated option is badged in its own right.',
+    };
+  }
+
   function spiderRatings() {
     carouselRatings({
       storylets: [SPIDER_STORYLET], index: SPIDER_INDEX, storyletSpec: spiderStoryletSpec, optionSpec: spiderSpec,
       cls: SPIDER_CLASS, flag: SPIDER_FLAG, branchCls: SPIDER_BRANCH_CLASS, branchFlag: SPIDER_BRANCH_FLAG,
+    });
+    carouselRatings({
+      storylets: [LITERARY_STORYLET], index: LITERARY_INDEX, storyletSpec: literaryStoryletSpec, optionSpec: literarySpec,
+      cls: LITERARY_CLASS, flag: LITERARY_FLAG, branchCls: LITERARY_BRANCH_CLASS, branchFlag: LITERARY_BRANCH_FLAG,
     });
   }
 
@@ -39259,6 +39345,940 @@
     });
   }
 
+  // === feature: Attract a Visitor at Hallowmas =============================
+  //
+  // Seasonal (Hallowmas / Feast of Masks) card. Game Instructions require
+  // Making Waves AND Nightmares both >=5, dealt as a card whose "choices
+  // keep changing." Base options (not Airs-gated) are flavour-only and out
+  // of scope.
+  //
+  // **What the badge says.** Making Waves + Nightmares changes and any
+  // spent item. THREE windows genuinely OVERLAP another (30-35 inside
+  // 26-50; 81-90 and 90-100 both inside 76-100) -- each badges
+  // independently, never assuming only one of an overlapping pair is live.
+  // "Attend a lecture on 'spiritual hygiene'" is Fate-locked and further
+  // blocked once specific items are held -- excluded from ranking, both
+  // gates stated in the tooltip.
+  //
+  // Transcribed from the card's own page and all 7 option pages (fetched
+  // through the API, 2026-09-27) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-c.md
+  // section 2. Corrections go in HALLOWMAS_OPTIONS and nowhere else.
+
+  const HALLOWMAS_STORYLET = 'Attract a Visitor at Hallowmas';
+
+  function hwRow(name, airs, needs, ch, gives, more) {
+    return Object.assign({ storylet: HALLOWMAS_STORYLET, name: name, airs: airs, needs: needs, ch: ch, gives: gives }, more);
+  }
+
+  const HALLOWMAS_OPTIONS = [
+    hwRow("Light the candle in the horse's skull.", [1, 25], 'Foxfire Candle Stub x2 (spent), Making Waves <11', null,
+      'Making Waves +1-3, Nightmares +1-2'),
+    hwRow('Burn your promises', [26, 50], 'Steadfast 2 (spent, -3 CP), Making Waves <11', null,
+      'Steadfast -3, Nightmares +1, Making Waves +1 or +3 (random), Subtle +3 (cap 10)'),
+    hwRow("Attend a lecture on 'spiritual hygiene'", [30, 35],
+      '7 Fate, Renown: Hell 5; blocked by holding an Infernal Contract or a Peculiar Personal Enhancement',
+      { stat: 'Watchful', diff: 200 },
+      'Your very own Infernal Contract x1, Hedonist +5 (cap 15) AND a choice of 1 of 4 items, Favours: Hell +1',
+      { fate: 7, fail: 'Wounds +1, same item choice (redirects either way).' }),
+    hwRow('Serve wine with bitter herbs', [51, 75], 'Hedonist 1, Penny x100 (spent), Making Waves <11', null,
+      'Hedonist -3, Nightmares +1, Making Waves +1-5, Austere +3 (cap 10)'),
+    hwRow('Whisper secrets to mirrors', [76, 100], 'Whispered Hint x77 (spent), Making Waves <11', { stat: 'Watchful', diff: 50 },
+      'Having Recurring Dreams: Is Someone There? +1 (cap 8), Touched by Fingerwork +1 (cap 8), Shadowy +3, '
+      + 'Making Waves +1-4, Nightmares +1-4', { note: 'The guide calls this "impossible to fail" at reasonable Watchful.' }),
+    hwRow('Echoes of Christmas', [81, 90], 'Putting the Pieces Together: the Taste of Lacre 2', null,
+      'Tale of Terror!! x1, Nightmares +2, Making Waves +2'),
+    hwRow('Feeding the River', [90, 100], "Penny x50 (spent), Putting the Pieces Together: the Drownies",
+      { stat: 'Watchful', diff: 200 },
+      "Watchful CP, Putting the Pieces Together: the Drownies +1, Making Waves +1-5?, Nightmares +1-3?, "
+      + 'Extraordinary Implication x1',
+      { fail: 'Watchful CP, same quality progress, Making Waves +1-3?, Nightmares +5.' }),
+  ];
+
+  const HALLOWMAS_INDEX = carouselIndex(HALLOWMAS_OPTIONS);
+
+  const HALLOWMAS_CLASS = 'fl-ux-hallowmas';
+  const HALLOWMAS_FLAG = 'flUxHallowmas';
+  const HALLOWMAS_BRANCH_CLASS = 'fl-ux-hallowmas-branch';
+  const HALLOWMAS_BRANCH_FLAG = 'flUxHallowmasBranch';
+
+  function hallowmasVisitorSpec(e) {
+    const mark = e.ch ? CAROUSEL_MARK_CHALLENGE : '';
+    const lines = [
+      e.name, HALLOWMAS_STORYLET, '',
+      'Airs of London ' + e.airs[0] + '-' + e.airs[1] + '.',
+      e.ch ? 'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.' : 'No challenge.',
+      'Requires: ' + e.needs + '.',
+      'Gives: ' + e.gives + '.',
+      e.fail ? 'Failure: ' + e.fail : null,
+      e.fate ? 'Costs ' + e.fate + ' Fate -- excluded from any free-to-play ranking.' : null,
+      e.note || null,
+    ].filter(Boolean).join('\n');
+    return { text: e.gives.split(',')[0] + mark, color: CAROUSEL_COLOR_PROGRESS, title: lines };
+  }
+
+  function hallowmasVisitorStoryletSpec(key) {
+    if (key !== normalizeName(HALLOWMAS_STORYLET)) return null;
+    return {
+      text: 'Hallowmas', color: CAROUSEL_COLOR_LABEL,
+      title: HALLOWMAS_STORYLET + '\n\nSeasonal. Requires Making Waves and Nightmares both >=5. '
+        + 'Open the storylet and every Airs-gated option is badged in its own right.',
+    };
+  }
+
+  function hallowmasVisitorRatings() {
+    carouselRatings({
+      storylets: [HALLOWMAS_STORYLET], index: HALLOWMAS_INDEX, storyletSpec: hallowmasVisitorStoryletSpec,
+      optionSpec: hallowmasVisitorSpec, cls: HALLOWMAS_CLASS, flag: HALLOWMAS_FLAG,
+      branchCls: HALLOWMAS_BRANCH_CLASS, branchFlag: HALLOWMAS_BRANCH_FLAG,
+    });
+  }
+
+  // === Investigate Clathermont's Tattoo Parlour ============================
+  //
+  // **What it is.** Ladybones Road side-branch of the Making Your Name
+  // investigation ("A Name in Seven Secret Alphabets" 1-3). NOT the
+  // Clathermont-family storyline elsewhere in this file, which runs on
+  // "Entwined in the Intrigues of the Clathermont Family" -- different
+  // quality, different content.
+  //
+  // **What the badge says.** The success payout. Every row is a Watchful
+  // challenge whose failure gives nothing but the Airs re-roll. On five of the
+  // six rows the item count literally equals the Watchful difficulty, so a
+  // flat success value marked as a challenge is honest. Two pairs share an
+  // Airs window (0-25, 51-75): both are live at once, each badges on its own.
+  //
+  // Transcribed from all 6 option pages (fetched through the API,
+  // 2026-09-27) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-c.md
+  // section 5. Corrections go in CLATHERMONT_OPTIONS and nowhere else.
+
+  const CLATHERMONT_STORYLET = "Investigate Clathermont's Tattoo Parlour";
+
+  function ctRow(name, airs, diff, item, count, more) {
+    return Object.assign({
+      storylet: CLATHERMONT_STORYLET, name: name, airs: airs, needs: null,
+      ch: { stat: 'Watchful', diff: diff }, item: item, count: count,
+    }, more);
+  }
+
+  const CLATHERMONT_OPTIONS = [
+    ctRow('Snatch a glimpse of a tattoo – and memorise it', [0, 25], 21, 'Moon-Pearl', 21),
+    ctRow('Make clandestine sketches, right there in the shop!', [0, 25], 24, 'Moon-Pearl', 24),
+    ctRow('Get casual work sweeping the parlour floor – and listen in', [26, 50], 18, 'Cryptic Clue', 9,
+      { rare: 'Rare success: Inkling of Identity x4 instead.' }),
+    ctRow('Note down descriptions of the visitors', [51, 75], 15, 'Moon-Pearl', 15),
+    ctRow('See if you can get the names of the visitors.', [51, 75], 18, 'Moon-Pearl', 18),
+    ctRow("Frequent the public house across from Clathermont's Tattoo Parlour.", [76, 100], 13, 'Whispered Hint', 13),
+  ];
+
+  const CLATHERMONT_INDEX = carouselIndex(CLATHERMONT_OPTIONS);
+
+  const CLATHERMONT_CLASS = 'fl-ux-clathermont';
+  const CLATHERMONT_FLAG = 'flUxClathermont';
+  const CLATHERMONT_BRANCH_CLASS = 'fl-ux-clathermont-branch';
+  const CLATHERMONT_BRANCH_FLAG = 'flUxClathermontBranch';
+
+  function clathermontTattooSpec(e) {
+    const lines = [
+      e.name, CLATHERMONT_STORYLET, '',
+      'Airs of London ' + e.airs[0] + '-' + e.airs[1] + '.',
+      'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.',
+      'Gives: ' + e.item + ' x' + e.count + '.',
+      e.count === e.ch.diff ? 'The item count equals the difficulty.' : null,
+      e.rare || null,
+      'Failure: nothing but the Airs re-roll.',
+    ].filter(Boolean).join('\n');
+    return { text: e.item + ' x' + e.count + CAROUSEL_MARK_CHALLENGE, color: CAROUSEL_COLOR_PROGRESS, title: lines };
+  }
+
+  function clathermontTattooStoryletSpec(key) {
+    if (key !== normalizeName(CLATHERMONT_STORYLET)) return null;
+    return {
+      text: 'Tattoo Parlour', color: CAROUSEL_COLOR_LABEL,
+      title: CLATHERMONT_STORYLET + '\n\nSide-branch of "A Name in Seven Secret Alphabets". '
+        + 'Open the storylet and every Airs-gated option is badged in its own right.',
+    };
+  }
+
+  function clathermontTattooRatings() {
+    carouselRatings({
+      storylets: [CLATHERMONT_STORYLET], index: CLATHERMONT_INDEX, storyletSpec: clathermontTattooStoryletSpec,
+      optionSpec: clathermontTattooSpec, cls: CLATHERMONT_CLASS, flag: CLATHERMONT_FLAG,
+      branchCls: CLATHERMONT_BRANCH_CLASS, branchFlag: CLATHERMONT_BRANCH_FLAG,
+    });
+  }
+
+  // === Shifting Streets ====================================================
+  //
+  // **What it is.** A Living World Event storylet, gated on Pedestrian
+  // Peregrinations and Airs. Six build-progress options; every one adds
+  // Pedestrian Peregrinations +7 on either outcome.
+  //
+  // **What the badge says.** The tier-1 item reward, marked as a challenge.
+  // The real payout also depends on "In Search of an Itinerant Address" (a
+  // Math quality keyed to which City is being searched: tiers 1/4/8), which
+  // this script cannot read. The tier-4/8 bonus is DESCRIBED in the tooltip,
+  // never computed -- same convention as Scaling the Quartz. The base option
+  // "Scour map and memory" and the Conclusion are not Airs-gated and not
+  // badged.
+  //
+  // Transcribed from all 6 option pages (fetched through the API,
+  // 2026-09-27) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-c.md
+  // section 6. Corrections go in SHIFTING_STREETS_OPTIONS and nowhere else.
+
+  const SHIFTING_STREETS_STORYLET = 'Shifting Streets';
+
+  function ssRow(name, airs, ch, item, bonus, fail) {
+    return { storylet: SHIFTING_STREETS_STORYLET, name: name, airs: airs, needs: null, ch: ch, item: item, count: 15,
+      bonus: bonus, fail: fail };
+  }
+
+  const SHIFTING_STREETS_OPTIONS = [
+    ssRow('Search the city for vagrant streets', 'Airs of London 0-66', { stat: 'Watchful', diff: '60/100/180 by City searched' },
+      'Map Scrap', 'Extraordinary Implication x1 and Map Scrap x5 more at tier 4; Extraordinary Implication x2 at tier 8',
+      'Nightmares +1'),
+    ssRow('Observe the city from on high', 'Airs of London 34-100', { stat: 'Shadowy', diff: '60/100/180 by City searched' },
+      "Maniac's Prayer", "Aeolian Scream x1 and Maniac's Prayer x5 more at tier 4; Aeolian Scream x2 at tier 8",
+      'Nightmares +1'),
+    ssRow('Ingratiate yourself with the citizens', 'Airs of London outside 34-66 (0-33 and 67-100)',
+      { stat: 'Persuasive', diff: '60/100/180 by City searched' },
+      'Map Scrap', 'Night on the Town x1 and Map Scrap x5 more at tier 4; Night on the Town x2 at tier 8', 'Scandal +1'),
+    ssRow('Pore over your maps', 'Airs of London 17-83', { stat: 'Mithridacy', diff: '1/5/9 by City searched' },
+      'Map Scrap', 'Extraordinary Implication x1 and Map Scrap x5 more at tier 4; Extraordinary Implication x2 at tier 8',
+      'Nightmares +1'),
+    ssRow('Study convolutions of space', 'Airs of London outside 17-49',
+      { stat: 'Artisan of the Red Science', diff: '1/5/9 by City searched' },
+      "Maniac's Prayer", "Aeolian Scream x1 and Maniac's Prayer x5 more at tier 4; Aeolian Scream x2 at tier 8", 'Wounds +1'),
+    ssRow('Search for meaning in the rearrangements', 'Airs of London outside 50-83',
+      { stat: 'A Player of Chess', diff: '1/5/9 by City searched' },
+      'Romantic Notion', 'Extraordinary Implication x1 and Romantic Notion x5 more at tier 4; Extraordinary Implication x2 at tier 8',
+      'Suspicion +1'),
+  ];
+
+  const SHIFTING_STREETS_INDEX = carouselIndex(SHIFTING_STREETS_OPTIONS);
+
+  const SHIFTING_STREETS_CLASS = 'fl-ux-shifting-streets';
+  const SHIFTING_STREETS_FLAG = 'flUxShiftingStreets';
+  const SHIFTING_STREETS_BRANCH_CLASS = 'fl-ux-shifting-streets-branch';
+  const SHIFTING_STREETS_BRANCH_FLAG = 'flUxShiftingStreetsBranch';
+
+  function shiftingStreetsSpec(e) {
+    const lines = [
+      e.name, SHIFTING_STREETS_STORYLET, '',
+      e.airs + '.',
+      'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.',
+      'Gives (base, tier 1): ' + e.item + ' x' + e.count + '.',
+      'Bonus, not computed (depends on which City you are searching for): ' + e.bonus + '.',
+      'Failure: ' + e.fail + ', same progress.',
+    ].join('\n');
+    return { text: e.item + ' x' + e.count + CAROUSEL_MARK_CHALLENGE, color: CAROUSEL_COLOR_PROGRESS, title: lines };
+  }
+
+  function shiftingStreetsStoryletSpec(key) {
+    if (key !== normalizeName(SHIFTING_STREETS_STORYLET)) return null;
+    return {
+      text: 'Shifting Streets', color: CAROUSEL_COLOR_LABEL,
+      title: SHIFTING_STREETS_STORYLET + '\n\nLiving World Event. Every option adds Pedestrian Peregrinations +7 '
+        + 'on either outcome. The item reward differs per option and grows with the City you are searching for.',
+    };
+  }
+
+  function shiftingStreetsRatings() {
+    carouselRatings({
+      storylets: [SHIFTING_STREETS_STORYLET], index: SHIFTING_STREETS_INDEX, storyletSpec: shiftingStreetsStoryletSpec,
+      optionSpec: shiftingStreetsSpec, cls: SHIFTING_STREETS_CLASS, flag: SHIFTING_STREETS_FLAG,
+      branchCls: SHIFTING_STREETS_BRANCH_CLASS, branchFlag: SHIFTING_STREETS_BRANCH_FLAG,
+    });
+  }
+
+  // === Candlefinder: Canvassing the Clay Men ===============================
+  //
+  // **What it is.** A global (Location "Fallen London") storylet, unlocked
+  // with "Candlefinder Lead: Clay Men of London". This is ONE storylet of a
+  // larger Candlefinder storyline (Dockers and Servants exist too, deferred);
+  // only the Clay Men are covered here.
+  //
+  // **What the badge says.** How far the option moves the "Detecting..."
+  // progress quality (8/6/6/6/4), marked as a challenge where it has one.
+  // Requirements and the failure menace are in the tooltip. Two options are
+  // not Airs-gated and not badged: "Eavesdrop on private conversations" and
+  // "Concrete evidence" (the case-closer).
+  //
+  // Transcribed from all 7 option pages (fetched through the API,
+  // 2026-09-27) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-c.md
+  // section 7. Corrections go in CANDLEFINDER_CLAY_MEN_OPTIONS and nowhere else.
+
+  const CANDLEFINDER_CLAY_MEN_STORYLET = 'Candlefinder: Canvassing the Clay Men';
+
+  function cfRow(name, airs, needs, ch, progress, more, fail) {
+    return Object.assign({ storylet: CANDLEFINDER_CLAY_MEN_STORYLET, name: name, airs: airs, needs: needs, ch: ch,
+      progress: progress, fail: fail || null }, more);
+  }
+
+  const CANDLEFINDER_CLAY_MEN_OPTIONS = [
+    cfRow('Emancipate a Clay Man', 'Airs of London 40-80', 'Strong-Backed Labour (spent)', null, 8,
+      { extra: 'Ruthless +? (cap 10), Magnanimous +2' }),
+    cfRow('Patch up an injured Clay Man', 'Airs of London 70-100', null, { stat: 'Dangerous', diff: 150 }, 6, null, 'Nightmares +1'),
+    cfRow('Send in the Gravel-Voiced Gossip', 'Airs of London 0-50', 'Gravel-Voiced Gossip (companion)', null, 6,
+      { extra: 'Suspicion +2' }),
+    cfRow('Keep track of Clay movements', 'Airs of London 31-69', 'Detecting... 4', { stat: 'Shadowy', diff: 130 }, 6, null,
+      'Suspicion +1'),
+    cfRow('Be open about your motives', 'Airs of London below 40 (locked at 40 and above)', null,
+      { stat: 'Persuasive', diff: 150 }, 4, null, 'Scandal +1'),
+  ];
+
+  const CANDLEFINDER_CLAY_MEN_INDEX = carouselIndex(CANDLEFINDER_CLAY_MEN_OPTIONS);
+
+  const CANDLEFINDER_CLAY_MEN_CLASS = 'fl-ux-candlefinder-clay-men';
+  const CANDLEFINDER_CLAY_MEN_FLAG = 'flUxCandlefinderClayMen';
+  const CANDLEFINDER_CLAY_MEN_BRANCH_CLASS = 'fl-ux-candlefinder-clay-men-branch';
+  const CANDLEFINDER_CLAY_MEN_BRANCH_FLAG = 'flUxCandlefinderClayMenBranch';
+
+  function candlefinderClayMenSpec(e) {
+    const lines = [
+      e.name, CANDLEFINDER_CLAY_MEN_STORYLET, '',
+      e.airs + '.',
+      e.ch ? 'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.' : 'No challenge.',
+      e.needs ? 'Requires: ' + e.needs + '.' : null,
+      'Gives: Detecting... +' + e.progress + (e.extra ? ', ' + e.extra : '') + '.',
+      e.fail ? 'Failure: ' + e.fail + '.' : null,
+    ].filter(Boolean).join('\n');
+    return { text: 'Detecting... +' + e.progress + (e.ch ? CAROUSEL_MARK_CHALLENGE : ''), color: CAROUSEL_COLOR_PROGRESS, title: lines };
+  }
+
+  function candlefinderClayMenStoryletSpec(key) {
+    if (key !== normalizeName(CANDLEFINDER_CLAY_MEN_STORYLET)) return null;
+    return {
+      text: 'Clay Men', color: CAROUSEL_COLOR_LABEL,
+      title: CANDLEFINDER_CLAY_MEN_STORYLET + '\n\nOne storylet of the Candlefinder storyline. '
+        + 'Open it and every Airs-gated option is badged in its own right.',
+    };
+  }
+
+  function candlefinderClayMenRatings() {
+    carouselRatings({
+      storylets: [CANDLEFINDER_CLAY_MEN_STORYLET], index: CANDLEFINDER_CLAY_MEN_INDEX,
+      storyletSpec: candlefinderClayMenStoryletSpec, optionSpec: candlefinderClayMenSpec,
+      cls: CANDLEFINDER_CLAY_MEN_CLASS, flag: CANDLEFINDER_CLAY_MEN_FLAG,
+      branchCls: CANDLEFINDER_CLAY_MEN_BRANCH_CLASS, branchFlag: CANDLEFINDER_CLAY_MEN_BRANCH_FLAG,
+    });
+  }
+
+  // === On the Trail (Storylet) =============================================
+  //
+  // **What it is.** Moloch Street, unlocked with "Engaged in a Name-Making
+  // Case". "On the Trail" here is its own progress quality -- a DIFFERENT
+  // quality object from the Clay Highwayman's "On the Trail of the Clay
+  // Highwayman"; only the short display word coincides. The standard
+  // storylet-heading gate is enough (that storylet is headed "Who is the
+  // Clay Highwayman?").
+  //
+  // **What the badge says.** How much "On the Trail" progress the option
+  // pays, marked as a challenge where it has one. The Airs windows of two
+  // options depend on the case stage (1 vs 2-3), which this script cannot
+  // read, so both windows are shown. A Surly Goat-Demon complication adds 10
+  // to two difficulties and halves the reward of the housekeeper option.
+  // The three case-milestone sections lower on the page are NOT badged.
+  //
+  // Transcribed from all 5 option pages (fetched through the API,
+  // 2026-09-27) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-c.md
+  // section 9. Corrections go in ON_THE_TRAIL_OPTIONS and nowhere else.
+
+  const ON_THE_TRAIL_STORYLET = 'On the Trail';
+
+  function otRow(name, airs, needs, ch, gives, more) {
+    return Object.assign({ storylet: ON_THE_TRAIL_STORYLET, name: name, airs: airs, needs: needs, ch: ch, gives: gives }, more);
+  }
+
+  const ON_THE_TRAIL_OPTIONS = [
+    otRow('Comb through the papers', 'Airs of London below 51', null, { stat: 'Watchful', diff: 6 }, 'On the Trail +1'),
+    otRow('Trawl the local establishments', 'Airs of London below 51', null, { stat: 'Watchful', diff: 6 }, 'On the Trail +1'),
+    otRow("Take the city's pulse", null, null, { stat: 'Watchful', diff: 16, goat: 10 }, 'On the Trail +2',
+      { stages: ['below 51', 'below 34'] }),
+    otRow('Contact an information broker', null, 'Whispered Hint x10 (spent)', { stat: 'Watchful', diff: 12, goat: 10 },
+      'On the Trail +2', { stages: ['51-100', '34-66'],
+        fail: 'Nightmares +2, Whispered Hint x10 still spent, Appalling Secret x1.' }),
+    otRow('Pose as a housekeeper for the day', 'Airs of London 67',
+      'Engaged in a Name-Making Case 2, and a Faded Morning Suit or a Maidservant\'s Uniform', null, 'On the Trail +1-2',
+      { goatReward: true }),
+  ];
+
+  const ON_THE_TRAIL_INDEX = carouselIndex(ON_THE_TRAIL_OPTIONS);
+
+  const ON_THE_TRAIL_CLASS = 'fl-ux-on-the-trail';
+  const ON_THE_TRAIL_FLAG = 'flUxOnTheTrail';
+  const ON_THE_TRAIL_BRANCH_CLASS = 'fl-ux-on-the-trail-branch';
+  const ON_THE_TRAIL_BRANCH_FLAG = 'flUxOnTheTrailBranch';
+
+  function onTheTrailSpec(e) {
+    const lines = [
+      e.name, ON_THE_TRAIL_STORYLET, '',
+      e.stages ? 'Airs of London: ' + e.stages[0] + ' at case stage 1, or ' + e.stages[1]
+        + ' at case stage 2-3 (this script cannot read the stage; both shown).' : e.airs + '.',
+      e.ch ? 'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + (e.ch.goat ? ' (+' + e.ch.goat + ' with a Surly Goat-Demon)' : '') + '.'
+        : 'No challenge.',
+      e.needs ? 'Requires: ' + e.needs + '.' : null,
+      e.goatReward ? 'Gives: On the Trail +1 with a Surly Goat-Demon present, +2 with it absent.' : 'Gives: ' + e.gives + '.',
+      e.fail ? 'Failure: ' + e.fail : null,
+    ].filter(Boolean).join('\n');
+    return { text: e.gives + (e.ch ? CAROUSEL_MARK_CHALLENGE : ''), color: CAROUSEL_COLOR_PROGRESS, title: lines };
+  }
+
+  function onTheTrailStoryletSpec(key) {
+    if (key !== normalizeName(ON_THE_TRAIL_STORYLET)) return null;
+    return {
+      text: 'On the Trail', color: CAROUSEL_COLOR_LABEL,
+      title: ON_THE_TRAIL_STORYLET + '\n\nMoloch Street, "Engaged in a Name-Making Case". '
+        + 'Open the storylet and every Airs-gated option is badged in its own right.',
+    };
+  }
+
+  function onTheTrailRatings() {
+    carouselRatings({
+      storylets: [ON_THE_TRAIL_STORYLET], index: ON_THE_TRAIL_INDEX, storyletSpec: onTheTrailStoryletSpec,
+      optionSpec: onTheTrailSpec, cls: ON_THE_TRAIL_CLASS, flag: ON_THE_TRAIL_FLAG,
+      branchCls: ON_THE_TRAIL_BRANCH_CLASS, branchFlag: ON_THE_TRAIL_BRANCH_FLAG,
+    });
+  }
+
+  // === Send a Christmas Card ===============================================
+  //
+  // **What it is.** Your Social Engagements, seasonal (all of December, "World
+  // Unlock: London's Season: Christmas"). Four card-art variants share the
+  // display text "Send a Christmas Card" but pay DIFFERENT stats, one per
+  // Airs of London quarter. The DOM cannot tell them apart and this script
+  // cannot read the Airs, so there is ONE merged informational row listing
+  // all four outcomes -- never a guess.
+  //
+  // Not covered: three Fate-priced variants (not Airs-gated) and the
+  // "(Retired) Options from Past Mayors" block (never live).
+  //
+  // Transcribed from all 4 card-art variant pages (fetched through the API,
+  // 2026-09-27) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-c.md
+  // section 10. Corrections go in CHRISTMAS_CARD_OPTION and nowhere else.
+
+  const CHRISTMAS_CARD_STORYLET = 'Send a Christmas Card';
+
+  const CHRISTMAS_CARD_OPTION = {
+    storylet: CHRISTMAS_CARD_STORYLET, name: 'Send a Christmas Card',
+    variants: [
+      { airs: [0, 25], reduces: 'Wounds', gives: 'Making Waves +2, Dangerous +2' },
+      { airs: [26, 50], reduces: 'Nightmares', gives: 'Making Waves +2, Watchful +2' },
+      { airs: [51, 75], reduces: 'Scandal', gives: 'Making Waves +2, Persuasive +2' },
+      { airs: [76, 100], reduces: 'Suspicion', gives: 'Shadowy +2 (no Making Waves)' },
+    ],
+  };
+
+  const CHRISTMAS_CARD_INDEX = carouselIndex([CHRISTMAS_CARD_OPTION]);
+
+  const CHRISTMAS_CARD_CLASS = 'fl-ux-christmas-card';
+  const CHRISTMAS_CARD_FLAG = 'flUxChristmasCard';
+  const CHRISTMAS_CARD_BRANCH_CLASS = 'fl-ux-christmas-card-branch';
+  const CHRISTMAS_CARD_BRANCH_FLAG = 'flUxChristmasCardBranch';
+
+  function christmasCardSpec(e) {
+    const lines = [
+      e.name, CHRISTMAS_CARD_STORYLET, '',
+      'Costs 1 Potential Christmas Card.',
+      'Gives one of, depending on the current Airs of London, which this script cannot read:',
+    ].concat(e.variants.map(function (v) {
+      return 'Airs ' + v.airs[0] + '-' + v.airs[1] + ': ' + v.gives + '; reduces the recipient\'s ' + v.reduces + '.';
+    })).join('\n');
+    return { text: 'one of 4 gains', color: CAROUSEL_COLOR_NEUTRAL, title: lines };
+  }
+
+  function christmasCardStoryletSpec(key) {
+    if (key !== normalizeName(CHRISTMAS_CARD_STORYLET)) return null;
+    return {
+      text: 'Christmas', color: CAROUSEL_COLOR_LABEL,
+      title: CHRISTMAS_CARD_STORYLET + '\n\nSeasonal. The card art decides the reward; see the option badge.',
+    };
+  }
+
+  function christmasCardRatings() {
+    carouselRatings({
+      storylets: [CHRISTMAS_CARD_STORYLET], index: CHRISTMAS_CARD_INDEX, storyletSpec: christmasCardStoryletSpec,
+      optionSpec: christmasCardSpec, cls: CHRISTMAS_CARD_CLASS, flag: CHRISTMAS_CARD_FLAG,
+      branchCls: CHRISTMAS_CARD_BRANCH_CLASS, branchFlag: CHRISTMAS_CARD_BRANCH_FLAG,
+    });
+  }
+
+  // === Watchmaker's Hill: the "A Name Scrawled in Blood" Airs storylets ====
+  //
+  // **What it is.** Six storylets, each gated on A Name Scrawled in Blood AND
+  // on an Airs of London window for the WHOLE storylet (it is simply not
+  // offered outside the window). Together they tile the 0-100 range. Not the
+  // Department of Menace Eradication feature: "Provide Training at the
+  // Department of Menace Eradication" is its own storylet with its own ID.
+  //
+  // **What the badge says.** On every heading, its availability in words
+  // ("Airs 51-75 only"); nothing to rank on the four single-choice ones, so
+  // they carry no number. The two storylets that pay Jade Fragments have four
+  // option rows, badged with the Jade count, marked as a challenge. The count
+  // equals the Dangerous difficulty on three of them; "Talk them through your
+  // wounds" is 45 Jade at difficulty 48 and adds Bottle of Greyfields 1879 x2.
+  // "Deal with Unfinished Men" has two options ("Stand guard", "Root out the
+  // Unfinished Men") whose rewards are not itemised; they are not badged.
+  //
+  // Transcribed from the six storylet pages (fetched through the API,
+  // 2026-09-27/28) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-d.md
+  // section E. Corrections go in WATCHMAKERS_HILL_AIRS_STORYLETS and
+  // WATCHMAKERS_HILL_AIRS_OPTIONS and nowhere else.
+
+  const WHA_MARKSMAN = 'A Marksmanship Competition for a Prize of Jade!';
+  const WHA_DONATE = 'Donate your body to science for an hour or two';
+
+  const WATCHMAKERS_HILL_AIRS_STORYLETS = [
+    { name: WHA_MARKSMAN, blood: 1, airs: [0, 50] },
+    { name: WHA_DONATE, blood: 3, airs: [0, 25] },
+    { name: 'Rescue Shipwrecked Clay Men', blood: 3, airs: [26, 50] },
+    { name: 'Deal with Unfinished Men', blood: 3, airs: [51, 75] },
+    { name: 'Guard duty at the Observatory', blood: 1, airs: [51, 100] },
+    { name: 'Provide Training at the Department of Menace Eradication', blood: 3, airs: [76, 100] },
+  ];
+
+  function whaRow(storylet, name, diff, count, more) {
+    return Object.assign({ storylet: storylet, name: name, ch: { stat: 'Dangerous', diff: diff }, count: count }, more);
+  }
+
+  const WATCHMAKERS_HILL_AIRS_OPTIONS = [
+    whaRow(WHA_MARKSMAN, 'Stick with shooting bottles off the end of the jetty', 21, 21, { rare: true }),
+    whaRow(WHA_MARKSMAN, 'Turn me round! Point me at the target! I\'ll shoot it right off his head!', 24, 24, { rare: true }),
+    whaRow(WHA_DONATE, 'Lie very, very still', 45, 45),
+    whaRow(WHA_DONATE, 'Talk them through your wounds', 48, 45, { extra: 'Bottle of Greyfields 1879 x2' }),
+  ];
+
+  const WATCHMAKERS_HILL_AIRS_INDEX = carouselIndex(WATCHMAKERS_HILL_AIRS_OPTIONS);
+
+  const WATCHMAKERS_HILL_AIRS_CLASS = 'fl-ux-whill-airs';
+  const WATCHMAKERS_HILL_AIRS_FLAG = 'flUxWhillAirs';
+  const WATCHMAKERS_HILL_AIRS_BRANCH_CLASS = 'fl-ux-whill-airs-branch';
+  const WATCHMAKERS_HILL_AIRS_BRANCH_FLAG = 'flUxWhillAirsBranch';
+
+  function watchmakersHillAirsSpec(e) {
+    const lines = [
+      e.name, e.storylet, '',
+      'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.',
+      'Gives: Jade Fragment x' + e.count + (e.extra ? ' and ' + e.extra : '') + '.',
+      e.rare ? 'A rare success adds a bonus.' : null,
+      'Re-rolls Airs of London.',
+    ].filter(Boolean).join('\n');
+    return { text: 'Jade ×' + e.count + (e.extra ? ' + Greyfields ×2' : '') + CAROUSEL_MARK_CHALLENGE,
+      color: CAROUSEL_COLOR_PAYOUT, title: lines };
+  }
+
+  function watchmakersHillAirsStoryletSpec(key) {
+    const s = WATCHMAKERS_HILL_AIRS_STORYLETS.filter(function (x) { return normalizeName(x.name) === key; })[0];
+    if (!s) return null;
+    return {
+      text: 'Airs ' + s.airs[0] + '-' + s.airs[1] + ' only', color: CAROUSEL_COLOR_LABEL,
+      title: s.name + '\n\nOffered only at Airs of London ' + s.airs[0] + '-' + s.airs[1]
+        + ', and only with A Name Scrawled in Blood ' + s.blood + ' or more.',
+    };
+  }
+
+  function watchmakersHillAirsRatings() {
+    carouselRatings({
+      storylets: WATCHMAKERS_HILL_AIRS_STORYLETS.map(function (s) { return s.name; }), index: WATCHMAKERS_HILL_AIRS_INDEX,
+      storyletSpec: watchmakersHillAirsStoryletSpec, optionSpec: watchmakersHillAirsSpec,
+      cls: WATCHMAKERS_HILL_AIRS_CLASS, flag: WATCHMAKERS_HILL_AIRS_FLAG,
+      branchCls: WATCHMAKERS_HILL_AIRS_BRANCH_CLASS, branchFlag: WATCHMAKERS_HILL_AIRS_BRANCH_FLAG,
+    });
+  }
+
+  // === An opportunity for profit ===========================================
+  //
+  // **What it is.** A card, locked with "A Name in Seven Secret Alphabets" 3
+  // (the Making Your Name investigation). Two options. Neither has an Airs
+  // window; both just re-roll Airs on the way out, so nothing here is gated
+  // on the Airs. TODO.md's "[1 unlock]" count could not be reconciled with
+  // that reading; no window is invented.
+  //
+  // **What the badge says.** "Eavesdrop" (the wiki's "Eavesdrop (opportunity)"
+  // is a pipe-trick title, so the game shows "Eavesdrop") pays Moon-Pearl x60
+  // on the page, marked "Bundle: Up to 24" -- the exact count is not stated,
+  // so the badge shows the ceiling. "Buy them both a drink" costs Piece of
+  // Rostygold x10 and gives Favours: Criminals +1; the faction result comes
+  // AFTER the badge text, the file's shared convention.
+  //
+  // Transcribed from the card and its two option pages (fetched through the
+  // API, 2026-09-28) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-d.md
+  // section F. Corrections go in OPPORTUNITY_FOR_PROFIT_OPTIONS and nowhere
+  // else.
+
+  const OPPORTUNITY_FOR_PROFIT_STORYLET = 'An opportunity for profit';
+
+  const OPPORTUNITY_FOR_PROFIT_OPTIONS = [
+    { storylet: OPPORTUNITY_FOR_PROFIT_STORYLET, name: 'Eavesdrop', aliases: ['Eavesdrop (opportunity)'],
+      ch: { stat: 'Watchful', diff: 12 }, gives: 'Moon-Pearl x60 (the page marks the bundle "Up to 24")', badge: 'Moon-Pearl ≤24' },
+    { storylet: OPPORTUNITY_FOR_PROFIT_STORYLET, name: 'Buy them both a drink',
+      ch: { stat: 'Persuasive', diff: 10 }, needs: 'Piece of Rostygold x10 (spent)', gives: 'Favours: Criminals +1',
+      badge: 'Rostygold −10', factions: [['Favours: Criminals', 1]] },
+  ];
+
+  const OPPORTUNITY_FOR_PROFIT_INDEX = carouselIndex(OPPORTUNITY_FOR_PROFIT_OPTIONS);
+
+  const OPPORTUNITY_FOR_PROFIT_CLASS = 'fl-ux-opportunity-profit';
+  const OPPORTUNITY_FOR_PROFIT_FLAG = 'flUxOpportunityProfit';
+  const OPPORTUNITY_FOR_PROFIT_BRANCH_CLASS = 'fl-ux-opportunity-profit-branch';
+  const OPPORTUNITY_FOR_PROFIT_BRANCH_FLAG = 'flUxOpportunityProfitBranch';
+  const OPPORTUNITY_FOR_PROFIT_CARD_CLASS = 'fl-ux-opportunity-profit-card';
+  const OPPORTUNITY_FOR_PROFIT_CARD_FLAG = 'flUxOpportunityProfitCard';
+
+  function opportunityForProfitSpec(e) {
+    const lines = [
+      e.name, OPPORTUNITY_FOR_PROFIT_STORYLET, '',
+      'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.',
+      e.needs ? 'Requires: ' + e.needs + '.' : null,
+      'Gives: ' + e.gives + '.',
+      factionLine(e),
+      'Re-rolls Airs of London on either outcome.',
+    ].filter(Boolean).join('\n');
+    return { text: withFactions(e.badge + CAROUSEL_MARK_CHALLENGE, e), color: CAROUSEL_COLOR_PAYOUT, title: lines };
+  }
+
+  function opportunityForProfitCardSpec() {
+    return {
+      text: 'Moon-Pearl or Criminals', color: CAROUSEL_COLOR_LABEL,
+      title: OPPORTUNITY_FOR_PROFIT_STORYLET + '\n\nEavesdrop for Moon-Pearl (Watchful), or buy a drink for Favours: '
+        + 'Criminals +1 (Persuasive, costs Piece of Rostygold x10). Needs A Name in Seven Secret Alphabets 3.',
+    };
+  }
+
+  function opportunityForProfitStoryletSpec(key) {
+    return key === normalizeName(OPPORTUNITY_FOR_PROFIT_STORYLET) ? opportunityForProfitCardSpec() : null;
+  }
+
+  function opportunityForProfitRatings() {
+    carouselRatings({
+      storylets: [OPPORTUNITY_FOR_PROFIT_STORYLET], index: OPPORTUNITY_FOR_PROFIT_INDEX,
+      storyletSpec: opportunityForProfitStoryletSpec, optionSpec: opportunityForProfitSpec,
+      cls: OPPORTUNITY_FOR_PROFIT_CLASS, flag: OPPORTUNITY_FOR_PROFIT_FLAG,
+      branchCls: OPPORTUNITY_FOR_PROFIT_BRANCH_CLASS, branchFlag: OPPORTUNITY_FOR_PROFIT_BRANCH_FLAG,
+    });
+    eachCardName(function (host, name, place, style) {
+      // The opened card is the carousel's own heading badge.
+      if (host.classList && host.classList.contains('storylet-root__heading')) return;
+      const ok = normalizeName(name) === normalizeName(OPPORTUNITY_FOR_PROFIT_STORYLET);
+      attachBadge(host, {
+        cls: OPPORTUNITY_FOR_PROFIT_CARD_CLASS, flag: OPPORTUNITY_FOR_PROFIT_CARD_FLAG, value: name,
+        spec: ok ? opportunityForProfitCardSpec() : null, place: place, style: style,
+      });
+    });
+  }
+
+  // === The Alleys of Spite =================================================
+  //
+  // **What it is.** A Spite storylet with seven options; two are Airs-gated
+  // Shadowy exercises that pay Whispered Hints. The others (the Pickpocket's
+  // Promenade, the Cats of Spite, the courier work) are not covered here.
+  //
+  // **What the badge says.** The flat Whispered Hint reward, marked as a
+  // challenge. Both options are LOCKED WITH "A Name Whispered in Darkness":
+  // they are hidden once you hold that quality at any level. That is the
+  // opposite of a requirement, and the tooltip says so.
+  //
+  // Transcribed from the storylet and both option pages (fetched through the
+  // API, 2026-09-28) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-d.md
+  // section F, which calls the lock a requirement; the pages say "Locked
+  // with". Corrections go in ALLEYS_OF_SPITE_OPTIONS and nowhere else.
+
+  const ALLEYS_OF_SPITE_STORYLET = 'The Alleys of Spite';
+
+  const ALLEYS_OF_SPITE_OPTIONS = [
+    { storylet: ALLEYS_OF_SPITE_STORYLET, name: 'Follow an unsuspecting mark', airs: [0, 50],
+      ch: { stat: 'Shadowy', diff: 3 }, hints: 3, rare: 'Rare success: Whispered Hint x5 and Piece of Rostygold x10.' },
+    { storylet: ALLEYS_OF_SPITE_STORYLET, name: 'Eavesdrop on a random target', airs: [51, 100],
+      ch: { stat: 'Shadowy', diff: 4 }, hints: 10, needs: 'Shadowy 2' },
+  ];
+
+  const ALLEYS_OF_SPITE_INDEX = carouselIndex(ALLEYS_OF_SPITE_OPTIONS);
+
+  const ALLEYS_OF_SPITE_CLASS = 'fl-ux-alleys-of-spite';
+  const ALLEYS_OF_SPITE_FLAG = 'flUxAlleysOfSpite';
+  const ALLEYS_OF_SPITE_BRANCH_CLASS = 'fl-ux-alleys-of-spite-branch';
+  const ALLEYS_OF_SPITE_BRANCH_FLAG = 'flUxAlleysOfSpiteBranch';
+
+  function alleysOfSpiteSpec(e) {
+    const lines = [
+      e.name, ALLEYS_OF_SPITE_STORYLET, '',
+      'Airs of London ' + e.airs[0] + (e.airs[1] === 100 && e.airs[0] > 0 ? '+' : '-' + e.airs[1]) + '.',
+      'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.',
+      e.needs ? 'Requires: ' + e.needs + '.' : null,
+      'Hidden once you hold A Name Whispered in Darkness at any level (the page says "Locked with"); '
+        + 'this is not a requirement.',
+      'Gives: Whispered Hint x' + e.hints + '.',
+      e.rare || null,
+      e.airs[0] === 0 ? 'Re-rolls Airs of London on a success.' : null,
+    ].filter(Boolean).join('\n');
+    return { text: 'Hint ×' + e.hints + CAROUSEL_MARK_CHALLENGE, color: CAROUSEL_COLOR_PAYOUT, title: lines };
+  }
+
+  function alleysOfSpiteStoryletSpec(key) {
+    if (key !== normalizeName(ALLEYS_OF_SPITE_STORYLET)) return null;
+    return {
+      text: 'Whispered Hints', color: CAROUSEL_COLOR_LABEL,
+      title: ALLEYS_OF_SPITE_STORYLET + '\n\nTwo of its options pay Whispered Hints by the Airs of London, '
+        + 'and only while you do not hold A Name Whispered in Darkness.',
+    };
+  }
+
+  function alleysOfSpiteRatings() {
+    carouselRatings({
+      storylets: [ALLEYS_OF_SPITE_STORYLET], index: ALLEYS_OF_SPITE_INDEX, storyletSpec: alleysOfSpiteStoryletSpec,
+      optionSpec: alleysOfSpiteSpec, cls: ALLEYS_OF_SPITE_CLASS, flag: ALLEYS_OF_SPITE_FLAG,
+      branchCls: ALLEYS_OF_SPITE_BRANCH_CLASS, branchFlag: ALLEYS_OF_SPITE_BRANCH_FLAG,
+    });
+  }
+
+  // === The Flit and its King ===============================================
+  //
+  // **What it is.** Three Airs-window redirects, each opening a sub-storylet
+  // of Shadowy actions that pay a flat item count (the count equals the
+  // difficulty on four of five). "Race across the Flit" is the redirect
+  // option's text and "Race Across the Flit" the storylet's; they normalise
+  // to the same name, so the redirect row (under "The Flit and its King")
+  // and the two leaf rows (under the storylet) do not clash.
+  //
+  // **What the badge says.** A redirect shows its Airs window; a leaf action
+  // shows its flat reward, marked as a challenge. Real side effects are in
+  // the tooltip: "Go for a run!" failing moves you to Spite (Wounds +2 CP),
+  // "Hell for leather" failing moves you to Watchmaker's Hill (Wounds +2),
+  // "Taking messages" failing adds Suspicion +1 CP.
+  //
+  // Transcribed from the storylets and option pages (fetched through the
+  // API, 2026-09-28) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-d.md
+  // section H1 and Task 22 of the plan. Corrections go in
+  // FLIT_AND_ITS_KING_OPTIONS and nowhere else.
+
+  const FLIT_TOP = 'The Flit and its King';
+  const FLIT_KNOW = 'Getting to know the Flit';
+  const FLIT_COURIER = 'Courier for Revolutionaries';
+  const FLIT_RACE = 'Race Across the Flit';
+
+  function flitRedirect(name, airs, summary) {
+    return { storylet: FLIT_TOP, name: name, airs: airs, summary: summary };
+  }
+
+  function flitLeaf(storylet, name, diff, reward, more) {
+    return Object.assign({ storylet: storylet, name: name, ch: { stat: 'Shadowy', diff: diff }, reward: reward }, more);
+  }
+
+  const FLIT_AND_ITS_KING_OPTIONS = [
+    flitRedirect(FLIT_KNOW, [0, 33], 'Whispered Hint x61-64 from two Shadowy actions'),
+    flitRedirect(FLIT_COURIER, [34, 66], 'Proscribed Material x17 from one Shadowy action'),
+    flitRedirect('Race across the Flit', [67, 100], 'Moon-Pearl x69 or Drop of Prisoner\'s Honey x36 from two Shadowy actions'),
+    flitLeaf(FLIT_KNOW, 'Go for a wander', 61, 'Whispered Hint ×61', { badge: 'Hint ×61', fail: 'Nothing lost.' }),
+    flitLeaf(FLIT_KNOW, 'Go for a run!', 64, 'Whispered Hint ×64',
+      { badge: 'Hint ×64', fail: 'You are moved to Spite and gain Wounds +2 CP.' }),
+    flitLeaf(FLIT_COURIER, 'Taking messages', 66, 'Proscribed Material ×17',
+      { badge: 'Proscribed ×17', fail: 'Suspicion +1 CP.',
+        rare: 'Rare success: Proscribed Material x16 and Fistful of Surface Currency x3.' }),
+    flitLeaf(FLIT_RACE, 'Spire runners – to the guttering!', 69, 'Moon-Pearl ×69',
+      { badge: 'Moon-Pearl ×69', fail: 'Wounds +1.' }),
+    flitLeaf(FLIT_RACE, 'Hell for leather', 72, 'Drop of Prisoner\'s Honey ×36',
+      { badge: 'Honey ×36', fail: 'Wounds +2, and you are moved to Watchmaker\'s Hill.',
+        rare: 'Rare success: Bottle of Strangling Willow Absinthe x3.' }),
+  ];
+
+  const FLIT_AND_ITS_KING_INDEX = carouselIndex(FLIT_AND_ITS_KING_OPTIONS);
+  const FLIT_STORYLETS = [FLIT_TOP, FLIT_KNOW, FLIT_COURIER, FLIT_RACE, 'Race across the Flit'];
+
+  const FLIT_AND_ITS_KING_CLASS = 'fl-ux-flit-king';
+  const FLIT_AND_ITS_KING_FLAG = 'flUxFlitKing';
+  const FLIT_AND_ITS_KING_BRANCH_CLASS = 'fl-ux-flit-king-branch';
+  const FLIT_AND_ITS_KING_BRANCH_FLAG = 'flUxFlitKingBranch';
+
+  function flitAndItsKingSpec(e) {
+    if (!e.ch) {
+      return {
+        text: 'Airs ' + e.airs[0] + '-' + e.airs[1], color: CAROUSEL_COLOR_LABEL,
+        title: [e.name, e.storylet, '', 'Offered at Airs of London ' + e.airs[0] + '-' + e.airs[1] + '.',
+          'Opens: ' + e.summary + '.'].join('\n'),
+      };
+    }
+    const lines = [
+      e.name, e.storylet, '',
+      'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.',
+      'Gives: ' + e.reward + '.',
+      e.rare || null,
+      'Failure: ' + e.fail,
+    ].filter(Boolean).join('\n');
+    return { text: e.badge + CAROUSEL_MARK_CHALLENGE, color: CAROUSEL_COLOR_PAYOUT, title: lines };
+  }
+
+  function flitAndItsKingStoryletSpec(key) {
+    if (key !== normalizeName(FLIT_TOP)) return null;
+    return {
+      text: 'The Flit', color: CAROUSEL_COLOR_LABEL,
+      title: FLIT_TOP + '\n\nThree redirects by Airs of London: 0-33, 34-66 and 67-100. Each is badged with its window.',
+    };
+  }
+
+  function flitAndItsKingRatings() {
+    carouselRatings({
+      storylets: FLIT_STORYLETS, index: FLIT_AND_ITS_KING_INDEX, storyletSpec: flitAndItsKingStoryletSpec,
+      optionSpec: flitAndItsKingSpec, cls: FLIT_AND_ITS_KING_CLASS, flag: FLIT_AND_ITS_KING_FLAG,
+      branchCls: FLIT_AND_ITS_KING_BRANCH_CLASS, branchFlag: FLIT_AND_ITS_KING_BRANCH_FLAG,
+    });
+  }
+
+  // === Bones in the River ==================================================
+  //
+  // **What it is.** A very infrequent card, unlocked with Route: The Bone
+  // Market and Route: Wolfstack Docks. Two options on the same card face.
+  //
+  // **What the badge says.** A flat item reward at Watchful 200, marked as a
+  // challenge. Only "Explore the riverbank in low tide" is Airs-gated
+  // (0-25); it re-rolls Airs, and it has a second success (a Human Ribcage)
+  // and a failure that adds Nightmares +2 CP. "Search an especially useful
+  // bit of shore" is gated by an item, not by Airs: it spends a Survey of
+  // the Neath's Bones and needs one. Both are here because they share the card.
+  //
+  // Transcribed from the card and both option pages (fetched through the
+  // API, 2026-09-28) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-d.md
+  // section H1. Corrections go in BONES_IN_RIVER_OPTIONS and nowhere else.
+
+  const BONES_IN_RIVER_STORYLET = 'Bones in the River';
+
+  const BONES_IN_RIVER_OPTIONS = [
+    { storylet: BONES_IN_RIVER_STORYLET, name: 'Explore the riverbank in low tide',
+      aliases: ['Explore the riverbank in low tide (Bones in the River)'], airs: [0, 25],
+      ch: { stat: 'Watchful', diff: 200 }, badge: 'Skeleton + Thigh Bone',
+      gives: 'Headless Skeleton x1 and Unidentified Thigh Bone x1; the alternate success gives a Human Ribcage x1',
+      fail: 'Nightmares +2 CP', rerolls: true },
+    { storylet: BONES_IN_RIVER_STORYLET, name: 'Search an especially useful bit of shore',
+      ch: { stat: 'Watchful', diff: 200 }, badge: 'Knotted Humerus', needs: 'Survey of the Neath\'s Bones x1 (spent)',
+      gives: 'Knotted Humerus x1', fail: 'Femur of a Surface Deer x1 and Nightmares +1 CP' },
+  ];
+
+  const BONES_IN_RIVER_INDEX = carouselIndex(BONES_IN_RIVER_OPTIONS);
+
+  const BONES_IN_RIVER_CLASS = 'fl-ux-bones-river';
+  const BONES_IN_RIVER_FLAG = 'flUxBonesRiver';
+  const BONES_IN_RIVER_BRANCH_CLASS = 'fl-ux-bones-river-branch';
+  const BONES_IN_RIVER_BRANCH_FLAG = 'flUxBonesRiverBranch';
+
+  function bonesInRiverSpec(e) {
+    const lines = [
+      e.name, BONES_IN_RIVER_STORYLET, '',
+      e.airs ? 'Airs of London ' + e.airs[0] + '-' + e.airs[1] + '.' : 'Not gated by the Airs of London.',
+      'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.',
+      e.needs ? 'Requires: ' + e.needs + '.' : null,
+      'Gives: ' + e.gives + '.',
+      'Failure: ' + e.fail + '.',
+      e.rerolls ? 'Re-rolls Airs of London.' : null,
+    ].filter(Boolean).join('\n');
+    return { text: e.badge + CAROUSEL_MARK_CHALLENGE, color: CAROUSEL_COLOR_PAYOUT, title: lines };
+  }
+
+  function bonesInRiverStoryletSpec(key) {
+    if (key !== normalizeName(BONES_IN_RIVER_STORYLET)) return null;
+    return {
+      text: 'Bones', color: CAROUSEL_COLOR_LABEL,
+      title: BONES_IN_RIVER_STORYLET + '\n\nDealt with Route: The Bone Market or Route: Wolfstack Docks. '
+        + 'Explore the riverbank at Airs 0-25; the shore search needs a Survey of the Neath\'s Bones.',
+    };
+  }
+
+  function bonesInRiverRatings() {
+    carouselRatings({
+      storylets: [BONES_IN_RIVER_STORYLET], index: BONES_IN_RIVER_INDEX, storyletSpec: bonesInRiverStoryletSpec,
+      optionSpec: bonesInRiverSpec, cls: BONES_IN_RIVER_CLASS, flag: BONES_IN_RIVER_FLAG,
+      branchCls: BONES_IN_RIVER_BRANCH_CLASS, branchFlag: BONES_IN_RIVER_BRANCH_FLAG,
+    });
+    eachCardName(function (host, name, place, style) {
+      // The opened card is the carousel's own heading badge.
+      if (host.classList && host.classList.contains('storylet-root__heading')) return;
+      attachBadge(host, {
+        cls: BONES_IN_RIVER_CLASS + '-card', flag: BONES_IN_RIVER_FLAG + 'Card', value: name,
+        spec: normalizeName(name) === normalizeName(BONES_IN_RIVER_STORYLET) ? bonesInRiverStoryletSpec(normalizeName(BONES_IN_RIVER_STORYLET)) : null,
+        place: place, style: style,
+      });
+    });
+  }
+
+  // === The Chandleress' Complaint ==========================================
+  //
+  // **What it is.** A Department of Menace Eradication storylet, reached by a
+  // redirect from "Follow a chandler to her workshop". Four options.
+  //
+  // **What the badge says.** A flat reward per option, marked as a challenge
+  // where it has one. "Confide in the Chandleress" is the only Airs-gated one:
+  // a narrow window, 96-100 exactly. It has no challenge, gives Favours: The
+  // Docks +1 (after the badge text), Dangerous -5 CP, and re-rolls Airs.
+  // "Light a candle, and wait" pays Lumps of Lamplighter Beeswax that scale
+  // with Dangerous (0.4 x Dangerous + 30). "Back to the Department" costs
+  // nothing and redirects to The Department of Menace Eradication (its own
+  // storylet and feature); it gets a note, not a ranked value.
+  //
+  // Transcribed from the storylet and all four option pages (fetched through
+  // the API, 2026-09-28) -- see
+  // docs/superpowers/research/2026-09-27-airs-of-london-group-d.md
+  // section H1. Corrections go in CHANDLERESS_COMPLAINT_OPTIONS and nowhere
+  // else.
+
+  const CHANDLERESS_COMPLAINT_STORYLET = 'The Chandleress\' Complaint';
+
+  const CHANDLERESS_COMPLAINT_OPTIONS = [
+    { storylet: CHANDLERESS_COMPLAINT_STORYLET, name: 'Light a candle, and wait', ch: { stat: 'Dangerous', diff: 10 },
+      badge: 'Beeswax (scales)', gives: 'Lump of Lamplighter Beeswax x(0.4 x Dangerous + 30), so more the higher your Dangerous' },
+    { storylet: CHANDLERESS_COMPLAINT_STORYLET, name: 'Ask the Chandleress about the rat-catchers\' traditions',
+      ch: { stat: 'Persuasive', diff: 10 }, badge: 'Hint ×30', gives: 'Whispered Hint x30' },
+    { storylet: CHANDLERESS_COMPLAINT_STORYLET, name: 'Confide in the Chandleress', airs: [96, 100], ch: null,
+      badge: 'Dangerous -5 CP', gives: 'Favours: The Docks +1 and Dangerous -5 CP', rerolls: true,
+      factions: [['Favours: The Docks', 1]] },
+    { storylet: CHANDLERESS_COMPLAINT_STORYLET, name: 'Back to the Department', aliases: ['Back to the Department 2'], ch: null,
+      exit: true, badge: 'exit', gives: 'nothing; costs no action' },
+  ];
+
+  const CHANDLERESS_COMPLAINT_INDEX = carouselIndex(CHANDLERESS_COMPLAINT_OPTIONS);
+
+  const CHANDLERESS_COMPLAINT_CLASS = 'fl-ux-chandleress';
+  const CHANDLERESS_COMPLAINT_FLAG = 'flUxChandleress';
+  const CHANDLERESS_COMPLAINT_BRANCH_CLASS = 'fl-ux-chandleress-branch';
+  const CHANDLERESS_COMPLAINT_BRANCH_FLAG = 'flUxChandleressBranch';
+
+  function chandleressComplaintSpec(e) {
+    const lines = [
+      e.name, CHANDLERESS_COMPLAINT_STORYLET, '',
+      e.airs ? 'Airs of London ' + e.airs[0] + '-' + e.airs[1] + ' (a narrow window).' : null,
+      e.ch ? 'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.' : 'No challenge.',
+      e.exit ? 'Leads back to The Department of Menace Eradication.' : 'Gives: ' + e.gives + '.',
+      e.rerolls ? 'Re-rolls Airs of London.' : null,
+    ].filter(Boolean).join('\n');
+    return { text: withFactions(e.badge + (e.ch ? CAROUSEL_MARK_CHALLENGE : ''), e),
+      color: e.exit ? CAROUSEL_COLOR_NEUTRAL : CAROUSEL_COLOR_PAYOUT, title: lines };
+  }
+
+  function chandleressComplaintStoryletSpec(key) {
+    if (key !== normalizeName(CHANDLERESS_COMPLAINT_STORYLET)) return null;
+    return {
+      text: 'Chandleress', color: CAROUSEL_COLOR_LABEL,
+      title: CHANDLERESS_COMPLAINT_STORYLET + '\n\nOnly "Confide in the Chandleress" depends on the Airs of London: '
+        + 'it is offered at exactly 96-100.',
+    };
+  }
+
+  function chandleressComplaintRatings() {
+    carouselRatings({
+      storylets: [CHANDLERESS_COMPLAINT_STORYLET], index: CHANDLERESS_COMPLAINT_INDEX,
+      storyletSpec: chandleressComplaintStoryletSpec, optionSpec: chandleressComplaintSpec,
+      cls: CHANDLERESS_COMPLAINT_CLASS, flag: CHANDLERESS_COMPLAINT_FLAG,
+      branchCls: CHANDLERESS_COMPLAINT_BRANCH_CLASS, branchFlag: CHANDLERESS_COMPLAINT_BRANCH_FLAG,
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -39526,6 +40546,18 @@
     { name: 'university-creatures', run: universityCreaturesRatings },
     { name: 'clay-quarters', run: clayQuartersRatings },
     { name: 'mutually-agreed-divorce', run: mutuallyAgreedDivorceRatings },
+    { name: 'hallowmas-visitor', run: hallowmasVisitorRatings },
+    { name: 'clathermont-tattoo', run: clathermontTattooRatings },
+    { name: 'shifting-streets', run: shiftingStreetsRatings },
+    { name: 'candlefinder-clay-men', run: candlefinderClayMenRatings },
+    { name: 'on-the-trail', run: onTheTrailRatings },
+    { name: 'christmas-card', run: christmasCardRatings },
+    { name: 'watchmakers-hill-airs', run: watchmakersHillAirsRatings },
+    { name: 'opportunity-for-profit', run: opportunityForProfitRatings },
+    { name: 'alleys-of-spite', run: alleysOfSpiteRatings },
+    { name: 'flit-and-its-king', run: flitAndItsKingRatings },
+    { name: 'bones-in-river', run: bonesInRiverRatings },
+    { name: 'chandleress-complaint', run: chandleressComplaintRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
