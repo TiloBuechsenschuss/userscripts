@@ -170,7 +170,8 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   (IotM) bucket therefore matches each gem by its item name *or* its enchantment, since it isn't
   verified in-game which of the two KoL renders there.
 - **The shared menu button row** (`#tm-kol-menu-btns`) is a piece of markup two scripts
-  co-own: `daily-checklist.js` and `iotm.js` each carry an identical copy of `getButtonRow()`,
+  co-own: `daily-checklist.js`, `iotm.js` and (for the settings gear, `order:3`) `quest-helper.js`
+  each carry an identical copy of `getButtonRow()`,
   and whichever runs first creates it. Each button claims a fixed slot with CSS **`order`**
   (checklist 1, IotM 2), which is what makes the left-to-right arrangement independent of load
   order. The container is a plain flex row, which is what the menu frame has room for — two
@@ -415,6 +416,20 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   score too) with the `<font color>` beside a "Score:" cell as fallback, and an unrecognised
   colour yields **no box at all** rather than a guess about where to spend turns. The link
   carries `target="mainpane"` because the script runs inside the sidebar frame.
+- **The shared hide-UI switches** are a second piece of markup/code several scripts co-own.
+  `iotm.js` and `quest-helper.js` each carry a copy of the block between
+  `// --- BEGIN tm-kol-ui-settings` and `// --- END tm-kol-ui-settings ---`; the copies must stay
+  **byte-identical** (`tests/kol-ui-settings.test.mjs` checks it, and the three `getButtonRow()`
+  copies it depends on). Settings live in `localStorage` key `tm-kol-hidden-ui` as
+  `{ "<scriptId>.<featureId>": true }` — only *hidden* features are stored, so a new feature
+  defaults to shown — shared across characters. `account.php` gets one `#tm-kol-settings` panel
+  (first script to run creates it, the rest add a fieldset by id) and the menu row gets one
+  `#tm-kol-settings-btn` gear (`order:3`). A switch flipped on account.php reaches the menu and
+  charpane frames through the `storage` event, so they update without a reload. To add a script:
+  paste the block, call `kolUiSettingsSection` on `account.php` and `kolUiSettingsGear` in the
+  menu (plus a `getButtonRow()` copy), and gate each piece of UI on `kolUiHidden`. Hiding must hide
+  UI only, never bookkeeping (quest-helper's clue harvest keeps running). The `account.php` markup
+  is unverified, so the panel falls back to the page top.
 - **KoL has been consolidated down to nine scripts.** There is no module system here — a
   `.js` file is a self-contained IIFE — so the only way two features can share a helper is to
   live in the same file. Eight standalone scripts were folded into three hosts. Do not split

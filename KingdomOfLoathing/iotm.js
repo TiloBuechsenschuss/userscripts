@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/iotm.js
-// @version      1.35
+// @version      1.36
 // @description  Adds an "IotM" button to the icon menu with Item-of-the-Month actions.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -11,6 +11,8 @@
 // @match        https://kingdomofloathing.com/topmenu.php*
 // @match        https://www.kingdomofloathing.com/choice.php*
 // @match        https://kingdomofloathing.com/choice.php*
+// @match        https://www.kingdomofloathing.com/account.php*
+// @match        https://kingdomofloathing.com/account.php*
 // @grant        none
 
 // ==/UserScript==
@@ -40,10 +42,144 @@
  *   Confirmed against the live page (2026-10-01): the map draws from an explored maze, the
  *   arrow follows movement, and the layout holds side by side at 125% zoom. Not yet confirmed:
  *   Reset map and the earlier-day banner.
+ * Each popup action, and the IotM button itself, can be hidden: account.php gets a shared
+ *   "Userscript settings" box of Show checkboxes (also opened by a small gear in the menu row),
+ *   kept in the browser (localStorage), not per character. Meant for IotMs you do not own.
  */
 
 (function () {
   'use strict';
+
+  // --- BEGIN tm-kol-ui-settings (keep byte-identical across scripts) ---
+  // Shared "hide this piece of UI" switches, co-owned by every KoL script that carries this
+  // block (iotm.js, quest-helper.js). Each script has its own copy, so the settings panel
+  // and the menu gear are created by whichever runs first and found by id by the rest.
+  // Only HIDDEN features are stored ({ "<scriptId>.<featureId>": true }), so a feature
+  // added later is shown by default. Storage trouble reads as "everything shown".
+  const KOL_UI_KEY = 'tm-kol-hidden-ui';
+
+  function kolUiLoad() {
+    try {
+      const o = JSON.parse(localStorage.getItem(KOL_UI_KEY) || '{}');
+      return o && typeof o === 'object' && !Array.isArray(o) ? o : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function kolUiHidden(scriptId, featureId) {
+    return kolUiLoad()[scriptId + '.' + featureId] === true;
+  }
+
+  // Read-modify-write on a fresh read, so two scripts toggling never clobber each other.
+  function kolUiSetHidden(scriptId, featureId, hidden) {
+    const o = kolUiLoad();
+    const k = scriptId + '.' + featureId;
+    if (hidden) o[k] = true; else delete o[k];
+    try {
+      localStorage.setItem(KOL_UI_KEY, JSON.stringify(o));
+    } catch (e) { /* storage blocked: the switch just does not stick */ }
+  }
+
+  // Fires in every OTHER same-origin frame when a switch is flipped (never in the one that
+  // flipped it), which is what lets the menu and charpane react to account.php live.
+  function kolUiOnChange(fn) {
+    window.addEventListener('storage', function (e) {
+      if (e.key === KOL_UI_KEY || e.key === null) fn();
+    });
+  }
+
+  // account.php: one shared panel, one fieldset per script, sorted by scriptId so the
+  // order does not depend on which script loaded first. `features` is [{ id, label }].
+  function kolUiSettingsSection(scriptId, title, features) {
+    if (!document.body) return;
+    let panel = document.getElementById('tm-kol-settings');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'tm-kol-settings';
+      panel.style.cssText = [
+        'margin:8px auto', 'padding:6px 10px', 'max-width:480px', 'border:1px solid #888',
+        'background:#f5f5ff', 'font-family:arial,sans-serif', 'font-size:12px', 'text-align:left'
+      ].join(';');
+      const head = document.createElement('div');
+      head.textContent = 'Userscript settings';
+      head.style.cssText = 'font-weight:bold;margin-bottom:4px';
+      panel.appendChild(head);
+      // account.php's markup is unverified: go above its first table, else the page top.
+      const firstTable = document.body.querySelector('table');
+      if (firstTable && firstTable.parentNode) {
+        firstTable.parentNode.insertBefore(panel, firstTable);
+      } else {
+        document.body.insertBefore(panel, document.body.firstChild);
+      }
+      if (location.hash === '#tm-kol-settings') panel.scrollIntoView();
+    }
+    if (panel.querySelector('fieldset[data-tm-script="' + scriptId + '"]')) return;
+
+    const set = document.createElement('fieldset');
+    set.setAttribute('data-tm-script', scriptId);
+    set.style.cssText = 'margin:4px 0;padding:4px 8px';
+    const legend = document.createElement('legend');
+    legend.textContent = title;
+    set.appendChild(legend);
+    features.forEach(function (f) {
+      const label = document.createElement('label');
+      label.style.cssText = 'display:block;cursor:pointer';
+      const box = document.createElement('input');
+      box.type = 'checkbox';
+      box.checked = !kolUiHidden(scriptId, f.id);
+      box.addEventListener('change', function () {
+        kolUiSetHidden(scriptId, f.id, !box.checked);
+      });
+      label.appendChild(box);
+      label.appendChild(document.createTextNode(' Show ' + f.label));
+      set.appendChild(label);
+    });
+
+    let before = null;
+    panel.querySelectorAll('fieldset').forEach(function (o) {
+      if (!before && o.getAttribute('data-tm-script') > scriptId) before = o;
+    });
+    panel.insertBefore(set, before);
+  }
+
+  // Menu frame: a small gear that opens the panel in the mainpane. Never itself hideable --
+  // it is the way back to the switches.
+  function kolUiSettingsGear() {
+    if (document.getElementById('tm-kol-settings-btn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'tm-kol-settings-btn';
+    btn.type = 'button';
+    btn.textContent = '⚙';
+    btn.title = 'Userscript settings (account.php)';
+    btn.style.cssText = [
+      'padding:1px 4px', 'height:22px', 'line-height:1', 'font-size:12px', 'cursor:pointer',
+      'white-space:nowrap', 'background-color:white', 'order:3'
+    ].join(';');
+    btn.addEventListener('click', function () {
+      window.open('/account.php#tm-kol-settings', 'mainpane');
+    });
+
+    const row = getButtonRow();
+    if (row) {
+      row.appendChild(btn);
+      return;
+    }
+    // Text-mode topmenu: after the last of our buttons, else after the plain "edit" link.
+    const prev = document.getElementById('tm-iotm-btn') || document.getElementById('tm-checklist-btn');
+    if (prev) {
+      prev.insertAdjacentElement('afterend', btn);
+      return;
+    }
+    for (const a of document.querySelectorAll('a')) {
+      if (a.textContent.trim().toLowerCase().replace(/^\[|\]$/g, '') === 'edit') {
+        a.insertAdjacentElement('afterend', btn);
+        return;
+      }
+    }
+    if (document.body) document.body.insertBefore(btn, document.body.firstChild);
+  }
+  // --- END tm-kol-ui-settings ---
 
   // --- Configuration ---------------------------------------------------
   // Eternity Codpiece item icon, inlined as a data URI so it needs no network
@@ -531,9 +667,18 @@
       'box-shadow:0 2px 6px rgba(0,0,0,0.3)'
     ].join(';');
 
+    let shown = 0;
     ACTIONS.forEach(function (a) {
+      if (kolUiHidden('iotm', a.key)) return;
       pop.appendChild(makeActionButton(a, d));
+      shown++;
     });
+    if (!shown) {
+      const none = d.createElement('div');
+      none.textContent = 'All actions hidden — see account.php';
+      none.style.cssText = 'font:10px arial;white-space:nowrap';
+      pop.appendChild(none);
+    }
 
     d.body.appendChild(pop);
 
@@ -668,6 +813,7 @@
 
   function addButton() {
     if (document.getElementById('tm-iotm-btn')) return;
+    if (kolUiHidden('iotm', 'button')) return;
 
     const btn = makeIotmButton();
     const row = getButtonRow();
@@ -1977,8 +2123,27 @@
   // keeps each feature off sibling frames. A no-op gate for the standalone
   // install, whose @match already scopes it.
   const PATH = location.pathname;
+  const UI_FEATURES = [
+    { id: 'button', label: 'the IotM menu button' },
+    { id: 'codpiece', label: 'Codpiece in the IotM popup' },
+    { id: 'baseball', label: 'Play Ball in the IotM popup' },
+    { id: 'cup13', label: 'Cup of 13s in the IotM popup' },
+    { id: 'radiobackpack', label: 'Radio Backpack in the IotM popup' }
+  ];
   if (/\/(awesomemenu|topmenu)\.php/i.test(PATH)) {
     addButton();
+    kolUiSettingsGear();
+    kolUiOnChange(function () {
+      const btn = document.getElementById('tm-iotm-btn');
+      if (kolUiHidden('iotm', 'button')) {
+        closePopup();
+        if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
+      } else {
+        addButton();
+      }
+    });
+  } else if (/\/account\.php/i.test(PATH)) {
+    kolUiSettingsSection('iotm', 'KoL IotM Menu', UI_FEATURES);
   } else if (/\/choice\.php/i.test(PATH)) {
     initDecorator();
     initCup13Sort();

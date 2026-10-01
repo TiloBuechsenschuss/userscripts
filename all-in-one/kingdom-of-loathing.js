@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/all-in-one/kingdom-of-loathing.js
-// @version      1.55
+// @version      1.56
 // @description  Single-install loader for the Kingdom of Loathing userscripts in this repo.
 //
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
@@ -34,6 +34,8 @@
 // @match        https://kingdomofloathing.com/place.php*
 // @match        https://www.kingdomofloathing.com/questlog.php*
 // @match        https://kingdomofloathing.com/questlog.php*
+// @match        https://www.kingdomofloathing.com/account.php*
+// @match        https://kingdomofloathing.com/account.php*
 // @match        https://www.kingdomofloathing.com/dwarfcontraption.php*
 // @match        https://kingdomofloathing.com/dwarfcontraption.php*
 // @match        https://www.kingdomofloathing.com/cobbsknob.php*

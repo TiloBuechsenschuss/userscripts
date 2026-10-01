@@ -3,10 +3,16 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/quest-helper.js
-// @version      2.1
+// @version      2.2
 // @description  Fills in or highlights the known answers to puzzle-y quest adventures and combat cues.
 // @match        https://www.kingdomofloathing.com/choice.php*
 // @match        https://kingdomofloathing.com/choice.php*
+// @match        https://www.kingdomofloathing.com/awesomemenu.php*
+// @match        https://kingdomofloathing.com/awesomemenu.php*
+// @match        https://www.kingdomofloathing.com/topmenu.php*
+// @match        https://kingdomofloathing.com/topmenu.php*
+// @match        https://www.kingdomofloathing.com/account.php*
+// @match        https://kingdomofloathing.com/account.php*
 // @match        https://www.kingdomofloathing.com/fight.php*
 // @match        https://kingdomofloathing.com/fight.php*
 // @match        https://www.kingdomofloathing.com/tiles.php*
@@ -66,10 +72,177 @@
  *   retorts you own and what your odds of winning a match are.
  * Also reads the 8-Bit Realm Score in the charpane and turns its colour into a link to the zone
  *   that is currently paying double, with what to boost there.
+ * The Mer-kin button and the 8-Bit Realm box can be hidden: account.php gets a shared
+ *   "Userscript settings" box of Show checkboxes (also opened by a small gear in the menu row),
+ *   kept in the browser (localStorage), not per character.
  */
 
 (function () {
   'use strict';
+
+  // --- BEGIN tm-kol-ui-settings (keep byte-identical across scripts) ---
+  // Shared "hide this piece of UI" switches, co-owned by every KoL script that carries this
+  // block (iotm.js, quest-helper.js). Each script has its own copy, so the settings panel
+  // and the menu gear are created by whichever runs first and found by id by the rest.
+  // Only HIDDEN features are stored ({ "<scriptId>.<featureId>": true }), so a feature
+  // added later is shown by default. Storage trouble reads as "everything shown".
+  const KOL_UI_KEY = 'tm-kol-hidden-ui';
+
+  function kolUiLoad() {
+    try {
+      const o = JSON.parse(localStorage.getItem(KOL_UI_KEY) || '{}');
+      return o && typeof o === 'object' && !Array.isArray(o) ? o : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function kolUiHidden(scriptId, featureId) {
+    return kolUiLoad()[scriptId + '.' + featureId] === true;
+  }
+
+  // Read-modify-write on a fresh read, so two scripts toggling never clobber each other.
+  function kolUiSetHidden(scriptId, featureId, hidden) {
+    const o = kolUiLoad();
+    const k = scriptId + '.' + featureId;
+    if (hidden) o[k] = true; else delete o[k];
+    try {
+      localStorage.setItem(KOL_UI_KEY, JSON.stringify(o));
+    } catch (e) { /* storage blocked: the switch just does not stick */ }
+  }
+
+  // Fires in every OTHER same-origin frame when a switch is flipped (never in the one that
+  // flipped it), which is what lets the menu and charpane react to account.php live.
+  function kolUiOnChange(fn) {
+    window.addEventListener('storage', function (e) {
+      if (e.key === KOL_UI_KEY || e.key === null) fn();
+    });
+  }
+
+  // account.php: one shared panel, one fieldset per script, sorted by scriptId so the
+  // order does not depend on which script loaded first. `features` is [{ id, label }].
+  function kolUiSettingsSection(scriptId, title, features) {
+    if (!document.body) return;
+    let panel = document.getElementById('tm-kol-settings');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'tm-kol-settings';
+      panel.style.cssText = [
+        'margin:8px auto', 'padding:6px 10px', 'max-width:480px', 'border:1px solid #888',
+        'background:#f5f5ff', 'font-family:arial,sans-serif', 'font-size:12px', 'text-align:left'
+      ].join(';');
+      const head = document.createElement('div');
+      head.textContent = 'Userscript settings';
+      head.style.cssText = 'font-weight:bold;margin-bottom:4px';
+      panel.appendChild(head);
+      // account.php's markup is unverified: go above its first table, else the page top.
+      const firstTable = document.body.querySelector('table');
+      if (firstTable && firstTable.parentNode) {
+        firstTable.parentNode.insertBefore(panel, firstTable);
+      } else {
+        document.body.insertBefore(panel, document.body.firstChild);
+      }
+      if (location.hash === '#tm-kol-settings') panel.scrollIntoView();
+    }
+    if (panel.querySelector('fieldset[data-tm-script="' + scriptId + '"]')) return;
+
+    const set = document.createElement('fieldset');
+    set.setAttribute('data-tm-script', scriptId);
+    set.style.cssText = 'margin:4px 0;padding:4px 8px';
+    const legend = document.createElement('legend');
+    legend.textContent = title;
+    set.appendChild(legend);
+    features.forEach(function (f) {
+      const label = document.createElement('label');
+      label.style.cssText = 'display:block;cursor:pointer';
+      const box = document.createElement('input');
+      box.type = 'checkbox';
+      box.checked = !kolUiHidden(scriptId, f.id);
+      box.addEventListener('change', function () {
+        kolUiSetHidden(scriptId, f.id, !box.checked);
+      });
+      label.appendChild(box);
+      label.appendChild(document.createTextNode(' Show ' + f.label));
+      set.appendChild(label);
+    });
+
+    let before = null;
+    panel.querySelectorAll('fieldset').forEach(function (o) {
+      if (!before && o.getAttribute('data-tm-script') > scriptId) before = o;
+    });
+    panel.insertBefore(set, before);
+  }
+
+  // Menu frame: a small gear that opens the panel in the mainpane. Never itself hideable --
+  // it is the way back to the switches.
+  function kolUiSettingsGear() {
+    if (document.getElementById('tm-kol-settings-btn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'tm-kol-settings-btn';
+    btn.type = 'button';
+    btn.textContent = '⚙';
+    btn.title = 'Userscript settings (account.php)';
+    btn.style.cssText = [
+      'padding:1px 4px', 'height:22px', 'line-height:1', 'font-size:12px', 'cursor:pointer',
+      'white-space:nowrap', 'background-color:white', 'order:3'
+    ].join(';');
+    btn.addEventListener('click', function () {
+      window.open('/account.php#tm-kol-settings', 'mainpane');
+    });
+
+    const row = getButtonRow();
+    if (row) {
+      row.appendChild(btn);
+      return;
+    }
+    // Text-mode topmenu: after the last of our buttons, else after the plain "edit" link.
+    const prev = document.getElementById('tm-iotm-btn') || document.getElementById('tm-checklist-btn');
+    if (prev) {
+      prev.insertAdjacentElement('afterend', btn);
+      return;
+    }
+    for (const a of document.querySelectorAll('a')) {
+      if (a.textContent.trim().toLowerCase().replace(/^\[|\]$/g, '') === 'edit') {
+        a.insertAdjacentElement('afterend', btn);
+        return;
+      }
+    }
+    if (document.body) document.body.insertBefore(btn, document.body.firstChild);
+  }
+  // --- END tm-kol-ui-settings ---
+
+  // Shared button row under the edit icon. The IotM and daily-checklist scripts
+  // each install independently, so they cooperate through a single
+  // absolutely-positioned flex container (created by whichever runs first) and
+  // claim their slot with CSS `order` -- making the left-to-right arrangement
+  // independent of DOM insertion order / which script loads first. Two scripts
+  // use it (checklist 1, IotM 2), which is what the strip has room for: Auto and
+  // Mer-kin moved to the charpane when a fourth button ran off the right edge of
+  // the menu frame. Returns the row, or null in text-mode topmenu where
+  // #fixedawesome is absent.
+  function getButtonRow() {
+    let row = document.getElementById('tm-kol-menu-btns');
+    if (row) return row;
+    const fixed = document.getElementById('fixedawesome');
+    const editLink = document.querySelector('#fixedawesome a.config');
+    if (!fixed || !editLink) return null;
+    // #fixedawesome is position:absolute, so an absolutely positioned child is
+    // placed relative to it without disturbing the inline row of icons. The
+    // edit icon is 30px tall; hang the row just below it, left-aligned with it.
+    row = document.createElement('div');
+    row.id = 'tm-kol-menu-btns';
+    row.style.cssText = [
+      'position:absolute',
+      'top:31px',
+      'left:' + Math.max(0, editLink.offsetLeft) + 'px',
+      'z-index:3',
+      'display:flex',
+      'gap:3px',
+      'align-items:flex-start'
+    ].join(';');
+    fixed.appendChild(row);
+    return row;
+  }
 
   // The all-in-one loader @requires every KoL script onto the union of all matched
   // pages, so scope ourselves explicitly rather than trusting @match. adventure.php
@@ -86,7 +259,7 @@
   // The last four
   // are the Mer-kin dreadscroll's doing: its clue words are printed by an item
   // use (inv_use/inventory), a skill cast (runskillz) and a plate of sushi.
-  if (!/\/(choice|tiles|adventure|charpane|fight|pandamonium|beerpong|inv_use|inventory|runskillz|sushi)\.php/i
+  if (!/\/(choice|tiles|adventure|charpane|fight|pandamonium|beerpong|inv_use|inventory|runskillz|sushi|awesomemenu|topmenu|account)\.php/i
     .test(location.pathname)) {
     return;
   }
@@ -3716,6 +3889,20 @@
     return { bar, say };
   }
 
+  // The menu frame and account.php carry only the shared hide-UI settings (see the
+  // tm-kol-ui-settings block at the top), so they dispatch before anything puzzle-shaped.
+  if (/\/(awesomemenu|topmenu)\.php/i.test(location.pathname)) {
+    kolUiSettingsGear();
+    return;
+  }
+  if (/\/account\.php/i.test(location.pathname)) {
+    kolUiSettingsSection('quest-helper', 'KoL Quest Helper', [
+      { id: 'merkin', label: 'the Mer-kin button in the sidebar' },
+      { id: 'eightbit', label: 'the 8-Bit Realm box in the sidebar' },
+    ]);
+    return;
+  }
+
   // A dreadscroll clue word can turn up on any of half a dozen unrelated pages,
   // so this runs on every one of them and before anything else. It only reads
   // the page and files what it finds; a failure here must not take the puzzle
@@ -3735,15 +3922,39 @@
     // each: a charpane KoL has changed under one of them must not cost you the
     // other. Same rule as ux-enhancers.js's FEATURES registry.
     try {
-      showEightBit();
+      if (!kolUiHidden('quest-helper', 'eightbit')) showEightBit();
     } catch (e) {
       console.error('Quest helper: could not read the 8-Bit Realm score.', e);
     }
     try {
-      addMerkinButton();
+      if (!kolUiHidden('quest-helper', 'merkin')) addMerkinButton();
     } catch (e) {
       console.error('Quest helper: could not add the Mer-kin button.', e);
     }
+    // account.php flips a switch in another frame: show or drop the two pieces to match,
+    // without waiting for the next charpane rebuild. Hiding hides UI only -- the clue
+    // harvest above keeps filing words.
+    kolUiOnChange(function () {
+      try {
+        const box = document.getElementById('tm-8bit-advice');
+        if (kolUiHidden('quest-helper', 'eightbit')) {
+          if (box && box.parentNode) box.parentNode.removeChild(box);
+        } else {
+          showEightBit();
+        }
+        const btn = document.getElementById(MERKIN_BUTTON_ID);
+        if (kolUiHidden('quest-helper', 'merkin')) {
+          // placeMerkinButton wraps the button in a bare div; take the wrapper with it.
+          const wrap = btn && btn.parentNode;
+          if (wrap && wrap.parentNode) wrap.parentNode.removeChild(wrap);
+          closeMerkinPanel();
+        } else {
+          addMerkinButton();
+        }
+      } catch (e) {
+        console.error('Quest helper: could not apply the hide settings.', e);
+      }
+    });
     return;
   }
 
