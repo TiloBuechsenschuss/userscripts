@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/iotm.js
-// @version      1.37
+// @version      1.38
 // @description  Adds an "IotM" button to the icon menu with Item-of-the-Month actions.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -42,6 +42,8 @@
  *   Confirmed against the live page (2026-10-01): the map draws from an explored maze, the
  *   arrow follows movement, and the layout holds side by side at 125% zoom. Not yet confirmed:
  *   Reset map and the earlier-day banner.
+ *   The same map is also offered as the separate script KingdomOfLoathing/standalone/black-rose-garden.js, for
+ *   players who want it without the rest of this one.
  * Each popup action, and the IotM button itself, can be hidden: account.php gets a shared
  *   "Userscript settings" box of Show checkboxes (also opened by a small gear in the menu row),
  *   kept in the browser (localStorage), not per character. Meant for IotMs you do not own.

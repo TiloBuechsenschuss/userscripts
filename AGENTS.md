@@ -11,6 +11,19 @@ for three browser games:
 - `TwilightHeroes/` — scripts for twilightheroes.com
 - `FallenLondon/` — scripts for fallenlondon.com
 
+- `<game folder>/standalone/` — one `standalone/` subfolder per game folder (`KingdomOfLoathing/standalone/`,
+  and `TwilightHeroes/standalone/` or `FallenLondon/standalone/` when those games get one; create it on
+  first use) holding scripts that live **entirely alone**. A standalone script is never
+  `@require`d by an `all-in-one/` loader and is not listed in one's `@match` union; it carries no
+  on/off setting (installing it is what turns it on, so it does not join the shared hide-UI
+  switches either); and it holds its own copy of anything it needs. Where it copies a feature
+  another script also carries, the copies must stay identical and a test must say so. The game is named by the parent folder and, as for every script, by the `@name` prefix
+  (`KoL Black Rose Garden`). Use it for a feature that only some players want, where "optional"
+  should mean "not installed" rather than a setting. Currently:
+  `KingdomOfLoathing/standalone/black-rose-garden.js`, an extra offer of the map that `iotm.js` also carries
+  (see below). When you add one, list it
+  in README's "Standalone scripts" table. `scripts/bump-loaders.mjs` needs no change: it only
+  looks at files that `@require` repo files, which a standalone script never does.
 - `all-in-one/` — one "loader" userscript per game (`kingdom-of-loathing.js`,
   `twilight-heroes.js`, `fallen-london.js`). Each carries no logic of its own; it
   `@require`s every individual script for that game from GitHub, so a single install

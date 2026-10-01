@@ -1,4 +1,4 @@
-// Ad-hoc test for KingdomOfLoathing/iotm.js Black Rose Garden map helpers.
+// Ad-hoc test for KingdomOfLoathing/standalone/black-rose-garden.js map helpers.
 //
 // There's no test runner in this repo (see AGENTS.md). This is a standalone
 // Node script: it reads the userscript, evaluates its IIFE against a stub DOM
@@ -15,14 +15,14 @@
 //   - The drawn area is cropped to the maze plus a one-cell margin.
 //   - A map from an earlier KoL day is stale.
 //
-//   node tests/iotm-rosegarden.test.mjs
+//   node tests/black-rose-garden.test.mjs
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const src = readFileSync(join(here, '..', 'KingdomOfLoathing', 'iotm.js'), 'utf8');
+const src = readFileSync(join(here, '..', 'KingdomOfLoathing', 'standalone', 'black-rose-garden.js'), 'utf8');
 
 const fakeDoc = {
   querySelector: () => null,
@@ -40,6 +40,14 @@ const fn = new Function('document', 'location', 'localStorage',
 const api = fn(fakeDoc, fakeLocation, { getItem: () => null, setItem: () => {}, removeItem: () => {} });
 
 let failures = 0;
+
+// The map code is carried by iotm.js too, as a copy, so the two must not drift apart.
+const lf = (s) => s.replace(/\r\n/g, '\n');
+const iotmSrc = lf(readFileSync(join(here, '..', 'KingdomOfLoathing', 'iotm.js'), 'utf8'));
+const mapSection = (s, end) => s.slice(s.indexOf('  // === Black Rose Garden map'), s.indexOf(end)).trim();
+const iotmMap = mapSection(iotmSrc, '  // --- Dispatch');
+const standaloneMap = mapSection(lf(src), '\n  initRoseGarden();\n})();');
+
 function check(label, got, expected) {
   const g = JSON.stringify(got);
   const e = JSON.stringify(expected);
@@ -132,6 +140,10 @@ check('bounds: margin clamps at the edge',
 check('letter: icon', api.plaqueLetter('icon_u.png'), 'U');
 check('letter: blank plaque', api.plaqueLetter(''), '·');
 check('letter: unknown name', api.plaqueLetter('mystery.png'), '?');
+
+// --- the copy in iotm.js: the two files must not drift apart ---------
+check('map section found in both files', iotmMap.length > 1000 && standaloneMap.length > 1000, true);
+check('map section identical in iotm.js and standalone', iotmMap === standaloneMap, true);
 
 console.log(failures ? `\n${failures} FAILED` : '\nAll passed');
 process.exit(failures ? 1 : 0);
