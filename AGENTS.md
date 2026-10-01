@@ -428,8 +428,9 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   charpane frames through the `storage` event, so they update without a reload. To add a script:
   paste the block, call `kolUiSettingsSection` on `account.php` and `kolUiSettingsGear` in the
   menu (plus a `getButtonRow()` copy), and gate each piece of UI on `kolUiHidden`. Hiding must hide
-  UI only, never bookkeeping (quest-helper's clue harvest keeps running). The `account.php` markup
-  is unverified, so the panel falls back to the page top.
+  UI only, never bookkeeping (quest-helper's clue harvest keeps running). The panel is appended
+  as the last child of `account.php`'s body (below KoL's own settings), and the script scrolls to it
+  itself when the URL hash is `#tm-kol-settings`.
 - **KoL has been consolidated down to nine scripts.** There is no module system here — a
   `.js` file is a self-contained IIFE — so the only way two features can share a helper is to
   live in the same file. Eight standalone scripts were folded into three hosts. Do not split

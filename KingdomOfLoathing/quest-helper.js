@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/quest-helper.js
-// @version      2.2
+// @version      2.3
 // @description  Fills in or highlights the known answers to puzzle-y quest adventures and combat cues.
 // @match        https://www.kingdomofloathing.com/choice.php*
 // @match        https://kingdomofloathing.com/choice.php*
@@ -74,7 +74,8 @@
  *   that is currently paying double, with what to boost there.
  * The Mer-kin button and the 8-Bit Realm box can be hidden: account.php gets a shared
  *   "Userscript settings" box of Show checkboxes (also opened by a small gear in the menu row),
- *   kept in the browser (localStorage), not per character.
+ *   kept in the browser (localStorage), not per character. Confirmed against the live page
+ *   (2026-10-01).
  */
 
 (function () {
@@ -135,14 +136,14 @@
       head.textContent = 'Userscript settings';
       head.style.cssText = 'font-weight:bold;margin-bottom:4px';
       panel.appendChild(head);
-      // account.php's markup is unverified: go above its first table, else the page top.
-      const firstTable = document.body.querySelector('table');
-      if (firstTable && firstTable.parentNode) {
-        firstTable.parentNode.insertBefore(panel, firstTable);
-      } else {
-        document.body.insertBefore(panel, document.body.firstChild);
+      // Last thing on the page, below KoL's own settings. The menu gear links to
+      // account.php#tm-kol-settings; the box did not exist when the browser handled that
+      // hash, so scroll to it ourselves, and again once the page has finished loading.
+      document.body.appendChild(panel);
+      if (location.hash === '#tm-kol-settings') {
+        panel.scrollIntoView();
+        window.addEventListener('load', function () { panel.scrollIntoView(); });
       }
-      if (location.hash === '#tm-kol-settings') panel.scrollIntoView();
     }
     if (panel.querySelector('fieldset[data-tm-script="' + scriptId + '"]')) return;
 

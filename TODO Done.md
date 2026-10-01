@@ -405,6 +405,13 @@ Kingdom of Loathing:
     and whether a fresh day's grid is complete before exploring (see
     okf/kingdom-of-loathing/open-questions.md).
 
+  - Hide-UI settings — shared "Userscript settings" box on account.php plus a ⚙ button in
+    the menu row, iotm.js 1.36 / quest-helper.js 2.2 (loader 1.56). Hides the IotM menu
+    button and each IotM popup action, the Mer-kin button and the 8-Bit Realm box; kept in
+    localStorage, shared across characters. Verified in-game by the author (2026-10-01):
+    it works. Not reported on separately, so still unverified: the gear's fit in the menu
+    row and the account.php placement fallback.
+
 Fallen London:
   - "Optimize equipment" button beside every action with challenges — ux-enhancers
     3.4 (loader 0.54). Verified in-game by the author (2026-09-26): it works on real

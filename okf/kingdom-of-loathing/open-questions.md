@@ -17,3 +17,9 @@ updated: 2026-10-01
   cells of `grid` are not `1`.
 - **Are layouts per character or per account?** The helper stores one map per browser.
 - **What do the plaque letters spell, and where is it used?**
+
+## Hide-UI settings
+
+- **Does the gear click scroll exactly to the box on account.php?** The box now goes last on the
+  page and the script scrolls to it twice (on creation and on `load`). Not yet checked in-game.
+  See `hide-ui-settings.md`.

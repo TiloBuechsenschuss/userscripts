@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/iotm.js
-// @version      1.36
+// @version      1.37
 // @description  Adds an "IotM" button to the icon menu with Item-of-the-Month actions.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -45,6 +45,7 @@
  * Each popup action, and the IotM button itself, can be hidden: account.php gets a shared
  *   "Userscript settings" box of Show checkboxes (also opened by a small gear in the menu row),
  *   kept in the browser (localStorage), not per character. Meant for IotMs you do not own.
+ *   Confirmed against the live page (2026-10-01).
  */
 
 (function () {
@@ -105,14 +106,14 @@
       head.textContent = 'Userscript settings';
       head.style.cssText = 'font-weight:bold;margin-bottom:4px';
       panel.appendChild(head);
-      // account.php's markup is unverified: go above its first table, else the page top.
-      const firstTable = document.body.querySelector('table');
-      if (firstTable && firstTable.parentNode) {
-        firstTable.parentNode.insertBefore(panel, firstTable);
-      } else {
-        document.body.insertBefore(panel, document.body.firstChild);
+      // Last thing on the page, below KoL's own settings. The menu gear links to
+      // account.php#tm-kol-settings; the box did not exist when the browser handled that
+      // hash, so scroll to it ourselves, and again once the page has finished loading.
+      document.body.appendChild(panel);
+      if (location.hash === '#tm-kol-settings') {
+        panel.scrollIntoView();
+        window.addEventListener('load', function () { panel.scrollIntoView(); });
       }
-      if (location.hash === '#tm-kol-settings') panel.scrollIntoView();
     }
     if (panel.querySelector('fieldset[data-tm-script="' + scriptId + '"]')) return;
 
