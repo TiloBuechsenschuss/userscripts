@@ -53,7 +53,7 @@ Looking for a script that used to be here? See
 
 | Script | Pages | What it does |
 | --- | --- | --- |
-| `iotm.js` | top/awesome menu, codpiece decoration choice | "IotM" menu button opening a popup of Item-of-the-Month actions (Codpiece, Play Ball, Cup of 13s), plus tools on the Eternity Codpiece decoration screen to set every gem slot at once and to save/load named gem setups |
+| `iotm.js` | top/awesome menu, codpiece decoration choice, Black Rose Garden choice | "IotM" menu button opening a popup of Item-of-the-Month actions (Codpiece, Play Ball, Cup of 13s), plus tools on the Eternity Codpiece decoration screen to set every gem slot at once and to save/load named gem setups, and a live top-down map of the Black Rose Garden maze (position, things, plaque letters, reset button) |
 | `daily-checklist.js` | top/awesome menu | Daily tasks checklist |
 | `strange-leaflet.js` | main / leaflet | Strange Leaflet helper |
 | `instant-nemesis-maze.js` | volcanomaze | Solves the volcano (nemesis) maze |
@@ -204,6 +204,7 @@ root, named `*.test.mjs` and run directly with `node`:
 
 ```
 node tests/iotm-cup13-sort.test.mjs
+node tests/iotm-rosegarden.test.mjs
 node tests/quest-helper-rotation.test.mjs
 node tests/quest-helper-sven.test.mjs
 node tests/quest-helper-merkin.test.mjs

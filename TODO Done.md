@@ -397,6 +397,13 @@ Kingdom of Loathing:
   - sort those items by type — the "group by type" box under it, ux-enhancers
     1.22. Verified in-game: multi-use recipes / Meat / random yield / items,
     each under its own heading.
+  - Black Rose Garden map — top-down map beside the 3D view on choice 1637, iotm.js
+    1.35 (loader 1.55). Verified in-game by the author (2026-10-01): the map draws on
+    load from an explored maze, the player arrow follows movement, the things table
+    and legend table sit side by side beside the view and stay beside it at 125% zoom.
+    Not reported on, so still unverified: Reset map, the earlier-day warning banner,
+    and whether a fresh day's grid is complete before exploring (see
+    okf/kingdom-of-loathing/open-questions.md).
 
 Fallen London:
   - "Optimize equipment" button beside every action with challenges — ux-enhancers
