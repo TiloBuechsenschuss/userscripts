@@ -110,12 +110,11 @@ bars) are deliberately **not** switchable: they only appear inside their own cho
 
 **Verified** 2026-10-01 by the author in the live game: the feature works end to end (the box on
 account.php, hiding and showing the covered pieces), and the gear fits the menu row. The first
-version put the box above the page's first table, over KoL's own settings; it now goes last. The unit test covers the storage logic and the
+version put the box above the page's first table, over KoL's own settings; it now goes last: the box shows at the bottom and a gear click scrolls to it, while opening
+account.php directly (no hash) does not scroll, by design. The unit test covers the storage logic and the
 byte-identical copies, not the DOM.
 
 **Assumed**, not separately checked:
 
-- The scroll lands on the box on a page whose layout is still shifting; the second scroll on `load`
-  is there for that.
 - Unhiding the 8-Bit box restores it at once; if not, the next charpane rebuild does.
 - `window.open(url, 'mainpane')` targets the main frame by name in every browser.
