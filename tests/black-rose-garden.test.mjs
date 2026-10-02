@@ -8,12 +8,13 @@
 // What's pinned here:
 //
 //   - The game's inline `var RG = {...};` is parsed out of page HTML.
-//   - A stored map is merged with each page load: open cells win over hedge, so
-//     a grid the server only partly reveals accumulates over visits; points of
-//     interest are replaced by id, plaques are a union, position follows the page.
+//   - A stored map is merged with each page load: the grid is the page's (it is
+//     the whole maze from the first visit of a day); points of interest are
+//     replaced by id, plaques are a union, position follows the page.
+//   - A page whose hedge layout differs from the stored map is a new garden and
+//     starts a new map; one that differs only off the hedge is the same garden.
 //   - The renderer's position save (choice.php option=4, rgx/rgy/rgf) is parsed.
 //   - The drawn area is cropped to the maze plus a one-cell margin.
-//   - A map from an earlier KoL day is stale.
 //
 //   node tests/black-rose-garden.test.mjs
 
@@ -34,7 +35,7 @@ const fakeLocation = { pathname: '/nowhere.php' };
 const wrapped = src
   .replace('(function () {', 'globalThis.__iotm = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { parseRoseGarden, freshMap, mergeMap, isStale, parsePosBody, mapBounds, plaqueLetter, kolDayStamp }; })();');
+    'return { parseRoseGarden, freshMap, mergeMap, sameGarden, parsePosBody, mapBounds, plaqueLetter }; })();');
 const fn = new Function('document', 'location', 'localStorage',
   wrapped + '\nreturn globalThis.__iotm;');
 const api = fn(fakeDoc, fakeLocation, { getItem: () => null, setItem: () => {}, removeItem: () => {} });
@@ -74,7 +75,6 @@ check('parse: broken JSON gives null',
 // --- freshMap ------------------------------------------------------------
 const fresh = api.freshMap(RG, 1000);
 check('fresh: startedAt', fresh.startedAt, 1000);
-check('fresh: day is today', fresh.day, api.kolDayStamp());
 check('fresh: grid copied', fresh.grid, RG.grid);
 check('fresh: pois keyed by id', Object.keys(fresh.pois), ['0', '1', '2', '3', '4', '5']);
 check('fresh: poi shape', fresh.pois[2],
@@ -82,33 +82,34 @@ check('fresh: poi shape', fresh.pois[2],
 check('fresh: plaques copied', fresh.plaques.length, 8);
 check('fresh: pos copied', fresh.pos, RG.pos);
 
-// --- isStale -------------------------------------------------------------
-check('stale: today is not stale', api.isStale(fresh), false);
-check('stale: earlier day is stale', api.isStale({ ...fresh, day: '2000-1-1' }), true);
+// --- sameGarden ----------------------------------------------------------
+const cells = RG.grid.split('');
+// Off the hedge only: the start cell turned into plain floor.
+const offHedge = cells.slice(); offHedge[15 * W + 15] = '0';
+// The hedge itself: one floor cell walled up.
+const otherMaze = cells.slice(); otherMaze[15 * W + 14] = '1';
+check('same garden: identical grid', api.sameGarden(RG.grid, RG.grid), true);
+check('same garden: a change off the hedge', api.sameGarden(RG.grid, offHedge.join('')), true);
+check('same garden: wall art counts as hedge',
+  api.sameGarden(RG.grid, RG.grid.replace(/5/g, '1')), true);
+check('new garden: hedge moved', api.sameGarden(RG.grid, otherMaze.join('')), false);
+check('new garden: other size', api.sameGarden(RG.grid, RG.grid.slice(1)), false);
 
 // --- mergeMap ------------------------------------------------------------
-// A first visit that only revealed the start cell and its neighbours.
-const cells = RG.grid.split('');
-const partialCells = cells.map((c, i) => {
-  const x = i % W, y = Math.floor(i / W);
-  return Math.abs(x - 15) <= 1 && Math.abs(y - 15) <= 1 ? c : '1';
-});
-const partial = { ...RG, grid: partialCells.join(''), pois: [], plaques: [], pos: { x: 15, y: 15, f: 0 } };
-const m1 = api.freshMap(partial, 1000);
-check('merge: partial has fewer open cells',
-  m1.grid.split('').filter((c) => c !== '1').length <
-  RG.grid.split('').filter((c) => c !== '1').length, true);
-
-// A later visit reveals the rest: open cells accumulate.
-const m2 = api.mergeMap(m1, RG);
-check('merge: accumulates to the full grid', m2.grid, RG.grid);
-check('merge: keeps startedAt', m2.startedAt, 1000);
+const m1 = api.freshMap(RG, 1000);
+const later = { ...RG, grid: offHedge.join(''), pos: { x: 15, y: 16, f: 2 } };
+const m2 = api.mergeMap(m1, later, 5000);
+check('merge: same garden keeps startedAt', m2.startedAt, 1000);
+check('merge: grid is the page grid', m2.grid, later.grid);
+check('merge: pos follows the page', m2.pos, { x: 15, y: 16, f: 2 });
 check('merge: pois taken from the page', Object.keys(m2.pois).length, 6);
 
-// A later visit that reveals less must not erase what is known.
-const m3 = api.mergeMap(m2, partial);
-check('merge: hedge never overwrites an open cell', m3.grid, RG.grid);
-check('merge: pos follows the page', m3.pos, { x: 15, y: 15, f: 0 });
+// A new day's garden replaces the map, without asking for a reset.
+const nextDay = { ...RG, grid: otherMaze.join(''), pois: [], plaques: [] };
+const m3 = api.mergeMap(m1, nextDay, 9000);
+check('merge: new garden starts a new map', m3.startedAt, 9000);
+check('merge: new garden drops old plaques', m3.plaques.length, 0);
+check('merge: new garden drops old pois', Object.keys(m3.pois).length, 0);
 
 // Plaques are a union by x,y,f; a poi changing to done is picked up.
 const withNew = {
@@ -116,7 +117,7 @@ const withNew = {
   plaques: RG.plaques.concat([{ x: 1, y: 1, f: 2, icon: 'icon_q.png' }, RG.plaques[0]]),
   pois: RG.pois.map((p) => (p.i === 5 ? { ...p, d: 0 } : p))
 };
-const m4 = api.mergeMap(m2, withNew);
+const m4 = api.mergeMap(m2, withNew, 6000);
 check('merge: plaque union, no duplicates', m4.plaques.length, 9);
 check('merge: poi done flag updated', m4.pois[5].d, 0);
 

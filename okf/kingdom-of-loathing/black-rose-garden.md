@@ -4,7 +4,7 @@ title: Black Rose Garden page data
 kind: reference
 domain: kingdomofloathing.com
 status: current
-verified: 2026-10-01
+verified: 2026-10-02
 see_also: [open-questions.md]
 ---
 
@@ -32,6 +32,11 @@ global the page writes inline.
 | `pos` | `{x, y, f}`; `f` is 0 north, 1 east, 2 south, 3 west |
 | `pois` | `[{i, x, y, k, d, label, img?, frames?}]`; `k` is monster, fountain, food, booze, spleen or chest; `d` is 1 once dealt with |
 | `plaques` | `[{x, y, f, icon}]`; on the face of wall cell (x, y) seen while facing `f`; `icon` is an `icon_<letter>.png` name or empty for a blank plaque |
+
+**Verified** 2026-10-02 (player report, first visit of a new day): `grid` is the whole maze
+from the first visit of a day, not only the cells seen so far. The map helper therefore takes
+the grid from the page as it is, and treats a grid whose hedge cells differ from the stored
+map's as a new garden.
 
 Walls are `1`, `5`, `6`, `7`. Only a pending monster blocks movement; every other poi is walked
 over and used from the next cell.

@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/standalone/black-rose-garden.js
-// @version      1.0
+// @version      1.1
 // @description  Draws a top-down map of the Black Rose Garden maze beside its 3D view.
 // @match        https://www.kingdomofloathing.com/choice.php*
 // @match        https://kingdomofloathing.com/choice.php*
@@ -19,11 +19,12 @@
  *   a table of the things to fight or take (pending vs done) and a legend table side by side
  *   under it, and the cipher plaque letters. The map is kept between
  *   visits and shows when it was started; "Reset map" starts a new one. The garden changes
- *   every KoL day, so a map from an earlier day is kept but flagged with a warning until you
- *   reset it. One map is stored per browser, not per character.
- *   Confirmed against the live page (2026-10-01): the map draws from an explored maze, the
- *   arrow follows movement, and the layout holds side by side at 125% zoom. Not yet confirmed:
- *   Reset map and the earlier-day banner.
+ *   every KoL day, and the page shows the whole new maze from the first visit, so a new
+ *   garden replaces the old map by itself. One map is stored per browser, not per character.
+ *   Confirmed against the live page: the map draws from an explored maze, the arrow follows
+ *   movement, and the layout holds side by side at 125% zoom (2026-10-01); the whole maze is
+ *   there on the first visit of a new day (2026-10-02). Not yet confirmed: Reset map and the
+ *   switch to a new map when the garden changes.
  *
  * This is a STANDALONE script: it lives alone in KingdomOfLoathing/standalone/, is not part of the all-in-one
  *   loader, and has no settings -- installing it is what turns the map on. It is an extra
@@ -35,27 +36,17 @@
 (function () {
   'use strict';
 
-  // A day stamp that rolls at KoL's ~3:30am Pacific reset: shift "now" back by
-  // that offset and take the resulting calendar date, so the flag self-clears
-  // at rollover rather than local midnight.
-  function kolDayStamp() {
-    const now = Date.now();
-    // Pacific is UTC-8/-7; approximate rollover as UTC-11 so ~3:30am PT lands on
-    // the date boundary regardless of DST. Good enough for a daily self-clear.
-    const shifted = new Date(now - 11 * 3600 * 1000);
-    return shifted.getUTCFullYear() + '-' + (shifted.getUTCMonth() + 1) + '-' +
-      shifted.getUTCDate();
-  }
-
   // === Black Rose Garden map (choice.php, whichchoice=1637) ============
   // The garden is a first-person maze whose layout changes every KoL day. The page
   // hands the whole state to its renderer as `var RG = {w, grid, pos, pois, plaques}`
   // (okf/kingdom-of-loathing/black-rose-garden.md): grid chars 0 floor, 1 wall, 2 rocks,
-  // 3 decor, 4 poi, 8 start, 5/6/7 wall art; pos.f 0=N 1=E 2=S 3=W. We keep a merged copy
-  // in localStorage, so a grid the server only partly reveals accumulates across visits,
-  // and draw it top-down under the 3D view. The renderer saves the player's cell with
-  // an XHR (choice.php option=4, rgx/rgy/rgf) whenever a run of moves ends; hooking
-  // that gives the live position without touching the game's script.
+  // 3 decor, 4 poi, 8 start, 5/6/7 wall art; pos.f 0=N 1=E 2=S 3=W. The grid is the whole
+  // maze from the first visit of a day, so it is taken from the page as it is; a hedge
+  // layout unlike the stored one is a new garden and starts a new map, so no clock is
+  // needed to tell the days apart. We keep a copy in localStorage for the start time and
+  // the union of plaques, and draw it top-down beside the 3D view. The renderer saves the
+  // player's cell with an XHR (choice.php option=4, rgx/rgy/rgf) whenever a run of moves
+  // ends; hooking that gives the live position without touching the game's script.
   const ROSE_CHOICE = '1637';
   const ROSE_KEY = 'tm-iotm-rosegarden';
   const ROSE_ARROWS = ['▲', '▶', '▼', '◀'];   // N E S W
@@ -87,11 +78,21 @@
     });
   }
 
+  function roseWall(ch) { return ch === '1' || ch === '5' || ch === '6' || ch === '7'; }
+
+  // Whether two grids are the same garden: same size, hedge in the same cells.
+  function sameGarden(a, b) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (roseWall(a.charAt(i)) !== roseWall(b.charAt(i))) return false;
+    }
+    return true;
+  }
+
   // A new stored map from one page load's RG.
   function freshMap(rg, now) {
     return {
       v: 1,
-      day: kolDayStamp(),
       startedAt: now,
       w: rg.w,
       grid: rg.grid,
@@ -101,15 +102,11 @@
     };
   }
 
-  // Fold one page load into the stored map: an open cell beats hedge, so what has
-  // been seen stays seen; pois are replaced by id; plaques are a union by x,y,f;
-  // position follows the page.
-  function mergeMap(map, rg) {
-    if (map.grid.length !== rg.grid.length) return freshMap(rg, map.startedAt);
-    let grid = '';
-    for (let i = 0; i < rg.grid.length; i++) {
-      grid += rg.grid.charAt(i) !== '1' ? rg.grid.charAt(i) : map.grid.charAt(i);
-    }
+  // Fold one page load into the stored map: a different garden starts a new map at
+  // `now`; otherwise the grid is the page's, pois are replaced by id, plaques are a
+  // union by x,y,f, and position follows the page.
+  function mergeMap(map, rg, now) {
+    if (!sameGarden(map.grid, rg.grid)) return freshMap(rg, now);
     const plaques = map.plaques.slice();
     roseCopyPlaques(rg).forEach(function (q) {
       const seen = plaques.some(function (o) {
@@ -119,12 +116,10 @@
     });
     const pois = Object.assign({}, map.pois, roseCopyPois(rg));
     return {
-      v: 1, day: map.day, startedAt: map.startedAt, w: map.w, grid: grid,
+      v: 1, startedAt: map.startedAt, w: rg.w, grid: rg.grid,
       pos: { x: rg.pos.x, y: rg.pos.y, f: rg.pos.f }, pois: pois, plaques: plaques
     };
   }
-
-  function isStale(map) { return map.day !== kolDayStamp(); }
 
   // {x, y, f} out of the renderer's position-save body, else null.
   function parsePosBody(body) {
@@ -186,13 +181,12 @@
 
   // One map cell. Shape carries the meaning (letters, arrows, marks); colour only
   // backs it up. The player is blue on yellow, a pending thing is on pale blue.
-  function roseCell(map, x, y, stale) {
+  function roseCell(map, x, y) {
     const ch = map.grid.charAt(y * map.w + x);
     const el = document.createElement('div');
     el.style.cssText = 'width:15px;height:15px;line-height:15px;text-align:center;' +
       'font:bold 11px/15px monospace;overflow:hidden';
-    const wall = ch === '1' || ch === '5' || ch === '6' || ch === '7';
-    if (wall) {
+    if (roseWall(ch)) {
       el.style.background = '#3a3a3a';
       el.style.color = '#fff';
       const here = map.plaques.filter(function (q) { return q.x === x && q.y === y; });
@@ -222,7 +216,7 @@
         el.style.color = '#000';
       }
     });
-    if (!stale && map.pos.x === x && map.pos.y === y) {
+    if (map.pos.x === x && map.pos.y === y) {
       el.textContent = ROSE_ARROWS[map.pos.f];
       el.style.background = '#ffd400';
       el.style.color = '#0033cc';
@@ -278,7 +272,6 @@
   }
 
   function buildRosePanel(map, onReset) {
-    const stale = isStale(map);
     const wrap = document.createElement('div');
     wrap.id = 'tm-rosegarden';
     wrap.style.cssText = 'flex:0 1 auto;min-width:0;padding:6px;border:1px solid #888;' +
@@ -299,21 +292,12 @@
     head.appendChild(reset);
     wrap.appendChild(head);
 
-    if (stale) {
-      const warn = document.createElement('div');
-      warn.style.cssText = 'margin:4px 0;padding:4px;border:2px solid #000;' +
-        'background:#ffe08a;font-weight:bold';
-      warn.textContent = '⚠ This map is from ' + map.day +
-        ', not today. Press Reset map to map today’s garden.';
-      wrap.appendChild(warn);
-    }
-
     const b = mapBounds(map.grid, map.w);
     const grid = document.createElement('div');
     grid.style.cssText = 'display:inline-grid;gap:1px;background:#999;border:1px solid #999;' +
       'grid-template-columns:repeat(' + (b.x1 - b.x0 + 1) + ',15px)';
     for (let y = b.y0; y <= b.y1; y++) {
-      for (let x = b.x0; x <= b.x1; x++) grid.appendChild(roseCell(map, x, y, stale));
+      for (let x = b.x0; x <= b.x1; x++) grid.appendChild(roseCell(map, x, y));
     }
     wrap.appendChild(grid);
 
@@ -352,11 +336,9 @@
     const anchor = document.getElementById('rgwrap') || document.getElementById('rgtext');
     if (!anchor || !anchor.parentNode) return;
 
-    let map = loadRoseMap();
-    if (!map) map = freshMap(rg, Date.now());
-    else if (!isStale(map)) map = mergeMap(map, rg);
-    // A stale map is left as it was, until the player resets it.
-    if (!isStale(map)) saveRoseMap(map);
+    const stored = loadRoseMap();
+    let map = stored ? mergeMap(stored, rg, Date.now()) : freshMap(rg, Date.now());
+    saveRoseMap(map);
 
     // Map beside the 3D view, not under it, so both are on screen at once. The view
     // and its key legend (#rgwrap) go into a flex row with the panel that never wraps:
@@ -401,7 +383,7 @@
       const send = proto.send;
       proto.send = function (body) {
         const pos = parsePosBody(body);
-        if (pos && !isStale(map)) {
+        if (pos) {
           map.pos = pos;
           saveRoseMap(map);
           draw();

@@ -92,7 +92,7 @@ manager.
 
 | Script | Game | Pages | What it does |
 | --- | --- | --- | --- |
-| [`KingdomOfLoathing/standalone/black-rose-garden.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/standalone/black-rose-garden.js) | Kingdom of Loathing | `choice.php` (Black Rose Garden, choice 1637) | A live top-down map of the garden maze beside its 3D view: your position and facing, the things to fight or take (pending vs done), a legend, and the cipher plaque letters. Kept between visits; flags a map from an earlier KoL day; "Reset map" starts a new one |
+| [`KingdomOfLoathing/standalone/black-rose-garden.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/standalone/black-rose-garden.js) | Kingdom of Loathing | `choice.php` (Black Rose Garden, choice 1637) | A live top-down map of the garden maze beside its 3D view: your position and facing, the things to fight or take (pending vs done), a legend, and the cipher plaque letters. Kept between visits; a new day's garden replaces the old map by itself; "Reset map" starts a new one |
 
 `iotm.js` (and so the all-in-one loader) still carries the same Black Rose Garden map. The standalone
 script is the extra offer for players who want only the map. The two use the same storage key and
