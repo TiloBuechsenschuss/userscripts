@@ -217,6 +217,18 @@ check('the registered pass: hand card, opened card and its option, by a product-
   })(),
   ['NR +500', 'campaign card', 'NR +312/411? −156', null]);
 
+check('the reviewed card badges under any product name, a new campaign included',
+  (() => {
+    const card = makeHeading('Have Some Brand-New Cordial Reviewed');
+    const plain = makeHeading('Have mercy');
+    hand = [card, plain];
+    api.tirRatings();
+    const out = [text(card, api.TIR_CARD_CLASS), text(plain, api.TIR_CARD_CLASS)];
+    hand = [];
+    return out;
+  })(),
+  ['NR +312/411? −156', null]);
+
 check('no Trade in Reputations option name is in another feature\'s table',
   (() => { const others = otherNames('TIR_OPTIONS');
     return [...new Set(rows.map((e) => e.name))].filter((n) => others.includes(key(n))); })(), []);

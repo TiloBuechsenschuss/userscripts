@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.42
+// @version      1.43
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -20704,15 +20704,15 @@
   const TIR_STAKES = 'A Question of Challenge';
   const TIR_CONCLUDE = 'Conclude the campaign';
 
-  // The card "Have (Campaign Focus) Reviewed" is titled after the product. The
-  // four spellings below are the campaign names put in its place -- NOT
-  // captured in game.
-  const TIR_CAMPAIGNS = ['Mrs Winthrop’s Purifying Soap', 'Spirit of the Zee', 'Sterling’s Solar Hearth',
-    'The Cosmic Matchmaker'];
-  const TIR_CARD_ALIASES = TIR_CAMPAIGNS.reduce(function (all, c) {
-    all[normalizeName('Have ' + c + ' Reviewed')] = normalizeName(TIR_CARDS.reviewed);
-    return all;
-  }, {});
+  // The card "Have (Campaign Focus) Reviewed" is titled after whatever the
+  // campaign advertises ("Have Sterling's Solar Hearth Reviewed", captured in
+  // game), so any "Have <words> Reviewed" is that card -- the product list is
+  // not enumerated, so a new campaign still badges.
+  const TIR_REVIEWED_KEY = normalizeName(TIR_CARDS.reviewed);
+  const TIR_REVIEWED_TITLE = /^have .+ reviewed$/;
+  function TIR_CARD_ALIASES(key) {
+    return TIR_REVIEWED_TITLE.test(key) ? TIR_REVIEWED_KEY : null;
+  }
 
   //   nr / nrFlat / loss   the Name Recognition, as tirGain reads it.
   //   ch                    the challenge at Enterprise 0, with `perEnterprise`
@@ -21002,7 +21002,7 @@
 
   const TIR_HAND = {
     storylets: TIR_DECK, rows: TIR_OPTIONS, rank: tirRank, badgeText: tirBadgeText, head: 'A Trade in Reputations',
-    rules: TIR_RULES, cls: TIR_CARD_CLASS, flag: TIR_CARD_FLAG,
+    rules: TIR_RULES, cls: TIR_CARD_CLASS, flag: TIR_CARD_FLAG, aliases: TIR_CARD_ALIASES,
   };
 
   function tirRatings() {
