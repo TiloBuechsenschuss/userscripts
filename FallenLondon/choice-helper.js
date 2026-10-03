@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.43
+// @version      1.44
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -630,6 +630,15 @@
  *     and Hinterland Scrip an action, and a table of the station statues taken from the Station Statues badges. No badge: those
  *     two guides have no storylet options. Everything is in Stuivers, and a figure the source gives in Echoes, Tales or Scrip
  *     is converted only at a ratio the guides state, marked "≈", with its source in the tooltip. Filterable.
+ *     (23) Spending Secrets and Counting the Days, the Numismatrix's long game, and a seventh panel. Once Spending Secrets is
+ *     4, a dozen other cards and storylets each grow one option that pays 5 CP of Counting the Days (CtD) and usually some
+ *     A Pocketful of Loose Change (PLC); CtD 14 opens Secrets and Spending, whose every reward resets it. An option is badged
+ *     only while its own card is open. The badge is "+5 CtD · +2 PLC" ("≈" on a Luck option, whose odds are in the tooltip),
+ *     "▼" where it uses something up, and "★" on the options that pay the most PLC for your CtD band -- or "?" if your CtD
+ *     has never been read, "~" if the reading is over a minute old. A reward shows its cost and what it buys, then ✓ / ✗ / ?
+ *     for whether your PLC and Marks cover it, then its Favours. The panel adds your numbers (settable by hand where nothing
+ *     is read), the actions still to go to CtD 14, every option by the guide's four bands, and the rewards. The option pages
+ *     are followed over the guide: they lock six options at CtD 6, and Look at those coins and Ask someone else are Luck 50.
  *     Built as a feature registry so further advice can be added as entries.
  */
 
@@ -1488,6 +1497,7 @@
         if (bankFotzQualities(scan)) changed = true;
         if (bankPcQualities(scan)) changed = true;
         if (bankLabQualities(scan)) changed = true;
+        if (bankCtdQualities(scan)) changed = true;
       }
       const here = readPossessionCounts();
       if (!here || !here.size) {
@@ -35437,6 +35447,7 @@
       // three consumers.
       bankPcQualities(scan);
       bankLabQualities(scan);
+      bankCtdQualities(scan);
     }
     if (owned.length) bankItemCounts(readPossessionCounts());
   }
@@ -41769,6 +41780,794 @@
     ]);
   }
 
+  // === feature: Spending Secrets and Counting the Days ===================
+  //
+  // The Numismatrix's long game, and the first feature here that lives on
+  // other features' cards. Once Spending Secrets is 4, a dozen unrelated cards
+  // and storylets each grow ONE extra option that pays 5 CP of Counting the
+  // Days (CtD) and usually some A Pocketful of Loose Change (PLC). Raise CtD to
+  // 14 and the Secrets and Spending card opens, and every reward on it resets
+  // CtD to 0. A round is therefore 21 actions, and the whole question is which
+  // option to take at which CtD.
+  //
+  // **What the badge says.** An earning option: what it pays, "+5 CtD · +2
+  // PLC". Where the PLC rests on a Luck challenge it is the EXPECTED figure,
+  // marked ≈, and the odds are in the tooltip. ▼ marks an option that uses
+  // something up. ★ marks the options that pay the most PLC for your CtD band,
+  // among those that also pay CtD; it needs your CtD, so with none read the
+  // options that could be starred carry a ? instead, and a reading older than
+  // a minute carries ~. A reward: what it costs and what it buys, "1 Mark →
+  // Morelways ×120", then ✓ / ✗ / ? for whether you can afford it, then every
+  // Favours it pays, signed, after a ·.
+  //
+  // Shape, never colour, carries every claim here: ★ ▼ ≈ ? ~ ✓ ✗. The colour is
+  // a category (earns, rewards, cannot afford) and the reader is red-green
+  // weak, so none of the three is a red and a green.
+  //
+  // **Where the numbers come from.** The individual option pages, fetched
+  // through the API on 2026-10-03, with Spending Secrets and Counting the Days
+  // (Guide) as the cross-check. Where they differ the page is followed:
+  //   Quite a moral afternoon...  the page asks Subtle 4 on top of Scandal 2
+  //   Dicing for secrets and coins, Listen to them, Take him to the theatre,
+  //     Read a calming book, Take some honey, Unleash Baseborn, Quite a moral
+  //     afternoon -- the page LOCKS them at CtD 6, which is where the guide's
+  //     "under 6" band comes from.
+  //   Look at those coins         locked at CtD 10, so it is on offer in two of
+  //                               the guide's bands, and it is a Luck 50
+  //                               challenge the guide does not mention: +4 PLC
+  //                               and a First City Coin, or +1 Wounds and no PLC
+  //   Ask someone else what they saw  Luck 50: +2 PLC, or +1 PLC; both pay CtD
+  //   Chancing a Mark             a success RESETS PLC to 0 (the guide says only
+  //                               that a failure costs 10)
+  //   Go with her to a gambling-house  the page says CtD "10" with no upper end,
+  //                               the guide 10–11; the band here is 10–13, and
+  //                               the game only shows what is on offer anyway
+  // Corrections go in CTD_OPTIONS and nowhere else.
+  //
+  //   kind     'earn' | 'reward'.
+  //   place    the card or storylet the wiki files the option under (also
+  //            carried as `storylet`, which is what the carousel index reads). An option
+  //            is badged only while that is OPEN: "In passing" and "Loaded
+  //            down" are ordinary phrases.
+  //   band     [lo, hi] of CtD it is on offer in.
+  //   ctd      CtD CP it pays (5, or 0 for A smaller bazaar).
+  //   plc      PLC CP it pays: a number, or { win, lose, odds } for a Luck
+  //            challenge.
+  //   closest  the factions the page asks you to be Closest To, or null.
+  //   needs    everything else it asks, in words. cost: what it uses up.
+  //   uses     true when it uses something up (the ▼).
+  //   side     everything else it changes. fail: what a failure costs.
+  //   marks    Mark of Credit Pages a reward costs. plcNeed: PLC a reward needs.
+  //   gives    what a reward buys. factions: its Favours, signed (the badge
+  //            always carries them -- see withFactions).
+  //   note     anything that fits no field.
+
+  const CTD_QUALITY = 'Counting the Days';
+  const CTD_PLC = 'A Pocketful of Loose Change';
+  const CTD_GOAL = 14;
+  // CtD is a level whose Nth step costs N change points, so a level is
+  // N(N+1)/2 CP and 14 is 105 CP: 21 actions of 5.
+  const CTD_CP_PER_ACTION = 5;
+  const CTD_MARK_ITEM = 'Mark of Credit Page';
+  const CTD_REWARD_CARD = 'Secrets and Spending';
+
+  // The guide's four bands, which are also where the options' locks fall.
+  const CTD_BANDS = [
+    { lo: 0, hi: 5, label: 'CtD under 6' },
+    { lo: 6, hi: 9, label: 'CtD 6 to 9' },
+    { lo: 10, hi: 11, label: 'CtD 10 to 11' },
+    { lo: 12, hi: 13, label: 'CtD 12 to 13' },
+  ];
+
+  const CTD_LOW = [0, 5];
+  const CTD_ANY = [0, 13];
+
+  function ctdEarn(place, name, o) {
+    return Object.assign({ kind: 'earn', place: place, storylet: place, name: name, band: CTD_ANY, ctd: 5, plc: 0 }, o);
+  }
+
+  function ctdReward(name, o) {
+    return Object.assign({ kind: 'reward', place: CTD_REWARD_CARD, storylet: CTD_REWARD_CARD, name: name }, o);
+  }
+
+  // The eleven faction cards. Each pays 5 CtD and 2 PLC at any level below 14
+  // and has a small side effect on a personality quality.
+  function ctdFaction(place, name, faction, side) {
+    return ctdEarn(place, name, { plc: 2, closest: [faction], side: side || null });
+  }
+
+  const CTD_WOUNDS_ALL = ['Bohemians', 'The Church', 'The Constables', 'The Duchess', 'The Masters of the Bazaar',
+    'The University', 'Society'];
+  const CTD_ROUGH = ['Bohemians', 'Criminals', 'Hell', 'Revolutionaries', 'Rubbery Men', 'The Docks',
+    'The Great Game', 'Tomb-Colonists', 'Urchins'];
+
+  const CTD_OPTIONS = [
+    // === the eleven faction cards: any CtD below 14 =======================
+    ctdFaction('The Demi-Monde: Bohemians', 'In passing', 'Bohemians', 'Hedonist +1 CP, Austere −1 CP'),
+    ctdFaction('Altars and Alms-Houses: the Church', 'An unusual hat for a church official', 'The Church',
+      'Austere +1 CP, Hedonist −1 CP'),
+    ctdFaction('Court and Cell: the Constables', 'The list of stolen goods', 'The Constables'),
+    ctdFaction('The Alleys of London: the Criminals', 'Penny for your thoughts', 'Criminals'),
+    ctdFaction('Burning Shadows: the Devils of London', 'A quiet chat over sherry and souls', 'Hell'),
+    ctdFaction('Gunpowder and Zeal: the Revolutionaries', 'Taking a walk down gin lane', 'Revolutionaries'),
+    ctdFaction('By the River’s Side: the Docks', 'Loaded down', 'The Docks'),
+    ctdFaction('Whispers from the Surface: The Great Game', 'Just borrowing a shovel', 'The Great Game',
+      'Subtle +1 CP, Steadfast −1 CP'),
+    ctdFaction('Bandages and Dust: The Tomb-Colonies', 'Attend a very private lecture', 'Tomb-Colonists'),
+    ctdFaction('Park and Palace: Society', 'Coffee and exclamation', 'Society', 'Making Waves +3 CP'),
+    ctdFaction('The Roof-Tops: Urchins', 'Listen to a song the Fisher-Kings sing in the high places', 'Urchins',
+      'Daring +1 CP, Melancholy −1 CP'),
+
+    // === any level, no faction needed ====================================
+    ctdEarn('The Awful Temptation of Money', 'A smaller bazaar', {
+      ctd: 0, plc: 2, band: [0, 13], side: 'First City Coin ×1',
+      note: 'Pays PLC but no CtD. On offer at any CtD below 14.' }),
+    ctdEarn('A day at the races', 'Watch from a distance', {
+      plc: 0, side: 'Jade Fragment (base Persuasive) ×1',
+      note: 'Pays CtD but no PLC. Locked at CtD 14.' }),
+
+    // === CtD under 6 =====================================================
+    ctdEarn('Dice games on the quayside', 'Dicing for secrets and coins', {
+      band: CTD_LOW, plc: 1, closest: CTD_ROUGH,
+      note: 'Needs Spending Secrets 4. Locked at CtD 6.' }),
+    ctdEarn('Fun with the Fisher-Kings', 'Listen to them', {
+      band: CTD_LOW, plc: 2, closest: ['Urchins'], note: 'Locked at CtD 6.' }),
+    ctdEarn('Visit your acquaintance, the Regretful Soldier', 'Take him to the theatre', {
+      band: CTD_LOW, plc: 1, needs: 'the Regretful Soldier as an acquaintance',
+      side: 'Acquaintance: the Regretful Soldier +1 CP', note: 'Reached from the A Visit card. Locked at CtD 6.' }),
+    ctdEarn('A Moment’s Peace', 'Read a calming book', {
+      band: CTD_LOW, needs: 'Nightmares 3', side: 'Nightmares −3 CP, Watchful +1 CP', note: 'Locked at CtD 6.' }),
+    ctdEarn('A Moment’s Peace', 'Take some honey with a friend', {
+      band: CTD_LOW, needs: 'Nightmares 3; a friend, for a Social action', cost: 'Drop of Prisoner’s Honey ×50', uses: true,
+      side: 'Nightmares −3 CP, Scandal +1 CP, Approaching the Gates of the Garden +5 CP',
+      note: 'A Social action. Locked at CtD 6.' }),
+    ctdEarn('An Afternoon of Good Deeds?', 'Quite a moral afternoon. Let’s make sure it’s appreciated', {
+      band: CTD_LOW, needs: 'Scandal 2, Subtle 4', side: 'Scandal −3 CP, Suspicion −1 CP, Confident Smile ×1',
+      note: 'Locked at CtD 6. The guide does not mention Subtle 4.' }),
+    ctdEarn('The Law’s Long Arm', 'Unleash Baseborn & Fowlingpiece', {
+      band: CTD_LOW, needs: 'Suspicion 2', cost: 'Infernal Contract ×10', uses: true, side: 'Suspicion −6 to −7 CP',
+      note: 'Locked at CtD 6.' }),
+    ctdEarn('An unusual wager', 'Look at those coins', {
+      band: [0, 9], plc: { win: 4, lose: 0, odds: 50 }, side: 'First City Coin ×1 on a success',
+      fail: 'Wounds +1 CP and no PLC', note: 'Locked at CtD 10, so it is on offer in the first two bands.' }),
+
+    // === CtD 6 to 9 ======================================================
+    ctdEarn('Seeking Curios and Secrets in the Forgotten Quarter', 'Speak to an Aristocratic Academic', {
+      band: [6, 9], plc: 1, closest: ['Bohemians', 'The Church', 'The Constables', 'The Duchess', 'The Great Game',
+        'The Masters of the Bazaar', 'The University', 'Society'] }),
+    ctdEarn('Visit your acquaintance, the Repentant Forger', 'Old habits', {
+      band: [6, 9], plc: 1, needs: 'the Repentant Forger as an acquaintance',
+      side: 'Acquaintance: the Repentant Forger +1 CP', note: 'Reached from the A Visit card.' }),
+    ctdEarn('A Moment’s Peace', 'Mysticism and mesmerism', {
+      band: [6, 9], needs: 'Nightmares 3', side: 'Nightmares −4 CP, Scandal +1 CP, Touched by Fingerwork +5 CP' }),
+    ctdEarn('The Law’s Long Arm', 'Lay a false trail', { band: [6, 9], needs: 'Suspicion 2', side: 'Suspicion −3 CP' }),
+    ctdEarn('A Restorative', 'An exclusive dinner party', {
+      band: [6, 9], needs: 'Wounds 2', closest: CTD_WOUNDS_ALL, side: 'Wounds −3 CP' }),
+
+    // === CtD 10 to 11 ====================================================
+    ctdEarn('An unusual competition', 'Talk about something else', {
+      band: [10, 11], plc: 1, needs: 'you have not lost your soul (no Your very own Infernal Contract)' }),
+    ctdEarn('Visit your acquaintance, the Sardonic Music-Hall Singer', 'Go with her to a gambling-house', {
+      band: [10, 13], plc: 1, needs: 'the Sardonic Music-Hall Singer as an acquaintance',
+      side: 'Acquaintance: the Sardonic Music-Hall Singer +1 CP',
+      note: 'Reached from the A Visit card. The page says CtD 10 with no upper end; the guide says 10–11.' }),
+    ctdEarn('City Vices: Orthographic Infection', 'Ask someone else what they saw', {
+      band: [10, 13], plc: { win: 2, lose: 1, odds: 50 }, needs: 'Nightmares 1',
+      note: 'Pays CtD either way and 1 or 2 PLC.' }),
+    ctdEarn('A Moment’s Peace', 'Physical exercise and exertion', {
+      band: [10, 11], needs: 'Nightmares 3', side: 'Nightmares −3 CP' }),
+    ctdEarn('An Afternoon of Good Deeds?', 'Hide from those who would hound you', {
+      band: [10, 11], needs: 'Scandal 2', side: 'Scandal −3 CP, Hedonist −1 CP, Subtle +1 CP' }),
+    ctdEarn('A Restorative', 'The Itinerant Physician', {
+      band: [10, 11], needs: 'Wounds 2', cost: 'Shard of Glim ×75', uses: true, side: 'Wounds −3 CP' }),
+
+    // === CtD 12 to 13 ====================================================
+    ctdEarn('Shadowy Dealings at the University', 'Talk about robbery', {
+      band: [12, 13], plc: 1, needs: 'Master Thief 1',
+      note: 'Still on offer if you are Unwelcome at the University.' }),
+    ctdEarn('Visit your acquaintance, the Wry Functionary', 'Pop in while you’re passing', {
+      band: [12, 13], plc: 1, needs: 'the Wry Functionary as an acquaintance',
+      side: 'Acquaintance: the Wry Functionary +1 CP', note: 'Reached from the A Visit card.' }),
+    ctdEarn('An Afternoon of Good Deeds?', 'Blame someone else for your sins', {
+      band: [12, 13], needs: 'Scandal 2', side: 'Scandal −3 CP' }),
+    ctdEarn('The Law’s Long Arm', 'Make sure nobody is telling tales', {
+      band: [12, 13], needs: 'Suspicion 2', closest: CTD_ROUGH, side: 'Suspicion −5 to −9 CP, Wounds +1 CP' }),
+    ctdEarn('A Restorative', 'Can you be so unwise?', {
+      band: [12, 13], needs: 'Wounds 2', closest: ['Criminals', 'Hell', 'Revolutionaries', 'Rubbery Men',
+        'Tomb-Colonists', 'Urchins'], side: 'Wounds −4 CP, Nightmares +1 CP' }),
+
+    // === the rewards, on the Secrets and Spending card (CtD 14) ===========
+    ctdReward('A sack of coins', { gives: 'Fistful of Surface Currency ×333', note: 'About E9.99 when sold.' }),
+    ctdReward('Fencing certain coins', {
+      gives: 'First City Coin ×20', cost: 'Favours: Criminals ×3', side: 'Suspicion +1 CP',
+      factions: [['Favours: Criminals', -3]], note: 'About E5 when sold.' }),
+    ctdReward('Buy a Mark of Credit Page from the Numismatrix', {
+      gives: 'Mark of Credit Page ×1', plcNeed: 7, plcCost: 7,
+      note: 'The only certain way to a Mark, and it needs PLC 7.' }),
+    ctdReward('Chancing a Mark', {
+      gives: 'Mark of Credit Page ×1', plcNeed: 4, odds: 70,
+      win: 'PLC resets to 0', fail: 'PLC −10 CP and Proscribed Material ×40',
+      note: 'Luck 70. Win or lose, CtD resets.' }),
+    ctdReward('Find a decent home for your Mark of Credit Page', {
+      marks: 1, gives: 'Bottle of Morelways 1872 ×120', closest: ['The Constables', 'Society', 'The Church',
+        'The University', 'The Duchess'],
+      factions: [['Favours: Constables', 1], ['Favours: The Church', 1], ['Favours: Society', 1]],
+      side: 'Connected: Benthic +10 CP and Connected: Summerset +10 CP, if you already have them',
+      note: 'About E13.20, plus the connections.' }),
+    ctdReward('Find a hard-working home for your Mark of Credit Page', {
+      marks: 1, gives: 'Intriguing Snippet ×60', closest: ['Bohemians', 'The Great Game', 'The Docks', 'Urchins'],
+      factions: [['Favours: The Docks', 1], ['Favours: Urchins', 1], ['Favours: The Great Game', 1],
+        ['Favours: Bohemians', 1]],
+      note: 'About E28.' }),
+    ctdReward('Find an unusual home for your Mark of Credit Page', {
+      marks: 1, gives: 'Compromising Document ×50', closest: ['Criminals', 'Revolutionaries', 'Hell',
+        'Tomb-Colonists', 'Rubbery Men'],
+      factions: [['Favours: Criminals', 1], ['Favours: Tomb-Colonies', 1], ['Favours: Hell', 1],
+        ['Favours: Revolutionaries', 1]],
+      note: 'About E41.' }),
+    ctdReward('Obtain an Iron Republic Safe-Conduct', {
+      marks: 3, gives: 'Iron Republic Safe-Conduct', needs: 'Brass Ring, Renown: Hell 10, A Person of Some Importance',
+      side: 'Antique Mystery ×2, Aeolian Scream ×2, Discovered: The Cumaean Canal',
+      note: 'Required for the Iron Republic. It can also be had from your Lodgings, which does not reset CtD '
+        + 'and pays none of the goods.' }),
+    ctdReward('Spend a Mark of Credit on something for yourself', {
+      marks: 5, gives: 'Consonant Violin', note: 'One of two Respectable weapons freely available all year.' }),
+  ];
+
+  const CTD_ALIASES = {};
+  const CTD_INDEX = carouselIndex(CTD_OPTIONS);
+  const CTD_STORYLETS = Array.from(new Set(CTD_OPTIONS.map(function (e) { return e.place; })));
+
+  const CTD_CLASS = 'fl-ux-ctd';
+  const CTD_FLAG = 'flUxCtd';
+  const CTD_BRANCH_CLASS = 'fl-ux-ctd-branch';
+  const CTD_BRANCH_FLAG = 'flUxCtdBranch';
+
+  const CTD_MARK_BEST = '★';
+  const CTD_MARK_USES = '▼';
+  const CTD_MARK_EXPECTED = '≈';
+  const CTD_MARK_UNREAD = '?';
+  const CTD_MARK_STALE = '~';
+  const CTD_MARK_YES = '✓';
+  const CTD_MARK_NO = '✗';
+
+  // Earning options are teal and rewards gold, as in every carousel here; a
+  // reward you cannot afford goes grey. All three take white ink.
+  const CTD_COLOR_EARN = CAROUSEL_COLOR_PROGRESS;
+  const CTD_COLOR_REWARD = CAROUSEL_COLOR_PAYOUT;
+  const CTD_COLOR_CANNOT = CAROUSEL_COLOR_NEUTRAL;
+  const CTD_COLOR_LABEL = CAROUSEL_COLOR_LABEL;
+
+  // --- the arithmetic -----------------------------------------------------
+
+  function ctdTenth(x) {
+    return String(Math.round(x * 10) / 10);
+  }
+
+  // PLC an option is expected to pay. A Luck challenge is its odds times its
+  // win plus the rest times its loss.
+  function ctdExpectedPlc(e) {
+    if (e.kind !== 'earn') return 0;
+    if (typeof e.plc === 'number') return e.plc;
+    return (e.plc.odds / 100) * e.plc.win + (1 - e.plc.odds / 100) * e.plc.lose;
+  }
+
+  function ctdOnOffer(e, level) {
+    return e.kind === 'earn' && level >= e.band[0] && level <= e.band[1];
+  }
+
+  // The options worth starring at a CtD: those that pay CtD and the most
+  // expected PLC of the ones that do. Nothing at or above 14, and nothing when
+  // the best on offer pays no PLC at all.
+  function ctdBestAt(level) {
+    if (level == null || level >= CTD_GOAL) return [];
+    const pool = CTD_OPTIONS.filter(function (e) { return ctdOnOffer(e, level) && e.ctd > 0; });
+    let top = 0;
+    pool.forEach(function (e) { top = Math.max(top, ctdExpectedPlc(e)); });
+    if (top <= 0) return [];
+    return pool.filter(function (e) { return ctdExpectedPlc(e) === top; });
+  }
+
+  // An option that is starred at SOME CtD. Only these carry a ? when CtD is
+  // unread, since only a star depends on it.
+  const CTD_EVER_BEST = new Set();
+  for (let lvl = 0; lvl < CTD_GOAL; lvl++) ctdBestAt(lvl).forEach(function (e) { CTD_EVER_BEST.add(e); });
+
+  // Actions still to take to reach 14 from a CtD LEVEL. A level is a range of
+  // change points, and the Myself tab names only the level, so this is a
+  // range: level L runs from L(L+1)/2 to L(L+1)/2 + L.
+  function ctdActionsToGo(level) {
+    if (level == null || level < 0) return null;
+    if (level >= CTD_GOAL) return { lo: 0, hi: 0 };
+    const goal = CTD_GOAL * (CTD_GOAL + 1) / 2;
+    const least = level * (level + 1) / 2;
+    const most = least + level;
+    return {
+      lo: Math.max(0, Math.ceil((goal - most) / CTD_CP_PER_ACTION)),
+      hi: Math.ceil((goal - least) / CTD_CP_PER_ACTION),
+    };
+  }
+
+  function ctdActionsText(level) {
+    const a = ctdActionsToGo(level);
+    if (!a) return null;
+    if (a.hi === 0) return 'CtD is 14: the Secrets and Spending card is open.';
+    return 'About ' + (a.lo === a.hi ? a.hi : a.lo + '–' + a.hi) + ' more actions to reach CtD 14.';
+  }
+
+  // Can this reward be afforded? true / false, or null when the figure it
+  // depends on has not been read. PLC and Marks are the two it can depend on;
+  // a Favours or item cost is not checked here.
+  function ctdAffordable(e, st) {
+    if (e.kind !== 'reward') return null;
+    const checks = [];
+    if (e.plcNeed != null) checks.push(st && st.plc != null ? st.plc >= e.plcNeed : null);
+    if (e.marks != null) checks.push(st && st.marks != null ? st.marks >= e.marks : null);
+    if (!checks.length) return null;
+    if (checks.indexOf(false) !== -1) return false;
+    return checks.indexOf(null) !== -1 ? null : true;
+  }
+
+  // --- the badge ---------------------------------------------------------
+
+  function ctdPlcText(e) {
+    if (typeof e.plc === 'number') return e.plc > 0 ? '+' + e.plc + ' PLC' : null;
+    return CTD_MARK_EXPECTED + '+' + ctdTenth(ctdExpectedPlc(e)) + ' PLC';
+  }
+
+  function ctdEarnText(e, st) {
+    const parts = [];
+    if (e.ctd > 0) parts.push('+' + e.ctd + ' CtD');
+    const plc = ctdPlcText(e);
+    if (plc) parts.push(plc);
+    let text = parts.join(' · ');
+    if (e.ctd === 0) text += ' · no CtD';
+    if (e.uses) text += ' ' + CTD_MARK_USES;
+    const known = st && st.ctd != null;
+    if (known) {
+      if (ctdBestAt(st.ctd).indexOf(e) !== -1) text += ' ' + CTD_MARK_BEST + (st.ctdStale ? CTD_MARK_STALE : '');
+    } else if (CTD_EVER_BEST.has(e)) {
+      text += ' ' + CTD_MARK_UNREAD;
+    }
+    return text;
+  }
+
+  function ctdRewardCost(e) {
+    const bits = [];
+    if (e.marks != null) bits.push(e.marks + (e.marks === 1 ? ' Mark' : ' Marks'));
+    if (e.plcNeed != null) bits.push('PLC ' + e.plcNeed + (e.plcCost ? '' : '+'));
+    return bits.join(' + ');
+  }
+
+  function ctdRewardText(e, st) {
+    const cost = ctdRewardCost(e);
+    let text = (cost ? cost + ' ' : '') + '→ ' + (e.odds ? e.odds + '% ' : '') + e.gives.replace(/ ×1$/, '');
+    // The Favours go on the end, after the affordability mark.
+    const afford = ctdAffordable(e, st);
+    if (afford === true) text += ' ' + CTD_MARK_YES;
+    else if (afford === false) text += ' ' + CTD_MARK_NO;
+    else if (e.marks != null || e.plcNeed != null) text += ' ' + CTD_MARK_UNREAD;
+    return withFactions(text, e);
+  }
+
+  function ctdStateLines(st) {
+    if (!st) return ['Your Counting the Days and PLC have not been read. Open the Myself tab once.'];
+    const src = function (s) {
+      return s === 'manual' ? ' (set by hand in the panel)' : '';
+    };
+    const lines = [];
+    lines.push('Your CtD: ' + (st.ctd == null ? 'not read' : st.ctd + src(st.ctdSource)
+      + (st.ctdStale ? ', read ' + ageText(st.at) : '')));
+    lines.push('Your PLC: ' + (st.plc == null ? 'not read' : st.plc + src(st.plcSource)
+      + (st.plcStale ? ', read ' + ageText(st.at) : '')));
+    return lines;
+  }
+
+  function ctdEarnSpec(e, st) {
+    const odds = typeof e.plc === 'object' ? e.plc : null;
+    const lines = [e.name, e.place, ''];
+    if (e.ctd > 0) lines.push('Pays ' + e.ctd + ' CP of Counting the Days.');
+    if (e.ctd === 0) lines.push('Pays no Counting the Days.');
+    if (odds) {
+      lines.push('PLC: ' + odds.odds + '% chance of +' + odds.win + ' CP, otherwise '
+        + (odds.lose ? '+' + odds.lose + ' CP' : 'none') + '. The badge shows the expected '
+        + ctdTenth(ctdExpectedPlc(e)) + '.');
+    } else if (e.plc > 0) {
+      lines.push('Pays ' + e.plc + ' CP of A Pocketful of Loose Change.');
+    } else {
+      lines.push('Pays no A Pocketful of Loose Change.');
+    }
+    lines.push(
+      'On offer at CtD ' + e.band[0] + (e.band[1] === e.band[0] ? '' : '–' + e.band[1]) + '.',
+      e.closest ? 'Needs you Closest To: ' + e.closest.join(', ') + '.' : null,
+      e.needs ? 'Needs: ' + e.needs + '.' : null,
+      e.cost ? 'Uses up: ' + e.cost + '.' : null,
+      e.side ? 'Also: ' + e.side + '.' : null,
+      e.fail ? 'On a failure: ' + e.fail + '.' : null,
+      e.note || null,
+      '');
+    if (st && st.ctd != null) {
+      const best = ctdBestAt(st.ctd);
+      lines.push(best.indexOf(e) !== -1
+        ? CTD_MARK_BEST + ' Among the options that pay the most PLC at your CtD (' + st.ctd + ').'
+        : 'Not among the options that pay the most PLC at CtD ' + st.ctd + '.');
+    } else if (CTD_EVER_BEST.has(e)) {
+      lines.push(CTD_MARK_UNREAD + ' This option is starred at some CtD levels; yours is not known, so it cannot say.');
+    }
+    ctdStateLines(st).forEach(function (l) { lines.push(l); });
+    const go = st && st.ctd != null ? ctdActionsText(st.ctd) : null;
+    if (go) lines.push(go);
+    lines.push('', CTD_MARK_BEST + ' most PLC for your band · ' + CTD_MARK_EXPECTED + ' expected, from a Luck challenge · '
+      + CTD_MARK_USES + ' uses something up · ' + CTD_MARK_UNREAD + ' needs your CtD · ' + CTD_MARK_STALE
+      + ' reading over a minute old');
+    return {
+      text: ctdEarnText(e, st), color: CTD_COLOR_EARN,
+      title: lines.filter(function (l) { return l !== null; }).join('\n'),
+    };
+  }
+
+  function ctdRewardSpec(e, st) {
+    const afford = ctdAffordable(e, st);
+    const lines = [e.name, e.place, '', 'Buys: ' + e.gives + '.'];
+    if (e.marks != null) lines.push('Costs ' + e.marks + ' Mark of Credit Page'
+      + (e.marks === 1 ? '' : 's') + (st && st.marks != null ? '; you hold ' + st.marks + '.' : '; your Marks have not been read.'));
+    if (e.plcNeed != null) {
+      lines.push('Needs PLC ' + e.plcNeed + (e.plcCost ? ' and spends ' + e.plcCost + ' CP of it' : '')
+        + (st && st.plc != null ? '; you have ' + st.plc + '.' : '; your PLC has not been read.'));
+    }
+    lines.push(
+      e.odds ? 'A Luck ' + e.odds + ' challenge. On a success: ' + e.win + '. On a failure: ' + e.fail + '.' : null,
+      e.cost ? 'Uses up: ' + e.cost + '.' : null,
+      e.needs ? 'Needs: ' + e.needs + '.' : null,
+      e.closest ? 'Needs you Closest To: ' + e.closest.join(', ') + '.' : null,
+      e.side ? 'Also: ' + e.side + '.' : null,
+      factionLine(e),
+      e.name === 'Obtain an Iron Republic Safe-Conduct' ? null : 'Resets Counting the Days to 0.',
+      e.note || null);
+    if (afford === true) lines.push(CTD_MARK_YES + ' You can afford it.');
+    else if (afford === false) lines.push(CTD_MARK_NO + ' You cannot afford it yet.');
+    else if (e.marks != null || e.plcNeed != null) lines.push(CTD_MARK_UNREAD + ' Not enough has been read to say.');
+    lines.push('', CTD_MARK_YES + ' affordable · ' + CTD_MARK_NO + ' not yet · ' + CTD_MARK_UNREAD + ' not read');
+    return {
+      text: ctdRewardText(e, st), color: afford === false ? CTD_COLOR_CANNOT : CTD_COLOR_REWARD,
+      title: lines.filter(function (l) { return l !== null; }).join('\n'),
+    };
+  }
+
+  function ctdSpec(e, st) {
+    return e.kind === 'reward' ? ctdRewardSpec(e, st) : ctdEarnSpec(e, st);
+  }
+
+  // The one card heading this feature labels: the reward card, so the word
+  // "reset" is on screen before a reward is chosen.
+  function ctdCardSpec(key) {
+    if (key !== normalizeName(CTD_REWARD_CARD)) return null;
+    const rows = CTD_OPTIONS.filter(function (e) { return e.kind === 'reward'; });
+    return {
+      text: 'resets CtD', color: CTD_COLOR_LABEL,
+      title: CTD_REWARD_CARD + '\n\nEvery option but the Lodgings Safe-Conduct resets Counting the Days to 0.\n\n'
+        + rows.map(function (e) { return e.name + ': ' + ctdRewardCost(e) + ' → ' + e.gives; }).join('\n'),
+    };
+  }
+
+  // --- your numbers ------------------------------------------------------
+  //
+  // CtD and PLC are on the Myself tab and nowhere near the cards that pay
+  // them, so this borrows the same plumbing as the Port Carnelian purse: bank
+  // a reading whenever that tab goes by, label one older than a minute, and
+  // let the player set either figure by hand in the panel when it was never
+  // read. A hand-set figure is used only where no reading exists.
+
+  const CTD_CACHE_KEY = 'fl-ux-ctd-reading';
+  const CTD_MANUAL_KEY = 'fl-ux-ctd-manual';
+  const CTD_FRESH_MS = 60 * 1000;
+  const CTD_QUALITIES = [CTD_QUALITY, CTD_PLC];
+
+  // Bumped whenever a reading is banked or a hand-set figure changes.
+  let ctdGen = 0;
+
+  function ctdFromQualities(scan) {
+    const values = {};
+    const zeroIsSafe = !scan.filtered;
+    for (const name of CTD_QUALITIES) {
+      const q = scan.values.get(name);
+      if (q) values[name] = q.level;
+      else if (zeroIsSafe) values[name] = 0;
+    }
+    return values;
+  }
+
+  function bankCtdQualities(scan) {
+    if (!scan) return false;
+    const values = ctdFromQualities(scan);
+    if (!Object.keys(values).length) return false;
+    saveCache(CTD_CACHE_KEY, { v: 1, at: Date.now(), character: characterName() || null, values: values });
+    ctdGen++;
+    return true;
+  }
+
+  function ctdManual() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(CTD_MANUAL_KEY));
+      const num = function (v) { return typeof v === 'number' && isFinite(v) && v >= 0 ? Math.floor(v) : null; };
+      return raw ? { ctd: num(raw.ctd), plc: num(raw.plc) } : { ctd: null, plc: null };
+    } catch (e) {
+      return { ctd: null, plc: null };
+    }
+  }
+
+  function setCtdManual(rec) {
+    try {
+      localStorage.setItem(CTD_MANUAL_KEY, JSON.stringify(rec));
+    } catch (e) { /* storage unavailable: the reading still works */ }
+    ctdGen++;
+  }
+
+  function readCtdState() {
+    const scan = readQualities();
+    if (scan) {
+      const values = ctdFromQualities(scan);
+      if (Object.keys(values).length) return { live: true, at: Date.now(), values: values };
+    }
+    const rec = loadCache(CTD_CACHE_KEY, 1);
+    if (!rec || !rec.values) return null;
+    return { live: false, at: rec.at, values: rec.values };
+  }
+
+  // Pure: the reading, the hand-set figures and the Marks held in, the state
+  // the badges need out. Null for "nothing is known".
+  function ctdStateFrom(read, manual, marks, now) {
+    const pick = function (name, byHand) {
+      const v = read && typeof read.values[name] === 'number' ? read.values[name] : null;
+      if (v != null) return { value: v, source: read.live ? 'read' : 'cache' };
+      if (byHand != null) return { value: byHand, source: 'manual' };
+      return { value: null, source: null };
+    };
+    const ctd = pick(CTD_QUALITY, manual && manual.ctd);
+    const plc = pick(CTD_PLC, manual && manual.plc);
+    if (ctd.value == null && plc.value == null && marks == null) return null;
+    const old = !!read && !read.live && (now - read.at) > CTD_FRESH_MS;
+    const st = {
+      ctd: ctd.value, ctdSource: ctd.source, ctdStale: ctd.source === 'cache' && old,
+      plc: plc.value, plcSource: plc.source, plcStale: plc.source === 'cache' && old,
+      marks: marks, at: read ? read.at : null,
+    };
+    st.sig = [st.ctd, st.ctdSource, st.ctdStale ? '~' : '', st.plc, st.plcSource, st.plcStale ? '~' : '', st.marks].join('/');
+    return st;
+  }
+
+  let ctdStateMemo = null;
+  function ctdState() {
+    const key = ctdGen + '@' + fotzGen + '@' + Math.floor(Date.now() / CTD_FRESH_MS);
+    if (ctdStateMemo && ctdStateMemo.key === key) return ctdStateMemo.value;
+    let value = null;
+    try {
+      const holdings = fotzHoldings();
+      value = ctdStateFrom(readCtdState(), ctdManual(), holdings ? holdings.count(CTD_MARK_ITEM) : null, Date.now());
+    } catch (e) {
+      value = null;
+    }
+    ctdStateMemo = { key: key, value: value };
+    return value;
+  }
+
+  // --- wiring ------------------------------------------------------------
+
+  function ctdRatings() {
+    const st = ctdState();
+    carouselRatings({
+      storylets: CTD_STORYLETS, index: CTD_INDEX, storyletSpec: ctdCardSpec,
+      optionSpec: function (e) { return ctdSpec(e, st); },
+      aliases: CTD_ALIASES, salt: '#' + (st ? st.sig : 'unread'),
+      cls: CTD_CLASS, flag: CTD_FLAG, branchCls: CTD_BRANCH_CLASS, branchFlag: CTD_BRANCH_FLAG,
+    });
+  }
+
+  // === panel: Spending Secrets and Counting the Days ======================
+  //
+  // The plan behind the badges: your numbers (and a way to set them by hand),
+  // how far you are from CtD 14, every earning option by the guide's four
+  // bands, and the rewards with what each costs and whether you can pay.
+
+  function ctdBadgeNode(e, st) {
+    return makeBadge(ctdSpec(e, st), CTD_CLASS);
+  }
+
+  function ctdOptionRow(e, st) {
+    const where = e.kind === 'reward' ? 'Secrets and Spending' : e.place;
+    const row = h('tr', null, [
+      h('td', { css: TD }, [
+        h('div', null, [wikiLink(e.name, e.name)]),
+        h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [where]),
+      ]),
+      h('td', { css: TD + 'text-align:center;' }, [ctdBadgeNode(e, st)]),
+      h('td', { css: TD + 'color:' + UI.dim + ';font-size:12px;' }, [
+        e.closest ? h('div', null, ['Closest To: ' + e.closest.join(', ')]) : null,
+        e.needs ? h('div', null, ['Needs ' + e.needs]) : null,
+        e.cost ? h('div', null, ['Uses ' + e.cost]) : null,
+        e.side ? h('div', null, [e.side]) : null,
+        e.note ? h('div', null, [e.note]) : null,
+      ]),
+    ]);
+    row.dataset.ctdSearch = [e.name, e.place, e.gives, e.needs, e.cost, e.side, e.note, e.win, e.fail,
+      (e.closest || []).join(' ')].filter(Boolean).join(' ').toLowerCase();
+    return row;
+  }
+
+  function renderCtdPanel(ctx) {
+    const st = ctdState();
+    let busy = false;
+    if (ctx && autoRefreshEnabled() && (!st || st.ctdStale || st.plcStale)) {
+      busy = true;
+      refreshBackgroundState().then(function () { ctx.rerender(); });
+    }
+
+    const section = function (title, children) {
+      return h('div', { css: 'margin-top:14px;' }, [
+        h('div', {
+          css: 'font:bold 11px ' + UI.font + ';letter-spacing:.06em;text-transform:uppercase;'
+            + 'color:' + UI.accent + ';margin-bottom:5px;',
+        }, [title]),
+        children,
+      ]);
+    };
+    const table = function (heads, rows) {
+      return h('table', { css: 'width:100%;border-collapse:collapse;' }, [
+        h('thead', null, [h('tr', null, heads.map(function (head) {
+          return h('th', { css: TH, title: head.title || '' }, [head.text]);
+        }))]),
+        h('tbody', null, rows),
+      ]);
+    };
+    const stat = function (label, value, title) {
+      return h('div', { title: title || '', css: 'min-width:92px;' }, [
+        h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [label]),
+        h('div', { css: 'font-size:16px;color:' + UI.text + ';' }, [value]),
+      ]);
+    };
+    const shown = function (v, source, stale) {
+      if (v == null) return '–';
+      return v + (source === 'manual' ? ' (by hand)' : '') + (stale ? ' ' + CTD_MARK_STALE : '');
+    };
+
+    // --- your numbers, and the hand-set figures -----------------------------
+    const field = function (id, placeholder, value) {
+      return h('input', {
+        type: 'number', min: '0', id: id, placeholder: placeholder,
+        value: value == null ? '' : String(value),
+        css: 'width:64px;box-sizing:border-box;padding:3px 6px;background:' + UI.bgAlt + ';color:' + UI.text
+          + ';border:1px solid ' + UI.line + ';border-radius:3px;font:12px ' + UI.font + ';',
+      });
+    };
+    const manual = ctdManual();
+    const ctdField = field('fl-ux-ctd-by-hand', 'CtD', manual.ctd);
+    const plcField = field('fl-ux-plc-by-hand', 'PLC', manual.plc);
+    const numberOf = function (el) {
+      const v = String(el.value == null ? '' : el.value).trim();
+      return v === '' || !isFinite(Number(v)) ? null : Math.max(0, Math.floor(Number(v)));
+    };
+    const button = function (text, title, fn) {
+      return h('button', {
+        type: 'button', title: title,
+        css: 'padding:3px 9px;background:' + UI.bgAlt + ';color:' + UI.text + ';border:1px solid ' + UI.line
+          + ';border-radius:3px;font:12px ' + UI.font + ';cursor:pointer;',
+        on: { click: fn },
+      }, [text]);
+    };
+    const redraw = function () {
+      schedule();
+      if (ctx && ctx.rerender) ctx.rerender();
+    };
+    const go = st && st.ctd != null ? ctdActionsText(st.ctd) : null;
+
+    const numbers = h('div', {
+      css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent + ';background:' + UI.bgAlt
+        + ';font-size:12px;line-height:1.6;',
+    }, [
+      h('div', { css: 'display:flex;flex-wrap:wrap;gap:16px;' }, [
+        stat('Counting the Days', st ? shown(st.ctd, st.ctdSource, st.ctdStale) : '–'),
+        stat('Loose Change (PLC)', st ? shown(st.plc, st.plcSource, st.plcStale) : '–'),
+        stat('Marks of Credit', st && st.marks != null ? String(st.marks) : '–', 'From your Possessions.'),
+      ]),
+      h('div', { css: 'margin-top:6px;color:' + UI.dim + ';' }, [
+        st && st.at && st.ctdSource !== 'manual'
+          ? 'Read ' + ageText(st.at) + (busy ? ' — refreshing from the Myself tab…' : '.')
+          : (st ? '' : 'Nothing has been read yet. Open the Myself tab once, or set the two figures below.'),
+        go ? ' ' + go : '',
+      ]),
+      h('div', { css: 'margin-top:8px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;' }, [
+        h('span', { css: 'color:' + UI.dim + ';' }, ['Set by hand, used only where nothing is read:']),
+        ctdField, plcField,
+        button('Save', 'Keep these two figures for the badges', function () {
+          setCtdManual({ ctd: numberOf(ctdField), plc: numberOf(plcField) });
+          redraw();
+        }),
+        button('Clear', 'Forget the hand-set figures', function () {
+          setCtdManual({ ctd: null, plc: null });
+          redraw();
+        }),
+      ]),
+    ]);
+
+    // --- the rules ---------------------------------------------------------
+    const rules = h('div', {
+      css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.line + ';background:' + UI.bgAlt
+        + ';color:' + UI.dim + ';font-size:12px;line-height:1.6;',
+    }, [
+      h('div', null, ['Reach ', wikiLink('Counting the Days', 'CtD'), ' 14 — 21 actions of 5 CP — to open ',
+        wikiLink('Secrets and Spending', 'Secrets and Spending'), '. Every reward but the Lodgings Safe-Conduct resets it.']),
+      h('div', null, ['The cards below need ', wikiLink('Spending Secrets', 'Spending Secrets'),
+        ' 4, which the ', wikiLink('Choosing a Side', 'Choosing a Side'), ' card gives you.']),
+      h('div', null, ['A Mark costs 7 PLC from the Numismatrix, or 4+ PLC and a Luck 70 gamble that resets PLC to 0 '
+        + 'on a win and takes 10 on a loss.']),
+    ]);
+
+    // --- every earning option, by band -------------------------------------
+    const earns = CTD_OPTIONS.filter(function (e) { return e.kind === 'earn'; });
+    const rows = [];
+    const addGroup = function (label, list) {
+      if (!list.length) return;
+      const header = h('tr', null, [h('td', {
+        colSpan: 3,
+        css: 'padding:8px 8px 3px;font:bold 11px ' + UI.font + ';letter-spacing:.05em;text-transform:uppercase;'
+          + 'color:' + UI.dim + ';border-bottom:1px solid ' + UI.line + ';',
+      }, [label])]);
+      header.dataset.ctdGroup = '1';
+      rows.push(header);
+      list.forEach(function (e) { rows.push(ctdOptionRow(e, st)); });
+    };
+    const reaches = function (e, band) { return e.band[0] <= band.hi && e.band[1] >= band.lo; };
+    const everywhere = function (e) { return CTD_BANDS.every(function (b) { return reaches(e, b); }); };
+    addGroup('Any CtD below 14', earns.filter(everywhere));
+    CTD_BANDS.forEach(function (band) {
+      addGroup(band.label, earns.filter(function (e) { return !everywhere(e) && reaches(e, band); }));
+    });
+    addGroup('Rewards — Secrets and Spending (CtD 14)', CTD_OPTIONS.filter(function (e) { return e.kind === 'reward'; }));
+
+    const search = h('input', {
+      type: 'text', placeholder: 'filter options, cards, requirements…',
+      css: 'flex:1;min-width:140px;box-sizing:border-box;padding:3px 7px;background:' + UI.bgAlt + ';color:' + UI.text
+        + ';border:1px solid ' + UI.line + ';border-radius:3px;font:12px ' + UI.font + ';',
+      on: {
+        input: function (e) {
+          const term = String(e.currentTarget.value || '').trim().toLowerCase();
+          for (const row of rows) {
+            if (row.dataset.ctdGroup) continue;
+            row.hidden = !!term && row.dataset.ctdSearch.indexOf(term) === -1;
+          }
+          let group = null, count = 0;
+          for (const row of rows) {
+            if (row.dataset.ctdGroup) {
+              if (group) group.hidden = count === 0;
+              group = row; count = 0;
+            } else if (!row.hidden) count++;
+          }
+          if (group) group.hidden = count === 0;
+        },
+      },
+    });
+
+    return h('div', { css: 'padding:0 12px 12px;' }, [
+      numbers,
+      rules,
+      section('Every option', h('div', null, [
+        h('div', { css: 'display:flex;margin-bottom:6px;' }, [search]),
+        table([{ text: 'Option' }, { text: '' }, { text: 'What it asks and does' }], rows),
+      ])),
+      h('div', { css: 'margin-top:12px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+        h('div', null, [h('b', null, [CTD_MARK_BEST]), ' the most PLC for your band · ',
+          h('b', null, [CTD_MARK_EXPECTED]), ' expected, from a Luck challenge · ',
+          h('b', null, [CTD_MARK_USES]), ' uses something up · ',
+          h('b', null, [CTD_MARK_UNREAD]), ' needs a figure that has not been read · ',
+          h('b', null, [CTD_MARK_STALE]), ' a reading over a minute old · ',
+          h('b', null, [CTD_MARK_YES + ' ' + CTD_MARK_NO]), ' can you afford it.']),
+        h('div', { css: 'margin-top:6px;' }, ['Data from ',
+          wikiLink('Spending Secrets and Counting the Days (Guide)', 'Spending Secrets and Counting the Days (Guide)'),
+          ' and the option pages on the Fallen London wiki.']),
+      ]),
+    ]);
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -42051,6 +42850,9 @@
     { name: 'relickers', run: relickerRatings },
     { name: 'the-stacks', run: stacksRatings },
     { name: 'the-marrow', run: marrowRatings },
+    // The Numismatrix's long game: an option on a dozen other features' cards, so it badges the options of
+    // each card only while that card is open, and owns the Secrets and Spending card's rewards.
+    { name: 'spending-secrets', run: ctdRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
@@ -42106,6 +42908,13 @@
       hint: 'What the Roof shops pay, what only Stuivers buy, and what each grind is worth, all in Stuivers',
       render: renderEconomyPanel,
     },
+    {
+      id: 'spending-secrets',
+      icon: '🪙',
+      label: 'Spending Secrets',
+      hint: 'Counting the Days to 14: every option by band, your Loose Change and Marks, and what the rewards cost',
+      render: renderCtdPanel,
+    },
   ];
 
   function registerPanels() {
@@ -42149,6 +42958,7 @@
       bankFotzQualities(got);
       bankPcQualities(got);
       bankLabQualities(got);
+      bankCtdQualities(got);
     } else if (path === '/possessions') {
       bankItemCounts(readPossessionCounts(doc));
     }

@@ -2660,6 +2660,27 @@ navigation. Two consequences:
   three "White as ..." cards, the exit, the shop and the airship upgrades. Research:
   `docs/superpowers/research/2026-09-29-the-marrow-behind.md`.
 
+  **Spending Secrets and Counting the Days** (`spending-secrets`, `CTD_OPTIONS`, on `carouselRatings`; panel `spending-secrets`,
+  `renderCtdPanel`, the seventh behind the ⚙ UX launcher -- the panel was the user's decision, 2026-10-03): once *Spending Secrets*
+  is 4, a dozen unrelated cards and storylets each grow ONE option paying 5 CP of Counting the Days (CtD) and usually some A
+  Pocketful of Loose Change (PLC); CtD 14 opens *Secrets and Spending*, every reward on which resets CtD. There is **no area gate**: it
+  lives on cards and storylets, and an option is badged only while its own card is OPEN (`In passing` and `Loaded down` are ordinary
+  phrases). 46 rows: 37 earning (the eleven faction cards, two at any level, six under CtD 6, 5 / 6 / 5 in the later bands) and 9
+  rewards. **The badge** is `+5 CtD · +2 PLC`; `≈` where the PLC rests on a Luck challenge (the expected figure; odds in the tooltip),
+  `▼` where it uses something up, `★` on the options that pay the most expected PLC among those that also pay CtD for your band, `?`
+  in place of the star on an option that is ever starred when CtD has never been read, `~` after it when the reading is over a minute
+  old. A reward is `1 Mark → Bottle of Morelways 1872 ×120 ✓ · Favours: Constables +1 …`: cost, what it buys, ✓ / ✗ / ? for PLC and
+  Marks (Marks come from the Possessions reading), then every Favours, signed. Colour is a category (teal earns, gold rewards, grey
+  cannot afford) and never carries a claim alone. **State:** CtD and PLC are banked off the Myself tab (`bankCtdQualities`, key
+  `fl-ux-ctd-reading`) and may be set by hand in the panel (`fl-ux-ctd-manual`), a hand-set figure used only where nothing is read.
+  `ctdActionsToGo` gives a RANGE, since the Myself tab names a CtD level and a level is a range of change points. **Traps (pages over
+  guide):** the page locks *Dicing*, *Listen to them*, *Take him to the theatre*, *Read a calming book*, *Take some honey* and *Unleash
+  Baseborn* at CtD 6 (that is the guide's "under 6" band) and *Look at those coins* at 10; *Look at those coins* and *Ask someone else
+  what they saw* are **Luck 50** challenges the guide does not mention; *Chancing a Mark* resets PLC to 0 on a win; *Quite a moral
+  afternoon* also asks Subtle 4; *Go with her to a gambling-house* says CtD "10" with no upper end. Left out: the Lodgings Gossip's
+  second Safe-Conduct option (its storylet is a generic title), *Choosing a Side*, and the *Numismatrix* intro. Research: the option
+  and card pages, fetched through the API on 2026-10-03.
+
   **Economy** (panel `economy`, `ECON_*`, `renderEconomyPanel`; the sixth behind the ⚙ UX launcher): Roof Economy (Guide) and Stuiver
   Grinding (Guide) are prices, shops and Stuiver-only items with **no storylet options**, so this is a panel and no badge. Ten
   filterable tables: the Roof shops' buy / sell matrix (16 items × five markets), the Zenith and Risen Burgundy trading posts, what only
@@ -3912,6 +3933,15 @@ Confirmed live by the author:
   (*Judge the contract*, *Devour the condemned*, *Reflect*, *Dare to dance with the King*). **(5) A locked option** -- whether the
   story options are drawn greyed or not at all.
 
+- **Spending Secrets and Counting the Days** (`spending-secrets`, added 2026-10-03). Nothing seen in the game; every table is
+  transcribed from the option and card pages. Report first: **(1) The eleven faction card headings** -- whether the cards show as
+  the wiki titles them (*The Demi-Monde: Bohemians*, *Altars and Alms-Houses: the Church*, ...), because an option is badged only
+  while its card's heading matches; a bare faction name would need an alias. **(2) Myself names** -- that the tab reads *Counting the
+  Days* and *A Pocketful of Loose Change* exactly so (otherwise the panel shows a dash and the star shows `?`). **(3) The Luck odds**
+  on *Look at those coins* and *Ask someone else what they saw* (50) and on *Chancing a Mark* (70), against what the challenge
+  shows. **(4) The bands** -- that each option appears at the CtD the page says, in particular the six the page locks at 6. **(5)
+  Whether a locked option is drawn greyed or not at all**, which decides whether a badge can sit on an option you cannot take.
+
 - The **transcribed numbers**, here and everywhere else in this script -- the per-depth Favour
   table, the Sights bands, the Airs windows, the item roster. This is not the sort of thing
   looking at the screen can confirm: a wrong number renders exactly as well as a right one. They
@@ -4649,6 +4679,12 @@ Current tests:
   number; the wiring keyed by the open card with the two wiki-only "(The Empty Corpse)" headings and both form storylet headings;
   *Consume what is not there* left to the Firmament feature; and the two ordinary phrases and the one shared card as the only names
   another table also carries.
+- `tests/choice-spending-secrets.test.mjs` — 46 rows (37 earning, 9 rewards), none listed twice; the bands and the page-over-guide
+  facts (six options locked at CtD 6, two Luck 50 options, the Chancing a Mark reset); the star rule per band and that it is among
+  options that pay CtD; the `?` / `~` marks; the actions-to-go range; affordability in yes / no / unread; that a reward's badge
+  ends with its Favours; the state reader (live, stale, by hand, nothing) and that its signature carries no time; the wiring keyed by
+  the open card (an ordinary phrase is badged under it and not elsewhere); the panel, its filter and its registration; and that no
+  option name is quoted in another table.
 - `tests/choice-the-stacks.test.mjs` — 56 card options, 8 books, 8 finale options; every progress figure one of 5, 10 or 15; the
   eight options that add Noises +6 on a failure say so in the badge and take the risk colour; the book totals against the
   totals their finale option carries; the wiring keyed by the open card (an ordinary phrase is badged under its own card only,
