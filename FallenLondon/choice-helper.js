@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.44
+// @version      1.45
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -7153,6 +7153,21 @@
           fail: labLin(10, 2), failAlso: 'Disgruntlement +1 CP' },
         { branch: 'Take Tea with F.F. Gebrandt', gate: 'The Airs of London 1–25', label: 'Airs',
           winAlso: 'changes The Airs of London' },
+      ],
+    },
+
+    {
+      name: 'Rely on the Silk-Clad Expert', group: 'staff', freq: 'Standard',
+      needs: 'the Silk-Clad Expert (Fate)',
+      note: 'The option for Experimental Object 401–500 (Unavoidable Epiphany) is not transcribed: its in-game '
+        + 'title is not on the wiki and has not been captured.',
+      opts: [
+        { branch: 'Have her work on research', eo: [[101, 400], [501, 1610]], win: labLin(0, 5 / 3) },
+        { branch: 'Apply her particular expertise in a novel way', eo: [[101, 400], [501, 1610]],
+          gate: 'an Unlikely Connection', consumes: 'an Unlikely Connection', ch: 'Watchful 220', rp: true,
+          win: labLin(7, 2), winAlso: 'Unexpected Result +1', fail: labLin(5, 2) },
+        { branch: 'Ask her for help with Parabolan research', win: labLin(0, 5 / 3),
+          winAlso: 'Parabolan Research +5' },
       ],
     },
 
