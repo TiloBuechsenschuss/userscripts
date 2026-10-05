@@ -47,6 +47,29 @@ over and used from the next cell.
 `POST choice.php` with `whichchoice=1637&pwd=...&option=4&rgx=X&rgy=Y&rgf=F`; the reply is
 ignored. Using a poi submits a form and reloads the page with a fresh `RG`.
 
+## The game's list of things (`#rgpois`)
+
+**Verified** 2026-10-05 against the renderer source (`rosegarden.<date>.js`, pasted by the
+player) and the wiki talk page ("press Tab twice ... a list of buttons to go to known
+monster/item locations"). The renderer has no Tab key handler: Tab only moves keyboard focus.
+
+- The page carries the text interface `#rgtext` and, in it or beside it, `#rgpois`: one
+  `<form class="rgpoi" data-i="<poi id>">` per point of interest, with hidden fields `rgx`,
+  `rgy`, `rgf` and a button. Pressing F in the 3D view fills in the current cell on the
+  facing poi's form and submits it; the server then puts you next to the thing, facing it.
+- The page ships `#rgpois` with class `rgsr` (visually hidden, still read by screen readers).
+  If the 3D view cannot start, the renderer clears the class and the list is the whole
+  interface. Once the view is up it sets `rgsr` itself, but **only if the list has no class**.
+- **Verified** 2026-10-05 (player report, live page): the Tab-twice list is this `#rgpois`;
+  swapping its `rgsr` class for another one shows it on load, and it works. The `rgsr` style
+  itself is in the page, which has not been captured.
+- **Assumed:** the server takes the position from a form's `rgx/rgy/rgf`. Which pois get a
+  form (all, or only pending ones) has not been captured.
+
+The map helper swaps `rgsr` for its own class `tm-rgpois`, which shows the list and, being
+non-empty, stops the renderer from hiding it again; it also copies each position save into
+every `rgpoi` form so a button pressed after walking sends the current cell.
+
 ## Plaque letters
 
 **Verified** against the wiki gallery: `icon_a.png` is A through `icon_z.png` is Z. What the

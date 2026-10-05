@@ -55,7 +55,7 @@ Looking for a script that used to be here? See
 
 | Script | Pages | What it does |
 | --- | --- | --- |
-| `iotm.js` | top/awesome menu, codpiece decoration choice, Black Rose Garden choice | "IotM" menu button opening a popup of Item-of-the-Month actions (Codpiece, Play Ball, Cup of 13s), plus tools on the Eternity Codpiece decoration screen to set every gem slot at once and to save/load named gem setups, and a live top-down map of the Black Rose Garden maze (also available on its own, see Standalone scripts). Each popup action and the button itself can be hidden from the shared "Userscript settings" box on `account.php` (or the ⚙ button in the menu) |
+| `iotm.js` | top/awesome menu, codpiece decoration choice, Black Rose Garden choice | "IotM" menu button opening a popup of Item-of-the-Month actions (Codpiece, Play Ball, Cup of 13s), plus tools on the Eternity Codpiece decoration screen to set every gem slot at once and to save/load named gem setups, and a live top-down map of the Black Rose Garden maze, with the game's own list of go-to buttons (otherwise behind Tab Tab) shown (also available on its own, see Standalone scripts). Each popup action and the button itself can be hidden from the shared "Userscript settings" box on `account.php` (or the ⚙ button in the menu) |
 | `daily-checklist.js` | top/awesome menu | Daily tasks checklist |
 | `strange-leaflet.js` | main / leaflet | Strange Leaflet helper |
 | `instant-nemesis-maze.js` | volcanomaze | Solves the volcano (nemesis) maze |
@@ -92,7 +92,7 @@ manager.
 
 | Script | Game | Pages | What it does |
 | --- | --- | --- | --- |
-| [`KingdomOfLoathing/standalone/black-rose-garden.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/standalone/black-rose-garden.js) | Kingdom of Loathing | `choice.php` (Black Rose Garden, choice 1637) | A live top-down map of the garden maze beside its 3D view: your position and facing, the things to fight or take (pending vs done), a legend, and the cipher plaque letters. Kept between visits; a new day's garden replaces the old map by itself; "Reset map" starts a new one |
+| [`KingdomOfLoathing/standalone/black-rose-garden.js`](https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/standalone/black-rose-garden.js) | Kingdom of Loathing | `choice.php` (Black Rose Garden, choice 1637) | A live top-down map of the garden maze beside its 3D view: your position and facing, the things to fight or take (pending vs done), a legend, and the cipher plaque letters. Also shows the game's own list of buttons that take you to each thing, which otherwise only appears when you press Tab twice. Kept between visits; a new day's garden replaces the old map by itself; "Reset map" starts a new one |
 
 `iotm.js` (and so the all-in-one loader) still carries the same Black Rose Garden map. The standalone
 script is the extra offer for players who want only the map. The two use the same storage key and

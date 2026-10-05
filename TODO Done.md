@@ -404,6 +404,10 @@ Kingdom of Loathing:
     Not reported on, so still unverified: Reset map, the earlier-day warning banner,
     and whether a fresh day's grid is complete before exploring (see
     okf/kingdom-of-loathing/open-questions.md).
+  - Black Rose Garden go-to list — the game's own list of buttons to each point of
+    interest (#rgpois, otherwise only reached with Tab Tab) shown on load; standalone 1.2,
+    iotm.js 1.40 (loader 1.60). Verified in-game by the author (2026-10-05): the list
+    shows and works.
 
   - Hide-UI settings — shared "Userscript settings" box on account.php plus a ⚙ button in
     the menu row, iotm.js 1.36 / quest-helper.js 2.2 (loader 1.56). Hides the IotM menu
