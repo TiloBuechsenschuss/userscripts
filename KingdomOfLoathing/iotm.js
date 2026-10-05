@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/iotm.js
-// @version      1.39
+// @version      1.40
 // @description  Adds an "IotM" button to the icon menu with Item-of-the-Month actions.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -35,8 +35,10 @@
  * Also draws a top-down map of the Black Rose Garden (choice.php whichchoice=1637) beside its 3D
  *   view: hedge, floor, start, your own position and facing (which follows you as you walk),
  *   a table of the things to fight or take (pending vs done) and a legend table side by side
- *   under it, and the cipher plaque letters. The map is kept between
- *   visits and shows when it was started; "Reset map" starts a new one. The garden changes
+ *   under it, and the cipher plaque letters. The game's own list of buttons that take you to
+ *   each thing, which it otherwise shows only when you press Tab twice, is shown as well (not
+ *   yet confirmed on the live page). The map is kept between visits and shows when it was
+ *   started; "Reset map" starts a new one. The garden changes
  *   every KoL day, and the page shows the whole new maze from the first visit, so a new
  *   garden replaces the old map by itself. One map is stored per browser, not per character.
  *   Confirmed against the live page: the map draws from an explored maze, the arrow follows
@@ -2044,6 +2046,32 @@
     return wrap;
   }
 
+  // The game's own list of things (#rgpois): one form (class rgpoi) per point of
+  // interest, each with a button that takes you to it. Once the 3D view is up the page
+  // hides the list as screen-reader-only (class rgsr), so a sighted player only reaches
+  // it by pressing Tab into it. Show it: swap rgsr for a class of our own. Any non-empty
+  // class also keeps the renderer, which sets rgsr only on a list with no class at all,
+  // from hiding it again should it run after us. A list with no class (the page's
+  // fallback when the 3D view cannot start) is already shown and is left alone.
+  function showRosePois() {
+    const list = document.getElementById('rgpois');
+    if (list && list.className === 'rgsr') list.className = 'tm-rgpois';
+  }
+
+  // Each rgpoi form carries the player's cell (rgx, rgy, rgf) as the page was loaded;
+  // the renderer fills in the current one only on the form it submits for F. Keep them
+  // all current, so a button pressed after walking sends where you stand.
+  function syncRosePoiForms(pos) {
+    const forms = document.getElementsByClassName('rgpoi');
+    for (let i = 0; i < forms.length; i++) {
+      const f = forms[i];
+      if (!f.rgx || !f.rgy || !f.rgf) continue;
+      f.rgx.value = pos.x;
+      f.rgy.value = pos.y;
+      f.rgf.value = pos.f;
+    }
+  }
+
   function initRoseGarden() {
     if (document.getElementById('tm-rosegarden')) return;
     if (!document.querySelector(
@@ -2055,6 +2083,7 @@
     if (!rg) return;
     const anchor = document.getElementById('rgwrap') || document.getElementById('rgtext');
     if (!anchor || !anchor.parentNode) return;
+    showRosePois();
 
     const stored = loadRoseMap();
     let map = stored ? mergeMap(stored, rg, Date.now()) : freshMap(rg, Date.now());
@@ -2107,6 +2136,7 @@
           map.pos = pos;
           saveRoseMap(map);
           draw();
+          syncRosePoiForms(pos);
         }
         return send.apply(this, arguments);
       };

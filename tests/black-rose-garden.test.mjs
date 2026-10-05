@@ -15,6 +15,9 @@
 //     starts a new map; one that differs only off the hedge is the same garden.
 //   - The renderer's position save (choice.php option=4, rgx/rgy/rgf) is parsed.
 //   - The drawn area is cropped to the maze plus a one-cell margin.
+//   - The game's own list of things (#rgpois) loses its screen-reader-only class
+//     (rgsr) for a non-empty one of ours; a list with no class is left alone.
+//   - Every point-of-interest form's rgx/rgy/rgf follow the player's position.
 //
 //   node tests/black-rose-garden.test.mjs
 
@@ -25,17 +28,21 @@ import { dirname, join } from 'node:path';
 const here = dirname(fileURLToPath(import.meta.url));
 const src = readFileSync(join(here, '..', 'KingdomOfLoathing', 'standalone', 'black-rose-garden.js'), 'utf8');
 
+// byId / byClass are swapped per test below; the dispatch at load sees neither.
+let byId = {};
+let byClass = {};
 const fakeDoc = {
   querySelector: () => null,
   querySelectorAll: () => [],
-  getElementById: () => null
+  getElementById: (id) => byId[id] || null,
+  getElementsByClassName: (c) => byClass[c] || []
 };
 const fakeLocation = { pathname: '/nowhere.php' };
 
 const wrapped = src
   .replace('(function () {', 'globalThis.__iotm = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { parseRoseGarden, freshMap, mergeMap, sameGarden, parsePosBody, mapBounds, plaqueLetter }; })();');
+    'return { parseRoseGarden, freshMap, mergeMap, sameGarden, parsePosBody, mapBounds, plaqueLetter, showRosePois, syncRosePoiForms }; })();');
 const fn = new Function('document', 'location', 'localStorage',
   wrapped + '\nreturn globalThis.__iotm;');
 const api = fn(fakeDoc, fakeLocation, { getItem: () => null, setItem: () => {}, removeItem: () => {} });
@@ -141,6 +148,32 @@ check('bounds: margin clamps at the edge',
 check('letter: icon', api.plaqueLetter('icon_u.png'), 'U');
 check('letter: blank plaque', api.plaqueLetter(''), '·');
 check('letter: unknown name', api.plaqueLetter('mystery.png'), '?');
+
+// --- showRosePois ------------------------------------------------------
+const hidden = { className: 'rgsr' };
+byId = { rgpois: hidden };
+api.showRosePois();
+check('pois list: rgsr swapped for a non-empty class', hidden.className, 'tm-rgpois');
+const shown = { className: '' };
+byId = { rgpois: shown };
+api.showRosePois();
+check('pois list: no class (fallback, already shown) left alone', shown.className, '');
+byId = {};
+api.showRosePois();
+check('pois list: absent list is not an error', true, true);
+
+// --- syncRosePoiForms --------------------------------------------------
+const field = (v) => ({ value: v });
+const formA = { rgx: field('15'), rgy: field('15'), rgf: field('0') };
+const formB = { rgx: field('15'), rgy: field('15'), rgf: field('0') };
+const formNoFields = {};
+byClass = { rgpoi: [formA, formB, formNoFields] };
+api.syncRosePoiForms({ x: 13, y: 22, f: 2 });
+check('poi forms: every form gets the position',
+  [formA, formB].map((f) => [f.rgx.value, f.rgy.value, f.rgf.value]),
+  [[13, 22, 2], [13, 22, 2]]);
+check('poi forms: a form without the fields is skipped', formNoFields, {});
+byClass = {};
 
 // --- the copy in iotm.js: the two files must not drift apart ---------
 check('map section found in both files', iotmMap.length > 1000 && standaloneMap.length > 1000, true);
