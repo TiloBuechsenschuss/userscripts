@@ -60,8 +60,9 @@ monster/item locations"). The renderer has no Tab key handler: Tab only moves ke
 - The page ships `#rgpois` with class `rgsr` (visually hidden, still read by screen readers).
   If the 3D view cannot start, the renderer clears the class and the list is the whole
   interface. Once the view is up it sets `rgsr` itself, but **only if the list has no class**.
-- **Assumed:** the Tab-twice list is this `#rgpois`, revealed by focus. The `rgsr` style
-  itself (and whether it shows on focus) is in the page, which has not been captured.
+- **Verified** 2026-10-05 (player report, live page): the Tab-twice list is this `#rgpois`;
+  swapping its `rgsr` class for another one shows it on load, and it works. The `rgsr` style
+  itself is in the page, which has not been captured.
 - **Assumed:** the server takes the position from a form's `rgx/rgy/rgf`. Which pois get a
   form (all, or only pending ones) has not been captured.
 

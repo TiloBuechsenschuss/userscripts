@@ -18,8 +18,8 @@
  *   view: hedge, floor, start, your own position and facing (which follows you as you walk),
  *   a table of the things to fight or take (pending vs done) and a legend table side by side
  *   under it, and the cipher plaque letters. The game's own list of buttons that take you to
- *   each thing, which it otherwise shows only when you press Tab twice, is shown as well (not
- *   yet confirmed on the live page). The map is kept between visits and shows when it was
+ *   each thing, which it otherwise shows only when you press Tab twice, is shown as well
+ *   (confirmed on the live page, 2026-10-05). The map is kept between visits and shows when it was
  *   started; "Reset map" starts a new one. The garden changes
  *   every KoL day, and the page shows the whole new maze from the first visit, so a new
  *   garden replaces the old map by itself. One map is stored per browser, not per character.
