@@ -96,5 +96,7 @@ stub DOM.
 
 **Captured 2026-10-07** (`temp/capure-results/fl-capture-account.html`): the route is `/account`; the page is `div.content.container > div.account` holding `h1`, a tab list (`nav__list`, buttons `role=tab`) and `div.stack-content` with one tabpanel. An "Extensions" tab the capture shows is not ours.
 
-**Not yet checked in the live game**: the account box,  the look and touch size of the settings view, that a
+**Tested in game by the author on 2026-10-07** (wiki-links 0.10, ux-enhancers 3.6, choice-helper 1.52): the Settings panel with its search box, the account-page box, and switching features and menu entries off and on. The details of what was looked at were not recorded.
+
+**Not separately recorded as checked**: the account box,  the look and touch size of the settings view, that a
 switch removes badges from a real hand at once, and that React does not fight the removal.

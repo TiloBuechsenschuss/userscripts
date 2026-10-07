@@ -4186,6 +4186,10 @@
 
   // === switches (tm-fl-ui-settings) ======================================
   //
+  // **Tested in game by the author on 2026-10-07** (ux-enhancers 3.6, choice-helper 1.52,
+  // wiki-links 0.10): the Settings panel with its search box, the account-page box, and
+  // switching features and menu entries off and on.
+  //
   // An entry with a `group` can be switched off in Settings; one without (the launcher, which is
   // the way back, and the two captures, which draw nothing) cannot. `off` takes the entry's own
   // drawing out of the page when it is switched off, flags included, so that switching it on

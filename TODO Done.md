@@ -426,3 +426,6 @@ Fallen London:
     read ("Not counted: X"). Not reported on, so still unverified: Undo, Dismiss,
     filling an empty slot, the API-and-reload fallback, and the phone layout.
 
+
+Fallen London feature switcher (done 2026-10-07; tested in game by the author 2026-10-07, wiki-links 0.10, ux-enhancers 3.6, choice-helper 1.52, loader 0.76):
+  Settings under ⚙ UX with categories (London, Airs of London, Zailing, Parabola, Firmament, Railway & beyond, Seasonal, Menu entries), a search box, live switching, menu entries switchable on their own (a seasonal panel follows its festival feature), and a matching box on the Account page. Contract: okf/fallen-london/hide-ui-settings.md.
