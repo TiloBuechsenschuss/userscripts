@@ -93,6 +93,11 @@ if (registries) {
   const dupes = FEATURES.map((f) => f.name).filter((n, i, all) => all.indexOf(n) !== i);
   if (dupes.length) fail('FEATURES', 'duplicate names: ' + dupes.join(', '));
 
+  // Every feature that draws something must be filed under a Settings category (FEATURE_GROUPS in
+  // choice-helper.js), or the player cannot switch it off. Only fotz-capture draws nothing.
+  const unfiled = FEATURES.filter((f) => !f.group && f.name !== 'fotz-capture').map((f) => f.name);
+  if (unfiled.length) fail('FEATURE_GROUPS', 'not filed under a Settings category: ' + unfiled.join(', '));
+
   PANELS.forEach(function (panel, i) {
     for (const field of ['id', 'icon', 'label', 'hint']) {
       if (!panel[field]) fail('PANELS[' + i + ']', 'has no ' + field);

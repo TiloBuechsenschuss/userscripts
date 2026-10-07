@@ -83,6 +83,7 @@ const DIFFERENT = {
   refreshBackgroundState: 'each refreshes and banks only its own numbers',
   FEATURES: 'each registry holds its own features',
   PANELS: 'each script\'s own panels',
+  UI_SCRIPT: 'the id each script files its switches under (tm-fl-ui-settings)',
   scan: 'the dispatch: Choice Helper also prunes a tap-to-read panel',
 };
 
@@ -210,7 +211,7 @@ for (const first of [UX, CHOICE]) {
   for (const file of order) apis[file] = load(page, file, file === UX ? UX_NAMES : CHOICE_NAMES);
   const ids = apis[UX].menuPanels().map((p) => p.id);
   check('loaded ' + order.join(' then ') + ': the menu holds Factions and then Choice Helper\'s five',
-    ids, ['factions', ...CHOICE_PANELS]);
+    ids, ['factions', ...CHOICE_PANELS, 'settings']);
   check('...and neither script threw while loading', page.errors, []);
   apis[CHOICE].registerPanels();
   check('...registering again adds nothing', page.win.__flUxPanels.map((p) => p.id), CHOICE_PANELS);
@@ -221,7 +222,7 @@ for (const first of [UX, CHOICE]) {
   const ux = load(page, UX, UX_NAMES);
   const choice = load(page, CHOICE, CHOICE_NAMES);
   check('with no window at all, UX Enhancers offers its own panels and nothing breaks',
-    [ux.menuPanels().map((p) => p.id), ux.sharedPanels(), page.errors], [['factions'], null, []]);
+    [ux.menuPanels().map((p) => p.id), ux.sharedPanels(), page.errors], [['factions', 'settings'], null, []]);
   choice.shareFrame('/myself', qualityDoc([['Renown: Bohemians', '27/55']]));
   check('...and sharing a frame is a quiet no-op', page.errors, []);
 }

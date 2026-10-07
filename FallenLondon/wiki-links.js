@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/wiki-links.js
-// @version      0.8
+// @version      0.9
 // @description  Adds a small "W" badge linking storylets and cards to the Fallen London wiki.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -24,6 +24,188 @@
 
 (function () {
   'use strict';
+
+  // --- BEGIN tm-fl-ui-settings (keep byte-identical across scripts) ---
+  // Shared "show / hide this piece of UI" switches, co-owned by every Fallen London script that
+  // carries this block (wiki-links.js, ux-enhancers.js, choice-helper.js). Each script has its
+  // own copy and registers what it can switch in one catalogue on the page window, so the
+  // settings view lists whichever scripts are installed, in any load order.
+  // Only HIDDEN features are stored ({ "<scriptId>.<featureId>": true }), so a feature added
+  // later is shown by default. Storage trouble reads as "everything shown".
+  const FL_UI_KEY = 'tm-fl-hidden-ui';
+  const FL_UI_EVENT = 'fl-ui-settings-change';
+  const FL_UI_CATALOGUE = '__flUiFeatures';
+  const FL_UI_GROUPS = [
+    'Wiki links', 'UX tweaks', 'London', 'Airs of London', 'Zailing', 'Parabola', 'Firmament',
+    'Railway & beyond', 'Seasonal', 'Menu entries',
+  ];
+
+  function flUiLoad() {
+    try {
+      const o = JSON.parse(localStorage.getItem(FL_UI_KEY) || '{}');
+      return o && typeof o === 'object' && !Array.isArray(o) ? o : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function flUiHidden(scriptId, featureId) {
+    return flUiLoad()[scriptId + '.' + featureId] === true;
+  }
+
+  // Read-modify-write on a fresh read, so two scripts toggling never clobber each other.
+  // `storage` events never fire in the document that wrote, and Fallen London is one document,
+  // so the change is also announced on the window for this page's own scripts.
+  function flUiSetHidden(scriptId, featureId, hidden) {
+    const o = flUiLoad();
+    const k = scriptId + '.' + featureId;
+    if (hidden) o[k] = true; else delete o[k];
+    try {
+      localStorage.setItem(FL_UI_KEY, JSON.stringify(o));
+    } catch (e) { /* storage blocked: the switch just does not stick */ }
+    try {
+      flUiWin().dispatchEvent(new CustomEvent(FL_UI_EVENT));
+    } catch (e) { /* no CustomEvent: the next scan still applies the switch */ }
+  }
+
+  // Without a window (a test harness) there is nothing to listen to and nothing to switch.
+  function flUiWin() {
+    return typeof window === 'object' && window ? window : null;
+  }
+
+  function flUiOnChange(fn) {
+    const w = flUiWin();
+    if (!w) return;
+    w.addEventListener(FL_UI_EVENT, function () { fn(); });
+    w.addEventListener('storage', function (e) {
+      if (e.key === FL_UI_KEY || e.key === null) fn();
+    });
+  }
+
+  // Add this script's switchable things to the shared catalogue. `features` is
+  // [{ id, label, group }]; the same scriptId registered twice merges by feature id.
+  function flUiRegister(scriptId, title, features) {
+    const w = flUiWin();
+    if (!w) return;
+    if (!Array.isArray(w[FL_UI_CATALOGUE])) w[FL_UI_CATALOGUE] = [];
+    const cat = w[FL_UI_CATALOGUE];
+    let entry = cat.find(function (e) { return e.scriptId === scriptId; });
+    if (!entry) {
+      entry = { scriptId: scriptId, title: title, features: [] };
+      cat.push(entry);
+    }
+    features.forEach(function (f) {
+      if (!entry.features.some(function (o) { return o.id === f.id; })) entry.features.push(f);
+    });
+  }
+
+  // The settings view: one collapsible section per group, a group checkbox (dash = some shown)
+  // and one "Show <label>" checkbox per feature. Checked means shown. Plain DOM, so any of the
+  // three scripts can draw it (the launcher panel, or a box in the page).
+  function flUiRenderSettings() {
+    const w = flUiWin();
+    const cat = w && Array.isArray(w[FL_UI_CATALOGUE]) ? w[FL_UI_CATALOGUE] : [];
+    const byGroup = {};
+    cat.forEach(function (entry) {
+      entry.features.forEach(function (f) {
+        const g = f.group || 'Other';
+        (byGroup[g] = byGroup[g] || []).push({ scriptId: entry.scriptId, id: f.id, label: f.label });
+      });
+    });
+    const names = Object.keys(byGroup).sort(function (a, b) {
+      const ia = FL_UI_GROUPS.indexOf(a), ib = FL_UI_GROUPS.indexOf(b);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || (a < b ? -1 : 1);
+    });
+
+    const root = document.createElement('div');
+    root.id = 'fl-ui-settings';
+    root.style.cssText = 'font:13px/1.4 sans-serif;text-align:left;';
+    const intro = document.createElement('p');
+    intro.style.cssText = 'margin:0 0 8px;';
+    intro.textContent = 'Tick what you want to see. Changes apply at once.';
+    root.appendChild(intro);
+
+    names.forEach(function (g) {
+      const rows = byGroup[g].slice().sort(function (a, b) {
+        return a.label < b.label ? -1 : a.label > b.label ? 1 : 0;
+      });
+      const det = document.createElement('details');
+      det.style.cssText = 'margin:0 0 6px;border:1px solid rgba(128,128,128,.6);border-radius:3px;';
+      const sum = document.createElement('summary');
+      sum.style.cssText = 'cursor:pointer;padding:6px 8px;min-height:20px;';
+      const all = document.createElement('input');
+      all.type = 'checkbox';
+      all.style.cssText = 'margin:0 8px 0 0;vertical-align:middle;';
+      all.addEventListener('click', function (e) { e.stopPropagation(); });
+      const title = document.createElement('span');
+      title.textContent = g + ' (' + rows.length + ')';
+      sum.appendChild(all);
+      sum.appendChild(title);
+      det.appendChild(sum);
+
+      const boxes = [];
+      const refresh = function () {
+        const on = boxes.filter(function (b) { return b.checked; }).length;
+        all.checked = on === boxes.length;
+        all.indeterminate = on > 0 && on < boxes.length;
+      };
+      rows.forEach(function (r) {
+        const label = document.createElement('label');
+        label.style.cssText = 'display:block;cursor:pointer;padding:6px 8px 6px 28px;min-height:20px;';
+        const box = document.createElement('input');
+        box.type = 'checkbox';
+        box.checked = !flUiHidden(r.scriptId, r.id);
+        box.style.cssText = 'margin:0 8px 0 0;vertical-align:middle;';
+        box.addEventListener('change', function () {
+          flUiSetHidden(r.scriptId, r.id, !box.checked);
+          refresh();
+        });
+        boxes.push(box);
+        label.appendChild(box);
+        label.appendChild(document.createTextNode('Show ' + r.label));
+        det.appendChild(label);
+      });
+      all.addEventListener('change', function () {
+        boxes.forEach(function (b, i) {
+          if (b.checked === all.checked) return;
+          b.checked = all.checked;
+          flUiSetHidden(rows[i].scriptId, rows[i].id, !all.checked);
+        });
+        refresh();
+      });
+      refresh();
+      root.appendChild(det);
+    });
+    return root;
+  }
+  // FL's own Account page (/account): the settings view as a box after the page's tabs. Appending
+  // our own node at the end of the React-managed container is the one safe shape here, and the
+  // next scan puts it back if a re-render drops it. The first script to get here creates it;
+  // the others find it by id and redraw it only when the catalogue has grown.
+  function flUiMountAccountBox() {
+    if (typeof location !== 'object' || !location || location.pathname !== '/account') return;
+    const host = document.querySelector('.account');
+    if (!host) return;
+    const w = flUiWin();
+    const cat = w && Array.isArray(w[FL_UI_CATALOGUE]) ? w[FL_UI_CATALOGUE] : [];
+    const count = cat.reduce(function (n, e) { return n + e.features.length; }, 0);
+    let box = document.getElementById('fl-ui-settings-box');
+    if (box && box.parentNode === host && box.dataset.count === String(count)) return;
+    if (!box) {
+      box = document.createElement('section');
+      box.id = 'fl-ui-settings-box';
+      box.style.cssText = 'margin-top:24px;';
+    }
+    box.textContent = '';
+    const head = document.createElement('h2');
+    head.className = 'heading heading--2';
+    head.textContent = 'Userscript settings';
+    box.appendChild(head);
+    box.appendChild(flUiRenderSettings());
+    box.dataset.count = String(count);
+    if (box.parentNode !== host) host.appendChild(box);
+  }
+  // --- END tm-fl-ui-settings ---
 
   // Fallen London is a single-page React app: storylets, branches and results
   // are swapped into the DOM client-side without any page navigation. So unlike
@@ -249,18 +431,38 @@
   // for the root view). addBadge's per-element flag keeps
   // repeated passes idempotent. Observe document.body since the React root is
   // replaced wholesale during navigation.
+  // Switchable from the shared UI settings (see tm-fl-ui-settings). Switching off removes every
+  // "W" this script drew and its flags, so switching on draws them again on the next scan.
+  const WIKI_UI_ID = 'wiki';
+  flUiRegister(WIKI_UI_ID, 'Wiki Links', [
+    { id: 'badge', label: 'wiki “W” badges', group: 'Wiki links' },
+  ]);
+
+  function removeWikiBadges() {
+    document.querySelectorAll('.fl-wiki-link').forEach(function (a) { a.remove(); });
+    document.querySelectorAll('[data-fl-wiki]').forEach(function (el) { delete el.dataset.flWiki; });
+  }
+
   let pending = false;
   function scan() {
     pending = false;
-    linkStorylets();
-    linkHandCards();
-    resolveWikiLinks();
+    flUiMountAccountBox();
+    if (!flUiHidden(WIKI_UI_ID, 'badge')) {
+      linkStorylets();
+      linkHandCards();
+      resolveWikiLinks();
+    }
   }
   function schedule() {
     if (pending) return;
     pending = true;
     requestAnimationFrame(scan);
   }
+
+  flUiOnChange(function () {
+    if (flUiHidden(WIKI_UI_ID, 'badge')) removeWikiBadges();
+    schedule();
+  });
 
   scan();
   new MutationObserver(schedule).observe(document.body, {

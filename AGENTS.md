@@ -997,6 +997,16 @@ navigation. Two consequences:
   - **The launcher's ids** (`fl-ux-launcher`, `fl-ux-launcher-button`). The depth control docks
     behind the button by finding it by id (`launcherDockHost`). A **cross-file contract**: change
     them in both scripts or not at all.
+  **The shared show/hide switches** are a third thing all three FL scripts co-own, and the
+  counterpart of KoL's `tm-kol-ui-settings`. Each carries a copy of the code between
+  `// --- BEGIN tm-fl-ui-settings` and `// --- END tm-fl-ui-settings ---`; the copies must stay
+  **byte-identical** (`tests/fl-ui-settings.test.mjs` checks it). Settings live in `localStorage`
+  key `tm-fl-hidden-ui` as `{ "<scriptId>.<featureId>": true }` (script ids `wiki`, `ux`, `choice`,
+  `menu`), hidden-only, and each script lists what it can switch in `window.__flUiFeatures`. A
+  `FEATURES` entry with a `group` is switchable; `scan` skips it when hidden, `keep()` still
+  runs, and `off()` removes what it drew. Badges need no `off`: `attachBadge` records the feature
+  that drew each one. **A new `choice-helper.js` feature must be filed in `FEATURE_GROUPS`**, or
+  `fl-ui-settings.test.mjs` fails. Contract: `okf/fallen-london/hide-ui-settings.md`.
   Storage keys and badge classes kept their `fl-ux-` names through the split on purpose: a
   returning player's caches are still found under the keys they were banked with, and nothing
   about a class name is visible to anyone.

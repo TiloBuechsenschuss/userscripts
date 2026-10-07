@@ -66,3 +66,4 @@ right file and delete the entry.
 - **Unknown:** any rate limit on the API, and how long the token lasts.
 - **Meanwhile:** one request at a time, no polling; an authentication failure
   stops the feature and says so.
+

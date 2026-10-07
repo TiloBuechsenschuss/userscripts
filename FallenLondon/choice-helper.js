@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.50
+// @version      1.51
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -652,6 +652,188 @@
 (function () {
   'use strict';
 
+  // --- BEGIN tm-fl-ui-settings (keep byte-identical across scripts) ---
+  // Shared "show / hide this piece of UI" switches, co-owned by every Fallen London script that
+  // carries this block (wiki-links.js, ux-enhancers.js, choice-helper.js). Each script has its
+  // own copy and registers what it can switch in one catalogue on the page window, so the
+  // settings view lists whichever scripts are installed, in any load order.
+  // Only HIDDEN features are stored ({ "<scriptId>.<featureId>": true }), so a feature added
+  // later is shown by default. Storage trouble reads as "everything shown".
+  const FL_UI_KEY = 'tm-fl-hidden-ui';
+  const FL_UI_EVENT = 'fl-ui-settings-change';
+  const FL_UI_CATALOGUE = '__flUiFeatures';
+  const FL_UI_GROUPS = [
+    'Wiki links', 'UX tweaks', 'London', 'Airs of London', 'Zailing', 'Parabola', 'Firmament',
+    'Railway & beyond', 'Seasonal', 'Menu entries',
+  ];
+
+  function flUiLoad() {
+    try {
+      const o = JSON.parse(localStorage.getItem(FL_UI_KEY) || '{}');
+      return o && typeof o === 'object' && !Array.isArray(o) ? o : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function flUiHidden(scriptId, featureId) {
+    return flUiLoad()[scriptId + '.' + featureId] === true;
+  }
+
+  // Read-modify-write on a fresh read, so two scripts toggling never clobber each other.
+  // `storage` events never fire in the document that wrote, and Fallen London is one document,
+  // so the change is also announced on the window for this page's own scripts.
+  function flUiSetHidden(scriptId, featureId, hidden) {
+    const o = flUiLoad();
+    const k = scriptId + '.' + featureId;
+    if (hidden) o[k] = true; else delete o[k];
+    try {
+      localStorage.setItem(FL_UI_KEY, JSON.stringify(o));
+    } catch (e) { /* storage blocked: the switch just does not stick */ }
+    try {
+      flUiWin().dispatchEvent(new CustomEvent(FL_UI_EVENT));
+    } catch (e) { /* no CustomEvent: the next scan still applies the switch */ }
+  }
+
+  // Without a window (a test harness) there is nothing to listen to and nothing to switch.
+  function flUiWin() {
+    return typeof window === 'object' && window ? window : null;
+  }
+
+  function flUiOnChange(fn) {
+    const w = flUiWin();
+    if (!w) return;
+    w.addEventListener(FL_UI_EVENT, function () { fn(); });
+    w.addEventListener('storage', function (e) {
+      if (e.key === FL_UI_KEY || e.key === null) fn();
+    });
+  }
+
+  // Add this script's switchable things to the shared catalogue. `features` is
+  // [{ id, label, group }]; the same scriptId registered twice merges by feature id.
+  function flUiRegister(scriptId, title, features) {
+    const w = flUiWin();
+    if (!w) return;
+    if (!Array.isArray(w[FL_UI_CATALOGUE])) w[FL_UI_CATALOGUE] = [];
+    const cat = w[FL_UI_CATALOGUE];
+    let entry = cat.find(function (e) { return e.scriptId === scriptId; });
+    if (!entry) {
+      entry = { scriptId: scriptId, title: title, features: [] };
+      cat.push(entry);
+    }
+    features.forEach(function (f) {
+      if (!entry.features.some(function (o) { return o.id === f.id; })) entry.features.push(f);
+    });
+  }
+
+  // The settings view: one collapsible section per group, a group checkbox (dash = some shown)
+  // and one "Show <label>" checkbox per feature. Checked means shown. Plain DOM, so any of the
+  // three scripts can draw it (the launcher panel, or a box in the page).
+  function flUiRenderSettings() {
+    const w = flUiWin();
+    const cat = w && Array.isArray(w[FL_UI_CATALOGUE]) ? w[FL_UI_CATALOGUE] : [];
+    const byGroup = {};
+    cat.forEach(function (entry) {
+      entry.features.forEach(function (f) {
+        const g = f.group || 'Other';
+        (byGroup[g] = byGroup[g] || []).push({ scriptId: entry.scriptId, id: f.id, label: f.label });
+      });
+    });
+    const names = Object.keys(byGroup).sort(function (a, b) {
+      const ia = FL_UI_GROUPS.indexOf(a), ib = FL_UI_GROUPS.indexOf(b);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || (a < b ? -1 : 1);
+    });
+
+    const root = document.createElement('div');
+    root.id = 'fl-ui-settings';
+    root.style.cssText = 'font:13px/1.4 sans-serif;text-align:left;';
+    const intro = document.createElement('p');
+    intro.style.cssText = 'margin:0 0 8px;';
+    intro.textContent = 'Tick what you want to see. Changes apply at once.';
+    root.appendChild(intro);
+
+    names.forEach(function (g) {
+      const rows = byGroup[g].slice().sort(function (a, b) {
+        return a.label < b.label ? -1 : a.label > b.label ? 1 : 0;
+      });
+      const det = document.createElement('details');
+      det.style.cssText = 'margin:0 0 6px;border:1px solid rgba(128,128,128,.6);border-radius:3px;';
+      const sum = document.createElement('summary');
+      sum.style.cssText = 'cursor:pointer;padding:6px 8px;min-height:20px;';
+      const all = document.createElement('input');
+      all.type = 'checkbox';
+      all.style.cssText = 'margin:0 8px 0 0;vertical-align:middle;';
+      all.addEventListener('click', function (e) { e.stopPropagation(); });
+      const title = document.createElement('span');
+      title.textContent = g + ' (' + rows.length + ')';
+      sum.appendChild(all);
+      sum.appendChild(title);
+      det.appendChild(sum);
+
+      const boxes = [];
+      const refresh = function () {
+        const on = boxes.filter(function (b) { return b.checked; }).length;
+        all.checked = on === boxes.length;
+        all.indeterminate = on > 0 && on < boxes.length;
+      };
+      rows.forEach(function (r) {
+        const label = document.createElement('label');
+        label.style.cssText = 'display:block;cursor:pointer;padding:6px 8px 6px 28px;min-height:20px;';
+        const box = document.createElement('input');
+        box.type = 'checkbox';
+        box.checked = !flUiHidden(r.scriptId, r.id);
+        box.style.cssText = 'margin:0 8px 0 0;vertical-align:middle;';
+        box.addEventListener('change', function () {
+          flUiSetHidden(r.scriptId, r.id, !box.checked);
+          refresh();
+        });
+        boxes.push(box);
+        label.appendChild(box);
+        label.appendChild(document.createTextNode('Show ' + r.label));
+        det.appendChild(label);
+      });
+      all.addEventListener('change', function () {
+        boxes.forEach(function (b, i) {
+          if (b.checked === all.checked) return;
+          b.checked = all.checked;
+          flUiSetHidden(rows[i].scriptId, rows[i].id, !all.checked);
+        });
+        refresh();
+      });
+      refresh();
+      root.appendChild(det);
+    });
+    return root;
+  }
+  // FL's own Account page (/account): the settings view as a box after the page's tabs. Appending
+  // our own node at the end of the React-managed container is the one safe shape here, and the
+  // next scan puts it back if a re-render drops it. The first script to get here creates it;
+  // the others find it by id and redraw it only when the catalogue has grown.
+  function flUiMountAccountBox() {
+    if (typeof location !== 'object' || !location || location.pathname !== '/account') return;
+    const host = document.querySelector('.account');
+    if (!host) return;
+    const w = flUiWin();
+    const cat = w && Array.isArray(w[FL_UI_CATALOGUE]) ? w[FL_UI_CATALOGUE] : [];
+    const count = cat.reduce(function (n, e) { return n + e.features.length; }, 0);
+    let box = document.getElementById('fl-ui-settings-box');
+    if (box && box.parentNode === host && box.dataset.count === String(count)) return;
+    if (!box) {
+      box = document.createElement('section');
+      box.id = 'fl-ui-settings-box';
+      box.style.cssText = 'margin-top:24px;';
+    }
+    box.textContent = '';
+    const head = document.createElement('h2');
+    head.className = 'heading heading--2';
+    head.textContent = 'Userscript settings';
+    box.appendChild(head);
+    box.appendChild(flUiRenderSettings());
+    box.dataset.count = String(count);
+    if (box.parentNode !== host) host.appendChild(box);
+  }
+  // --- END tm-fl-ui-settings ---
+
   // Advice on what Fallen London's storylets and opportunity cards do: a badge
   // on each one this script has a table for, and a reference panel per area
   // built on the same table. Split out of FallenLondon/ux-enhancers.js at its
@@ -1043,6 +1225,23 @@
   //          'after' (next sibling -- for headings; putting a badge INSIDE a
   //          heading would corrupt wiki-links.js's textContent read of it).
   //   style  optional extra inline styles, e.g. to position an overlay.
+  // The feature whose `run` is on the stack (set by `scan`), so a badge can be traced back to
+  // the feature that drew it and taken out again when that feature is switched off.
+  let currentFeature = null;
+  const badgeOrigin = new WeakMap();
+
+  // Takes every badge `name` drew out of the page, and the flag it left on its host, so that
+  // switching the feature on again draws the badge again rather than finding it "already done".
+  function clearFeatureBadges(name) {
+    document.querySelectorAll('.' + BADGE_CLASS + '[data-fl-feature]').forEach(function (b) {
+      if (b.dataset.flFeature !== name) return;
+      const origin = badgeOrigin.get(b);
+      if (origin) delete origin.host.dataset[origin.flag];
+      if (tipAnchor && (tipAnchor === b || b.contains(tipAnchor))) hideTip();
+      b.remove();
+    });
+  }
+
   function attachBadge(host, opts) {
     const cls = opts.cls;
     // The flag records BOTH the value and whether a badge was drawn for it
@@ -1072,6 +1271,10 @@
     if (!opts.spec) return;
 
     const badge = makeBadge(opts.spec, cls);
+    if (currentFeature && badge.dataset) {
+      badge.dataset.flFeature = currentFeature;
+      badgeOrigin.set(badge, { host: host, flag: opts.flag });
+    }
     if (opts.style) Object.assign(badge.style, opts.style);
     if (opts.place === 'append') host.appendChild(badge);
     else host.after(badge);
@@ -36957,6 +37160,17 @@
     mountDepthRow(at, floor);
   }
 
+  function fotzDepthControlsOff() {
+    if (depthRow) {
+      depthRow.remove();
+      depthRow = null;
+    }
+    if (depthDock) {
+      depthDock.remove();
+      depthDock = null;
+    }
+  }
+
   // === feature: Ecdysis ===================================================
   //
   // A repeatable Firmament carousel in Hallow's Throat, storylet "Ecdysis: One
@@ -42979,11 +43193,11 @@
     { name: 'fotz-capture', run: captureFotzState },
     { name: 'spite-card-ratings', run: spiteCardRatings },
     { name: 'zee-card-ratings', run: zeeCardRatings },
-    { name: 'fotz-card-ratings', run: fotzCardRatings },
+    { name: 'fotz-card-ratings', run: fotzCardRatings, keep: forgetStaleDepth },
     // How deep you are, set in the page rather than behind the launcher. AFTER
     // the ratings, because `fotzCardRatings` is where `forgetStaleDepth` runs:
     // a depth thrown away on surfacing is gone before the control can draw it.
-    { name: 'fotz-depth-control', run: fotzDepthControls },
+    { name: 'fotz-depth-control', run: fotzDepthControls, off: fotzDepthControlsOff },
     // The only feature that decorates a storylet's OPTIONS rather than cards.
     { name: 'fotz-supplication', run: fotzSupplicationBranches },
     // Port Carnelian deals no opportunity cards at all, so this one badges the
@@ -43260,6 +43474,105 @@
     { name: 'philosofruits', run: phfRatings },
   ];
 
+  // === switches (tm-fl-ui-settings) ======================================
+  //
+  // Which category each feature is filed under in Settings. A feature listed here can be
+  // switched off; one that is not (today only `fotz-capture`, which draws nothing) cannot.
+  // `tests/fl-ui-settings.test.mjs` fails on a feature that is neither listed here nor named
+  // there as drawing nothing, so a new feature has to be filed. Seasonal is festival and holiday
+  // content that is only on for part of the year.
+  const FEATURE_GROUPS = {
+    'London': [
+      'spite-card-ratings', 'university-laboratory', 'arbor', 'lb-industries', 'menace-eradication',
+      'vertiginous-horticulture', 'forgotten-quarter', 'cat-and-mouse', 'season-in-soup',
+      'long-dead-god', 'engaged-in-a-case', 'sunken-embassy', 'law-furnace', 'prelapsarian-museum',
+      'on-a-heist', 'spider-symposium', 'short-stories', 'flash-lays', 'social-actions',
+      'cave-of-the-nadir', 'empress-court', 'breeding-monsters', 'mahogany-hall', 'master-classes',
+      'sixth-coil', 'rat-market', 'boxful-of-intrigue', 'underclay', 'hunting-bees',
+      'featuring-tales-university', 'term-passing', 'trade-in-reputations', 'savage-cobbles',
+      'publishing-newspaper', 'war-of-assassins', 'wars-of-illusion', 'foreign-posting',
+      'temple-club', 'attending-party', 'missing-woman', 'wilmots-business', 'brawling-dockers',
+      'assembling-skeleton', 'professional-activities', 'hearts-game', 'relickers', 'the-stacks',
+      'the-marrow', 'spending-secrets', 'philosofruits',
+    ],
+    'Airs of London': [
+      'airs-of-london', 'the-hunt-is-on', 'running-battle', 'casing', 'fascinating', 'inspired',
+      'investigating', 'someone-is-coming', 'hellworm', 'risen-burgundy', 'menace-locations',
+      'rattus-faber', 'tower-of-eyes', 'cheery-man-constable', 'time-in-bed', 'burning-city',
+      'university-creatures', 'clay-quarters', 'mutually-agreed-divorce', 'clathermont-tattoo',
+      'shifting-streets', 'candlefinder-clay-men', 'on-the-trail', 'watchmakers-hill-airs',
+      'opportunity-for-profit', 'alleys-of-spite', 'flit-and-its-king', 'bones-in-river',
+      'chandleress-complaint',
+    ],
+    'Zailing': [
+      'zee-card-ratings', 'port-carnelian', 'scientific-voyages', 'hunters-keep', 'mutton-island',
+      'venderbight', 'godfall', 'maze-garden', 'promenade', 'port-cecil', 'zee-beasts', 'piracy',
+      'irem', 'khaganian-intrigue',
+    ],
+    'Parabola': [
+      'chessboard', 'parabolan-hunting', 'oneiropomp', 'sacroboscan', 'parabolan-war',
+      'cubs-education', 'parabolan-camp',
+    ],
+    'Firmament': [
+      'firmament', 'discordant-studies', 'plaster-face', 'ecdysis', 'midnight-trade', 'high-sancta',
+      'moon-miser-herding', 'sous-catacombs', 'upon-a-red-stage', 'to-make-a-moth',
+      'scaling-quartz',
+    ],
+    'Railway & beyond': [
+      'helicon-house', 'jericho-library', 'canal-cruising', 'barristering', 'magistracy-diving',
+      'railway-board', 'deciphering', 'disappearing', 'cover-identities', 'moonlit-woods',
+      'painting-balmoral', 'church-in-the-wild', 'law-hunting', 'moulin-expeditions',
+      'writing-monograph', 'kitchen-artists', 'alchemy-station-viii', 'cornelius',
+      'clay-highwayman', 'hurling', 'chthonic-communication', 'digging-hurlers',
+      'marigold-station', 'station-developments', 'city-of-the-tracklayers', 'station-statues',
+      'iron-republic',
+    ],
+    'Seasonal': [
+      'fotz-card-ratings', 'fotz-depth-control', 'fotz-supplication', 'feast-of-the-rose',
+      'festive-fir', 'christmas-card', 'hallowmas-visitor',
+    ],
+  };
+
+  // Settings wording where the feature's name, title-cased, would not read well.
+  const FEATURE_LABELS = {
+    'spite-card-ratings': 'The Crowds of Spite cards',
+    'zee-card-ratings': 'Zailing cards',
+    'fotz-card-ratings': 'Fruits of the Zee diving cards',
+    'fotz-depth-control': 'Fruits of the Zee depth control',
+    'fotz-supplication': 'Fruits of the Zee supplication options',
+    'lb-industries': 'L. B. Industries',
+    'sacroboscan': 'The Sacroboscan Calendar',
+    'cubs-education': 'A Cub’s Education',
+    'hunters-keep': 'Hunter’s Keep',
+    'wilmots-business': 'Wilmot’s End business',
+    'hearts-game': 'Hearts’ Game',
+    'law-furnace': 'Law-Furnace',
+  };
+
+  const LABEL_SMALL = { a: 1, an: 1, the: 1, of: 1, in: 1, on: 1, to: 1, and: 1, at: 1, for: 1 };
+  function featureLabel(name) {
+    return FEATURE_LABELS[name] || name.split('-').map(function (w, i) {
+      return i && LABEL_SMALL[w] ? w : w.charAt(0).toUpperCase() + w.slice(1);
+    }).join(' ');
+  }
+
+  FEATURES.forEach(function (feature) {
+    Object.keys(FEATURE_GROUPS).forEach(function (group) {
+      if (FEATURE_GROUPS[group].indexOf(feature.name) === -1) return;
+      feature.group = group;
+      feature.label = featureLabel(feature.name);
+    });
+  });
+
+  const UI_SCRIPT = 'choice';
+
+  flUiRegister(UI_SCRIPT, 'Choice Helper', FEATURES.filter(function (f) { return f.group; })
+    .map(function (f) { return { id: f.name, label: f.label, group: f.group }; }));
+
+  function featureHidden(feature) {
+    return !!feature.group && flUiHidden(UI_SCRIPT, feature.name);
+  }
+
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
   // { id, icon, label, hint, render } entry. `render(ctx)` returns the element
   // to show and is called fresh on every open, so a panel showing live values
@@ -43338,11 +43651,20 @@
     // Before anything is drawn: a tap-to-read panel whose badge React has
     // since thrown away is pointing at nothing.
     pruneTip();
+    flUiMountAccountBox();
     for (const feature of FEATURES) {
       try {
+        if (featureHidden(feature)) {
+          // Bookkeeping that is not UI still happens (see `keep`).
+          if (feature.keep) feature.keep();
+          continue;
+        }
+        currentFeature = feature.name;
         feature.run();
       } catch (e) {
         console.error('FL Choice Helper: feature "' + feature.name + '" failed.', e);
+      } finally {
+        currentFeature = null;
       }
     }
     resolveWikiLinks();
@@ -43354,6 +43676,19 @@
   }
 
   registerPanels();
+  flUiRegister('menu', 'Menu entries', PANELS.map(function (p) {
+    return { id: p.id, label: p.label + ' menu entry', group: 'Menu entries' };
+  }));
+  // Switching a feature off takes what it drew out of the page at once; switching it on draws it
+  // again on the next scan.
+  flUiOnChange(function () {
+    for (const feature of FEATURES) {
+      if (!featureHidden(feature)) continue;
+      clearFeatureBadges(feature.name);
+      if (feature.off) feature.off();
+    }
+    schedule();
+  });
   // A page UX Enhancers loaded in a hidden frame is a page this script would
   // otherwise load again for itself. `schedule()` afterwards, because banking
   // a reading changes nothing in the page and so would redraw no badge.

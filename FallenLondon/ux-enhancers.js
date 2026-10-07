@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      3.4
+// @version      3.5
 // @description  Small quality-of-life tweaks for Fallen London, behind a docked "UX" button.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -64,6 +64,188 @@
 
 (function () {
   'use strict';
+
+  // --- BEGIN tm-fl-ui-settings (keep byte-identical across scripts) ---
+  // Shared "show / hide this piece of UI" switches, co-owned by every Fallen London script that
+  // carries this block (wiki-links.js, ux-enhancers.js, choice-helper.js). Each script has its
+  // own copy and registers what it can switch in one catalogue on the page window, so the
+  // settings view lists whichever scripts are installed, in any load order.
+  // Only HIDDEN features are stored ({ "<scriptId>.<featureId>": true }), so a feature added
+  // later is shown by default. Storage trouble reads as "everything shown".
+  const FL_UI_KEY = 'tm-fl-hidden-ui';
+  const FL_UI_EVENT = 'fl-ui-settings-change';
+  const FL_UI_CATALOGUE = '__flUiFeatures';
+  const FL_UI_GROUPS = [
+    'Wiki links', 'UX tweaks', 'London', 'Airs of London', 'Zailing', 'Parabola', 'Firmament',
+    'Railway & beyond', 'Seasonal', 'Menu entries',
+  ];
+
+  function flUiLoad() {
+    try {
+      const o = JSON.parse(localStorage.getItem(FL_UI_KEY) || '{}');
+      return o && typeof o === 'object' && !Array.isArray(o) ? o : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function flUiHidden(scriptId, featureId) {
+    return flUiLoad()[scriptId + '.' + featureId] === true;
+  }
+
+  // Read-modify-write on a fresh read, so two scripts toggling never clobber each other.
+  // `storage` events never fire in the document that wrote, and Fallen London is one document,
+  // so the change is also announced on the window for this page's own scripts.
+  function flUiSetHidden(scriptId, featureId, hidden) {
+    const o = flUiLoad();
+    const k = scriptId + '.' + featureId;
+    if (hidden) o[k] = true; else delete o[k];
+    try {
+      localStorage.setItem(FL_UI_KEY, JSON.stringify(o));
+    } catch (e) { /* storage blocked: the switch just does not stick */ }
+    try {
+      flUiWin().dispatchEvent(new CustomEvent(FL_UI_EVENT));
+    } catch (e) { /* no CustomEvent: the next scan still applies the switch */ }
+  }
+
+  // Without a window (a test harness) there is nothing to listen to and nothing to switch.
+  function flUiWin() {
+    return typeof window === 'object' && window ? window : null;
+  }
+
+  function flUiOnChange(fn) {
+    const w = flUiWin();
+    if (!w) return;
+    w.addEventListener(FL_UI_EVENT, function () { fn(); });
+    w.addEventListener('storage', function (e) {
+      if (e.key === FL_UI_KEY || e.key === null) fn();
+    });
+  }
+
+  // Add this script's switchable things to the shared catalogue. `features` is
+  // [{ id, label, group }]; the same scriptId registered twice merges by feature id.
+  function flUiRegister(scriptId, title, features) {
+    const w = flUiWin();
+    if (!w) return;
+    if (!Array.isArray(w[FL_UI_CATALOGUE])) w[FL_UI_CATALOGUE] = [];
+    const cat = w[FL_UI_CATALOGUE];
+    let entry = cat.find(function (e) { return e.scriptId === scriptId; });
+    if (!entry) {
+      entry = { scriptId: scriptId, title: title, features: [] };
+      cat.push(entry);
+    }
+    features.forEach(function (f) {
+      if (!entry.features.some(function (o) { return o.id === f.id; })) entry.features.push(f);
+    });
+  }
+
+  // The settings view: one collapsible section per group, a group checkbox (dash = some shown)
+  // and one "Show <label>" checkbox per feature. Checked means shown. Plain DOM, so any of the
+  // three scripts can draw it (the launcher panel, or a box in the page).
+  function flUiRenderSettings() {
+    const w = flUiWin();
+    const cat = w && Array.isArray(w[FL_UI_CATALOGUE]) ? w[FL_UI_CATALOGUE] : [];
+    const byGroup = {};
+    cat.forEach(function (entry) {
+      entry.features.forEach(function (f) {
+        const g = f.group || 'Other';
+        (byGroup[g] = byGroup[g] || []).push({ scriptId: entry.scriptId, id: f.id, label: f.label });
+      });
+    });
+    const names = Object.keys(byGroup).sort(function (a, b) {
+      const ia = FL_UI_GROUPS.indexOf(a), ib = FL_UI_GROUPS.indexOf(b);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || (a < b ? -1 : 1);
+    });
+
+    const root = document.createElement('div');
+    root.id = 'fl-ui-settings';
+    root.style.cssText = 'font:13px/1.4 sans-serif;text-align:left;';
+    const intro = document.createElement('p');
+    intro.style.cssText = 'margin:0 0 8px;';
+    intro.textContent = 'Tick what you want to see. Changes apply at once.';
+    root.appendChild(intro);
+
+    names.forEach(function (g) {
+      const rows = byGroup[g].slice().sort(function (a, b) {
+        return a.label < b.label ? -1 : a.label > b.label ? 1 : 0;
+      });
+      const det = document.createElement('details');
+      det.style.cssText = 'margin:0 0 6px;border:1px solid rgba(128,128,128,.6);border-radius:3px;';
+      const sum = document.createElement('summary');
+      sum.style.cssText = 'cursor:pointer;padding:6px 8px;min-height:20px;';
+      const all = document.createElement('input');
+      all.type = 'checkbox';
+      all.style.cssText = 'margin:0 8px 0 0;vertical-align:middle;';
+      all.addEventListener('click', function (e) { e.stopPropagation(); });
+      const title = document.createElement('span');
+      title.textContent = g + ' (' + rows.length + ')';
+      sum.appendChild(all);
+      sum.appendChild(title);
+      det.appendChild(sum);
+
+      const boxes = [];
+      const refresh = function () {
+        const on = boxes.filter(function (b) { return b.checked; }).length;
+        all.checked = on === boxes.length;
+        all.indeterminate = on > 0 && on < boxes.length;
+      };
+      rows.forEach(function (r) {
+        const label = document.createElement('label');
+        label.style.cssText = 'display:block;cursor:pointer;padding:6px 8px 6px 28px;min-height:20px;';
+        const box = document.createElement('input');
+        box.type = 'checkbox';
+        box.checked = !flUiHidden(r.scriptId, r.id);
+        box.style.cssText = 'margin:0 8px 0 0;vertical-align:middle;';
+        box.addEventListener('change', function () {
+          flUiSetHidden(r.scriptId, r.id, !box.checked);
+          refresh();
+        });
+        boxes.push(box);
+        label.appendChild(box);
+        label.appendChild(document.createTextNode('Show ' + r.label));
+        det.appendChild(label);
+      });
+      all.addEventListener('change', function () {
+        boxes.forEach(function (b, i) {
+          if (b.checked === all.checked) return;
+          b.checked = all.checked;
+          flUiSetHidden(rows[i].scriptId, rows[i].id, !all.checked);
+        });
+        refresh();
+      });
+      refresh();
+      root.appendChild(det);
+    });
+    return root;
+  }
+  // FL's own Account page (/account): the settings view as a box after the page's tabs. Appending
+  // our own node at the end of the React-managed container is the one safe shape here, and the
+  // next scan puts it back if a re-render drops it. The first script to get here creates it;
+  // the others find it by id and redraw it only when the catalogue has grown.
+  function flUiMountAccountBox() {
+    if (typeof location !== 'object' || !location || location.pathname !== '/account') return;
+    const host = document.querySelector('.account');
+    if (!host) return;
+    const w = flUiWin();
+    const cat = w && Array.isArray(w[FL_UI_CATALOGUE]) ? w[FL_UI_CATALOGUE] : [];
+    const count = cat.reduce(function (n, e) { return n + e.features.length; }, 0);
+    let box = document.getElementById('fl-ui-settings-box');
+    if (box && box.parentNode === host && box.dataset.count === String(count)) return;
+    if (!box) {
+      box = document.createElement('section');
+      box.id = 'fl-ui-settings-box';
+      box.style.cssText = 'margin-top:24px;';
+    }
+    box.textContent = '';
+    const head = document.createElement('h2');
+    head.className = 'heading heading--2';
+    head.textContent = 'Userscript settings';
+    box.appendChild(head);
+    box.appendChild(flUiRenderSettings());
+    box.dataset.count = String(count);
+    if (box.parentNode !== host) host.appendChild(box);
+  }
+  // --- END tm-fl-ui-settings ---
 
   // This script is a container for small Fallen London quality-of-life tweaks,
   // in the same spirit as KingdomOfLoathing/ux-enhancers.js. The difference is
@@ -421,16 +603,30 @@
 
   // Ours first, then the registry's, each id once. An entry without a `render`
   // is dropped rather than drawn as a button that throws when it is pressed.
+  // The settings screen itself. It is never in the shared registry and never switchable: it is
+  // the way back to every other switch. Last in the menu.
+  const SETTINGS_PANEL = {
+    id: 'settings',
+    icon: '⚙',
+    label: 'Settings',
+    hint: 'Choose which badges, tweaks and menu entries to show',
+    render: flUiRenderSettings,
+  };
+
+  // Menu entries the player switched off (category "Menu entries") are left out.
   function menuPanels() {
     const out = PANELS.slice();
     const shared = sharedPanels();
-    if (!shared) return out;
-    for (const panel of shared) {
-      if (!panel || !panel.id || typeof panel.render !== 'function') continue;
-      if (out.some(function (p) { return p.id === panel.id; })) continue;
-      out.push(panel);
+    if (shared) {
+      for (const panel of shared) {
+        if (!panel || !panel.id || typeof panel.render !== 'function') continue;
+        if (out.some(function (p) { return p.id === panel.id; })) continue;
+        out.push(panel);
+      }
     }
-    return out;
+    return out.filter(function (p) {
+      return !flUiHidden('menu', p.id);
+    }).concat([SETTINGS_PANEL]);
   }
 
   function btnStyle(extra) {
@@ -1111,6 +1307,7 @@
     // menu opens. Choice Helper's panels arrive through the shared registry,
     // and nothing promises that script ran before this one built the menu.
     const menuItems = h('div');
+    let openPanelId = null;
     let menuSig = null;
     function syncMenu() {
       const panels = menuPanels();
@@ -1190,9 +1387,18 @@
     }
     function closeMenu() { menu.style.display = 'none'; }
     function closePanel() {
+      openPanelId = null;
       panelHost.style.display = 'none';
       panelHost.textContent = '';
     }
+    // A menu entry switched off in Settings goes from the menu at once, and its panel closes
+    // if it is the one open.
+    flUiOnChange(function () {
+      syncMenu();
+      if (openPanelId && openPanelId !== SETTINGS_PANEL.id && flUiHidden('menu', openPanelId)) {
+        closePanel();
+      }
+    });
     // The header stays put and only the body is rebuilt, so a panel that
     // refreshes itself doesn't make the whole thing flicker or lose its
     // scroll position. `ctx.rerender()` is how a panel asks for that.
@@ -1220,6 +1426,7 @@
     });
 
     function openPanel(panel) {
+      openPanelId = panel.id;
       panelHost.textContent = '';
       syncFullscreenButton();
       panelHost.appendChild(h('div', {
@@ -3918,18 +4125,60 @@
     { name: 'pending-item', run: runPendingItem },
     // Possessions: stars the best item per slot for the "Show:" stat, and
     // adds BDR to that filter.
-    { name: 'equipment-helper', run: equipmentHelper },
+    { name: 'equipment-helper', run: equipmentHelper, off: equipmentHelperOff,
+      group: 'UX tweaks', label: 'best-item stars and the BDR filter (Possessions)' },
     // Every action with a challenge: an "Optimize equipment" button that equips
     // the outfit giving the best chance, through the game's own API.
-    { name: 'equipment-optimizer', run: equipmentOptimizer },
+    { name: 'equipment-optimizer', run: equipmentOptimizer, off: equipmentOptimizerOff,
+      group: 'UX tweaks', label: 'the Optimize equipment button' },
   ];
+
+  // === switches (tm-fl-ui-settings) ======================================
+  //
+  // An entry with a `group` can be switched off in Settings; one without (the launcher, which is
+  // the way back, and the two captures, which draw nothing) cannot. `off` takes the entry's own
+  // drawing out of the page when it is switched off, flags included, so that switching it on
+  // draws it again. Only the drawing stops: nothing a capture banks depends on a switch.
+
+  const UI_SCRIPT = 'ux';
+
+  flUiRegister(UI_SCRIPT, 'UX Enhancers', FEATURES.filter(function (f) { return f.group; })
+    .map(function (f) { return { id: f.name, label: f.label, group: f.group }; }));
+  flUiRegister('menu', 'Menu entries', PANELS.map(function (p) {
+    return { id: p.id, label: p.label + ' menu entry', group: 'Menu entries' };
+  }));
+
+  function featureHidden(feature) {
+    return !!feature.group && flUiHidden(UI_SCRIPT, feature.name);
+  }
+
+  function equipmentHelperOff() {
+    document.querySelectorAll('[data-fl-ux-equip]').forEach(function (node) {
+      node.querySelectorAll('.' + EQUIP_MARK_CLASS).forEach(function (m) {
+        if (m.parentNode === node) m.remove();
+      });
+      node.style.boxShadow = '';
+      delete node.dataset[EQUIP_FLAG];
+    });
+    drawEquipSummary(null, '');
+    const list = document.querySelector('.equipment-group-list');
+    setBdrChosen(false);
+    showBdrValue(list ? findShowControl() : null, false);
+    document.querySelectorAll('[id$="' + EQUIP_BDR_OPTION + '"]').forEach(function (o) { o.remove(); });
+  }
+
+  function equipmentOptimizerOff() {
+    document.querySelectorAll('.' + EO_CLASS).forEach(function (w) { w.remove(); });
+  }
 
   // === dispatch ==========================================================
 
   let pending = false;
   function scan() {
     pending = false;
+    flUiMountAccountBox();
     for (const feature of FEATURES) {
+      if (featureHidden(feature)) continue;
       try {
         feature.run();
       } catch (e) {
@@ -3949,6 +4198,18 @@
   onSharedFrame(function (path, doc) {
     if (path === '/myself') bankQualities(readQualities(doc));
     else if (path === '/possessions') bankPossessions(readPossessions(doc));
+  });
+
+  flUiOnChange(function () {
+    for (const feature of FEATURES) {
+      if (!featureHidden(feature) || !feature.off) continue;
+      try {
+        feature.off();
+      } catch (e) {
+        console.error('FL UX Enhancers: switching off "' + feature.name + '" failed.', e);
+      }
+    }
+    schedule();
   });
 
   scan();

@@ -42,6 +42,18 @@ Read a name with **`headingName(el)`, never `textContent`** — `wiki-links.js` 
 "W" anchor into the same heading, so `textContent` yields `"A drunkW"` and matches
 nothing. And never put a badge *inside* a heading, for the same reason in reverse.
 
+## Switches
+
+Every badge feature can be switched off by the player (Settings in the ⚙ UX menu; contract in
+`okf/fallen-london/hide-ui-settings.md`). A new `FEATURES` entry therefore has to be **filed**: add
+its name to one list in `FEATURE_GROUPS` (London, Airs of London, Zailing, Parabola, Firmament,
+Railway & beyond, or Seasonal for festival and holiday content), and to `FEATURE_LABELS` if its
+name title-cased does not read well. The `group` and `label` are stamped on the entry for you.
+Nothing else is needed for a badge: `attachBadge` records which feature drew it, so switching the
+feature off removes its badges and clears the host flags. A feature that draws something *other*
+than badges needs an `off` function on its entry that removes it and its flags, and one that also
+banks state needs a `keep`. `check.mjs` and `tests/fl-ui-settings.test.mjs` fail on an unfiled one.
+
 ## Checklist
 
 Work in this order. **TRAP** marks the ones that get skipped.
