@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.45
+// @version      1.46
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -639,6 +639,13 @@
  *     for whether your PLC and Marks cover it, then its Favours. The panel adds your numbers (settable by hand where nothing
  *     is read), the actions still to go to CtD 14, every option by the guide's four bands, and the rewards. The option pages
  *     are followed over the guide: they lock six options at CtD 6, and Look at those coins and Ask someone else are Luck 50.
+ *     (24) Philosofruits, the Fate-locked activity in the Wisp-Ways behind the Mangrove College, markup only, no panel. The
+ *     wiki records none of its card or option names, only their pictures, so its cards and their options are matched by
+ *     PICTURE until the titles are read off the game and filled in; a filled-in title then wins over the picture. A card
+ *     shows what each of its options does to the five qualities a Harvest reads ("+A? / +R?": Y Yield, A Asceticism,
+ *     C Curiosity, F Frivolity, R Rot), an option its own part, with "?" for a stat challenge and "clears hand" where it
+ *     wipes the hand. No ranking: the letter you want depends on the recipe. Shown only under a Wisp-Ways greeting, since
+ *     the pictures are used all over the game; the tooltip of an unnamed row quotes the name the game shows, to copy in.
  *     Built as a feature registry so further advice can be added as entries.
  */
 
@@ -42583,6 +42590,373 @@
     ]);
   }
 
+  // === feature: Philosofruits ============================================
+  //
+  // The repeatable activity in the Wisp-Ways, behind the Mangrove College, once
+  // the Fate story The Mushroom's Dream is done. It is played from its own
+  // opportunity deck (infinite draw, a hand of three, nothing discardable):
+  // most card options move one of five qualities, a Harvest storylet turns
+  // them into fruit, and a Philosophy storylet turns the fruit into a reward.
+  //
+  // **The cards have no names here yet, on purpose.** The content is
+  // Fate-locked and the wiki records none of its text: Philosofruits (Guide)
+  // identifies every card and every option by its PICTURE (`Treeblue.png`,
+  // `treesmall.png`), and no card or option page exists. So each row carries
+  // the picture it is matched by today and a `title` that stays null until
+  // someone reads the real name off the game. A filled-in title wins over the
+  // picture -- and once a card has one, another card that happens to share its
+  // picture is no longer taken for it. The tooltip of every row without a title
+  // quotes what the game shows in its place, so filling a name in is copying it
+  // from the tooltip into PHF_CARDS.
+  //
+  // **Matching by picture is unverified twice over.** (1) Where the picture
+  // sits: only `.hand__image` (the wide hand) is a captured <img>. The one
+  // branch capture in this file (the supplication branches) elides
+  // `.branch__left`, so an option's picture is read as the first <img> inside
+  // it; the opened card's as the first <img> under `.media--root` that is not
+  // inside a branch; the compact hand's as the first <img> under
+  // `.small-card-container`. All three are guesses inside verified containers.
+  // (2) The file names: the wiki uploads Fallen London's art under the game's
+  // own file name with the first letter capitalised, and `phfImageKey` compares
+  // both sides in lower case, without the folder, the extension or a trailing
+  // "small" (the small variant of an icon).
+  //
+  // **Gated on the greeting, every row.** None of these pictures is the
+  // activity's own: Treeblue.png is on fifty other wiki pages, the blemmigan
+  // on fifty more. A picture says nothing about where you are, so nothing here
+  // is badged unless the greeting names the Wisp-Ways -- the place The
+  // Mushroom's Dream says it unlocks. That is the story page's name, not a
+  // captured greeting: if it is wrong, nothing is badged at all, which is the
+  // safe way to be wrong. PHF_AREAS is the one place to fix it. An OPENED card
+  // matched by picture must also have every option on screen be one of its
+  // own, since a storylet in the same place (a Harvest, say) may well share a
+  // card's picture.
+  //
+  // **What the badge says.** What a success does to the five qualities the
+  // Harvest reads, by letter -- Y Yield, A Asceticism, C Curiosity, F
+  // Frivolity, R Rot -- then anything else it does ("+Y · Nightmares +2"),
+  // with "?" for a stat challenge and "clears hand" on the one option that
+  // wipes the hand. No ranking: which letter you want depends on the recipe you
+  // are growing towards, and that is the player's choice; the tooltip has the
+  // rules a recipe has to meet. A card in the hand shows all of its options
+  // ("+A? / +R?"). Colour is the letter's, never the only carrier. Nothing here
+  // moves a Faction, so no row has a faction part.
+  //
+  // Transcribed from Philosofruits (Guide) (fetched through the API on
+  // 2026-10-07), its Cards table. The guide states a default difficulty
+  // (Primary stats Broad 180, certain at 300; Skills Narrow 5, certain at 10)
+  // and prints a number only where a challenge differs; a null difficulty here
+  // is that default. "Shapeling Arts 2", "Kataleptic Toxicology 2" and
+  // "Mithridacy 2" are read as difficulty 2, and the tooltip says it is a
+  // reading. A failure the guide marks "-" is "nothing the guide records".
+  // Corrections -- and the titles, once read off the game -- go in PHF_CARDS and
+  // nowhere else.
+
+  // The area greetings the badges are shown under. A guess from The Mushroom's
+  // Dream ("Unlocks the Wisp-Ways"), not a capture. A leading "The" is ignored.
+  const PHF_AREAS = ['The Wisp-Ways'];
+
+  // The five qualities a card moves, in the order a badge prints them.
+  const PHF_QUALITIES = [
+    ['Y', 'Philosofruit Yield'], ['A', 'Fruitful Asceticism'], ['C', 'Fruitful Curiosity'],
+    ['F', 'Fruitful Frivolity'], ['R', 'Fruitful Rot'],
+  ];
+  const PHF_QUALITY_NAME = {};
+  PHF_QUALITIES.forEach(function (q) { PHF_QUALITY_NAME[q[0]] = q[1]; });
+
+  // Narrow challenges; every other stat here is a Primary, so Broad.
+  const PHF_SKILLS = ['Shapeling Arts', 'Kataleptic Toxicology', 'Mithridacy'];
+  const PHF_MENACES = ['Nightmares', 'Wounds'];
+  // The guide's defaults and the level it says makes each certain. The broad
+  // pair is the cross-check of broadCertainAt.
+  const PHF_BROAD_DEFAULT = 180;
+  const PHF_BROAD_CERTAIN = 300;
+  const PHF_NARROW_DEFAULT = 5;
+  const PHF_NARROW_CERTAIN = 10;
+  const PHF_HARVEST_PER_YIELD = 50;
+
+  // An option: the picture it is matched by, its challenge ([stat, difficulty],
+  // a null difficulty the guide's default; null for none) and what a success
+  // does to the five qualities. In `o`: `other`, [[quality, change]] outside
+  // the five (a menace in CP, anything else an item count); `fail` and
+  // `failOther`, the same for a failure; `clears`, the option that wipes the
+  // hand; `title`, once read off the game.
+  function phfOpt(image, ch, win, o) {
+    return Object.assign({ image: image, title: null, ch: ch, win: win, other: [], fail: {}, failOther: [] }, o);
+  }
+
+  // A card: its picture, the guide's frequency (%), its options; `drawn`, the
+  // quality level it needs to be in the deck at all; `title` as above.
+  function phfCard(image, freq, options, o) {
+    return Object.assign({ image: image, title: null, freq: freq, drawn: null, options: options }, o);
+  }
+
+  const PHF_CARDS = [
+    phfCard('treeblue', 100, [
+      phfOpt('treesmall', ['Shapeling Arts', 2], { A: 1 }),
+      phfOpt('cagedmansmall', ['Dangerous', null], { R: 1 }),
+    ]),
+    phfCard('blemmigan', 100, [
+      phfOpt('mushroomsmall', ['Kataleptic Toxicology', 2], { C: 1 }, { failOther: [['Nightmares', 2]] }),
+      phfOpt('blacksmall', ['Persuasive', null], { R: 1 }),
+    ]),
+    phfCard('passerby', 100, [
+      phfOpt('salon3small', ['Mithridacy', 2], { F: 1 }),
+      phfOpt('ring_brokensmall', ['Watchful', null], { R: 1 }),
+    ]),
+    phfCard('argument', 80, [
+      phfOpt('tonguesmall', ['Dangerous', null], { C: 1 }, { failOther: [['Nightmares', 2]] }),
+      phfOpt('confidentsmilesmall', ['Persuasive', null], { A: 1 }, { failOther: [['Wounds', 2]] }),
+      phfOpt('ropecourtsmall', ['Shadowy', null], { F: 1 }),
+      phfOpt('blacksmall', ['Mithridacy', null], { R: 1 }),
+    ]),
+    // The flavour options here take the point back on a failure.
+    phfCard('crowd2', 50, [
+      phfOpt('uttershroom_portsmall', ['Watchful', 150], { C: 1 }, { fail: { C: -1 } }),
+      phfOpt('spidertreesmall', ['Dangerous', 150], { A: 1 }, { fail: { A: -1 } }),
+      phfOpt('servantsmall', ['Persuasive', 150], { F: 1 }, { fail: { F: -1 } }),
+      phfOpt('salon3small', ['Shadowy', null], { Y: 1 }, { clears: true }),
+    ]),
+    phfCard('jungle', 80, [
+      phfOpt('blueeyesmall', ['Watchful', 150], { Y: 1 }, { failOther: [['Wounds', 2]] }),
+    ]),
+    phfCard('stick', 50, [
+      phfOpt('fistsmall', ['Dangerous', 150], { Y: 1 }, { fail: { C: 2 } }),
+    ]),
+    phfCard('cherries', 100, [
+      phfOpt('whispered_secretsmall', ['Persuasive', 150], { Y: 1 }, { failOther: [['Nightmares', 2]] }),
+    ]),
+    phfCard('mangrovecollege_interior', 80, [
+      phfOpt('cherriessmall', ['Kataleptic Toxicology', null], {},
+        { other: [['Nightmares', -4], ['Wounds', 2]], failOther: [['Nightmares', 2]] }),
+      phfOpt('applegallssmall', null, { Y: 1 }, { other: [['Nightmares', 2]] }),
+      phfOpt('creepyhandsmall', ['Watchful', 150], {}, { other: [['Solacefruit', 10]], fail: { Y: -1 } }),
+    ]),
+    // The card that raises nothing, dealt to make a big harvest harder.
+    phfCard('elegaiccockatoo', 80, [
+      phfOpt('heartfruitsmall', ['Shadowy', null], {}, { other: [['Wounds', -2]], fail: { Y: -2 } }),
+    ], { drawn: { Y: 3 } }),
+    // One per flavour, frequent once that flavour is 3: three of it into Yield.
+    phfCard('drowned', 200, [phfOpt('toolboxsmall', null, { C: -3, Y: 3 })], { drawn: { C: 3 } }),
+    phfCard('spidertree', 200, [phfOpt('mercyhandsmall', null, { A: -3, Y: 3 })], { drawn: { A: 3 } }),
+    phfCard('parrot', 200, [phfOpt('booktearssmall', null, { F: -3, Y: 3 })], { drawn: { F: 3 } }),
+  ];
+
+  // What a recipe has to meet, from the guide's Mechanics and Restrictions.
+  const PHF_RULES = [
+    'A Harvest pays ' + PHF_HARVEST_PER_YIELD + ' fruit per Yield. Asceticism, Curiosity and Frivolity only decide '
+      + 'how it splits, and together may not be more than your Yield. Rot 2 needs that flavour total at 5+, Rot 3 at '
+      + '8+, and Rot 4+ rules a regular Harvest out; a Rot Harvest needs Yield 2 and Rot 3 (or the flavour total, if higher).',
+    'At Yield 3+ a card that raises nothing joins the deck, so the guide says: flavour first, yield second.',
+    'The guide’s best repeatable recipe: Curiosity 200 and Frivolity 200 for Storm-Threnody ×4, 11 actions at least, '
+      + '4.54 EPA (5.76 selling at the Rat Market).',
+  ];
+
+  // Colour is the letter's and never the only carrier: the letter is printed.
+  const PHF_COLOR = { Y: '#8a6420', A: '#3f5f8a', C: '#5f4b8b', F: '#1b7d67', R: '#6b4a2e' };
+  const PHF_COLOR_OTHER = '#5b5b5b';   // raises none of the five
+  const PHF_COLOR_CARD = '#4a5560';    // a card's summary of its options
+
+  const PHF_CLASS = 'fl-ux-philosofruits';
+  const PHF_FLAG = 'flUxPhilosofruits';
+  const PHF_BRANCH_CLASS = 'fl-ux-philosofruits-branch';
+  const PHF_BRANCH_FLAG = 'flUxPhilosofruitsBranch';
+
+  // A picture's key, the same for the game's URL and the wiki's file name:
+  // "https://…/cards/Treeblue.png?v=2" and "treeblue" are both "treeblue",
+  // "treesmall" and "tree.png" both "tree".
+  function phfImageKey(src) {
+    if (!src) return null;
+    let s = String(src).split(/[?#]/)[0];
+    s = s.slice(s.lastIndexOf('/') + 1).toLowerCase().replace(/\.(png|jpe?g|gif|webp)$/, '').replace(/small$/, '');
+    return s || null;
+  }
+
+  function phfHere() {
+    const strip = function (n) { return normalizeName(n).replace(/^the /, ''); };
+    const area = strip(currentArea());
+    return !!area && PHF_AREAS.some(function (a) { return strip(a) === area; });
+  }
+
+  // "+A" for one, "+3Y −3C" for more; Yield first.
+  function phfDeltaText(d) {
+    return PHF_QUALITIES.filter(function (q) { return d && d[q[0]]; }).map(function (q) {
+      const n = d[q[0]];
+      return (n > 0 ? '+' : '−') + (Math.abs(n) === 1 ? '' : Math.abs(n)) + q[0];
+    }).join(' ');
+  }
+
+  function phfDeltaWords(d) {
+    return PHF_QUALITIES.filter(function (q) { return d && d[q[0]]; }).map(function (q) {
+      return PHF_QUALITY_NAME[q[0]] + ' ' + carouselSigned(d[q[0]]);
+    });
+  }
+
+  function phfOtherText(pairs, words) {
+    return (pairs || []).map(function (p) {
+      if (PHF_MENACES.indexOf(p[0]) !== -1) return p[0] + ' ' + carouselSigned(p[1]) + (words ? ' CP' : '');
+      return p[0] + ' ×' + p[1];
+    });
+  }
+
+  function phfOptionText(o) {
+    const other = phfOtherText(o.other, false);
+    const parts = [(phfDeltaText(o.win) || other.shift() || 'nothing') + (o.ch ? CAROUSEL_MARK_CHALLENGE : '')];
+    other.forEach(function (t) { parts.push(t); });
+    if (o.clears) parts.push('clears hand');
+    return parts.join(' · ');
+  }
+
+  // The quality a success raises most; a trade's colour is what it buys.
+  function phfColor(o) {
+    let best = null;
+    PHF_QUALITIES.forEach(function (q) {
+      const n = o.win[q[0]] || 0;
+      if (n > 0 && (!best || n > o.win[best])) best = q[0];
+    });
+    return best ? PHF_COLOR[best] : PHF_COLOR_OTHER;
+  }
+
+  function phfChallengeWords(ch) {
+    if (PHF_SKILLS.indexOf(ch[0]) !== -1) {
+      return ch[1] == null
+        ? 'Narrow ' + ch[0] + ' ' + PHF_NARROW_DEFAULT + ', the guide’s default for a Skill, certain at ' + PHF_NARROW_CERTAIN
+        : 'Narrow ' + ch[0] + ' ' + ch[1] + ' (the guide writes “' + ch[0] + ' ' + ch[1] + '”, read as the difficulty)';
+    }
+    const diff = ch[1] == null ? PHF_BROAD_DEFAULT : ch[1];
+    return 'Broad ' + ch[0] + ' ' + diff + (ch[1] == null ? ', the guide’s default' : '') + ', certain at ' + broadCertainAt(diff);
+  }
+
+  function phfLabel(row, kind, seen) {
+    return row.title || (seen ? seen : 'The ' + kind + ' pictured ' + row.image);
+  }
+
+  // What to do about a row nobody has named yet: say what the game calls it.
+  function phfUntitled(kind, image, seen) {
+    return 'Matched by its picture (' + image + '); the ' + kind + '’s title is not recorded yet.'
+      + (seen ? ' The game shows “' + seen + '”: that is the title to copy into PHF_CARDS.' : '');
+  }
+
+  function phfDrawnWords(card) {
+    if (!card.drawn) return '';
+    const q = Object.keys(card.drawn)[0];
+    return ', and only while ' + PHF_QUALITY_NAME[q] + ' is ' + card.drawn[q] + ' or more';
+  }
+
+  function phfOptionSpec(card, o, seen, cardSeen) {
+    const lines = [phfLabel(o, 'option', seen), 'On ' + phfLabel(card, 'card', cardSeen), ''];
+    const win = phfDeltaWords(o.win).concat(phfOtherText(o.other, true));
+    lines.push('Success: ' + (win.length ? win.join(', ') : 'nothing') + (o.clears ? ', and it clears your hand' : '') + '.');
+    if (o.ch) {
+      lines.push('Challenge: ' + phfChallengeWords(o.ch) + '. The badge quotes the success.');
+      const fail = phfDeltaWords(o.fail).concat(phfOtherText(o.failOther, true));
+      lines.push('Failure: ' + (fail.length ? fail.join(', ') : 'nothing the guide records') + '.');
+    } else {
+      lines.push('No challenge.');
+    }
+    if (o.win.R) lines.push('Rot options open once you have delivered The Dream of the Hintershroom.');
+    lines.push('');
+    PHF_RULES.forEach(function (l) { lines.push(l); });
+    if (!o.title) lines.push('', phfUntitled('option', o.image, seen));
+    return { text: phfOptionText(o), color: phfColor(o), title: lines.join('\n') };
+  }
+
+  function phfCardSpec(card, seen) {
+    const lines = [phfLabel(card, 'card', seen),
+      'Philosofruits: in the deck at ' + card.freq + '% frequency' + phfDrawnWords(card) + '.', ''];
+    card.options.forEach(function (o) {
+      lines.push('• ' + (o.title || 'pictured ' + o.image) + ': ' + phfOptionText(o)
+        + (o.ch ? ' (' + phfChallengeWords(o.ch) + ')' : ''));
+    });
+    lines.push('');
+    PHF_RULES.forEach(function (l) { lines.push(l); });
+    if (!card.title) lines.push('', phfUntitled('card', card.image, seen));
+    return { text: card.options.map(phfOptionText).join(' / '), color: PHF_COLOR_CARD, title: lines.join('\n') };
+  }
+
+  // A card by its title, else by its picture. A titled card is matched by its
+  // title alone: a picture it shares with a card of another name is that card.
+  function phfFindCard(name, key) {
+    const n = normalizeName(name);
+    for (const card of PHF_CARDS) {
+      if (card.title && n && normalizeName(card.title) === n) return { card: card, by: 'title' };
+    }
+    if (!key) return null;
+    const card = PHF_CARDS.find(function (c) { return !c.title && phfImageKey(c.image) === key; });
+    return card ? { card: card, by: 'picture' } : null;
+  }
+
+  // One of the card's options, by title, else by a picture no other untitled
+  // option on the same card shares.
+  function phfFindOption(card, name, key) {
+    const n = normalizeName(name);
+    const titled = card.options.filter(function (o) { return o.title && n && normalizeName(o.title) === n; });
+    if (titled.length === 1) return titled[0];
+    if (!key) return null;
+    const pics = card.options.filter(function (o) { return !o.title && phfImageKey(o.image) === key; });
+    return pics.length === 1 ? pics[0] : null;
+  }
+
+  function phfImgKeyOf(img) {
+    return img && img.getAttribute ? phfImageKey(img.getAttribute('src')) : null;
+  }
+
+  // The first picture under `root` that is not an option's.
+  function phfFirstImage(root) {
+    if (!root || !root.querySelectorAll) return null;
+    for (const img of root.querySelectorAll('img')) {
+      if (!(img.closest && img.closest('.branch'))) return img;
+    }
+    return null;
+  }
+
+  // The picture of a card host as eachCardName hands it over.
+  function phfCardImage(host, place) {
+    if (place === 'append') return phfImgKeyOf(host.querySelector('.hand__image'));
+    if (!host.closest) return null;
+    return phfImgKeyOf(phfFirstImage(host.closest('.small-card-container') || host.closest('.media--root')));
+  }
+
+  function phfBranches() {
+    const out = [];
+    document.querySelectorAll('.branch__title').forEach(function (head) {
+      const branch = head.closest ? head.closest('.branch') : null;
+      const left = branch ? branch.querySelector('.branch__left') : null;
+      out.push({ head: head, name: headingName(head), key: phfImgKeyOf(left ? left.querySelector('img') : null) });
+    });
+    return out;
+  }
+
+  function phfRatings() {
+    const here = phfHere();
+    const branches = phfBranches();
+    const sig = branches.map(function (b) { return b.key || '-'; }).join(',');
+    let open = null;
+    let openName = '';
+    eachCardName(function (host, name, place, style) {
+      const root = !!(host.classList && host.classList.contains('storylet-root__heading'));
+      const key = here ? phfCardImage(host, place) : null;
+      let hit = here ? phfFindCard(name, key) : null;
+      // An opened card known only by its picture must show its own options.
+      if (hit && root && hit.by === 'picture' && !(branches.length && branches.every(function (b) {
+        return phfFindOption(hit.card, b.name, b.key);
+      }))) hit = null;
+      if (root && hit) { open = hit.card; openName = name; }
+      attachBadge(host, {
+        cls: PHF_CLASS, flag: PHF_FLAG, value: name + '|' + (key || '-') + (root ? '#' + sig : ''),
+        spec: hit ? phfCardSpec(hit.card, name) : null, place: place, style: style,
+      });
+    });
+    branches.forEach(function (b) {
+      const o = open ? phfFindOption(open, b.name, b.key) : null;
+      attachBadge(b.head, {
+        cls: PHF_BRANCH_CLASS, flag: PHF_BRANCH_FLAG,
+        value: b.name + '|' + (b.key || '-') + '@' + (open ? open.image + '|' + openName : '-'),
+        spec: o ? phfOptionSpec(open, o, b.name, openName) : null, place: 'after',
+      });
+    });
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -42868,6 +43242,10 @@
     // The Numismatrix's long game: an option on a dozen other features' cards, so it badges the options of
     // each card only while that card is open, and owns the Secrets and Spending card's rewards.
     { name: 'spending-secrets', run: ctdRatings },
+    // The first feature matched by PICTURE: the wiki records no card or option
+    // names for this Fate-locked deck, so every row waits for its title and is
+    // badged only under the Wisp-Ways greeting meanwhile.
+    { name: 'philosofruits', run: phfRatings },
   ];
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a

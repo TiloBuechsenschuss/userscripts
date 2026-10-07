@@ -23,7 +23,7 @@ Fallen London:
     - https://fallenlondon.wiki/wiki/Tanah-Chook_(Guide) (Early Zailing) [Tanah-Chook] (considered, nothing to badge: Fate-locked, the wiki records option pictures not titles, see docs/superpowers/research/2026-09-29-fate-locked-guides.md)
     - https://fallenlondon.wiki/wiki/Tending_the_Colossus_(Guide) (Early Zailing) [Zailing the Unterzee] (considered, nothing to badge: Fate-locked, the wiki records option pictures not titles, see docs/superpowers/research/2026-09-29-fate-locked-guides.md)
     - https://fallenlondon.wiki/wiki/Tales_of_the_Tabernacle_(Guide) (Early Zailing) [Zailing the Unterzee] (considered, nothing to badge: Fate-locked, the wiki records option pictures not titles, see docs/superpowers/research/2026-09-29-fate-locked-guides.md)
-    - https://fallenlondon.wiki/wiki/Philosofruits_(Guide) (Mid Zailing) [Mangrove College] (considered, nothing to badge: Fate-locked, the wiki records option pictures not titles, see docs/superpowers/research/2026-09-29-fate-locked-guides.md)
+    - https://fallenlondon.wiki/wiki/Philosofruits_(Guide) (Mid Zailing) [Mangrove College] (reopened 2026-10-07 at the user's request: `philosofruits`, matched by picture until the titles are read off the game, gated on the Wisp-Ways greeting; see docs/superpowers/research/2026-09-29-fate-locked-guides.md §7)
 
   Reference (not carousels: overviews, progress qualities, shops; same order):
   Analysed 2026-09-24; work packages in the plan for these guides (progress-quality
