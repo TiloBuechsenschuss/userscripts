@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js
-// @version      1.25
+// @version      1.26
 // @description  Grab-bag of quality-of-life tweaks for Kingdom of Loathing pages.
 // @match        https://www.kingdomofloathing.com/hermit.php*
 // @match        https://kingdomofloathing.com/hermit.php*
@@ -88,7 +88,7 @@
  *   and on a player's mall store page (mallstore.php) a checkbox and quantity on every row
  *   with one "Buy checked" button, buying several different items in one go; and on the Mall
  *   page (mall.php) a saved "Daily shopping list" (item and quantity, with a button that adds
- *   the six perfect drinks) whose "Buy list" searches each item, plans the cheapest stores,
+ *   the six perfect drinks or the five hi meins) whose "Buy list" searches each item, plans the cheapest stores,
  *   shows one total to confirm, and buys.
  *   On the ascension page (ascend.php) a "Before you jump" list above the form: Interesting
  *   Coins you would lose (counted, with a link to the coin shop), cast buttons for the blood
@@ -988,9 +988,13 @@
   const DAILY_KEY = 'tm-kol-mall-daily-list';
   const DAILY_MSG_KEY = 'tm-ux-mall-daily-result';
   const DAILY_PANEL_ID = 'tm-mall-daily-panel';
-  const PERFECT_DRINKS = [
-    'perfect cosmopolitan', 'perfect dark and stormy', 'perfect mimosa',
-    'perfect negroni', 'perfect old-fashioned', 'perfect paloma',
+  // One-click additions to the list: [button label, tooltip, item names].
+  const DAILY_PRESETS = [
+    ['+ perfect drinks', 'Add the six perfect drinks, one each', [
+      'perfect cosmopolitan', 'perfect dark and stormy', 'perfect mimosa',
+      'perfect negroni', 'perfect old-fashioned', 'perfect paloma']],
+    ['+ hi meins', 'Add the five hi meins (cold, hot, sleazy, spooky, stinky), one each', [
+      'cold hi mein', 'hot hi mein', 'sleazy hi mein', 'spooky hi mein', 'stinky hi mein']],
   ];
 
   // --- pure helpers (unit-tested) ------------------------------------------
@@ -1032,32 +1036,55 @@
   // --- searching and buying -------------------------------------------------
 
   // The offers for one item, read off a background copy of the exact-name search.
+  // Returns { item, why }: `item` is null when nothing usable came back and `why`
+  // says what went wrong, so the panel can show where a list stalled rather than
+  // sitting on "Looking up...". A page with no item table at all is retried once
+  // after a pause -- KoL slows searches that follow each other quickly.
   async function findMallItem(name) {
-    try {
-      const res = await fetch(ORIGIN + '/' + mallSearchUrl(name), {
-        credentials: 'same-origin', cache: 'no-store',
-      });
-      if (!res.ok) return null;
-      const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
-      const items = [];
-      for (const table of doc.querySelectorAll('table.itemtable')) {
-        const it = parseItemTable(table);
-        if (it) items.push(it);
+    let why = 'no item table on the search page';
+    for (let attempt = 0; attempt < 2; attempt++) {
+      if (attempt) await new Promise((r) => setTimeout(r, 1500));
+      const ctl = typeof AbortController === 'function' ? new AbortController() : null;
+      const timer = ctl ? setTimeout(() => ctl.abort(), 20000) : null;
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await fetch(ORIGIN + '/' + mallSearchUrl(name), {
+          credentials: 'same-origin', cache: 'no-store', signal: ctl ? ctl.signal : undefined,
+        });
+        if (!res.ok) { why = 'HTTP ' + res.status; continue; }
+        // eslint-disable-next-line no-await-in-loop
+        const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+        const tables = doc.querySelectorAll('table.itemtable');
+        const items = [];
+        for (const table of tables) {
+          const it = parseItemTable(table);
+          if (it) items.push(it);
+        }
+        if (!tables.length) continue;
+        const item = pickItemByName(items, name);
+        if (item) return { item: item, why: '' };
+        return { item: null, why: 'no listing named exactly that (' +
+          items.map((i) => i.name).join(', ') + ')' };
+      } catch (e) {
+        why = e && e.name === 'AbortError' ? 'timed out after 20 s' : String(e && e.message || e);
+      } finally {
+        if (timer) clearTimeout(timer);
       }
-      return pickItemByName(items, name);
-    } catch (e) {
-      return null;
     }
+    return { item: null, why: why };
   }
 
   async function buyDailyList(list, say) {
     const entries = [];
     const missing = [];
+    let done = 0;
     for (const row of list) {
-      say('Looking up ' + row.name + '...');
+      done++;
+      say('Looking up ' + row.name + ' (' + done + '/' + list.length + ')...');
       // eslint-disable-next-line no-await-in-loop
-      const item = await findMallItem(row.name);
-      if (!item) { missing.push(row.name); continue; }
+      const found = await findMallItem(row.name);
+      if (!found.item) { missing.push(row.name + ' (' + found.why + ')'); continue; }
+      const item = found.item;
       entries.push({ name: item.name, itemId: item.itemId, plan: planPurchase(item.offers, row.qty) });
     }
     const buyable = entries.filter((e) => e.plan.qty > 0);
@@ -1156,11 +1183,14 @@
       nameIn.value = '';
       render();
     });
-    const drinks = makeButton('tm-mall-daily-drinks', '+ perfect drinks');
-    drinks.title = 'Add the six perfect drinks, one each';
-    drinks.addEventListener('click', () => {
-      writeDailyList(readDailyList().concat(PERFECT_DRINKS.map((n) => ({ name: n, qty: 1 }))));
-      render();
+    const presets = DAILY_PRESETS.map((pr, i) => {
+      const b = makeButton('tm-mall-daily-preset' + i, pr[0]);
+      b.title = pr[1];
+      b.addEventListener('click', () => {
+        writeDailyList(readDailyList().concat(pr[2].map((n) => ({ name: n, qty: 1 }))));
+        render();
+      });
+      return b;
     });
     const buy = makeButton('tm-mall-daily-buy', 'Buy list');
     buy.title = 'Find the cheapest stores for every row, show the total, then buy after you confirm';
@@ -1185,8 +1215,10 @@
     addRow.appendChild(qtyIn);
     addRow.appendChild(document.createTextNode(' '));
     addRow.appendChild(add);
-    addRow.appendChild(document.createTextNode(' '));
-    addRow.appendChild(drinks);
+    presets.forEach((b) => {
+      addRow.appendChild(document.createTextNode(' '));
+      addRow.appendChild(b);
+    });
 
     body.appendChild(rowsBox);
     body.appendChild(addRow);
