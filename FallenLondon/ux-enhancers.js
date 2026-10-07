@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      3.5
+// @version      3.6
 // @description  Small quality-of-life tweaks for Fallen London, behind a docked "UX" button.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -139,8 +139,10 @@
     });
   }
 
-  // The settings view: one collapsible section per group, a group checkbox (dash = some shown)
-  // and one "Show <label>" checkbox per feature. Checked means shown. Plain DOM, so any of the
+  // The settings view: a search box, then one collapsible section per category with a group
+  // checkbox (a dash = some shown) and one "Show <label>" checkbox per feature. Checked means
+  // shown. A menu entry that follows a feature (`follows: { scriptId, id, label }`) is switched off
+  // with it: its box is unticked and disabled, and says whose it follows. Plain DOM, so any of the
   // three scripts can draw it (the launcher panel, or a box in the page).
   function flUiRenderSettings() {
     const w = flUiWin();
@@ -149,7 +151,9 @@
     cat.forEach(function (entry) {
       entry.features.forEach(function (f) {
         const g = f.group || 'Other';
-        (byGroup[g] = byGroup[g] || []).push({ scriptId: entry.scriptId, id: f.id, label: f.label });
+        (byGroup[g] = byGroup[g] || []).push({
+          scriptId: entry.scriptId, id: f.id, label: f.label, follows: f.follows || null,
+        });
       });
     });
     const names = Object.keys(byGroup).sort(function (a, b) {
@@ -164,6 +168,48 @@
     intro.style.cssText = 'margin:0 0 8px;';
     intro.textContent = 'Tick what you want to see. Changes apply at once.';
     root.appendChild(intro);
+    const search = document.createElement('input');
+    search.type = 'search';
+    search.placeholder = 'Search settings';
+    search.setAttribute('aria-label', 'Search settings');
+    search.style.cssText = 'display:block;box-sizing:border-box;width:100%;margin:0 0 8px;'
+      + 'padding:8px;font:inherit;';
+    root.appendChild(search);
+
+    const sections = [];
+    const followed = function (r) {
+      return !!r.follows && flUiHidden(r.follows.scriptId, r.follows.id);
+    };
+    // Re-reads every box from storage: a switch can change another row (a followed menu entry).
+    const syncAll = function () {
+      sections.forEach(function (sec) {
+        sec.items.forEach(function (it) {
+          const off = followed(it.r);
+          it.box.disabled = off;
+          it.box.checked = !off && !flUiHidden(it.r.scriptId, it.r.id);
+          it.note.textContent = off ? ' (off with ' + it.r.follows.label + ')' : '';
+        });
+        const usable = sec.items.filter(function (it) { return !it.box.disabled; });
+        const on = usable.filter(function (it) { return it.box.checked; }).length;
+        sec.all.disabled = !usable.length;
+        sec.all.checked = !!usable.length && on === usable.length;
+        sec.all.indeterminate = on > 0 && on < usable.length;
+      });
+    };
+    const applyFilter = function () {
+      const q = search.value.trim().toLowerCase();
+      sections.forEach(function (sec) {
+        let any = false;
+        sec.items.forEach(function (it) {
+          it.visible = !q || it.r.label.toLowerCase().indexOf(q) >= 0;
+          it.el.style.display = it.visible ? 'block' : 'none';
+          any = any || it.visible;
+        });
+        sec.det.style.display = any ? '' : 'none';
+        if (q && any) sec.det.open = true;
+      });
+    };
+    search.addEventListener('input', applyFilter);
 
     names.forEach(function (g) {
       const rows = byGroup[g].slice().sort(function (a, b) {
@@ -183,41 +229,40 @@
       sum.appendChild(title);
       det.appendChild(sum);
 
-      const boxes = [];
-      const refresh = function () {
-        const on = boxes.filter(function (b) { return b.checked; }).length;
-        all.checked = on === boxes.length;
-        all.indeterminate = on > 0 && on < boxes.length;
-      };
+      const sec = { det: det, all: all, items: [] };
       rows.forEach(function (r) {
         const label = document.createElement('label');
         label.style.cssText = 'display:block;cursor:pointer;padding:6px 8px 6px 28px;min-height:20px;';
         const box = document.createElement('input');
         box.type = 'checkbox';
-        box.checked = !flUiHidden(r.scriptId, r.id);
         box.style.cssText = 'margin:0 8px 0 0;vertical-align:middle;';
+        const note = document.createElement('span');
+        note.style.cssText = 'opacity:.75;';
         box.addEventListener('change', function () {
           flUiSetHidden(r.scriptId, r.id, !box.checked);
-          refresh();
+          syncAll();
         });
-        boxes.push(box);
         label.appendChild(box);
         label.appendChild(document.createTextNode('Show ' + r.label));
+        label.appendChild(note);
         det.appendChild(label);
+        sec.items.push({ r: r, box: box, note: note, el: label, visible: true });
       });
+      // The group box acts on what the search leaves showing, and skips followed entries.
       all.addEventListener('change', function () {
-        boxes.forEach(function (b, i) {
-          if (b.checked === all.checked) return;
-          b.checked = all.checked;
-          flUiSetHidden(rows[i].scriptId, rows[i].id, !all.checked);
+        sec.items.forEach(function (it) {
+          if (!it.visible || it.box.disabled || it.box.checked === all.checked) return;
+          flUiSetHidden(it.r.scriptId, it.r.id, !all.checked);
         });
-        refresh();
+        syncAll();
       });
-      refresh();
+      sections.push(sec);
       root.appendChild(det);
     });
+    syncAll();
     return root;
   }
+
   // FL's own Account page (/account): the settings view as a box after the page's tabs. Appending
   // our own node at the end of the React-managed container is the one safe shape here, and the
   // next scan puts it back if a re-render drops it. The first script to get here creates it;
@@ -625,8 +670,15 @@
       }
     }
     return out.filter(function (p) {
-      return !flUiHidden('menu', p.id);
+      return !panelHidden(p);
     }).concat([SETTINGS_PANEL]);
+  }
+
+  // Off by its own switch, or because the feature it follows is off (a festival's panel goes
+  // with the festival).
+  function panelHidden(p) {
+    return flUiHidden('menu', p.id)
+      || !!(p.follows && flUiHidden(p.follows.scriptId, p.follows.id));
   }
 
   function btnStyle(extra) {
@@ -1395,9 +1447,8 @@
     // if it is the one open.
     flUiOnChange(function () {
       syncMenu();
-      if (openPanelId && openPanelId !== SETTINGS_PANEL.id && flUiHidden('menu', openPanelId)) {
-        closePanel();
-      }
+      const gone = menuPanels().every(function (p) { return p.id !== openPanelId; });
+      if (openPanelId && openPanelId !== SETTINGS_PANEL.id && gone) closePanel();
     });
     // The header stays put and only the body is rebuilt, so a panel that
     // refreshes itself doesn't make the whole thing flicker or lose its

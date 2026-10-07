@@ -10,8 +10,8 @@ see_also: [open-questions.md, ../kingdom-of-loathing/hide-ui-settings.md]
 
 # Shared show/hide settings
 
-A way for the three Fallen London userscripts (`wiki-links.js` 0.9, `ux-enhancers.js` 3.5,
-`choice-helper.js` 1.51, loader 0.75) to let the player switch off pieces of injected UI from one
+A way for the three Fallen London userscripts (`wiki-links.js` 0.10, `ux-enhancers.js` 3.6,
+`choice-helper.js` 1.52, loader 0.76) to let the player switch off pieces of injected UI from one
 place. It is the Fallen London counterpart of the Kingdom of Loathing one
 (`../kingdom-of-loathing/hide-ui-settings.md`), changed where the two games differ: Fallen London
 is one document with no frames, and one script holds about 150 features.

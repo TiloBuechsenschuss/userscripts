@@ -208,6 +208,12 @@ const UX_NO_UI = ['launcher', 'faction-capture', 'pending-item'];
   const ids = ux.menuPanels().map((p) => p.id);
   check('a menu entry switched off leaves the menu, Settings stays',
     [ids.includes('zailing'), ids.includes('factions'), ids.includes('settings')], [false, true, true]);
+  ux.flUiSetHidden('choice', 'fotz-card-ratings', true);
+  check('a menu entry follows its seasonal feature off',
+    ux.menuPanels().some((p) => p.id === 'fruits-of-the-zee'), false);
+  ux.flUiSetHidden('choice', 'fotz-card-ratings', false);
+  check('...and comes back with it', ux.menuPanels().some((p) => p.id === 'fruits-of-the-zee'), true);
+  check('the settings view has a search box', ux.flUiRenderSettings().children.some((c) => c.type === 'search'), true);
   ux.flUiSetHidden('menu', 'settings', true);
   check('Settings itself cannot be switched off', ux.menuPanels().some((p) => p.id === 'settings'), true);
 
