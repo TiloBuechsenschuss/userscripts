@@ -2681,6 +2681,27 @@ navigation. Two consequences:
   second Safe-Conduct option (its storylet is a generic title), *Choosing a Side*, and the *Numismatrix* intro. Research: the option
   and card pages, fetched through the API on 2026-10-03.
 
+  **Philosofruits** (`philosofruits`, `PHF_CARDS`; no panel by decision of the earlier analysis): the Fate-locked activity in the
+  Wisp-Ways behind the Mangrove College (*The Mushroom's Dream*, 25 Fate), played from its own deck. **The first feature matched by
+  PICTURE**: the wiki records no card or option text of Fate content, so Philosofruits (Guide) names every card and option by its
+  file (`Treeblue.png`, `treesmall.png`). Each row carries that picture and a `title: null`; a filled-in title wins over the
+  picture, and a titled card is no longer matched by its picture at all. An untitled row's tooltip quotes the name the game shows,
+  so filling titles in is copying them from the tooltips into `PHF_CARDS`. Three card titles are in (a phone screenshot of the
+  hand, 2026-10-07, tied to rows by the card art): *A Philosophy Close to Home* (passerby), *A Meeting of Minds* (argument), *The
+  Deeper Wisp-Ways* (jungle); no option title yet. `phfImageKey` compares lower case, no folder, no
+  extension, no trailing `small`. **Where the picture is read** is unverified apart from `.hand__image`: the first `<img>` in
+  `.branch__left` (an option), under `.media--root` outside a branch (the opened card), under `.small-card-container` (compact
+  hand). **The gate is the greeting, for every row** -- `PHF_AREAS`, *The Wisp-Ways*, taken from the story page, not captured --
+  because the pictures are reused all over the game; a wrong guess badges nothing. An opened card matched by picture must also show
+  only its own options, or neither it nor they are badged. **The badge** is what a success does to Yield / Asceticism / Curiosity /
+  Frivolity / Rot by letter (`+A?`, `+3Y −3C`, `+Y · Nightmares +2`), `?` on a stat challenge, `clears hand` on the one option that
+  does; a hand card joins its options with ` / `. No ranking (the letter you want depends on the recipe; the tooltip has the
+  Harvest rules and the guide's best recipe). 13 cards, 24 options. **Traps:** `salon3small` is Frivolity on one card and Yield on
+  another, and `blacksmall` is on two cards, so options are matched within the open card; the guide's "Shapeling Arts 2" is read
+  as difficulty 2 and the tooltip says so; a "-" failure is "nothing the guide records". Left out: the Harvest and Philosophy
+  storylets (the guide gives neither titles nor pictures for their options). Research:
+  `docs/superpowers/research/2026-09-29-fate-locked-guides.md` §7.
+
   **Economy** (panel `economy`, `ECON_*`, `renderEconomyPanel`; the sixth behind the ⚙ UX launcher): Roof Economy (Guide) and Stuiver
   Grinding (Guide) are prices, shops and Stuiver-only items with **no storylet options**, so this is a panel and no badge. Ten
   filterable tables: the Roof shops' buy / sell matrix (16 items × five markets), the Zenith and Risen Burgundy trading posts, what only
@@ -3933,6 +3954,13 @@ Confirmed live by the author:
   (*Judge the contract*, *Devour the condemned*, *Reflect*, *Dare to dance with the King*). **(5) A locked option** -- whether the
   story options are drawn greyed or not at all.
 
+- **Philosofruits** (`philosofruits`, added 2026-10-07). The table is transcribed from the guide, which names cards and options
+  only by picture. **Confirmed in game 2026-10-07:** matching by picture, for hand cards and for storylet options, and with it the
+  greeting guess (*The Wisp-Ways*, `PHF_AREAS`). Still to report: **(2) The titles** -- every card's and option's name as the game
+  shows it (each untitled badge's tooltip quotes it), to fill in `title`; eight cards are done, five cards and every option are
+  not (checklist: `docs/philosofruits/cards.md`). **(4) The "Skill 2" figures** -- whether *Shapeling Arts 2* and the like are the difficulty. **(5) A locked Rot
+  option** -- drawn greyed or not at all before the Hintershroom.
+
 - **Spending Secrets and Counting the Days** (`spending-secrets`, added 2026-10-03). Nothing seen in the game; every table is
   transcribed from the option and card pages. Report first: **(1) The eleven faction card headings** -- whether the cards show as
   the wiki titles them (*The Demi-Monde: Bohemians*, *Altars and Alms-Houses: the Church*, ...), because an option is badged only
@@ -4685,6 +4713,11 @@ Current tests:
   ends with its Favours; the state reader (live, stale, by hand, nothing) and that its signature carries no time; the wiring keyed by
   the open card (an ordinary phrase is badged under it and not elsewhere); the panel, its filter and its registration; and that no
   option name is quoted in another table.
+- `tests/choice-philosofruits.test.mjs` — 13 cards, 24 options; the guide's rules against the table (18 options raise one quality
+  by one, three raise none, each conversion card drawn at 3 of what it spends); the stated broad default against `broadCertainAt`;
+  the picture key for a game URL and a wiki file name; the badge texts and that the letter alone carries the claim; the gate in all
+  three greeting states and that leaving clears; the opened card, a storylet sharing its picture but not its options, and a picture
+  shared by two cards; and a filled-in title winning over the picture.
 - `tests/choice-the-stacks.test.mjs` — 56 card options, 8 books, 8 finale options; every progress figure one of 5, 10 or 15; the
   eight options that add Noises +6 on a failure say so in the badge and take the risk colour; the book totals against the
   totals their finale option carries; the wiring keyed by the open card (an ordinary phrase is badged under its own card only,

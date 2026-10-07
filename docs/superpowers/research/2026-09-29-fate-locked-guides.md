@@ -86,3 +86,29 @@ The Whisker-Ways (5.5), Tales of the Tabernacle (4.50), Tending the Colossus (4.
 
 1. **All eleven closed** as `(considered, nothing to badge: Fate-locked, the wiki records option pictures not titles, see this doc §1)`. No code, no version bump.
 2. Panel: none.
+
+## 7. Philosofruits reopened (2026-10-07)
+
+At the user's request Philosofruits is built anyway (`philosofruits`, `PHF_CARDS` in `choice-helper.js`), **matched by
+picture** until the titles are read off the game. Every row carries the wiki's file name (`treeblue`, `treesmall`) and a
+`title: null` to fill in; a filled-in title takes precedence over the picture. What this rests on, none of it captured:
+
+1. **Where the pictures sit.** Only `.hand__image` (the wide hand) is a captured `<img>`. An option's picture is read as
+   the first `<img>` in `.branch__left`, the opened card's as the first `<img>` under `.media--root` outside a branch,
+   the compact hand's as the first `<img>` under `.small-card-container`.
+2. **The file names.** That the game serves the same file names the wiki files them under (compared in lower case,
+   without folder, extension or a trailing `small`).
+3. **The greeting.** The pictures are reused all over the game (`Treeblue.png` is on 50+ wiki pages), so nothing is
+   badged unless the greeting names *the Wisp-Ways*, the place *The Mushroom's Dream* says it unlocks. Not captured.
+   An opened card matched by picture must also show only its own options.
+
+Two pictures are on two cards each (`salon3small`: Frivolity on one card, Yield on another; `blacksmall`: Rot on
+both), so options are matched within the open card. The guide's "Shapeling Arts 2" style figures are read as
+difficulties. Its Harvest and Philosophy storylets are not badged: the guide gives neither their options' titles nor
+their pictures.
+
+**First titles (2026-10-07).** A phone screenshot of the hand (compact layout) showed three cards. Matched to the guide's
+rows by comparing the card art with the wiki files: *A Philosophy Close to Home* = `Passerby.png`, *A Meeting of Minds* =
+`Argument.png`, *The Deeper Wisp-Ways* = `Jungle.png`. The screenshot shows no greeting, so `PHF_AREAS` is still unconfirmed,
+though a card named *The Deeper Wisp-Ways* makes the Wisp-Ways likely.
+
