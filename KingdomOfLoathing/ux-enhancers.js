@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js
-// @version      1.26
+// @version      1.27
 // @description  Grab-bag of quality-of-life tweaks for Kingdom of Loathing pages.
 // @match        https://www.kingdomofloathing.com/hermit.php*
 // @match        https://kingdomofloathing.com/hermit.php*
@@ -35,6 +35,8 @@
 // @match        https://kingdomofloathing.com/mallstore.php*
 // @match        https://www.kingdomofloathing.com/ascend.php*
 // @match        https://kingdomofloathing.com/ascend.php*
+// @match        https://www.kingdomofloathing.com/account.php*
+// @match        https://kingdomofloathing.com/account.php*
 // @grant        none
 // ==/UserScript==
 
@@ -84,7 +86,7 @@
  *   items, under a heading each -- also without moving anything, since flex order decides what is
  *   drawn where; and on fight.php a banner with a star and a note for any monster on your rare-
  *   monster watch list (the rampaging adding machine by default), a watch link on every other
- *   monster, and a list to manage them -- Auto Combat stops instead of fighting a watched one;
+ *   monster, and a list on account.php ("Userscript settings") to add and remove them -- Auto Combat stops instead of fighting a watched one;
  *   and on a player's mall store page (mallstore.php) a checkbox and quantity on every row
  *   with one "Buy checked" button, buying several different items in one go; and on the Mall
  *   page (mall.php) a saved "Daily shopping list" (item and quantity, with a button that adds
@@ -3592,24 +3594,112 @@
       }));
     }
 
-    const list = document.createElement('div');
-    list.style.cssText = 'display:none;margin-top:4px;text-align:left;';
-    line.appendChild(link('manage list', 'Show every watched monster', () => {
-      list.style.display = list.style.display === 'none' ? 'block' : 'none';
-    }));
-    rareMonsterList().forEach((m) => {
-      const row = document.createElement('div');
-      row.textContent = '★ ' + m.name + (m.note ? ' — ' + m.note : '') +
-        (m.builtin ? ' (built in)' : '');
-      row.appendChild(link('remove', 'Stop watching ' + m.name, () => {
-        rareMonsterSetWatched(m.name, false); redraw();
-      }));
-      list.appendChild(row);
+    // The list itself is edited under "Userscript settings" on account.php.
+    const manage = link('edit list', 'Add or remove watched monsters (account.php settings)', () => {
+      window.open('/account.php#tm-kol-settings', 'mainpane');
     });
+    line.appendChild(manage);
 
     box.appendChild(line);
-    box.appendChild(list);
     document.body.insertBefore(box, document.body.firstChild);
+  }
+
+  // --- Rare monster list (account.php, "Userscript settings") ----------
+  // The same panel iotm.js and quest-helper.js use (tm-kol-hidden-ui, see
+  // okf/kingdom-of-loathing/hide-ui-settings.md). That block is not carried here
+  // -- it wants the menu-row helper -- so this only finds the panel by id and
+  // makes it, with the same look, if this script ran first. The gear that opens
+  // it lives in the menu frame and needs iotm.js or quest-helper.js; without
+  // them the panel is still the last thing on account.php.
+  function rareMonsterSettings() {
+    if (!document.body) return;
+    let panel = document.getElementById('tm-kol-settings');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'tm-kol-settings';
+      panel.style.cssText = [
+        'margin:8px auto', 'padding:6px 10px', 'max-width:480px', 'border:1px solid #888',
+        'background:#f5f5ff', 'font-family:arial,sans-serif', 'font-size:12px', 'text-align:left',
+      ].join(';');
+      const head = document.createElement('div');
+      head.textContent = 'Userscript settings';
+      head.style.cssText = 'font-weight:bold;margin-bottom:4px';
+      panel.appendChild(head);
+      document.body.appendChild(panel);
+      if (location.hash === '#tm-kol-settings') {
+        panel.scrollIntoView();
+        window.addEventListener('load', () => panel.scrollIntoView());
+      }
+    }
+    const id = 'ux-enhancers';
+    if (panel.querySelector('fieldset[data-tm-script="' + id + '"]')) return;
+
+    const set = document.createElement('fieldset');
+    set.setAttribute('data-tm-script', id);
+    set.style.cssText = 'margin:4px 0;padding:4px 8px';
+    const legend = document.createElement('legend');
+    legend.textContent = 'KoL UX Enhancers \u2014 rare monsters';
+    set.appendChild(legend);
+    const intro = document.createElement('div');
+    intro.textContent = 'Monsters flagged on the fight page; Auto Combat stops instead of ' +
+      'fighting them. Names ignore case and a leading a / an / the.';
+    intro.style.marginBottom = '4px';
+    set.appendChild(intro);
+
+    const rows = document.createElement('div');
+    set.appendChild(rows);
+    const render = () => {
+      rows.textContent = '';
+      const list = rareMonsterList();
+      if (!list.length) rows.textContent = 'No monsters watched.';
+      list.forEach((m) => {
+        const row = document.createElement('div');
+        row.textContent = '\u2605 ' + m.name + (m.note ? ' \u2014 ' + m.note : '') +
+          (m.builtin ? ' (built in)' : '') + ' ';
+        const rm = document.createElement('a');
+        rm.href = '#';
+        rm.textContent = '[remove]';
+        rm.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          rareMonsterSetWatched(m.name, false);
+          render();
+        });
+        row.appendChild(rm);
+        rows.appendChild(row);
+      });
+    };
+
+    const add = document.createElement('div');
+    add.style.marginTop = '4px';
+    const nameIn = document.createElement('input');
+    nameIn.type = 'text'; nameIn.size = 22; nameIn.placeholder = 'monster name';
+    const noteIn = document.createElement('input');
+    noteIn.type = 'text'; noteIn.size = 22; noteIn.placeholder = 'note (optional)';
+    const btn = document.createElement('input');
+    btn.type = 'button'; btn.value = 'Add';
+    const msg = document.createElement('span');
+    msg.style.marginLeft = '6px';
+    btn.addEventListener('click', () => {
+      const n = rareMonsterNorm(nameIn.value);
+      if (!n) { msg.textContent = 'Type a monster name first.'; return; }
+      rareMonsterSetWatched(n, true, noteIn.value.trim());
+      nameIn.value = ''; noteIn.value = ''; msg.textContent = 'Added ' + n + '.';
+      render();
+    });
+    add.appendChild(nameIn);
+    add.appendChild(document.createTextNode(' '));
+    add.appendChild(noteIn);
+    add.appendChild(document.createTextNode(' '));
+    add.appendChild(btn);
+    add.appendChild(msg);
+    set.appendChild(add);
+    render();
+
+    let before = null;
+    panel.querySelectorAll('fieldset').forEach((o) => {
+      if (!before && o.getAttribute('data-tm-script') > id) before = o;
+    });
+    panel.insertBefore(set, before);
   }
 
   // --- Items acquired (fight.php) --------------------------------------
@@ -5100,6 +5190,7 @@
     { name: 'wiki-monster', path: /\/fight\.php/i, run: linkMonster },
     { name: 'wiki-drops', path: /\/fight\.php/i, run: linkDrops },
     { name: 'rare-monster-banner', path: /\/fight\.php/i, run: rareMonsterBanner },
+    { name: 'rare-monster-settings', path: /\/account\.php/i, run: rareMonsterSettings },
     { name: 'wiki-inventory', path: /\/inventory\.php/i, run: linkInventory },
     { name: 'inventory-collapse', path: /\/inventory\.php/i, run: buildCollapseBar },
     { name: 'equip-optimize', path: /\/inventory\.php/i, run: buildEquipOptimizer },

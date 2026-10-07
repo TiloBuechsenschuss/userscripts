@@ -4011,7 +4011,7 @@ on a report.
   silently dropped.
 - **Rare-monster watch list** (`fight.php` + `auto-combat.js` 0.10). See
   `okf/kingdom-of-loathing/rare-monsters.md`. The two scripts carry a byte-identical block
-  (`tm-kol-rare-monsters`), pinned by `tests/kol-rare-monsters.test.mjs`. Auto Combat checks round 1
+  (`tm-kol-rare-monsters`), pinned by `tests/kol-rare-monsters.test.mjs`. The list is edited under "Userscript settings" on `account.php` (a fieldset `ux-enhancers` in the shared `#tm-kol-settings` panel; this script does not carry the shared block, so it finds the panel by id or builds it alike). Auto Combat checks round 1
   only and stops with the fight left open.
 - **Ascension checklist** (`ascend.php`). One `form[name=ascend]` (an Ascend button plus the
   "confirm" and "seriously" checkboxes); a panel goes above it and a `submit` listener asks while a
