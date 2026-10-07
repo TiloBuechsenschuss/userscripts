@@ -184,11 +184,13 @@ check('13 cards, 24 options, as the guide\'s Cards table',
 check('no two cards share a picture',
   new Set(api.PHF_CARDS.map((c) => api.phfImageKey(c.image))).size, 13);
 
-// The wiki has no titles; these three were read off the game (a phone
-// screenshot of the hand, 2026-10-07) and tied to their rows by the card art.
+// The wiki has no titles; these were read off the game (a phone screenshot of
+// the hand, and the hand's HTML, 2026-10-07) and tied to their rows by the card art.
 check('the card titles read off the game, on the rows whose art they show',
   api.PHF_CARDS.filter((c) => c.title).map((c) => c.image + ': ' + c.title),
-  ['passerby: A Philosophy Close to Home', 'argument: A Meeting of Minds', 'jungle: The Deeper Wisp-Ways']);
+  ['treeblue: The Roots of Wisdom', 'blemmigan: Mycorrhizal meditations', 'passerby: A Philosophy Close to Home',
+    'argument: A Meeting of Minds', 'crowd2: Philosophers without Portfolio', 'jungle: The Deeper Wisp-Ways',
+    'cherries: The Matter of Solacefruit', 'mangrovecollege_interior: Endless Bounty']);
 check('no option title yet', allOptions.filter((o) => o.title).length, 0);
 
 check('every challenge names a known stat and a number or the default',
@@ -277,14 +279,14 @@ check('tooltip: a Rot option says when Rot opens',
   api.phfOptionSpec(card('treeblue'), card('treeblue').options[1], '', '').title
     .includes('The Dream of the Hintershroom'), true);
 check('tooltip: an untitled card quotes what the game shows, to copy in',
-  api.phfCardSpec(card('treeblue'), 'A Lone Tree').title
+  api.phfCardSpec(card('stick'), 'A Lone Tree').title
     .includes('The game shows “A Lone Tree”: that is the title to copy into PHF_CARDS.'), true);
 check('tooltip: a titled card has no such line',
   api.phfCardSpec(card('jungle'), 'The Deeper Wisp-Ways').title.includes('not recorded'), false);
 
 // --- matching ------------------------------------------------------------------
 
-check('a card by picture', api.phfFindCard('Anything', 'crowd2').card.image, 'crowd2');
+check('a card by picture', api.phfFindCard('Anything', 'stick').card.image, 'stick');
 check('an unknown picture is no card', api.phfFindCard('Anything', 'zzz'), null);
 check('one picture on two cards: the open card decides',
   [delta(api.phfFindOption(card('passerby'), '', 'salon3')), delta(api.phfFindOption(card('crowd2'), '', 'salon3'))],
@@ -337,10 +339,10 @@ function stage(...nodes) {
 const badges = (cls) => body.querySelectorAll('.' + cls).map((b) => b.textContent);
 
 greet('The Wisp-Ways');
-stage(handCard('A Philosophical Tree', 'treeblue'), handCard('A Crowd', 'crowd2'), handCard('Something Else', 'zzz'));
+stage(handCard('A Philosophical Tree', 'stick'), handCard('A Crowd', 'elegaiccockatoo'), handCard('Something Else', 'zzz'));
 api.phfRatings();
 check('hand: the two known pictures are badged, the third is not',
-  badges(api.PHF_CLASS), ['+A? / +R?', '+C? / +A? / +F? / +Y? · clears hand']);
+  badges(api.PHF_CLASS), ['+Y?', 'Wounds −2?']);
 api.phfRatings();
 check('hand: a second pass draws nothing twice', badges(api.PHF_CLASS).length, 2);
 greet('Mangrove College');
@@ -348,7 +350,7 @@ api.phfRatings();
 check('hand: leaving the Wisp-Ways clears them', badges(api.PHF_CLASS), []);
 
 greet('The Wisp-Ways');
-stage(openCard('An Overgrown Courtyard', 'mangrovecollege_interior',
+stage(openCard('Endless Bounty', 'mangrovecollege_interior',
   [['Taste the fruit', 'cherriessmall'], ['Gather windfalls', 'applegallssmall'], ['Reach into the hollow', 'creepyhandsmall']]));
 api.phfRatings();
 check('opened card: the card and its three options',
@@ -367,7 +369,7 @@ check('opened storylet with the card\'s picture but not its options: nothing',
 stage(openCard('A Philosophy Close to Home', 'passerby', [['Talk', 'salon3small'], ['Look', 'ring_brokensmall']]));
 api.phfRatings();
 check('opened card: the shared picture reads as this card\'s option', badges(api.PHF_BRANCH_CLASS), ['+F?', '+R?']);
-stage(openCard('A Crowd', 'crowd2', [['A', 'uttershroom_portsmall'], ['B', 'spidertreesmall'], ['C', 'servantsmall'],
+stage(openCard('Philosophers without Portfolio', 'crowd2', [['A', 'uttershroom_portsmall'], ['B', 'spidertreesmall'], ['C', 'servantsmall'],
   ['D', 'salon3small']]));
 api.phfRatings();
 check('opened card: and as the other card\'s on the other card',
@@ -385,10 +387,11 @@ function smallCard(name) {
 }
 greet('The Wisp-Ways');
 stage(makeEl('div', 'hand', {}, [smallCard('A Philosophy Close to Home'), smallCard('A Meeting of Minds'),
-  smallCard('The Deeper Wisp-Ways')]));
+  smallCard('The Deeper Wisp-Ways'), smallCard('The Roots of Wisdom'), smallCard('Philosophers without Portfolio')]));
 api.phfRatings();
 check('screenshot hand: all three badged by title',
-  badges(api.PHF_CLASS), ['+F? / +R?', '+C? / +A? / +F? / +R?', '+Y?']);
+  badges(api.PHF_CLASS), ['+F? / +R?', '+C? / +A? / +F? / +R?', '+Y?', '+A? / +R?',
+    '+C? / +A? / +F? / +Y? · clears hand']);
 greet('Mangrove College');
 api.phfRatings();
 check('screenshot hand: still only under the Wisp-Ways greeting', badges(api.PHF_CLASS), []);
@@ -396,14 +399,14 @@ greet('The Wisp-Ways');
 
 // --- a title filled in -----------------------------------------------------------
 
-card('treeblue').title = 'The Tree of Philosophies';
-stage(handCard('The Tree of Philosophies', 'somethingelse'), handCard('An Oak', 'treeblue'));
+card('stick').title = 'The Tree of Philosophies';
+stage(handCard('The Tree of Philosophies', 'somethingelse'), handCard('An Oak', 'stick'));
 api.phfRatings();
 check('titled: matched by its title whatever the picture, and its picture alone no longer counts',
-  badges(api.PHF_CLASS), ['+A? / +R?']);
+  badges(api.PHF_CLASS), ['+Y?']);
 check('titled: no "not recorded" line',
   body.querySelector('.' + api.PHF_CLASS).title.includes('not recorded'), false);
-card('treeblue').title = null;
+card('stick').title = null;
 
 // --- registration ----------------------------------------------------------------
 

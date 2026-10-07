@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.47
+// @version      1.50
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -42653,7 +42653,16 @@
   // nowhere else. Three card titles are in, read off a phone screenshot of the
   // hand on 2026-10-07 and tied to their rows by comparing the card art with the
   // wiki's files: A Philosophy Close to Home (Passerby.png), A Meeting of Minds
-  // (Argument.png), The Deeper Wisp-Ways (Jungle.png). No option title yet.
+  // (Argument.png), The Deeper Wisp-Ways (Jungle.png). Two more, read off the hand's
+  // HTML the same day: The Roots of Wisdom (Treeblue.png), Philosophers without
+  // Portfolio (Crowd2.png), and Endless Bounty (Mangrovecollege_interior.png); then
+  // Mycorrhizal meditations (Blemmigan.png) and The Matter of Solacefruit
+  // (Cherries.png). No option title yet.
+  //
+  // **Confirmed in game (2026-10-07):** matching by picture works, for cards in
+  // the hand and for the options of an opened storylet. The badges were drawn
+  // on untitled cards, which only the picture can match, and that needed the
+  // greeting to be one of PHF_AREAS, so that guess held too.
 
   // The area greetings the badges are shown under. A guess from The Mushroom's
   // Dream ("Unlocks the Wisp-Ways"), not a capture. A leading "The" is ignored.
@@ -42698,11 +42707,11 @@
     phfCard('treeblue', 100, [
       phfOpt('treesmall', ['Shapeling Arts', 2], { A: 1 }),
       phfOpt('cagedmansmall', ['Dangerous', null], { R: 1 }),
-    ]),
+    ], { title: 'The Roots of Wisdom' }),
     phfCard('blemmigan', 100, [
       phfOpt('mushroomsmall', ['Kataleptic Toxicology', 2], { C: 1 }, { failOther: [['Nightmares', 2]] }),
       phfOpt('blacksmall', ['Persuasive', null], { R: 1 }),
-    ]),
+    ], { title: 'Mycorrhizal meditations' }),
     phfCard('passerby', 100, [
       phfOpt('salon3small', ['Mithridacy', 2], { F: 1 }),
       phfOpt('ring_brokensmall', ['Watchful', null], { R: 1 }),
@@ -42719,7 +42728,7 @@
       phfOpt('spidertreesmall', ['Dangerous', 150], { A: 1 }, { fail: { A: -1 } }),
       phfOpt('servantsmall', ['Persuasive', 150], { F: 1 }, { fail: { F: -1 } }),
       phfOpt('salon3small', ['Shadowy', null], { Y: 1 }, { clears: true }),
-    ]),
+    ], { title: 'Philosophers without Portfolio' }),
     phfCard('jungle', 80, [
       phfOpt('blueeyesmall', ['Watchful', 150], { Y: 1 }, { failOther: [['Wounds', 2]] }),
     ], { title: 'The Deeper Wisp-Ways' }),
@@ -42728,13 +42737,13 @@
     ]),
     phfCard('cherries', 100, [
       phfOpt('whispered_secretsmall', ['Persuasive', 150], { Y: 1 }, { failOther: [['Nightmares', 2]] }),
-    ]),
+    ], { title: 'The Matter of Solacefruit' }),
     phfCard('mangrovecollege_interior', 80, [
       phfOpt('cherriessmall', ['Kataleptic Toxicology', null], {},
         { other: [['Nightmares', -4], ['Wounds', 2]], failOther: [['Nightmares', 2]] }),
       phfOpt('applegallssmall', null, { Y: 1 }, { other: [['Nightmares', 2]] }),
       phfOpt('creepyhandsmall', ['Watchful', 150], {}, { other: [['Solacefruit', 10]], fail: { Y: -1 } }),
-    ]),
+    ], { title: 'Endless Bounty' }),
     // The card that raises nothing, dealt to make a big harvest harder.
     phfCard('elegaiccockatoo', 80, [
       phfOpt('heartfruitsmall', ['Shadowy', null], {}, { other: [['Wounds', -2]], fail: { Y: -2 } }),

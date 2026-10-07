@@ -3954,12 +3954,11 @@ Confirmed live by the author:
   (*Judge the contract*, *Devour the condemned*, *Reflect*, *Dare to dance with the King*). **(5) A locked option** -- whether the
   story options are drawn greyed or not at all.
 
-- **Philosofruits** (`philosofruits`, added 2026-10-07). Nothing seen in the game; the table is transcribed from the guide, which
-  names cards and options only by picture. Report first: **(1) The greeting** inside the activity -- if it is not *The Wisp-Ways*
-  (`PHF_AREAS`), nothing is badged at all. **(2) The titles** -- every card's and option's name as the game shows it (each untitled
-  badge's tooltip quotes it), to fill in `title`; three cards are done, ten cards and every option are not. **(3) Whether pictures match at all** -- the `src` of a hand card, an opened card
-  and an option, against the wiki file names (`treeblue`, `treesmall`); if a badge is missing where a title is not yet filled in,
-  this is why. **(4) The "Skill 2" figures** -- whether *Shapeling Arts 2* and the like are the difficulty. **(5) A locked Rot
+- **Philosofruits** (`philosofruits`, added 2026-10-07). The table is transcribed from the guide, which names cards and options
+  only by picture. **Confirmed in game 2026-10-07:** matching by picture, for hand cards and for storylet options, and with it the
+  greeting guess (*The Wisp-Ways*, `PHF_AREAS`). Still to report: **(2) The titles** -- every card's and option's name as the game
+  shows it (each untitled badge's tooltip quotes it), to fill in `title`; eight cards are done, five cards and every option are
+  not (checklist: `docs/philosofruits/cards.md`). **(4) The "Skill 2" figures** -- whether *Shapeling Arts 2* and the like are the difficulty. **(5) A locked Rot
   option** -- drawn greyed or not at all before the Hintershroom.
 
 - **Spending Secrets and Counting the Days** (`spending-secrets`, added 2026-10-03). Nothing seen in the game; every table is
