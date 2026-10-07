@@ -40,7 +40,7 @@ function make(store) {
     setItem: (k, v) => { if (store.blocked) throw new Error('blocked'); store.d[k] = v; },
   };
   return new Function('localStorage', bu[0] +
-    '\nreturn { rareMonsterNorm, rareMonsterList, rareMonsterFor, rareMonsterSetWatched };')(localStorage);
+    '\nreturn { rareMonsterNorm, rareMonsterList, rareMonsterFor, rareMonsterSetWatched, rareMonsterRestoreGroup };')(localStorage);
 }
 
 let api = make({ d: {} });
@@ -56,16 +56,33 @@ check('built-in can be watched again', !!api.rareMonsterFor('rampaging adding ma
 
 api.rareMonsterSetWatched('the Bat', true, 'beware');
 check('added entry round trips', api.rareMonsterFor('a bat'),
-  { name: 'bat', note: 'beware', builtin: false });
+  { name: 'bat', note: 'beware', builtin: false, group: 'added' });
 api.rareMonsterSetWatched('bat', false);
 check('added entry can be removed', api.rareMonsterFor('bat'), null);
 
 api = make({ d: { 'tm-kol-rare-monsters': '{nope' } });
-check('corrupt JSON reads as built-ins', api.rareMonsterList().map((m) => m.name), ['rampaging adding machine']);
+const builtinCount = make({ d: {} }).rareMonsterList().length;
+check('corrupt JSON reads as built-ins', api.rareMonsterList().length, builtinCount);
 api = make({ d: { 'tm-kol-rare-monsters': '[1,2]' } });
-check('wrong shape reads as built-ins', api.rareMonsterList().length, 1);
+check('wrong shape reads as built-ins', api.rareMonsterList().length, builtinCount);
 api = make({ d: {}, blocked: true });
-check('blocked storage does not throw', (() => { api.rareMonsterSetWatched('x', true); return api.rareMonsterList().length; })(), 1);
+check('blocked storage does not throw', (() => { api.rareMonsterSetWatched('x', true); return api.rareMonsterList().length; })(), builtinCount);
+
+
+// --- ultra-rares ------------------------------------------------------------
+api = make({ d: {} });
+const ultra = api.rareMonsterList().filter((m) => m.group === 'ultra-rare');
+check('14 ultra-rares are built in', ultra.length, 14);
+check('every built-in name is already normalised', api.rareMonsterList().every((m) => m.name === api.rareMonsterNorm(m.name)), true);
+check('KoL spelling with an article matches', !!api.rareMonsterFor('The Temporal Bandit') && !!api.rareMonsterFor('the Nuge'), true);
+check('the ordinary pooltergeist is not watched', api.rareMonsterFor('a pooltergeist'), null);
+api.rareMonsterSetWatched('crazy bastard', false);
+api.rareMonsterSetWatched('baiowulf', false);
+check('removed ultra-rares drop out', api.rareMonsterList().filter((m) => m.group === 'ultra-rare').length, 12);
+api.rareMonsterSetWatched('rampaging adding machine', false);
+api.rareMonsterRestoreGroup('ultra-rare');
+check('restore brings the group back', api.rareMonsterList().filter((m) => m.group === 'ultra-rare').length, 14);
+check('restore leaves other removals alone', api.rareMonsterFor('rampaging adding machine'), null);
 
 console.log(failures ? failures + ' FAILED' : 'all passed');
 process.exit(failures ? 1 : 0);

@@ -429,3 +429,9 @@ Fallen London:
 
 Fallen London feature switcher (done 2026-10-07; tested in game by the author 2026-10-07, wiki-links 0.10, ux-enhancers 3.6, choice-helper 1.52, loader 0.76):
   Settings under ⚙ UX with categories (London, Airs of London, Zailing, Parabola, Firmament, Railway & beyond, Seasonal, Menu entries), a search box, live switching, menu entries switchable on their own (a seasonal panel follows its festival feature), and a matching box on the Account page. Contract: okf/fallen-london/hide-ui-settings.md.
+
+Kingdom of Loathing features (done 2026-10-07; tested in game by the author 2026-10-07, ux-enhancers 1.27, auto-combat 0.10, loader 1.64):
+  - Mall store multibuy on mallstore.php: a checkbox and quantity per row and one "Buy checked" button; one confirm with the total, then buys row by row, stopping at the first short row.
+  - Daily shopping list on mall.php: saved item + quantity rows, "+ perfect drinks" and "+ hi meins" quick-adds, "Buy list" plans the cheapest stores and shows one total. (An earlier stall after the first item was met with a timeout, one retry and per-item status; confirmed working afterwards.)
+  - Rare-monster watch list: star banner and note on fight.php (rampaging adding machine built in), "watch" / "unwatch" links, Auto Combat stops with the fight left open, and the list edited under Userscript settings on account.php.
+  - Ascension checklist on ascend.php: Interesting Coins (counted, coin shop link), blood cubic zirconia item skills (Blood Thinner, Spinal Tapas, Pheromone Cocktail), codpiece reminder, and a confirm on Ascend while a line is open.

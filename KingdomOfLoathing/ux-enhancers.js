@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js
-// @version      1.27
+// @version      1.28
 // @description  Grab-bag of quality-of-life tweaks for Kingdom of Loathing pages.
 // @match        https://www.kingdomofloathing.com/hermit.php*
 // @match        https://kingdomofloathing.com/hermit.php*
@@ -95,7 +95,12 @@
  *   On the ascension page (ascend.php) a "Before you jump" list above the form: Interesting
  *   Coins you would lose (counted, with a link to the coin shop), cast buttons for the blood
  *   cubic zirconia's thinner / tapas / cocktail skills, and a reminder to set the codpiece
- *   gems; Ascend asks for confirmation while a line is still open.
+ *   gems, plus adventures left, room left in stomach and liver, a reminder to burn out a
+ *   Chef- or Bartender-in-the-box, and how many Daily Checklist tasks are unticked; Ascend
+ *   asks for confirmation while a line is still open.
+ *
+ * Confirmed against the live game on 2026-10-07 (1.27; the 1.28 lines and ultra-rares are not yet): the store multibuy, the daily shopping list,
+ *   the rare-monster banner and its account.php list, and the ascension checklist.
  */
 
 (function () {
@@ -1513,6 +1518,75 @@
       '\n\nAscend anyway?';
   }
 
+  // First finite number among the status fields named in `keys`, else null. The
+  // field names here are assumed (not captured), so every reader falls back to
+  // "?" rather than guessing a number.
+  function statusNumber(status, keys) {
+    for (const k of keys) {
+      if (!status || status[k] === undefined || status[k] === null || status[k] === '') continue;
+      const n = Number(String(status[k]).replace(/,/g, ''));
+      if (Number.isFinite(n)) return n;
+    }
+    return null;
+  }
+
+  function ascendAdventuresLine(n) {
+    if (!Number.isFinite(n)) return { mark: '?', open: false, text: 'Could not read your adventures left.' };
+    if (n <= 0) return { mark: '\u2714', open: false, text: 'No adventures left to waste.' };
+    return {
+      mark: '\u2718', open: true,
+      text: n + ' adventure' + (n === 1 ? '' : 's') + ' left. Spend them (or overdrink) first.',
+    };
+  }
+
+  // kind is 'eat' or 'drink'. api.php's status carries how full / drunk you are
+  // ("full", "drunk" -- captured 2026-10-07) but no maximum, so without one the
+  // usual limit stands in (15 full, 14 drunk) and the text says so: a bigger
+  // stomach or liver reads as full too early, a smaller one as having room, and the
+  // "skip" tick is there for that. Unreadable "used" is still "?".
+  const USUAL_ROOM = { eat: 15, drink: 14 };
+  function ascendRoomLine(kind, used, max) {
+    const eat = kind === 'eat';
+    const noun = eat ? 'fullness' : 'drunkenness';
+    if (!Number.isFinite(used)) {
+      return { mark: '?', open: false, text: 'Could not read your ' + noun + '.' };
+    }
+    const guessed = !Number.isFinite(max);
+    const limit = guessed ? USUAL_ROOM[kind] : max;
+    const tail = guessed ? ' (usual limit; yours may differ)' : '';
+    if (limit <= 0) return { mark: '✔', open: false, text: 'You cannot ' + (eat ? 'eat' : 'drink') + ' this run.' };
+    if (used >= limit) {
+      return { mark: '✔', open: false, text: 'Your ' + (eat ? 'stomach' : 'liver') + ' is full (' + used + '/' + limit + ')' + tail + '.' };
+    }
+    return {
+      mark: '✘', open: true,
+      text: (limit - used) + ' ' + noun + ' left (' + used + '/' + limit + ')' + tail + '. Use it before you ascend.',
+    };
+  }
+
+  // The Daily Checklist script's saved list ({ date, ronin, items:[{ done, off, disabled }] }).
+  // Its `done` flags belong to `date`, so a list last opened on an earlier day counts every
+  // task as open. A task is skipped when switched off or blocked in the current run phase.
+  function ascendDailyLine(state, today) {
+    if (!state || typeof state !== 'object' || !Array.isArray(state.items)) {
+      return { mark: '?', open: false, text: 'No saved Daily Checklist found.' };
+    }
+    const phase = state.ronin ? 'ronin' : 'post-ronin';
+    const fresh = state.date === today;
+    const open = state.items.filter((it) => it && !it.off && it.disabled !== phase && !(fresh && it.done)).length;
+    if (!open) return { mark: '\u2714', open: false, text: 'Every Daily Checklist task is ticked.' };
+    return {
+      mark: '\u2718', open: true,
+      text: open + ' Daily Checklist task' + (open === 1 ? '' : 's') + ' not ticked' +
+        (fresh ? '' : ' (the list has not been opened today)') + '.',
+    };
+  }
+
+  function localDateStr(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getDate()).padStart(2, '0');
+  }
+
   function readAscendTicks(key) {
     try {
       const o = JSON.parse(localStorage.getItem(ASCEND_KEY));
@@ -1717,6 +1791,57 @@
             (names.length ? ' (saved setups: ' + names.join(', ') + ')' : '')));
         });
       redraw();
+    });
+
+    // A computed line the player can set aside with a "skip" tick (for example a
+    // character who cannot eat or drink at all).
+    const skippable = (label, tickName, compute) => addLine(label, (draw) => {
+      const redraw = () => {
+        const ticked = !!readAscendTicks(tickKey)[tickName];
+        const ln = compute();
+        draw(ticked && ln.open ? ascendTickLine(true, 'Skipped by you.', '') : ln, (r) => {
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = ticked;
+          cb.addEventListener('change', () => { writeAscendTick(tickKey, tickName, cb.checked); redraw(); });
+          r.appendChild(cb);
+          r.appendChild(document.createTextNode(' skip'));
+        });
+      };
+      redraw();
+    });
+
+    // 4. adventures left
+    skippable('Adventures left', 'skip-adv',
+      () => ascendAdventuresLine(statusNumber(status, ['adventures', 'advs'])));
+
+    // 5. fullness and drunkenness
+    skippable('Stomach', 'skip-eat', () => ascendRoomLine('eat',
+      statusNumber(status, ['full', 'fullness']), statusNumber(status, ['fullmax', 'fullnessmax', 'maxfull'])));
+    skippable('Liver', 'skip-drink', () => ascendRoomLine('drink',
+      statusNumber(status, ['drunk', 'inebriety']), statusNumber(status, ['drunkmax', 'inebrietymax', 'maxdrunk'])));
+
+    // 6. burn out boxes: nothing to read, so a plain manual tick
+    addLine('Chef / Bartender-in-the-box', (draw) => {
+      const redraw = () => draw(
+        ascendTickLine(readAscendTicks(tickKey).boxes, 'Marked done.',
+          'Campground furnishings are lost at the Gash; burn out a box for its parts first.'),
+        (r) => {
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = !!readAscendTicks(tickKey).boxes;
+          cb.addEventListener('change', () => { writeAscendTick(tickKey, 'boxes', cb.checked); redraw(); });
+          r.appendChild(cb);
+          r.appendChild(document.createTextNode(' done'));
+        });
+      redraw();
+    });
+
+    // 7. the Daily Checklist script's list
+    addLine('Daily Checklist', (draw) => {
+      let state = null;
+      try { state = JSON.parse(localStorage.getItem('tm-kol-daily-checklist')); } catch (e) { /* none */ }
+      draw(ascendDailyLine(state, localDateStr(new Date())));
     });
 
     form.addEventListener('submit', (ev) => {
@@ -3475,9 +3600,24 @@
   // Stored as { added: [{ name, note }], removed: [name] } so a built-in can be
   // unwatched without editing code. Names are kept normalised (rareMonsterNorm).
   const RARE_MONSTERS_KEY = 'tm-kol-rare-monsters';
+  const ULTRA_NOTE = 'Ultra-rare: finish it yourself, with item drops up.';
   const RARE_MONSTERS_BUILTIN = [
-    { name: 'rampaging adding machine',
+    { name: 'rampaging adding machine', group: 'rare',
       note: 'Combines scrolls: use two scrolls on it in combat. Auto-attack aborts against it.' },
+    { name: 'pooltergeist (ultra-rare)', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'temporal bandit', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'crazy bastard', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'knott slanding', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'hockey elemental', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'hypnotist of hey deze', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'infinite meat bug', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'quickbasic elemental', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'master of thieves', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'remarkable elba kramer', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'baiowulf', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'count bakula', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'nuge', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'visiting space soldier', group: 'ultra-rare', note: ULTRA_NOTE },
   ];
 
   // "a Rampaging  Adding Machine" -> "rampaging adding machine".
@@ -3496,16 +3636,16 @@
     return { added: added, removed: removed };
   }
 
-  // Every watched monster: [{ name, note, builtin }].
+  // Every watched monster: [{ name, note, builtin, group }].
   function rareMonsterList() {
     const s = rareMonsterRead();
     const out = RARE_MONSTERS_BUILTIN
       .filter((b) => s.removed.indexOf(b.name) === -1)
-      .map((b) => ({ name: b.name, note: b.note, builtin: true }));
+      .map((b) => ({ name: b.name, note: b.note, builtin: true, group: b.group }));
     s.added.forEach((a) => {
       const n = rareMonsterNorm(a.name);
       if (n && !out.some((x) => x.name === n)) {
-        out.push({ name: n, note: String(a.note || ''), builtin: false });
+        out.push({ name: n, note: String(a.note || ''), builtin: false, group: 'added' });
       }
     });
     return out;
@@ -3528,6 +3668,14 @@
     s.removed = s.removed.filter((r) => r !== n);
     if (on && !builtin) s.added.push({ name: n, note: String(note || '') });
     if (!on && builtin) s.removed.push(n);
+    try { localStorage.setItem(RARE_MONSTERS_KEY, JSON.stringify(s)); } catch (e) { /* blocked */ }
+  }
+
+  // Watch every built-in of one group again (e.g. 'ultra-rare') after some were removed.
+  function rareMonsterRestoreGroup(group) {
+    const names = RARE_MONSTERS_BUILTIN.filter((b) => b.group === group).map((b) => b.name);
+    const s = rareMonsterRead();
+    s.removed = s.removed.filter((r) => names.indexOf(r) === -1);
     try { localStorage.setItem(RARE_MONSTERS_KEY, JSON.stringify(s)); } catch (e) { /* blocked */ }
   }
   // --- END tm-kol-rare-monsters ---
@@ -3693,6 +3841,12 @@
     add.appendChild(btn);
     add.appendChild(msg);
     set.appendChild(add);
+    const restore = document.createElement('input');
+    restore.type = 'button'; restore.value = '+ ultra-rares';
+    restore.title = 'Watch every ultra-rare monster again, including any you removed';
+    restore.style.marginTop = '4px';
+    restore.addEventListener('click', () => { rareMonsterRestoreGroup('ultra-rare'); render(); });
+    set.appendChild(restore);
     render();
 
     let before = null;

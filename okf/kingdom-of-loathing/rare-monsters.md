@@ -10,8 +10,8 @@ see_also: [hide-ui-settings.md, open-questions.md]
 
 # Rare-monster watch list
 
-Monsters the player wants flagged. `ux-enhancers.js` 1.27 draws a banner on `fight.php` and edits the list on `account.php`;
-`auto-combat.js` 0.10 stops the run instead of attacking one.
+Monsters the player wants flagged. `ux-enhancers.js` 1.28 draws a banner on `fight.php` and edits the list on `account.php`;
+`auto-combat.js` 0.11 stops the run instead of attacking one.
 
 ## Where the list is edited
 
@@ -38,11 +38,17 @@ the copies differ.
 
 ## Built-ins
 
+Each built-in has a `group` (`rare` or `ultra-rare`); the settings box's "+ ultra-rares" button
+(`rareMonsterRestoreGroup`) takes a group's names back out of `removed`.
+
 | Monster | Why | Source |
 |---|---|---|
 | rampaging adding machine | combines scrolls; auto-attack aborts against it | **verified** against the KoL wiki page, 2026-10-07 |
+| pooltergeist (ultra-rare) | ultra-rare, Haunted Billiards Room | wiki list verified; the in-game name is **assumed** (the wiki page title carries "(Ultra-Rare)" and the ordinary pooltergeist must not match) |
+| temporal bandit, crazy bastard, knott slanding, hockey elemental, hypnotist of hey deze, infinite meat bug, quickbasic elemental, master of thieves, remarkable elba kramer, baiowulf, count bakula, nuge, visiting space soldier | ultra-rares | wiki "Ultra rare" list verified 2026-10-07; spelling as KoL prints it **assumed** (leading "the" is stripped) |
 
 ## Open
 
 - **unknown:** auto-combat only checks the first round of a fight; not captured whether a fight
   can start with a different monster name in `#monname` than a later round.
+- **unknown:** how `fight.php` marks a boss. Needed before Auto Combat can stop on bosses in its "wherever I adventured last" mode; not captured.

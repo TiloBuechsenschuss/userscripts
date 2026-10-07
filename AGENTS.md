@@ -4026,6 +4026,14 @@ on a report.
   api.php gives none). The codpiece line only links to the decoration screen
   (`inventory.php?action=docodpiece`): that page is choice 1588, and fetching it from here would
   put the player into a choice adventure.
+  1.28 added lines for adventures left, stomach and liver room, burning out a Chef-/Bartender-in-the-box
+  (furnishings are lost at the Gash; wiki-verified) and the Daily Checklist's unticked tasks (read from
+  `tm-kol-daily-checklist`: a list whose `date` is not today counts every live task open). **Verified** against a captured `api.php?what=status` (2026-10-07): `name`, `ascensions`, `adventures`,
+  `full` and `drunk` exist (as strings); there is **no maximum** for either, so the room lines use the usual
+  limits (15 full, 14 drunk) and say so -- a bigger stomach reads as full too early, which the skip tick covers.
+  An unreadable value shows `?` and is never open. Stomach, liver and adventures have a
+  "skip" tick for characters who cannot eat or drink. The 14 wiki ultra-rares are rare-monster built-ins,
+  so Auto Combat stops for them in every zone mode.
 
 ## Verifying a change
 

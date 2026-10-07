@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/auto-combat.js
-// @version      0.10
+// @version      0.11
 // @description  Adds an "Auto" panel to the charpane that adventures in a chosen zone for you.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -46,7 +46,10 @@
  *   ask-once-then-remember handling.
  * A fight against a monster on the rare-monster watch list (managed on fight.php by KoL UX
  *   Enhancers; the rampaging adding machine is on it by default) stops the run with the fight
- *   left open, since auto-attack would abort or waste it.
+ *   left open, since auto-attack would abort or waste it. The ultra-rares (pooltergeist, Temporal
+ *   Bandit, crazy bastard, ...) are on that list from the start, so a run stops for them too and you
+ *   can finish them by hand; each can be removed on account.php. The rare-monster stop was confirmed
+ *   against the live game on 2026-10-07 (0.10); the ultra-rare names are not yet.
  */
 
 (function () {
@@ -1301,9 +1304,24 @@
   // Stored as { added: [{ name, note }], removed: [name] } so a built-in can be
   // unwatched without editing code. Names are kept normalised (rareMonsterNorm).
   const RARE_MONSTERS_KEY = 'tm-kol-rare-monsters';
+  const ULTRA_NOTE = 'Ultra-rare: finish it yourself, with item drops up.';
   const RARE_MONSTERS_BUILTIN = [
-    { name: 'rampaging adding machine',
+    { name: 'rampaging adding machine', group: 'rare',
       note: 'Combines scrolls: use two scrolls on it in combat. Auto-attack aborts against it.' },
+    { name: 'pooltergeist (ultra-rare)', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'temporal bandit', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'crazy bastard', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'knott slanding', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'hockey elemental', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'hypnotist of hey deze', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'infinite meat bug', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'quickbasic elemental', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'master of thieves', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'remarkable elba kramer', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'baiowulf', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'count bakula', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'nuge', group: 'ultra-rare', note: ULTRA_NOTE },
+    { name: 'visiting space soldier', group: 'ultra-rare', note: ULTRA_NOTE },
   ];
 
   // "a Rampaging  Adding Machine" -> "rampaging adding machine".
@@ -1322,16 +1340,16 @@
     return { added: added, removed: removed };
   }
 
-  // Every watched monster: [{ name, note, builtin }].
+  // Every watched monster: [{ name, note, builtin, group }].
   function rareMonsterList() {
     const s = rareMonsterRead();
     const out = RARE_MONSTERS_BUILTIN
       .filter((b) => s.removed.indexOf(b.name) === -1)
-      .map((b) => ({ name: b.name, note: b.note, builtin: true }));
+      .map((b) => ({ name: b.name, note: b.note, builtin: true, group: b.group }));
     s.added.forEach((a) => {
       const n = rareMonsterNorm(a.name);
       if (n && !out.some((x) => x.name === n)) {
-        out.push({ name: n, note: String(a.note || ''), builtin: false });
+        out.push({ name: n, note: String(a.note || ''), builtin: false, group: 'added' });
       }
     });
     return out;
@@ -1354,6 +1372,14 @@
     s.removed = s.removed.filter((r) => r !== n);
     if (on && !builtin) s.added.push({ name: n, note: String(note || '') });
     if (!on && builtin) s.removed.push(n);
+    try { localStorage.setItem(RARE_MONSTERS_KEY, JSON.stringify(s)); } catch (e) { /* blocked */ }
+  }
+
+  // Watch every built-in of one group again (e.g. 'ultra-rare') after some were removed.
+  function rareMonsterRestoreGroup(group) {
+    const names = RARE_MONSTERS_BUILTIN.filter((b) => b.group === group).map((b) => b.name);
+    const s = rareMonsterRead();
+    s.removed = s.removed.filter((r) => names.indexOf(r) === -1);
     try { localStorage.setItem(RARE_MONSTERS_KEY, JSON.stringify(s)); } catch (e) { /* blocked */ }
   }
   // --- END tm-kol-rare-monsters ---
