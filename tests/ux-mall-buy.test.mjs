@@ -35,7 +35,8 @@ const wrapped = src
   .replace('(function () {', 'globalThis.__ux = (function () {')
   .replace(/\}\)\(\);\s*$/,
     'return { parseCount, parseLimit, priceFromUrl, availableFrom, buyUrlFor, ' +
-    'acquiredCount, planPurchase, describePlan, purchaseSummary }; })();');
+    'acquiredCount, planPurchase, describePlan, purchaseSummary, parseStoreStock, ' +
+    'parseStoreRow, describeBasket, cleanDailyList, pickItemByName }; })();');
 const fn = new Function('document', 'location', 'window',
   wrapped + '\nreturn globalThis.__ux;');
 const api = fn(fakeDoc, fakeLocation, {});
@@ -201,6 +202,65 @@ check('Meat leaving with nothing arriving is called out',
 // Items measured but Meat unreadable: report the count, don't invent a total.
 check('an unknown spend doesn\'t fabricate an average',
   summary(10, null, 10, 10), 'Bought 10.');
+
+// --- a player's store page (mallstore.php) ----------------------------------
+// Row shape captured from store 545961 (pwd faked).
+
+check('store stock is the first bracketed number',
+  [api.parseStoreStock('perfect dark and stormy (529,679)  (Limit 1 / day)'),
+   api.parseStoreStock('no stock shown')], [529679, null]);
+
+function fakeRow(value, name, text) {
+  const radio = { name: 'whichitem', value };
+  const b = { textContent: name, parentNode: { textContent: text } };
+  return { querySelector: (sel) => (sel.startsWith('input') ? radio : sel === 'b' ? b : null) };
+}
+const fields = { pwd: 'x', whichstore: '545961', buying: 'Yep.' };
+const row = api.parseStoreRow(
+  fakeRow('8739.120', 'perfect dark and stormy', 'perfect dark and stormy (529,679)  (Limit 1 / day)'),
+  fields, "Kid's store");
+check('store row: id, price, stock, limit, cap',
+  [row.itemId, row.price, row.stock, row.limit, row.available],
+  ['8739', 120, 529679, 1, 1]);
+check('store row replays the form fields plus the chosen item',
+  row.postFields, { pwd: 'x', whichstore: '545961', buying: 'Yep.', whichitem: '8739.120' });
+check('a row with no radio, or a bad value, is not buyable', [
+  api.parseStoreRow({ querySelector: () => null }, fields, 's'),
+  api.parseStoreRow(fakeRow('abc', 'x', 'x'), fields, 's'),
+], [null, null]);
+const unlimited = api.parseStoreRow(fakeRow('9.50', 'thing', 'thing (40)'), fields, 's');
+check('no daily limit: capped by stock', [unlimited.limit, unlimited.available], [null, 40]);
+
+const basket = [
+  { name: 'perfect dark and stormy', plan: api.planPurchase([row], 3) },
+  { name: 'thing', plan: api.planPurchase([unlimited], 4) },
+];
+const basketText = api.describeBasket(basket, 100);
+check('basket: capped quantity is shown as short',
+  /1 × perfect dark and stormy @ 120 = 120 Meat {2}\(2 short/.test(basketText), true);
+check('basket: total adds every line', /Total: {3}320 Meat for 5 items/.test(basketText), true);
+check('basket: warns when Meat is short', /WARNING: that is 220 Meat more than you have/.test(basketText), true);
+check('basket: no warning when affordable', /WARNING/.test(api.describeBasket(basket, 1000)), false);
+
+// --- the saved daily list -----------------------------------------------------
+
+check('daily list: junk rows and duplicates are dropped, quotes stripped', api.cleanDailyList([
+  { name: ' perfect "mimosa" ', qty: 2 }, { name: 'Perfect Mimosa', qty: 5 },
+  { name: '', qty: 1 }, { name: 'x', qty: 0 }, { name: 'y', qty: 'abc' }, null, { name: 'z', qty: 2.9 },
+]), [{ name: 'perfect mimosa', qty: 2 }, { name: 'z', qty: 2 }]);
+check('daily list: a non-array reads as empty', [api.cleanDailyList(null), api.cleanDailyList({})], [[], []]);
+check('exact-name pick ignores case and rejects look-alikes',
+  [api.pickItemByName([{ name: 'perfect dark and stormy mix' }, { name: 'Perfect Dark and Stormy' }],
+    'perfect dark and stormy').name,
+   api.pickItemByName([{ name: 'perfect dark and stormy mix' }], 'perfect dark and stormy')],
+  ['Perfect Dark and Stormy', null]);
+const two = api.planPurchase([
+  { price: 100, available: 1, storeName: 'a', limit: 1 }, { price: 120, available: 1, storeName: 'b', limit: 1 },
+], 2);
+const multi = api.describeBasket([{ name: 'perfect mimosa', plan: two }], 1000);
+check('basket: a multi-store line shows the average and store count',
+  /2 × perfect mimosa @ avg 110 \(2 stores\) = 220 Meat/.test(multi), true);
+check('basket: daily-limited stores add the caveat', /daily limits/.test(multi), true);
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nAll passed');
 process.exit(failures ? 1 : 0);

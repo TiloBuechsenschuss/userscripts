@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/auto-combat.js
-// @version      0.9
+// @version      0.10
 // @description  Adds an "Auto" panel to the charpane that adventures in a chosen zone for you.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -44,6 +44,9 @@
  *   for the run and in a per-character tally for the day; and "wherever I adventured last", which
  *   reads your last adventure from api.php when you press Start and grinds there with the ordinary
  *   ask-once-then-remember handling.
+ * A fight against a monster on the rare-monster watch list (managed on fight.php by KoL UX
+ *   Enhancers; the rampaging adding machine is on it by default) stops the run with the fight
+ *   left open, since auto-attack would abort or waste it.
  */
 
 (function () {
@@ -1293,6 +1296,68 @@
     return { key: zone.key, name: name, url: 'adventure.php?snarfblat=' + snarf };
   }
 
+  // --- BEGIN tm-kol-rare-monsters (keep byte-identical across scripts) ---
+  // Monsters the player wants to be told about (and Auto Combat to stop for).
+  // Stored as { added: [{ name, note }], removed: [name] } so a built-in can be
+  // unwatched without editing code. Names are kept normalised (rareMonsterNorm).
+  const RARE_MONSTERS_KEY = 'tm-kol-rare-monsters';
+  const RARE_MONSTERS_BUILTIN = [
+    { name: 'rampaging adding machine',
+      note: 'Combines scrolls: use two scrolls on it in combat. Auto-attack aborts against it.' },
+  ];
+
+  // "a Rampaging  Adding Machine" -> "rampaging adding machine".
+  function rareMonsterNorm(name) {
+    return String(name || '').toLowerCase().replace(/\s+/g, ' ').trim()
+      .replace(/^(an?|the) (?=\S)/, '');
+  }
+
+  // Corrupt JSON, a wrong shape or blocked storage all read as "built-ins only".
+  function rareMonsterRead() {
+    let o = null;
+    try { o = JSON.parse(localStorage.getItem(RARE_MONSTERS_KEY)); } catch (e) { /* none */ }
+    if (!o || typeof o !== 'object') o = {};
+    const added = Array.isArray(o.added) ? o.added.filter((x) => x && typeof x.name === 'string') : [];
+    const removed = Array.isArray(o.removed) ? o.removed.filter((x) => typeof x === 'string') : [];
+    return { added: added, removed: removed };
+  }
+
+  // Every watched monster: [{ name, note, builtin }].
+  function rareMonsterList() {
+    const s = rareMonsterRead();
+    const out = RARE_MONSTERS_BUILTIN
+      .filter((b) => s.removed.indexOf(b.name) === -1)
+      .map((b) => ({ name: b.name, note: b.note, builtin: true }));
+    s.added.forEach((a) => {
+      const n = rareMonsterNorm(a.name);
+      if (n && !out.some((x) => x.name === n)) {
+        out.push({ name: n, note: String(a.note || ''), builtin: false });
+      }
+    });
+    return out;
+  }
+
+  // The watch entry for a monster name as KoL prints it, or null.
+  function rareMonsterFor(name) {
+    const n = rareMonsterNorm(name);
+    if (!n) return null;
+    return rareMonsterList().find((x) => x.name === n) || null;
+  }
+
+  // Read-modify-write, so two scripts toggling never overwrite each other.
+  function rareMonsterSetWatched(name, on, note) {
+    const n = rareMonsterNorm(name);
+    if (!n) return;
+    const s = rareMonsterRead();
+    const builtin = RARE_MONSTERS_BUILTIN.some((b) => b.name === n);
+    s.added = s.added.filter((a) => rareMonsterNorm(a.name) !== n);
+    s.removed = s.removed.filter((r) => r !== n);
+    if (on && !builtin) s.added.push({ name: n, note: String(note || '') });
+    if (!on && builtin) s.removed.push(n);
+    try { localStorage.setItem(RARE_MONSTERS_KEY, JSON.stringify(s)); } catch (e) { /* blocked */ }
+  }
+  // --- END tm-kol-rare-monsters ---
+
   // Fight one combat through to its end.
   //
   // The loop condition is KoL's own fight-over flag, so it ends on victory, on
@@ -1308,6 +1373,13 @@
       if (!inFight(page)) return page;           // fight is over
 
       if (RUN.stopRequested) throw Stop('stopped by you (mid-fight)');
+      if (rounds === 1) {
+        const rare = rareMonsterFor(readMonster(page).name);
+        if (rare) {
+          throw Stop('rare monster: ' + rare.name + ' -- fight left open for you' +
+                     (rare.note ? ' (' + rare.note + ')' : ''));
+        }
+      }
       if (++rounds > MAX_ROUNDS_PER_FIGHT) {
         throw Stop('fight ran past ' + MAX_ROUNDS_PER_FIGHT +
                    ' rounds -- left open for you');

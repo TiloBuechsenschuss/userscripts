@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js
-// @version      1.24
+// @version      1.25
 // @description  Grab-bag of quality-of-life tweaks for Kingdom of Loathing pages.
 // @match        https://www.kingdomofloathing.com/hermit.php*
 // @match        https://kingdomofloathing.com/hermit.php*
@@ -31,6 +31,10 @@
 // @match        https://kingdomofloathing.com/cellar.php*
 // @match        https://www.kingdomofloathing.com/sellstuff_ugly.php*
 // @match        https://kingdomofloathing.com/sellstuff_ugly.php*
+// @match        https://www.kingdomofloathing.com/mallstore.php*
+// @match        https://kingdomofloathing.com/mallstore.php*
+// @match        https://www.kingdomofloathing.com/ascend.php*
+// @match        https://kingdomofloathing.com/ascend.php*
 // @grant        none
 // ==/UserScript==
 
@@ -78,7 +82,18 @@
  *   type" box under it that sorts the survivors into multi-use recipes (a smoked potsherd makes
  *   five different things depending on how many you use at once), Meat, random yields and plain
  *   items, under a heading each -- also without moving anything, since flex order decides what is
- *   drawn where.
+ *   drawn where; and on fight.php a banner with a star and a note for any monster on your rare-
+ *   monster watch list (the rampaging adding machine by default), a watch link on every other
+ *   monster, and a list to manage them -- Auto Combat stops instead of fighting a watched one;
+ *   and on a player's mall store page (mallstore.php) a checkbox and quantity on every row
+ *   with one "Buy checked" button, buying several different items in one go; and on the Mall
+ *   page (mall.php) a saved "Daily shopping list" (item and quantity, with a button that adds
+ *   the six perfect drinks) whose "Buy list" searches each item, plans the cheapest stores,
+ *   shows one total to confirm, and buys.
+ *   On the ascension page (ascend.php) a "Before you jump" list above the form: Interesting
+ *   Coins you would lose (counted, with a link to the coin shop), cast buttons for the blood
+ *   cubic zirconia's thinner / tapas / cocktail skills, and a reminder to set the codpiece
+ *   gems; Ascend asks for confirmation while a line is still open.
  */
 
 (function () {
@@ -684,6 +699,17 @@
   // One purchase. Resolves with what the response claimed -- a number, or null
   // for "couldn't tell". Never used on its own; runPlan measures instead.
   async function buyFrom(offer, qty) {
+    if (offer.postFields) {
+      // A store's own page (mallstore.php) buys by POSTing its form: replay the
+      // form's fields with our quantity. The reply is a whole page, so only the
+      // inventory delta in runPlan is trusted for what arrived.
+      const body = new URLSearchParams(offer.postFields);
+      body.set('quantity', String(qty));
+      const r = await fetch(ORIGIN + '/mallstore.php', {
+        method: 'POST', body: body, credentials: 'same-origin', cache: 'no-store',
+      });
+      return r.ok ? acquiredCount(await r.text()) : 0;
+    }
     const url = buyUrlFor(offer, qty);
     if (!url) return 0;
     const res = await fetch(ORIGIN + '/' + url.replace(/^\//, ''), {
@@ -946,6 +972,723 @@
       addBuyX(item);
       item.offers.forEach((offer) => { addBuyAll(item, offer); });
     }
+  }
+
+  // === feature: a saved daily shopping list in the Mall ==================
+  //
+  // Things bought every day (the perfect drinks, say) cost a search, a read and
+  // a buy each. This keeps a short list of "item, how many" in localStorage and
+  // one "Buy list" button that, for each row, runs the exact-name Mall search
+  // in the background, reads the stores with the same parser the Mall page
+  // uses, and plans the cheapest stores first. One confirm shows every line and
+  // the grand total before any Meat moves; the buying itself is runPlan, so
+  // what was bought is measured from the inventory. A row that arrives short
+  // stops the whole list, as in the store basket above.
+
+  const DAILY_KEY = 'tm-kol-mall-daily-list';
+  const DAILY_MSG_KEY = 'tm-ux-mall-daily-result';
+  const DAILY_PANEL_ID = 'tm-mall-daily-panel';
+  const PERFECT_DRINKS = [
+    'perfect cosmopolitan', 'perfect dark and stormy', 'perfect mimosa',
+    'perfect negroni', 'perfect old-fashioned', 'perfect paloma',
+  ];
+
+  // --- pure helpers (unit-tested) ------------------------------------------
+
+  // Anything that isn't [{ name, qty }] with a real name and a whole qty >= 1
+  // is dropped, so a hand-edited or corrupt value can't reach the buying code.
+  function cleanDailyList(raw) {
+    if (!Array.isArray(raw)) return [];
+    const out = [];
+    raw.forEach((r) => {
+      const name = r && typeof r.name === 'string' ? r.name.trim().replace(/"/g, '') : '';
+      const qty = Math.floor(Number(r && r.qty));
+      if (name && Number.isFinite(qty) && qty >= 1 && !out.some((o) => sameName(o.name, name))) {
+        out.push({ name: name, qty: qty });
+      }
+    });
+    return out;
+  }
+
+  function sameName(a, b) {
+    return String(a).trim().toLowerCase() === String(b).trim().toLowerCase();
+  }
+
+  // The item table of a search page whose item is called exactly `name`. The
+  // search is by exact name, but the page can still list more than one item, so
+  // never take the first table blindly: buying the wrong item costs Meat.
+  function pickItemByName(items, name) {
+    return items.find((it) => it && sameName(it.name, name)) || null;
+  }
+
+  function readDailyList() {
+    try { return cleanDailyList(JSON.parse(localStorage.getItem(DAILY_KEY))); } catch (e) { return []; }
+  }
+
+  function writeDailyList(list) {
+    try { localStorage.setItem(DAILY_KEY, JSON.stringify(cleanDailyList(list))); } catch (e) { /* blocked */ }
+  }
+
+  // --- searching and buying -------------------------------------------------
+
+  // The offers for one item, read off a background copy of the exact-name search.
+  async function findMallItem(name) {
+    try {
+      const res = await fetch(ORIGIN + '/' + mallSearchUrl(name), {
+        credentials: 'same-origin', cache: 'no-store',
+      });
+      if (!res.ok) return null;
+      const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+      const items = [];
+      for (const table of doc.querySelectorAll('table.itemtable')) {
+        const it = parseItemTable(table);
+        if (it) items.push(it);
+      }
+      return pickItemByName(items, name);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function buyDailyList(list, say) {
+    const entries = [];
+    const missing = [];
+    for (const row of list) {
+      say('Looking up ' + row.name + '...');
+      // eslint-disable-next-line no-await-in-loop
+      const item = await findMallItem(row.name);
+      if (!item) { missing.push(row.name); continue; }
+      entries.push({ name: item.name, itemId: item.itemId, plan: planPurchase(item.offers, row.qty) });
+    }
+    const buyable = entries.filter((e) => e.plan.qty > 0);
+    const empty = entries.filter((e) => !e.plan.qty).map((e) => e.name);
+    const notes = missing.map((n) => n + ': not found in the Mall, skipped')
+      .concat(empty.map((n) => n + ': no store can sell any right now, skipped'));
+    if (!buyable.length) return { lines: notes.length ? notes : ['Nothing to buy.'], bought: false };
+
+    say('Checking your Meat...');
+    const meat = await apiMeat();
+    let text = describeBasket(buyable, meat);
+    if (notes.length) text = notes.join('\n') + '\n\n' + text;
+    if (!window.confirm(text)) return { lines: ['Cancelled — nothing was bought.'], bought: false };
+
+    const report = notes.slice();
+    for (const e of buyable) {
+      say('Buying ' + e.name + '...');
+      // eslint-disable-next-line no-await-in-loop
+      const res = await runPlan(e.plan, e.itemId, () => {});
+      report.push(e.name + ': ' + purchaseSummary(res, e.plan.qty));
+      if (res.bought === null || res.bought < e.plan.qty) {
+        report.push('Stopped here; the rest of the list was not bought.');
+        break;
+      }
+    }
+    return { lines: report, bought: true };
+  }
+
+  // --- the panel -------------------------------------------------------------
+
+  function mallDailyList() {
+    if (document.getElementById(DAILY_PANEL_ID) || !document.body) return;
+    const panel = document.createElement('div');
+    panel.id = DAILY_PANEL_ID;
+    panel.style.cssText = 'margin:6px auto;max-width:560px;border:1px solid #888;padding:4px 8px;font-size:0.9em';
+
+    const head = document.createElement('div');
+    const toggle = document.createElement('a');
+    toggle.href = '#';
+    toggle.style.fontWeight = 'bold';
+    head.appendChild(toggle);
+    panel.appendChild(head);
+
+    const body = document.createElement('div');
+    panel.appendChild(body);
+    let open = false;
+    const setOpen = (on) => {
+      open = on;
+      body.style.display = on ? 'block' : 'none';
+      toggle.textContent = (on ? '▾' : '▸') + ' Daily shopping list (' + readDailyList().length + ')';
+    };
+    toggle.addEventListener('click', (ev) => { ev.preventDefault(); setOpen(!open); });
+
+    const rowsBox = document.createElement('div');
+    const status = document.createElement('div');
+    status.style.cssText = 'margin-top:4px;font-weight:bold';
+    const render = () => {
+      rowsBox.textContent = '';
+      const list = readDailyList();
+      if (!list.length) rowsBox.textContent = 'Empty. Add an item below.';
+      list.forEach((row) => {
+        const line = document.createElement('div');
+        const q = document.createElement('input');
+        q.type = 'text'; q.className = 'text'; q.size = 3; q.value = String(row.qty);
+        q.addEventListener('change', () => {
+          writeDailyList(readDailyList().map((r) => (sameName(r.name, row.name)
+            ? { name: r.name, qty: parseCount(q.value) || r.qty } : r)));
+          render();
+        });
+        const rm = document.createElement('a');
+        rm.href = '#'; rm.textContent = '[remove]'; rm.style.marginLeft = '8px';
+        rm.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          writeDailyList(readDailyList().filter((r) => !sameName(r.name, row.name)));
+          render();
+        });
+        line.appendChild(q);
+        line.appendChild(document.createTextNode(' × ' + row.name));
+        line.appendChild(rm);
+        rowsBox.appendChild(line);
+      });
+      setOpen(open);
+    };
+
+    const addRow = document.createElement('div');
+    addRow.style.marginTop = '4px';
+    const nameIn = document.createElement('input');
+    nameIn.type = 'text'; nameIn.className = 'text'; nameIn.size = 24;
+    nameIn.placeholder = 'exact item name';
+    const qtyIn = document.createElement('input');
+    qtyIn.type = 'text'; qtyIn.className = 'text'; qtyIn.size = 3; qtyIn.value = '1';
+    const add = makeButton('tm-mall-daily-add', 'Add');
+    add.addEventListener('click', () => {
+      const qty = parseCount(qtyIn.value) || 1;
+      writeDailyList(readDailyList().concat([{ name: nameIn.value, qty: qty }]));
+      nameIn.value = '';
+      render();
+    });
+    const drinks = makeButton('tm-mall-daily-drinks', '+ perfect drinks');
+    drinks.title = 'Add the six perfect drinks, one each';
+    drinks.addEventListener('click', () => {
+      writeDailyList(readDailyList().concat(PERFECT_DRINKS.map((n) => ({ name: n, qty: 1 }))));
+      render();
+    });
+    const buy = makeButton('tm-mall-daily-buy', 'Buy list');
+    buy.title = 'Find the cheapest stores for every row, show the total, then buy after you confirm';
+    buy.addEventListener('click', async () => {
+      const list = readDailyList();
+      if (!list.length) { status.textContent = 'The list is empty.'; return; }
+      buy.disabled = true;
+      try {
+        const out = await buyDailyList(list, (m) => { status.textContent = m; });
+        if (out.bought) {
+          try { sessionStorage.setItem(DAILY_MSG_KEY, JSON.stringify({ lines: out.lines })); } catch (e) { /* lose summary */ }
+          location.reload();
+          return;
+        }
+        status.textContent = out.lines.join(' — ');
+      } finally {
+        buy.disabled = false;
+      }
+    });
+    addRow.appendChild(nameIn);
+    addRow.appendChild(document.createTextNode(' × '));
+    addRow.appendChild(qtyIn);
+    addRow.appendChild(document.createTextNode(' '));
+    addRow.appendChild(add);
+    addRow.appendChild(document.createTextNode(' '));
+    addRow.appendChild(drinks);
+
+    body.appendChild(rowsBox);
+    body.appendChild(addRow);
+    body.appendChild(document.createElement('br'));
+    body.appendChild(buy);
+
+    panel.appendChild(status);
+    document.body.insertBefore(panel, document.body.firstChild);
+    render();
+
+    try {
+      const raw = sessionStorage.getItem(DAILY_MSG_KEY);
+      if (raw) {
+        sessionStorage.removeItem(DAILY_MSG_KEY);
+        const prev = JSON.parse(raw);
+        status.textContent = '';
+        (prev.lines || []).forEach((l) => {
+          const div = document.createElement('div');
+          div.textContent = l;
+          status.appendChild(div);
+        });
+        setOpen(true);
+      }
+    } catch (e) { /* junk or unavailable; skip the summary */ }
+  }
+
+  // === feature: buy several items at once from one mall store ===========
+  //
+  // A player's store page (mallstore.php) shows its stock as a radio group in
+  // one form, so only one kind of item can be bought per click. This adds a
+  // checkbox and a quantity to every row and one "Buy checked" button, then
+  // buys the ticked rows one after another with the same planner and the same
+  // measured-from-inventory runPlan the Mall search uses (no new way to spend
+  // Meat). Captured row, trimmed:
+  //   <td><input name=whichitem type=radio value=8739.120></td><td><img></td>
+  //   <td><b>perfect dark and stormy</b> (529,679)  (Limit 1 / day)</td>
+  //   <td>120 Meat</td>
+  // inside <form name="mallbuy" action="mallstore.php" method="post"> whose
+  // hidden fields (pwd, whichstore, buying) are replayed as they are -- only
+  // `whichitem` and `quantity` change. Whichever row fails short stops the
+  // whole basket: when the Meat or the stock ran out, buying on is not safe.
+
+  const STORE_MSG_KEY = 'tm-ux-mallstore-result';
+  const STORE_BOX_CLASS = 'tm-store-multi';
+
+  // --- pure helpers (unit-tested) ------------------------------------------
+
+  // "perfect dark and stormy (529,679) (Limit 1 / day)" -> 529679. The stock is
+  // the first bracketed number after the name; null when there isn't one.
+  function parseStoreStock(text) {
+    const m = String(text || '').replace(NBSP, ' ').match(/\(\s*(\d[\d,]*)\s*\)/);
+    return m ? parseInt(m[1].replace(/,/g, ''), 10) : null;
+  }
+
+  // One row of the store's form as an offer shaped like parseOfferRow's, or
+  // null when it isn't a buyable row. `fields` is the form's hidden inputs.
+  function parseStoreRow(tr, fields, storeName) {
+    const radio = tr.querySelector('input[name="whichitem"]');
+    if (!radio) return null;
+    const m = String(radio.value || '').match(/^(\d+)\.(\d+)$/);
+    if (!m) return null;
+    const nameEl = tr.querySelector('b');
+    const cell = nameEl ? nameEl.parentNode : tr;
+    const text = cell.textContent || '';
+    const stock = parseStoreStock(text);
+    const limit = parseLimit(text);
+    return {
+      row: tr,
+      itemId: m[1],
+      name: nameEl ? (nameEl.textContent || '').trim() : 'item ' + m[1],
+      storeName: storeName,
+      price: parseInt(m[2], 10),
+      stock: stock === null ? 0 : stock,
+      limit: limit,
+      available: availableFrom(stock, limit),
+      postFields: Object.assign({}, fields, { whichitem: m[0] }),
+    };
+  }
+
+  // The one confirm() for a basket. `entries` is [{ name, plan }].
+  function describeBasket(entries, meat) {
+    const lines = ['Buy from this store:', ''];
+    let qty = 0;
+    let cost = 0;
+    entries.forEach((e) => {
+      const many = e.plan.steps.length > 1;
+      const price = many ? Math.round(e.plan.avg) : (e.plan.steps.length ? e.plan.steps[0].offer.price : 0);
+      lines.push('  ' + meatFmt(e.plan.qty) + ' × ' + e.name + ' @ ' +
+        (many ? 'avg ' : '') + meatFmt(price) + (many ? ' (' + e.plan.steps.length + ' stores)' : '') +
+        ' = ' + meatFmt(e.plan.cost) + ' Meat' +
+        (e.plan.short ? '  (' + meatFmt(e.plan.short) + ' short of what you asked for)' : ''));
+      qty += e.plan.qty;
+      cost += e.plan.cost;
+    });
+    lines.push('');
+    lines.push('Total:   ' + meatFmt(cost) + ' Meat for ' + meatFmt(qty) +
+      ' item' + (qty === 1 ? '' : 's'));
+    if (Number.isFinite(meat)) {
+      lines.push('You have ' + meatFmt(meat) + ' Meat.');
+      if (cost > meat) {
+        lines.push('');
+        lines.push('WARNING: that is ' + meatFmt(cost - meat) +
+          ' Meat more than you have. The run will stop when the Meat does.');
+      }
+    }
+    if (entries.some((e) => e.plan.limited)) {
+      lines.push('');
+      lines.push('NOTE: some stores have daily limits. The page can\'t say how much of ' +
+        'today\'s limit you\'ve used, so a line may come up short.');
+    }
+    lines.push('');
+    lines.push('Meat is spent immediately and cannot be refunded. Continue?');
+    return lines.join('\n');
+  }
+
+  // --- the page ------------------------------------------------------------
+
+  function readStoreForm(form) {
+    const fields = {};
+    for (const inp of form.querySelectorAll('input[type="hidden"]')) {
+      if (inp.name) fields[inp.name] = inp.value;
+    }
+    return fields;
+  }
+
+  function mallStoreMultibuy() {
+    const form = document.querySelector('form[name="mallbuy"]');
+    if (!form || form.querySelector('.' + STORE_BOX_CLASS)) return;
+    const fields = readStoreForm(form);
+    const owner = document.querySelector('a[href*="showplayer.php"]');
+    const storeName = owner ? (owner.textContent || '').trim() + "'s store" : 'this store';
+
+    const rows = [];
+    for (const tr of form.querySelectorAll('tr')) {
+      const offer = parseStoreRow(tr, fields, storeName);
+      if (offer && offer.available > 0) rows.push(offer);
+    }
+    if (!rows.length) return;
+
+    const table = rows[0].row.closest('table');
+    rows.forEach((offer) => {
+      const td = document.createElement('td');
+      td.className = STORE_BOX_CLASS;
+      td.style.cssText = 'padding-left:10px;white-space:nowrap';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.title = 'Include in "Buy checked"';
+      const qty = document.createElement('input');
+      qty.type = 'text';
+      qty.className = 'text';
+      qty.size = 3;
+      qty.value = '1';
+      qty.title = 'How many (up to ' + meatFmt(offer.available) + ')';
+      td.appendChild(cb);
+      td.appendChild(document.createTextNode(' × '));
+      td.appendChild(qty);
+      offer.row.appendChild(td);
+      offer.cb = cb;
+      offer.qtyInput = qty;
+    });
+
+    const bar = document.createElement('div');
+    bar.style.cssText = 'margin:6px 0;text-align:center';
+    const status = document.createElement('span');
+    status.style.marginLeft = '8px';
+    const go = makeButton('tm-store-buy-checked', 'Buy checked');
+    go.addEventListener('click', async () => {
+      const entries = [];
+      for (const o of rows) {
+        if (!o.cb.checked) continue;
+        const want = parseCount(o.qtyInput.value);
+        if (!want || want < 1) {
+          status.textContent = 'Enter a quantity for ' + o.name + '.';
+          return;
+        }
+        entries.push({ offer: o, name: o.name, plan: planPurchase([o], want) });
+      }
+      if (!entries.length) { status.textContent = 'Tick at least one item.'; return; }
+      status.textContent = 'Checking your Meat...';
+      const meat = await apiMeat();
+      if (!window.confirm(describeBasket(entries, meat))) {
+        status.textContent = 'Cancelled — nothing was bought.';
+        return;
+      }
+      go.disabled = true;
+      const report = [];
+      for (const e of entries) {
+        status.textContent = 'Buying ' + e.name + '...';
+        // eslint-disable-next-line no-await-in-loop
+        const res = await runPlan(e.plan, e.offer.itemId, () => {});
+        report.push(e.name + ': ' + purchaseSummary(res, e.plan.qty));
+        // Short, or not measurable: stop the basket rather than buy on blind.
+        if (res.bought === null || res.bought < e.plan.qty) {
+          report.push('Stopped here; the rest of the basket was not bought.');
+          break;
+        }
+      }
+      try {
+        sessionStorage.setItem(STORE_MSG_KEY, JSON.stringify({ lines: report }));
+      } catch (err) { /* we just lose the summary */ }
+      location.reload();
+    });
+    bar.appendChild(go);
+    bar.appendChild(status);
+    table.parentNode.insertBefore(bar, table);
+
+    try {
+      const raw = sessionStorage.getItem(STORE_MSG_KEY);
+      if (raw) {
+        sessionStorage.removeItem(STORE_MSG_KEY);
+        const prev = JSON.parse(raw);
+        const box = document.createElement('div');
+        box.style.cssText = 'margin:6px;padding:6px 10px;border:1px solid #888;font-weight:bold';
+        (prev.lines || []).forEach((l) => {
+          const div = document.createElement('div');
+          div.textContent = l;
+          box.appendChild(div);
+        });
+        table.parentNode.insertBefore(box, bar);
+      }
+    } catch (err) { /* junk or unavailable; skip the summary */ }
+  }
+
+  // === feature: a "before you jump" checklist on the ascension page ======
+  //
+  // ascend.php is one form: a Ascend button and two checkboxes ("confirm",
+  // "seriously"). Nothing on it says what you are about to lose or waste, so a
+  // panel goes above the form listing three things, each marked with a word and
+  // a shape (never colour alone):
+  //   1. Interesting Coins -- quest items, they do not survive the Astral Gash.
+  //      Counted for you; the link goes to the coin shop.
+  //   2. The blood cubic zirconia's item skills (blood thinner, spinal tapas,
+  //      pheromone cocktail) -- make the ones you want before the run ends. A
+  //      cast button per skill; you tick the line yourself because casts have
+  //      no natural "done".
+  //   3. Codpiece gems -- they persist across the Gash, so this is only a
+  //      reminder to set up the next run. A link to the decoration screen; the
+  //      page is a choice adventure, so it is never fetched from here.
+  // Ticks are kept per character and per ascension count, so the next run
+  // starts with an empty list. The Ascend button asks before it submits while
+  // a line is still open; nothing is ever submitted on your behalf.
+
+  const ASCEND_KEY = 'tm-kol-ascend-checklist';
+  const ASCEND_PANEL_ID = 'tm-ascend-panel';
+  const COIN_NAME = 'Interesting Coin';
+  const COIN_SHOP = 'shop.php?whichshop=interesting';
+  const BCZ_SKILLS = [
+    { name: 'BCZ: Create Blood Thinner', label: 'Blood thinner' },
+    { name: 'BCZ: Prepare Spinal Tapas', label: 'Spinal tapas' },
+    { name: 'BCZ: Craft a Pheromone Cocktail', label: 'Pheromone cocktail' },
+  ];
+
+  // --- pure helpers (unit-tested) ------------------------------------------
+
+  // The coin line. The mark is a shape and the text says it in words.
+  function ascendCoinLine(count) {
+    if (!Number.isFinite(count)) {
+      return { mark: '?', open: false, text: 'Could not read your Interesting Coin count.' };
+    }
+    if (count <= 0) return { mark: '✔', open: false, text: 'No Interesting Coins left to lose.' };
+    return {
+      mark: '✘', open: true,
+      text: count + ' Interesting Coin' + (count === 1 ? '' : 's') +
+        ' will be lost when you ascend. Spend them first.',
+    };
+  }
+
+  // A manual line: open until ticked.
+  function ascendTickLine(ticked, doneText, openText) {
+    return ticked
+      ? { mark: '✔', open: false, text: doneText }
+      : { mark: '✘', open: true, text: openText };
+  }
+
+  // Ticks belong to one character's one run. Without an ascension count the day
+  // stands in, so a stale tick still expires rather than lasting forever.
+  function ascendTickKey(status, today) {
+    const who = status && status.name ? String(status.name) : 'unknown';
+    const run = status && status.ascensions !== undefined && status.ascensions !== null &&
+      status.ascensions !== '' ? 'run' + status.ascensions : 'day' + today;
+    return who + '|' + run;
+  }
+
+  // "Open lines" text for the confirm shown when you press Ascend.
+  function ascendOpenSummary(lines) {
+    const open = lines.filter((l) => l.open);
+    if (!open.length) return '';
+    return 'Still open before you ascend:\n\n' +
+      open.map((l) => '✘ ' + l.label + ': ' + l.text).join('\n') +
+      '\n\nAscend anyway?';
+  }
+
+  function readAscendTicks(key) {
+    try {
+      const o = JSON.parse(localStorage.getItem(ASCEND_KEY));
+      return o && o.key === key && o.ticks && typeof o.ticks === 'object' ? o.ticks : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function writeAscendTick(key, name, on) {
+    const ticks = readAscendTicks(key);
+    ticks[name] = on;
+    try { localStorage.setItem(ASCEND_KEY, JSON.stringify({ key: key, ticks: ticks })); } catch (e) { /* blocked */ }
+  }
+
+  // --- reading the game -----------------------------------------------------
+
+  // How many of an item by NAME the player holds, read off the inventory pages
+  // (each item is `table.item` with `b.ircm` for the name and `(N)` after it;
+  // see the inventory [mall] feature). Null when it cannot be told -- which is
+  // different from 0 -- because a wrong "none left" is the one lie this line
+  // must not tell.
+  async function inventoryCountByName(name) {
+    let readAny = false;
+    for (const which of [3, 1, 2]) {
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await fetch(ORIGIN + '/inventory.php?which=' + which, {
+          credentials: 'same-origin', cache: 'no-store',
+        });
+        if (!res.ok) continue;
+        // eslint-disable-next-line no-await-in-loop
+        const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+        const tables = doc.querySelectorAll('table.item');
+        if (tables.length) readAny = true;
+        for (const t of tables) {
+          const b = t.querySelector('b.ircm') || t.querySelector('b');
+          if (!b || !sameName(b.textContent, name)) continue;
+          const span = b.parentNode.querySelector('span');
+          const n = span ? parseCount(span.textContent) : 1;
+          return n === null ? 1 : n;
+        }
+      } catch (e) { /* try the next tab */ }
+    }
+    return readAny ? 0 : null;
+  }
+
+  async function ascendStatus() {
+    const j = await apiJson('status');
+    return j && typeof j === 'object' ? j : {};
+  }
+
+  // One cast through runskillz.php, like the heal button's castOnce, but
+  // returning whether the server refused. A refusal reads "no|reason" on the
+  // ajax route; anything else is taken as sent.
+  async function castSkillChecked(id, pwd) {
+    const params = new URLSearchParams({ action: 'Skillz', whichskill: id, quantity: '1', ajax: '1' });
+    if (pwd) params.set('pwd', pwd);
+    const res = await fetch(ORIGIN + '/runskillz.php?' + params.toString(), {
+      credentials: 'same-origin', cache: 'no-store',
+    });
+    const text = res.ok ? await res.text() : 'no|request failed';
+    return failureReason(text);
+  }
+
+  // --- the panel --------------------------------------------------------------
+
+  async function ascendChecklist() {
+    const form = document.querySelector('form[name="ascend"]');
+    if (!form || document.getElementById(ASCEND_PANEL_ID)) return;
+
+    const panel = document.createElement('div');
+    panel.id = ASCEND_PANEL_ID;
+    panel.style.cssText = 'margin:8px 0;padding:6px 10px;border:1px solid #888;text-align:left';
+    const title = document.createElement('b');
+    title.textContent = 'Before you jump';
+    panel.appendChild(title);
+    form.parentNode.insertBefore(panel, form);
+
+    const status = await ascendStatus();
+    const tickKey = ascendTickKey(status, Math.floor(Date.now() / 86400000));
+    const lines = []; // { label, open, text } -- kept current for the submit guard
+
+    const addLine = (label, build) => {
+      const entry = { label: label, open: false, text: '' };
+      lines.push(entry);
+      const row = document.createElement('div');
+      row.style.marginTop = '6px';
+      panel.appendChild(row);
+      const draw = (ln, extra) => {
+        entry.open = ln.open;
+        entry.text = ln.text;
+        row.textContent = '';
+        const head = document.createElement('b');
+        head.textContent = ln.mark + ' ' + label + ': ';
+        row.appendChild(head);
+        row.appendChild(document.createTextNode(ln.text + ' '));
+        if (extra) extra(row);
+      };
+      build(draw);
+    };
+
+    // 1. coins
+    addLine('Interesting Coins', (draw) => {
+      const link = (r) => {
+        const a = document.createElement('a');
+        a.href = COIN_SHOP;
+        a.textContent = '[coin shop]';
+        r.appendChild(a);
+      };
+      draw({ mark: '…', open: false, text: 'counting...' });
+      inventoryCountByName(COIN_NAME).then((n) => draw(ascendCoinLine(n), link));
+    });
+
+    // 2. blood cubic zirconia skills
+    addLine('Blood cubic zirconia items', (draw) => {
+      const redraw = () => draw(
+        ascendTickLine(readAscendTicks(tickKey).bcz,
+          'Marked done.', 'Make any blood thinner, spinal tapas or pheromone cocktail you want.'),
+        (r) => {
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = !!readAscendTicks(tickKey).bcz;
+          cb.addEventListener('change', () => { writeAscendTick(tickKey, 'bcz', cb.checked); redraw(); });
+          r.appendChild(cb);
+          r.appendChild(document.createTextNode(' done'));
+          r.appendChild(castBox);
+        });
+      const castBox = document.createElement('div');
+      castBox.style.marginLeft = '16px';
+      castBox.textContent = 'Looking up your skills...';
+      redraw();
+      (async () => {
+        const doc = await fetchSkillsDoc(true);
+        castBox.textContent = '';
+        if (!doc) { castBox.textContent = 'Could not read your skills page.'; return; }
+        const map = buildSkillMap(doc);
+        BCZ_SKILLS.forEach((sk) => {
+          const id = findSkillId(map, sk.name);
+          const line = document.createElement('div');
+          if (!id) {
+            line.textContent = sk.label + ': not available now (wear the blood cubic zirconia, ' +
+              'or the codpiece holding it).';
+            castBox.appendChild(line);
+            return;
+          }
+          const n = document.createElement('input');
+          n.type = 'text'; n.className = 'text'; n.size = 2; n.value = '1';
+          const btn = makeButton('tm-ascend-cast-' + id, 'Cast');
+          const out = document.createElement('span');
+          out.style.marginLeft = '6px';
+          btn.addEventListener('click', async () => {
+            const want = Math.min(parseCount(n.value) || 1, 22);
+            btn.disabled = true;
+            const pwd = await getPwd();
+            let made = 0;
+            let why = '';
+            for (; made < want; made++) {
+              out.textContent = 'casting ' + (made + 1) + '/' + want + '...';
+              // eslint-disable-next-line no-await-in-loop
+              why = await castSkillChecked(id, pwd);
+              if (why) break;
+            }
+            out.textContent = made + ' cast' + (made === 1 ? '' : 's') + ' sent' +
+              (why ? '; stopped: ' + why : '') + '. Check your inventory.';
+            btn.disabled = false;
+          });
+          line.appendChild(document.createTextNode(sk.label + ': '));
+          line.appendChild(n);
+          line.appendChild(document.createTextNode(' '));
+          line.appendChild(btn);
+          line.appendChild(out);
+          castBox.appendChild(line);
+        });
+      })();
+    });
+
+    // 3. codpiece
+    addLine('Codpiece gems', (draw) => {
+      let names = [];
+      try { names = Object.keys(JSON.parse(localStorage.getItem('tm-codpiece-setups')) || {}); } catch (e) { /* none */ }
+      const redraw = () => draw(
+        ascendTickLine(readAscendTicks(tickKey).codpiece,
+          'Marked done.', 'Gems stay across the Gash; set them for the next run.'),
+        (r) => {
+          const a = document.createElement('a');
+          a.href = '#';
+          a.textContent = '[decorate]';
+          a.addEventListener('click', async (ev) => {
+            ev.preventDefault();
+            const pwd = await getPwd();
+            location.href = 'inventory.php?action=docodpiece' + (pwd ? '&pwd=' + pwd : '');
+          });
+          r.appendChild(a);
+          r.appendChild(document.createTextNode(' '));
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = !!readAscendTicks(tickKey).codpiece;
+          cb.addEventListener('change', () => { writeAscendTick(tickKey, 'codpiece', cb.checked); redraw(); });
+          r.appendChild(cb);
+          r.appendChild(document.createTextNode(' done' +
+            (names.length ? ' (saved setups: ' + names.join(', ') + ')' : '')));
+        });
+      redraw();
+    });
+
+    form.addEventListener('submit', (ev) => {
+      const text = ascendOpenSummary(lines);
+      if (text && !window.confirm(text)) ev.preventDefault();
+    });
   }
 
   // === feature: a [mall] action on every inventory item ==================
@@ -2693,6 +3436,68 @@
     });
   }
 
+  // --- BEGIN tm-kol-rare-monsters (keep byte-identical across scripts) ---
+  // Monsters the player wants to be told about (and Auto Combat to stop for).
+  // Stored as { added: [{ name, note }], removed: [name] } so a built-in can be
+  // unwatched without editing code. Names are kept normalised (rareMonsterNorm).
+  const RARE_MONSTERS_KEY = 'tm-kol-rare-monsters';
+  const RARE_MONSTERS_BUILTIN = [
+    { name: 'rampaging adding machine',
+      note: 'Combines scrolls: use two scrolls on it in combat. Auto-attack aborts against it.' },
+  ];
+
+  // "a Rampaging  Adding Machine" -> "rampaging adding machine".
+  function rareMonsterNorm(name) {
+    return String(name || '').toLowerCase().replace(/\s+/g, ' ').trim()
+      .replace(/^(an?|the) (?=\S)/, '');
+  }
+
+  // Corrupt JSON, a wrong shape or blocked storage all read as "built-ins only".
+  function rareMonsterRead() {
+    let o = null;
+    try { o = JSON.parse(localStorage.getItem(RARE_MONSTERS_KEY)); } catch (e) { /* none */ }
+    if (!o || typeof o !== 'object') o = {};
+    const added = Array.isArray(o.added) ? o.added.filter((x) => x && typeof x.name === 'string') : [];
+    const removed = Array.isArray(o.removed) ? o.removed.filter((x) => typeof x === 'string') : [];
+    return { added: added, removed: removed };
+  }
+
+  // Every watched monster: [{ name, note, builtin }].
+  function rareMonsterList() {
+    const s = rareMonsterRead();
+    const out = RARE_MONSTERS_BUILTIN
+      .filter((b) => s.removed.indexOf(b.name) === -1)
+      .map((b) => ({ name: b.name, note: b.note, builtin: true }));
+    s.added.forEach((a) => {
+      const n = rareMonsterNorm(a.name);
+      if (n && !out.some((x) => x.name === n)) {
+        out.push({ name: n, note: String(a.note || ''), builtin: false });
+      }
+    });
+    return out;
+  }
+
+  // The watch entry for a monster name as KoL prints it, or null.
+  function rareMonsterFor(name) {
+    const n = rareMonsterNorm(name);
+    if (!n) return null;
+    return rareMonsterList().find((x) => x.name === n) || null;
+  }
+
+  // Read-modify-write, so two scripts toggling never overwrite each other.
+  function rareMonsterSetWatched(name, on, note) {
+    const n = rareMonsterNorm(name);
+    if (!n) return;
+    const s = rareMonsterRead();
+    const builtin = RARE_MONSTERS_BUILTIN.some((b) => b.name === n);
+    s.added = s.added.filter((a) => rareMonsterNorm(a.name) !== n);
+    s.removed = s.removed.filter((r) => r !== n);
+    if (on && !builtin) s.added.push({ name: n, note: String(note || '') });
+    if (!on && builtin) s.removed.push(n);
+    try { localStorage.setItem(RARE_MONSTERS_KEY, JSON.stringify(s)); } catch (e) { /* blocked */ }
+  }
+  // --- END tm-kol-rare-monsters ---
+
   // --- Combat monster (fight.php) --------------------------------------
   // Verified: the current foe's name sits in <span id="monname">, including
   // the leading article ("a gingerbread murderer"; the page also carries a
@@ -2703,6 +3508,76 @@
     const el = document.getElementById('monname');
     if (!el) return;
     addBadge(el, 'after', stripArticle(el.textContent));
+  }
+
+  // --- Rare monster banner (fight.php) ---------------------------------
+  // A watched monster gets a banner with a star and its note; any other gets a
+  // small "watch" link. Auto Combat reads the same list (auto-combat.js) and
+  // stops instead of fighting a watched one. The mark is a star plus words,
+  // never colour alone.
+  const RARE_BANNER_ID = 'tm-rare-monster-banner';
+
+  function rareMonsterBanner() {
+    const el = document.getElementById('monname');
+    if (!el) return;
+    const old = document.getElementById(RARE_BANNER_ID);
+    if (old) old.remove();
+
+    const name = rareMonsterNorm(el.textContent);
+    const hit = rareMonsterFor(name);
+    const redraw = () => rareMonsterBanner();
+    const link = (text, title, fn) => {
+      const a = document.createElement('a');
+      a.href = '#';
+      a.textContent = text;
+      a.title = title;
+      a.style.marginLeft = '10px';
+      a.addEventListener('click', (ev) => { ev.preventDefault(); fn(); });
+      return a;
+    };
+
+    const box = document.createElement('div');
+    box.id = RARE_BANNER_ID;
+    box.style.cssText = hit
+      ? 'margin:6px;padding:8px 12px;border:2px solid #b8860b;border-radius:6px;' +
+        'background:#fff3c4;color:#4a3600;text-align:center;'
+      : 'margin:4px 6px;font-size:0.85em;text-align:center;';
+
+    const line = document.createElement('div');
+    if (hit) {
+      const b = document.createElement('b');
+      b.textContent = '★ Rare monster: ' + name;
+      line.appendChild(b);
+      if (hit.note) line.appendChild(document.createTextNode(' — ' + hit.note));
+      line.appendChild(link('unwatch', 'Stop watching this monster', () => {
+        rareMonsterSetWatched(name, false); redraw();
+      }));
+    } else {
+      line.appendChild(link('☆ watch ' + name, 'Highlight this monster and make Auto Combat stop for it', () => {
+        const note = window.prompt('Note to show with ' + name + ' (optional):', '');
+        if (note === null) return;
+        rareMonsterSetWatched(name, true, note); redraw();
+      }));
+    }
+
+    const list = document.createElement('div');
+    list.style.cssText = 'display:none;margin-top:4px;text-align:left;';
+    line.appendChild(link('manage list', 'Show every watched monster', () => {
+      list.style.display = list.style.display === 'none' ? 'block' : 'none';
+    }));
+    rareMonsterList().forEach((m) => {
+      const row = document.createElement('div');
+      row.textContent = '★ ' + m.name + (m.note ? ' — ' + m.note : '') +
+        (m.builtin ? ' (built in)' : '');
+      row.appendChild(link('remove', 'Stop watching ' + m.name, () => {
+        rareMonsterSetWatched(m.name, false); redraw();
+      }));
+      list.appendChild(row);
+    });
+
+    box.appendChild(line);
+    box.appendChild(list);
+    document.body.insertBefore(box, document.body.firstChild);
   }
 
   // --- Items acquired (fight.php) --------------------------------------
@@ -4177,6 +5052,9 @@
     { name: 'hermit-clovers', path: /\/hermit\.php/i, run: hermitClovers },
     { name: 'beer-garden-guard', path: /\/campground\.php/i, run: beerGardenGuard },
     { name: 'mall-bulk-buy', path: /\/mall\.php/i, run: mallBulkBuy },
+    { name: 'mall-daily-list', path: /\/mall\.php/i, run: mallDailyList },
+    { name: 'mallstore-multibuy', path: /\/mallstore\.php/i, run: mallStoreMultibuy },
+    { name: 'ascend-checklist', path: /\/ascend\.php/i, run: ascendChecklist },
     { name: 'inventory-mall-link', path: /\/inventory\.php/i, run: inventoryMallLinks },
     { name: 'inventory-yield-filter', path: /\/inventory\.php/i, run: inventoryYieldFilter },
     { name: 'mcd-always-visible', path: /\/charpane\.php/i, run: mcdAlwaysVisible },
@@ -4189,6 +5067,7 @@
     { name: 'wiki-quests', path: /\/questlog\.php/i, run: linkQuests },
     { name: 'wiki-monster', path: /\/fight\.php/i, run: linkMonster },
     { name: 'wiki-drops', path: /\/fight\.php/i, run: linkDrops },
+    { name: 'rare-monster-banner', path: /\/fight\.php/i, run: rareMonsterBanner },
     { name: 'wiki-inventory', path: /\/inventory\.php/i, run: linkInventory },
     { name: 'inventory-collapse', path: /\/inventory\.php/i, run: buildCollapseBar },
     { name: 'equip-optimize', path: /\/inventory\.php/i, run: buildEquipOptimizer },

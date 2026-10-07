@@ -3990,6 +3990,43 @@ Everything else in this script is confirmed live. Keep it that way: when you add
 rests on markup you have only reasoned about, say so here and in the code, and move it up only
 on a report.
 
+**KoL `ux-enhancers.js` 1.25 added four features** (captures: `ascend.php`, `mallstore.php`,
+`shop.php?whichshop=interesting`, all 2026-10-07):
+
+- **Mall store multibuy** (`mallstore.php`). The store page is one `form[name=mallbuy]` with a
+  `whichitem` radio per row (`value="<itemId>.<price>"`), so KoL itself buys one item type per
+  click. A checkbox and quantity per row plus a "Buy checked" button; each row is turned into an
+  `offer` shaped like `parseOfferRow`'s (`parseStoreRow`) and bought with the same `planPurchase` /
+  `runPlan`. The only difference is `buyFrom`: an offer with `postFields` replays the form's hidden
+  inputs (`pwd`, `whichstore`, `buying`) as a POST with `whichitem` and `quantity` swapped in, rather
+  than the mall search's `rel` URL. The reply is a whole page, so the inventory delta is still the
+  only thing believed. **A short or unmeasurable row stops the whole basket** — out of Meat or stock
+  means buying on is not safe. The page does not say how much of a "Limit 1 / day" has been used, so
+  the confirm carries that caveat.
+- **Daily shopping list** (`mall.php`). `tm-kol-mall-daily-list` holds `[{ name, qty }]`
+  (`cleanDailyList` drops anything else). "Buy list" runs the exact-name search
+  (`mallSearchUrl`) per row in the background, parses it with `parseItemTable`, and takes the table
+  whose name matches exactly (`pickItemByName` — never the first table, since a wrong item costs
+  Meat). One `describeBasket` confirm for the whole list. A row not found is skipped and named, not
+  silently dropped.
+- **Rare-monster watch list** (`fight.php` + `auto-combat.js` 0.10). See
+  `okf/kingdom-of-loathing/rare-monsters.md`. The two scripts carry a byte-identical block
+  (`tm-kol-rare-monsters`), pinned by `tests/kol-rare-monsters.test.mjs`. Auto Combat checks round 1
+  only and stops with the fight left open.
+- **Ascension checklist** (`ascend.php`). One `form[name=ascend]` (an Ascend button plus the
+  "confirm" and "seriously" checkboxes); a panel goes above it and a `submit` listener asks while a
+  line is open. Coins are counted by *name* off the inventory tabs (`inventoryCountByName`) because
+  neither the coin shop page nor the wiki gives the coin's item id — **assumed**: that
+  `inventory.php?which=3|1|2` renders its items in full (`table.item`, `b.ircm`, `(N)`); an
+  unreadable count shows `?`, never "none left". The blood cubic zirconia skills (*BCZ: Create Blood
+  Thinner*, *Prepare Spinal Tapas*, *Craft a Pheromone Cocktail* — not Heartstone skills) are cast
+  with `runskillz.php`; each cast is sent and a `no|reason` reply stops the loop, but **assumed**:
+  that is how a refusal reads on that route. Casts and codpiece gems are manual ticks, kept in
+  `tm-kol-ascend-checklist` per character and per `ascensions` count (the day stands in when
+  api.php gives none). The codpiece line only links to the decoration screen
+  (`inventory.php?action=docodpiece`): that page is choice 1588, and fetching it from here would
+  put the player into a choice adventure.
+
 ## Verifying a change
 
 There is (almost) nothing to run here. Validate by reasoning about the DOM the script targets
@@ -4066,6 +4103,13 @@ Current tests:
   bought"), and an unmeasurable run must admit it rather than claim either that nothing
   happened or that the Meat is untouched. This is the money path — extend it before touching
   the planner, never after.
+- `tests/kol-rare-monsters.test.mjs` — the rare-monster block is byte-identical in
+  `ux-enhancers.js` and `auto-combat.js`, names match whatever article KoL prints, a built-in can
+  be unwatched and re-watched, and corrupt or blocked storage reads as built-ins only.
+- `tests/ux-ascend-checklist.test.mjs` — the ascension lines read the same without colour (shape
+  plus words), the tick key changes with the ascension count, and the Ascend confirm lists only
+  open lines. `tests/ux-mall-buy.test.mjs` also covers `parseStoreRow`, `describeBasket`,
+  `cleanDailyList` and `pickItemByName`.
 - `tests/ux-beer-garden.test.mjs` — asserts `ux-enhancers.js`'s beer garden
   yield table against the wiki's (3 barley/hops per day, clamped at day 7; day 1 gives no
   fancy item and day 2 gives the first, which is where the threshold comes from), what the
