@@ -2686,7 +2686,9 @@ navigation. Two consequences:
   PICTURE**: the wiki records no card or option text of Fate content, so Philosofruits (Guide) names every card and option by its
   file (`Treeblue.png`, `treesmall.png`). Each row carries that picture and a `title: null`; a filled-in title wins over the
   picture, and a titled card is no longer matched by its picture at all. An untitled row's tooltip quotes the name the game shows,
-  so filling titles in is copying them from the tooltips into `PHF_CARDS`. `phfImageKey` compares lower case, no folder, no
+  so filling titles in is copying them from the tooltips into `PHF_CARDS`. Three card titles are in (a phone screenshot of the
+  hand, 2026-10-07, tied to rows by the card art): *A Philosophy Close to Home* (passerby), *A Meeting of Minds* (argument), *The
+  Deeper Wisp-Ways* (jungle); no option title yet. `phfImageKey` compares lower case, no folder, no
   extension, no trailing `small`. **Where the picture is read** is unverified apart from `.hand__image`: the first `<img>` in
   `.branch__left` (an option), under `.media--root` outside a branch (the opened card), under `.small-card-container` (compact
   hand). **The gate is the greeting, for every row** -- `PHF_AREAS`, *The Wisp-Ways*, taken from the story page, not captured --
@@ -3955,7 +3957,7 @@ Confirmed live by the author:
 - **Philosofruits** (`philosofruits`, added 2026-10-07). Nothing seen in the game; the table is transcribed from the guide, which
   names cards and options only by picture. Report first: **(1) The greeting** inside the activity -- if it is not *The Wisp-Ways*
   (`PHF_AREAS`), nothing is badged at all. **(2) The titles** -- every card's and option's name as the game shows it (each untitled
-  badge's tooltip quotes it), to fill in `title`. **(3) Whether pictures match at all** -- the `src` of a hand card, an opened card
+  badge's tooltip quotes it), to fill in `title`; three cards are done, ten cards and every option are not. **(3) Whether pictures match at all** -- the `src` of a hand card, an opened card
   and an option, against the wiki file names (`treeblue`, `treesmall`); if a badge is missing where a title is not yet filled in,
   this is why. **(4) The "Skill 2" figures** -- whether *Shapeling Arts 2* and the like are the difficulty. **(5) A locked Rot
   option** -- drawn greyed or not at all before the Hintershroom.

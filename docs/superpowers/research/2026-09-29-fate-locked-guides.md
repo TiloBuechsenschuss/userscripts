@@ -107,3 +107,8 @@ both), so options are matched within the open card. The guide's "Shapeling Arts 
 difficulties. Its Harvest and Philosophy storylets are not badged: the guide gives neither their options' titles nor
 their pictures.
 
+**First titles (2026-10-07).** A phone screenshot of the hand (compact layout) showed three cards. Matched to the guide's
+rows by comparing the card art with the wiki files: *A Philosophy Close to Home* = `Passerby.png`, *A Meeting of Minds* =
+`Argument.png`, *The Deeper Wisp-Ways* = `Jungle.png`. The screenshot shows no greeting, so `PHF_AREAS` is still unconfirmed,
+though a card named *The Deeper Wisp-Ways* makes the Wisp-Ways likely.
+

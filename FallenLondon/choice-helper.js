@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.46
+// @version      1.47
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -42650,7 +42650,10 @@
   // "Mithridacy 2" are read as difficulty 2, and the tooltip says it is a
   // reading. A failure the guide marks "-" is "nothing the guide records".
   // Corrections -- and the titles, once read off the game -- go in PHF_CARDS and
-  // nowhere else.
+  // nowhere else. Three card titles are in, read off a phone screenshot of the
+  // hand on 2026-10-07 and tied to their rows by comparing the card art with the
+  // wiki's files: A Philosophy Close to Home (Passerby.png), A Meeting of Minds
+  // (Argument.png), The Deeper Wisp-Ways (Jungle.png). No option title yet.
 
   // The area greetings the badges are shown under. A guess from The Mushroom's
   // Dream ("Unlocks the Wisp-Ways"), not a capture. A leading "The" is ignored.
@@ -42703,13 +42706,13 @@
     phfCard('passerby', 100, [
       phfOpt('salon3small', ['Mithridacy', 2], { F: 1 }),
       phfOpt('ring_brokensmall', ['Watchful', null], { R: 1 }),
-    ]),
+    ], { title: 'A Philosophy Close to Home' }),
     phfCard('argument', 80, [
       phfOpt('tonguesmall', ['Dangerous', null], { C: 1 }, { failOther: [['Nightmares', 2]] }),
       phfOpt('confidentsmilesmall', ['Persuasive', null], { A: 1 }, { failOther: [['Wounds', 2]] }),
       phfOpt('ropecourtsmall', ['Shadowy', null], { F: 1 }),
       phfOpt('blacksmall', ['Mithridacy', null], { R: 1 }),
-    ]),
+    ], { title: 'A Meeting of Minds' }),
     // The flavour options here take the point back on a failure.
     phfCard('crowd2', 50, [
       phfOpt('uttershroom_portsmall', ['Watchful', 150], { C: 1 }, { fail: { C: -1 } }),
@@ -42719,7 +42722,7 @@
     ]),
     phfCard('jungle', 80, [
       phfOpt('blueeyesmall', ['Watchful', 150], { Y: 1 }, { failOther: [['Wounds', 2]] }),
-    ]),
+    ], { title: 'The Deeper Wisp-Ways' }),
     phfCard('stick', 50, [
       phfOpt('fistsmall', ['Dangerous', 150], { Y: 1 }, { fail: { C: 2 } }),
     ]),

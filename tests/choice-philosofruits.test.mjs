@@ -184,8 +184,12 @@ check('13 cards, 24 options, as the guide\'s Cards table',
 check('no two cards share a picture',
   new Set(api.PHF_CARDS.map((c) => api.phfImageKey(c.image))).size, 13);
 
-check('no title is recorded yet -- the wiki has none',
-  api.PHF_CARDS.filter((c) => c.title).length + allOptions.filter((o) => o.title).length, 0);
+// The wiki has no titles; these three were read off the game (a phone
+// screenshot of the hand, 2026-10-07) and tied to their rows by the card art.
+check('the card titles read off the game, on the rows whose art they show',
+  api.PHF_CARDS.filter((c) => c.title).map((c) => c.image + ': ' + c.title),
+  ['passerby: A Philosophy Close to Home', 'argument: A Meeting of Minds', 'jungle: The Deeper Wisp-Ways']);
+check('no option title yet', allOptions.filter((o) => o.title).length, 0);
 
 check('every challenge names a known stat and a number or the default',
   allOptions.filter((o) => o.ch && !(['Watchful', 'Shadowy', 'Dangerous', 'Persuasive'].concat(api.PHF_SKILLS)
@@ -273,8 +277,10 @@ check('tooltip: a Rot option says when Rot opens',
   api.phfOptionSpec(card('treeblue'), card('treeblue').options[1], '', '').title
     .includes('The Dream of the Hintershroom'), true);
 check('tooltip: an untitled card quotes what the game shows, to copy in',
-  api.phfCardSpec(card('passerby'), 'A Passing Stranger').title
-    .includes('The game shows “A Passing Stranger”: that is the title to copy into PHF_CARDS.'), true);
+  api.phfCardSpec(card('treeblue'), 'A Lone Tree').title
+    .includes('The game shows “A Lone Tree”: that is the title to copy into PHF_CARDS.'), true);
+check('tooltip: a titled card has no such line',
+  api.phfCardSpec(card('jungle'), 'The Deeper Wisp-Ways').title.includes('not recorded'), false);
 
 // --- matching ------------------------------------------------------------------
 
@@ -358,7 +364,7 @@ api.phfRatings();
 check('opened storylet with the card\'s picture but not its options: nothing',
   [badges(api.PHF_CLASS), badges(api.PHF_BRANCH_CLASS)], [[], []]);
 
-stage(openCard('A Passer-by', 'passerby', [['Talk', 'salon3small'], ['Look', 'ring_brokensmall']]));
+stage(openCard('A Philosophy Close to Home', 'passerby', [['Talk', 'salon3small'], ['Look', 'ring_brokensmall']]));
 api.phfRatings();
 check('opened card: the shared picture reads as this card\'s option', badges(api.PHF_BRANCH_CLASS), ['+F?', '+R?']);
 stage(openCard('A Crowd', 'crowd2', [['A', 'uttershroom_portsmall'], ['B', 'spidertreesmall'], ['C', 'servantsmall'],
@@ -366,6 +372,27 @@ stage(openCard('A Crowd', 'crowd2', [['A', 'uttershroom_portsmall'], ['B', 'spid
 api.phfRatings();
 check('opened card: and as the other card\'s on the other card',
   badges(api.PHF_BRANCH_CLASS), ['+C?', '+A?', '+F?', '+Y? · clears hand']);
+
+// --- the hand from the screenshot -------------------------------------------------
+//
+// The phone (compact) layout, as captured 2026-10-07: three titled cards. They
+// are badged by title, so a picture the stub does not even carry is no matter.
+
+function smallCard(name) {
+  return makeEl('div', 'small-card-container', {}, [
+    makeEl('div', 'small-card__body', {}, [makeEl('h2', 'media__heading heading heading--3', {}, [name])]),
+  ]);
+}
+greet('The Wisp-Ways');
+stage(makeEl('div', 'hand', {}, [smallCard('A Philosophy Close to Home'), smallCard('A Meeting of Minds'),
+  smallCard('The Deeper Wisp-Ways')]));
+api.phfRatings();
+check('screenshot hand: all three badged by title',
+  badges(api.PHF_CLASS), ['+F? / +R?', '+C? / +A? / +F? / +R?', '+Y?']);
+greet('Mangrove College');
+api.phfRatings();
+check('screenshot hand: still only under the Wisp-Ways greeting', badges(api.PHF_CLASS), []);
+greet('The Wisp-Ways');
 
 // --- a title filled in -----------------------------------------------------------
 
