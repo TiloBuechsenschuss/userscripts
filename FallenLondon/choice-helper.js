@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.55
+// @version      1.56
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -43343,6 +43343,7 @@
       busy = true;
       refreshBackgroundState().then(function () { ctx.rerender(); });
     }
+    busy = busy || !!refreshing;   // a click's rerender must still show it
 
     const section = function (title, children) {
       return h('div', { css: 'margin-top:14px;' }, [
@@ -43376,10 +43377,28 @@
       h('div', { css: 'display:flex;flex-wrap:wrap;gap:16px;' }, growing),
       h('div', { css: 'color:' + UI.dim + ';font-size:11px;margin-top:8px;' }, ['Held']),
       h('div', { css: 'display:flex;flex-wrap:wrap;gap:16px;' }, held),
+      h('div', { css: 'margin-top:6px;color:' + UI.dim + ';display:flex;flex-wrap:wrap;align-items:center;gap:8px;' }, [
+        h('span', null, [st ? 'Read ' + ageText(st.at) + (busy ? ' — refreshing from the Myself tab…' : '.')
+          : 'Nothing has been read yet. Open the Myself tab once.']),
+        h('button', {
+          type: 'button',
+          disabled: busy,
+          title: 'Load /myself and /possessions in a hidden frame and re-read them.',
+          css: 'border:1px solid ' + UI.line + ';border-radius:3px;background:transparent;color:'
+            + (busy ? UI.dim : UI.accent) + ';font:11px ' + UI.font + ';padding:1px 7px;'
+            + 'cursor:' + (busy ? 'default' : 'pointer') + ';',
+          on: {
+            click: function () {
+              if (busy || !ctx) return;
+              const done = refreshBackgroundState();
+              ctx.rerender();
+              done.then(function () { ctx.rerender(); });
+            },
+          },
+        }, [busy ? 'Refreshing…' : 'Refresh']),
+      ]),
       h('div', { css: 'margin-top:6px;color:' + UI.dim + ';' }, [
-        st ? 'Read ' + ageText(st.at) + (busy ? ' — refreshing from the Myself tab…' : '.')
-          : 'Nothing has been read yet. Open the Myself tab once.',
-        ' The flavour fruit you have already harvested is not shown: no page records what the game calls it.',
+        'The flavour fruit you have already harvested is not shown: no page records what the game calls it.',
       ]),
     ]);
 
