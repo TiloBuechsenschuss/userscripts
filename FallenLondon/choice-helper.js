@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.56
+// @version      1.57
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -43245,14 +43245,14 @@
   // derived from them (PHF_HARVEST_PER_YIELD), never typed in twice. Corrections
   // go in PHF_FIRST_RECIPES / PHF_RECIPES and nowhere else.
   //
-  // **Not read: the flavour fruit.** The guide calls them "Ascetic Fruit",
-  // "Frivolous Fruit" and the like but no page records an item or quality of
-  // that name, so the panel does not guess one. It shows the Blackened
-  // Philosofruit (the Rot fruit, a wiki item), Solacefruit and Memory of
-  // Distant Shores, and the five growing qualities.
+  // **Held items.** The harvested fruit are Sustenance items on the Possessions
+  // tab (captured 2026-10-08): Ascetic, Curious and Frivolous Philosofruit, plus
+  // the wiki's Blackened Philosofruit; Solacefruit and Memory of Distant Shores
+  // ride along because recipes and excess fruit pay them.
 
   const PHF_CACHE_KEY = 'fl-ux-phf';
-  const PHF_ITEMS = ['Blackened Philosofruit', 'Solacefruit', 'Memory of Distant Shores'];
+  const PHF_ITEMS = ['Ascetic Philosofruit', 'Curious Philosofruit', 'Frivolous Philosofruit',
+    'Blackened Philosofruit', 'Solacefruit', 'Memory of Distant Shores'];
 
   function phfRecipe(a, c, f, r, reward, o) {
     return Object.assign({ A: a, C: c, F: f, R: r, reward: reward, actions: null, epa: null, note: null }, o);
@@ -43396,9 +43396,6 @@
             },
           },
         }, [busy ? 'Refreshing…' : 'Refresh']),
-      ]),
-      h('div', { css: 'margin-top:6px;color:' + UI.dim + ';' }, [
-        'The flavour fruit you have already harvested is not shown: no page records what the game calls it.',
       ]),
     ]);
 
