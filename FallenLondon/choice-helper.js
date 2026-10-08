@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.52
+// @version      1.55
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -639,7 +639,7 @@
  *     for whether your PLC and Marks cover it, then its Favours. The panel adds your numbers (settable by hand where nothing
  *     is read), the actions still to go to CtD 14, every option by the guide's four bands, and the rewards. The option pages
  *     are followed over the guide: they lock six options at CtD 6, and Look at those coins and Ask someone else are Luck 50.
- *     (24) Philosofruits, the Fate-locked activity in the Wisp-Ways behind the Mangrove College, markup only, no panel. The
+ *     (24) Philosofruits, the Fate-locked activity in the Wisp-Ways behind the Mangrove College, a panel behind ⚙ UX (what you grow and hold, every recipe). The
  *     wiki records none of its card or option names, only their pictures, so its cards and their options are matched by
  *     PICTURE until the titles are read off the game and filled in; a filled-in title then wins over the picture. A card
  *     shows what each of its options does to the five qualities a Harvest reads ("+A? / +R?": Y Yield, A Asceticism,
@@ -1753,6 +1753,7 @@
         if (bankPcQualities(scan)) changed = true;
         if (bankLabQualities(scan)) changed = true;
         if (bankCtdQualities(scan)) changed = true;
+        if (bankPhfQualities(scan)) changed = true;
       }
       const here = readPossessionCounts();
       if (!here || !here.size) {
@@ -35718,6 +35719,7 @@
       bankPcQualities(scan);
       bankLabQualities(scan);
       bankCtdQualities(scan);
+      bankPhfQualities(scan);
     }
     if (owned.length) bankItemCounts(readPossessionCounts());
   }
@@ -42916,7 +42918,7 @@
   // HTML the same day: The Roots of Wisdom (Treeblue.png), Philosophers without
   // Portfolio (Crowd2.png), and Endless Bounty (Mangrovecollege_interior.png); then
   // Mycorrhizal meditations (Blemmigan.png) and The Matter of Solacefruit
-  // (Cherries.png). No option title yet.
+  // (Cherries.png). Ambush Philosophy (Stick.png), read off the hand's HTML 2026-10-08. No option title yet.
   //
   // **Confirmed in game (2026-10-07):** matching by picture works, for cards in
   // the hand and for the options of an opened storylet. The badges were drawn
@@ -42993,7 +42995,7 @@
     ], { title: 'The Deeper Wisp-Ways' }),
     phfCard('stick', 50, [
       phfOpt('fistsmall', ['Dangerous', 150], { Y: 1 }, { fail: { C: 2 } }),
-    ]),
+    ], { title: 'Ambush Philosophy' }),
     phfCard('cherries', 100, [
       phfOpt('whispered_secretsmall', ['Persuasive', 150], { Y: 1 }, { failOther: [['Nightmares', 2]] }),
     ], { title: 'The Matter of Solacefruit' }),
@@ -43172,11 +43174,14 @@
     return img && img.getAttribute ? phfImageKey(img.getAttribute('src')) : null;
   }
 
-  // The first picture under `root` that is not an option's.
+  // The first picture under `root` that is not an option's. The compact hand's
+  // card container is itself a `.branch` (captured 2026-10-08), so only a
+  // branch below `root` marks an option.
   function phfFirstImage(root) {
     if (!root || !root.querySelectorAll) return null;
     for (const img of root.querySelectorAll('img')) {
-      if (!(img.closest && img.closest('.branch'))) return img;
+      const branch = img.closest ? img.closest('.branch') : null;
+      if (!branch || branch === root) return img;
     }
     return null;
   }
@@ -43226,6 +43231,201 @@
         spec: o ? phfOptionSpec(open, o, b.name, openName) : null, place: 'after',
       });
     });
+  }
+
+  // === panel: Philosofruits ================================================
+  //
+  // What you are growing right now (the five qualities a card moves, read off
+  // the Myself tab and banked, and the three fruit-like items from Possessions),
+  // then every recipe the guide records and what it pays.
+  //
+  // Recipes: Philosofruits (Guide), "Initial Harvest Rewards" and "Repeatable
+  // Rewards" (fetched through the API on 2026-10-08). Fruit amounts are the
+  // guide's; a Harvest pays 50 fruit per Yield, so the Yield a recipe needs is
+  // derived from them (PHF_HARVEST_PER_YIELD), never typed in twice. Corrections
+  // go in PHF_FIRST_RECIPES / PHF_RECIPES and nowhere else.
+  //
+  // **Not read: the flavour fruit.** The guide calls them "Ascetic Fruit",
+  // "Frivolous Fruit" and the like but no page records an item or quality of
+  // that name, so the panel does not guess one. It shows the Blackened
+  // Philosofruit (the Rot fruit, a wiki item), Solacefruit and Memory of
+  // Distant Shores, and the five growing qualities.
+
+  const PHF_CACHE_KEY = 'fl-ux-phf';
+  const PHF_ITEMS = ['Blackened Philosofruit', 'Solacefruit', 'Memory of Distant Shores'];
+
+  function phfRecipe(a, c, f, r, reward, o) {
+    return Object.assign({ A: a, C: c, F: f, R: r, reward: reward, actions: null, epa: null, note: null }, o);
+  }
+
+  // The first deliveries, in the order the guide says they go. Step is the
+  // guide's own.
+  const PHF_FIRST_RECIPES = [
+    phfRecipe(50, 0, 50, 0, ['Memory of a Much Lesser Self ×10'], { step: 1 }),
+    phfRecipe(50, 50, 0, 0, ['Antique Mystery ×1', 'Presbyterate Passphrase ×5'], { step: 1 }),
+    phfRecipe(0, 50, 50, 0, ['Uncanny Incunabulum ×1', 'Extraordinary Implication ×5'], { step: 1 }),
+    phfRecipe(100, 100, 100, 0, ['Storm-Threnody ×4'], { step: 2 }),
+    phfRecipe(0, 0, 0, 300, ['Direful Reflection ×5'], { step: 3 }),
+    phfRecipe(100, 100, 100, 100, ['Searing Enigma ×1', 'Direful Reflection ×1'], { step: 4 }),
+    phfRecipe(0, 200, 100, 100, ['Primaeval Hint ×1', 'Antique Mystery ×1'], { step: 4 }),
+  ];
+
+  const PHF_RECIPES = [
+    phfRecipe(50, 0, 50, 0, ['Blackmail Material ×1', 'An Identity Uncovered! ×3'], { actions: 5, epa: '4.00' }),
+    phfRecipe(50, 50, 0, 0, ['Antique Mystery ×1', 'Presbyterate Passphrase ×3'], { actions: 5, epa: '4.00' }),
+    phfRecipe(0, 50, 50, 0, ['Uncanny Incunabulum ×1', 'Extraordinary Implication ×3'],
+      { actions: 5, epa: '4.00', note: 'Up to 4.58 with the Rat Market.' }),
+    phfRecipe(150, 150, 150, 0, ['Comprehensive Bribe ×4'], { actions: 13, epa: '3.85' }),
+    phfRecipe(0, 0, 0, 300, ['Correspondence Plaque ×90'],
+      { actions: 10, epa: '4.50', note: 'Needs a Starstone Demark (not consumed).' }),
+    phfRecipe(200, 200, 0, 250, ['Fourth City Airag: Year of the Tortoise ×1', 'Cellar of Wine ×2'],
+      { actions: 20, epa: '4.375', note: 'Up to 5.09 using the Khanate and Rat Market, discounting travel costs.' }),
+    phfRecipe(0, 200, 200, 0, ['Storm-Threnody ×4'],
+      { actions: 11, epa: '4.54', note: 'Up to 5.76 with the Rat Market.' }),
+  ];
+
+  // The Harvests a recipe takes: fruit ÷ 50 is the Yield, and a Rot fruit is a
+  // Harvest of its own. A recipe with both is two.
+  function phfHarvests(r) {
+    const per = PHF_HARVEST_PER_YIELD;
+    const out = [];
+    const flavours = [['A', 'Asceticism'], ['C', 'Curiosity'], ['F', 'Frivolity']]
+      .filter(function (q) { return r[q[0]] > 0; });
+    if (flavours.length) {
+      const total = flavours.reduce(function (n, q) { return n + r[q[0]]; }, 0);
+      out.push('Yield ' + total / per + ': ' + flavours.map(function (q) { return q[1] + ' ' + r[q[0]] / per; }).join(', '));
+    }
+    if (r.R > 0) out.push('Rot Harvest: Yield ' + r.R / per + ', Rot at least ' + Math.max(3, r.R / per));
+    return out;
+  }
+
+  function phfFruitText(r) {
+    return [['A', 'Ascetic'], ['C', 'Curious'], ['F', 'Frivolous'], ['R', 'Blackened']]
+      .filter(function (q) { return r[q[0]] > 0; })
+      .map(function (q) { return q[1] + ' ' + r[q[0]]; }).join(' · ');
+  }
+
+  function phfFromQualities(scan) {
+    const values = {};
+    const zeroIsSafe = !scan.filtered;
+    for (const q of PHF_QUALITIES) {
+      const got = scan.values.get(q[1]);
+      if (got) values[q[1]] = got.level;
+      else if (zeroIsSafe) values[q[1]] = 0;
+    }
+    return values;
+  }
+
+  function bankPhfQualities(scan) {
+    if (!scan) return false;
+    const values = phfFromQualities(scan);
+    if (!Object.keys(values).length) return false;
+    saveCache(PHF_CACHE_KEY, { v: 1, at: Date.now(), character: characterName() || null, values: values });
+    return true;
+  }
+
+  function readPhfState() {
+    const scan = readQualities();
+    if (scan) {
+      const values = phfFromQualities(scan);
+      if (Object.keys(values).length) return { live: true, at: Date.now(), values: values };
+    }
+    const rec = loadCache(PHF_CACHE_KEY, 1);
+    return rec && rec.values ? { live: false, at: rec.at, values: rec.values } : null;
+  }
+
+  function renderPhfPanel(ctx) {
+    const st = readPhfState();
+    const holdings = fotzHoldings();
+    const stale = !st || (!st.live && Date.now() - st.at > FRESH_MS);
+    let busy = false;
+    if (ctx && autoRefreshEnabled() && stale) {
+      busy = true;
+      refreshBackgroundState().then(function () { ctx.rerender(); });
+    }
+
+    const section = function (title, children) {
+      return h('div', { css: 'margin-top:14px;' }, [
+        h('div', {
+          css: 'font:bold 11px ' + UI.font + ';letter-spacing:.06em;text-transform:uppercase;'
+            + 'color:' + UI.accent + ';margin-bottom:5px;',
+        }, [title]),
+        children,
+      ]);
+    };
+    const stat = function (label, value) {
+      return h('div', { css: 'min-width:92px;' }, [
+        h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [label]),
+        h('div', { css: 'font-size:16px;color:' + UI.text + ';' }, [value]),
+      ]);
+    };
+
+    const growing = PHF_QUALITIES.map(function (q) {
+      const v = st && typeof st.values[q[1]] === 'number' ? st.values[q[1]] : null;
+      return stat(q[0] + ' · ' + q[1].replace(/^Fruitful /, ''), v == null ? '–' : String(v));
+    });
+    const held = PHF_ITEMS.map(function (name) {
+      return stat(name, holdings ? String(holdings.count(name)) : '–');
+    });
+
+    const top = h('div', {
+      css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent + ';background:' + UI.bgAlt
+        + ';font-size:12px;line-height:1.6;',
+    }, [
+      h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, ['Growing now']),
+      h('div', { css: 'display:flex;flex-wrap:wrap;gap:16px;' }, growing),
+      h('div', { css: 'color:' + UI.dim + ';font-size:11px;margin-top:8px;' }, ['Held']),
+      h('div', { css: 'display:flex;flex-wrap:wrap;gap:16px;' }, held),
+      h('div', { css: 'margin-top:6px;color:' + UI.dim + ';' }, [
+        st ? 'Read ' + ageText(st.at) + (busy ? ' — refreshing from the Myself tab…' : '.')
+          : 'Nothing has been read yet. Open the Myself tab once.',
+        ' The flavour fruit you have already harvested is not shown: no page records what the game calls it.',
+      ]),
+    ]);
+
+    const rules = h('div', {
+      css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.line + ';background:' + UI.bgAlt
+        + ';color:' + UI.dim + ';font-size:12px;line-height:1.6;',
+    }, PHF_RULES.map(function (l) { return h('div', null, [l]); }));
+
+    const recipeTable = function (list, withStep) {
+      return h('table', { css: 'width:100%;border-collapse:collapse;' }, [
+        h('thead', null, [h('tr', null, [
+          h('th', { css: TH }, [withStep ? 'Step' : 'Fruit']),
+          h('th', { css: TH }, [withStep ? 'Fruit' : 'Harvest']),
+          h('th', { css: TH }, ['Reward']),
+        ])]),
+        h('tbody', null, list.map(function (r) {
+          return h('tr', null, [
+            h('td', { css: TD + 'white-space:nowrap;' }, [withStep ? String(r.step) : phfFruitText(r)]),
+            h('td', { css: TD + 'color:' + UI.dim + ';font-size:12px;' },
+              withStep ? [phfFruitText(r)] : phfHarvests(r).map(function (t) { return h('div', null, [t]); })),
+            h('td', { css: TD }, [
+              h('div', null, [r.reward.join(' · ')]),
+              r.actions ? h('div', { css: 'color:' + UI.dim + ';font-size:11px;' },
+                ['At least ' + r.actions + ' actions · ' + r.epa + ' EPA' + (r.note ? ' · ' + r.note : '')]) : null,
+            ]),
+          ]);
+        })),
+      ]);
+    };
+
+    return h('div', { css: 'padding:0 12px 12px;' }, [
+      top,
+      rules,
+      section('Repeatable recipes', recipeTable(PHF_RECIPES, false)),
+      section('First deliveries (in this order)', h('div', null, [
+        h('div', { css: 'color:' + UI.dim + ';font-size:12px;margin-bottom:5px;' }, [
+          'Steps 1–4 are done once. Rot options open after The Dream of the Hintershroom; '
+            + 'the guide’s table reflects trying to change the Hintershroom’s mind.']),
+        recipeTable(PHF_FIRST_RECIPES, true),
+      ])),
+      h('div', { css: 'margin-top:12px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+        'Excess fruit pays out as ', wikiLink('Memory of Distant Shores', 'Memory of Distant Shores'),
+        ', 6 fruit to a Memory. Data from ', wikiLink('Philosofruits (Guide)', 'Philosofruits (Guide)'),
+        ' on the Fallen London wiki.',
+      ]),
+    ]);
   }
 
   // === feature registry ==================================================
@@ -43680,6 +43880,14 @@
       hint: 'Counting the Days to 14: every option by band, your Loose Change and Marks, and what the rewards cost',
       render: renderCtdPanel,
     },
+    {
+      id: 'philosofruits',
+      icon: '🍒',
+      label: 'Philosofruits',
+      follows: { scriptId: 'choice', id: 'philosofruits' },
+      hint: 'What you are growing and hold now, every recipe and what it pays',
+      render: renderPhfPanel,
+    },
   ];
 
   function registerPanels() {
@@ -43750,6 +43958,7 @@
       bankPcQualities(got);
       bankLabQualities(got);
       bankCtdQualities(got);
+      bankPhfQualities(got);
     } else if (path === '/possessions') {
       bankItemCounts(readPossessionCounts(doc));
     }

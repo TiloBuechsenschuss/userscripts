@@ -154,7 +154,8 @@ const wrapped = src
     + ' PHF_BROAD_DEFAULT, PHF_BROAD_CERTAIN, PHF_NARROW_DEFAULT, PHF_NARROW_CERTAIN, PHF_SKILLS,'
     + ' PHF_CLASS, PHF_FLAG, PHF_BRANCH_CLASS, PHF_BRANCH_FLAG, BADGE_CLASS,'
     + ' phfImageKey, phfDeltaText, phfOptionText, phfOptionSpec, phfCardSpec, phfFindCard, phfFindOption,'
-    + ' phfHere, phfRatings, broadCertainAt, FEATURES, PANELS }; })();');
+    + ' phfHere, phfRatings, broadCertainAt, FEATURES, PANELS,'
+    + ' PHF_RECIPES, PHF_FIRST_RECIPES, phfHarvests, phfFruitText, renderPhfPanel }; })();');
 const fn = new Function(
   'document', 'MutationObserver', 'requestAnimationFrame', 'getComputedStyle', 'console',
   'localStorage', 'setInterval', 'setTimeout', 'clearInterval', 'clearTimeout',
@@ -190,8 +191,11 @@ check('the card titles read off the game, on the rows whose art they show',
   api.PHF_CARDS.filter((c) => c.title).map((c) => c.image + ': ' + c.title),
   ['treeblue: The Roots of Wisdom', 'blemmigan: Mycorrhizal meditations', 'passerby: A Philosophy Close to Home',
     'argument: A Meeting of Minds', 'crowd2: Philosophers without Portfolio', 'jungle: The Deeper Wisp-Ways',
-    'cherries: The Matter of Solacefruit', 'mangrovecollege_interior: Endless Bounty']);
+    'stick: Ambush Philosophy', 'cherries: The Matter of Solacefruit', 'mangrovecollege_interior: Endless Bounty']);
 check('no option title yet', allOptions.filter((o) => o.title).length, 0);
+// The suites below need a card nobody has named: blank this one's title (and put it back at the end).
+const stickTitle = card('stick').title;
+card('stick').title = null;
 
 check('every challenge names a known stat and a number or the default',
   allOptions.filter((o) => o.ch && !(['Watchful', 'Shadowy', 'Dangerous', 'Persuasive'].concat(api.PHF_SKILLS)
@@ -397,6 +401,21 @@ api.phfRatings();
 check('screenshot hand: still only under the Wisp-Ways greeting', badges(api.PHF_CLASS), []);
 greet('The Wisp-Ways');
 
+// --- an untitled card in the compact hand ----------------------------------------
+//
+// Captured 2026-10-08: the compact card's container is itself a `.branch`, which
+// once made every picture in it look like an option's and left the card unbadged.
+
+function untitledSmallCard(name, image) {
+  return makeEl('div', 'branch small-card-container', {}, [
+    makeEl('div', 'media__left small-card__left', {}, [makeEl('img', 'small-card__image', { alt: name, src: '//images.fallenlondon.com/icons/' + image + '.png' })]),
+    makeEl('div', 'small-card__body', {}, [makeEl('h2', 'media__heading heading heading--3', {}, [name])]),
+  ]);
+}
+stage(makeEl('div', 'hand', {}, [untitledSmallCard('Ambush Philosophy', 'stick')]));
+api.phfRatings();
+check('compact hand: an untitled card is matched by its picture', badges(api.PHF_CLASS), ['+Y?']);
+
 // --- a title filled in -----------------------------------------------------------
 
 card('stick').title = 'The Tree of Philosophies';
@@ -406,13 +425,35 @@ check('titled: matched by its title whatever the picture, and its picture alone 
   badges(api.PHF_CLASS), ['+Y?']);
 check('titled: no "not recorded" line',
   body.querySelector('.' + api.PHF_CLASS).title.includes('not recorded'), false);
-card('stick').title = null;
+card('stick').title = stickTitle;
 
 // --- registration ----------------------------------------------------------------
 
-check('registered once, with no panel',
-  [api.FEATURES.filter((f) => f.name === 'philosofruits').length, api.PANELS.some((p) => /philosofruit/.test(p.id))],
-  [1, false]);
+check('registered once, with its panel behind the feature switch',
+  [api.FEATURES.filter((f) => f.name === 'philosofruits').length,
+    api.PANELS.filter((p) => p.id === 'philosofruits').map((p) => [p.label, typeof p.render, p.follows.id])],
+  [1, [['Philosofruits', 'function', 'philosofruits']]]);
+
+// --- the panel -------------------------------------------------------------------
+
+check('recipes: 7 repeatable, 7 first deliveries, every one pays something',
+  [api.PHF_RECIPES.length, api.PHF_FIRST_RECIPES.length,
+    [...api.PHF_RECIPES, ...api.PHF_FIRST_RECIPES].every((r) => r.reward.length > 0)], [7, 7, true]);
+check('recipes: every fruit amount is a whole number of Yield (50 each)',
+  [...api.PHF_RECIPES, ...api.PHF_FIRST_RECIPES].every((r) => ['A', 'C', 'F', 'R'].every((k) => r[k] % 50 === 0)), true);
+check('harvests: a flavour recipe is one Harvest, a mixed Rot one is two',
+  [api.phfHarvests(api.PHF_RECIPES[0]), api.phfHarvests(api.PHF_RECIPES[5])],
+  [['Yield 2: Asceticism 1, Frivolity 1'],
+    ['Yield 8: Asceticism 4, Curiosity 4', 'Rot Harvest: Yield 5, Rot at least 5']]);
+check('harvests: Rot 300 needs Yield 6 and Rot 6; Rot never needs less than 3',
+  api.phfHarvests(api.PHF_RECIPES[4]), ['Rot Harvest: Yield 6, Rot at least 6']);
+check('fruit text names the fruit', api.phfFruitText(api.PHF_RECIPES[3]), 'Ascetic 150 · Curious 150 · Frivolous 150');
+{
+  const panel = api.renderPhfPanel(null);
+  const all = [];
+  (function walk(n) { all.push(n); (n.children || []).forEach(walk); })(panel);
+  check('the panel builds', !!panel && all.length > 100, true);
+}
 
 console.log(failures ? failures + ' FAILED' : 'All passed');
 process.exitCode = failures ? 1 : 0;
