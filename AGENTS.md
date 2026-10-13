@@ -2712,6 +2712,22 @@ navigation. Two consequences:
   storylets (the guide gives neither titles nor pictures for their options). Research:
   `docs/superpowers/research/2026-09-29-fate-locked-guides.md` §7.
 
+  **Hallowmas Masques** (`hallowmas-masques`, `HM_MASQUE_OPTIONS`; panel `hallowmas`, `renderHallowmasPanel`, added 2026-10-13; filed
+  under Seasonal, the panel follows the feature). The festival's main loop: raise a Masque's Menace to 7 (28 CP), hand it to the Fool's
+  Apostate for 28 Spirit of Hallowmas, cash the Spirit in at the end. Four Masques, 35 option pages: the Roof Below (Wounds, Infant), the
+  Wreck of the St Elmo (Suspicion, Crown), the Pavilion of Butterflies (Nightmares, Moth), Saint Dunstan's Sacristy (Scandal, Demon).
+  **The badge** is the Menace CP the option pays, `▼` when it spends an item, the mask it needs as a trailing word (`Nightmares +7 CP ▼ ·
+  Moth`) -- a word and not a hue, because the script cannot read your mask, so every option is badged and the game greys the ones you
+  cannot take. A Confession exchange reads `Whimsy → Guile`; a Leave says which mask waives the Favour. The tooltip carries the Airs band, the
+  item chain (Promenade! feeds the Toast; Walk the chambers feeds the amber vats) and the lock at Menace 7. **Gate:** none beyond the
+  matching -- `carouselRatings` looks a row up under the OPEN storylet's title, so a Masque that is not running draws nothing and the generic
+  names (*Promenade!*, *Make merry!*) cannot leak. **Trap:** the guide's Confession-exchange table files the Wreck's three exchanges under the
+  Pavilion and the Sacristy's three under the Wreck; the option pages put them where the tests pin them, and the Pavilion has only the Roof
+  Below's two. The Spirit rewards carry both stated Echoes and stated Echoes per Spirit (cross-checked); the 2025 upgrades carry both the
+  guide's list and its tick-grid (cross-checked). **Not modelled:** Menace-raising gear (scales the CP), Scandal's 2025 absence (the guide
+  says it returns in 2026), the Fate Masque cards and the Visitors (the latter is `hallowmas-visitor`). Research:
+  `docs/superpowers/research/2026-10-13-hallowmas.md`.
+
   **Economy** (panel `economy`, `ECON_*`, `renderEconomyPanel`; the sixth behind the ⚙ UX launcher): Roof Economy (Guide) and Stuiver
   Grinding (Guide) are prices, shops and Stuiver-only items with **no storylet options**, so this is a panel and no badge. Ten
   filterable tables: the Roof shops' buy / sell matrix (16 items × five markets), the Zenith and Risen Burgundy trading posts, what only
@@ -3971,6 +3987,13 @@ Confirmed live by the author:
   not (checklist: `docs/philosofruits/cards.md`). **(4) The "Skill 2" figures** -- whether *Shapeling Arts 2* and the like are the difficulty. **(5) A locked Rot
   option** -- drawn greyed or not at all before the Hintershroom.
 
+- **Hallowmas Masques** (`hallowmas-masques`, added 2026-10-13, prepared from 2025's pages before the festival opened). Nothing has been seen
+  in game. Report first: **(1) The storylet headings** -- whether each Masque's open heading is exactly *The Roof Below*, *The Wreck of the
+  St Elmo*, *The Pavilion of Butterflies* and *Saint Dunstan's Sacristy* (a different title draws nothing). **(2) The option titles** -- whether
+  the exchanges show as *Exchange a Confession of X for a Confession of Y* without the wiki's "(The Roof Below)". **(3) The real CP** against
+  the badge, and with which gear. **(4) Which Masques and masks run in 2026** (Scandal and the Demon are due back) and whether any option
+  changed. **(5) The 2026 companion upgrades**, since the panel's table is 2025's.
+
 - **Spending Secrets and Counting the Days** (`spending-secrets`, added 2026-10-03). Nothing seen in the game; every table is
   transcribed from the option and card pages. Report first: **(1) The eleven faction card headings** -- whether the cards show as
   the wiki titles them (*The Demi-Monde: Bohemians*, *Altars and Alms-Houses: the Church*, ...), because an option is badged only
@@ -4780,6 +4803,10 @@ Current tests:
   the picture key for a game URL and a wiki file name; the badge texts and that the letter alone carries the claim; the gate in all
   three greeting states and that leaving clears; the opened card, a storylet sharing its picture but not its options, and a picture
   shared by two cards; and a filled-in title winning over the picture.
+- `tests/choice-hallowmas-masques.test.mjs` — 35 options across four Masques, one Leave each, every row's mask and Menace agreeing with its Masque;
+  the badge (Menace CP, `▼` exactly when an item is spent, the mask as a trailing word, the exchange and Leave texts); the Spirit rewards' stated
+  Echoes against their stated Echoes per Spirit; the guide's upgrade list against its tick-grid; the exchanges filed where the option pages put them;
+  a row looked up under the open storylet only; that no name is in another table; the registration under Seasonal; and the whole panel built.
 - `tests/choice-the-stacks.test.mjs` — 56 card options, 8 books, 8 finale options; every progress figure one of 5, 10 or 15; the
   eight options that add Noises +6 on a failure say so in the badge and take the risk colour; the book totals against the
   totals their finale option carries; the wiring keyed by the open card (an ordinary phrase is badged under its own card only,

@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.57
+// @version      1.58
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -646,6 +646,13 @@
  *     C Curiosity, F Frivolity, R Rot), an option its own part, with "?" for a stat challenge and "clears hand" where it
  *     wipes the hand. No ranking: the letter you want depends on the recipe. Shown only under a Wisp-Ways greeting, since
  *     the pictures are used all over the game; the tooltip of an unnamed row quotes the name the game shows, to copy in.
+ *     (25) Hallowmas Masques, the festival's main loop, and a panel behind ⚙ UX (every Masque option by Airs band, what Spirit
+ *     buys, the affiliations, the leftover-Confession turn-ins, and 2025's companion upgrades, marked 2025). Each option in
+ *     a Masque (the Roof Below, the Wreck of the St Elmo, the Pavilion of Butterflies, Saint Dunstan's Sacristy) shows the Menace CP it pays
+ *     ("Nightmares +7 CP ▼ · Moth"): ▼ means it spends an item, and the mask it needs is a word, since the script cannot read your mask.
+ *     Confession exchanges read "Whimsy → Guile" and a Leave says which mask waives the Favour to re-enter. Rows are matched
+ *     under the OPEN storylet only, so a Masque that is not running this year draws nothing. The CP is the page's base
+ *     figure; Menace-raising gear scales it and is not modelled. 0 → 7 is 28 CP, handed in for 28 Spirit.
  *     Built as a feature registry so further advice can be added as entries.
  */
 
@@ -39912,6 +39919,354 @@
     });
   }
 
+  // === feature: Hallowmas Masques ==========================================
+  //
+  // The festival's main loop: raise the Masque's Menace to 7, submit it to the
+  // Fool's Apostate for 28 Spirit of Hallowmas, cash the Spirit in at the end.
+  // Each Masque is a storylet whose options are gated by Airs of the Hallowmas
+  // Season (1-33 / 34-66 / 67-100) and, for the best ones, by the mask.
+  //
+  // **What the badge says.** The Menace CP the option pays, because that is the
+  // one number that varies across a Masque and CP is what Spirit is made of
+  // (0 -> 7 is 28 CP = 28 Spirit). A `▼` marks an option that spends an item, a
+  // trailing mask name ("· Moth") one that needs that mask. The CP is the page's
+  // base figure: menace-raising gear scales it and is not modelled. The mask is
+  // a word, not a hue, and the script cannot read your mask, so every option is
+  // badged and the game greys the ones you cannot take.
+  //
+  // Which Masques run changes every year (2025: Roof Below, Wreck of the St
+  // Elmo, Pavilion of Butterflies; the Sacristy and Scandal return in 2026 per
+  // the guide). Rows are scoped by the OPEN storylet's title, so a Masque that
+  // is not running simply draws nothing, and generic names (Promenade!, Make
+  // merry!) cannot leak into another storylet.
+  //
+  // Transcribed 2026-10-13, through the API, from the four Masque pages and all
+  // 35 option pages they list, with the guide as cross-check. WHERE THEY
+  // DISAGREE the option pages won: the guide's Confession-exchange table files
+  // the Wreck's three exchanges under the Pavilion and the Sacristy's three
+  // under the Wreck. The Pavilion page lists only the same two exchanges as the
+  // Roof Below. Corrections go in HM_MASQUE_OPTIONS and nowhere else.
+  //
+  // The Spirit rewards (HM_SPIRIT_REWARDS) carry both the stated Echoes and the
+  // stated Echoes per Spirit; the companion upgrades (HM_UPGRADES_2025) are
+  // 2025's and say so wherever they are shown -- the guide itself says the
+  // companions change each year.
+
+  const HM_MASQUES = {
+    'The Roof Below': { menace: 'Wounds', mask: 'Infant', card: 'The Squall of Infants',
+      favours: 'Rubbery Men, Constables or Criminals' },
+    'The Wreck of the St Elmo': { menace: 'Suspicion', mask: 'Crown', card: 'The Crown’s Splendour',
+      favours: 'the Docks, Urchins or the Tomb-Colonies' },
+    'The Pavilion of Butterflies': { menace: 'Nightmares', mask: 'Moth', card: 'The Flight of Moths',
+      favours: 'Society, the Great Game or Revolutionaries' },
+    'Saint Dunstan’s Sacristy': { menace: 'Scandal', mask: 'Demon', card: 'The Devil’s Gambit',
+      favours: 'Hell, the Church or Bohemians' },
+  };
+  const HM_ROOF = 'The Roof Below';
+  const HM_WRECK = 'The Wreck of the St Elmo';
+  const HM_PAVILION = 'The Pavilion of Butterflies';
+  const HM_SACRISTY = 'Saint Dunstan’s Sacristy';
+  const HM_BANDS = { low: [1, 33], mid: [34, 66], high: [67, 100] };
+  const HM_SPIRIT_PER_MENACE = 28;
+
+  // spends / gains: [item, count] (count a number or a 'lo–hi' range string).
+  function hmRow(storylet, name, more) {
+    return Object.assign({ storylet: storylet, name: name, airs: null, cp: 0, mask: null,
+      spends: null, gains: null, needs: null, swap: null, leave: false }, more);
+  }
+  function hmExchange(storylet, from, to) {
+    return hmRow(storylet, 'Exchange a Confession of ' + from + ' for a Confession of ' + to,
+      { airs: HM_BANDS.mid, swap: [from, to] });
+  }
+  function hmLeave(storylet, name) { return hmRow(storylet, name, { leave: true }); }
+
+  const HM_MASQUE_OPTIONS = [
+    // --- The Roof Below: Wounds ---
+    hmRow(HM_ROOF, 'Take part in a training exercise', { airs: HM_BANDS.low, cp: 5, mask: 'Infant' }),
+    hmRow(HM_ROOF, 'Take a shift in the hospice', { airs: HM_BANDS.low, cp: 3,
+      spends: ['Strong-Backed Labour', 1], gains: ['Memory of Distant Shores', '1–3'] }),
+    hmExchange(HM_ROOF, 'Whimsy', 'Guile'),
+    hmExchange(HM_ROOF, 'Curiosity', 'Pride'),
+    hmRow(HM_ROOF, 'Enter a secret conclave', { airs: HM_BANDS.high, cp: 3,
+      spends: ['London Street Sign', 1], gains: ['Moves in the Great Game', '1–2'] }),
+    hmRow(HM_ROOF, 'Bathe in the amber vats', { airs: HM_BANDS.high, cp: 7, mask: 'Infant',
+      spends: ['Unearthly Fossil', 1], gains: ['An Identity Uncovered!', 1], needs: 'Shapeling Arts below 3' }),
+    hmRow(HM_ROOF, 'Immerse yourself in the amber springs', { airs: HM_BANDS.high, cp: 7, mask: 'Infant',
+      gains: ['An Identity Uncovered!', 1], needs: 'Shapeling Arts 3' }),
+    hmRow(HM_ROOF, 'Walk the chambers', { cp: 1, gains: ['Unearthly Fossil', '1–2'] }),
+    hmLeave(HM_ROOF, 'Leave the Ball'),
+    // --- The Wreck of the St Elmo: Suspicion ---
+    hmRow(HM_WRECK, 'Descend to the hold', { airs: HM_BANDS.low, cp: 7, mask: 'Crown',
+      spends: ['Knob of Scintillack', 1], gains: ['Muscaria Brandy', 1] }),
+    hmRow(HM_WRECK, 'Gain entry to the galley', { airs: HM_BANDS.low, cp: 3,
+      spends: ['Presbyterate Passphrase', 1], gains: ['Journal of Infamy', '1–2'] }),
+    hmExchange(HM_WRECK, 'Impropriety', 'Curiosity'),
+    hmExchange(HM_WRECK, 'Violence', 'Whimsy'),
+    hmExchange(HM_WRECK, 'Whimsy', 'Pride'),
+    hmRow(HM_WRECK, 'Swap ghost stories', { airs: HM_BANDS.high, cp: 3, spends: ['Tale of Terror!!', 5] }),
+    hmRow(HM_WRECK, 'Dine with the Merry Captain', { airs: HM_BANDS.high, cp: 7, mask: 'Crown',
+      spends: ['Volume of Collated Research', 1], gains: ['Mourning Candle', 1] }),
+    hmRow(HM_WRECK, 'Make merry!', { cp: 1, gains: ['Inkling of Identity', '1–5'] }),
+    hmLeave(HM_WRECK, 'Leave the Wreck'),
+    // --- The Pavilion of Butterflies: Nightmares ---
+    hmRow(HM_PAVILION, 'Hunt for butterflies', { airs: HM_BANDS.low, cp: 5, mask: 'Moth' }),
+    hmRow(HM_PAVILION, 'Take a turn of the Pavilion', { airs: HM_BANDS.low, cp: 3,
+      spends: ['Partial Map', 1], gains: ['Memory of Distant Shores', 1] }),
+    hmExchange(HM_PAVILION, 'Whimsy', 'Guile'),
+    hmExchange(HM_PAVILION, 'Curiosity', 'Pride'),
+    hmRow(HM_PAVILION, 'Exchange amusing tittle-tattle', { airs: HM_BANDS.high, cp: 3,
+      spends: ['Scrap of Incendiary Gossip', 5], gains: ['Tale of Terror!!', 1] }),
+    hmRow(HM_PAVILION, 'Toast the Queen of Air and Darkness', { airs: HM_BANDS.high, cp: 7, mask: 'Moth',
+      spends: ['Bottle of Strangling Willow Absinthe', 5], gains: ['Muscaria Brandy', 1] }),
+    hmRow(HM_PAVILION, 'Promenade!', { cp: 1, gains: ['Bottle of Strangling Willow Absinthe', '1–2'] }),
+    hmLeave(HM_PAVILION, 'Leave the Pavilion'),
+    // --- Saint Dunstan's Sacristy: Scandal (not running in 2025; back in 2026 per the guide) ---
+    hmRow(HM_SACRISTY, 'Join the Saturnine Duke’s dance', { airs: HM_BANDS.low, cp: 5, mask: 'Demon' }),
+    hmRow(HM_SACRISTY, 'Bring a bottle of your own', { airs: HM_BANDS.low, cp: 3,
+      spends: ['Muscaria Brandy', 1], gains: ['Bottle of Strangling Willow Absinthe', '1–3'] }),
+    hmExchange(HM_SACRISTY, 'Impropriety', 'Violence'),
+    hmExchange(HM_SACRISTY, 'Guile', 'Violence'),
+    hmExchange(HM_SACRISTY, 'Pride', 'Impropriety'),
+    hmRow(HM_SACRISTY, 'Donate a candle to the revels', { airs: HM_BANDS.high, cp: 3,
+      spends: ['Mourning Candle', 1], gains: ['Moves in the Great Game', '1–2'] }),
+    hmRow(HM_SACRISTY, 'Partake in a Confession', { airs: HM_BANDS.high, cp: 7, mask: 'Demon',
+      spends: ['Touching Love Story', 1], gains: ['An Identity Uncovered!', 1] }),
+    hmRow(HM_SACRISTY, 'Soak in the sinful ambience', { cp: 1, gains: ['Amanita Sherry', '1–5'] }),
+    hmLeave(HM_SACRISTY, 'Leave the Sacristy'),
+  ];
+
+  // Where an option's gain is what another option spends -- the reason to take
+  // a +1 line at all. Keyed by item; text for the tooltip.
+  const HM_FEEDS = {
+    'Unearthly Fossil': 'feeds Bathe in the amber vats (+7 Wounds)',
+    'Bottle of Strangling Willow Absinthe': 'feeds Toast the Queen of Air and Darkness (+7 Nightmares, needs 5)',
+    'Mourning Candle': 'feeds Donate a candle to the revels (+3 Scandal)',
+    'Muscaria Brandy': 'feeds Bring a bottle of your own (+3 Scandal)',
+    'Tale of Terror!!': 'feeds Swap ghost stories (+3 Suspicion, needs 5)',
+  };
+
+  const HM_MARK_SPENDS = '▼';
+
+  function hmItem(pair) {
+    return (pair[1] === 1 ? '' : pair[1] + ' × ') + pair[0];
+  }
+
+  function hmMasqueSpec(e) {
+    const m = HM_MASQUES[e.storylet];
+    const airs = e.airs ? 'Airs of the Hallowmas Season ' + e.airs[0] + '–' + e.airs[1] : 'Any Airs';
+    const head = [e.name, e.storylet, ''];
+    if (e.leave) {
+      return {
+        text: 'leave · Favour to re-enter unless ' + m.mask, color: CAROUSEL_COLOR_NEUTRAL,
+        title: head.concat(['Leaves the Masque. Unless you wear the ' + m.mask + ' mask, re-entering costs a Favour ('
+          + m.favours + ').']).join('\n'),
+      };
+    }
+    if (e.swap) {
+      return {
+        text: e.swap[0] + ' → ' + e.swap[1], color: CAROUSEL_COLOR_NEUTRAL,
+        title: head.concat([airs + '.', 'Trades one Confession of ' + e.swap[0] + ' for one of ' + e.swap[1] + '.',
+          'Confessions are handed to the Attendants to upgrade companions; see the Hallowmas panel.']).join('\n'),
+      };
+    }
+    let text = m.menace + ' +' + e.cp + ' CP';
+    if (e.spends) text += ' ' + HM_MARK_SPENDS;
+    if (e.mask) text += ' · ' + e.mask;
+    const lines = head.concat([
+      airs + '.',
+      e.mask ? 'Needs the ' + e.mask + ' mask (' + m.menace + ' is its Menace).' : 'No mask needed.',
+      e.needs ? 'Also: ' + e.needs + '.' : null,
+      e.spends ? HM_MARK_SPENDS + ' Spends ' + hmItem(e.spends) + '.' : 'Spends nothing.',
+      e.gains ? 'Gives ' + hmItem(e.gains) + (HM_FEEDS[e.gains[0]] ? ' — ' + HM_FEEDS[e.gains[0]] : '') + '.' : null,
+      'Gives ' + m.menace + ' +' + e.cp + ' CP. Locked once ' + m.menace + ' is 7.',
+      '0 → 7 is ' + HM_SPIRIT_PER_MENACE + ' CP, handed in for ' + HM_SPIRIT_PER_MENACE
+        + ' Spirit of Hallowmas. Gear that raises Menace gain scales the CP; that is not modelled here.',
+    ]).filter(Boolean);
+    return { text: text, color: CAROUSEL_COLOR_PROGRESS, title: lines.join('\n') };
+  }
+
+  function hmMasqueStoryletSpec(key) {
+    const name = Object.keys(HM_MASQUES).find(function (n) { return normalizeName(n) === key; });
+    if (!name) return null;
+    const m = HM_MASQUES[name];
+    return {
+      text: 'Hallowmas · ' + m.menace, color: CAROUSEL_COLOR_LABEL,
+      title: name + '\n\nA Hallowmas Masque: its Menace is ' + m.menace + '. The ' + m.mask + ' mask gets free entry '
+        + 'through the card ' + m.card + '; otherwise entry costs a Favour (' + m.favours + '). '
+        + 'Every option is badged with the Menace CP it pays.',
+    };
+  }
+
+  const HM_MASQUE_INDEX = carouselIndex(HM_MASQUE_OPTIONS);
+  const HM_MASQUE_CLASS = 'fl-ux-hallowmas-masque';
+  const HM_MASQUE_FLAG = 'flUxHallowmasMasque';
+  const HM_MASQUE_BRANCH_CLASS = 'fl-ux-hallowmas-masque-branch';
+  const HM_MASQUE_BRANCH_FLAG = 'flUxHallowmasMasqueBranch';
+
+  function hallowmasMasquesRatings() {
+    carouselRatings({
+      storylets: Object.keys(HM_MASQUES), index: HM_MASQUE_INDEX, storyletSpec: hmMasqueStoryletSpec,
+      optionSpec: hmMasqueSpec, cls: HM_MASQUE_CLASS, flag: HM_MASQUE_FLAG,
+      branchCls: HM_MASQUE_BRANCH_CLASS, branchFlag: HM_MASQUE_BRANCH_FLAG,
+    });
+  }
+
+  // --- what Spirit buys (Hallowmas: The Fool's Justice), from the guide, 2025 ---
+  // `echo` and `per` are both as the guide states them; the test checks echo / cost
+  // against per. `ratket` is the guide's figure with a Ratket, where it gives one.
+  const HM_SPIRIT_REWARDS = [
+    { cost: 1, items: 'Appalling Secret ×2', echo: 0.30, per: 0.30 },
+    { cost: 5, items: 'Tale of Terror!! ×3', echo: 1.50, per: 0.30 },
+    { cost: 50, items: 'Muscaria Brandy, Bazaar Permit', echo: 15, per: 0.30 },
+    { cost: 100, items: 'Favour in High Places, Cellar of Wine, Stolen Kiss ×3', echo: 32.5, per: 0.325 },
+    { cost: 250, items: 'Cellar of Wine ×3, Vital Intelligence ×2', echo: 62.5, per: 0.25, ratket: 70.5 },
+    { cost: 500, items: 'Silent Soul ×10', echo: 125, per: 0.25 },
+    { cost: 1000, items: 'Night-Whisper ×4', echo: 250, per: 0.25, ratket: 330 },
+    { cost: 1500, items: 'Element of Dawn ×3, Mountain-sherd ×3', echo: 375, per: 0.25 },
+    { cost: 2000, items: 'Direful Reflection ×7, Searing Enigma, Vial of Tears of the Bazaar', echo: 462.5, per: 0.231 },
+  ];
+  const HM_KNIGHT_THRESHOLD = 2500;
+  const HM_KNIGHT_RATIO = 20;
+
+  const HM_AFFILIATIONS = [
+    { menace: 'Nightmares', first: 'A Member of the Order of Those Who Will Not Be Caught Red-Handed', repeat: 'Night-Whisper' },
+    { menace: 'Wounds', first: 'Inducted into the Inverted Stalactite Society', repeat: 'Primaeval Hint' },
+    { menace: 'Suspicion', first: 'A Member of the Crew of the St Elmo', repeat: 'Bottle of Fourth City Airag: Year of the Tortoise' },
+    { menace: 'Scandal', first: 'A Seat at the Bishop’s Table', repeat: 'Primaeval Hint', note: 'not offered in 2025' },
+  ];
+
+  const HM_CONFESSION_REWARDS = [
+    ['Curiosity', 'Extraordinary Implication'], ['Guile', 'An Identity Uncovered!'],
+    ['Impropriety', 'Touching Love Story'], ['Pride', 'Sworn Statement'],
+    ['Violence', 'Aeolian Scream'], ['Whimsy', 'Bottle of Broken Giant 1844'],
+  ];
+
+  // --- 2025's companion upgrades. The companions change every year. ---
+  // `confessions` is the guide's list table; HM_UPGRADE_GRID is its tick-grid.
+  const HM_UPGRADES_2025 = [
+    { from: 'Perforated Diver', to: 'No One of Consequence', confessions: ['Impropriety', 'Violence'], kind: 'Affiliation' },
+    { from: 'Perforated Diver', to: 'Perforated Zubmariner', confessions: ['Curiosity', 'Guile', 'Pride'], kind: 'Agent' },
+    { from: 'Associating with Radical Academics 75 + A Web Awaiting Its Spider 10', to: 'The Ragged Recusant',
+      confessions: ['Curiosity', 'Violence', 'Whimsy'], kind: 'Agent' },
+    { from: 'Violant Moon-Miser or Alchemical Moon-Miser', to: 'Coruscating Miser-Mount',
+      confessions: ['Guile', 'Impropriety', 'Pride'], kind: 'Transport' },
+    { from: 'Analgesic Rhetorician (Fate)', to: 'Glimsatin Gown', confessions: ['Guile', 'Impropriety'], kind: 'Clothing' },
+    { from: 'Associating with the Candlefinder Society 10 + Rookery Password', to: 'Topsy Tailcoat',
+      confessions: ['Curiosity', 'Whimsy'], kind: 'Clothing' },
+    { from: 'The Chap on the Corner and Ex-Privateer Charter Clerk', to: 'Shipful of Schemers',
+      confessions: ['Guile', 'Pride'], kind: 'Crew' },
+    { from: 'Rose-Bearing Maggot (Fate)', to: 'Maggot-Bearing Rose', confessions: ['Violence', 'Whimsy'], kind: 'Adornment' },
+    { from: 'The Chap on the Corner', to: 'Nimble-fingered Intelligencer', confessions: ['Curiosity', 'Pride'], kind: 'Companion' },
+    { from: 'Ex-Privateer Charter Clerk', to: 'Only-Semi-Retired Privateer Charter Clerk',
+      confessions: ['Impropriety', 'Violence'], kind: 'Companion' },
+    { from: 'Forty-Nine-Voiced Warbler', to: 'Portable Fingerking Moot', confessions: ['Curiosity', 'Pride', 'Whimsy'], kind: 'Companion' },
+    { from: 'Misplaced Ring', to: 'Recalcitrant Sculptress', confessions: ['Guile', 'Impropriety', 'Violence'], kind: 'Companion' },
+  ];
+  // Columns Curiosity, Guile, Impropriety, Pride, Violence, Whimsy; 'x' is a tick.
+  const HM_CONFESSION_COLUMNS = ['Curiosity', 'Guile', 'Impropriety', 'Pride', 'Violence', 'Whimsy'];
+  const HM_UPGRADE_GRID = {
+    'No One of Consequence': '..x.x.', 'Perforated Zubmariner': 'xx.x..', 'The Ragged Recusant': 'x...xx',
+    'Coruscating Miser-Mount': '.xxx..', 'Glimsatin Gown': '.xx...', 'Topsy Tailcoat': 'x....x',
+    'Shipful of Schemers': '.x.x..', 'Maggot-Bearing Rose': '....xx', 'Nimble-fingered Intelligencer': 'x..x..',
+    'Only-Semi-Retired Privateer Charter Clerk': '..x.x.', 'Portable Fingerking Moot': 'x..x.x',
+    'Recalcitrant Sculptress': '.xx.x.',
+  };
+
+  function renderHallowmasPanel() {
+    const section = function (title, children) {
+      return h('div', { css: 'margin-top:14px;' }, [
+        h('div', {
+          css: 'font:bold 11px ' + UI.font + ';letter-spacing:.06em;text-transform:uppercase;'
+            + 'color:' + UI.accent + ';margin-bottom:5px;',
+        }, [title]),
+        children,
+      ]);
+    };
+    const note = function (text) {
+      return h('div', { css: 'color:' + UI.dim + ';font-size:11px;line-height:1.6;margin-bottom:4px;' }, text);
+    };
+    const table = function (heads, rows) {
+      return h('table', { css: 'width:100%;border-collapse:collapse;' }, [
+        h('thead', null, [h('tr', null, heads.map(function (t) { return h('th', { css: TH }, [t]); }))]),
+        h('tbody', null, rows),
+      ]);
+    };
+    const cell = function (c) { return h('td', { css: TD + 'color:' + UI.text + ';' }, [c]); };
+
+    const groups = [];
+    const filter = h('input', {
+      type: 'search', placeholder: 'Filter Masque options (name, item, mask, Menace)…',
+      css: 'width:100%;box-sizing:border-box;margin:8px 0 0;padding:5px 8px;background:' + UI.bgAlt
+        + ';border:1px solid ' + UI.line + ';border-radius:3px;color:' + UI.text + ';font:12px ' + UI.font + ';',
+      on: {
+        input: function () {
+          const q = normalizeName(filter.value || '');
+          groups.forEach(function (g) {
+            let any = false;
+            g.rows.forEach(function (r) {
+              const show = !q || String(r.dataset.hmSearch).indexOf(q) !== -1;
+              r.style.display = show ? '' : 'none';
+              if (show) any = true;
+            });
+            g.block.style.display = any ? '' : 'none';
+          });
+        },
+      },
+    });
+
+    const masques = Object.keys(HM_MASQUES).map(function (name) {
+      const m = HM_MASQUES[name];
+      const rows = HM_MASQUE_OPTIONS.filter(function (e) { return e.storylet === name && !e.leave; }).map(function (e) {
+        const spec = hmMasqueSpec(e);
+        const tr = h('tr', null, [
+          cell(e.airs ? e.airs[0] + '–' + e.airs[1] : 'any'),
+          cell(wikiLink(e.name)),
+          cell(spec.text),
+          cell(e.spends ? hmItem(e.spends) : e.swap ? '—' : 'nothing'),
+          cell(e.gains ? hmItem(e.gains) : ''),
+        ]);
+        tr.dataset.hmSearch = normalizeName([e.name, m.menace, e.mask || '', e.spends ? e.spends[0] : '',
+          e.gains ? e.gains[0] : '', name].join(' '));
+        return tr;
+      });
+      const block = h('div', { css: 'margin-top:10px;' }, [
+        h('div', { css: 'color:' + UI.text + ';font-weight:bold;' }, [wikiLink(name), ' — ' + m.menace]),
+        note('Mask: ' + m.mask + ' (free entry through ' + m.card + '). Otherwise a Favour: ' + m.favours + '.'),
+        table(['Airs', 'Option', 'Badge', 'Spends', 'Gives'], rows),
+      ]);
+      groups.push({ block: block, rows: rows });
+      return block;
+    });
+
+    const spiritRows = HM_SPIRIT_REWARDS.map(function (r) {
+      return h('tr', null, [cell(String(r.cost)), cell(r.items),
+        cell(r.echo + (r.ratket ? ' (' + r.ratket + ' with a Ratket)' : '')), cell(String(r.per))]);
+    });
+
+    return h('div', null, [
+      note('Main storylets close and turn-ins open on the third Monday of the festival; upgrading companions closes '
+        + 'then. Masques, masks and companions change every year; the figures below are the wiki’s, from 2025.'),
+      section('Menace to Spirit', note('Raise a Masque’s Menace to 7 (28 CP), leave the storylet and open The Fool’s '
+        + 'Judgement to hand all of it in for ' + HM_SPIRIT_PER_MENACE + ' Spirit of Hallowmas. Reaching 8 sends you to '
+        + 'the Menace area instead. Spirit above ' + HM_KNIGHT_THRESHOLD + ' becomes CP for The Knight of Hallowmas at '
+        + HM_KNIGHT_RATIO + ':1. The Menace you hand in most often decides your affiliation.')),
+      section('Masques', [filter, masques]),
+      section('What Spirit buys', table(['Spirit', 'Gives', 'Echoes', 'Echoes per Spirit'], spiritRows)),
+      section('Affiliations', table(['Menace', 'First time', 'Repeat'], HM_AFFILIATIONS.map(function (a) {
+        return h('tr', null, [cell(a.menace), cell([wikiLink(a.first), a.note ? ' (' + a.note + ')' : '']), cell(wikiLink(a.repeat))]);
+      }))),
+      section('Leftover Confessions', table(['Confession', 'Turned in for'], HM_CONFESSION_REWARDS.map(function (r) {
+        return h('tr', null, [cell(r[0]), cell(wikiLink(r[1]))]);
+      }))),
+      section('Companion upgrades — 2025 only', [
+        note('These are 2025’s. Different companions are upgradeable each year: check the guide once this year’s list is up.'),
+        table(['Original', 'Confessions', 'Upgrade'], HM_UPGRADES_2025.map(function (u) {
+          return h('tr', null, [cell(u.from), cell(u.confessions.join(', ')), cell([wikiLink(u.to), ' (' + u.kind + ')'])]);
+        })),
+      ]),
+    ]);
+  }
+
   // === Investigate Clathermont's Tattoo Parlour ============================
   //
   // **What it is.** Ladybones Road side-branch of the Making Your Name
@@ -43712,6 +44067,7 @@
     { name: 'clay-quarters', run: clayQuartersRatings },
     { name: 'mutually-agreed-divorce', run: mutuallyAgreedDivorceRatings },
     { name: 'hallowmas-visitor', run: hallowmasVisitorRatings },
+    { name: 'hallowmas-masques', run: hallowmasMasquesRatings },
     { name: 'clathermont-tattoo', run: clathermontTattooRatings },
     { name: 'shifting-streets', run: shiftingStreetsRatings },
     { name: 'candlefinder-clay-men', run: candlefinderClayMenRatings },
@@ -43790,7 +44146,7 @@
     ],
     'Seasonal': [
       'fotz-card-ratings', 'fotz-depth-control', 'fotz-supplication', 'feast-of-the-rose',
-      'festive-fir', 'christmas-card', 'hallowmas-visitor',
+      'festive-fir', 'christmas-card', 'hallowmas-visitor', 'hallowmas-masques',
     ],
   };
 
@@ -43903,6 +44259,14 @@
       follows: { scriptId: 'choice', id: 'philosofruits' },
       hint: 'What you are growing and hold now, every recipe and what it pays',
       render: renderPhfPanel,
+    },
+    {
+      id: 'hallowmas',
+      icon: '🎭',
+      label: 'Hallowmas',
+      follows: { scriptId: 'choice', id: 'hallowmas-masques' },
+      hint: 'Every Masque option by Airs, what Spirit buys, affiliations, and 2025’s companion upgrades',
+      render: renderHallowmasPanel,
     },
   ];
 
