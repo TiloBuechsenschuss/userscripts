@@ -4046,6 +4046,22 @@ on a report.
   `okf/kingdom-of-loathing/rare-monsters.md`. The two scripts carry a byte-identical block
   (`tm-kol-rare-monsters`), pinned by `tests/kol-rare-monsters.test.mjs`. The list is edited under "Userscript settings" on `account.php` (a fieldset `ux-enhancers` in the shared `#tm-kol-settings` panel; this script does not carry the shared block, so it finds the panel by id or builds it alike). Auto Combat checks round 1
   only and stops with the fight left open.
+- **Auto-Attack dropdown** (`charpane.php`, ux-enhancers 1.29+). An "AA:" select with account.php's
+  Auto-Attack choices. Wiring is KoL's own, **verified** against KoLmafia (`AccountRequest`,
+  `AutoAttackCommand`, fixture `test_account_tab_combat.html`): the current value is api.php's
+  `flag_config.autoattack` ("0" off, "1" weapon, a skill id, or a `99…` macro id); the list is
+  account.php?tab=combat's `select[name=autoattack]`, cached per character in
+  `tm-kol-autoattack-options:<name>` for 6 h or until the current value isn't in it; a change is
+  POSTed as `am=1&pwd&action=autoattack&value&ajax=1` and then confirmed by re-reading api.php,
+  not by the reply. The select sits in a wrapper div **`#tm-charpane-lastadv-tools`** that is a
+  contract with `auto-combat.js` (0.12+): whichever script runs first makes it at the
+  last-adventure spot, the other joins it (Auto's button always first), so both share a line in
+  either load order. Rename that id in both scripts or neither.
+  Hideable (1.30): ux-enhancers carries only `kolUiLoad`/`kolUiHidden`/`kolUiSetHidden` of the
+  shared hide-UI contract (not the marked block, which needs `getButtonRow()`), listed in
+  `UX_HIDEABLE` and drawn as "Show …" checkboxes at the top of its account.php fieldset (now titled
+  "KoL UX Enhancers", rare monsters below). The id is `ux-enhancers.autoattack`; the charpane
+  listens for `storage` and hides the box or builds it without a reload.
 - **Ascension checklist** (`ascend.php`). One `form[name=ascend]` (an Ascend button plus the
   "confirm" and "seriously" checkboxes); a panel goes above it and a `submit` listener asks while a
   line is open. Coins are counted by *name* off the inventory tabs (`inventoryCountByName`) because

@@ -25,6 +25,10 @@ file records the contract so the feature can be rebuilt or moved into another sc
   handles that hash, so the script scrolls to it itself, and again on the window `load` event.
 - A switch takes effect without a reload in the menu and sidebar frames.
 
+`ux-enhancers.js` (1.30+) also uses the key without carrying the block: it keeps only the
+read and write helpers, and adds its switches ("Show Auto-Attack dropdown in the charpane",
+id `ux-enhancers.autoattack`) to its own fieldset.
+
 ## Storage
 
 | Item | Value |

@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/auto-combat.js
-// @version      0.11
+// @version      0.12
 // @description  Adds an "Auto" panel to the charpane that adventures in a chosen zone for you.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -2305,8 +2305,18 @@
   // (test_charpane_basic.html / test_charpane_compact.html). Each step falls
   // through to the next, and the last one always works, so an unrecognised
   // charpane still gets a usable button rather than none.
+  //
+  // The wrapper's id is shared with ux-enhancers.js, whose Auto-Attack dropdown
+  // belongs on the same line: whichever script runs first makes the wrapper,
+  // and the other joins it. The button always goes first in it.
+  const LASTADV_TOOLS_ID = 'tm-charpane-lastadv-tools';
+
   function placeCharpaneButton(btn) {
+    const shared = document.getElementById(LASTADV_TOOLS_ID);
+    if (shared) { shared.insertBefore(btn, shared.firstChild); return; }
+
     const wrap = document.createElement('div');
+    wrap.id = LASTADV_TOOLS_ID;
     wrap.style.cssText = 'text-align:center;margin:2px 0';
     wrap.appendChild(btn);
 

@@ -27,4 +27,10 @@ Fallen London Choice Helper:
     - Hinterland Efficiency (City of the Tracklayers badges say `Eff`) is not read: check whether the Myself tab
       shows it
 
+Kingdom of Loathing:
+  - Test in game: charpane "AA:" Auto-Attack dropdown (ux-enhancers 1.30, auto-combat 0.12) -- shows the
+    current setting in expanded and compact charpanes, sits on one line with Auto, a pick saves (check
+    account.php?tab=combat), "refresh list" picks up a new macro, and it still appears without auto-combat.
+    Unticking "Show Auto-Attack dropdown" in account.php's Userscript settings hides it at once (1.30).
+
 # Maybe

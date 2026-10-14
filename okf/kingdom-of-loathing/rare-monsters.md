@@ -16,7 +16,7 @@ Monsters the player wants flagged. `ux-enhancers.js` 1.28 draws a banner on `fig
 ## Where the list is edited
 
 - **fight.php:** `☆ watch <name>` on an unwatched monster, `unwatch` on a watched one, and an `edit list` link to the settings panel.
-- **account.php:** a "KoL UX Enhancers — rare monsters" fieldset in the shared `#tm-kol-settings` panel (the one in `hide-ui-settings.md`): every watched monster with `[remove]`, and name + note + Add. `ux-enhancers.js` does not carry the shared block, so it finds the panel by id and builds it with the same look if it ran first.
+- **account.php:** a "KoL UX Enhancers" fieldset (its "Rare monsters" part) in the shared `#tm-kol-settings` panel (the one in `hide-ui-settings.md`): every watched monster with `[remove]`, and name + note + Add. `ux-enhancers.js` does not carry the shared block, so it finds the panel by id and builds it with the same look if it ran first.
 
 ## Storage
 

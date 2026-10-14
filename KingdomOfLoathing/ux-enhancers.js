@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js
-// @version      1.28
+// @version      1.30
 // @description  Grab-bag of quality-of-life tweaks for Kingdom of Loathing pages.
 // @match        https://www.kingdomofloathing.com/hermit.php*
 // @match        https://kingdomofloathing.com/hermit.php*
@@ -98,6 +98,9 @@
  *   gems, plus adventures left, room left in stomach and liver, a reminder to burn out a
  *   Chef- or Bartender-in-the-box, and how many Daily Checklist tasks are unticked; Ascend
  *   asks for confirmation while a line is still open.
+ *   In the character pane, next to Auto Combat's "Auto" button, an "AA:" dropdown with the same
+ *   choices as account.php's Auto-Attack setting (off, weapon, your combat skills and macros)
+ *   that saves the moment you pick one; "Userscript settings" on account.php can hide it.
  *
  * Confirmed against the live game on 2026-10-07 (1.27; the 1.28 lines and ultra-rares are not yet): the store multibuy, the daily shopping list,
  *   the rare-monster banner and its account.php list, and the ascension checklist.
@@ -3752,6 +3755,41 @@
     document.body.insertBefore(box, document.body.firstChild);
   }
 
+  // --- Hide-UI switches (the shared tm-kol-hidden-ui key) ---------------
+  // Only the read and the write of the contract in
+  // okf/kingdom-of-loathing/hide-ui-settings.md, not the whole shared block:
+  // that block needs the menu-row helper, and the gear it adds comes from
+  // iotm.js / quest-helper.js anyway. Same key, same shape -- only HIDDEN
+  // features are stored, so anything new is shown by default.
+  const KOL_UI_KEY = 'tm-kol-hidden-ui';
+  const UX_SCRIPT_ID = 'ux-enhancers';
+  const UX_HIDEABLE = [
+    { id: 'autoattack', label: 'Auto-Attack dropdown in the charpane' },
+  ];
+
+  function kolUiLoad() {
+    try {
+      const o = JSON.parse(localStorage.getItem(KOL_UI_KEY) || '{}');
+      return o && typeof o === 'object' && !Array.isArray(o) ? o : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function kolUiHidden(scriptId, featureId) {
+    return kolUiLoad()[scriptId + '.' + featureId] === true;
+  }
+
+  // Read-modify-write on a fresh read, so other scripts' switches survive.
+  function kolUiSetHidden(scriptId, featureId, hidden) {
+    const o = kolUiLoad();
+    const k = scriptId + '.' + featureId;
+    if (hidden) o[k] = true; else delete o[k];
+    try {
+      localStorage.setItem(KOL_UI_KEY, JSON.stringify(o));
+    } catch (e) { /* storage blocked: the switch just does not stick */ }
+  }
+
   // --- Rare monster list (account.php, "Userscript settings") ----------
   // The same panel iotm.js and quest-helper.js use (tm-kol-hidden-ui, see
   // okf/kingdom-of-loathing/hide-ui-settings.md). That block is not carried here
@@ -3786,8 +3824,26 @@
     set.setAttribute('data-tm-script', id);
     set.style.cssText = 'margin:4px 0;padding:4px 8px';
     const legend = document.createElement('legend');
-    legend.textContent = 'KoL UX Enhancers \u2014 rare monsters';
+    legend.textContent = 'KoL UX Enhancers';
     set.appendChild(legend);
+
+    // Hide-UI switches, in the shared panel's own "Show <thing>" style.
+    UX_HIDEABLE.forEach((f) => {
+      const label = document.createElement('label');
+      label.style.cssText = 'display:block;cursor:pointer';
+      const box = document.createElement('input');
+      box.type = 'checkbox';
+      box.checked = !kolUiHidden(id, f.id);
+      box.addEventListener('change', () => kolUiSetHidden(id, f.id, !box.checked));
+      label.appendChild(box);
+      label.appendChild(document.createTextNode(' Show ' + f.label));
+      set.appendChild(label);
+    });
+
+    const sub = document.createElement('div');
+    sub.textContent = 'Rare monsters';
+    sub.style.cssText = 'font-weight:bold;margin-top:6px';
+    set.appendChild(sub);
     const intro = document.createElement('div');
     intro.textContent = 'Monsters flagged on the fight page; Auto Combat stops instead of ' +
       'fighting them. Names ignore case and a leading a / an / the.';
@@ -5322,6 +5378,271 @@
     addRefreshButton();
   }
 
+  // === feature: auto-attack dropdown in the charpane ======================
+  //
+  // KoL's Auto-Attack setting lives on account.php?tab=combat, three clicks
+  // and a page away from where you notice you want it changed. This puts the
+  // same select in the charpane, next to Auto Combat's "Auto" button, and saves
+  // on change exactly as account.php does.
+  //
+  // The game's own wiring, from KoL's account.php JS and KoLmafia
+  // (AccountRequest / AutoAttackCommand, fixture test_account_tab_combat.html):
+  //
+  //   read   api.php?what=status -> flag_config.autoattack, a string:
+  //          "0" disabled, "1" weapon, a skill id, or a 99... macro id
+  //   list   account.php?tab=combat -> <select name="autoattack">, options
+  //          "Saucegeyser (24 Muscularity Points)", "barf (Combat Macro)"
+  //   write  POST account.php am=1&pwd=..&action=autoattack&value=..&ajax=1
+  //
+  // The option list costs a whole account.php page, so it is cached per
+  // character and re-read only when stale, when the current setting isn't in
+  // it (a new macro, a new skill), or when you ask with "refresh list". The
+  // current value comes from api.php on every charpane load, so the select
+  // never shows a stale setting -- KoL also turns auto-attack off on ascension.
+  //
+  // Placement is shared with auto-combat.js: whichever script runs first makes
+  // the #tm-charpane-lastadv-tools wrapper at the last-adventure spot, and the
+  // other joins it, so the two controls share a line in either load order.
+
+  const AA_SELECT_ID = 'tm-autoattack-select';
+  const AA_CACHE_KEY = 'tm-kol-autoattack-options';
+  const AA_CACHE_MS = 6 * 60 * 60 * 1000;
+  const AA_REFRESH = '__refresh';
+  const LASTADV_TOOLS_ID = 'tm-charpane-lastadv-tools';
+
+  // --- pure helpers (unit-tested) ------------------------------------------
+
+  function autoAttackKind(value, label) {
+    if (value === '0') return 'off';
+    if (value === '1') return 'weapon';
+    if (/\(\s*combat macro\s*\)\s*$/i.test(label)) return 'macro';
+    return 'skill';
+  }
+
+  // account.php's <select name="autoattack"> -> [{ value, label, kind }].
+  function parseAutoAttackOptions(doc) {
+    const sel = doc && doc.querySelector('select[name="autoattack"]');
+    if (!sel) return null;
+    const out = [];
+    for (const o of sel.querySelectorAll('option')) {
+      const value = String(o.getAttribute('value') || '').trim();
+      if (!/^\d+$/.test(value)) continue;
+      const label = String(o.textContent || '').replace(/\s+/g, ' ').trim();
+      out.push({ value: value, label: label, kind: autoAttackKind(value, label) });
+    }
+    return out;
+  }
+
+  // Drop the trailing "(cost)" / "(Combat Macro)" so the charpane select stays
+  // narrow. Only a final parenthesised group goes; "Harpoon!" keeps its "!".
+  function shortAutoAttackLabel(label) {
+    const s = String(label || '').replace(/\s+/g, ' ').trim();
+    const short = s.replace(/\s*\([^()]*\)\s*$/, '').trim();
+    return short || s;
+  }
+
+  // --- data ----------------------------------------------------------------
+
+  async function fetchAutoAttackStatus() {
+    const res = await fetch(ORIGIN + '/api.php?what=status&for=ux-enhancers', {
+      credentials: 'same-origin', cache: 'no-store',
+    });
+    if (!res.ok) throw new Error('api.php answered ' + res.status);
+    const j = await res.json();
+    const flags = (j && j.flag_config) || {};
+    return {
+      pwd: j && j.pwd,
+      name: String((j && j.name) || 'unknown').toLowerCase(),
+      value: flags.autoattack == null ? null : String(flags.autoattack),
+    };
+  }
+
+  function loadAutoAttackCache(name) {
+    try {
+      const o = JSON.parse(localStorage.getItem(AA_CACHE_KEY + ':' + name));
+      if (o && Array.isArray(o.options)) return o;
+    } catch (e) { /* blocked or corrupt */ }
+    return null;
+  }
+
+  async function fetchAutoAttackOptions(name) {
+    const res = await fetch(ORIGIN + '/account.php?tab=combat', {
+      credentials: 'same-origin', cache: 'no-store',
+    });
+    if (!res.ok) throw new Error('account.php answered ' + res.status);
+    const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+    const options = parseAutoAttackOptions(doc);
+    if (!options || !options.length) throw new Error('no auto-attack list on account.php');
+    try {
+      localStorage.setItem(AA_CACHE_KEY + ':' + name,
+        JSON.stringify({ at: Date.now(), options: options }));
+    } catch (e) { /* blocked */ }
+    return options;
+  }
+
+  async function saveAutoAttack(pwd, value) {
+    const body = new URLSearchParams({
+      am: '1', pwd: pwd, action: 'autoattack', value: value, ajax: '1',
+    });
+    const res = await fetch(ORIGIN + '/account.php', {
+      method: 'POST', credentials: 'same-origin', body: body,
+    });
+    if (!res.ok) throw new Error('account.php answered ' + res.status);
+    // Trust the game's own record over the reply, which is barely documented.
+    const after = await fetchAutoAttackStatus();
+    if (after.value !== value) {
+      throw new Error('KoL still reports auto-attack as ' + after.value);
+    }
+  }
+
+  // --- UI --------------------------------------------------------------------
+
+  function fillAutoAttackSelect(sel, options, current) {
+    sel.textContent = '';
+    const groups = [
+      ['Basic', options.filter((o) => o.kind === 'off' || o.kind === 'weapon')],
+      ['Macros', options.filter((o) => o.kind === 'macro')],
+      ['Skills', options.filter((o) => o.kind === 'skill')],
+    ];
+    let found = false;
+    for (const [title, list] of groups) {
+      if (!list.length) continue;
+      const g = document.createElement('optgroup');
+      g.label = title;
+      for (const o of list) {
+        const opt = document.createElement('option');
+        opt.value = o.value;
+        // The off state says so in words, never by colour alone.
+        opt.textContent = o.kind === 'off' ? '(off)' : shortAutoAttackLabel(o.label);
+        opt.title = o.label;
+        if (o.value === current) { opt.selected = true; found = true; }
+        g.appendChild(opt);
+      }
+      sel.appendChild(g);
+    }
+    if (!found && current != null) {
+      // A value we can't name (the list is behind): show it rather than lie.
+      const opt = document.createElement('option');
+      opt.value = current;
+      opt.textContent = '#' + current;
+      opt.selected = true;
+      sel.insertBefore(opt, sel.firstChild);
+    }
+    const refresh = document.createElement('option');
+    refresh.value = AA_REFRESH;
+    refresh.textContent = '↻ refresh list';
+    sel.appendChild(refresh);
+    sel.setAttribute('data-current', current == null ? '' : current);
+    const pick = options.find((o) => o.value === current);
+    sel.title = 'Auto-Attack: ' + (pick ? pick.label : (current == null ? 'unknown' : current));
+  }
+
+  // Same spots auto-combat.js's placeCharpaneButton uses, in the same order.
+  function lastAdvToolsWrap() {
+    const existing = document.getElementById(LASTADV_TOOLS_ID);
+    if (existing) return existing;
+
+    const wrap = document.createElement('div');
+    wrap.id = LASTADV_TOOLS_ID;
+    wrap.style.cssText = 'text-align:center;margin:2px 0';
+
+    // An older auto-combat makes its own anonymous wrap: sit right after it.
+    const auto = document.getElementById('tm-autocombat-btn');
+    if (auto && auto.parentNode) {
+      auto.parentNode.insertAdjacentElement('afterend', wrap);
+      return wrap;
+    }
+
+    const anchors = Array.from(document.querySelectorAll('a'));
+    const label = anchors.find((a) => /^\s*last adventure/i.test(a.textContent || ''));
+    const block = label && label.closest && label.closest('center');
+    if (block) { block.appendChild(wrap); return wrap; }
+
+    const menu = document.getElementById('lastadvmenu');
+    const table = menu && menu.closest && menu.closest('table');
+    if (table && table.parentNode) { table.insertAdjacentElement('afterend', wrap); return wrap; }
+
+    const nudge = document.getElementById('nudgeblock');
+    if (nudge && nudge.parentNode) { nudge.parentNode.insertBefore(wrap, nudge); return wrap; }
+
+    document.body.insertBefore(wrap, document.body.firstChild);
+    return wrap;
+  }
+
+  // Hideable from "Userscript settings" on account.php. A switch flipped there
+  // fires `storage` here, so the dropdown goes or comes back without a reload.
+  // Hiding is display:none on the dropdown's box; showing it again builds it
+  // if it was never built (hidden at charpane load).
+  function autoAttackFeature() {
+    window.addEventListener('storage', function (e) {
+      if (e.key !== KOL_UI_KEY && e.key !== null) return;
+      const sel = document.getElementById(AA_SELECT_ID);
+      const hidden = kolUiHidden(UX_SCRIPT_ID, 'autoattack');
+      if (sel && sel.parentNode) sel.parentNode.style.display = hidden ? 'none' : '';
+      else if (!hidden) {
+        addAutoAttackSelect().catch((err) =>
+          console.error('UX Enhancers: auto-attack dropdown failed.', err));
+      }
+    });
+    if (kolUiHidden(UX_SCRIPT_ID, 'autoattack')) return;
+    return addAutoAttackSelect();
+  }
+
+  async function addAutoAttackSelect() {
+    if (document.getElementById(AA_SELECT_ID) || !document.body) return;
+
+    const status = await fetchAutoAttackStatus();
+    if (status.value == null) return;   // not logged in, or api.php changed
+
+    let cache = loadAutoAttackCache(status.name);
+    let options = cache && cache.options;
+    const stale = !cache || Date.now() - (cache.at || 0) > AA_CACHE_MS ||
+      !options.some((o) => o.value === status.value);
+    if (stale) {
+      try { options = await fetchAutoAttackOptions(status.name); }
+      catch (e) { if (!options) throw e; }
+    }
+    if (document.getElementById(AA_SELECT_ID)) return;   // a parallel run won
+    if (kolUiHidden(UX_SCRIPT_ID, 'autoattack')) return;   // hidden while we fetched
+
+    const box = document.createElement('span');
+    box.style.cssText = 'white-space:nowrap;margin-left:4px;font-size:10px;font-family:arial';
+    const lab = document.createElement('label');
+    lab.textContent = 'AA: ';
+    lab.setAttribute('for', AA_SELECT_ID);
+    const sel = document.createElement('select');
+    sel.id = AA_SELECT_ID;
+    sel.style.cssText = 'font-size:10px;font-family:arial;height:18px;max-width:110px';
+    fillAutoAttackSelect(sel, options, status.value);
+    box.appendChild(lab);
+    box.appendChild(sel);
+    lastAdvToolsWrap().appendChild(box);
+
+    sel.addEventListener('change', async function () {
+      const prev = sel.getAttribute('data-current');
+      const want = sel.value;
+      sel.disabled = true;
+      try {
+        const now = await fetchAutoAttackStatus();
+        if (want === AA_REFRESH) {
+          options = await fetchAutoAttackOptions(now.name);
+          fillAutoAttackSelect(sel, options, now.value);
+          return;
+        }
+        sel.title = 'Saving…';
+        if (!now.pwd) throw new Error('no pwd hash from api.php');
+        await saveAutoAttack(now.pwd, want);
+        fillAutoAttackSelect(sel, options, want);
+      } catch (e) {
+        console.error('UX Enhancers: auto-attack change failed.', e);
+        fillAutoAttackSelect(sel, options, prev);
+        alert('Could not change Auto-Attack: ' + (e && e.message ? e.message : e));
+      } finally {
+        sel.disabled = false;
+      }
+    });
+  }
+
   // === feature registry =================================================
 
   const FEATURES = [
@@ -5350,6 +5671,7 @@
     { name: 'equip-optimize', path: /\/inventory\.php/i, run: buildEquipOptimizer },
     { name: 'charpane-heal', path: /\/charpane\.php/i, run: addHealButton },
     { name: 'charpane-cast-max', path: /\/charpane\.php/i, run: enhance },
+    { name: 'charpane-autoattack', path: /\/charpane\.php/i, run: autoAttackFeature },
   ];
 
   function run() {
