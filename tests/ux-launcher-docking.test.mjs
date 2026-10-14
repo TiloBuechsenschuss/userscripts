@@ -327,7 +327,7 @@ const wrapped = src
     'return { mountLauncher, dockLauncher, positionLauncher, findTravelAnchor,'
     + ' dockPreferred, setDockPreferred, LAUNCHER_ID, LAUNCHER_BUTTON_ID,'
     + ' fullscreenPreferred, setFullscreenPreferred, applyPanelFullscreen,'
-    + ' PANEL_FULLSCREEN_CSS, PANEL_WINDOWED_CSS, PANELS }; })();');
+    + ' PANEL_FULLSCREEN_CSS, PANEL_WINDOWED_CSS, PANELS, MENU_CLOCK }; })();');
 const api = new Function(
   'document', 'MutationObserver', 'requestAnimationFrame', 'getComputedStyle', 'console',
   'URLSearchParams', 'localStorage', 'sessionStorage', 'location', 'Event', 'window',
@@ -705,11 +705,24 @@ check('the card is light, and every colour written on it is readable against it'
     (win.__flUxPanels || []).map((p) => p.id),
     ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory', 'economy', 'spending-secrets', 'philosofruits', 'hallowmas']);
 
+  // Out of season, so no festival floats to the top and the order is the groups'.
+  api.MENU_CLOCK.now = () => new Date(2026, 5, 1);
   open();
-  check('the menu lists them after the launcher\'s own Factions panel',
+  check('the menu lists them in their groups, the launcher\'s own Factions first under General',
     labels().slice(0, 5),
-    ['⚔  Factions', '⚓  Zailing', '🐅  Port Carnelian', '🔬  Scientific Voyages',
-      '🐚  Fruits of the Zee']);
+    ['⚔  Factions', '⚓  Zailing', '💰  Economy', '🐅  Port Carnelian', '🔬  Scientific Voyages']);
+  check('...under a heading per group, and Settings last, just above the dock toggle',
+    [menu().querySelectorAll('div').map((d) => d.textContent)
+      .filter((t) => ['General', 'Activities', 'Seasonal', 'In season'].includes(t)),
+     labels().slice(-2)[0]],
+    [['General', 'Activities', 'Seasonal'], '⚙  Settings']);
+
+  api.MENU_CLOCK.now = () => new Date(2026, 9, 31);
+  open();
+  check('while Hallowmas runs, its panel is the first entry, under In season',
+    [labels()[0], menu().querySelectorAll('div').map((d) => d.textContent).includes('In season')],
+    ['🎭  Hallowmas', true]);
+  api.MENU_CLOCK.now = () => new Date(2026, 5, 1);
 
   win.__flUxPanels.push({ id: 'late', icon: 'L', label: 'Late', hint: '', render: () => makeEl('div') });
   win.__flUxPanels.push({ id: 'factions', icon: 'X', label: 'Impostor', hint: '', render: () => makeEl('div') });

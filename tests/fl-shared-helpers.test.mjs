@@ -195,7 +195,8 @@ function load(page, file, names) {
     page.win);
 }
 
-const UX_NAMES = ['menuPanels', 'sharedPanels', 'shareFrame', 'myselfLoaded', 'possessionsLoaded',
+const UX_NAMES = ['menuPanels', 'menuPanelGroups', 'menuGroups', 'inSeason', 'MENU_CLOCK', 'MENU_GROUPS',
+  'sharedPanels', 'shareFrame', 'myselfLoaded', 'possessionsLoaded',
   'CACHE_KEY', 'ITEMS_KEY', 'SCRIPT_ID'];
 const CHOICE_NAMES = ['PANELS', 'registerPanels', 'shareFrame', 'PC_CACHE_KEY', 'FOTZ_CACHE_KEY',
   'COUNTS_KEY', 'SCRIPT_ID'];
@@ -203,18 +204,73 @@ const CHOICE_NAMES = ['PANELS', 'registerPanels', 'shareFrame', 'PC_CACHE_KEY', 
 // --- the panel registry ----------------------------------------------------
 
 const CHOICE_PANELS = ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory', 'economy', 'spending-secrets', 'philosofruits', 'hallowmas'];
+// The menu sorts them into its groups. Out of season (1 June) that is General, Activities, Seasonal.
+const OFF_SEASON = new Date(2026, 5, 1);
+const MENU_ORDER = ['factions', 'zailing', 'economy',
+  'port-carnelian', 'scientific-voyages', 'university-laboratory', 'spending-secrets', 'philosofruits',
+  'fruits-of-the-zee', 'hallowmas', 'settings'];
 
 for (const first of [UX, CHOICE]) {
   const page = makePage(true);
   const order = first === UX ? [UX, CHOICE] : [CHOICE, UX];
   const apis = {};
   for (const file of order) apis[file] = load(page, file, file === UX ? UX_NAMES : CHOICE_NAMES);
-  const ids = apis[UX].menuPanels().map((p) => p.id);
-  check('loaded ' + order.join(' then ') + ': the menu holds Factions and then Choice Helper\'s five',
-    ids, ['factions', ...CHOICE_PANELS, 'settings']);
+  const ids = apis[UX].menuPanels(OFF_SEASON).map((p) => p.id);
+  check('loaded ' + order.join(' then ') + ': the menu holds Factions and Choice Helper\'s panels, grouped',
+    ids, MENU_ORDER);
   check('...and neither script threw while loading', page.errors, []);
   apis[CHOICE].registerPanels();
   check('...registering again adds nothing', page.win.__flUxPanels.map((p) => p.id), CHOICE_PANELS);
+}
+
+// --- the menu's groups, and a festival floating to the top -----------------
+
+{
+  const page = makePage(true);
+  const ux = load(page, UX, UX_NAMES);
+  load(page, CHOICE, CHOICE_NAMES);
+  const groups = (date) => ux.menuPanelGroups(date).map((g) => [g.label, g.panels.map((p) => p.id)]);
+
+  check('out of season: General, Activities, Seasonal, each panel under its own',
+    groups(OFF_SEASON),
+    [['General', ['factions', 'zailing', 'economy']],
+     ['Activities', ['port-carnelian', 'scientific-voyages', 'university-laboratory', 'spending-secrets', 'philosofruits']],
+     ['Seasonal', ['fruits-of-the-zee', 'hallowmas']]]);
+
+  check('every registered panel names a group the menu knows',
+    page.win.__flUxPanels.filter((p) => !ux.MENU_GROUPS.includes(p.group)).map((p) => p.id), []);
+
+  check('on 31 October Hallowmas is at the top, In season, and Fruits of the Zee stays Seasonal',
+    groups(new Date(2026, 9, 31)).map((g) => g[0] + ':' + g[1].join(',')),
+    ['In season:hallowmas', 'General:factions,zailing,economy',
+     'Activities:port-carnelian,scientific-voyages,university-laboratory,spending-secrets,philosofruits',
+     'Seasonal:fruits-of-the-zee']);
+
+  check('on 5 September it is Fruits of the Zee, and the menu order follows',
+    ux.menuPanels(new Date(2026, 8, 5)).map((p) => p.id).slice(0, 2), ['fruits-of-the-zee', 'factions']);
+
+  check('the windows include both ends and nothing outside them',
+    [[10, 16], [10, 17], [11, 17], [11, 18]].map(([m, d]) =>
+      ux.inSeason({ from: [10, 17], to: [11, 17] }, new Date(2026, m - 1, d))),
+    [false, true, true, false]);
+
+  check('a window may run over New Year',
+    [[12, 30], [1, 2], [2, 1]].map(([m, d]) => ux.inSeason({ from: [12, 20], to: [1, 5] }, new Date(2026, m - 1, d))),
+    [true, true, false]);
+
+  check('a panel with no group, or an unknown one, goes under Other; Settings is still last',
+    (() => {
+      page.win.__flUxPanels.push({ id: 'late', icon: 'L', label: 'Late', render: () => null });
+      page.win.__flUxPanels.push({ id: 'odd', icon: 'O', label: 'Odd', group: 'Nonsense', render: () => null });
+      const g = ux.menuPanelGroups(OFF_SEASON).slice(-1)[0];
+      const last = ux.menuPanels(OFF_SEASON).slice(-1)[0].id;
+      page.win.__flUxPanels.splice(-2);
+      return [g.label, g.panels.map((p) => p.id), last];
+    })(),
+    ['Other', ['late', 'odd'], 'settings']);
+
+  ux.MENU_CLOCK.now = () => new Date(2026, 9, 31);
+  check('with no date passed, the menu reads the clock', ux.menuPanels()[0].id, 'hallowmas');
 }
 
 {

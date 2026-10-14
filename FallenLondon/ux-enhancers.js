@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      3.6
+// @version      3.7
 // @description  Small quality-of-life tweaks for Fallen London, behind a docked "UX" button.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -628,23 +628,58 @@
   const LAUNCHER_BUTTON_ID = 'fl-ux-launcher-button';
 
   // A panel is a screen of its own behind the launcher menu. Add one by
-  // pushing a { id, icon, label, hint, render } entry: `render(ctx)` returns the
-  // element to show, and is called fresh on every open so a panel showing live
-  // values never has to invalidate a cache.
+  // pushing a { id, icon, label, hint, render, group, season? } entry: `render(ctx)` returns
+  // the element to show, and is called fresh on every open so a panel showing live
+  // values never has to invalidate a cache. `group` files it under a menu heading
+  // (MENU_GROUPS); `season` is a festival's rough dates, see `inSeason`.
   //
   // These are this script's own. The menu also offers whatever the other
   // Fallen London script has put on the shared registry -- Choice Helper's
-  // Zailing, Port Carnelian, Scientific Voyages and Fruits of the Zee -- after
-  // these, in the order they were registered.
+  // Zailing, Port Carnelian, Scientific Voyages and the rest -- each under its
+  // group, in the order they were registered.
   const PANELS = [
     {
       id: 'factions',
       icon: '⚔',
       label: 'Factions',
+      group: 'General',
       hint: 'Renown, Favours, Renown items and each faction’s Faction Item',
       render: renderFactionsPanel,
     },
   ];
+
+  // The menu's headings, in order. A panel with no group, or one not listed here, goes under
+  // Other. A panel whose `season` takes in today is lifted out of its group to the top, under
+  // "In season", so a festival's panel is the first thing in the menu while it runs.
+  const MENU_GROUPS = ['General', 'Activities', 'Seasonal', 'Other'];
+  const MENU_IN_SEASON = 'In season';
+  // Swappable so a test can pin the date; the menu reads it every time it opens.
+  const MENU_CLOCK = { now: function () { return new Date(); } };
+
+  // `season` is { from: [month, day], to: [month, day] }, both ends included, local time. The
+  // dates are a festival's usual weeks with some slack either side, not the game's own switch:
+  // the game's season is a world quality no page shows. A window may run over New Year.
+  function inSeason(season, date) {
+    if (!season || !season.from || !season.to) return false;
+    const md = (date.getMonth() + 1) * 100 + date.getDate();
+    const from = season.from[0] * 100 + season.from[1];
+    const to = season.to[0] * 100 + season.to[1];
+    return from <= to ? md >= from && md <= to : md >= from || md <= to;
+  }
+
+  // [{ label, panels }] in menu order, empty groups left out. Order within a group is the
+  // order the panels came in.
+  function menuGroups(panels, date) {
+    const groups = [MENU_IN_SEASON].concat(MENU_GROUPS).map(function (label) {
+      return { label: label, panels: [] };
+    });
+    for (const p of panels) {
+      if (inSeason(p.season, date)) { groups[0].panels.push(p); continue; }
+      const at = MENU_GROUPS.indexOf(p.group);
+      groups[1 + (at === -1 ? MENU_GROUPS.indexOf('Other') : at)].panels.push(p);
+    }
+    return groups.filter(function (g) { return g.panels.length; });
+  }
 
   // Ours first, then the registry's, each id once. An entry without a `render`
   // is dropped rather than drawn as a button that throws when it is pressed.
@@ -658,8 +693,9 @@
     render: flUiRenderSettings,
   };
 
-  // Menu entries the player switched off (category "Menu entries") are left out.
-  function menuPanels() {
+  // Menu entries the player switched off (category "Menu entries") are left out. Grouped, and
+  // without Settings, which the menu draws on its own at the bottom.
+  function menuPanelGroups(date) {
     const out = PANELS.slice();
     const shared = sharedPanels();
     if (shared) {
@@ -669,9 +705,16 @@
         out.push(panel);
       }
     }
-    return out.filter(function (p) {
+    return menuGroups(out.filter(function (p) {
       return !panelHidden(p);
-    }).concat([SETTINGS_PANEL]);
+    }), date || MENU_CLOCK.now());
+  }
+
+  // Every entry in menu order, Settings last.
+  function menuPanels(date) {
+    const flat = [];
+    menuPanelGroups(date).forEach(function (g) { flat.push.apply(flat, g.panels); });
+    return flat.concat([SETTINGS_PANEL]);
   }
 
   // Off by its own switch, or because the feature it follows is off (a festival's panel goes
@@ -1362,13 +1405,15 @@
     let openPanelId = null;
     let menuSig = null;
     function syncMenu() {
-      const panels = menuPanels();
-      const sig = panels.map(function (p) { return p.id; }).join('|');
+      const groups = menuPanelGroups();
+      const sig = groups.map(function (g) {
+        return g.label + ':' + g.panels.map(function (p) { return p.id; }).join(',');
+      }).join('|');
       if (sig === menuSig) return;
       menuSig = sig;
       menuItems.textContent = '';
-      for (const panel of panels) {
-        menuItems.appendChild(h('button', {
+      const item = function (panel) {
+        return h('button', {
           type: 'button',
           title: panel.hint || '',
           style: btnStyle(),
@@ -1377,8 +1422,17 @@
             mouseenter: function (e) { e.currentTarget.style.background = UI.bgAlt; },
             mouseleave: function (e) { e.currentTarget.style.background = 'transparent'; },
           },
-        }, [panel.icon + '  ' + panel.label]));
-      }
+        }, [panel.icon + '  ' + panel.label]);
+      };
+      groups.forEach(function (g, i) {
+        menuItems.appendChild(h('div', {
+          css: 'padding:' + (i ? '8px' : '6px') + ' 12px 2px;color:' + UI.dim + ';font:bold 10px ' + UI.font
+            + ';letter-spacing:.08em;text-transform:uppercase;'
+            + (i ? 'border-top:1px solid ' + UI.line + ';' : ''),
+        }, [g.label]));
+        g.panels.forEach(function (p) { menuItems.appendChild(item(p)); });
+      });
+      menuItems.appendChild(h('div', { css: 'border-top:1px solid ' + UI.line + ';' }, [item(SETTINGS_PANEL)]));
     }
     syncMenu();
 
