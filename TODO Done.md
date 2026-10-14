@@ -435,3 +435,7 @@ Kingdom of Loathing features (done 2026-10-07; tested in game by the author 2026
   - Daily shopping list on mall.php: saved item + quantity rows, "+ perfect drinks" and "+ hi meins" quick-adds, "Buy list" plans the cheapest stores and shows one total. (An earlier stall after the first item was met with a timeout, one retry and per-item status; confirmed working afterwards.)
   - Rare-monster watch list: star banner and note on fight.php (rampaging adding machine built in), "watch" / "unwatch" links, Auto Combat stops with the fight left open, and the list edited under Userscript settings on account.php.
   - Ascension checklist on ascend.php: Interesting Coins (counted, coin shop link), blood cubic zirconia item skills (Blood Thinner, Spinal Tapas, Pheromone Cocktail), codpiece reminder, and a confirm on Ascend while a line is open.
+
+Kingdom of Loathing Auto-Attack dropdown (done 2026-10-14; tested in game by the author 2026-10-14, ux-enhancers 1.30, auto-combat 0.12, loader 1.66):
+  - Charpane "AA:" dropdown with account.php's Auto-Attack choices (off, weapon, skills, macros): shows the current setting in the expanded and compact charpanes, sits on one line with Auto Combat's button, a pick saves (matches account.php?tab=combat), "refresh list" picks up a new macro, and it still appears without auto-combat.
+  - "Show Auto-Attack dropdown in the charpane" switch in account.php's Userscript settings hides and restores it without a reload.

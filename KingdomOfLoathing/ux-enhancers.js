@@ -104,6 +104,8 @@
  *
  * Confirmed against the live game on 2026-10-07 (1.27; the 1.28 lines and ultra-rares are not yet): the store multibuy, the daily shopping list,
  *   the rare-monster banner and its account.php list, and the ascension checklist.
+ * Confirmed against the live game on 2026-10-14 (1.30): the charpane Auto-Attack dropdown and its
+ *   hide switch.
  */
 
 (function () {
@@ -5403,6 +5405,10 @@
   // Placement is shared with auto-combat.js: whichever script runs first makes
   // the #tm-charpane-lastadv-tools wrapper at the last-adventure spot, and the
   // other joins it, so the two controls share a line in either load order.
+  //
+  // Confirmed against the live game on 2026-10-14 (1.30, auto-combat 0.12):
+  // both charpane layouts, one line with Auto, saving a pick, "refresh list",
+  // no auto-combat installed, and the account.php hide switch.
 
   const AA_SELECT_ID = 'tm-autoattack-select';
   const AA_CACHE_KEY = 'tm-kol-autoattack-options';
