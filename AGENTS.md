@@ -4163,6 +4163,15 @@ Current tests:
 - `tests/kol-rare-monsters.test.mjs` — the rare-monster block is byte-identical in
   `ux-enhancers.js` and `auto-combat.js`, names match whatever article KoL prints, a built-in can
   be unwatched and re-watched, and corrupt or blocked storage reads as built-ins only.
+- `tests/adventure-choices-lights-out.test.mjs` — asserts `adventure-choices.js`'s Spookyraven
+  Manor Lights Out spoilers (890-903). They live in the **button-text** table
+  (`CheckButtonText`), not the option-number one, because each room is several screens under one
+  `whichchoice` and the quest button only appears once unlocked, so no option number is stable
+  (and none is verified in-game). The suite pins that every key is lower case (the lookup
+  lower-cases the label), that every label the wiki lists has a spoiler, that the Elizabeth
+  (890-896) and Stephen (897-903) chains read 1/7..7/7 in order, and that only the two ghost
+  fights claim to cost an adventure. The labels are the wiki's; a wording KoL renders
+  differently gets added as a second key, as `go to the childrens' section` already is.
 - `tests/ux-ascend-checklist.test.mjs` — the ascension lines read the same without colour (shape
   plus words), the tick key changes with the ascension count, and the Ascend confirm lists only
   open lines. `tests/ux-mall-buy.test.mjs` also covers `parseStoreRow`, `describeBasket`,
