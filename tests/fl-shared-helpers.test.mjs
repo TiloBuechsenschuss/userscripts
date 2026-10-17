@@ -195,7 +195,8 @@ function load(page, file, names) {
     page.win);
 }
 
-const UX_NAMES = ['menuPanels', 'menuPanelGroups', 'menuGroups', 'inSeason', 'MENU_CLOCK', 'MENU_GROUPS',
+const UX_NAMES = ['menuPanels', 'menuPanelGroups', 'menuGroups', 'runningFestivals', 'setFestivalRunning',
+  'renderSettingsPanel', 'RUNNING_KEY', 'MENU_GROUPS',
   'sharedPanels', 'shareFrame', 'myselfLoaded', 'possessionsLoaded',
   'CACHE_KEY', 'ITEMS_KEY', 'SCRIPT_ID'];
 const CHOICE_NAMES = ['PANELS', 'registerPanels', 'shareFrame', 'PC_CACHE_KEY', 'FOTZ_CACHE_KEY',
@@ -204,8 +205,8 @@ const CHOICE_NAMES = ['PANELS', 'registerPanels', 'shareFrame', 'PC_CACHE_KEY', 
 // --- the panel registry ----------------------------------------------------
 
 const CHOICE_PANELS = ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory', 'economy', 'spending-secrets', 'philosofruits', 'hallowmas'];
-// The menu sorts them into its groups. Out of season (1 June) that is General, Activities, Seasonal.
-const OFF_SEASON = new Date(2026, 5, 1);
+// The menu sorts them into its groups. With no festival running that is General, Activities, Seasonal.
+const OFF_SEASON = [];
 const MENU_ORDER = ['factions', 'zailing', 'economy',
   'port-carnelian', 'scientific-voyages', 'university-laboratory', 'spending-secrets', 'philosofruits',
   'fruits-of-the-zee', 'hallowmas', 'settings'];
@@ -240,23 +241,17 @@ for (const first of [UX, CHOICE]) {
   check('every registered panel names a group the menu knows',
     page.win.__flUxPanels.filter((p) => !ux.MENU_GROUPS.includes(p.group)).map((p) => p.id), []);
 
-  check('on 31 October Hallowmas is at the top, In season, and Fruits of the Zee stays Seasonal',
-    groups(new Date(2026, 9, 31)).map((g) => g[0] + ':' + g[1].join(',')),
+  check('with Hallowmas marked running it is at the top, In season, and Fruits of the Zee stays Seasonal',
+    groups(['hallowmas']).map((g) => g[0] + ':' + g[1].join(',')),
     ['In season:hallowmas', 'General:factions,zailing,economy',
      'Activities:port-carnelian,scientific-voyages,university-laboratory,spending-secrets,philosofruits',
      'Seasonal:fruits-of-the-zee']);
 
-  check('on 5 September it is Fruits of the Zee, and the menu order follows',
-    ux.menuPanels(new Date(2026, 8, 5)).map((p) => p.id).slice(0, 2), ['fruits-of-the-zee', 'factions']);
+  check('with Fruits of the Zee marked running, the menu order follows',
+    ux.menuPanels(['fruits-of-the-zee']).map((p) => p.id).slice(0, 2), ['fruits-of-the-zee', 'factions']);
 
-  check('the windows include both ends and nothing outside them',
-    [[10, 16], [10, 17], [11, 17], [11, 18]].map(([m, d]) =>
-      ux.inSeason({ from: [10, 17], to: [11, 17] }, new Date(2026, m - 1, d))),
-    [false, true, true, false]);
-
-  check('a window may run over New Year',
-    [[12, 30], [1, 2], [2, 1]].map(([m, d]) => ux.inSeason({ from: [12, 20], to: [1, 5] }, new Date(2026, m - 1, d))),
-    [true, true, false]);
+  check('only a Seasonal panel can be marked running; an Activities id is ignored',
+    groups(['port-carnelian'])[0][0], 'General');
 
   check('a panel with no group, or an unknown one, goes under Other; Settings is still last',
     (() => {
@@ -269,8 +264,18 @@ for (const first of [UX, CHOICE]) {
     })(),
     ['Other', ['late', 'odd'], 'settings']);
 
-  ux.MENU_CLOCK.now = () => new Date(2026, 9, 31);
-  check('with no date passed, the menu reads the clock', ux.menuPanels()[0].id, 'hallowmas');
+  check('nothing is running by default', [ux.runningFestivals(), ux.menuPanels()[0].id], [[], 'factions']);
+  ux.setFestivalRunning('hallowmas', true);
+  check('with nothing passed, the menu reads what the player ticked', ux.menuPanels()[0].id, 'hallowmas');
+  ux.setFestivalRunning('hallowmas', true);
+  ux.setFestivalRunning('fruits-of-the-zee', true);
+  ux.setFestivalRunning('hallowmas', false);
+  check('ticking twice stores the id once, and unticking removes only that one',
+    ux.runningFestivals(), ['fruits-of-the-zee']);
+  ux.setFestivalRunning('fruits-of-the-zee', false);
+  page.storage.setItem(ux.RUNNING_KEY, '{nonsense');
+  check('a broken stored value reads as nothing running', ux.runningFestivals(), []);
+  page.storage.removeItem(ux.RUNNING_KEY);
 }
 
 {

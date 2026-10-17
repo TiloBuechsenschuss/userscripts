@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      3.7
+// @version      3.8
 // @description  Small quality-of-life tweaks for Fallen London, behind a docked "UX" button.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -628,10 +628,10 @@
   const LAUNCHER_BUTTON_ID = 'fl-ux-launcher-button';
 
   // A panel is a screen of its own behind the launcher menu. Add one by
-  // pushing a { id, icon, label, hint, render, group, season? } entry: `render(ctx)` returns
+  // pushing a { id, icon, label, hint, render, group } entry: `render(ctx)` returns
   // the element to show, and is called fresh on every open so a panel showing live
   // values never has to invalidate a cache. `group` files it under a menu heading
-  // (MENU_GROUPS); `season` is a festival's rough dates, see `inSeason`.
+  // (MENU_GROUPS); a Seasonal one can be marked running in Settings, see `runningFestivals`.
   //
   // These are this script's own. The menu also offers whatever the other
   // Fallen London script has put on the shared registry -- Choice Helper's
@@ -649,53 +649,93 @@
   ];
 
   // The menu's headings, in order. A panel with no group, or one not listed here, goes under
-  // Other. A panel whose `season` takes in today is lifted out of its group to the top, under
-  // "In season", so a festival's panel is the first thing in the menu while it runs.
+  // Other. A Seasonal panel the player has marked running is lifted out of its group to the top,
+  // under "In season", so a festival's panel is the first thing in the menu while it runs.
   const MENU_GROUPS = ['General', 'Activities', 'Seasonal', 'Other'];
   const MENU_IN_SEASON = 'In season';
-  // Swappable so a test can pin the date; the menu reads it every time it opens.
-  const MENU_CLOCK = { now: function () { return new Date(); } };
+  const MENU_SEASONAL = 'Seasonal';
 
-  // `season` is { from: [month, day], to: [month, day] }, both ends included, local time. The
-  // dates are a festival's usual weeks with some slack either side, not the game's own switch:
-  // the game's season is a world quality no page shows. A window may run over New Year.
-  function inSeason(season, date) {
-    if (!season || !season.from || !season.to) return false;
-    const md = (date.getMonth() + 1) * 100 + date.getDate();
-    const from = season.from[0] * 100 + season.from[1];
-    const to = season.to[0] * 100 + season.to[1];
-    return from <= to ? md >= from && md <= to : md >= from || md <= to;
+  // Which festivals are on is the player's to say, ticked in Settings ("Festivals running").
+  // It used to be a date window per panel, but a festival's dates shift from year to year (2026's
+  // Hallowmas opened days after the window did) and the game's own switch is a world quality no
+  // page shows. Stored as the ids of the Seasonal panels marked running; nothing is running by
+  // default, and storage trouble reads as nothing running.
+  const RUNNING_KEY = 'fl-ux-running-festivals';
+
+  function runningFestivals() {
+    try {
+      const a = JSON.parse(localStorage.getItem(RUNNING_KEY) || '[]');
+      return Array.isArray(a) ? a.filter(function (id) { return typeof id === 'string'; }) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function setFestivalRunning(id, on) {
+    const ids = runningFestivals().filter(function (x) { return x !== id; });
+    if (on) ids.push(id);
+    try {
+      localStorage.setItem(RUNNING_KEY, JSON.stringify(ids));
+    } catch (e) { /* private mode; it just won't be remembered */ }
   }
 
   // [{ label, panels }] in menu order, empty groups left out. Order within a group is the
-  // order the panels came in.
-  function menuGroups(panels, date) {
+  // order the panels came in. `running` is the ids of the festivals marked running.
+  function menuGroups(panels, running) {
     const groups = [MENU_IN_SEASON].concat(MENU_GROUPS).map(function (label) {
       return { label: label, panels: [] };
     });
     for (const p of panels) {
-      if (inSeason(p.season, date)) { groups[0].panels.push(p); continue; }
+      if (p.group === MENU_SEASONAL && running.indexOf(p.id) !== -1) { groups[0].panels.push(p); continue; }
       const at = MENU_GROUPS.indexOf(p.group);
       groups[1 + (at === -1 ? MENU_GROUPS.indexOf('Other') : at)].panels.push(p);
     }
     return groups.filter(function (g) { return g.panels.length; });
   }
 
-  // Ours first, then the registry's, each id once. An entry without a `render`
-  // is dropped rather than drawn as a button that throws when it is pressed.
   // The settings screen itself. It is never in the shared registry and never switchable: it is
   // the way back to every other switch. Last in the menu.
   const SETTINGS_PANEL = {
     id: 'settings',
     icon: '⚙',
     label: 'Settings',
-    hint: 'Choose which badges, tweaks and menu entries to show',
-    render: flUiRenderSettings,
+    hint: 'Choose which badges, tweaks and menu entries to show, and which festivals are running',
+    render: renderSettingsPanel,
   };
 
-  // Menu entries the player switched off (category "Menu entries") are left out. Grouped, and
-  // without Settings, which the menu draws on its own at the bottom.
-  function menuPanelGroups(date) {
+  // The shared settings view, with this script's "Festivals running" box above it: one checkbox
+  // per Seasonal panel, off by default. The box is this script's alone, so it lives outside the
+  // byte-identical block and the Account page's copy of the view goes without it.
+  function renderSettingsPanel() {
+    const settings = flUiRenderSettings();
+    const festivals = allPanels().filter(function (p) { return p.group === MENU_SEASONAL; });
+    if (!festivals.length) return settings;
+    const running = runningFestivals();
+    const box = h('fieldset', {
+      id: 'fl-ux-festivals',
+      css: 'margin:0 0 10px;padding:6px 8px;border:1px solid rgba(128,128,128,.6);border-radius:3px;'
+        + 'font:13px/1.4 sans-serif;text-align:left;',
+    }, [
+      h('legend', { css: 'padding:0 4px;font-weight:bold;' }, ['Festivals running']),
+      h('p', { css: 'margin:0 0 4px;opacity:.75;' },
+        ['Tick a festival while it is on: its panel moves to the top of the menu, under In season.']),
+      festivals.map(function (p) {
+        const tick = h('input', {
+          type: 'checkbox',
+          checked: running.indexOf(p.id) !== -1,
+          css: 'margin:0 8px 0 0;vertical-align:middle;',
+          on: { change: function (e) { setFestivalRunning(p.id, e.currentTarget.checked); } },
+        });
+        return h('label', { css: 'display:block;cursor:pointer;padding:6px 0;min-height:20px;' },
+          [tick, p.label + ' is running']);
+      }),
+    ]);
+    return h('div', null, [box, settings]);
+  }
+
+  // Ours first, then the registry's, each id once, switched-off ones included. An entry without a
+  // `render` is dropped rather than drawn as a button that throws when it is pressed.
+  function allPanels() {
     const out = PANELS.slice();
     const shared = sharedPanels();
     if (shared) {
@@ -705,15 +745,22 @@
         out.push(panel);
       }
     }
-    return menuGroups(out.filter(function (p) {
+    return out;
+  }
+
+  // Menu entries the player switched off (category "Menu entries") are left out. Grouped, and
+  // without Settings, which the menu draws on its own at the bottom. `running` defaults to what
+  // the player ticked; a test passes its own.
+  function menuPanelGroups(running) {
+    return menuGroups(allPanels().filter(function (p) {
       return !panelHidden(p);
-    }), date || MENU_CLOCK.now());
+    }), running || runningFestivals());
   }
 
   // Every entry in menu order, Settings last.
-  function menuPanels(date) {
+  function menuPanels(running) {
     const flat = [];
-    menuPanelGroups(date).forEach(function (g) { flat.push.apply(flat, g.panels); });
+    menuPanelGroups(running).forEach(function (g) { flat.push.apply(flat, g.panels); });
     return flat.concat([SETTINGS_PANEL]);
   }
 

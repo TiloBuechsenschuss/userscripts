@@ -327,7 +327,7 @@ const wrapped = src
     'return { mountLauncher, dockLauncher, positionLauncher, findTravelAnchor,'
     + ' dockPreferred, setDockPreferred, LAUNCHER_ID, LAUNCHER_BUTTON_ID,'
     + ' fullscreenPreferred, setFullscreenPreferred, applyPanelFullscreen,'
-    + ' PANEL_FULLSCREEN_CSS, PANEL_WINDOWED_CSS, PANELS, MENU_CLOCK }; })();');
+    + ' PANEL_FULLSCREEN_CSS, PANEL_WINDOWED_CSS, PANELS, setFestivalRunning, renderSettingsPanel }; })();');
 const api = new Function(
   'document', 'MutationObserver', 'requestAnimationFrame', 'getComputedStyle', 'console',
   'URLSearchParams', 'localStorage', 'sessionStorage', 'location', 'Event', 'window',
@@ -705,8 +705,7 @@ check('the card is light, and every colour written on it is readable against it'
     (win.__flUxPanels || []).map((p) => p.id),
     ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory', 'economy', 'spending-secrets', 'philosofruits', 'hallowmas']);
 
-  // Out of season, so no festival floats to the top and the order is the groups'.
-  api.MENU_CLOCK.now = () => new Date(2026, 5, 1);
+  // No festival marked running, so none floats to the top and the order is the groups'.
   open();
   check('the menu lists them in their groups, the launcher\'s own Factions first under General',
     labels().slice(0, 5),
@@ -717,12 +716,20 @@ check('the card is light, and every colour written on it is readable against it'
      labels().slice(-2)[0]],
     [['General', 'Activities', 'Seasonal'], '⚙  Settings']);
 
-  api.MENU_CLOCK.now = () => new Date(2026, 9, 31);
+  check('Settings offers a "Festivals running" box with one unticked checkbox per Seasonal panel',
+    (() => {
+      const labs = api.renderSettingsPanel().querySelectorAll('label')
+        .filter((l) => l.textContent.endsWith(' is running'));
+      return labs.map((l) => [l.textContent, l.children[0].checked]);
+    })(),
+    [['Fruits of the Zee is running', false], ['Hallowmas is running', false]]);
+
+  api.setFestivalRunning('hallowmas', true);
   open();
-  check('while Hallowmas runs, its panel is the first entry, under In season',
+  check('with Hallowmas marked running, its panel is the first entry, under In season',
     [labels()[0], menu().querySelectorAll('div').map((d) => d.textContent).includes('In season')],
     ['🎭  Hallowmas', true]);
-  api.MENU_CLOCK.now = () => new Date(2026, 5, 1);
+  api.setFestivalRunning('hallowmas', false);
 
   win.__flUxPanels.push({ id: 'late', icon: 'L', label: 'Late', hint: '', render: () => makeEl('div') });
   win.__flUxPanels.push({ id: 'factions', icon: 'X', label: 'Impostor', hint: '', render: () => makeEl('div') });

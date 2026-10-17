@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.59
+// @version      1.60
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -44191,8 +44191,9 @@
   }
 
   // A panel is a screen of its own behind UX Enhancers' launcher menu: a
-  // { id, icon, label, group, season?, hint, render } entry. `group` is the menu heading it sits
-  // under (General, Activities, Seasonal); a `season` lifts it to the top while today is inside it.
+  // { id, icon, label, group, hint, render } entry. `group` is the menu heading it sits under
+  // (General, Activities, Seasonal); a Seasonal one the player marks running in Settings is lifted
+  // to the top.
   // `render(ctx)` returns the element to show and is called fresh on every open, so a panel showing
   // live values never has to invalidate a cache; `ctx.rerender()` redraws its body. They are handed
   // to the launcher through PANEL_REGISTRY, in this order; the launcher sorts them into its groups.
@@ -44228,8 +44229,6 @@
       icon: '🐚',
       label: 'Fruits of the Zee',
       group: 'Seasonal',
-      // The first weeks of September, then the week-two trades; slack either side.
-      season: { from: [8, 25], to: [9, 30] },
       // Seasonal: switched off with the festival's diving cards.
       follows: { scriptId: 'choice', id: 'fotz-card-ratings' },
       hint: 'What the festival still owes you, what your treasures trade for, and '
@@ -44275,8 +44274,6 @@
       icon: '🎭',
       label: 'Hallowmas',
       group: 'Seasonal',
-      // 2025 ran 20 October to the 11 November turn-in close; slack either side.
-      season: { from: [10, 17], to: [11, 17] },
       follows: { scriptId: 'choice', id: 'hallowmas-masques' },
       hint: 'Every Masque option by Airs, what Spirit buys, affiliations, and 2025’s companion upgrades',
       render: renderHallowmasPanel,

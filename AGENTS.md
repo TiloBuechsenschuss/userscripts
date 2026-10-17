@@ -1068,19 +1068,22 @@ navigation. Two consequences:
   A feature that wants a screen rather than a decoration registers a **panel** instead: the
   `launcher` feature mounts a "⚙ UX" button whose menu is built from UX Enhancers' own `PANELS`
   registry followed by whatever `choice-helper.js` has put on `window.__flUxPanels`
-  (`{ id, icon, label, group, season?, hint, render }`, `render(ctx)` called fresh on every open so a live panel
+  (`{ id, icon, label, group, hint, render }`, `render(ctx)` called fresh on every open so a live panel
   never has to invalidate a cache). A menu entry needs an `id` and a `render`; a registry entry
   whose `id` the menu already holds is not listed twice. **The menu is grouped** (added 2026-10-14,
   `MENU_GROUPS`, `menuGroups`): a heading each for General (Factions, Zailing, Economy), Activities
   (Port Carnelian, Scientific Voyages, University Laboratory, Spending Secrets, Philosofruits) and
   Seasonal (Fruits of the Zee, Hallowmas); a panel with no or an unknown `group` goes under Other,
-  and Settings stays last on its own. A panel's `season` (`{ from: [month, day], to: [month, day] }`,
-  both ends included, may run over New Year) lifts it out of its group to the top, under "In
-  season", while today is inside it. The windows are the festival's usual dates with slack (Fruits
-  of the Zee 25 Aug–30 Sep, Hallowmas 17 Oct–17 Nov), not the game's own switch, which no page
-  shows. `MENU_CLOCK.now` is swappable so the suites pin the date. **Not verified in-game:** the
-  group headings' look on a phone, and whether either window wants moving once a festival's real
-  dates are known.
+  and Settings stays last on its own. A Seasonal panel the player has **marked running** lifts out
+  of its group to the top, under "In season". The mark is manual (changed 2026-10-17, UX Enhancers
+  3.8): Settings opens with a "Festivals running" box, one "<label> is running" checkbox per
+  Seasonal panel, all off by default, stored as an id list in `localStorage`
+  (`fl-ux-running-festivals`, `runningFestivals` / `setFestivalRunning`). It replaced a per-panel
+  date window, because festival dates shift every year (2026's Hallowmas opened days after its
+  window did) and the game's own switch is a world quality no page shows. The box is UX
+  Enhancers' own (`renderSettingsPanel` wraps the shared view), so the Account page's copy of the
+  settings goes without it. **Not verified in-game:** the group headings' and the festivals box's
+  look on a phone.
   Every panel's sticky header carries a **fullscreen** button beside its close button, and the
   choice is **remembered** in `localStorage` (`fl-ux-panel-fullscreen`), so a long panel opens at
   full size every time rather than needing the button pressed again (added 2026-09-06). The
