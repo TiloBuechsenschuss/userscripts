@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           KoL Choice Adventure Rewards Updated
-// @version        3.20
+// @version        3.21
 // @description    Spoiler text on Kingdom of Loathing choice adventure buttons, plus a few other pages.
 // @author	       Tilo
 // @namespace      https://github.com/TiloBuechsenschuss
@@ -42,6 +42,7 @@
 // @grant 	GM_setValue
 // @grant	GM_xmlhttpRequest
 // @grant   GM_registerMenuCommand
+// @history 3.21 added the Spookyraven Manor Lights Out choices (890-903), Elizabeth and Stephen quest steps
 // @history 3.20 added a short @description
 // @history 3.19 moved the Play Ball! (1598) pitch button highlighting to the IotM menu script (still adds the pitch spoiler text)
 // @history 3.18 Play Ball! (1598): highlight MAJOR pitches (gold) and the item-granting pitch (green) buttons
@@ -191,6 +192,115 @@ function CheckButtonText(inputs, cNum)
                 "take the silver door":"to sleeping quarters (distention/dog hair/back to start)",
                 "take the purple door":"to hallway (toward EMU helmet/hardtack&squeeze)"
 
+            },
+        // Spookyraven Manor "Lights Out" (890-903), once every 37 total turns played.
+        // Keyed by button text, not option number: each room is several screens under
+        // the same choice number, and the quest option only shows once it is unlocked.
+        // Labels and outcomes are the wiki's; the option numbers are unverified in-game.
+        // Nothing here costs an adventure except the two ghost fights.
+        // Elizabeth's chain: Storage Room -> Laundry -> Bathroom -> Kitchen -> Library -> Ballroom -> Gallery.
+        "890":{ "feel your way to the door":"leave",
+                "pull away a sheet":"creepy statue, you flee -- nothing",
+                "look out the window":"[Elizabeth 1/7] Old Agnes -- unlocks Check a Pile of Stained Sheets in the Laundry Room",
+                "open a chest":"locked -- nothing"
+            },
+        "891":{ "feel your way to the door":"leave",
+                "investigate the steam press":"nothing",
+                "check a pile of stained sheets":"[Elizabeth 2/7] unlocks Inspect the Bathtub in the Bathroom",
+                "snag some clothespins":"nothing"
+            },
+        "892":{ "fumble your way to the door":"leave",
+                "flush the toilet":"nothing",
+                "inspect the bathtub":"[Elizabeth 3/7] unlocks Make a Snack in the Kitchen",
+                "check out the vanity":"nothing"
+            },
+        "893":{ "refuse to take the heat":"leave",
+                "light a candle":"witzergeist puns -- nothing",
+                "open the icebox":"nothing",
+                "make a snack":"[Elizabeth 4/7] unlocks Go to the Children's Section in the Library"
+            },
+        "894":{ "get out of the library":"leave",
+                "go to the children's section":"[Elizabeth 5/7] unlocks Dance with Yourself in the Ballroom",
+                "go to the childrens' section":"[Elizabeth 5/7] unlocks Dance with Yourself in the Ballroom",
+                "grab a candle":"nothing",
+                "ponder a quaint and curious volume":"nothing"
+            },
+        "895":{ "get out of the ballroom":"leave",
+                "dance with yourself":"[Elizabeth 6/7] unlocks Check out the Tormented Damned Souls Painting in the Gallery",
+                "play the organ":"witzergeist puns -- nothing",
+                "check out the punch bowl":"nothing"
+            },
+        "896":{ "quit the gallery":"leave",
+                "check out the paint-splattered painting":"nothing",
+                "check out the cut paper collage":"nothing",
+                "check out the tormented damned souls painting":"[Elizabeth 7/7] Monster: ghost of Elizabeth Spookyraven (costs 1 adventure)\nwin: Elizabeth's Dollie, Elizabeth's paintbrush"
+            },
+        // Stephen's chain: Bedroom -> Nursery -> Conservatory -> Billiards Room -> Wine Cellar -> Boiler Room -> Laboratory.
+        // A room visited before its turn shows the "nothing" version of the quest button.
+        "897":{ "search for a light":"[Stephen 1/7] toward Search a nearby nightstand",
+                "flee":"leave",
+                "run away":"leave",
+                "hide under the bed":"nothing",
+                "search a nearby nightstand":"[Stephen 1/7] toward Check a nightstand on your left",
+                "check a nightstand on your left":"[Stephen 1/7] Lady Spookyraven's note -- unlocks the teddy bear in the Nursery",
+                "check a nightstand on your right":"dentures bite you -- nothing"
+            },
+        "898":{ "search for a lamp":"[Stephen 2/7] toward the stuffed animals",
+                "flee":"leave",
+                "search over by the (ugggh) dolls":"you panic and flee -- nothing",
+                "search over by the (gaaah) stuffed animals":"[Stephen 2/7] light the lamp, toward Examine the Dresser",
+                "good question. let's go.":"leave",
+                "examine the dresser":"\n[Stephen 2/7] after the Bedroom step: find Stephen's teddy bear\notherwise: locked box -- nothing",
+                "ha ha, not in a million years":"leave",
+                "open the bear and put your hand inside":"[Stephen 2/7] get the key, toward Unlock the box",
+                "unlock the box":"[Stephen 2/7] Stephen's diary -- unlocks the Crumbles grave in the Conservatory"
+            },
+        "899":{ "make a torch":"[Stephen 3/7] toward Examine the Graves",
+                "forget this":"leave",
+                "examine the plants":"nothing",
+                "examine the graves":"[Stephen 3/7] toward the grave marked \"Crumbles\"",
+                "examine the grave marked \"sangfroid\"":"nothing",
+                "examine the grave marked \"pibble\"":"nothing",
+                "examine the grave marked \"crumbles\"":"\n[Stephen 3/7] after the Nursery step: dig up Crumbles -- unlocks the taxidermy heads in the Billiards Room\notherwise: nothing"
+            },
+        "900":{ "search for a light":"[Stephen 4/7] toward the taxidermy heads",
+                "get the heck out of here":"leave",
+                "maybe let's not hang out in here":"leave",
+                "what the heck, let's explore a bit":"[Stephen 4/7] toward Examine the taxidermy heads",
+                "search the cupboard over there":"nothing",
+                "examine the taxidermy heads":"\n[Stephen 4/7] after the Conservatory step: Crumbles' head, hidden Pinot Noir -- unlocks the Pinot Noir rack in the Wine Cellar\notherwise: nothing"
+            },
+        "901":{ "try to find a light":"[Stephen 5/7] toward Keep your cool",
+                "get out of here right now go go go":"leave",
+                "commence freaking out":"leave",
+                "keep your cool":"[Stephen 5/7] toward Investigate the wine racks",
+                "i don't remember either":"leave",
+                "investigate the wine racks":"[Stephen 5/7] toward the Pinot Noir rack",
+                "investigate the... other stuff?":"nothing",
+                "examine the chablis rack":"nothing",
+                "examine the merlot rack":"nothing",
+                "examine the pinot noir rack":"\n[Stephen 5/7] after the Billiards Room step: Stephen's ledger -- unlocks the barrel in the Boiler Room\notherwise: nothing"
+            },
+        "902":{ "look for a light":"[Stephen 6/7] toward Search the barrel",
+                "get the heck out":"leave",
+                "search the shelves":"nothing",
+                "search the barrel":"[Stephen 6/7] toward No, but I will anyway",
+                "blow this poop stand":"leave",
+                "no thank you":"leave",
+                "no, but i will anyway":"\n[Stephen 6/7] after the Wine Cellar step: Crumbles II's collar (code 23-47-99) -- unlocks the machine in the Laboratory\notherwise: nothing"
+            },
+        "903":{ "search for a light":"[Stephen 7/7] toward Check it out",
+                "leave well enough alone":"leave",
+                "check it out":"[Stephen 7/7] start the generator, toward Examine the weird machines",
+                "back away slowly":"leave",
+                "examine the chemistry gear":"nothing",
+                "examine the surgical equipment":"nothing",
+                "examine the weird machines":"\n[Stephen 7/7] after the Boiler Room step: the combination lock\notherwise: nothing",
+                "enter 23-47-99 and turn on the machine.":"[Stephen 7/7] wake Stephen -- the next button starts the fight",
+                "enter 23-47-99 and turn on the machine":"[Stephen 7/7] wake Stephen -- the next button starts the fight",
+                "leave the machine alone.":"leave",
+                "leave the machine alone":"leave",
+                "oh god":"Monster: Stephen Spookyraven (costs 1 adventure)\nwin: Stephen's lab coat, Stephen's secret formula"
             },
         // Play Ball! -- you throw one pitch per batter; each element offers its 2 minor
         // pitches first, then the major one (once both minors are thrown this inning).
