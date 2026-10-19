@@ -13,6 +13,8 @@
 //    the guide prints (the list and the tick-grid) against each other.
 //  - That a row is looked up under the OPEN storylet only: the same exchange
 //    title exists in two Masques, and Promenade! / Make merry! must not leak.
+//  - The seasons: one per year, three Masques each, hmSeason's fallback for a
+//    year with no entry, and the panel built for 2025, 2026 and 2027.
 //  - That no Masque name is in another Choice Helper table, and the whole panel
 //    builds.
 
@@ -135,7 +137,7 @@ const frameCount = () => fakeDoc.body.children.filter((el) => el.tagName === 'IF
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { HM_MASQUES, HM_MASQUE_OPTIONS, HM_SPIRIT_REWARDS, HM_UPGRADES_2025, HM_UPGRADE_GRID,'
+    'return { HM_MASQUES, HM_MASQUE_OPTIONS, HM_SPIRIT_REWARDS, HM_SEASONS, hmSeason, hmMenaceRuns,'
     + ' HM_CONFESSION_COLUMNS, HM_AFFILIATIONS, HM_CONFESSION_REWARDS, HM_MARK_SPENDS,'
     + ' hmMasqueSpec, hmMasqueStoryletSpec, renderHallowmasPanel, hallowmasMasquesRatings,'
     + ' ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS, PC_OPTIONS, HALLOWMAS_OPTIONS, normalizeName,'
@@ -282,31 +284,47 @@ check('only the 250 and 1000 rewards give a Ratket figure, and it is the better 
   api.HM_SPIRIT_REWARDS.filter((r) => r.ratket).map((r) => [r.cost, r.ratket > r.echo]),
   [[250, true], [1000, true]]);
 
-// --- the 2025 upgrades, cross-checked ----------------------------------------
-
-check('twelve upgrades, each with a row in the tick-grid, none without',
-  [api.HM_UPGRADES_2025.length, api.HM_UPGRADES_2025.filter((u) => !api.HM_UPGRADE_GRID[u.to]).length,
-   Object.keys(api.HM_UPGRADE_GRID).length],
-  [12, 0, 12]);
-
+// --- the seasons -----------------------------------------------------------------
+const seasons = api.HM_SEASONS;
+const at = (y) => new Date(y, 9, 20);
+check('one season per year, oldest first',
+  seasons.filter((s, i) => i && s.year <= seasons[i - 1].year).length, 0);
+check('every season runs three distinct known Masques and rests the fourth',
+  seasons.filter((s) => s.masques.length !== 3 || new Set(s.masques).size !== 3
+    || s.masques.some((n) => !api.HM_MASQUES[n])).map((s) => s.year), []);
+check('2025 rested the Sacristy, 2026 rests the Wreck',
+  seasons.map((s) => [s.year, Object.keys(api.HM_MASQUES).filter((n) => !s.masques.includes(n))]),
+  [[2025, [SACRISTY]], [2026, [WRECK]]]);
+check('hmSeason: this year exact, a later year falls back to the newest marked stale, an earlier one to the oldest',
+  [2026, 2027, 2024].map((y) => { const s = api.hmSeason(at(y)); return [s.year, s.stale]; }),
+  [[2026, false], [2026, true], [2025, true]]);
+check('in 2026 Scandal is handed in and Suspicion is not',
+  ['Scandal', 'Suspicion'].map((m) => api.hmMenaceRuns(api.hmSeason(at(2026)), m)), [true, false]);
+check('every season carries its upgrades, a free companion and a checked date',
+  seasons.filter((s) => !s.upgrades.length || !s.newCompanion || !s.checked).map((s) => s.year), []);
+check('twelve upgrades a year in 2025 and 2026',
+  seasons.map((s) => s.upgrades.length), [12, 12]);
+check('where a season prints a tick-grid, every upgrade has a row and none is spare',
+  seasons.filter((s) => s.grid).map((s) => [s.year, s.upgrades.filter((u) => !s.grid[u.to]).length,
+    Object.keys(s.grid).length === s.upgrades.length]),
+  [[2025, 0, true]]);
 check('the guide list table and its tick-grid agree on every upgrade',
-  api.HM_UPGRADES_2025.filter((u) => {
+  seasons.filter((s) => s.grid).flatMap((s) => s.upgrades.filter((u) => {
     const grid = api.HM_CONFESSION_COLUMNS.map((c) => (u.confessions.includes(c) ? 'x' : '.')).join('');
-    return grid !== api.HM_UPGRADE_GRID[u.to];
-  }).map((u) => u.to), []);
-
+    return grid !== s.grid[u.to];
+  }).map((u) => s.year + ' ' + u.to)), []);
 check('an upgrade takes two or three distinct Confessions of the six',
-  api.HM_UPGRADES_2025.filter((u) => u.confessions.length < 2 || u.confessions.length > 3
+  seasons.flatMap((s) => s.upgrades.filter((u) => u.confessions.length < 2 || u.confessions.length > 3
     || new Set(u.confessions).size !== u.confessions.length
-    || u.confessions.some((c) => !api.HM_CONFESSION_COLUMNS.includes(c))).map((u) => u.to), []);
-
+    || u.confessions.some((c) => !api.HM_CONFESSION_COLUMNS.includes(c))).map((u) => s.year + ' ' + u.to)), []);
+check('2026 transcribed: the Parisian Emigre has two upgrades and the Henchman two',
+  ['Parisian Émigré', 'Devious Henchman'].map((f) => seasons[1].upgrades.filter((u) => u.from === f).map((u) => u.to)),
+  [['Parisian Infiltrator', 'Rats in the Walls'], ['Pious Henchman', 'Faustian Henchman']]);
 check('the leftover-Confession turn-ins cover all six Confessions once',
   api.HM_CONFESSION_REWARDS.map((r) => r[0]).sort(), [...api.HM_CONFESSION_COLUMNS].sort());
-
-check('four affiliations, one per Menace, Scandal marked as not offered in 2025',
-  [api.HM_AFFILIATIONS.map((a) => a.menace), api.HM_AFFILIATIONS.find((a) => a.menace === 'Scandal').note],
-  [['Nightmares', 'Wounds', 'Suspicion', 'Scandal'], 'not offered in 2025']);
-
+check('four affiliations, one per Menace, none carrying a hard-coded year',
+  [api.HM_AFFILIATIONS.map((a) => a.menace), api.HM_AFFILIATIONS.filter((a) => a.note).length],
+  [['Nightmares', 'Wounds', 'Suspicion', 'Scandal'], 0]);
 // --- registration ---------------------------------------------------------------
 
 check('the feature is registered once, and filed under Seasonal',
@@ -393,22 +411,46 @@ check('Make merry! is the Wreck, +1 Suspicion, and only the Wreck',
 
 // --- the panel -----------------------------------------------------------------
 
-check('the panel builds: a row per non-Leave option, every section, and the 2025 caveat',
+function panelText(now) {
+  const root = api.renderHallowmasPanel(null, now);
+  let text = '';
+  let rows = 0;
+  (function walk(el) {
+    if (!el) return;
+    if (el.nodeType === 3) { text += el.nodeValue; return; }
+    if (el.dataset && el.dataset.hmSearch) rows++;
+    for (const child of el.childNodes || []) walk(child);
+  })(root);
+  return { text, rows };
+}
+check('the 2026 panel builds: a row per non-Leave option, every section, this year’s upgrades and Masques',
   (() => {
-    const root = api.renderHallowmasPanel();
-    let text = '';
-    let rows = 0;
-    (function walk(el) {
-      if (!el) return;
-      if (el.nodeType === 3) { text += el.nodeValue; return; }
-      if (el.dataset && el.dataset.hmSearch) rows++;
-      for (const child of el.childNodes || []) walk(child);
-    })(root);
-    return [rows, ['Menace to Spirit', 'What Spirit buys', 'Affiliations', 'Leftover Confessions',
-      'Companion upgrades — 2025 only', 'Different companions are upgradeable each year']
-      .filter((s) => !text.includes(s))];
+    const { text, rows } = panelText(at(2026));
+    return [rows, ['Hallowmas 2026', 'Dates', '2 November', 'Menace to Spirit', 'Suspicion cannot be handed in',
+      'What Spirit buys', 'Affiliations', 'Leftover Confessions', 'Companion upgrades — 2026 only', 'Morsel of Mignon',
+      'Parisian Émigré', 'not running in 2026', 'not offered in 2026']
+      .filter((x) => !text.includes(x)),
+      ['Perforated Diver', 'No entry for'].filter((x) => text.includes(x))];
   })(),
-  [opts.filter((e) => !e.leave).length, []]);
+  [opts.filter((e) => !e.leave).length, [], []]);
+check('the panel lists the running Masques first and the resting one last',
+  (() => {
+    const { text } = panelText(at(2026));
+    return ['Wounds', 'Nightmares', 'Scandal', 'Suspicion (not running'].map((m) => text.indexOf(' — ' + m)).every((v, i, a) => v >= 0 && (!i || v > a[i - 1]));
+  })(), true);
+check('a year with no entry shows the newest season and says so',
+  (() => {
+    const { text } = panelText(at(2027));
+    return ['No entry for 2027', 'Companion upgrades — 2026 only', 'check the guide'].filter((x) => !text.includes(x));
+  })(), []);
+check('the 2025 panel still builds from its own entry',
+  (() => {
+    const { text } = panelText(at(2025));
+    return ['Companion upgrades — 2025 only', 'Perforated Diver', 'not running in 2025'].filter((x) => !text.includes(x));
+  })(), []);
+check('a Masque the season rests says so in its storylet tooltip; a running one does not',
+  [WRECK, SACRISTY].map((n) => api.hmMasqueStoryletSpec(api.normalizeName(n)).title.includes('does not expect')),
+  [true, false]);
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nAll passed');
 process.exit(failures ? 1 : 0);

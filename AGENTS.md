@@ -2737,8 +2737,15 @@ navigation. Two consequences:
   names (*Promenade!*, *Make merry!*) cannot leak. **Trap:** the guide's Confession-exchange table files the Wreck's three exchanges under the
   Pavilion and the Sacristy's three under the Wreck; the option pages put them where the tests pin them, and the Pavilion has only the Roof
   Below's two. The Spirit rewards carry both stated Echoes and stated Echoes per Spirit (cross-checked); the 2025 upgrades carry both the
-  guide's list and its tick-grid (cross-checked). **Not modelled:** Menace-raising gear (scales the CP), Scandal's 2025 absence (the guide
-  says it returns in 2026), the Fate Masque cards and the Visitors (the latter is `hallowmas-visitor`). Research:
+  guide's list and its tick-grid (cross-checked). **Per year** (`HM_SEASONS`, added 2026-10-19 with the 2026 guide): everything that
+  changes by year is one entry per year -- the three running Masques (the fourth rests), the free companion, that year's upgrade list (and
+  its tick-grid as `grid` when the guide prints one; 2026's was not yet updated), the dates, and when it was checked. `hmSeason()` takes the
+  entry for the clock's year, or the newest one marked `stale` (the panel then says no entry exists for this year). **Next Hallowmas: add one
+  entry to `HM_SEASONS`** -- and new option rows only if a Masque page changed. The season never gates a badge (a resting Masque never shows,
+  and a wrong season entry must not black a running one out); it orders the panel (running Masques first, the resting one dimmed and
+  marked), says which Menaces can be handed in, marks the affiliation not offered, and adds a "please report" line to the storylet tooltip
+  of an open Masque the season says is resting. 2026: Roof Below, Pavilion, Sacristy (Scandal, Demon); the Wreck rests. **Not modelled:**
+  Menace-raising gear (scales the CP), the Fate Masque cards and the Visitors (the latter is `hallowmas-visitor`). Research:
   `docs/superpowers/research/2026-10-13-hallowmas.md`.
 
   **Economy** (panel `economy`, `ECON_*`, `renderEconomyPanel`; the sixth behind the ⚙ UX launcher): Roof Economy (Guide) and Stuiver
@@ -4005,7 +4012,8 @@ Confirmed live by the author:
   St Elmo*, *The Pavilion of Butterflies* and *Saint Dunstan's Sacristy* (a different title draws nothing). **(2) The option titles** -- whether
   the exchanges show as *Exchange a Confession of X for a Confession of Y* without the wiki's "(The Roof Below)". **(3) The real CP** against
   the badge, and with which gear. **(4) Which Masques and masks run in 2026** (Scandal and the Demon are due back) and whether any option
-  changed. **(5) The 2026 companion upgrades**, since the panel's table is 2025's.
+  changed. **(5) The 2026 companion upgrades** -- the panel's are the guide's of opening day (2026-10-19), whose tick-grid was not yet updated.
+  **(6) The 2026 dates** -- only 19 October was confirmed; the other three are the guide's expectation.
 
 - **Spending Secrets and Counting the Days** (`spending-secrets`, added 2026-10-03). Nothing seen in the game; every table is
   transcribed from the option and card pages. Report first: **(1) The eleven faction card headings** -- whether the cards show as
@@ -4844,7 +4852,9 @@ Current tests:
 - `tests/choice-hallowmas-masques.test.mjs` — 35 options across four Masques, one Leave each, every row's mask and Menace agreeing with its Masque;
   the badge (Menace CP, `▼` exactly when an item is spent, the mask as a trailing word, the exchange and Leave texts); the Spirit rewards' stated
   Echoes against their stated Echoes per Spirit; the guide's upgrade list against its tick-grid; the exchanges filed where the option pages put them;
-  a row looked up under the open storylet only; that no name is in another table; the registration under Seasonal; and the whole panel built.
+  a row looked up under the open storylet only; that no name is in another table; the registration under Seasonal; the seasons (one per year,
+  three Masques each, 2025 resting the Sacristy and 2026 the Wreck, `hmSeason`'s fallback either side, each year's upgrades and grid where
+  printed); and the whole panel built for 2025, 2026 and a 2027 with no entry.
 - `tests/choice-the-stacks.test.mjs` — 56 card options, 8 books, 8 finale options; every progress figure one of 5, 10 or 15; the
   eight options that add Noises +6 on a failure say so in the badge and take the risk colour; the book totals against the
   totals their finale option carries; the wiring keyed by the open card (an ordinary phrase is badged under its own card only,

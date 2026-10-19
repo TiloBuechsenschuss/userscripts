@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.60
+// @version      1.61
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -646,8 +646,10 @@
  *     C Curiosity, F Frivolity, R Rot), an option its own part, with "?" for a stat challenge and "clears hand" where it
  *     wipes the hand. No ranking: the letter you want depends on the recipe. Shown only under a Wisp-Ways greeting, since
  *     the pictures are used all over the game; the tooltip of an unnamed row quotes the name the game shows, to copy in.
- *     (25) Hallowmas Masques, the festival's main loop, and a panel behind ⚙ UX (every Masque option by Airs band, what Spirit
- *     buys, the affiliations, the leftover-Confession turn-ins, and 2025's companion upgrades, marked 2025). Each option in
+ *     (25) Hallowmas Masques, the festival's main loop, and a panel behind ⚙ UX (this year's dates, every Masque option by Airs
+ *     band with the resting Masque last, what Spirit buys, the affiliations, the leftover-Confession turn-ins, and this year's
+ *     companion upgrades). Everything that changes by year is one entry per year in HM_SEASONS (2025, 2026); a year with no
+ *     entry shows the newest one, marked out of date. Each option in
  *     a Masque (the Roof Below, the Wreck of the St Elmo, the Pavilion of Butterflies, Saint Dunstan's Sacristy) shows the Menace CP it pays
  *     ("Nightmares +7 CP ▼ · Moth"): ▼ means it spends an item, and the mask it needs is a word, since the script cannot read your mask.
  *     Confession exchanges read "Whimsy → Guile" and a Leave says which mask waives the Favour to re-enter. Rows are matched
@@ -39934,11 +39936,14 @@
   // a word, not a hue, and the script cannot read your mask, so every option is
   // badged and the game greys the ones you cannot take.
   //
-  // Which Masques run changes every year (2025: Roof Below, Wreck of the St
-  // Elmo, Pavilion of Butterflies; the Sacristy and Scandal return in 2026 per
-  // the guide). Rows are scoped by the OPEN storylet's title, so a Masque that
-  // is not running simply draws nothing, and generic names (Promenade!, Make
-  // merry!) cannot leak into another storylet.
+  // Which Masques run changes every year, and so do the companions, the
+  // upgrades and the dates. All of that lives in HM_SEASONS, one entry per
+  // year: next Hallowmas is one new entry there and nothing else. The badges
+  // do not consult it -- rows are scoped by the OPEN storylet's title, so a
+  // Masque that is not running simply never shows and draws nothing, and a
+  // season entry the wiki got wrong cannot black a running Masque out. The
+  // season decides what the panel leads with and what the tooltips say.
+  // Generic names (Promenade!, Make merry!) cannot leak into another storylet.
   //
   // Transcribed 2026-10-13, through the API, from the four Masque pages and all
   // 35 option pages they list, with the guide as cross-check. WHERE THEY
@@ -39948,9 +39953,14 @@
   // Roof Below. Corrections go in HM_MASQUE_OPTIONS and nowhere else.
   //
   // The Spirit rewards (HM_SPIRIT_REWARDS) carry both the stated Echoes and the
-  // stated Echoes per Spirit; the companion upgrades (HM_UPGRADES_2025) are
-  // 2025's and say so wherever they are shown -- the guide itself says the
-  // companions change each year.
+  // stated Echoes per Spirit; the companion upgrades are per season and say
+  // which year they are wherever they are shown.
+  //
+  // 2026 re-checked 2026-10-19 (opening day) against the guide as edited that
+  // day: the Sacristy (Scandal, Demon) is back and the Wreck (Suspicion,
+  // Crown) is out; new upgrades. The four Masque pages are unchanged since
+  // 2024, so the option rows stand. The guide's exchange table still files
+  // the Wreck's three exchanges under the Pavilion; the option pages still win.
 
   const HM_MASQUES = {
     'The Roof Below': { menace: 'Wounds', mask: 'Infant', card: 'The Squall of Infants',
@@ -40020,7 +40030,7 @@
       spends: ['Bottle of Strangling Willow Absinthe', 5], gains: ['Muscaria Brandy', 1] }),
     hmRow(HM_PAVILION, 'Promenade!', { cp: 1, gains: ['Bottle of Strangling Willow Absinthe', '1–2'] }),
     hmLeave(HM_PAVILION, 'Leave the Pavilion'),
-    // --- Saint Dunstan's Sacristy: Scandal (not running in 2025; back in 2026 per the guide) ---
+    // --- Saint Dunstan's Sacristy: Scandal ---
     hmRow(HM_SACRISTY, 'Join the Saturnine Duke’s dance', { airs: HM_BANDS.low, cp: 5, mask: 'Demon' }),
     hmRow(HM_SACRISTY, 'Bring a bottle of your own', { airs: HM_BANDS.low, cp: 3,
       spends: ['Muscaria Brandy', 1], gains: ['Bottle of Strangling Willow Absinthe', '1–3'] }),
@@ -40089,11 +40099,16 @@
     const name = Object.keys(HM_MASQUES).find(function (n) { return normalizeName(n) === key; });
     if (!name) return null;
     const m = HM_MASQUES[name];
+    const season = hmSeason();
+    // Only said when the season table disagrees with the screen: the Masque is open, so it is running.
+    const listed = season.masques.indexOf(name) !== -1 ? ''
+      : '\n\nThe script does not expect this Masque in ' + season.year + ' (the wiki said it rests that year). '
+        + 'If it is open during Hallowmas ' + season.year + ', its season table needs correcting: please report it.';
     return {
       text: 'Hallowmas · ' + m.menace, color: CAROUSEL_COLOR_LABEL,
       title: name + '\n\nA Hallowmas Masque: its Menace is ' + m.menace + '. The ' + m.mask + ' mask gets free entry '
         + 'through the card ' + m.card + '; otherwise entry costs a Favour (' + m.favours + '). '
-        + 'Every option is badged with the Menace CP it pays.',
+        + 'Every option is badged with the Menace CP it pays.' + listed,
     };
   }
 
@@ -40128,11 +40143,13 @@
   const HM_KNIGHT_THRESHOLD = 2500;
   const HM_KNIGHT_RATIO = 20;
 
+  // All four; whether one is offered in a given year follows from that
+  // season's Masques (hmMenaceRuns), never from a note here.
   const HM_AFFILIATIONS = [
     { menace: 'Nightmares', first: 'A Member of the Order of Those Who Will Not Be Caught Red-Handed', repeat: 'Night-Whisper' },
     { menace: 'Wounds', first: 'Inducted into the Inverted Stalactite Society', repeat: 'Primaeval Hint' },
     { menace: 'Suspicion', first: 'A Member of the Crew of the St Elmo', repeat: 'Bottle of Fourth City Airag: Year of the Tortoise' },
-    { menace: 'Scandal', first: 'A Seat at the Bishop’s Table', repeat: 'Primaeval Hint', note: 'not offered in 2025' },
+    { menace: 'Scandal', first: 'A Seat at the Bishop’s Table', repeat: 'Primaeval Hint' },
   ];
 
   const HM_CONFESSION_REWARDS = [
@@ -40141,8 +40158,14 @@
     ['Violence', 'Aeolian Scream'], ['Whimsy', 'Bottle of Broken Giant 1844'],
   ];
 
-  // --- 2025's companion upgrades. The companions change every year. ---
-  // `confessions` is the guide's list table; HM_UPGRADE_GRID is its tick-grid.
+  // Columns Curiosity, Guile, Impropriety, Pride, Violence, Whimsy; 'x' is a tick.
+  const HM_CONFESSION_COLUMNS = ['Curiosity', 'Guile', 'Impropriety', 'Pride', 'Violence', 'Whimsy'];
+
+  // --- the companion upgrades, per year. The companions change every year. ---
+  // `confessions` is the guide's list table. Where the guide also prints its
+  // tick-grid for that year, the season carries it as `grid` and the test
+  // checks the two against each other; 2026's grid was still 2025's on
+  // 2026-10-19 ("not yet updated"), so 2026 carries none.
   const HM_UPGRADES_2025 = [
     { from: 'Perforated Diver', to: 'No One of Consequence', confessions: ['Impropriety', 'Violence'], kind: 'Affiliation' },
     { from: 'Perforated Diver', to: 'Perforated Zubmariner', confessions: ['Curiosity', 'Guile', 'Pride'], kind: 'Agent' },
@@ -40162,9 +40185,7 @@
     { from: 'Forty-Nine-Voiced Warbler', to: 'Portable Fingerking Moot', confessions: ['Curiosity', 'Pride', 'Whimsy'], kind: 'Companion' },
     { from: 'Misplaced Ring', to: 'Recalcitrant Sculptress', confessions: ['Guile', 'Impropriety', 'Violence'], kind: 'Companion' },
   ];
-  // Columns Curiosity, Guile, Impropriety, Pride, Violence, Whimsy; 'x' is a tick.
-  const HM_CONFESSION_COLUMNS = ['Curiosity', 'Guile', 'Impropriety', 'Pride', 'Violence', 'Whimsy'];
-  const HM_UPGRADE_GRID = {
+  const HM_UPGRADE_GRID_2025 = {
     'No One of Consequence': '..x.x.', 'Perforated Zubmariner': 'xx.x..', 'The Ragged Recusant': 'x...xx',
     'Coruscating Miser-Mount': '.xxx..', 'Glimsatin Gown': '.xx...', 'Topsy Tailcoat': 'x....x',
     'Shipful of Schemers': '.x.x..', 'Maggot-Bearing Rose': '....xx', 'Nimble-fingered Intelligencer': 'x..x..',
@@ -40172,7 +40193,68 @@
     'Recalcitrant Sculptress': '.xx.x.',
   };
 
-  function renderHallowmasPanel() {
+  // From the guide's "available in 2026" table, 2026-10-19. The two Fate marks
+  // are from the option pages "Meet an Enthusiastic Visitor (5 FATE)" and
+  // "Meet a Presbyterate Diplomat (10 FATE)"; the guide's table has none.
+  const HM_UPGRADES_2026 = [
+    { from: 'Parisian Émigré', to: 'Parisian Infiltrator', confessions: ['Curiosity', 'Guile', 'Pride'], kind: 'Agent',
+      note: 'a Morsel of Mignon instead if you have not unlocked Agents' },
+    { from: 'Parisian Émigré', to: 'Rats in the Walls', confessions: ['Impropriety', 'Violence', 'Curiosity'], kind: 'Affiliation' },
+    { from: 'Enthusiastic Visitor (Fate)', to: 'Mangled Accent', confessions: ['Curiosity', 'Whimsy', 'Impropriety'], kind: 'Hat' },
+    { from: 'Presbyterate Diplomat (Fate)', to: 'Two-Faced Briefcase', confessions: ['Pride', 'Guile'], kind: 'Luggage' },
+    { from: 'Fairly Tame Sorrow-Spider 6 + Lost Research Assistant 3 + Key to a Cottage by the Observatory',
+      to: 'Blind Navigators', confessions: ['Curiosity', 'Pride', 'Whimsy'], kind: 'Crew' },
+    { from: 'A Hunter of Zee-Beasts 10', to: 'Deposed King Crocodile', confessions: ['Violence', 'Pride', 'Guile'], kind: 'Companion' },
+    { from: 'An Interloper in the Library + Proscribed Material 250', to: 'Silent Trolley',
+      confessions: ['Curiosity', 'Impropriety'], kind: 'Luggage' },
+    { from: 'Honey-Mazed Bear', to: 'Ursine Honey Connoisseur', confessions: ['Whimsy', 'Violence', 'Impropriety'], kind: 'Companion' },
+    { from: 'Devious Henchman', to: 'Pious Henchman', confessions: ['Guile', 'Impropriety'], kind: 'Companion' },
+    { from: 'Devious Henchman', to: 'Faustian Henchman', confessions: ['Guile', 'Violence'], kind: 'Companion' },
+    { from: 'Cheerful Goldfish', to: 'Memorious Goldfish', confessions: ['Curiosity', 'Whimsy'], kind: 'Companion' },
+    { from: 'Fairly Tame Sorrow-Spider', to: 'Spider of Silken Marvels', confessions: ['Pride', 'Whimsy'], kind: 'Companion' },
+  ];
+
+  // One entry per Hallowmas, oldest first. A new year is a new entry here:
+  //   masques       the three running, by HM_MASQUES key (the fourth rests)
+  //   newCompanion  the free companion that joins you this year
+  //   upgrades      that year's upgrade list; `grid` its tick-grid, if printed
+  //   timeline      [date, what happens], as the guide gives them
+  //   checked       when the entry was last compared with the guide
+  // hmSeason() picks the entry for the current year, or the newest one and
+  // says it is out of date. The dates are for reading, never a gate: the
+  // festival's dates shift and the launcher's "running" mark is the player's.
+  const HM_SEASONS = [
+    { year: 2025, masques: [HM_ROOF, HM_WRECK, HM_PAVILION], newCompanion: 'Perforated Diver',
+      upgrades: HM_UPGRADES_2025, grid: HM_UPGRADE_GRID_2025, timeline: [], checked: '2026-10-13' },
+    { year: 2026, masques: [HM_ROOF, HM_PAVILION, HM_SACRISTY], newCompanion: 'Parisian Émigré',
+      upgrades: HM_UPGRADES_2026, checked: '2026-10-19',
+      timeline: [
+        ['19 October', 'Masques open; the first 7 free Confessions.'],
+        ['26 October', 'The second 7 free Confessions (guide: expected).'],
+        ['2 November', 'Masques and companion upgrades close; Spirit and leftover Confessions turn in (guide: expected).'],
+        ['9 November', 'Turn-ins close; leftover Spirit and Confessions are wiped (guide: expected).'],
+      ] },
+  ];
+
+  function hmSeason(now) {
+    const year = (now || new Date()).getFullYear();
+    const exact = HM_SEASONS.find(function (s) { return s.year === year; });
+    if (exact) return Object.assign({ stale: false }, exact);
+    const past = HM_SEASONS.filter(function (s) { return s.year < year; });
+    return Object.assign({ stale: true }, past.length ? past[past.length - 1] : HM_SEASONS[0]);
+  }
+
+  function hmMenaceRuns(season, menace) {
+    return season.masques.some(function (n) { return HM_MASQUES[n].menace === menace; });
+  }
+
+  // `now` is for the test; the launcher passes only its ctx.
+  function renderHallowmasPanel(ctx, now) {
+    const season = hmSeason(now);
+    const yearNote = season.stale
+      ? 'No entry for ' + (now || new Date()).getFullYear() + ' yet: everything below is ' + season.year
+        + '’s. Masques, masks and companions change every year.'
+      : 'Hallowmas ' + season.year + ', from the wiki guide as checked ' + season.checked + '.';
     const section = function (title, children) {
       return h('div', { css: 'margin-top:14px;' }, [
         h('div', {
@@ -40214,8 +40296,13 @@
       },
     });
 
-    const masques = Object.keys(HM_MASQUES).map(function (name) {
+    // This year's Masques first, the resting one after, marked so.
+    const order = season.masques.concat(Object.keys(HM_MASQUES).filter(function (n) {
+      return season.masques.indexOf(n) === -1;
+    }));
+    const masques = order.map(function (name) {
       const m = HM_MASQUES[name];
+      const resting = season.masques.indexOf(name) === -1;
       const rows = HM_MASQUE_OPTIONS.filter(function (e) { return e.storylet === name && !e.leave; }).map(function (e) {
         const spec = hmMasqueSpec(e);
         const tr = h('tr', null, [
@@ -40229,8 +40316,9 @@
           e.gains ? e.gains[0] : '', name].join(' '));
         return tr;
       });
-      const block = h('div', { css: 'margin-top:10px;' }, [
-        h('div', { css: 'color:' + UI.text + ';font-weight:bold;' }, [wikiLink(name), ' — ' + m.menace]),
+      const block = h('div', { css: 'margin-top:10px;' + (resting ? 'opacity:.6;' : '') }, [
+        h('div', { css: 'color:' + UI.text + ';font-weight:bold;' },
+          [wikiLink(name), ' — ' + m.menace + (resting ? ' (not running in ' + season.year + ')' : '')]),
         note('Mask: ' + m.mask + ' (free entry through ' + m.card + '). Otherwise a Favour: ' + m.favours + '.'),
         table(['Airs', 'Option', 'Badge', 'Spends', 'Gives'], rows),
       ]);
@@ -40243,25 +40331,37 @@
         cell(r.echo + (r.ratket ? ' (' + r.ratket + ' with a Ratket)' : '')), cell(String(r.per))]);
     });
 
+    const running = season.masques.map(function (n) { return HM_MASQUES[n].menace; });
+    const resting = Object.keys(HM_MASQUES).map(function (n) { return HM_MASQUES[n].menace; })
+      .filter(function (x) { return running.indexOf(x) === -1; });
+
     return h('div', null, [
-      note('Main storylets close and turn-ins open on the third Monday of the festival; upgrading companions closes '
-        + 'then. Masques, masks and companions change every year; the figures below are the wiki’s, from 2025.'),
+      note(yearNote),
+      season.timeline.length
+        ? section('Dates', table(['When', 'What'], season.timeline.map(function (t) {
+          return h('tr', null, [cell(t[0]), cell(t[1])]);
+        })))
+        : note('Main storylets close and turn-ins open on the third Monday of the festival; upgrading companions closes then.'),
       section('Menace to Spirit', note('Raise a Masque’s Menace to 7 (28 CP), leave the storylet and open The Fool’s '
         + 'Judgement to hand all of it in for ' + HM_SPIRIT_PER_MENACE + ' Spirit of Hallowmas. Reaching 8 sends you to '
-        + 'the Menace area instead. Spirit above ' + HM_KNIGHT_THRESHOLD + ' becomes CP for The Knight of Hallowmas at '
-        + HM_KNIGHT_RATIO + ':1. The Menace you hand in most often decides your affiliation.')),
+        + 'the Menace area instead. In ' + season.year + ' that is ' + running.join(', ') + '; '
+        + resting.join(', ') + ' cannot be handed in. Spirit above ' + HM_KNIGHT_THRESHOLD + ' becomes CP for The Knight '
+        + 'of Hallowmas at ' + HM_KNIGHT_RATIO + ':1. The Menace you hand in most often decides your affiliation.')),
       section('Masques', [filter, masques]),
       section('What Spirit buys', table(['Spirit', 'Gives', 'Echoes', 'Echoes per Spirit'], spiritRows)),
       section('Affiliations', table(['Menace', 'First time', 'Repeat'], HM_AFFILIATIONS.map(function (a) {
-        return h('tr', null, [cell(a.menace), cell([wikiLink(a.first), a.note ? ' (' + a.note + ')' : '']), cell(wikiLink(a.repeat))]);
+        const off = hmMenaceRuns(season, a.menace) ? '' : ' (not offered in ' + season.year + ')';
+        return h('tr', null, [cell(a.menace), cell([wikiLink(a.first), off]), cell(wikiLink(a.repeat))]);
       }))),
       section('Leftover Confessions', table(['Confession', 'Turned in for'], HM_CONFESSION_REWARDS.map(function (r) {
         return h('tr', null, [cell(r[0]), cell(wikiLink(r[1]))]);
       }))),
-      section('Companion upgrades — 2025 only', [
-        note('These are 2025’s. Different companions are upgradeable each year: check the guide once this year’s list is up.'),
-        table(['Original', 'Confessions', 'Upgrade'], HM_UPGRADES_2025.map(function (u) {
-          return h('tr', null, [cell(u.from), cell(u.confessions.join(', ')), cell([wikiLink(u.to), ' (' + u.kind + ')'])]);
+      section('Companion upgrades — ' + season.year + ' only', [
+        note('The free companion in ' + season.year + ' is the ' + season.newCompanion + '. Different companions are '
+          + 'upgradeable each year' + (season.stale ? ': check the guide once this year’s list is up.' : '.')),
+        table(['Original', 'Confessions', 'Upgrade'], season.upgrades.map(function (u) {
+          return h('tr', null, [cell(u.from), cell(u.confessions.join(', ')),
+            cell([wikiLink(u.to), ' (' + u.kind + (u.note ? '; ' + u.note : '') + ')'])]);
         })),
       ]),
     ]);
@@ -44275,7 +44375,7 @@
       label: 'Hallowmas',
       group: 'Seasonal',
       follows: { scriptId: 'choice', id: 'hallowmas-masques' },
-      hint: 'Every Masque option by Airs, what Spirit buys, affiliations, and 2025’s companion upgrades',
+      hint: 'Every Masque option by Airs, the dates, what Spirit buys, affiliations, and this year’s companion upgrades',
       render: renderHallowmasPanel,
     },
   ];

@@ -24,3 +24,11 @@ All fetched through `fallenlondon.wiki/w/api.php` (Anubis blocks plain fetches):
 ## Not verified
 
 No Masque has been seen in game; see the AGENTS.md "Not verified in-game" entry.
+
+## 2026 update (2026-10-19, opening day)
+
+- Guide re-fetched the day it was edited for 2026. Running: The Roof Below (Wounds, Infant), The Pavilion of Butterflies (Nightmares, Moth), Saint Dunstan's Sacristy (Scandal, Demon). The Wreck of the St Elmo, the Crown and Suspicion rest until 2027.
+- The four Masque storylet pages were last edited in 2024 or earlier, so no option row changed. The guide's exchange table now files the Sacristy's three under the Sacristy, but still lists the Wreck's three under the Pavilion; the option pages still win.
+- New free companion: Parisian Émigré. Twelve upgrades transcribed from the guide's "available in 2026" table into `HM_UPGRADES_2026`. Its tick-grid table carries a "not yet updated" banner and still shows 2025, so 2026 has no `grid`.
+- Enthusiastic Visitor and Presbyterate Diplomat are Fate: their "Meet ..." pages were created that day as (5 FATE) and (10 FATE).
+- Spirit rewards, affiliations and leftover-Confession turn-ins: unchanged. Dates: 19 October confirmed; 26 October, 2 and 9 November are the guide's expectation.
