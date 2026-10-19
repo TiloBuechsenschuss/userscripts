@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/iotm.js
-// @version      1.40
+// @version      1.41
 // @description  Adds an "IotM" button to the icon menu with Item-of-the-Month actions.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -11,6 +11,10 @@
 // @match        https://kingdomofloathing.com/topmenu.php*
 // @match        https://www.kingdomofloathing.com/choice.php*
 // @match        https://kingdomofloathing.com/choice.php*
+// @match        https://www.kingdomofloathing.com/fight.php*
+// @match        https://kingdomofloathing.com/fight.php*
+// @match        https://www.kingdomofloathing.com/adventure.php*
+// @match        https://kingdomofloathing.com/adventure.php*
 // @match        https://www.kingdomofloathing.com/account.php*
 // @match        https://kingdomofloathing.com/account.php*
 // @grant        none
@@ -23,7 +27,9 @@
  * Adds an "IotM" button to the KoL icon menu that opens a small popup of Item-of-the-Month actions:
  *   fire the Codpiece (inventory.php?action=docodpiece), play ball at the baseball diamond
  *   (highlighted when a ball is available), drink from the Cup of 13s, and open the Allied Radio
- *   Backpack.
+ *   Backpack. Play Ball turns subdued once the diamond is done for the day: when it refuses a
+ *   pitch, or when an adventure says so ("That's all three innings you've got in you today" or
+ *   "...your arm is done for today"). Confirmed in game (2026-10-19).
  * Also highlights the worthwhile pitch buttons on the Play Ball! choice (choice.php
  *   whichchoice=1598), adds sort buttons to the Cup of 13s ingredient dropdowns (choice.php
  *   whichchoice=1601), adds a one-click request table to the Request Supply Drop choice for both
@@ -388,8 +394,15 @@
   // page flag for it, so we detect the refusal message when a pitch is rejected
   // (see playBall) and remember it for the rest of the KoL day in localStorage.
   const BALL_SPENT_KEY = 'tm-iotm-ball-spent';
-  const BALL_EXHAUSTED_RE =
-    /already pitched .*innings today|blow out your shoulder/i;
+  // Adventures say it too: the last inning ends with "That's all three innings
+  // you've got in you today", and recruiting a foe after the arm is spent says
+  // "your arm is done for today" (see initBallDoneSniff).
+  const BALL_EXHAUSTED_RE = new RegExp([
+    'already pitched .*innings today',
+    'blow out your shoulder',
+    'innings you.ve got in you today',
+    'your arm is done for today'
+  ].join('|'), 'i');
   // The opposite signal: the diamond refuses because the team is short ("You
   // need to recruit 3 more foes to play baseball"), which the server only says
   // when innings are still left today. Seeing it proves a stored "spent" flag is
@@ -490,6 +503,15 @@
         clearInterval(timer);
       }
     }, 200);
+  }
+
+  // Adventure pages (choice, fight, adventure) can announce the diamond is done
+  // for the day without the Play Ball button being pressed: after the third
+  // inning, or when a foe is recruited once the arm is spent. Read the page
+  // once and fold it into the spent flag like a Play Ball response.
+  function initBallDoneSniff() {
+    if (!document.body) return;
+    applyBallResultText(document.body.textContent || '');
   }
 
   // Baseball button highlight: 'spent' (subdued) once exhausted for the day,
@@ -2172,10 +2194,13 @@
   } else if (/\/account\.php/i.test(PATH)) {
     kolUiSettingsSection('iotm', 'KoL IotM Menu', UI_FEATURES);
   } else if (/\/choice\.php/i.test(PATH)) {
+    initBallDoneSniff();
     initDecorator();
     initCup13Sort();
     initBallPitchHighlight();
     initSupplyDrop();
     initRoseGarden();
+  } else if (/\/(fight|adventure)\.php/i.test(PATH)) {
+    initBallDoneSniff();
   }
 })();

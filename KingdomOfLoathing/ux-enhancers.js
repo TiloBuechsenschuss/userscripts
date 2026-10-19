@@ -106,7 +106,7 @@
  *   to the map that holds it, the way KoL links the places in other quests -- the Treasury
  *   goes to Cobb's Knob, the Haunted Gallery to the second floor of Spookyraven Manor. It
  *   never links the zone itself, since a click there would spend a turn. The Bad Trip has no
- *   map, so it stays plain text. Not yet tested in the live game (1.31).
+ *   map, so it stays plain text. Confirmed against the live game on 2026-10-19 (1.31).
  *
  * Confirmed against the live game on 2026-10-07 (1.27; the 1.28 lines and ultra-rares are not yet): the store multibuy, the daily shopping list,
  *   the rare-monster banner and its account.php list, and the ascension checklist.
@@ -3620,7 +3620,8 @@
   // plus the wiki's wording where the two differ; the maps come from KoLmafia's
   // zonelist.txt parents and its place.php names (junggate_N from
   // CampgroundRequest). The Bad Trip has no map to return to, so it is left
-  // unlinked. Matched longest-first and case-insensitively, after an optional
+  // unlinked. Confirmed in the live game on 2026-10-19 (1.31) for the bounties
+  // on hand; the other rows are unclicked. Matched longest-first and case-insensitively, after an optional
   // "the "; " of Spookyraven Manor" and similar tails stay part of the link.
   const BOUNTY_ZONE_MAPS = [
     ['place.php?whichplace=bathole', ['Beanbat Chamber', 'Guano Junction', 'Bat Hole Entrance']],

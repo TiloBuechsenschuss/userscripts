@@ -416,6 +416,17 @@ Kingdom of Loathing:
     it works. Not reported on separately, so still unverified: the gear's fit in the menu
     row and the account.php placement fallback.
 
+  - Bounty Hunter Hunter zone links — in questlog.php and the charpane's Current Quest
+    list, the bounty's zone links to the map that holds it (Treasury -> Cobb's Knob),
+    ux-enhancers 1.31 (loader 1.67). Verified in-game by the author (2026-10-19): it works.
+    Only the zones of the bounties on hand were seen; the rest of the zone-to-map table
+    is from KoLmafia's data and unclicked.
+
+  - Baseball diamond done-for-today from adventure text — the IotM menu's Play Ball turns
+    subdued when a choice, fight or adventure page says "That's all three innings you've
+    got in you today" or "...your arm is done for today", iotm 1.41. Verified in-game by
+    the author (2026-10-19): it works.
+
 Fallen London:
   - "Optimize equipment" button beside every action with challenges — ux-enhancers
     3.4 (loader 0.54). Verified in-game by the author (2026-09-26): it works on real
