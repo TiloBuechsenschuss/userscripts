@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js
-// @version      1.30
+// @version      1.31
 // @description  Grab-bag of quality-of-life tweaks for Kingdom of Loathing pages.
 // @match        https://www.kingdomofloathing.com/hermit.php*
 // @match        https://kingdomofloathing.com/hermit.php*
@@ -101,6 +101,12 @@
  *   In the character pane, next to Auto Combat's "Auto" button, an "AA:" dropdown with the same
  *   choices as account.php's Auto-Attack setting (off, weapon, your combat skills and macros)
  *   that saves the moment you pick one; "Userscript settings" on account.php can hide it.
+ *   In the quest log and the charpane's Current Quest list, the zone named by a Bounty Hunter
+ *   Hunter bounty ("Who Hunts The Easy Hunters" and the hard and special ones) becomes a link
+ *   to the map that holds it, the way KoL links the places in other quests -- the Treasury
+ *   goes to Cobb's Knob, the Haunted Gallery to the second floor of Spookyraven Manor. It
+ *   never links the zone itself, since a click there would spend a turn. The Bad Trip has no
+ *   map, so it stays plain text. Not yet tested in the live game (1.31).
  *
  * Confirmed against the live game on 2026-10-07 (1.27; the 1.28 lines and ultra-rares are not yet): the store multibuy, the daily shopping list,
  *   the rare-monster banner and its account.php list, and the ascension checklist.
@@ -3600,6 +3606,143 @@
     });
   }
 
+  // --- Bounty locations (questlog.php, charpane.php) ---------------------
+  // The Bounty Hunter Hunter's quests ("Who Hunts The Easy Hunters" and its
+  // hard/special siblings) name their zone in plain text, unlike the other
+  // quests, whose places KoL links as <a href="place.php?..."><b>Name</b></a>:
+  //   The Bounty Hunter Hunter wants you to collect 11 bundles of receipts from
+  //   Knob Goblin Bean Counters in the Cobb's Knob Treasury (0 of 11 collected so far)
+  // We wrap the zone name in the same kind of link, pointing at the map that
+  // CONTAINS the zone (the Treasury goes to Cobb's Knob), never at
+  // adventure.php -- a click there would spend a turn.
+  //
+  // Zone names are KoLmafia's bounty.txt "Best Location" column (minus "The"),
+  // plus the wiki's wording where the two differ; the maps come from KoLmafia's
+  // zonelist.txt parents and its place.php names (junggate_N from
+  // CampgroundRequest). The Bad Trip has no map to return to, so it is left
+  // unlinked. Matched longest-first and case-insensitively, after an optional
+  // "the "; " of Spookyraven Manor" and similar tails stay part of the link.
+  const BOUNTY_ZONE_MAPS = [
+    ['place.php?whichplace=bathole', ['Beanbat Chamber', 'Guano Junction', 'Bat Hole Entrance']],
+    ['place.php?whichplace=plains', ['Outskirts of Cobb\'s Knob', '"Fun" House']],
+    ['cobbsknob.php', ['Cobb\'s Knob Treasury']],
+    ['cobbsknob.php?action=tolabs', ['Cobb\'s Knob Laboratory']],
+    ['cobbsknob.php?action=tomenagerie', ['Cobb\'s Knob Menagerie, Level 3', 'Menagerie Level 3']],
+    ['place.php?whichplace=town_wrong', ['Overgrown Lot', 'Sleazy Back Alley', 'Copperhead Club']],
+    ['place.php?whichplace=town_market', ['Skeleton Store']],
+    ['place.php?whichplace=town_right', ['Madness Bakery']],
+    ['place.php?whichplace=knoll_hostile', ['Degrassi Knoll Restroom', 'Degrassi Knoll Gym']],
+    ['place.php?whichplace=desertbeach', ['South of the Border', 'Oasis', 'Arid, Extra-Dry Desert']],
+    ['tavern.php', ['A Barroom Brawl', 'Barroom Brawl']],
+    ['place.php?whichplace=manor1', ['Haunted Conservatory', 'Haunted Kitchen', 'Haunted Pantry']],
+    ['place.php?whichplace=manor2', ['Haunted Gallery', 'Haunted Bathroom']],
+    ['place.php?whichplace=manor3', ['Haunted Nursery', 'Haunted Laboratory']],
+    ['place.php?whichplace=manor4', ['Haunted Wine Cellar']],
+    ['place.php?whichplace=woods', ['Spooky Forest', 'Black Forest']],
+    ['place.php?whichplace=giantcastle', ['Castle in the Clouds in the Sky (Basement)',
+      'Castle in the Clouds in the Sky (Top Floor)']],
+    ['place.php?whichplace=beanstalk', ['Penultimate Fantasy Airship', 'Hole in the Sky']],
+    ['place.php?whichplace=palindome', ['Inside the Palindome', 'Palindome']],
+    ['place.php?whichplace=mclargehuge', ['Lair of the Ninja Snowmen', 'eXtreme Slope', 'Mt. McLargeHuge']],
+    ['place.php?whichplace=orc_chasm', ['Smut Orc Logging Camp']],
+    ['place.php?whichplace=hiddencity', ['Hidden Office Building', 'Hidden City']],
+    ['place.php?whichplace=cove', ['Poop Deck']],
+    ['place.php?whichplace=mountains', ['Dungeons of Doom', 'Mt. Molehill']],
+    ['place.php?whichplace=airport_stench', ['Pirates of the Garbage Barges']],
+    ['place.php?whichplace=airport_cold', ['Ice Hotel']],
+    ['place.php?whichplace=airport_hot', ['LavaCo™ Lamp Factory', 'LavaCo Lamp Factory']],
+    ['place.php?whichplace=airport_sleaze', ['Sloppy Seconds Diner']],
+    ['place.php?whichplace=airport_spooky', ['Secret Government Laboratory']],
+    ['place.php?whichplace=wormwood', ['Stately Pleasure Dome']],
+    ['place.php?whichplace=rabbithole', ['Red Queen\'s Garden']],
+    ['place.php?whichplace=memories', ['Jungles of Ancient Loathing']],
+    ['spaaace.php', ['Domed City of Grimacia']],
+    ['suburbandis.php', ['Clumsiness Grove']],
+    ['place.php?whichplace=junggate_1', ['Chinatown Shops']],
+    ['place.php?whichplace=junggate_3', ['Anger Man\'s Level']],
+    ['place.php?whichplace=junggate_6', ['Nightmare Meatrealm']],
+  ];
+
+  let bountyZoneRe = null;
+  const bountyZoneUrl = {};
+
+  // One alternation over every name, longest first so "Haunted Laboratory"
+  // is never cut short by a shorter name it contains. Straight quotes also
+  // match KoL's curly ones.
+  function bountyZonePattern() {
+    if (bountyZoneRe) return bountyZoneRe;
+    const names = [];
+    for (const [url, list] of BOUNTY_ZONE_MAPS) {
+      for (const n of list) {
+        names.push(n);
+        bountyZoneUrl[n.toLowerCase()] = url;
+      }
+    }
+    names.sort(function (a, b) { return b.length - a.length; });
+    const alts = names.map(function (n) {
+      return escapeRegExp(n).replace(/"/g, '["“”]');
+    });
+    // Group 1: an optional leading "the "; group 2: the zone name; group 3:
+    // an "of <place>" tail running up to the "(x of y collected" count.
+    bountyZoneRe = new RegExp('\\b(?:in|on|at)\\s+(the\\s+)?(' + alts.join('|') + ')' +
+      '((?:\\s+of\\s+[^(]*?)?)(?=\\s*(?:\\(|[.,]|ride\\b|$))', 'i');
+    return bountyZoneRe;
+  }
+
+  function bountyZoneLookup(name) {
+    return bountyZoneUrl[name.toLowerCase().replace(/[“”]/g, '"')] || null;
+  }
+
+  // Link the zone in one text node, if it names one. Returns true on a link.
+  // `target` is set from the charpane, which must open the map in the main
+  // pane rather than in its own narrow frame.
+  function linkBountyText(node, target) {
+    const m = bountyZonePattern().exec(node.nodeValue);
+    if (!m) return false;
+    const url = bountyZoneLookup(m[2]);
+    if (!url) return false;
+    const start = m.index + m[0].length - m[2].length - m[3].length;
+    const label = m[2] + m[3];
+    const rest = node.splitText(start);
+    rest.splitText(label.length);
+    const a = document.createElement('a');
+    a.href = url;
+    if (target) a.target = target;
+    a.title = 'Go to the map this zone is on';
+    a.dataset.kolBountyZone = '1';
+    const b = document.createElement('b');
+    b.textContent = label;
+    a.appendChild(b);
+    rest.replaceWith(a);
+    return true;
+  }
+
+  // Only text that belongs to a Bounty Hunter Hunter quest: the description
+  // names him, and the charpane's shortened nudge still carries the
+  // "(x of y collected so far)" count.
+  function linkBountyZones(root, target) {
+    if (!root) return;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      if (/Bounty Hunter Hunter|collected so far/i.test(n.nodeValue)) nodes.push(n);
+    }
+    for (const n of nodes) {
+      if (n.parentElement && n.parentElement.closest('a')) continue;
+      linkBountyText(n, target);
+    }
+  }
+
+  function linkBountyQuestlog() {
+    document.querySelectorAll('blockquote').forEach(function (bq) {
+      linkBountyZones(bq, null);
+    });
+  }
+
+  function linkBountyCharpane() {
+    linkBountyZones(document.getElementById('nudgeblock') || document.body, 'mainpane');
+  }
+
   // --- BEGIN tm-kol-rare-monsters (keep byte-identical across scripts) ---
   // Monsters the player wants to be told about (and Auto Combat to stop for).
   // Stored as { added: [{ name, note }], removed: [name] } so a built-in can be
@@ -5668,6 +5811,8 @@
     { name: 'wiki-last-adventure', path: /\/charpane\.php/i, run: linkLastAdventure },
     { name: 'wiki-title-bar', path: /\/(place|choice|crypt)\.php/i, run: linkTitleBar },
     { name: 'wiki-quests', path: /\/questlog\.php/i, run: linkQuests },
+    { name: 'bounty-zones-questlog', path: /\/questlog\.php/i, run: linkBountyQuestlog },
+    { name: 'bounty-zones-charpane', path: /\/charpane\.php/i, run: linkBountyCharpane },
     { name: 'wiki-monster', path: /\/fight\.php/i, run: linkMonster },
     { name: 'wiki-drops', path: /\/fight\.php/i, run: linkDrops },
     { name: 'rare-monster-banner', path: /\/fight\.php/i, run: rareMonsterBanner },
