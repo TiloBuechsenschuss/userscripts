@@ -2744,7 +2744,22 @@ navigation. Two consequences:
   entry to `HM_SEASONS`** -- and new option rows only if a Masque page changed. The season never gates a badge (a resting Masque never shows,
   and a wrong season entry must not black a running one out); it orders the panel (running Masques first, the resting one dimmed and
   marked), says which Menaces can be handed in, marks the affiliation not offered, and adds a "please report" line to the storylet tooltip
-  of an open Masque the season says is resting. 2026: Roof Below, Pavilion, Sacristy (Scandal, Demon); the Wreck rests. **Not modelled:**
+  of an open Masque the season says is resting. 2026: Roof Below, Pavilion, Sacristy (Scandal, Demon); the Wreck rests. **What you hold**
+  (added 2026-10-21, `hmHoldings`, `hmUpgradeStatus`): the panel reads Possessions -- live, else the shared banked counts (`COUNTS_KEY`),
+  labelled with their age, with Refresh and auto through `refreshBackgroundState` like the Philosofruit panel -- for the six Confessions
+  (and their total), the four masks, a "(hold N)" on every option's spend, and a "You hold" column on the upgrades: `✓ have X (locked)`,
+  `needs …` (with `n/N` for a count), or `★ ready` (`★ ready if …` where the option also needs a quality). Items only; Spirit and the
+  Menaces are qualities and are not shown; a never-read inventory is a dash, never 0. The 2026 upgrade rows carry `holds` / `unread` /
+  `owned` / `keeps` from the 13 option pages of *Unburden Yourself to an Attendant*, which win over the guide (Rats in the Walls also
+  spends 10 Talkative Rattus Faber); 2025's rows carry none and show a dash. 2026 re-checked 2026-10-21: the companion is the
+  *Émigrée*, the Goldfish takes Violence + Whimsy, and the tick-grid is printed (`HM_UPGRADE_GRID_2026`, cross-checked). **Spirit**
+  (`HM_CACHE_KEY`, `bankHmQualities`, `readHmSpirit`): Spirit of Hallowmas is a quality, banked off the Myself tab in the same three
+  places as the other panels' qualities (the capture, the background refresh, the shared frame); the panel shows it (and the Knight CP
+  above 2500) and ticks the rewards it covers. **Converting Confessions** (`hmConfessionRoutes`, `hmRouteText`): a table per Confession
+  of the quickest route to it from every other and what it can become, built from the SEASON's running exchanges only -- fewest exchanges
+  first, then fewest moves between Masques (greedy runs of one Masque; a move is a Leave and a re-entry, a Favour unless masked). In 2026
+  nothing makes Curiosity or Whimsy and Violence becomes nothing, and the table says so in words. An upgrade short of a Confession is told
+  how to make it from one it can spare (one it does not need, or a second of one it does; each spare used once per row). **Not modelled:**
   Menace-raising gear (scales the CP), the Fate Masque cards and the Visitors (the latter is `hallowmas-visitor`). Research:
   `docs/superpowers/research/2026-10-13-hallowmas.md`.
 
@@ -4013,7 +4028,11 @@ Confirmed live by the author:
   the exchanges show as *Exchange a Confession of X for a Confession of Y* without the wiki's "(The Roof Below)". **(3) The real CP** against
   the badge, and with which gear. **(4) Which Masques and masks run in 2026** (Scandal and the Demon are due back) and whether any option
   changed. **(5) The 2026 companion upgrades** -- the panel's are the guide's of opening day (2026-10-19), whose tick-grid was not yet updated.
-  **(6) The 2026 dates** -- only 19 October was confirmed; the other three are the guide's expectation.
+  **(6) The 2026 dates** -- only 19 October was confirmed; the other three are the guide's expectation. **(7) What you hold** (added
+  2026-10-21) -- whether the Confessions read as *A Confession of X* and the masks as *The Moth* etc. on Possessions (a different name
+  reads as 0), and whether the Parisian Infiltrator, an Agent, shows there at all (if it does, it already counts as done). **(8) Spirit**
+  -- whether the Myself tab lists it as *Spirit of Hallowmas*, and whether a veteran who still holds the retired 1892 quality of the
+  same name sees the wrong number.
 
 - **Spending Secrets and Counting the Days** (`spending-secrets`, added 2026-10-03). Nothing seen in the game; every table is
   transcribed from the option and card pages. Report first: **(1) The eleven faction card headings** -- whether the cards show as
@@ -4854,7 +4873,10 @@ Current tests:
   Echoes against their stated Echoes per Spirit; the guide's upgrade list against its tick-grid; the exchanges filed where the option pages put them;
   a row looked up under the open storylet only; that no name is in another table; the registration under Seasonal; the seasons (one per year,
   three Masques each, 2025 resting the Sacristy and 2026 the Wreck, `hmSeason`'s fallback either side, each year's upgrades and grid where
-  printed); and the whole panel built for 2025, 2026 and a 2027 with no entry.
+  printed); and the whole panel built for 2025, 2026 and a 2027 with no entry; what you hold (dashes when never read, banked counts read
+  through `itemKey`, every `hmUpgradeStatus` state, the auto-refresh booked on open and not with auto off); banked Spirit and the rewards
+  it ticks; the Confession routes for 2026 and 2025 (each a breadth-first shortest count, the 2026 dead ends, one-Masque runs) and the
+  make-it hint never spending a Confession the upgrade needs.
 - `tests/choice-the-stacks.test.mjs` — 56 card options, 8 books, 8 finale options; every progress figure one of 5, 10 or 15; the
   eight options that add Noises +6 on a failure say so in the badge and take the risk colour; the book totals against the
   totals their finale option carries; the wiring keyed by the open card (an ordinary phrase is badged under its own card only,
