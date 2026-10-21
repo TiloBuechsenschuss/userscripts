@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.62
+// @version      1.63
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -649,8 +649,10 @@
  *     (25) Hallowmas Masques, the festival's main loop, and a panel behind ⚙ UX (this year's dates, every Masque option by Airs
  *     band with the resting Masque last, what Spirit buys, the affiliations, the leftover-Confession turn-ins, and this year's
  *     companion upgrades), and what you hold off the Possessions tab (live, or banked and labelled with its age, with
- *     Refresh and auto like the other panels): the six Confessions, the masks, what each option spends, and whether each
- *     upgrade is done, short of something, or ready. Everything that changes by year is one entry per year in HM_SEASONS (2025, 2026); a year with no
+ *     Refresh and auto like the other panels): Spirit of Hallowmas (a quality, off the Myself tab), the six Confessions, the
+ *     masks, what each option spends, and whether each upgrade is done, short of something (with the quickest way to make a
+ *     missing Confession out of a spare one), or ready; and the quickest route between every pair of Confessions through
+ *     this year's running exchanges (fewest exchanges, then fewest moves between Masques). Everything that changes by year is one entry per year in HM_SEASONS (2025, 2026); a year with no
  *     entry shows the newest one, marked out of date. Each option in
  *     a Masque (the Roof Below, the Wreck of the St Elmo, the Pavilion of Butterflies, Saint Dunstan's Sacristy) shows the Menace CP it pays
  *     ("Nightmares +7 CP ▼ · Moth"): ▼ means it spends an item, and the mask it needs is a word, since the script cannot read your mask.
@@ -1765,6 +1767,7 @@
         if (bankLabQualities(scan)) changed = true;
         if (bankCtdQualities(scan)) changed = true;
         if (bankPhfQualities(scan)) changed = true;
+        if (bankHmQualities(scan)) changed = true;
       }
       const here = readPossessionCounts();
       if (!here || !here.size) {
@@ -35731,6 +35734,7 @@
       bankLabQualities(scan);
       bankCtdQualities(scan);
       bankPhfQualities(scan);
+      bankHmQualities(scan);
     }
     if (owned.length) bankItemCounts(readPossessionCounts());
   }
@@ -39972,17 +39976,26 @@
   // open, banked (and labelled with its age) otherwise, refreshed in a hidden
   // frame like every other panel's -- for the six Confessions, the four masks,
   // what each Masque option spends and what each upgrade needs. Items only:
-  // Spirit and the Menaces are qualities and are not shown. A dash is
-  // "never read", never "none".
+  // Spirit of Hallowmas is a quality, so it comes off the Myself tab instead
+  // (HM_CACHE_KEY, banked wherever the other panels' qualities are); the
+  // Menaces are not shown. A dash is "never read", never "none".
+  //
+  // **Converting Confessions.** Every exchange is one for one at Airs 34-66,
+  // and only the running Masques' exchanges exist, so what can become what
+  // changes by year. hmConfessionRoutes() takes this season's exchanges and
+  // finds, for every pair, the route with the fewest exchanges and then the
+  // fewest moves between Masques (a move is a Leave and a re-entry, which
+  // costs a Favour unless you wear that Masque's mask). In 2026 nothing makes
+  // Curiosity or Whimsy and Violence becomes nothing; the panel says so.
 
   const HM_MASQUES = {
-    'The Roof Below': { menace: 'Wounds', mask: 'Infant', card: 'The Squall of Infants',
+    'The Roof Below': { menace: 'Wounds', mask: 'Infant', card: 'The Squall of Infants', short: 'the Roof Below',
       favours: 'Rubbery Men, Constables or Criminals' },
-    'The Wreck of the St Elmo': { menace: 'Suspicion', mask: 'Crown', card: 'The Crown’s Splendour',
+    'The Wreck of the St Elmo': { menace: 'Suspicion', mask: 'Crown', card: 'The Crown’s Splendour', short: 'the Wreck',
       favours: 'the Docks, Urchins or the Tomb-Colonies' },
-    'The Pavilion of Butterflies': { menace: 'Nightmares', mask: 'Moth', card: 'The Flight of Moths',
+    'The Pavilion of Butterflies': { menace: 'Nightmares', mask: 'Moth', card: 'The Flight of Moths', short: 'the Pavilion',
       favours: 'Society, the Great Game or Revolutionaries' },
-    'Saint Dunstan’s Sacristy': { menace: 'Scandal', mask: 'Demon', card: 'The Devil’s Gambit',
+    'Saint Dunstan’s Sacristy': { menace: 'Scandal', mask: 'Demon', card: 'The Devil’s Gambit', short: 'the Sacristy',
       favours: 'Hell, the Church or Bohemians' },
   };
   const HM_ROOF = 'The Roof Below';
@@ -40304,6 +40317,92 @@
 
   const HM_MASK_ITEMS = { Infant: 'The Infant', Crown: 'The Crown', Moth: 'The Moth', Demon: 'The Demon' };
 
+  // Spirit of Hallowmas is a QUALITY (Myself), not an item. Absent means 0
+  // only while the Myself tab's search box is empty, as for every quality.
+  // The retired 1892 quality of the same name would collide here; nothing
+  // shows whether anyone still holds it.
+  const HM_SPIRIT_QUALITY = 'Spirit of Hallowmas';
+  const HM_CACHE_KEY = 'fl-ux-hallowmas';
+
+  function hmSpiritFrom(scan) {
+    const q = scan.values.get(HM_SPIRIT_QUALITY);
+    return q ? q.level : scan.filtered ? null : 0;
+  }
+
+  function bankHmQualities(scan) {
+    if (!scan) return false;
+    const spirit = hmSpiritFrom(scan);
+    if (spirit == null) return false;
+    saveCache(HM_CACHE_KEY, { v: 1, at: Date.now(), character: characterName() || null, spirit: spirit });
+    return true;
+  }
+
+  function readHmSpirit() {
+    const scan = readQualities();
+    const live = scan ? hmSpiritFrom(scan) : null;
+    if (live != null) return { live: true, at: Date.now(), spirit: live };
+    const rec = loadCache(HM_CACHE_KEY, 1);
+    return rec && typeof rec.spirit === 'number' ? { live: false, at: rec.at, spirit: rec.spirit } : null;
+  }
+
+  // This season's Confession exchanges as from -> [{ to, masque }].
+  function hmExchangeGraph(season) {
+    const graph = {};
+    HM_MASQUE_OPTIONS.forEach(function (e) {
+      if (!e.swap || season.masques.indexOf(e.storylet) === -1) return;
+      (graph[e.swap[0]] = graph[e.swap[0]] || []).push({ to: e.swap[1], masque: e.storylet });
+    });
+    return graph;
+  }
+
+  // Splits a path's steps into runs that can be done in one Masque: the
+  // greedy left-to-right intersection, which gives the fewest runs.
+  function hmRouteRuns(steps) {
+    const runs = [];
+    steps.forEach(function (st) {
+      const last = runs[runs.length - 1];
+      const both = last ? last.masques.filter(function (m) { return st.masques.indexOf(m) !== -1; }) : [];
+      if (both.length) { last.masques = both; last.to.push(st.to); } else runs.push({ masques: st.masques.slice(), to: [st.to] });
+    });
+    return runs;
+  }
+
+  // Every pair's quickest route this season, keyed 'From>To': the fewest
+  // exchanges, then the fewest runs (moves between Masques). Six Confessions,
+  // so every simple path is simply tried.
+  function hmConfessionRoutes(season) {
+    const graph = hmExchangeGraph(season);
+    const best = {};
+    HM_CONFESSION_COLUMNS.forEach(function (from) {
+      (function walk(at, path, steps) {
+        if (steps.length) {
+          const runs = hmRouteRuns(steps);
+          const key = from + '>' + at;
+          const b = best[key];
+          if (!b || steps.length < b.steps || (steps.length === b.steps && runs.length < b.runs.length)) {
+            best[key] = { from: from, to: at, path: path.slice(), steps: steps.length, runs: runs };
+          }
+        }
+        const byTo = {};
+        (graph[at] || []).forEach(function (edge) { (byTo[edge.to] = byTo[edge.to] || []).push(edge.masque); });
+        Object.keys(byTo).forEach(function (to) {
+          if (path.indexOf(to) !== -1) return;
+          walk(to, path.concat([to]), steps.concat([{ to: to, masques: byTo[to] }]));
+        });
+      })(from, [from], []);
+    });
+    return best;
+  }
+
+  function hmRouteText(r) {
+    let text = r.from;
+    const where = r.runs.map(function (run) {
+      text += run.to.map(function (c) { return ' → ' + c; }).join('');
+      return run.masques.map(function (m) { return HM_MASQUES[m].short; }).join(' or ');
+    });
+    return text + ' (' + where.join(', then ') + ')';
+  }
+
   function hmConfessionItem(c) { return 'A Confession of ' + c; }
 
   // What you hold, off the Possessions tab: live when it is on screen, else
@@ -40325,14 +40424,33 @@
   // One upgrade row against what you hold: already done (you hold what locks
   // it), short of something, or ready. `unread` qualities keep a "ready" from
   // being claimed outright. null for a row the season carries no `holds` for.
-  function hmUpgradeStatus(u, held) {
+  // With `routes`, a missing Confession also says the quickest way to make it
+  // out of one you can spare: a Confession this upgrade does not need, or a
+  // second of one it does. Each spare is used once across the row.
+  function hmUpgradeStatus(u, held, routes) {
     if (!held || !u.holds) return null;
     const owned = (u.owned || [u.to]).filter(function (n) { return held.count(n) > 0; });
     if (owned.length) return { state: 'done', text: '✓ have ' + owned.join(', ') + ' (locked)' };
+    const spare = {};
+    HM_CONFESSION_COLUMNS.forEach(function (c) {
+      spare[c] = held.count(hmConfessionItem(c)) - (u.confessions.indexOf(c) !== -1 ? 1 : 0);
+    });
+    const make = function (c) {
+      if (!routes) return '';
+      if (!HM_CONFESSION_COLUMNS.some(function (from) { return routes[from + '>' + c]; })) {
+        return ' (no Masque makes it this year)';
+      }
+      const r = HM_CONFESSION_COLUMNS.filter(function (from) { return spare[from] > 0 && routes[from + '>' + c]; })
+        .map(function (from) { return routes[from + '>' + c]; })
+        .sort(function (a, b) { return a.steps - b.steps || a.runs.length - b.runs.length; })[0];
+      if (!r) return '';
+      spare[r.from]--;
+      return ' (make it: ' + hmRouteText(r) + ')';
+    };
     const short = u.holds.filter(function (p) { return held.count(p[0]) < p[1]; }).map(function (p) {
       return p[1] === 1 ? p[0] : p[0] + ' ' + held.count(p[0]) + '/' + p[1];
     }).concat(u.confessions.filter(function (c) { return held.count(hmConfessionItem(c)) < 1; }).map(function (c) {
-      return 'Confession of ' + c;
+      return 'Confession of ' + c + make(c);
     }));
     if (short.length) return { state: 'short', text: 'needs ' + short.join(', ') };
     return u.unread
@@ -40344,8 +40462,11 @@
   function renderHallowmasPanel(ctx, now) {
     const season = hmSeason(now);
     const held = hmHoldings();
+    const spirit = readHmSpirit();
+    const routes = hmConfessionRoutes(season);
+    const stale = function (r) { return !r || (!r.live && Date.now() - r.at > FRESH_MS); };
     let busy = false;
-    if (ctx && autoRefreshEnabled() && (!held || (!held.live && Date.now() - held.at > FRESH_MS))) {
+    if (ctx && autoRefreshEnabled() && (stale(held) || stale(spirit))) {
       busy = true;
       refreshBackgroundState().then(function () { ctx.rerender(); });
     }
@@ -40427,7 +40548,7 @@
     });
 
     const spiritRows = HM_SPIRIT_REWARDS.map(function (r) {
-      return h('tr', null, [cell(String(r.cost)), cell(r.items),
+      return h('tr', null, [cell(String(r.cost) + (spirit && spirit.spirit >= r.cost ? ' ✓' : '')), cell(r.items),
         cell(r.echo + (r.ratket ? ' (' + r.ratket + ' with a Ratket)' : '')), cell(String(r.per))]);
     });
 
@@ -40449,18 +40570,22 @@
       const off = runningMasks.indexOf(m) === -1;
       return stat(m + (off ? ' (resting)' : ''), held ? (held.count(HM_MASK_ITEMS[m]) ? '✓ held' : 'none') : '–');
     });
+    const spiritText = spirit ? String(spirit.spirit) + (spirit.spirit > HM_KNIGHT_THRESHOLD
+      ? ' (' + Math.floor((spirit.spirit - HM_KNIGHT_THRESHOLD) / HM_KNIGHT_RATIO) + ' Knight CP)' : '') : '–';
     const holdBlock = h('div', {
       css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent + ';background:' + UI.bgAlt
         + ';font-size:12px;line-height:1.6;',
     }, [
+      h('div', { css: 'display:flex;flex-wrap:wrap;gap:14px;margin-bottom:6px;' }, [stat('Spirit of Hallowmas', spiritText)]),
       h('div', { css: 'color:' + UI.dim + ';font-size:11px;' },
         ['Confessions' + (total != null ? ' — ' + total + ' in all' : '')]),
       h('div', { css: 'display:flex;flex-wrap:wrap;gap:14px;' }, confessions),
       h('div', { css: 'color:' + UI.dim + ';font-size:11px;margin-top:8px;' }, ['Masks']),
       h('div', { css: 'display:flex;flex-wrap:wrap;gap:14px;' }, masks),
       h('div', { css: 'margin-top:6px;color:' + UI.dim + ';display:flex;flex-wrap:wrap;align-items:center;gap:8px;' }, [
-        h('span', null, [held ? 'Possessions read ' + (held.live ? 'live' : ageText(held.at))
-          + (busy ? ' — refreshing…' : '.') : (busy ? 'Reading Possessions…' : 'Possessions never read. Open the tab once.')]),
+        h('span', null, [(held ? 'Possessions read ' + (held.live ? 'live' : ageText(held.at))
+          : 'Possessions never read') + ' · ' + (spirit ? 'Spirit read ' + (spirit.live ? 'live' : ageText(spirit.at))
+          : 'Spirit never read (Myself tab)') + (busy ? ' — refreshing…' : '.')]),
         h('button', {
           type: 'button',
           disabled: busy,
@@ -40505,6 +40630,26 @@
         + resting.join(', ') + ' cannot be handed in. Spirit above ' + HM_KNIGHT_THRESHOLD + ' becomes CP for The Knight '
         + 'of Hallowmas at ' + HM_KNIGHT_RATIO + ':1. The Menace you hand in most often decides your affiliation.')),
       section('Masques', [filter, masques]),
+      section('Converting Confessions — ' + season.year, [
+        note('Each exchange is one Confession for one, at Airs of the Hallowmas Season 34–66 in that Masque; the '
+          + 'other options there move the Airs. Moving to another Masque means leaving and re-entering, which costs '
+          + 'a Favour unless you wear its mask, so routes are the fewest exchanges, then the fewest moves. Trading '
+          + 'with a Contact (a social action) swaps any Confession for any other.'),
+        table(['Confession', 'You hold', 'Quickest from', 'Can become'], HM_CONFESSION_COLUMNS.map(function (c) {
+          const from = HM_CONFESSION_COLUMNS.map(function (f) { return routes[f + '>' + c]; }).filter(Boolean)
+            .sort(function (a, b) { return a.steps - b.steps || a.runs.length - b.runs.length; });
+          const into = HM_CONFESSION_COLUMNS.map(function (t) { return routes[c + '>' + t]; }).filter(Boolean)
+            .sort(function (a, b) { return a.steps - b.steps; });
+          return h('tr', null, [
+            cell(c),
+            cell(count(hmConfessionItem(c))),
+            cell(from.length ? from.map(function (r) { return h('div', null, [hmRouteText(r)]); })
+              : 'no Masque makes it in ' + season.year + ': keep yours, or trade a Contact for one'),
+            cell(into.length ? into.map(function (r) { return r.to + ' (' + r.steps + ')'; }).join(', ')
+              : 'nothing in ' + season.year),
+          ]);
+        })),
+      ]),
       section('What Spirit buys', table(['Spirit', 'Gives', 'Echoes', 'Echoes per Spirit'], spiritRows)),
       section('Affiliations', table(['Menace', 'First time', 'Repeat'], HM_AFFILIATIONS.map(function (a) {
         const off = hmMenaceRuns(season, a.menace) ? '' : ' (not offered in ' + season.year + ')';
@@ -40518,7 +40663,7 @@
           + 'upgradeable each year' + (season.stale ? ': check the guide once this year’s list is up.' : '.')
           + ' Each upgrade takes one of each Confession listed, at Unburden Yourself to an Attendant.'),
         table(['Original', 'Confessions', 'Upgrade', 'You hold'], season.upgrades.map(function (u) {
-          const st = hmUpgradeStatus(u, held);
+          const st = hmUpgradeStatus(u, held, routes);
           const extra = [u.kind, u.note, u.keeps ? 'keeps the original' : null].filter(Boolean).join('; ');
           return h('tr', null, [cell(u.from), cell(u.confessions.map(function (c) {
             return c + (held ? ' (' + held.count(hmConfessionItem(c)) + ')' : '');
@@ -44612,6 +44757,7 @@
       bankLabQualities(got);
       bankCtdQualities(got);
       bankPhfQualities(got);
+      bankHmQualities(got);
     } else if (path === '/possessions') {
       bankItemCounts(readPossessionCounts(doc));
     }

@@ -18,6 +18,10 @@
 //  - What you hold: the Confessions, masks, Masque spends and upgrade needs read
 //    off banked Possessions counts, a dash (never a zero) when nothing has been
 //    read, each upgrade's done / short / ready, and the auto-refresh on open.
+//  - Spirit of Hallowmas, a quality, off the banked Myself reading.
+//  - Converting Confessions: only the season's running exchanges, the fewest
+//    exchanges then the fewest moves between Masques, and an upgrade short of a
+//    Confession told how to make it from one it can spare.
 //  - That no Masque name is in another Choice Helper table, and the whole panel
 //    builds.
 
@@ -142,7 +146,7 @@ const wrapped = src
   .replace(/\}\)\(\);\s*$/,
     'return { HM_MASQUES, HM_MASQUE_OPTIONS, HM_SPIRIT_REWARDS, HM_SEASONS, hmSeason, hmMenaceRuns,'
     + ' HM_CONFESSION_COLUMNS, HM_AFFILIATIONS, HM_CONFESSION_REWARDS, HM_MARK_SPENDS,'
-    + ' hmHoldings, hmUpgradeStatus, COUNTS_KEY, AUTO_KEY,'
+    + ' hmHoldings, hmUpgradeStatus, COUNTS_KEY, AUTO_KEY, hmConfessionRoutes, hmRouteText, HM_CACHE_KEY,'
     + ' hmMasqueSpec, hmMasqueStoryletSpec, renderHallowmasPanel, hallowmasMasquesRatings,'
     + ' ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS, PC_OPTIONS, HALLOWMAS_OPTIONS, normalizeName,'
     + ' PANELS, FEATURES, BADGE_CLASS, CAROUSEL_COLOR_PROGRESS, CAROUSEL_COLOR_NEUTRAL }; })();');
@@ -491,8 +495,9 @@ check('no holdings read, or a season with no `holds`, is no status at all',
 check('nothing ever read: the panel shows dashes and says so, never a zero',
   (() => {
     const { text } = panelText(at(2026));
-    return [text.includes('Possessions never read'), text.includes('(hold –)'), text.includes('Confessions — ')];
-  })(), [true, true, false]);
+    return [text.includes('Possessions never read'), text.includes('Spirit never read'), text.includes('(hold –)'),
+      text.includes(' in all')];
+  })(), [true, true, true, false]);
 
 store.set(api.COUNTS_KEY, JSON.stringify({ v: 2, at: Date.now() - 5 * 60000, character: null, held: [
   ['confession of curiosity', 'A Confession of Curiosity', 3], ['confession of whimsy', 'A Confession of Whimsy', 1],
@@ -509,6 +514,74 @@ check('banked counts: the Confession total, a held mask, a Masque spend and an u
 check('hmHoldings reads the banked counts through itemKey, so the article does not matter',
   [api.hmHoldings().count('A Confession of Curiosity'), api.hmHoldings().count('Moth'), api.hmHoldings().count('The Crown')],
   [3, 1, 0]);
+
+// --- converting Confessions ------------------------------------------------------
+
+const routes26 = api.hmConfessionRoutes(api.hmSeason(at(2026)));
+const routes25 = api.hmConfessionRoutes(api.hmSeason(at(2025)));
+check('2026: the direct exchanges are one step at the Masques that run them',
+  ['Whimsy>Guile', 'Curiosity>Pride', 'Guile>Violence', 'Impropriety>Violence', 'Pride>Impropriety']
+    .map((k) => api.hmRouteText(routes26[k])),
+  ['Whimsy → Guile (the Roof Below or the Pavilion)', 'Curiosity → Pride (the Roof Below or the Pavilion)',
+   'Guile → Violence (the Sacristy)', 'Impropriety → Violence (the Sacristy)', 'Pride → Impropriety (the Sacristy)']);
+check('2026: a longer route stays in one Masque where it can and says where it moves',
+  [api.hmRouteText(routes26['Pride>Violence']), api.hmRouteText(routes26['Curiosity>Violence']),
+   routes26['Curiosity>Violence'].steps, routes26['Curiosity>Violence'].runs.length],
+  ['Pride → Impropriety → Violence (the Sacristy)',
+   'Curiosity → Pride → Impropriety → Violence (the Roof Below or the Pavilion, then the Sacristy)', 3, 2]);
+check('2026: nothing makes Curiosity or Whimsy, and Violence becomes nothing',
+  [Object.keys(routes26).filter((k) => /> ?(Curiosity|Whimsy)$/.test(k)).length,
+   Object.keys(routes26).filter((k) => k.startsWith('Violence>')).length],
+  [0, 0]);
+check('2025 used its own Masques: the Wreck turns Violence into Whimsy, and the Sacristy exchanges are absent',
+  [api.hmRouteText(routes25['Violence>Whimsy']), !!routes25['Guile>Violence']],
+  ['Violence → Whimsy (the Wreck)', false]);
+check('every route is the fewest exchanges: no route is longer than a breadth-first count over the same exchanges',
+  (() => {
+    const bad = [];
+    for (const [routes, year] of [[routes26, 2026], [routes25, 2025]]) {
+      const season = api.hmSeason(at(year));
+      const edges = api.HM_MASQUE_OPTIONS.filter((e) => e.swap && season.masques.includes(e.storylet)).map((e) => e.swap);
+      for (const from of api.HM_CONFESSION_COLUMNS) {
+        const dist = { [from]: 0 };
+        const queue = [from];
+        while (queue.length) {
+          const c = queue.shift();
+          for (const [a, b] of edges) if (a === c && dist[b] == null) { dist[b] = dist[c] + 1; queue.push(b); }
+        }
+        for (const to of api.HM_CONFESSION_COLUMNS) {
+          if (to === from) continue;
+          const r = routes[from + '>' + to];
+          if ((dist[to] == null) !== !r || (r && r.steps !== dist[to])) bad.push(year + ' ' + from + '>' + to);
+        }
+      }
+    }
+    return bad;
+  })(), []);
+check('a missing Confession is made from one the upgrade can spare, never from one it needs',
+  [api.hmUpgradeStatus(up('Faustian Henchman'), heldOf({ 'Devious Henchman': 1, 'A Confession of Guile': 1 }), routes26).text,
+   api.hmUpgradeStatus(up('Faustian Henchman'), heldOf({ 'Devious Henchman': 1, 'A Confession of Guile': 2 }), routes26).text,
+   api.hmUpgradeStatus(up('Memorious Goldfish'), heldOf({ 'Cheerful Goldfish': 1, 'A Confession of Violence': 1,
+     'A Confession of Guile': 3 }), routes26).text],
+  ['needs Confession of Violence',
+   'needs Confession of Violence (make it: Guile → Violence (the Sacristy))',
+   'needs Confession of Whimsy (no Masque makes it this year)']);
+check('the panel carries the conversion table for this year, with the dead ends said in words',
+  (() => {
+    const { text } = panelText(at(2026));
+    return ['Converting Confessions — 2026', 'no Masque makes it in 2026', 'nothing in 2026',
+      'Whimsy → Guile → Violence (the Roof Below or the Pavilion, then the Sacristy)'].filter((x) => !text.includes(x));
+  })(), []);
+
+// --- Spirit of Hallowmas -----------------------------------------------------------
+
+store.set(api.HM_CACHE_KEY, JSON.stringify({ v: 1, at: Date.now() - 2 * 60000, character: null, spirit: 120 }));
+check('banked Spirit is shown with its age, and the rewards it covers are ticked',
+  (() => {
+    const { text } = panelText(at(2026));
+    return ['Spirit of Hallowmas120', 'Spirit read 2 minutes ago', '100 ✓', '50 ✓'].filter((x) => !text.includes(x))
+      .concat(text.includes('250 ✓') ? ['250 ticked'] : []);
+  })(), []);
 
 // Last, because the refresh it books never settles under the stubbed timers.
 check('opening the panel on stale counts books a background refresh, unless auto is off',
