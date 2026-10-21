@@ -4,8 +4,8 @@ title: Open questions about Fallen London
 kind: open-questions
 domain: fallenlondon.com
 status: open
-updated: 2026-09-26
-see_also: [api.md, challenges.md, equipment.md]
+updated: 2026-10-21
+see_also: [api.md, challenges.md, equipment.md, agents-tab.md]
 ---
 
 # Open questions
@@ -13,6 +13,21 @@ see_also: [api.md, challenges.md, equipment.md]
 Each entry says what is unknown, why it matters, what the code does meanwhile,
 and what capture would settle it. When one is settled, move the fact into the
 right file and delete the entry.
+
+## The Agents tab
+
+- **Unknown:** what `/agents` shows a character with no Agents, or one who has
+  not unlocked them (an empty list with "0/N Active Plots", a different page,
+  or a redirect), and what a filled equipment slot on an agent looks like.
+- **Matters:** `readAgents` waits for the "Active Plots" count; a page without
+  one reads as a failure, which is banked and retried after an hour rather than
+  read as "no agents".
+- **Meanwhile:** the Hallowmas panel says "Agents tab could not be read" and
+  keeps the Infiltrator row conditional.
+- **Capture:** `/agents` on a character with no Agents, and on one with an item
+  equipped on an agent.
+- **Unknown:** whether an Agent ever shows on the Possessions tab. Nothing
+  depends on it any more.
 
 ## Challenges that combine stats
 
