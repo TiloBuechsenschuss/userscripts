@@ -45,7 +45,8 @@ Facts about how a game behaves that took a capture to establish are written down
 `okf/fallen-london/`: `index.md` (start here), `api.md` (the game's web API: base URL, the
 bearer token, every endpoint seen and its reply shapes), `challenges.md` (broad and narrow
 chances, the 10% floor and 100% cap, how to infer what the game does not send),
-`equipment.md` (slots, item bonuses, effective versus base level, equipping) and
+`equipment.md` (slots, item bonuses, effective versus base level, equipping),
+`agents-tab.md` (the `/agents` tab's markup and how Choice Helper reads it) and
 `open-questions.md` (what has not been captured).
 
 The format is structured markdown: a front-matter block (`okf: 1`, `title`, `kind`,
@@ -2750,7 +2751,7 @@ navigation. Two consequences:
   (and their total), the four masks, a "(hold N)" on every option's spend, and a "You hold" column on the upgrades: `✓ have X (locked)`,
   `needs …` (with `n/N` for a count), or `★ ready` (`★ ready if …` where the option also needs a quality). Items only; Spirit and the
   Menaces are qualities and are not shown; a never-read inventory is a dash, never 0. The 2026 upgrade rows carry `holds` / `unread` /
-  `owned` / `keeps` from the 13 option pages of *Unburden Yourself to an Attendant*, which win over the guide (Rats in the Walls also
+  `owned` / `agent` / `keeps` from the 13 option pages of *Unburden Yourself to an Attendant*, which win over the guide (Rats in the Walls also
   spends 10 Talkative Rattus Faber); 2025's rows carry none and show a dash. 2026 re-checked 2026-10-21: the companion is the
   *Émigrée*, the Goldfish takes Violence + Whimsy, and the tick-grid is printed (`HM_UPGRADE_GRID_2026`, cross-checked). **Spirit**
   (`HM_CACHE_KEY`, `bankHmQualities`, `readHmSpirit`): Spirit of Hallowmas is a quality, banked off the Myself tab in the same three
@@ -3305,6 +3306,19 @@ navigation. Two consequences:
     in-game by the author (2026-09-26)** on real actions, including the in-page route, the Use/Equip
     popup and the unreadable-level case. Not yet reported on: Undo, Dismiss, filling an empty slot, the
     API-and-reload fallback, and the phone layout.
+- **The Agents tab (`/agents`)** is read by Choice Helper's `readAgents` (captured 2026-10-21; the whole
+  structure is in `okf/fallen-london/agents-tab.md`). Agents are not items and carry no `data-quality-id`, so
+  this tab is the only place that lists them. `#agents` holds `.agents-header` (whose `N/M Active Plots` span is
+  the sign the list is drawn), a react-select filter (`.agent-filter-group`, its value in an emotion-hashed
+  `…-singleValue` div: anything but `All` means agents may be hidden), then one `.working-agent` per agent out on
+  a plot (name in `span.agent-header`, plot in a `.branch__title`, `146/250: 104 actions before your agent returns`
+  in `.working-agent-elapsed-actions`) and one `.free-agent` per agent at home (name in `h2.agent-header`). The
+  name element's TAG differs between the two, so select on the class. The plot heading is a `.branch__title`,
+  so every option-badging feature walks it (harmlessly: no table holds a plot name), and its name is read with
+  `headingName`. Banked in `fl-ux-agents` by `captureAgents` (run from `fotz-capture`, not a feature of its
+  own) and loaded in a hidden frame by `refreshAgents`, which is **not** part of `refreshBackgroundState`: it
+  is a third SPA boot, so only a panel that needs it (Hallowmas) calls it. A failed read is banked as
+  `failedAt` beside the last good one and retried after an hour.
 - **Refreshing the Factions panel: `fetch` does not work, and that is settled.** Fallen London is
   client-rendered — `GET /myself` returns a ~4.7KB shell whose `#root` holds a loading splash and
   no quality list (checked against the live site, not assumed). So `refreshBackgroundState()` uses a
@@ -4030,7 +4044,8 @@ Confirmed live by the author:
   changed. **(5) The 2026 companion upgrades** -- the panel's are the guide's of opening day (2026-10-19), whose tick-grid was not yet updated.
   **(6) The 2026 dates** -- only 19 October was confirmed; the other three are the guide's expectation. **(7) What you hold** (added
   2026-10-21) -- whether the Confessions read as *A Confession of X* and the masks as *The Moth* etc. on Possessions (a different name
-  reads as 0), and whether the Parisian Infiltrator, an Agent, shows there at all (if it does, it already counts as done). **(8) Spirit**
+  reads as 0). The Parisian Infiltrator, an Agent, is read off the Agents tab (`readAgents`): done when listed, ready
+  outright only when the tab was read unfiltered; still to report is what the tab shows a character with no Agents. **(8) Spirit**
   -- whether the Myself tab lists it as *Spirit of Hallowmas*, and whether a veteran who still holds the retired 1892 quality of the
   same name sees the wrong number.
 
@@ -4928,6 +4943,11 @@ Current tests:
   - Extended, not new: `tests/choice-spider-symposium.test.mjs` (the five Literary Ambitions
     rows, the two HOJOTOHO!-gated) and `tests/choice-someone-is-coming.test.mjs` (the eight visiting
     rows, storylet scoping between the four identical pairs).
+- `tests/fl-agents-tab.test.mjs` — `readAgents` run against a trimmed copy of the real `/agents` capture
+  through a small HTML parser in the suite (so the selectors meet the game's own shape): a working and a free
+  agent, the plot and its progress, the wiki-links "W" kept out of the plot name, the filter making the list
+  incomplete, an undrawn list and another tab reading as null; the banking (live, cached, stale after a minute,
+  a failure kept beside the good reading and retried after an hour); and the Hallowmas Infiltrator row against it.
 - `tests/fl-shared-helpers.test.mjs` — asserts what `ux-enhancers.js` and
   `choice-helper.js` share now that they are two files, which no other suite can see because
   every other suite loads one of the two. First the **copies**: every top-level declaration the

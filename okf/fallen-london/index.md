@@ -4,7 +4,7 @@ title: Fallen London knowledge base
 kind: index
 domain: fallenlondon.com
 status: current
-updated: 2026-09-26
+updated: 2026-10-21
 ---
 
 # Fallen London knowledge base
@@ -28,6 +28,7 @@ one place.
 
 | File | About |
 |---|---|
+| [agents-tab.md](agents-tab.md) | The Agents tab (`/agents`): its markup, working and free agents, the filter, and how Choice Helper reads it. |
 | [api.md](api.md) | The game's own web API: base URL, authentication, every endpoint seen, request and reply shapes. |
 | [challenges.md](challenges.md) | How a challenge's shown percentage relates to your level: broad and narrow, the 10% floor, the 100% cap, and how to infer what the game does not send. |
 | [equipment.md](equipment.md) | Outfit slots, items, stat bonuses, effective versus base level, and how equipping works. |
