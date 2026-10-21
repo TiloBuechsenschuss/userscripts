@@ -15,6 +15,9 @@
 //    title exists in two Masques, and Promenade! / Make merry! must not leak.
 //  - The seasons: one per year, three Masques each, hmSeason's fallback for a
 //    year with no entry, and the panel built for 2025, 2026 and 2027.
+//  - What you hold: the Confessions, masks, Masque spends and upgrade needs read
+//    off banked Possessions counts, a dash (never a zero) when nothing has been
+//    read, each upgrade's done / short / ready, and the auto-refresh on open.
 //  - That no Masque name is in another Choice Helper table, and the whole panel
 //    builds.
 
@@ -139,6 +142,7 @@ const wrapped = src
   .replace(/\}\)\(\);\s*$/,
     'return { HM_MASQUES, HM_MASQUE_OPTIONS, HM_SPIRIT_REWARDS, HM_SEASONS, hmSeason, hmMenaceRuns,'
     + ' HM_CONFESSION_COLUMNS, HM_AFFILIATIONS, HM_CONFESSION_REWARDS, HM_MARK_SPENDS,'
+    + ' hmHoldings, hmUpgradeStatus, COUNTS_KEY, AUTO_KEY,'
     + ' hmMasqueSpec, hmMasqueStoryletSpec, renderHallowmasPanel, hallowmasMasquesRatings,'
     + ' ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS, PC_OPTIONS, HALLOWMAS_OPTIONS, normalizeName,'
     + ' PANELS, FEATURES, BADGE_CLASS, CAROUSEL_COLOR_PROGRESS, CAROUSEL_COLOR_NEUTRAL }; })();');
@@ -307,7 +311,7 @@ check('twelve upgrades a year in 2025 and 2026',
 check('where a season prints a tick-grid, every upgrade has a row and none is spare',
   seasons.filter((s) => s.grid).map((s) => [s.year, s.upgrades.filter((u) => !s.grid[u.to]).length,
     Object.keys(s.grid).length === s.upgrades.length]),
-  [[2025, 0, true]]);
+  [[2025, 0, true], [2026, 0, true]]);
 check('the guide list table and its tick-grid agree on every upgrade',
   seasons.filter((s) => s.grid).flatMap((s) => s.upgrades.filter((u) => {
     const grid = api.HM_CONFESSION_COLUMNS.map((c) => (u.confessions.includes(c) ? 'x' : '.')).join('');
@@ -317,9 +321,18 @@ check('an upgrade takes two or three distinct Confessions of the six',
   seasons.flatMap((s) => s.upgrades.filter((u) => u.confessions.length < 2 || u.confessions.length > 3
     || new Set(u.confessions).size !== u.confessions.length
     || u.confessions.some((c) => !api.HM_CONFESSION_COLUMNS.includes(c))).map((u) => s.year + ' ' + u.to)), []);
-check('2026 transcribed: the Parisian Emigre has two upgrades and the Henchman two',
-  ['Parisian Émigré', 'Devious Henchman'].map((f) => seasons[1].upgrades.filter((u) => u.from === f).map((u) => u.to)),
+check('2026 transcribed: the Parisian Emigree has two upgrades and the Henchman two',
+  ['Parisian Émigrée', 'Devious Henchman'].map((f) => seasons[1].upgrades.filter((u) => u.from === f).map((u) => u.to)),
   [['Parisian Infiltrator', 'Rats in the Walls'], ['Pious Henchman', 'Faustian Henchman']]);
+check('2026 re-checked against the option pages: the Goldfish takes Violence, Rats in the Walls also 10 Rattus Faber',
+  [seasons[1].upgrades.find((u) => u.to === 'Memorious Goldfish').confessions,
+   seasons[1].upgrades.find((u) => u.to === 'Rats in the Walls').holds],
+  [['Violence', 'Whimsy'], [['Parisian Émigrée', 1], ['Talkative Rattus Faber', 10]]]);
+check('every 2026 upgrade says what it needs from Possessions, as [item, count >= 1] pairs',
+  seasons[1].upgrades.filter((u) => !Array.isArray(u.holds)
+    || u.holds.some((p) => typeof p[0] !== 'string' || !(p[1] >= 1))).map((u) => u.to), []);
+check('the free companion is spelt as the guide and its item page spell it',
+  [seasons[1].newCompanion, seasons[1].upgrades.filter((u) => u.from === 'Parisian Émigrée').length], ['Parisian Émigrée', 2]);
 check('the leftover-Confession turn-ins cover all six Confessions once',
   api.HM_CONFESSION_REWARDS.map((r) => r[0]).sort(), [...api.HM_CONFESSION_COLUMNS].sort());
 check('four affiliations, one per Menace, none carrying a hard-coded year',
@@ -451,6 +464,63 @@ check('the 2025 panel still builds from its own entry',
 check('a Masque the season rests says so in its storylet tooltip; a running one does not',
   [WRECK, SACRISTY].map((n) => api.hmMasqueStoryletSpec(api.normalizeName(n)).title.includes('does not expect')),
   [true, false]);
+
+// --- what you hold -----------------------------------------------------------------
+
+const heldOf = (pairs) => ({ live: false, at: 0, count: (n) => (pairs[n] || 0) });
+const up = (to) => seasons[1].upgrades.find((u) => u.to === to);
+check('an upgrade is done when you hold what locks it, short when anything is missing, else ready',
+  [api.hmUpgradeStatus(up('Memorious Goldfish'), heldOf({ 'Memorious Goldfish': 1 })),
+   api.hmUpgradeStatus(up('Memorious Goldfish'), heldOf({ 'Cheerful Goldfish': 1, 'A Confession of Whimsy': 2 })),
+   api.hmUpgradeStatus(up('Memorious Goldfish'),
+     heldOf({ 'Cheerful Goldfish': 1, 'A Confession of Whimsy': 1, 'A Confession of Violence': 1 }))].map((s) => s.text),
+  ['✓ have Memorious Goldfish (locked)', 'needs Confession of Violence', '★ ready']);
+check('a count short of what is needed says how far short',
+  api.hmUpgradeStatus(up('Rats in the Walls'), heldOf({ 'Parisian Émigrée': 1, 'Talkative Rattus Faber': 4,
+    'A Confession of Impropriety': 1, 'A Confession of Violence': 1, 'A Confession of Curiosity': 1 })).text,
+  'needs Talkative Rattus Faber 4/10');
+check('a quality the row also needs keeps "ready" conditional, and the no-Agents Morsel counts as done',
+  [api.hmUpgradeStatus(up('Deposed King Crocodile'), heldOf({ 'A Confession of Violence': 1, 'A Confession of Pride': 1,
+    'A Confession of Guile': 1 })).text.startsWith('★ ready if you have A Hunter of Zee-Beasts 10'),
+   api.hmUpgradeStatus(up('Parisian Infiltrator'), heldOf({ 'Morsel of Mignon': 1 })).state],
+  [true, 'done']);
+check('no holdings read, or a season with no `holds`, is no status at all',
+  [api.hmUpgradeStatus(up('Memorious Goldfish'), null), api.hmUpgradeStatus(seasons[0].upgrades[0], heldOf({}))],
+  [null, null]);
+
+check('nothing ever read: the panel shows dashes and says so, never a zero',
+  (() => {
+    const { text } = panelText(at(2026));
+    return [text.includes('Possessions never read'), text.includes('(hold –)'), text.includes('Confessions — ')];
+  })(), [true, true, false]);
+
+store.set(api.COUNTS_KEY, JSON.stringify({ v: 2, at: Date.now() - 5 * 60000, character: null, held: [
+  ['confession of curiosity', 'A Confession of Curiosity', 3], ['confession of whimsy', 'A Confession of Whimsy', 1],
+  ['confession of violence', 'A Confession of Violence', 2], ['moth', 'The Moth', 1],
+  ['cheerful goldfish', 'Cheerful Goldfish', 1], ['bottle of strangling willow absinthe', 'Bottle of Strangling Willow Absinthe', 7],
+] }));
+check('banked counts: the Confession total, a held mask, a Masque spend and an upgrade ready, with the read labelled',
+  (() => {
+    const { text } = panelText(at(2026));
+    return ['Confessions — 6 in all', '✓ held', 'Crown (resting)', '5 × Bottle of Strangling Willow Absinthe (hold 7)',
+      'Possessions read 5 minutes ago', '★ ready', 'Whimsy (1)', 'keeps the original']
+      .filter((x) => !text.includes(x));
+  })(), []);
+check('hmHoldings reads the banked counts through itemKey, so the article does not matter',
+  [api.hmHoldings().count('A Confession of Curiosity'), api.hmHoldings().count('Moth'), api.hmHoldings().count('The Crown')],
+  [3, 1, 0]);
+
+// Last, because the refresh it books never settles under the stubbed timers.
+check('opening the panel on stale counts books a background refresh, unless auto is off',
+  (() => {
+    const ctx = { rerender() {} };
+    store.set(api.AUTO_KEY, '0');
+    api.renderHallowmasPanel(ctx, at(2026));
+    const off = frameCount();
+    store.delete(api.AUTO_KEY);
+    api.renderHallowmasPanel(ctx, at(2026));
+    return [off, frameCount() > off];
+  })(), [0, true]);
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nAll passed');
 process.exit(failures ? 1 : 0);

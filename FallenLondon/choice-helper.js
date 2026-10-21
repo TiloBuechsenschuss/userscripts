@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.61
+// @version      1.62
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -648,7 +648,9 @@
  *     the pictures are used all over the game; the tooltip of an unnamed row quotes the name the game shows, to copy in.
  *     (25) Hallowmas Masques, the festival's main loop, and a panel behind ⚙ UX (this year's dates, every Masque option by Airs
  *     band with the resting Masque last, what Spirit buys, the affiliations, the leftover-Confession turn-ins, and this year's
- *     companion upgrades). Everything that changes by year is one entry per year in HM_SEASONS (2025, 2026); a year with no
+ *     companion upgrades), and what you hold off the Possessions tab (live, or banked and labelled with its age, with
+ *     Refresh and auto like the other panels): the six Confessions, the masks, what each option spends, and whether each
+ *     upgrade is done, short of something, or ready. Everything that changes by year is one entry per year in HM_SEASONS (2025, 2026); a year with no
  *     entry shows the newest one, marked out of date. Each option in
  *     a Masque (the Roof Below, the Wreck of the St Elmo, the Pavilion of Butterflies, Saint Dunstan's Sacristy) shows the Menace CP it pays
  *     ("Nightmares +7 CP ▼ · Moth"): ▼ means it spends an item, and the mask it needs is a word, since the script cannot read your mask.
@@ -39961,6 +39963,17 @@
   // Crown) is out; new upgrades. The four Masque pages are unchanged since
   // 2024, so the option rows stand. The guide's exchange table still files
   // the Wreck's three exchanges under the Pavilion; the option pages still win.
+  // Re-checked 2026-10-21: the masks and Scandal are now confirmed rather
+  // than expected, the four Masque pages and their option pages are still
+  // unchanged, and the Fool's Judgement pages changed wording only. The
+  // upgrade table changed; see HM_UPGRADES_2026.
+  //
+  // **What you hold.** The panel reads the Possessions tab -- live when it is
+  // open, banked (and labelled with its age) otherwise, refreshed in a hidden
+  // frame like every other panel's -- for the six Confessions, the four masks,
+  // what each Masque option spends and what each upgrade needs. Items only:
+  // Spirit and the Menaces are qualities and are not shown. A dash is
+  // "never read", never "none".
 
   const HM_MASQUES = {
     'The Roof Below': { menace: 'Wounds', mask: 'Infant', card: 'The Squall of Infants',
@@ -40164,8 +40177,8 @@
   // --- the companion upgrades, per year. The companions change every year. ---
   // `confessions` is the guide's list table. Where the guide also prints its
   // tick-grid for that year, the season carries it as `grid` and the test
-  // checks the two against each other; 2026's grid was still 2025's on
-  // 2026-10-19 ("not yet updated"), so 2026 carries none.
+  // checks the two against each other. A year without `holds` on its rows
+  // (2025) shows a dash in the panel's "you hold" column: nothing checked.
   const HM_UPGRADES_2025 = [
     { from: 'Perforated Diver', to: 'No One of Consequence', confessions: ['Impropriety', 'Violence'], kind: 'Affiliation' },
     { from: 'Perforated Diver', to: 'Perforated Zubmariner', confessions: ['Curiosity', 'Guile', 'Pride'], kind: 'Agent' },
@@ -40193,26 +40206,67 @@
     'Recalcitrant Sculptress': '.xx.x.',
   };
 
-  // From the guide's "available in 2026" table, 2026-10-19. The two Fate marks
-  // are from the option pages "Meet an Enthusiastic Visitor (5 FATE)" and
-  // "Meet a Presbyterate Diplomat (10 FATE)"; the guide's table has none.
+  // From the guide's "available in 2026" table, 2026-10-19, re-checked
+  // 2026-10-21 against the guide as edited that evening (the companion is the
+  // Émigrée; the Goldfish takes Violence, not Curiosity) AND against the 13
+  // 2026 option pages of Unburden Yourself to an Attendant, which win where
+  // they differ: Rats in the Walls also spends 10 Talkative Rattus Faber,
+  // which the guide does not say. Every option spends ONE of each Confession
+  // listed and gives Spirit of Hallowmas +3, and is locked while you hold
+  // what it gives.
+  //
+  // For the panel's "you hold" column, from the same option pages:
+  //   holds   the items it needs, [name, count] -- items only, because those
+  //           are what the Possessions tab can show
+  //   unread  a condition it also has that is a quality, so is not checked
+  //   owned   the items whose possession locks it; [to] when absent. The
+  //           Infiltrator is an Agent (the wiki files it as one, not as an
+  //           item), so it may never show on Possessions; the Morsel the
+  //           no-Agents option gives instead does
+  //   keeps   the option does not take the original
+  // The guide marks the Visitor as from the Feast of the Exceptional Rose or
+  // Fate and the Diplomat as the Rose only, but a "Meet a Presbyterate
+  // Diplomat (10 FATE)" option page exists, so both say both.
   const HM_UPGRADES_2026 = [
-    { from: 'Parisian Émigré', to: 'Parisian Infiltrator', confessions: ['Curiosity', 'Guile', 'Pride'], kind: 'Agent',
-      note: 'a Morsel of Mignon instead if you have not unlocked Agents' },
-    { from: 'Parisian Émigré', to: 'Rats in the Walls', confessions: ['Impropriety', 'Violence', 'Curiosity'], kind: 'Affiliation' },
-    { from: 'Enthusiastic Visitor (Fate)', to: 'Mangled Accent', confessions: ['Curiosity', 'Whimsy', 'Impropriety'], kind: 'Hat' },
-    { from: 'Presbyterate Diplomat (Fate)', to: 'Two-Faced Briefcase', confessions: ['Pride', 'Guile'], kind: 'Luggage' },
+    { from: 'Parisian Émigrée', to: 'Parisian Infiltrator', confessions: ['Curiosity', 'Guile', 'Pride'], kind: 'Agent',
+      note: 'a Morsel of Mignon instead if you have not unlocked Agents',
+      holds: [['Parisian Émigrée', 1]], owned: ['Parisian Infiltrator', 'Morsel of Mignon'],
+      unread: 'you have no Infiltrator yet (an Agent, which Possessions may not show)' },
+    { from: 'Parisian Émigrée', to: 'Rats in the Walls', confessions: ['Impropriety', 'Violence', 'Curiosity'], kind: 'Affiliation',
+      note: 'also spends 10 Talkative Rattus Faber',
+      holds: [['Parisian Émigrée', 1], ['Talkative Rattus Faber', 10]] },
+    { from: 'Enthusiastic Visitor (Feast of the Rose or Fate)', to: 'Mangled Accent',
+      confessions: ['Curiosity', 'Whimsy', 'Impropriety'], kind: 'Hat', holds: [['Enthusiastic Visitor', 1]], keeps: true },
+    { from: 'Presbyterate Diplomat (Feast of the Rose or Fate)', to: 'Two-Faced Briefcase', confessions: ['Pride', 'Guile'],
+      kind: 'Luggage', holds: [['Presbyterate Diplomat', 1]], keeps: true },
     { from: 'Fairly Tame Sorrow-Spider 6 + Lost Research Assistant 3 + Key to a Cottage by the Observatory',
-      to: 'Blind Navigators', confessions: ['Curiosity', 'Pride', 'Whimsy'], kind: 'Crew' },
-    { from: 'A Hunter of Zee-Beasts 10', to: 'Deposed King Crocodile', confessions: ['Violence', 'Pride', 'Guile'], kind: 'Companion' },
+      to: 'Blind Navigators', confessions: ['Curiosity', 'Pride', 'Whimsy'], kind: 'Crew',
+      holds: [['Fairly Tame Sorrow-Spider', 6], ['Lost Research Assistant', 3], ['Key to a Cottage by the Observatory', 1]],
+      unread: 'the Cottage is not loaned out' },
+    { from: 'A Hunter of Zee-Beasts 10', to: 'Deposed King Crocodile', confessions: ['Violence', 'Pride', 'Guile'], kind: 'Companion',
+      holds: [], unread: 'you have A Hunter of Zee-Beasts 10', keeps: true },
     { from: 'An Interloper in the Library + Proscribed Material 250', to: 'Silent Trolley',
-      confessions: ['Curiosity', 'Impropriety'], kind: 'Luggage' },
-    { from: 'Honey-Mazed Bear', to: 'Ursine Honey Connoisseur', confessions: ['Whimsy', 'Violence', 'Impropriety'], kind: 'Companion' },
-    { from: 'Devious Henchman', to: 'Pious Henchman', confessions: ['Guile', 'Impropriety'], kind: 'Companion' },
-    { from: 'Devious Henchman', to: 'Faustian Henchman', confessions: ['Guile', 'Violence'], kind: 'Companion' },
-    { from: 'Cheerful Goldfish', to: 'Memorious Goldfish', confessions: ['Curiosity', 'Whimsy'], kind: 'Companion' },
-    { from: 'Fairly Tame Sorrow-Spider', to: 'Spider of Silken Marvels', confessions: ['Pride', 'Whimsy'], kind: 'Companion' },
+      confessions: ['Curiosity', 'Impropriety'], kind: 'Luggage',
+      holds: [['Proscribed Material', 250]], unread: 'you have An Interloper in the Library' },
+    { from: 'Honey-Mazed Bear', to: 'Ursine Honey Connoisseur', confessions: ['Whimsy', 'Violence', 'Impropriety'], kind: 'Companion',
+      holds: [['Honey-Mazed Bear', 1]] },
+    { from: 'Devious Henchman', to: 'Pious Henchman', confessions: ['Guile', 'Impropriety'], kind: 'Companion',
+      holds: [['Devious Henchman', 1]] },
+    { from: 'Devious Henchman', to: 'Faustian Henchman', confessions: ['Guile', 'Violence'], kind: 'Companion',
+      holds: [['Devious Henchman', 1]] },
+    { from: 'Cheerful Goldfish', to: 'Memorious Goldfish', confessions: ['Violence', 'Whimsy'], kind: 'Companion',
+      holds: [['Cheerful Goldfish', 1]] },
+    { from: 'Fairly Tame Sorrow-Spider', to: 'Spider of Silken Marvels', confessions: ['Pride', 'Whimsy'], kind: 'Companion',
+      holds: [['Fairly Tame Sorrow-Spider', 1]] },
   ];
+  // The guide's 2026 tick-grid, as printed 2026-10-21 (the "not yet updated"
+  // banner gone). Same columns as 2025's.
+  const HM_UPGRADE_GRID_2026 = {
+    'Parisian Infiltrator': 'xx.x..', 'Rats in the Walls': 'x.x.x.', 'Mangled Accent': 'x.x..x',
+    'Two-Faced Briefcase': '.x.x..', 'Blind Navigators': 'x..x.x', 'Deposed King Crocodile': '.x.xx.',
+    'Silent Trolley': 'x.x...', 'Ursine Honey Connoisseur': '..x.xx', 'Pious Henchman': '.xx...',
+    'Faustian Henchman': '.x..x.', 'Memorious Goldfish': '....xx', 'Spider of Silken Marvels': '...x.x',
+  };
 
   // One entry per Hallowmas, oldest first. A new year is a new entry here:
   //   masques       the three running, by HM_MASQUES key (the fourth rests)
@@ -40226,8 +40280,8 @@
   const HM_SEASONS = [
     { year: 2025, masques: [HM_ROOF, HM_WRECK, HM_PAVILION], newCompanion: 'Perforated Diver',
       upgrades: HM_UPGRADES_2025, grid: HM_UPGRADE_GRID_2025, timeline: [], checked: '2026-10-13' },
-    { year: 2026, masques: [HM_ROOF, HM_PAVILION, HM_SACRISTY], newCompanion: 'Parisian Émigré',
-      upgrades: HM_UPGRADES_2026, checked: '2026-10-19',
+    { year: 2026, masques: [HM_ROOF, HM_PAVILION, HM_SACRISTY], newCompanion: 'Parisian Émigrée',
+      upgrades: HM_UPGRADES_2026, grid: HM_UPGRADE_GRID_2026, checked: '2026-10-21',
       timeline: [
         ['19 October', 'Masques open; the first 7 free Confessions.'],
         ['26 October', 'The second 7 free Confessions (guide: expected).'],
@@ -40248,9 +40302,55 @@
     return season.masques.some(function (n) { return HM_MASQUES[n].menace === menace; });
   }
 
+  const HM_MASK_ITEMS = { Infant: 'The Infant', Crown: 'The Crown', Moth: 'The Moth', Demon: 'The Demon' };
+
+  function hmConfessionItem(c) { return 'A Confession of ' + c; }
+
+  // What you hold, off the Possessions tab: live when it is on screen, else
+  // the banked counts every other panel shares (COUNTS_KEY). null when
+  // neither has ever been read -- the panel then shows dashes, not zeroes.
+  function hmHoldings() {
+    const live = readPossessionCounts();
+    const rec = live && live.size ? { live: true, at: Date.now(), held: live } : loadCounts();
+    if (!rec) return null;
+    return {
+      live: !!rec.live, at: rec.at,
+      count: function (name) {
+        const got = rec.held.get(itemKey(name));
+        return got ? got.count : 0;
+      },
+    };
+  }
+
+  // One upgrade row against what you hold: already done (you hold what locks
+  // it), short of something, or ready. `unread` qualities keep a "ready" from
+  // being claimed outright. null for a row the season carries no `holds` for.
+  function hmUpgradeStatus(u, held) {
+    if (!held || !u.holds) return null;
+    const owned = (u.owned || [u.to]).filter(function (n) { return held.count(n) > 0; });
+    if (owned.length) return { state: 'done', text: '✓ have ' + owned.join(', ') + ' (locked)' };
+    const short = u.holds.filter(function (p) { return held.count(p[0]) < p[1]; }).map(function (p) {
+      return p[1] === 1 ? p[0] : p[0] + ' ' + held.count(p[0]) + '/' + p[1];
+    }).concat(u.confessions.filter(function (c) { return held.count(hmConfessionItem(c)) < 1; }).map(function (c) {
+      return 'Confession of ' + c;
+    }));
+    if (short.length) return { state: 'short', text: 'needs ' + short.join(', ') };
+    return u.unread
+      ? { state: 'ready', text: '★ ready if ' + u.unread + ' (not checked)' }
+      : { state: 'ready', text: '★ ready' };
+  }
+
   // `now` is for the test; the launcher passes only its ctx.
   function renderHallowmasPanel(ctx, now) {
     const season = hmSeason(now);
+    const held = hmHoldings();
+    let busy = false;
+    if (ctx && autoRefreshEnabled() && (!held || (!held.live && Date.now() - held.at > FRESH_MS))) {
+      busy = true;
+      refreshBackgroundState().then(function () { ctx.rerender(); });
+    }
+    busy = busy || !!refreshing;   // a click's rerender must still show it
+    const count = function (name) { return held ? String(held.count(name)) : '–'; };
     const yearNote = season.stale
       ? 'No entry for ' + (now || new Date()).getFullYear() + ' yet: everything below is ' + season.year
         + '’s. Masques, masks and companions change every year.'
@@ -40309,7 +40409,7 @@
           cell(e.airs ? e.airs[0] + '–' + e.airs[1] : 'any'),
           cell(wikiLink(e.name)),
           cell(spec.text),
-          cell(e.spends ? hmItem(e.spends) : e.swap ? '—' : 'nothing'),
+          cell(e.spends ? hmItem(e.spends) + ' (hold ' + count(e.spends[0]) + ')' : e.swap ? '—' : 'nothing'),
           cell(e.gains ? hmItem(e.gains) : ''),
         ]);
         tr.dataset.hmSearch = normalizeName([e.name, m.menace, e.mask || '', e.spends ? e.spends[0] : '',
@@ -40335,8 +40435,65 @@
     const resting = Object.keys(HM_MASQUES).map(function (n) { return HM_MASQUES[n].menace; })
       .filter(function (x) { return running.indexOf(x) === -1; });
 
+    // --- what you hold ------------------------------------------------------
+    const stat = function (label, value) {
+      return h('div', { css: 'min-width:78px;' }, [
+        h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [label]),
+        h('div', { css: 'font-size:16px;color:' + UI.text + ';' }, [value]),
+      ]);
+    };
+    const confessions = HM_CONFESSION_COLUMNS.map(function (c) { return stat(c, count(hmConfessionItem(c))); });
+    const total = held ? HM_CONFESSION_COLUMNS.reduce(function (n, c) { return n + held.count(hmConfessionItem(c)); }, 0) : null;
+    const runningMasks = season.masques.map(function (n) { return HM_MASQUES[n].mask; });
+    const masks = Object.keys(HM_MASK_ITEMS).map(function (m) {
+      const off = runningMasks.indexOf(m) === -1;
+      return stat(m + (off ? ' (resting)' : ''), held ? (held.count(HM_MASK_ITEMS[m]) ? '✓ held' : 'none') : '–');
+    });
+    const holdBlock = h('div', {
+      css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent + ';background:' + UI.bgAlt
+        + ';font-size:12px;line-height:1.6;',
+    }, [
+      h('div', { css: 'color:' + UI.dim + ';font-size:11px;' },
+        ['Confessions' + (total != null ? ' — ' + total + ' in all' : '')]),
+      h('div', { css: 'display:flex;flex-wrap:wrap;gap:14px;' }, confessions),
+      h('div', { css: 'color:' + UI.dim + ';font-size:11px;margin-top:8px;' }, ['Masks']),
+      h('div', { css: 'display:flex;flex-wrap:wrap;gap:14px;' }, masks),
+      h('div', { css: 'margin-top:6px;color:' + UI.dim + ';display:flex;flex-wrap:wrap;align-items:center;gap:8px;' }, [
+        h('span', null, [held ? 'Possessions read ' + (held.live ? 'live' : ageText(held.at))
+          + (busy ? ' — refreshing…' : '.') : (busy ? 'Reading Possessions…' : 'Possessions never read. Open the tab once.')]),
+        h('button', {
+          type: 'button',
+          disabled: busy,
+          title: 'Load /myself and /possessions in a hidden frame and re-read them.',
+          css: 'border:1px solid ' + UI.line + ';border-radius:3px;background:transparent;color:'
+            + (busy ? UI.dim : UI.accent) + ';font:11px ' + UI.font + ';padding:1px 7px;'
+            + 'cursor:' + (busy ? 'default' : 'pointer') + ';',
+          on: {
+            click: function () {
+              if (busy || !ctx) return;
+              const done = refreshBackgroundState();
+              ctx.rerender();
+              done.then(function () { ctx.rerender(); });
+            },
+          },
+        }, [busy ? 'Refreshing…' : 'Refresh']),
+        h('label', {
+          title: 'Refresh automatically when this panel opens on stale numbers.',
+          css: 'display:inline-flex;align-items:center;gap:4px;cursor:pointer;',
+        }, [
+          h('input', {
+            type: 'checkbox',
+            checked: autoRefreshEnabled(),
+            on: { change: function (e) { setAutoRefresh(!!e.currentTarget.checked); } },
+          }),
+          'auto',
+        ]),
+      ]),
+    ]);
+
     return h('div', null, [
       note(yearNote),
+      holdBlock,
       season.timeline.length
         ? section('Dates', table(['When', 'What'], season.timeline.map(function (t) {
           return h('tr', null, [cell(t[0]), cell(t[1])]);
@@ -40358,10 +40515,16 @@
       }))),
       section('Companion upgrades — ' + season.year + ' only', [
         note('The free companion in ' + season.year + ' is the ' + season.newCompanion + '. Different companions are '
-          + 'upgradeable each year' + (season.stale ? ': check the guide once this year’s list is up.' : '.')),
-        table(['Original', 'Confessions', 'Upgrade'], season.upgrades.map(function (u) {
-          return h('tr', null, [cell(u.from), cell(u.confessions.join(', ')),
-            cell([wikiLink(u.to), ' (' + u.kind + (u.note ? '; ' + u.note : '') + ')'])]);
+          + 'upgradeable each year' + (season.stale ? ': check the guide once this year’s list is up.' : '.')
+          + ' Each upgrade takes one of each Confession listed, at Unburden Yourself to an Attendant.'),
+        table(['Original', 'Confessions', 'Upgrade', 'You hold'], season.upgrades.map(function (u) {
+          const st = hmUpgradeStatus(u, held);
+          const extra = [u.kind, u.note, u.keeps ? 'keeps the original' : null].filter(Boolean).join('; ');
+          return h('tr', null, [cell(u.from), cell(u.confessions.map(function (c) {
+            return c + (held ? ' (' + held.count(hmConfessionItem(c)) + ')' : '');
+          }).join(', ')),
+          cell([wikiLink(u.to), ' (' + extra + ')']),
+          cell(st ? st.text : '–')]);
         })),
       ]),
     ]);
