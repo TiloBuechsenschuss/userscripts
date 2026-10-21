@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.63
+// @version      1.64
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -650,7 +650,8 @@
  *     band with the resting Masque last, what Spirit buys, the affiliations, the leftover-Confession turn-ins, and this year's
  *     companion upgrades), and what you hold off the Possessions tab (live, or banked and labelled with its age, with
  *     Refresh and auto like the other panels): Spirit of Hallowmas (a quality, off the Myself tab), the six Confessions, the
- *     masks, what each option spends, and whether each upgrade is done, short of something (with the quickest way to make a
+ *     masks, the Agents tab (for the one upgrade that is an Agent), what each option spends, and whether each upgrade is
+ *     done, short of something (with the quickest way to make a
  *     missing Confession out of a spare one), or ready; and the quickest route between every pair of Confessions through
  *     this year's running exchanges (fewest exchanges, then fewest moves between Masques). Everything that changes by year is one entry per year in HM_SEASONS (2025, 2026); a year with no
  *     entry shows the newest one, marked out of date. Each option in
@@ -1630,6 +1631,123 @@
       else if (count > seen.count) seen.count = count;
     });
     return held;
+  }
+
+
+  // --- your agents -------------------------------------------------------
+  //
+  // The Agents tab (/agents). Captured 2026-10-21 from a real character; the
+  // whole structure is in okf/fallen-london/agents-tab.md. An Agent is not an
+  // item, and nothing has shown it on Possessions, so this tab is the only
+  // place that says which ones you have:
+  //
+  //   <div id="agents">
+  //     <div class="agents-header"><h1 …>Agents</h1>
+  //       <span class="heading heading--3 heading--close">1/3 Active Plots</span></div>
+  //     <div class="agent-filter-group"><span class="agent-filter-label">Show:</span>
+  //       … <div class="css-gj4dr3-singleValue">All</div> …   (a react-select)
+  //     <div class="working-agent">   -- one per agent out on a plot
+  //       <span class="heading heading--2 heading--close agent-header">Nectared Proprietor</span>
+  //       … <h2 class="media__heading heading heading--3 branch__title">An Expedition …</h2>
+  //       … <div class="working-agent-elapsed-actions">146/250: 104 actions before your agent returns</div>
+  //     <div class="free-agent">      -- one per agent at home
+  //       <h2 class="heading heading--2 agent-header">Mild-Mannered Mondaine</h2>
+  //
+  // The "Active Plots" count is the sign the list is drawn: the header text
+  // alone is there before the data is. The filter's class is an emotion hash,
+  // so it is matched on its `-singleValue` suffix; anything but "All" means
+  // the list may be missing agents, and an absent one then proves nothing.
+  const AGENTS_PLOTS_RE = /(\d+)\s*\/\s*(\d+)\s*Active Plots/i;
+  const AGENTS_LEFT_RE = /(\d+)\s*\/\s*(\d+)\s*:\s*(\d+)\s*actions?/i;
+
+  function readAgents(doc) {
+    const d = doc || document;
+    const root = d.querySelector('#agents');
+    if (!root) return null;
+    const head = root.querySelector('.agents-header');
+    const plots = head ? AGENTS_PLOTS_RE.exec(head.textContent) : null;
+    if (!plots) return null;
+    const show = root.querySelector('.agent-filter-group [class*="-singleValue"]');
+    const filter = show ? show.textContent.trim() : null;
+    const agents = [];
+    root.querySelectorAll('.working-agent, .free-agent').forEach(function (el) {
+      const nameEl = el.querySelector('.agent-header');
+      const name = nameEl ? headingName(nameEl) : '';
+      if (!name) return;
+      const working = String(el.className).split(/\s+/).indexOf('working-agent') !== -1;
+      const plotEl = working ? el.querySelector('.branch__title') : null;
+      const leftEl = working ? el.querySelector('.working-agent-elapsed-actions') : null;
+      const left = leftEl ? AGENTS_LEFT_RE.exec(leftEl.textContent) : null;
+      agents.push({
+        name: name, working: working, plot: plotEl ? headingName(plotEl) : null,
+        progress: left ? [Number(left[1]), Number(left[2])] : null, left: left ? Number(left[3]) : null,
+      });
+    });
+    return {
+      agents: agents, active: Number(plots[1]), slots: Number(plots[2]),
+      filter: filter, filtered: filter !== 'All',
+    };
+  }
+
+  const AGENTS_KEY = 'fl-ux-agents';
+  // A character without Agents may never get a list drawn there; a failed
+  // read is banked too, so the panel does not boot the tab again on every
+  // open, and is retried after this long.
+  const AGENTS_RETRY_MS = 60 * 60 * 1000;
+
+  function bankAgents(got) {
+    if (!got) return false;
+    saveCache(AGENTS_KEY, {
+      v: 1, at: Date.now(), character: characterName() || null, agents: got.agents,
+      active: got.active, slots: got.slots, filter: got.filter, filtered: got.filtered,
+    });
+    return true;
+  }
+
+  // `failedAt` alongside whatever good reading there was, never over it.
+  function bankAgentsFailed() {
+    const rec = loadCache(AGENTS_KEY, 1) || { v: 1, character: characterName() || null };
+    rec.failedAt = Date.now();
+    saveCache(AGENTS_KEY, rec);
+  }
+
+  // Live when the tab is on screen, else the banked reading. `stale` is for
+  // the caller's auto-refresh: a minute for a reading, an hour after a failure.
+  function agentsState() {
+    const live = readAgents();
+    if (live) return Object.assign({ live: true, at: Date.now(), stale: false }, live);
+    const rec = loadCache(AGENTS_KEY, 1);
+    if (!rec) return null;
+    const failedLast = rec.failedAt && (!rec.at || rec.failedAt > rec.at);
+    const since = Date.now() - (failedLast ? rec.failedAt : rec.at);
+    return Object.assign({ live: false, failed: !!failedLast,
+      stale: since > (failedLast ? AGENTS_RETRY_MS : FRESH_MS) }, rec);
+  }
+
+  let lastAgentsSig = null;
+  function captureAgents() {
+    const got = readAgents();
+    if (!got) { lastAgentsSig = null; return; }
+    const sig = got.filter + '|' + got.agents.map(function (a) { return a.name + ':' + a.left; }).join(',');
+    if (sig === lastAgentsSig) return;
+    lastAgentsSig = sig;
+    bankAgents(got);
+  }
+
+  // Only the panels that need it call this: it is a third boot of the SPA,
+  // so it is not part of refreshBackgroundState.
+  let refreshingAgents = null;
+  function refreshAgents() {
+    if (refreshingAgents) return refreshingAgents;
+    refreshingAgents = (readAgents() ? Promise.resolve(readAgents()) : loadInFrame('/agents', readAgents))
+      .then(function (got) {
+        if (got) bankAgents(got); else bankAgentsFailed();
+        return !!got;
+      }).catch(function () { return false; }).then(function (v) {
+        refreshingAgents = null;
+        return v;
+      });
+    return refreshingAgents;
   }
 
 
@@ -35717,6 +35835,8 @@
   // the factions plumbing stays exactly as it was.
   let lastFotzSig = null;
   function captureFotzState() {
+    // The Agents tab rides along here rather than as a feature of its own.
+    captureAgents();
     const items = document.querySelectorAll('li.quality-item');
     const owned = document.querySelectorAll(OWNED_MARKER);
     if (!items.length && !owned.length) { lastFotzSig = null; return; }
@@ -39975,7 +40095,8 @@
   // **What you hold.** The panel reads the Possessions tab -- live when it is
   // open, banked (and labelled with its age) otherwise, refreshed in a hidden
   // frame like every other panel's -- for the six Confessions, the four masks,
-  // what each Masque option spends and what each upgrade needs. Items only:
+  // what each Masque option spends and what each upgrade needs, plus the
+  // Agents tab (readAgents) for the one upgrade that is an Agent. Items only:
   // Spirit of Hallowmas is a quality, so it comes off the Myself tab instead
   // (HM_CACHE_KEY, banked wherever the other panels' qualities are); the
   // Menaces are not shown. A dash is "never read", never "none".
@@ -40232,10 +40353,10 @@
   //   holds   the items it needs, [name, count] -- items only, because those
   //           are what the Possessions tab can show
   //   unread  a condition it also has that is a quality, so is not checked
-  //   owned   the items whose possession locks it; [to] when absent. The
-  //           Infiltrator is an Agent (the wiki files it as one, not as an
-  //           item), so it may never show on Possessions; the Morsel the
-  //           no-Agents option gives instead does
+  //   owned   the items whose possession locks it; [to] when absent
+  //   agent   an Agent whose presence locks it, read off the Agents tab: the
+  //           Infiltrator is an Agent, not an item. The Morsel the no-Agents
+  //           option gives instead is an item, so it is in `owned`
   //   keeps   the option does not take the original
   // The guide marks the Visitor as from the Feast of the Exceptional Rose or
   // Fate and the Diplomat as the Rose only, but a "Meet a Presbyterate
@@ -40243,8 +40364,7 @@
   const HM_UPGRADES_2026 = [
     { from: 'Parisian Émigrée', to: 'Parisian Infiltrator', confessions: ['Curiosity', 'Guile', 'Pride'], kind: 'Agent',
       note: 'a Morsel of Mignon instead if you have not unlocked Agents',
-      holds: [['Parisian Émigrée', 1]], owned: ['Parisian Infiltrator', 'Morsel of Mignon'],
-      unread: 'you have no Infiltrator yet (an Agent, which Possessions may not show)' },
+      holds: [['Parisian Émigrée', 1]], owned: ['Morsel of Mignon'], agent: 'Parisian Infiltrator' },
     { from: 'Parisian Émigrée', to: 'Rats in the Walls', confessions: ['Impropriety', 'Violence', 'Curiosity'], kind: 'Affiliation',
       note: 'also spends 10 Talkative Rattus Faber',
       holds: [['Parisian Émigrée', 1], ['Talkative Rattus Faber', 10]] },
@@ -40427,10 +40547,22 @@
   // With `routes`, a missing Confession also says the quickest way to make it
   // out of one you can spare: a Confession this upgrade does not need, or a
   // second of one it does. Each spare is used once across the row.
-  function hmUpgradeStatus(u, held, routes) {
+  //
+  // `agents` is agentsState(); an Agent row is only "ready" outright when the
+  // tab was read with nothing filtered out.
+  function hmUpgradeStatus(u, held, routes, agents) {
     if (!held || !u.holds) return null;
     const owned = (u.owned || [u.to]).filter(function (n) { return held.count(n) > 0; });
+    const known = agents && agents.agents && !agents.failed ? agents : null;
+    if (u.agent && known && known.agents.some(function (a) { return itemKey(a.name) === itemKey(u.agent); })) {
+      owned.unshift(u.agent);
+    }
     if (owned.length) return { state: 'done', text: '✓ have ' + owned.join(', ') + ' (locked)' };
+    const conds = [u.unread];
+    if (u.agent && (!known || known.filtered)) {
+      conds.push('you have no ' + u.agent + ' yet (Agents tab ' + (known ? 'filtered to ' + known.filter : 'not read') + ')');
+    }
+    const cond = conds.filter(Boolean).join(' and ');
     const spare = {};
     HM_CONFESSION_COLUMNS.forEach(function (c) {
       spare[c] = held.count(hmConfessionItem(c)) - (u.confessions.indexOf(c) !== -1 ? 1 : 0);
@@ -40453,8 +40585,8 @@
       return 'Confession of ' + c + make(c);
     }));
     if (short.length) return { state: 'short', text: 'needs ' + short.join(', ') };
-    return u.unread
-      ? { state: 'ready', text: '★ ready if ' + u.unread + ' (not checked)' }
+    return cond
+      ? { state: 'ready', text: '★ ready if ' + cond + ' (not checked)' }
       : { state: 'ready', text: '★ ready' };
   }
 
@@ -40463,14 +40595,19 @@
     const season = hmSeason(now);
     const held = hmHoldings();
     const spirit = readHmSpirit();
+    const agents = agentsState();
     const routes = hmConfessionRoutes(season);
     const stale = function (r) { return !r || (!r.live && Date.now() - r.at > FRESH_MS); };
+    // Possessions and Myself first, then the Agents tab: one frame at a time.
+    const refreshAll = function () {
+      return refreshBackgroundState().then(function () { return refreshAgents(); });
+    };
     let busy = false;
-    if (ctx && autoRefreshEnabled() && (stale(held) || stale(spirit))) {
+    if (ctx && autoRefreshEnabled() && (stale(held) || stale(spirit) || !agents || agents.stale)) {
       busy = true;
-      refreshBackgroundState().then(function () { ctx.rerender(); });
+      refreshAll().then(function () { ctx.rerender(); });
     }
-    busy = busy || !!refreshing;   // a click's rerender must still show it
+    busy = busy || !!refreshing || !!refreshingAgents;   // a click's rerender must still show it
     const count = function (name) { return held ? String(held.count(name)) : '–'; };
     const yearNote = season.stale
       ? 'No entry for ' + (now || new Date()).getFullYear() + ' yet: everything below is ' + season.year
@@ -40585,18 +40722,21 @@
       h('div', { css: 'margin-top:6px;color:' + UI.dim + ';display:flex;flex-wrap:wrap;align-items:center;gap:8px;' }, [
         h('span', null, [(held ? 'Possessions read ' + (held.live ? 'live' : ageText(held.at))
           : 'Possessions never read') + ' · ' + (spirit ? 'Spirit read ' + (spirit.live ? 'live' : ageText(spirit.at))
-          : 'Spirit never read (Myself tab)') + (busy ? ' — refreshing…' : '.')]),
+          : 'Spirit never read (Myself tab)') + ' · ' + (!agents ? 'Agents never read'
+          : agents.failed ? 'Agents tab could not be read' + (agents.at ? ' (last read ' + ageText(agents.at) + ')' : '')
+          : 'Agents read ' + (agents.live ? 'live' : ageText(agents.at)) + (agents.filtered ? ', filtered to ' + agents.filter : ''))
+          + (busy ? ' — refreshing…' : '.')]),
         h('button', {
           type: 'button',
           disabled: busy,
-          title: 'Load /myself and /possessions in a hidden frame and re-read them.',
+          title: 'Load /myself, /possessions and /agents in a hidden frame and re-read them.',
           css: 'border:1px solid ' + UI.line + ';border-radius:3px;background:transparent;color:'
             + (busy ? UI.dim : UI.accent) + ';font:11px ' + UI.font + ';padding:1px 7px;'
             + 'cursor:' + (busy ? 'default' : 'pointer') + ';',
           on: {
             click: function () {
               if (busy || !ctx) return;
-              const done = refreshBackgroundState();
+              const done = refreshAll();
               ctx.rerender();
               done.then(function () { ctx.rerender(); });
             },
@@ -40663,7 +40803,7 @@
           + 'upgradeable each year' + (season.stale ? ': check the guide once this year’s list is up.' : '.')
           + ' Each upgrade takes one of each Confession listed, at Unburden Yourself to an Attendant.'),
         table(['Original', 'Confessions', 'Upgrade', 'You hold'], season.upgrades.map(function (u) {
-          const st = hmUpgradeStatus(u, held, routes);
+          const st = hmUpgradeStatus(u, held, routes, agents);
           const extra = [u.kind, u.note, u.keeps ? 'keeps the original' : null].filter(Boolean).join('; ');
           return h('tr', null, [cell(u.from), cell(u.confessions.map(function (c) {
             return c + (held ? ' (' + held.count(hmConfessionItem(c)) + ')' : '');
