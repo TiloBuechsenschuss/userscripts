@@ -18,6 +18,8 @@
 //   - The game's own list of things (#rgpois) loses its screen-reader-only class
 //     (rgsr) for a non-empty one of ours; a list with no class is left alone.
 //   - Every point-of-interest form's rgx/rgy/rgf follow the player's position.
+//   - The point-of-interest forms sort free items (food, booze, spleen) first, then
+//     monsters, fountains, chests, unknown last; the page order holds within a kind.
 //
 //   node tests/black-rose-garden.test.mjs
 
@@ -42,7 +44,7 @@ const fakeLocation = { pathname: '/nowhere.php' };
 const wrapped = src
   .replace('(function () {', 'globalThis.__iotm = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { parseRoseGarden, freshMap, mergeMap, sameGarden, parsePosBody, mapBounds, plaqueLetter, showRosePois, syncRosePoiForms }; })();');
+    'return { parseRoseGarden, freshMap, mergeMap, sameGarden, parsePosBody, mapBounds, plaqueLetter, showRosePois, syncRosePoiForms, roseSortedForms }; })();');
 const fn = new Function('document', 'location', 'localStorage',
   wrapped + '\nreturn globalThis.__iotm;');
 const api = fn(fakeDoc, fakeLocation, { getItem: () => null, setItem: () => {}, removeItem: () => {} });
@@ -174,6 +176,14 @@ check('poi forms: every form gets the position',
   [[13, 22, 2], [13, 22, 2]]);
 check('poi forms: a form without the fields is skipped', formNoFields, {});
 byClass = {};
+
+// --- roseSortedForms ---------------------------------------------------
+const poiForm = (i) => ({ i, getAttribute: (a) => (a === 'data-i' ? String(i) : null) });
+const kinds = { 1: { k: 'chest' }, 2: { k: 'monster' }, 3: { k: 'fountain' }, 4: { k: 'booze' },
+  5: { k: 'monster' }, 6: { k: 'food' }, 7: { k: 'spleen' } };
+check('poi order: free items, fights, fountains, chests, unknown last',
+  api.roseSortedForms([1, 2, 3, 4, 5, 6, 7, 8].map(poiForm), kinds).map((f) => f.i),
+  [4, 6, 7, 2, 5, 3, 1, 8]);
 
 // --- the copy in iotm.js: the two files must not drift apart ---------
 check('map section found in both files', iotmMap.length > 1000 && standaloneMap.length > 1000, true);

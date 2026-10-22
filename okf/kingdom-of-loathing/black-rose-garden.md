@@ -68,7 +68,10 @@ monster/item locations"). The renderer has no Tab key handler: Tab only moves ke
 
 The map helper swaps `rgsr` for its own class `tm-rgpois`, which shows the list and, being
 non-empty, stops the renderer from hiding it again; it also copies each position save into
-every `rgpoi` form so a button pressed after walking sends the current cell.
+every `rgpoi` form so a button pressed after walking sends the current cell. It also reorders
+the forms by the kind of their poi (looked up by `data-i`): food, booze and spleen first, then
+monsters, fountains, chests. **Assumed:** each form's `data-i` is the `i` of its poi in `RG.pois`
+(read from the renderer source, not yet seen working on the live page).
 
 ## Plaque letters
 

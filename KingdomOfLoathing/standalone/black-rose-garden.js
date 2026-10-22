@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/standalone/black-rose-garden.js
-// @version      1.2
+// @version      1.3
 // @description  Draws a top-down map of the Black Rose Garden maze beside its 3D view.
 // @match        https://www.kingdomofloathing.com/choice.php*
 // @match        https://kingdomofloathing.com/choice.php*
@@ -19,7 +19,8 @@
  *   a table of the things to fight or take (pending vs done) and a legend table side by side
  *   under it, and the cipher plaque letters. The game's own list of buttons that take you to
  *   each thing, which it otherwise shows only when you press Tab twice, is shown as well
- *   (confirmed on the live page, 2026-10-05). The map is kept between visits and shows when it was
+ *   (confirmed on the live page, 2026-10-05), ordered free items (food, booze, spleen) first,
+ *   then fights, fountains and chests (not yet confirmed on the live page). The map is kept between visits and shows when it was
  *   started; "Reset map" starts a new one. The garden changes
  *   every KoL day, and the page shows the whole new maze from the first visit, so a new
  *   garden replaces the old map by itself. One map is stored per browser, not per character.
@@ -352,6 +353,34 @@
     }
   }
 
+  // The buttons in #rgpois come in the page's own order. Put them in the order a
+  // player works through a garden: free items (food, booze, spleen) first, then
+  // fights, then fountains, then chests; anything else last. Within a kind the page's
+  // order holds. A form's data-i is its poi id, the key of map.pois.
+  const ROSE_POI_ORDER = { food: 0, booze: 0, spleen: 0, monster: 1, fountain: 2, chest: 3 };
+  function roseSortedForms(forms, pois) {
+    function rank(f) {
+      const p = pois[f.getAttribute('data-i')];
+      const r = p && ROSE_POI_ORDER[p.k];
+      return r === undefined ? 4 : r;
+    }
+    return forms.map(function (f, i) { return { f: f, r: rank(f), i: i }; })
+      .sort(function (a, b) { return a.r - b.r || a.i - b.i; })
+      .map(function (o) { return o.f; });
+  }
+  // Each sorted form takes the place of one of the old ones, so whatever else sits
+  // between them in the list stays where it was.
+  function sortRosePois(pois) {
+    const forms = Array.prototype.slice.call(document.getElementsByClassName('rgpoi'));
+    const sorted = roseSortedForms(forms, pois);
+    const slots = forms.map(function (f) {
+      const c = document.createComment('');
+      f.parentNode.insertBefore(c, f);
+      return c;
+    });
+    slots.forEach(function (c, i) { c.parentNode.replaceChild(sorted[i], c); });
+  }
+
   function initRoseGarden() {
     if (document.getElementById('tm-rosegarden')) return;
     if (!document.querySelector(
@@ -368,6 +397,7 @@
     const stored = loadRoseMap();
     let map = stored ? mergeMap(stored, rg, Date.now()) : freshMap(rg, Date.now());
     saveRoseMap(map);
+    sortRosePois(map.pois);
 
     // Map beside the 3D view, not under it, so both are on screen at once. The view
     // and its key legend (#rgwrap) go into a flex row with the panel that never wraps:
