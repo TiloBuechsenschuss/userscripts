@@ -93,7 +93,7 @@ const DIFFERENT = {
 const SHARED = [
   'h', 'wikiHref', 'wikiLink', 'TAG_RE', 'normalizeName', 'itemKey', 'UI', 'viewportSize',
   'TH', 'TD', 'COLOR_READY', 'COLOR_FULL',
-  'FACTION_QUALITY_RE', 'parseQualityItem', 'readQualities', 'OWNED_MARKER', 'ITEM_COUNT_RE',
+  'FACTION_QUALITY_RE', 'QUALITY_LEVEL_RE', 'qualityNumber', 'parseQualityItem', 'readQualities', 'OWNED_MARKER', 'ITEM_COUNT_RE',
   'itemNameFromLabel', 'itemCountFromLabel', 'itemCountFromNode', 'readPossessionCounts',
   'characterName', 'loadCache', 'saveCache', 'REFRESH_TIMEOUT_MS', 'loadInFrame',
   'AUTO_KEY', 'autoRefreshEnabled', 'setAutoRefresh', 'FRESH_MS', 'stateIsFresh', 'ageText',

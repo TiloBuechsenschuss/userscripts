@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.64
+// @version      1.65
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -1497,7 +1497,14 @@
   // Fallback for an item with no usable alt. Anchored on the three prefixes we
   // care about so a quality whose NAME contains a number can't be mis-split.
   const FACTION_QUALITY_RE =
-    /^((?:Renown|Favours|Connected):\s*.+?)\s+(\d+)(?:\s*\/\s*(\d+))?(?:\s*[-–].*)?$/;
+    /^((?:Renown|Favours|Connected):\s*.+?)\s+(\d{1,3}(?:,\d{3})+|\d+)(?:\s*\/\s*(\d{1,3}(?:,\d{3})+|\d+))?(?:\s*[-–].*)?$/;
+
+  // A level of 1000 or more is shown with a thousands separator ("Spirit of
+  // Hallowmas 1,036 - Your deeds..."); a bare \d+ stopped at the comma and read 1.
+  const QUALITY_LEVEL_RE = /^\s*(\d{1,3}(?:,\d{3})+|\d+)(?:\s*\/\s*(\d{1,3}(?:,\d{3})+|\d+))?/;
+  function qualityNumber(s) {
+    return Number(s.replace(/,/g, ''));
+  }
 
   function parseQualityItem(li) {
     const nameEl = li.querySelector('.quality-item__name');
@@ -1507,7 +1514,7 @@
     const img = li.querySelector('img[alt]');
     const alt = img ? (img.getAttribute('alt') || '').trim() : '';
     if (alt && text.slice(0, alt.length).toLowerCase() === alt.toLowerCase()) {
-      const m = /^\s*(\d+)(?:\s*\/\s*(\d+))?/.exec(text.slice(alt.length));
+      const m = QUALITY_LEVEL_RE.exec(text.slice(alt.length));
       // An ACCOMPLISHMENT has no number anywhere -- FL renders it as the name
       // and nothing else ("Discovered: the Pentamerous Bride", captured from
       // /myself on 2026-09-06). Returning null for those dropped every one of
@@ -1516,12 +1523,12 @@
       // trench. You either have an Accomplishment or you do not, so the level
       // it is missing is 1.
       if (!m) return { quality: alt, level: 1, cap: null };
-      return { quality: alt, level: Number(m[1]), cap: m[2] ? Number(m[2]) : null };
+      return { quality: alt, level: qualityNumber(m[1]), cap: m[2] ? qualityNumber(m[2]) : null };
     }
 
     const m = FACTION_QUALITY_RE.exec(text);
     if (!m) return null;
-    return { quality: m[1].trim(), level: Number(m[2]), cap: m[3] ? Number(m[3]) : null };
+    return { quality: m[1].trim(), level: qualityNumber(m[2]), cap: m[3] ? qualityNumber(m[3]) : null };
   }
 
   // Every quality currently on screen, by name. `filtered` matters: the Myself

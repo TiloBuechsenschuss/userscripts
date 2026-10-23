@@ -331,6 +331,24 @@ const noAlt = parseLi(QUALITY_HTML[1].replace(/<img alt="[^"]*"/, '<img'));
 check('with no alt attribute the text-only fallback gets the same answer',
   api.parseQualityItem(noAlt), { quality: 'Renown: Society', level: 34, cap: 55 });
 
+// Captured from /myself during Hallowmas 2026: a level of 1000 or more carries
+// a thousands separator, and a bare \d+ stopped at the comma and read 1.
+check('a level with a thousands separator reads whole (Spirit of Hallowmas 1,036)',
+  api.parseQualityItem(parseLi(
+    '<li class="quality-item"><div class="icon icon--circular quality-item__icon" data-branch-id="140547">'
+    + '<img alt="Spirit of Hallowmas" class="media__object" src="//images.fallenlondon.com/icons/hallowmasssmall.png">'
+    + '</div><div class="quality-item__body"><span class="js-item-name item__name quality-item__name">'
+    + '<span>Spirit of Hallowmas 1,036 - Your deeds this Hallowmas are drawing attention</span></span>'
+    + '<p class="quality-item__description">There are those who observe all things done at Hallowmas.'
+    + ' There are those who keep score. What will be your reckoning in the end?</p></div></li>')),
+  { quality: 'Spirit of Hallowmas', level: 1036, cap: null });
+
+check('...and so does the alt-less fallback',
+  api.parseQualityItem(parseLi(
+    '<li class="quality-item"><img><span class="quality-item__name"><span>'
+    + 'Renown: Society 1,234/2,000 - Known</span></span></li>')),
+  { quality: 'Renown: Society', level: 1234, cap: 2000 });
+
 check('a quality that is not a faction is not mistaken for one',
   api.parseQualityItem(parseLi(
     '<li class="quality-item"><img><span class="quality-item__name"><span>'
