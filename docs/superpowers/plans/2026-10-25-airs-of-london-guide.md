@@ -37,8 +37,8 @@ rest use your recommendation. Make a skeleton, I'll supply html next."
 | Plans tab read (verified) | **waiting on capture A** |
 | `GET /api/plan` reader and the panel's Refresh + auto-refresh | **waiting on capture B** |
 | New Airs beside an outcome | **waiting on capture C** |
-| A cavalry officer badge | **waiting on answer D** |
-| Census badge (*Sift through the pages* in *Perusal of Forgotten Pages*) | not started; data in hand |
+| A cavalry officer badge | **done** (*Rob a drunk*, a Spite card; answer D, 2026-10-25) |
+| Census badge (*Sift through the pages* in *Perusal of Forgotten Pages*) | **done** (heading captured 2026-10-25) |
 | Unfinished Business ×4 | deferred |
 
 ## What the user is to supply
@@ -49,9 +49,9 @@ tasks refer to them:
 
 - **A, B, C** — section "The Airs of London: the Plans tab and the outcome page": the Plans tab's
   markup, the `GET /api/plan` reply, and the outcome page after an Airs change.
-- **D** — section "The Airs of London: options the guide names": where *A cavalry officer* is and
-  its title. The same section holds the Census item's storylet heading and the two guide-versus-page
-  disagreements (*Prepare the ground*, *Chat to a Tipsy Spy*).
+- **D** — settled 2026-10-25: *A cavalry officer* is an option of the Spite card *Rob a drunk*, and the
+  Census item opens *Perusal of Forgotten Pages*. Section "The Airs of London: options the guide names"
+  still holds the two guide-versus-page disagreements (*Prepare the ground*, *Chat to a Tipsy Spy*).
 
 When a capture settles one, move the fact into the right OKF file, delete the entry there, and tick
 the task here.
@@ -104,11 +104,11 @@ the task here.
 
 ### Task 4 — New badges (answer D, and the Census now)
 
-- [ ] *Sift through the pages* (storylet *Perusal of Forgotten Pages*, the Census item's action):
+- [x] *Sift through the pages* (storylet *Perusal of Forgotten Pages*, the Census item's action):
       an `aolE('Perusal of Forgotten Pages', 'Sift through the pages', null, { ch: ['Watchful', 150],
       g: [['Proscribed Material', [41, 55]]], fail: { g: [['Proscribed Material', 25]] } })` row, if
       the opened item's heading is that title (an open question in `open-questions.md`). `re: 'both'`.
-- [ ] *A cavalry officer*: once its place is known, a row in the matching table (an opportunity
+- [x] *A cavalry officer*: once its place is known, a row in the matching table (an opportunity
       card goes through `eachCardName`). Airs 50–100, Shadowy 30; success: Nevercold Brass Sliver,
       F.F. Gebrandt's Tincture of Vigour: Half-Full, Map Scrap `floor(0.03 × Shadowy + 3.49)`; rare:
       Tasselled Sword-Cane; failure: Suspicion +1 CP, 3 Cryptic Clues; re-rolls on every outcome.

@@ -2529,6 +2529,14 @@ navigation. Two consequences:
   carousel of its own: Unfinished Business ×4 (Duelling the Black Ribbon and Hunting Dangerous Prey
   went to `running-battle` and `the-hunt-is-on`, below); and the options that only *re-roll* Airs
   without being gated on it (*Sample prisoner’s honey*).
+  **Sift through the pages (2026-10-25).** Using The Censored Census of 1862 opens *Perusal of Forgotten Pages* (captured
+  in game, branch 247042); its one option is not Airs-gated, re-rolls the Airs at any Airs, and is filed under
+  `AOL_ELSEWHERE` with the window `0–100`. The page's Variant tables retitle the result text by Airs, not the option.
+  **A cavalry officer (2026-10-25).** An Airs-gated option kept from outside the six: an option of the Spite card
+  *Rob a drunk* (captured in game: branch 57934, "You unlocked this with The Airs of London 84 (you needed 50)"),
+  filed under `AOL_ELSEWHERE`, whose storylets get no heading badge of ours (the drunk rat beside it is Someone Is
+  Coming's). Its Map Scraps are `floor(0.03 × Shadowy + 3.49)`; the `scale` field prices them at the Shadowy where
+  the challenge is certain (50, so 4), the least a sure success pays, and the badge says `≥0.44 E?`.
   **Reading the current Airs (2026-09-30).** Fallen London prints it as the aria-label of the requirement icon of any Airs-gated
   option on offer (`.quality-requirement [aria-label]`: "You unlocked this with The Airs of London 88 (you needed 76)"); an option
   outside its window is not drawn. `aolCurrentAirs` reads it, the storylet heading says `Airs 88` and its tooltip marks each option
@@ -3828,6 +3836,9 @@ Confirmed live by the author:
   the wiki’s title and the storylet page’s shorter one. **(3) “One (gendertitle) and a weasel”.**
   What the game puts there. **(4) The Honey-Dens’ dream.** That all six really share the title
   *Deepen your acquaintance with Prisoner’s Honey* and that only one is offered at a time.
+  **(5) A cavalry officer (2026-10-25).** The card's markup is captured; the badge is not yet seen. Check
+  that *Rob a drunk* shows `≥0.44 E?` on the officer only, and how many Map Scraps a success actually pays at your Shadowy.
+  **(6) Sift through the pages (2026-10-25).** Markup captured; check the option shows `1.92 E?`.
 
 - The **Hunt is On! and Running Battle badges** (added 2026-09-24). Nothing seen in the game. Report
   first, in order: **(1) The Duelling heading.** That the storylet really is *Making your Name:
@@ -4599,7 +4610,8 @@ Current tests:
   price; the arithmetic of a range, a cost, a Luck option, a rare success and a bundle by hand; that
   the six dreams are one label and never a badge each; the `(gendertitle)`, `Accept the task` and
   `(5 FATE)` title traps; the two guide-versus-page disagreements; and that no option title is in
-  another feature’s table;
+  another feature’s table; *A cavalry officer*'s scaled Map Scraps, its `≥` badge, and that *Rob a drunk*
+  gets no heading badge of ours while the drunk rat stays Someone Is Coming's; the Census's *Sift through the pages*;
   and for the guide panel: the locked "(you have N)" wording, banking and its one-minute throttle, the panel
   state (live versus last read), that every notable window agrees with the table its badge uses, that every
   `badged` names a registered feature, what the storylets offer at an Airs, and the whole panel built.

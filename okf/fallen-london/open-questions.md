@@ -38,19 +38,6 @@ right file and delete the entry.
 
 ## The Airs of London: options the guide names
 
-- **Unknown:** where *A cavalry officer* turns up in Spite (an opportunity
-  card or a storylet option) and the exact title the game shows for it. The
-  wiki page gives no card or storylet it comes from.
-- **Matters:** it has no badge until then; the panel lists it as "not badged yet".
-- **Capture:** the card or storylet in game, with its title as shown.
-
-- **Unknown:** whether using The Censored Census of 1862 opens a storylet whose
-  heading is *Perusal of Forgotten Pages* (the wiki's Item Actions title),
-  holding *Sift through the pages*.
-- **Matters:** a badge for *Sift through the pages* would be gated on that
-  heading; a wrong one draws nothing.
-- **Capture:** use the item and note the heading.
-
 - **Unknown:** whether *Prepare the ground* (Hunting Dangerous Prey) re-rolls
   The Airs of London. The guide lists it among the ways to move the Airs on
   through 68-89; `THIO_OPTIONS` records it as not re-rolling (`re: 'none'`).

@@ -121,7 +121,7 @@ const wrapped = src
   .replace(/\}\)\(\);\s*$/,
     'return { carouselMatcher, carouselLookup, CAROUSEL_COLOR_NEUTRAL, CAROUSEL_COLOR_LABEL,'
     + ' AOL_OPTIONS, AOL_DREAMS, AOL_PRICE, AOL_UNPRICED, AOL_TOP, AOL_STORYLETS, AOL_INDEX, AOL_BANDS,'
-    + ' AOL_CLASS, AOL_BRANCH_CLASS, AOL_DREAM, AOL_SPITE, AOL_LADY, AOL_HILL, AOL_GAME, AOL_WIDOW, AOL_HONEY,'
+    + ' AOL_CLASS, AOL_BRANCH_CLASS, AOL_DREAM, AOL_DRUNK, AOL_CENSUS, AOL_ELSEWHERE, SIC_OPTIONS, AOL_SPITE, AOL_LADY, AOL_HILL, AOL_GAME, AOL_WIDOW, AOL_HONEY,'
     + ' aolEpa, aolBadgeText, aolSpec, aolStoryletSpec, aolAirsFrom, aolCurrentAirs, aolRatings, aolWindows, aolColor,'
     + ' LBI_STORYLETS, VH_STORYLET, LBI_OPTIONS, VH_OPTIONS, DME_OPTIONS, ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS,'
     + ' LAB_CARDS, ARBOR_OPTIONS, PC_OPTIONS, VSD_OPTIONS,'
@@ -156,7 +156,8 @@ const near = (a, b) => Math.abs(a - b) < 1e-9;
 // === the table's shape =====================================================
 
 const top = api.AOL_OPTIONS.filter((e) => api.AOL_TOP.includes(e.storylet));
-const inner = api.AOL_OPTIONS.filter((e) => !api.AOL_TOP.includes(e.storylet));
+const elsewhere = api.AOL_OPTIONS.filter((e) => api.AOL_ELSEWHERE.includes(e.storylet));
+const inner = api.AOL_OPTIONS.filter((e) => !api.AOL_TOP.includes(e.storylet) && !api.AOL_ELSEWHERE.includes(e.storylet));
 
 check('every top-level option carries an Airs window inside 0-100, low to high',
   top.filter((e) => !e.airs || !e.airs.length
@@ -295,6 +296,60 @@ check('the tooltip carries the window, the challenge with its certain point, and
 check('an option the page never lists re-rolling Airs says so',
   /does not list this option re-rolling Airs/.test(api.aolSpec(
     { ...opt('Avoid an Unfair Tax on Jewels', 'Retrieve \'costume\' jewellery'), airs: [[34, 100]] }).title), true);
+
+// === elsewhere: A cavalry officer, in Rob a drunk ========================
+
+check('the options kept from outside the six are A cavalry officer (Airs 50-100) and the Census’s Sift (any Airs), opening nothing',
+  elsewhere.map((e) => [e.storylet, e.name, e.airs, !!e.open]),
+  [['Rob a drunk', 'A cavalry officer', [[50, 100]], false], ['Perusal of Forgotten Pages', 'Sift through the pages', [[0, 100]], false]]);
+
+check('Sift through the pages: 41-55 Proscribed Material pays its middle, 48 x 0.04, and a failure gives 25',
+  (() => {
+    const e = opt(api.AOL_CENSUS, 'Sift through the pages');
+    const t = api.aolSpec(e).title;
+    return [near(api.aolEpa(e), 1.92), text(api.AOL_CENSUS, 'Sift through the pages'),
+      /Watchful 150, certain at Watchful 250/.test(t), /Failure: Proscribed Material ×25\./.test(t),
+      /Re-rolls Airs on a success and on a failure/.test(t), api.aolStoryletSpec(key(api.AOL_CENSUS))];
+  })(), [true, '1.92 E?', true, true, true, null]);
+
+check('its Map Scraps follow the page, floor(0.03 x Shadowy + 3.49): 4 at the certain Shadowy 50, 6 at 100, 9 at 200',
+  (() => {
+    const t = api.aolSpec(opt(api.AOL_DRUNK, 'A cavalry officer')).title;
+    return [/Map Scrap: 4 at Shadowy 50, 6 at Shadowy 100, 9 at Shadowy 200, 12 at Shadowy 300\./.test(t),
+      /Shadowy 30, certain at Shadowy 50/.test(t)];
+  })(), [true, true]);
+
+check('the badge prices a sure success at its least, 1 Brass, 1 Tincture and 4 Map Scraps, and says "at least"',
+  [near(api.aolEpa(opt(api.AOL_DRUNK, 'A cavalry officer')), 0.44), text(api.AOL_DRUNK, 'A cavalry officer'),
+    /Worth at least 0\.44 Echoes/.test(api.aolSpec(opt(api.AOL_DRUNK, 'A cavalry officer')).title)],
+  [true, '≥0.44 E?', true]);
+
+check('the rare Sword-Cane and the failure are in the tooltip, and every outcome re-rolls',
+  (() => {
+    const t = api.aolSpec(opt(api.AOL_DRUNK, 'A cavalry officer')).title;
+    return [/Rare success: Tasselled Sword-Cane ×1\./.test(t), /Failure: Cryptic Clue ×3; Suspicion \+1\./.test(t),
+      /Re-rolls Airs on a success and on a failure/.test(t)];
+  })(), [true, true, true]);
+
+check('Rob a drunk gets no heading badge of ours, and its option is not one of Someone Is Coming’s',
+  [api.aolStoryletSpec(key(api.AOL_DRUNK)),
+    api.SIC_OPTIONS.filter((e) => e.storylet === api.AOL_DRUNK).map((e) => e.name)],
+  [null, ['A furious and incoherent drunken rat']]);
+
+check('in game: the open card badges the cavalry officer and leaves the rat to Someone Is Coming',
+  (() => {
+    const officer = makeHeading('A cavalry officer');
+    const rat = makeHeading('A furious and incoherent drunken rat');
+    branches = [officer, rat];
+    roots = [makeHeading('Rob a drunk')];
+    icons = [{ getAttribute: () => 'You unlocked this with The Airs of London 84 (you needed 50)' }];
+    api.aolRatings();
+    const t = (head, cls) => { const b = badgeOf(head, cls); return b && b.textContent; };
+    const out = [t(roots[0], api.AOL_CLASS), t(officer, api.AOL_BRANCH_CLASS), t(rat, api.AOL_BRANCH_CLASS)];
+    branches = []; roots = []; icons = [];
+    api.aolRatings();
+    return out;
+  })(), [null, '≥0.44 E?', null]);
 
 // === a redirecting option carries its best line ===========================
 

@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.66
+// @version      1.68
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -549,7 +549,9 @@
  *     pays.
  *     The Airs of London badges the six London storylets whose options depend on it -- Opportunism
  *     in Spite, Life on Ladybones Road, Business on Watchmaker's Hill, Dabble in the Great Game,
- *     Working for the Widow and the Honey-Dens -- and the storylets their redirecting options open.
+ *     Working for the Widow and the Honey-Dens -- and the storylets their redirecting options open,
+ *     A cavalry officer in Spite's Rob a drunk, whose Map Scraps grow with your Shadowy ("≥"), and
+ *     Sift through the pages, which The Censored Census of 1862 opens.
  *     Each option shows the Echoes per action of what a success gives at the Bazaar sell price, then
  *     what else it moves and any faction result; a redirect shows its best line inside, a random
  *     bundle is marked rather than priced, and the six dreams that share one Honey-Dens title carry
@@ -9717,6 +9719,11 @@
   //   Confound the Constables    the Airs page lists Suspicion −4 or −3 "in
   //                              addition to" the contracts; the pages give −3
   //                              with them and −4 alone, and are followed
+  // Two options are kept here from outside the six (pages fetched 2026-10-25,
+  // both screens captured in game): A cavalry officer in Rob a drunk, gated on
+  // Airs 50-100, and Sift through the pages, which the Census item opens and
+  // which re-rolls the Airs at any Airs. Their storylets get no heading badge
+  // of ours.
   // Left out: Duelling the Black Ribbon, Hunting Dangerous Prey and Unfinished
   // Business (a carousel each), and the options that carry no Airs window.
   // Corrections go in AOL_OPTIONS and nowhere else.
@@ -9729,6 +9736,10 @@
   //   q / f    qualities / faction results a success moves, [name, n | [lo, hi]].
   //   bundle   a random bundle the page does not itemise.
   //   rare / fail  what a rare success / a failure gives: { g, q, f }.
+  //   scale    an item a success gives as many of as a stat makes it,
+  //            { item, stat, k, c }: floor(k × stat + c). The badge prices it
+  //            at the stat where the challenge is certain, the least a sure
+  //            success pays, and marks the figure "≥".
   //   re       where the page lists Airs re-rolled: 'both', 'win' or 'none'.
   //   needs / fate / actions / note / guide.
 
@@ -9739,6 +9750,12 @@
   const AOL_WIDOW = 'Working for the Widow';
   const AOL_HONEY = 'The Honey-Dens of Veilgarden';
   const AOL_TOP = [AOL_SPITE, AOL_LADY, AOL_HILL, AOL_GAME, AOL_WIDOW, AOL_HONEY];
+  // Storylets outside the six that hold an option of their own the guide names, not opened from the six. Rob a drunk
+  // is a Spite card whose other options are Someone Is Coming's or carry no window; Perusal of Forgotten Pages is what
+  // using The Censored Census of 1862 opens (both captured in game, 2026-10-25).
+  const AOL_DRUNK = 'Rob a drunk';
+  const AOL_CENSUS = 'Perusal of Forgotten Pages';
+  const AOL_ELSEWHERE = [AOL_DRUNK, AOL_CENSUS];
   const AOL_DREAM = 'Deepen your acquaintance with Prisoner’s Honey';
   const AOL_NAME_WHISPERED = 'A Name Whispered in Darkness 3';
 
@@ -9752,6 +9769,8 @@
     'Cryptic Clue': 0.02, 'Flawed Diamond': 0.12, 'Drop of Prisoner’s Honey': 0.02,
     'Primordial Shriek': 0.02, 'Appalling Secret': 0.15, 'Tale of Terror!!': 0.50,
     'Extraordinary Implication': 2.5, 'Memory of Distant Shores': 0.5, 'Phosphorescent Scarab': 0.10,
+    'Nevercold Brass Sliver': 0.01, 'F.F. Gebrandt’s Tincture of Vigour: Half-Full': 0.03, 'Map Scrap': 0.10,
+    'Tasselled Sword-Cane': 6.40,
   };
   // Cross-economy items: the pages give a figure, but not a Bazaar one.
   const AOL_UNPRICED = ['Memory of Light', 'Vision of the Surface'];
@@ -9929,6 +9948,15 @@
       null, { ch: ['Persuasive', 21], g: [['Moon-Pearl', [25, 35]]] }),
     aolE('Provide material to an agent of a foreign power', 'You’re an artist! Let the artistry begin!', null,
       { ch: ['Persuasive', 30], g: [['Moon-Pearl', [31, 47]]], fail: { q: [['Scandal', 1]] } }),
+
+    // --- elsewhere: an Airs-gated option on a storylet of its own ---------
+    aolE(AOL_DRUNK, 'A cavalry officer', [[50, 100]], { ch: ['Shadowy', 30],
+      g: [['Nevercold Brass Sliver', 1], ['F.F. Gebrandt’s Tincture of Vigour: Half-Full', 1]],
+      scale: { item: 'Map Scrap', stat: 'Shadowy', k: 0.03, c: 3.49 },
+      rare: { g: [['Tasselled Sword-Cane', 1]] }, fail: { g: [['Cryptic Clue', 3]], q: [['Suspicion', 1]] } }),
+    aolE(AOL_CENSUS, 'Sift through the pages', [[0, 100]], { ch: ['Watchful', 150], g: [['Proscribed Material', [41, 55]]],
+      fail: { g: [['Proscribed Material', 25]] }, needs: 'The Censored Census of 1862',
+      note: 'Not gated on the Airs: offered at any, and the guide’s fallback for cycling them.' }),
   ];
 
   // The Honey-Dens' dream: six options under one title, told apart only by the
@@ -9973,12 +10001,25 @@
     return (list || []).reduce(function (sum, p) { return sum + aolMid(p[1]) * (AOL_PRICE[p[0]] || 0); }, 0);
   }
 
+  // How many of a scaled item a success gives at a stat level.
+  function aolScaleAt(s, level) { return Math.floor(s.k * level + s.c); }
+
+  // The stat a scaled item is priced at: where the challenge is certain.
+  function aolScaleLevel(e) { return broadCertainAt(e.ch[1]); }
+
+  // What a success gives, a scaled item counted at aolScaleLevel.
+  function aolGain(e) {
+    if (!e.scale) return e.g;
+    return (e.g || []).concat([[e.scale.item, aolScaleAt(e.scale, aolScaleLevel(e))]]);
+  }
+
   // Echoes per action of a success, or null where there is nothing to price.
   // A bundle is not priced; a Luck option is its expected value.
   function aolEpa(e) {
-    if (e.bundle || !((e.g && e.g.length) || (e.u && e.u.length))) return null;
+    const g = aolGain(e);
+    if (e.bundle || !((g && g.length) || (e.u && e.u.length))) return null;
     const odds = e.ch && !Array.isArray(e.ch) ? e.ch.luck : 1;
-    return (odds * (aolWorth(e.g) - aolWorth(e.u))) / (e.actions || 1);
+    return (odds * (aolWorth(g) - aolWorth(e.u))) / (e.actions || 1);
   }
 
   function aolColor(epa) {
@@ -10015,7 +10056,7 @@
     const luck = e.ch && !Array.isArray(e.ch);
     const mark = luck ? CAROUSEL_MARK_EXPECTED : e.ch ? CAROUSEL_MARK_CHALLENGE : '';
     const parts = [];
-    if (epa !== null) parts.push(aolEchoes(epa) + ' E' + mark);
+    if (epa !== null) parts.push((e.scale ? '≥' : '') + aolEchoes(epa) + ' E' + mark);
     else if (e.bundle) parts.push('bundle ' + e.bundle + mark);
     aolMoves(e.q).forEach(function (m) { parts.push(m + (!parts.length ? mark : '')); });
     let text = parts.join(' · ');
@@ -10060,13 +10101,23 @@
     }
     lines.push(aolChallenge(e));
     if (e.bundle) lines.push('Success: a random bundle of up to ' + e.bundle.replace('≤', '') + ', not itemised on the page.');
-    const win = [aolGives(e.g), aolMoves(e.q).join(', '), aolMoves(e.f).join(', ')].filter(Boolean).join('; ');
+    const scaled = e.scale ? e.scale.item + ' ×(' + e.scale.k + ' × ' + e.scale.stat + ' + ' + e.scale.c + ', rounded down)' : '';
+    const win = [[aolGives(e.g), scaled].filter(Boolean).join(', '), aolMoves(e.q).join(', '), aolMoves(e.f).join(', ')]
+      .filter(Boolean).join('; ');
     if (win) lines.push('Success: ' + win + '.');
+    if (e.scale) {
+      const lv = aolScaleLevel(e);
+      lines.push(e.scale.item + ': ' + [lv, 100, 200, 300].map(function (n) {
+        return aolScaleAt(e.scale, n) + ' at ' + e.scale.stat + ' ' + n;
+      }).join(', ') + '.');
+    }
     if (e.u && e.u.length) lines.push('Spends: ' + aolGives(e.u) + '.');
     if (e.fate) lines.push('Costs ' + e.fate + ' FATE.');
     const epa = aolEpa(e);
     if (epa !== null) {
-      lines.push('Worth ' + aolEchoes(epa) + ' Echoes per action at the Bazaar sell price'
+      lines.push('Worth ' + (e.scale ? 'at least ' : '') + aolEchoes(epa) + ' Echoes per action at the Bazaar sell price'
+        + (e.scale ? ', the ' + e.scale.item + ' counted at ' + e.scale.stat + ' ' + aolScaleLevel(e) + ' where the challenge is certain, '
+          + 'and more above it' : '')
         + (e.ch && Array.isArray(e.ch) ? ', if the challenge succeeds' : '') + '.');
     }
     if (e.rare) {
@@ -10124,7 +10175,9 @@
   }
 
   function aolStoryletSpec(key) {
-    const own = AOL_OPTIONS.filter(function (e) { return normalizeName(e.storylet) === key; });
+    // A storylet of many other options, one of them ours: the option's badge is enough, as Someone Is Coming does there.
+    if (AOL_ELSEWHERE.some(function (s) { return normalizeName(s) === key; })) return null;
+    const own =AOL_OPTIONS.filter(function (e) { return normalizeName(e.storylet) === key; });
     if (!own.length) return key === normalizeName(AOL_HONEY) ? { text: 'Airs', color: CAROUSEL_COLOR_LABEL, title: aolDreamLines().join('\n') } : null;
     const lines = [own[0].storylet, ''];
     own.forEach(function (e) {
@@ -10306,7 +10359,7 @@
       gives: 'Irrigo +1 and a Devilbone Die', needs: 'The Airs of London exactly three times your Irrigo (3, 6, … 27)',
       badged: 'cave-of-the-nadir' },
     { airs: [[0, 100]], name: 'Sift through the pages', where: 'The Censored Census of 1862 (an item)',
-      gives: '41–55 Proscribed Material (Watchful 150); a failure gives 25', badged: null,
+      gives: '41–55 Proscribed Material (Watchful 150); a failure gives 25', badged: 'airs-of-london',
       note: 'Re-rolls the Airs on a success and a failure, at any Airs: the guide’s fallback for cycling them.' },
   ];
 
@@ -10317,10 +10370,9 @@
     { name: 'The six London storylets', where: 'Spite, Ladybones Road, Watchmaker’s Hill, Veilgarden',
       how: 'most options re-roll', badged: 'airs-of-london',
       note: AOL_TOP.join(', ') + '. Each option’s tooltip says whether it re-rolls.' },
-    { name: 'A cavalry officer', where: 'Spite', how: 're-rolls on a success, a rare success and a failure',
-      needs: 'The Airs of London 50–100; Shadowy 30', badged: null,
-      note: 'Pays a Nevercold Brass Sliver, a half-full Tincture of Vigour and Map Scraps. Whether it is a card or a '
-        + 'storylet, and its exact title, are not known yet, so it has no badge.' },
+    { name: 'A cavalry officer', where: 'Rob a drunk (a Spite card)', how: 're-rolls on a success, a rare success and a failure',
+      needs: 'The Airs of London 50–100; Shadowy 30', badged: 'airs-of-london',
+      note: 'Pays a Nevercold Brass Sliver, a half-full Tincture of Vigour and Map Scraps by your Shadowy (4 at Shadowy 50).' },
     { name: 'Chat to a Tipsy Spy', where: 'The Singing Mandrake', how: 're-rolls, says the guide',
       needs: 'a Bottle of Greyfields 1882', badged: null,
       note: 'The option page lists no change to the Airs; the guide is the only source.' },
@@ -10334,7 +10386,7 @@
     { name: 'Unfinished Business', where: 'Ladybones Road, Spite, Watchmaker’s Hill, Veilgarden', how: 're-rolls',
       needs: 'A Person of Some Importance', badged: null, note: 'Four storylets of about eight options each; not badged yet.' },
     { name: 'The Censored Census of 1862', where: 'an item: Sift through the pages', how: 're-rolls, at any Airs',
-      needs: 'the item', badged: null },
+      needs: 'the item', badged: 'airs-of-london' },
     { name: 'Brawling with Dockers', where: 'The Blind Helmsman', how: 'the fights re-roll',
       needs: 'A Name Scrawled in Blood 7 and Acquaintance: The Garrulous Drunk 3', badged: 'brawling-dockers' },
     { name: 'Stroll in the garden of bones', where: 'The Natural History Wing, the Museum', how: 're-rolls',
