@@ -43,19 +43,18 @@ rest use your recommendation. Make a skeleton, I'll supply html next."
 
 ## What the user is to supply
 
-- **A. The Plans tab.** With one Airs-gated plan bookmarked (Confound the Constables, the Widow's
-  audience, or any), the outer HTML of that plan's block, **once while its window is open and once
-  while it is not** (locked). The requirement icon's `aria-label` is the line that matters. Also
-  confirm the URL is `/plans`.
-- **B. `GET /api/plan`.** DevTools → Network → the `plan` request → Response. Strip the character
-  name; never paste the `Authorization` header.
-- **C. An outcome page.** The outer HTML (or a screenshot) of the page after playing an option that
-  re-rolls the Airs — Confound the Constables, Waylay a Weasel-Seller, Sift through the pages — and
-  ideally after *A dreamless sleep* (sets it to 0). Wanted: does the game mention The Airs of London
-  at all, does it give a number, or does it print the flavour text ("A bat zips past, not far
-  overhead.")?
-- **D. A cavalry officer.** Where it shows up in Spite — an opportunity card or a storylet option —
-  and its exact title as the game shows it.
+Every unknown this plan depends on lives in `okf/fallen-london/open-questions.md` (the repo's rule:
+unknown things live only there), each with what capture settles it. The letters below are how the
+tasks refer to them:
+
+- **A, B, C** — section "The Airs of London: the Plans tab and the outcome page": the Plans tab's
+  markup, the `GET /api/plan` reply, and the outcome page after an Airs change.
+- **D** — section "The Airs of London: options the guide names": where *A cavalry officer* is and
+  its title. The same section holds the Census item's storylet heading and the two guide-versus-page
+  disagreements (*Prepare the ground*, *Chat to a Tipsy Spy*).
+
+When a capture settles one, move the fact into the right OKF file, delete the entry there, and tick
+the task here.
 
 ## Tasks
 
@@ -108,7 +107,7 @@ rest use your recommendation. Make a skeleton, I'll supply html next."
 - [ ] *Sift through the pages* (storylet *Perusal of Forgotten Pages*, the Census item's action):
       an `aolE('Perusal of Forgotten Pages', 'Sift through the pages', null, { ch: ['Watchful', 150],
       g: [['Proscribed Material', [41, 55]]], fail: { g: [['Proscribed Material', 25]] } })` row, if
-      the opened item's heading is that title (to confirm in game). `re: 'both'`.
+      the opened item's heading is that title (an open question in `open-questions.md`). `re: 'both'`.
 - [ ] *A cavalry officer*: once its place is known, a row in the matching table (an opportunity
       card goes through `eachCardName`). Airs 50–100, Shadowy 30; success: Nevercold Brass Sliver,
       F.F. Gebrandt's Tincture of Vigour: Half-Full, Map Scrap `floor(0.03 × Shadowy + 3.49)`; rare:
@@ -142,8 +141,8 @@ disagree the option page wins and the entry's `note` says so.
 | Item | Guide | Option page / badge table | Kept |
 |---|---|---|---|
 | Confound the Constables | Suspicion −4 or −3 "in addition to" 2 Infernal Contracts and 1 Proscribed Material | −3 with them, −4 alone | page |
-| Prepare the ground | listed for cycling the Airs through 68–89 | `THIO_OPTIONS` records `re: 'none'` | badge table; **to re-check** the option page |
-| Chat to a Tipsy Spy | changes the Airs | the option page lists no Airs change | listed, flagged "the guide is the only source" |
+| Prepare the ground | listed for cycling the Airs through 68–89 | `THIO_OPTIONS` records `re: 'none'` | both quoted; open question in `open-questions.md` |
+| Chat to a Tipsy Spy | changes the Airs | the option page lists no Airs change | listed, flagged; open question in `open-questions.md` |
 | Confide in the Chandleress | Favours: The Docks +1 for 3 actions | also Dangerous −5 CP | both shown |
 | Dice! | Airs 3, 6 … 27 | Airs = Irrigo × 3 | the same rule |
 
