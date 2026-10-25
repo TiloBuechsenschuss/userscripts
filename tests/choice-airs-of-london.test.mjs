@@ -626,6 +626,16 @@ check('the captured line is 84-88; the ends of the table, a curly or straight qu
     api.aolAirsFromLine('Two costermongers stagger past.'), api.aolAirsFromLine('')],
   [{ lo: 84, hi: 88 }, { lo: 0, hi: 0 }, { lo: 0, hi: 0 }, { lo: 100, hi: 100 }, null, null]);
 
+check('the game\'s capital and "…" match the wiki\'s lower case and "..." (the Jack line, seen 2026-10-25)',
+  api.aolAirsFromLine('A scuffle! A pool of blood! A wild-eyed girl with a knife in either hand! The cry goes up, '
+    + '"A Jack!" Is it a Jack? She\'s gone, regardless…'), { lo: 76, hi: 80 });
+
+check('with case and punctuation dropped, no two lines of the table become the same key',
+  (() => {
+    const keys = api.AOL_AIRS_TEXT.map((r) => r[2].toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim());
+    return keys.filter((k, i) => keys.indexOf(k) !== i);
+  })(), []);
+
 check('the outcome badge says the range, or a single level, or "?" for a line the table lacks',
   [api.aolOutcomeSpec({ lo: 84, hi: 88 }).text, api.aolOutcomeSpec({ lo: 93, hi: 93 }).text, api.aolOutcomeSpec(null).text,
     /The Airs of London is now 84–88\./.test(api.aolOutcomeSpec({ lo: 84, hi: 88 }).title)],

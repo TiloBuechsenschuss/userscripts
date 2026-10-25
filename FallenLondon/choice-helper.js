@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.76
+// @version      1.77
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -10442,7 +10442,7 @@
   // a `.quality-update` with The Airs of London's icon and one line of flavour
   // text ("Two costermongers stagger past, roaring drunk, ..."; captured
   // 2026-10-25), and the wiki's Airs table maps each line to a level or a
-  // range. So the line is matched exactly (quotes and spacing evened out), a
+  // range. So the line is matched on its words (case and punctuation aside), a
   // badge beside it says the range ("Airs 84–88"), and the range is banked as
   // a range: the panel then marks a window ● only when all of it is inside.
   // A line the table does not carry gets "Airs ?" and is not banked.
@@ -10495,9 +10495,11 @@
   const AOL_OUTCOME_CLASS = 'fl-ux-aol-outcome';
   const AOL_OUTCOME_FLAG = 'flUxAolOutcome';
 
+  // Letters and digits only, lower case: the game and the wiki differ in case ("A Jack!" against the wiki's
+  // "a Jack!", seen 2026-10-25), in quotes and in "…" against "...". The lines are long enough that nothing else
+  // is needed to tell them apart; the suite checks no two collide.
   function aolLineKey(s) {
-    return String(s || '').replace(/[’‘]/g, '\'').replace(/[“”]/g, '"').replace(/…/g, '...')
-      .replace(/\s+/g, ' ').trim();
+    return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
   }
 
   const AOL_LINE_INDEX = AOL_AIRS_TEXT.map(function (r) { return aolLineKey(r[2]); });

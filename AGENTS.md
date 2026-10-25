@@ -2560,8 +2560,8 @@ navigation. Two consequences:
   time, never on a timer, not again within a minute. A reply with no Airs-gated plan says which to bookmark.
   **The Airs off an outcome (2026-10-25).** A re-roll prints no number, only a flavour line in a `.quality-update`
   whose icon is `aria-label="The Airs of London"` (`okf/fallen-london/outcome-page.md`). `aolOutcomes` matches it against
-  `AOL_AIRS_TEXT` (the wiki's Airs table, 38 rows covering 0-100 once each; quotes and spacing evened out by
-  `aolLineKey`), badges the line `Airs 84–88` (`fl-ux-aol-outcome`, `Airs ?` for a line the table lacks) and banks the
+  `AOL_AIRS_TEXT` (the wiki's Airs table, 38 rows covering 0-100 once each; matched on words alone, case and
+  punctuation dropped, by `aolLineKey`: the game wrote "A Jack!" where the wiki has "a Jack!"), badges the line `Airs 84–88` (`fl-ux-aol-outcome`, `Airs ?` for a line the table lacks) and banks the
   range: `aolBank(lo, 'outcome', now, true, hi)`, the record carrying `hi`. The panel shows the range, marks a window ●
   when all of it is inside, ◐ when part is (`aolCover`), ○ when none, and lists what the six storylets offer anywhere
   in it. **Not built:** marking a banked Airs "you have acted since" when an outcome does not mention it.
