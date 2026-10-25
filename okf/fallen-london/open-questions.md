@@ -4,7 +4,7 @@ title: Open questions about Fallen London
 kind: open-questions
 domain: fallenlondon.com
 status: open
-updated: 2026-10-21
+updated: 2026-10-25
 see_also: [api.md, challenges.md, equipment.md, agents-tab.md]
 ---
 
