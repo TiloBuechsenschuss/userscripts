@@ -33,6 +33,8 @@ one place.
 | [challenges.md](challenges.md) | How a challenge's shown percentage relates to your level: broad and narrow, the 10% floor, the 100% cap, and how to infer what the game does not send. |
 | [equipment.md](equipment.md) | Outfit slots, items, stat bonuses, effective versus base level, and how equipping works. |
 | [hide-ui-settings.md](hide-ui-settings.md) | The shared show/hide switches the three Fallen London userscripts carry: storage, catalogue, categories, live teardown. |
+| [outcome-page.md](outcome-page.md) | The outcome page after an action: its quality-update lines, and how The Airs of London reports a re-roll (flavour text, no number). |
+| [plans-tab.md](plans-tab.md) | The Plans tab (`/plans`): its layout, the requirement icons and their wordings, and how Choice Helper reads the Airs off it. |
 | [open-questions.md](open-questions.md) | What has not been captured or verified yet, and what to capture to settle it. |
 
 ## How the facts were gathered

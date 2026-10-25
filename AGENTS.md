@@ -2547,13 +2547,28 @@ navigation. Two consequences:
   `storylet`, `plans` (the path is `/plans`) or `manual`. An unchanged reading is not re-written within a minute; the
   feature's `keep` banks even with the badges switched off. `aolAirsFrom` now takes a locked requirement's "(you have N)"
   and returns null for a locked one without it, because the number after the name is then the level NEEDED -- the
-  Plans tab shows locked requirements. That wording is **assumed** from the Renown one in `okf/fallen-london/api.md`.
+  Plans tab shows locked requirements: "You can't do this when you have The Airs of London higher than 25 (you have 84)"
+  (captured 2026-10-25, `okf/fallen-london/plans-tab.md`); a "can't" or "need" text without "(you have N)" reads as nothing.
   The panel (`airs-of-london`, `renderAolPanel`) holds your Airs (live, last read with its age, or set by hand), what the
   six storylets offer at it (`aolOfferedAt`, best Echoes first), the guide's notable ranges (`AOL_NOTABLE`) marked
   ● / ○ against it, and every way to change the Airs (`AOL_CHANGERS`), each saying which feature badges it.
-  **Not verified in-game:** that the Plans tab draws `.quality-requirement [aria-label]` icons at all, and the locked
-  wording; the panel's Refresh (read the Plans tab without leaving the page) and the new Airs beside an outcome are not
-  built, both waiting on captures listed in `okf/fallen-london/open-questions.md`.
+  The Plans tab draws the same `.quality-requirement [aria-label]` icons (captured 2026-10-25).
+  **Asking the game (2026-10-25).** The panel's Refresh calls `GET /api/plan` (`aolAskGame`, through `flApi`, which
+  Choice Helper now carries byte-identical to UX Enhancers': `FL_API`, `flToken`, `flFail`, `flApi`) and reads the Airs
+  off every plan's Airs requirement (`aolAirsFromPlanJson`: `qualityId` 9070, the tooltip's tags stripped). Banked as
+  source `api`. With auto-refresh on, the panel asks by itself when it opens on an Airs that is not live; one ask at a
+  time, never on a timer, not again within a minute. A reply with no Airs-gated plan says which to bookmark.
+  **The Airs off an outcome (2026-10-25).** A re-roll prints no number, only a flavour line in a `.quality-update`
+  whose icon is `aria-label="The Airs of London"` (`okf/fallen-london/outcome-page.md`). `aolOutcomes` matches it against
+  `AOL_AIRS_TEXT` (the wiki's Airs table, 38 rows covering 0-100 once each; quotes and spacing evened out by
+  `aolLineKey`), badges the line `Airs 84–88` (`fl-ux-aol-outcome`, `Airs ?` for a line the table lacks) and banks the
+  range: `aolBank(lo, 'outcome', now, true, hi)`, the record carrying `hi`. The panel shows the range, marks a window ●
+  when all of it is inside, ◐ when part is (`aolCover`), ○ when none, and lists what the six storylets offer anywhere
+  in it. **Not built:** marking a banked Airs "you have acted since" when an outcome does not mention it.
+  **Using the Census (2026-10-25).** A row with `use` (the Census's two) gets a "use" button that opens the item on
+  Possessions, as the Factions panel's does. Choice Helper carries the request side byte-identical to UX Enhancers'
+  (`PENDING_KEY`, `writePending`, `clearPending`, `findItemNode`, `clickItem`, `openItem`); `runPendingItem`, which
+  finishes a request parked across a navigation, stays in UX Enhancers alone -- two finishers would click the item twice.
 
   **Progress qualities: The Hunt is On! and Running Battle** (`the-hunt-is-on`, `THIO_OPTIONS`,
   `running-battle`, `RUNB_OPTIONS`, both on the shared `pq*` helper): the first two features from the
@@ -3839,6 +3854,8 @@ Confirmed live by the author:
   **(5) A cavalry officer (2026-10-25).** The card's markup is captured; the badge is not yet seen. Check
   that *Rob a drunk* shows `≥0.44 E?` on the officer only, and how many Map Scraps a success actually pays at your Shadowy.
   **(6) Sift through the pages (2026-10-25).** Markup captured; check the option shows `1.92 E?`.
+  **(7) The outcome line (2026-10-25).** One outcome captured. Check other re-rolls' lines get `Airs N–M`, and report any
+  `Airs ?` with its line verbatim (a wording the wiki's table lacks, or a straight-versus-curly quote it did not even out).
 
 - The **Hunt is On! and Running Battle badges** (added 2026-09-24). Nothing seen in the game. Report
   first, in order: **(1) The Duelling heading.** That the storylet really is *Making your Name:
@@ -4614,7 +4631,9 @@ Current tests:
   gets no heading badge of ours while the drunk rat stays Someone Is Coming's; the Census's *Sift through the pages*;
   and for the guide panel: the locked "(you have N)" wording, banking and its one-minute throttle, the panel
   state (live versus last read), that every notable window agrees with the table its badge uses, that every
-  `badged` names a registered feature, what the storylets offer at an Airs, and the whole panel built.
+  `badged` names a registered feature, what the storylets offer at an Airs, and the whole panel built; the captured
+  `GET /api/plan` reply read (HTML tooltips, other qualities skipped, no Airs plan), and one ask at a time; the
+  Airs table's partition of 0-100, the captured outcome line read as 84-88 and banked as a range, and ● / ◐ / ○ over it.
 - `tests/choice-progress-qualities.test.mjs` — the shared `pq*` helper and the two features on it:
   the gain/spend vocabulary by hand for a dozen options, that a rare success and the guide’s Echoes
   stay off the badge, every guide-versus-page disagreement by name, that Hunting Dangerous Prey offers

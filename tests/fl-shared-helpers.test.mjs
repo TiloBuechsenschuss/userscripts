@@ -99,6 +99,8 @@ const SHARED = [
   'AUTO_KEY', 'autoRefreshEnabled', 'setAutoRefresh', 'FRESH_MS', 'stateIsFresh', 'ageText',
   'PANEL_REGISTRY', 'FRAME_EVENT', 'pageWindow', 'sharedPanels', 'shareFrame', 'onSharedFrame',
   'myselfLoaded', 'possessionsLoaded', 'LAUNCHER_ID', 'LAUNCHER_BUTTON_ID',
+  'FL_API', 'flToken', 'flFail', 'flApi',
+  'PENDING_KEY', 'writePending', 'clearPending', 'findItemNode', 'clickItem', 'openItem',
 ];
 
 check('every shared helper is declared in both files',

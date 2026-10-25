@@ -45,7 +45,7 @@ Verified means seen in the capture with the stated shape.
 | `POST /api/storylet/goback` | none | Leaves the open storylet. | yes |
 | `GET /api/opportunity` | none | The opportunity-card hand. | yes (shape not studied) |
 | `POST /api/map/move` | `{"areaId": <id>}` | Moves you to an area. | yes (shape not studied) |
-| `GET /api/plan` | none | Your plans. | yes (shape not studied) |
+| `GET /api/plan` | none | Your plans, active and completed, each with its requirements checked against you now. | yes (see below) |
 | `GET /api/messages` | none | Messages. | yes (shape not studied) |
 | `GET /api/settings` | none | Settings. | yes (shape not studied) |
 
@@ -168,6 +168,30 @@ wordings, all verbatim from the capture:
 | Locked | `You need Renown: Rubbery Men 25 (you have 18)` | at least 25, you have 18 |
 | Locked | `Unlocked when A Professional Specialisation is: Schismatic` | an accomplishment state |
 
+
+## `GET /api/plan`
+
+**Verified (2026-10-25)** from one reply (eleven active plans, one completed).
+Top-level keys: `active`, `complete` (arrays of plans), `isSuccess`.
+
+A plan: `branch`, `areaName` ("Spite"), `id` (the plan's own id), and
+`notes` when the player wrote one. `branch` is a branch in the shape of
+`POST /api/storylet`'s (below): `name`, `description` (HTML), `planKey`,
+`currencyCost`, `actionCost`, `buttonText`, `challenges`,
+`qualityRequirements`, `actionLocked`, `currencyLocked`, `qualityLocked`,
+`ordering`, `isLocked`, `image`, `id` (the branch id).
+
+Every requirement is checked against the character **now**, completed plans
+included, so a plan is a standing window onto a quality the Myself tab does not
+show. A requirement's `tooltip` is the Plans tab's icon text with HTML around
+the name:
+
+- `You unlocked this with <span class='quality-name'>The Airs of London</span> 84 <em>(you needed 64-87)</em>`
+- `You can't do this when you have <span class='quality-name'>The Airs of London</span> higher than 25 <em>(you have 84)</em>`
+
+The Airs of London is `qualityId` 9070, `category` `Randomizer`. Choice Helper
+reads it with `aolAirsFromPlanJson` (strip the tags, then the same reader the
+icons use). A reply with no Airs-gated plan says nothing about the Airs.
 
 ## Etiquette
 

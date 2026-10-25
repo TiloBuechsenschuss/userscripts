@@ -125,7 +125,7 @@ const wrapped = src
     + ' aolEpa, aolBadgeText, aolSpec, aolStoryletSpec, aolAirsFrom, aolCurrentAirs, aolRatings, aolWindows, aolColor,'
     + ' LBI_STORYLETS, VH_STORYLET, LBI_OPTIONS, VH_OPTIONS, DME_OPTIONS, ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS,'
     + ' LAB_CARDS, ARBOR_OPTIONS, PC_OPTIONS, VSD_OPTIONS,'
-    + ' aolBank, aolBanked, aolStateFrom, aolWindowHas, aolNotableHas, aolOfferedAt, aolEpa, renderAolPanel,'
+    + ' AOL_AIRS_TEXT, AOL_OUTCOME_CLASS, aolAirsFromLine, aolOutcomeSpec, aolOutcomes, aolCover, aolAirsFromPlanJson, aolAskGame, aolAsk, AOL_SOURCES, aolBank, aolBanked, aolStateFrom, aolWindowHas, aolNotableHas, aolOfferedAt, aolEpa, renderAolPanel,'
     + ' AOL_NOTABLE, AOL_CHANGERS, AOL_DEAD_RANGE, THIO_OPTIONS, RUNB_OPTIONS, CHANDLERESS_COMPLAINT_OPTIONS, PANELS,'
     + ' normalizeName, BADGE_CLASS, FEATURES }; })();');
 const fn = new Function(
@@ -528,26 +528,139 @@ check('an option says the Airs is inside its window, and a changed Airs redraws 
 
 // === the guide panel: the Airs read off the Plans tab, banked, and the guide's tables (2026-10-25) ======
 
-check('a locked requirement gives the "you have", never the level it needs; without one it says nothing',
-  [api.aolAirsFrom('You need The Airs of London 76 (you have 42)'),
-    api.aolAirsFrom('You need The Airs of London 76-100 (you have 0)'),
+check('the Plans tab, captured 2026-10-25: an unlocked plan gives your Airs, a locked one its "(you have)", never the bound',
+  [api.aolAirsFrom('You unlocked this with The Airs of London 84 (you needed 64-87)'),
+    api.aolAirsFrom('You can\'t do this when you have The Airs of London higher than 25 (you have 84)'),
+    api.aolAirsFrom('You can\'t do this when you have The Airs of London lower than 25'),
+    api.aolAirsFrom('You can\'t do this when you have The Airs of London higher than 25'),
+    api.aolAirsFrom('You need The Airs of London 76 (you have 42)'),
     api.aolAirsFrom('You need The Airs of London 76'),
-    api.aolAirsFrom('You unlocked this with The Airs of London 1 (you needed 50 at most)'),
-    api.aolAirsFrom('You unlocked this with The Airs of London 88 (you needed 76)')],
-  [42, 0, null, 1, 88]);
+    api.aolAirsFrom('You unlocked this with The Airs of London 1 (you needed 50 at most)')],
+  [84, 84, null, null, 42, null, 1]);
+
+check('...and on the captured Plans tab, other qualities\' icons around it are skipped',
+  (() => {
+    icons = ['You need 5 Puzzle-Damask Scraps (you have 4)', 'You need 5,000 Nodules of Deep Amber (you have 1,676)',
+      'You unlocked this with A Name Whispered in Darkness 7 (you needed 3)',
+      'You can\'t do this when you have The Airs of London higher than 25 (you have 84)']
+      .map((label) => ({ getAttribute: () => label }));
+    const n = api.aolCurrentAirs();
+    icons = [];
+    return n;
+  })(), 84);
+
+// GET /api/plan, captured 2026-10-25 and trimmed to the shapes that matter: an unlocked Airs plan, a locked one in
+// `complete`, and plans around them whose tooltips carry other qualities' "(you have N)".
+const PLAN_REPLY = {
+  active: [
+    { branch: { name: 'Acquire a Blinding Suit', qualityRequirements: [
+      { qualityId: 923, qualityName: 'Puzzle-Damask Scrap', status: 'Locked',
+        tooltip: "You need 5 <span class='quality-name'>Puzzle-Damask Scraps</span> <em>(you have 4)</em>" }] },
+      areaName: 'Bazaar Side-Streets', id: 22845997 },
+    { branch: { name: 'Case a Jeweller\'s Shop', qualityRequirements: [
+      { qualityId: 9070, qualityName: 'The Airs of London', status: 'Unlocked', category: 'Randomizer',
+        tooltip: "You unlocked this with <span class='quality-name'>The Airs of London</span> 84 <em>(you needed 64-87)</em>" }] },
+      areaName: 'Spite', id: 22851022 },
+  ],
+  complete: [
+    { branch: { name: 'Confound the Constables', qualityRequirements: [
+      { qualityId: 9070, qualityName: 'The Airs of London', status: 'Locked',
+        tooltip: "You can't do this when you have <span class='quality-name'>The Airs of London</span> higher than 25 <em>(you have 84)</em>" },
+      { qualityId: 1016, qualityName: 'A Name Whispered in Darkness', status: 'Unlocked',
+        tooltip: "You unlocked this with <span class='quality-name'>A Name Whispered in Darkness</span> 7 <em>(you needed 3)</em>" }] },
+      areaName: 'Spite', id: 22837241 },
+  ],
+  isSuccess: true,
+};
+
+check('GET /api/plan: the Airs is read off the Airs requirement\'s tooltip, HTML and all, skipping the other qualities',
+  [api.aolAirsFromPlanJson(PLAN_REPLY),
+    api.aolAirsFromPlanJson({ active: [], complete: PLAN_REPLY.complete }),
+    api.aolAirsFromPlanJson({ active: PLAN_REPLY.active.slice(0, 1), complete: [] }),
+    api.aolAirsFromPlanJson({ isSuccess: true }), api.aolAirsFromPlanJson(null)],
+  [84, 84, null, null, null]);
+
+check('a reading asked of the game is filed under its own source, never passed off as the Plans tab',
+  [api.AOL_SOURCES.api, api.AOL_SOURCES.plans], ['your plans, asked of the game', 'the Plans tab']);
+
+await (async () => {
+  // No token in this stub: the ask fails before any request, says why, and frees itself for the next one.
+  let calls = 0;
+  const started = api.aolAskGame(() => { calls += 1; });
+  const again = api.aolAskGame(() => { calls += 1; });
+  await new Promise((r) => setTimeout(r, 0));
+  await new Promise((r) => setTimeout(r, 0));
+  check('asking the game: one ask at a time, and with no token it fails on "Not signed in." without a request',
+    [started, again, calls, api.aolAsk.busy, api.aolAsk.error, api.aolAsk.at > 0], [true, false, 1, false, 'Not signed in.', true]);
+})();
 
 check('a reading is banked once, an unchanged one is not written again within the minute, a forced one always',
   [api.aolBank(40, 'storylet', 1000), api.aolBank(40, 'storylet', 2000), api.aolBank(41, 'storylet', 3000),
     api.aolBank(41, 'plans', 4000), api.aolBank(41, 'plans', 5000, true), api.aolBank(101, 'manual', 6000, true),
     api.aolBank(null, 'storylet', 7000)],
   [true, false, true, true, true, false, false]);
-check('...and with no storage the page still knows the last one', api.aolBanked(), { value: 41, source: 'plans', at: 5000 });
+check('...and with no storage the page still knows the last one', api.aolBanked(), { value: 41, hi: 41, source: 'plans', at: 5000 });
 
 check('the panel state: a figure on screen is live, a banked one never is, nothing is null',
   [api.aolStateFrom(12, 'storylet', { value: 90, source: 'plans', at: 1 }, 50),
     api.aolStateFrom(null, 'storylet', { value: 90, source: 'plans', at: 1 }, 50),
+    api.aolStateFrom(null, 'storylet', { value: 84, hi: 88, source: 'outcome', at: 1 }, 50),
     api.aolStateFrom(null, 'storylet', null, 50)],
-  [{ value: 12, source: 'storylet', at: 50, live: true }, { value: 90, source: 'plans', at: 1, live: false }, null]);
+  [{ value: 12, hi: 12, source: 'storylet', at: 50, live: true }, { value: 90, hi: 90, source: 'plans', at: 1, live: false },
+    { value: 84, hi: 88, source: 'outcome', at: 1, live: false }, null]);
+
+// === the Airs off an outcome's flavour line (captured 2026-10-25) ===========
+
+check('the wiki\'s Airs table covers 0-100 once each, low to high',
+  (() => {
+    const seen = [];
+    api.AOL_AIRS_TEXT.forEach((r) => { for (let x = r[0]; x <= r[1]; x++) seen.push(x); });
+    return [seen.length, seen.every((x, i) => x === i), new Set(api.AOL_AIRS_TEXT.map((r) => r[2])).size === api.AOL_AIRS_TEXT.length];
+  })(), [101, true, true]);
+
+check('the captured line is 84-88; the ends of the table, a curly or straight quote and stray spacing all match',
+  [api.aolAirsFromLine('Two costermongers stagger past, roaring drunk, their neckerchiefs alive with the colours of night.'),
+    api.aolAirsFromLine("  Out on the city's edge, zee-bats cry where black waves break on a black shore. "),
+    api.aolAirsFromLine('Out on the city’s edge, zee-bats cry where black waves break on a black shore.'),
+    api.aolAirsFromLine('All shall be well, and all manner of thing shall be well.'),
+    api.aolAirsFromLine('Two costermongers stagger past.'), api.aolAirsFromLine('')],
+  [{ lo: 84, hi: 88 }, { lo: 0, hi: 0 }, { lo: 0, hi: 0 }, { lo: 100, hi: 100 }, null, null]);
+
+check('the outcome badge says the range, or a single level, or "?" for a line the table lacks',
+  [api.aolOutcomeSpec({ lo: 84, hi: 88 }).text, api.aolOutcomeSpec({ lo: 93, hi: 93 }).text, api.aolOutcomeSpec(null).text,
+    /The Airs of London is now 84–88\./.test(api.aolOutcomeSpec({ lo: 84, hi: 88 }).title)],
+  ['Airs 84–88', 'Airs 93', 'Airs ?', true]);
+
+check('a range is covered all, some or none: 84-88 is all inside 76-100, partly inside 64-87, and outside 0-25',
+  [[76, 100], [64, 87], [0, 25]].map((w) => api.aolCover((x) => x >= w[0] && x <= w[1], 84, 88)), ['all', 'some', 'none']);
+
+check('on the captured outcome screen the Airs line is badged and banked as 84-88; the other updates are not',
+  (() => {
+    const update = (label, text) => {
+      const u = makeEl('div');
+      u.className = 'quality-update';
+      const body = makeEl('div');
+      body.className = 'quality-update__body';
+      const line = makeEl('div');
+      line.textContent = text;
+      body.appendChild(line);
+      u.appendChild(body);
+      u.querySelector = (sel) => (sel === '[aria-label="The Airs of London"]' ? (label === 'The Airs of London' ? {} : null)
+        : sel === '.quality-update__body' ? body : null);
+      Object.defineProperty(body, 'firstElementChild', { get: () => line });
+      return { u, line };
+    };
+    const gain = update('Proscribed Material', 'You\'ve gained 44 x Proscribed Material (new total 1,511).');
+    const airs = update('The Airs of London',
+      'Two costermongers stagger past, roaring drunk, their neckerchiefs alive with the colours of night.');
+    const prior = fakeDoc.querySelectorAll;
+    fakeDoc.querySelectorAll = (sel) => (sel === '.quality-update' ? [gain.u, airs.u] : prior(sel));
+    api.aolOutcomes();
+    const t = (line) => { const b = badgeOf(line, api.AOL_OUTCOME_CLASS); return b && b.textContent; };
+    const out = [t(airs.line), t(gain.line), api.aolBanked() && [api.aolBanked().value, api.aolBanked().hi, api.aolBanked().source]];
+    fakeDoc.querySelectorAll = prior;
+    return out;
+  })(), ['Airs 84–88', null, [84, 88, 'outcome']]);
 
 check('every notable window is inside 0-100, and Dice! is the multiples of 3 up to 27',
   [api.AOL_NOTABLE.filter((e) => !e.every3 && !e.airs.every((w) => w[0] >= 0 && w[1] <= 100 && w[0] <= w[1])).map((e) => e.name),
@@ -574,6 +687,23 @@ check('the guide\'s notable windows agree with the tables the badges use',
     ];
   })(), [true, true, true, true, true, true, true, true, true]);
 
+check('Prepare the ground re-rolls the Airs on both outcomes (seen in game 2026-10-25), and the panel no longer flags it',
+  [api.THIO_OPTIONS.find((e) => e.name === 'Prepare the ground').re,
+    /re-rolls them on a success and on a failure/.test(api.AOL_NOTABLE.find((e) => e.name === 'Prepare the ground').note),
+    /NOT re-rolling/.test(api.AOL_NOTABLE.find((e) => e.name === 'Prepare the ground').note)],
+  ['both', true, false]);
+
+check('Chat to a Tipsy Spy does not change the Airs (seen in game 2026-10-25), so it is not listed as a way to',
+  api.AOL_CHANGERS.concat(api.AOL_NOTABLE).filter((x) => /Tipsy Spy/.test(x.name)).length, 0);
+
+check('the Census rows carry a "use" for the item, and the panel draws the button',
+  (() => {
+    const rows = api.AOL_NOTABLE.concat(api.AOL_CHANGERS).filter((e) => e.use);
+    const text = (n) => (n.text || n.textContent || '') + (n.childNodes || []).map(text).join('|');
+    return [rows.map((e) => e.name).sort(), rows.every((e) => e.use === 'The Censored Census of 1862'),
+      (text(api.renderAolPanel(null)).match(/\|use\|/g) || []).length >= 2];
+  })(), [['Sift through the pages', 'The Censored Census of 1862'], true, true]);
+
 check('every "badged" names a registered feature',
   api.AOL_NOTABLE.concat(api.AOL_CHANGERS).filter((e) => e.badged && !api.FEATURES.some((f) => f.name === e.badged))
     .map((e) => e.name), []);
@@ -591,15 +721,17 @@ check('the panel is registered, follows the badges\' switch, and builds with and
     const p = api.PANELS.find((x) => x.id === 'airs-of-london');
     const count = (n) => 1 + (n.childNodes || []).reduce((s, c) => s + count(c), 0);
     const text = (n) => (n.text || n.textContent || '') + (n.childNodes || []).map(text).join('|');
-    // Earlier checks banked 41 off the Plans tab; nothing is on screen.
+    // Earlier checks banked 84-88 off an outcome's line; nothing is on screen.
     const a = api.renderAolPanel(null);
     icons = [icon('You unlocked this with The Airs of London 20 (you needed 25 at most)')];
     const b = api.renderAolPanel(null);
     icons = [];
     return [!!p, p && p.follows && p.follows.id, count(a) > 200,
-      text(a).includes('Last read'), text(a).includes('Offered at Airs 41'),
-      text(b).includes('Read now, off a storylet.'), text(b).includes('Offered at Airs 20'), text(b).includes('● now')];
-  })(), [true, 'airs-of-london', true, true, true, true, true, true]);
+      text(a).includes('Last read'), text(a).includes('Offered at Airs 84–88'), text(a).includes('◐ maybe'),
+      text(a).includes('84–88 (last read)'),
+      text(b).includes('Read now, off a storylet.'), text(b).includes('Offered at Airs 20'), text(b).includes('● now'),
+      text(b).includes('◐ maybe')];
+  })(), [true, 'airs-of-london', true, true, true, true, true, true, true, true, false]);
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall good');
 process.exit(failures ? 1 : 0);

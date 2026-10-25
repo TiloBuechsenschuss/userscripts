@@ -30,13 +30,13 @@ rest use your recommendation. Make a skeleton, I'll supply html next."
 
 | Part | State |
 |---|---|
-| `aolAirsFrom` reads a locked requirement's "(you have N)", and a locked text without it reads as nothing | **done** (wording assumed) |
+| `aolAirsFrom` reads a locked requirement's "(you have N)", and a locked text without it reads as nothing | **done** (wording captured 2026-10-25) |
 | Banking: `aolBank` / `aolBanked` / `aolStateFrom`, `fl-ux-aol-airs`, source `storylet` / `plans` / `manual`, one-minute write throttle, `keep` on the feature | **done** |
 | Panel `airs-of-london` (`renderAolPanel`): your Airs, set by hand, offered now, notable ranges ●/○, ways to change, filter | **done** |
 | Guide data: `AOL_NOTABLE`, `AOL_DEAD_RANGE`, `AOL_CHANGERS` | **done**, cross-checked in the suite against the badge tables |
-| Plans tab read (verified) | **waiting on capture A** |
-| `GET /api/plan` reader and the panel's Refresh + auto-refresh | **waiting on capture B** |
-| New Airs beside an outcome | **waiting on capture C** |
+| Plans tab read (verified) | **done** (captured 2026-10-25; `okf/fallen-london/plans-tab.md`) |
+| `GET /api/plan` reader and the panel's Refresh + auto-refresh | **done** (reply captured 2026-10-25) |
+| New Airs beside an outcome | **done** (flavour text, captured 2026-10-25); "acted since" not built |
 | A cavalry officer badge | **done** (*Rob a drunk*, a Spite card; answer D, 2026-10-25) |
 | Census badge (*Sift through the pages* in *Perusal of Forgotten Pages*) | **done** (heading captured 2026-10-25) |
 | Unfinished Business ×4 | deferred |
@@ -51,7 +51,7 @@ tasks refer to them:
   markup, the `GET /api/plan` reply, and the outcome page after an Airs change.
 - **D** — settled 2026-10-25: *A cavalry officer* is an option of the Spite card *Rob a drunk*, and the
   Census item opens *Perusal of Forgotten Pages*. Section "The Airs of London: options the guide names"
-  still holds the two guide-versus-page disagreements (*Prepare the ground*, *Chat to a Tipsy Spy*).
+  no longer holds anything: *Prepare the ground* (re-rolls) and *Chat to a Tipsy Spy* (does not) were settled the same day.
 
 When a capture settles one, move the fact into the right OKF file, delete the entry there, and tick
 the task here.
@@ -60,39 +60,39 @@ the task here.
 
 ### Task 1 — Plans tab, verified (capture A)
 
-- [ ] Put the captured markup into `okf/fallen-london/` (a new `plans-tab.md`, OKF front matter,
+- [x] Put the captured markup into `okf/fallen-london/` (a new `plans-tab.md`, OKF front matter,
       every claim labelled) and delete the Plans part of the open question.
-- [ ] If the Plans tab uses `.quality-requirement [aria-label]`: nothing to wire; replace the
+- [x] If the Plans tab uses `.quality-requirement [aria-label]`: nothing to wire; replace the
       ASSUMED comment above `AOL_CACHE_KEY` with the capture's date. If it does not: a
       `aolAirsFromPlansDoc(doc)` reader for the captured selector, called by `aolRatings` when
       `aolSourceHere() === 'plans'`.
-- [ ] Pin the captured locked and unlocked `aria-label` texts in `tests/choice-airs-of-london.test.mjs`
+- [x] Pin the captured locked and unlocked `aria-label` texts in `tests/choice-airs-of-london.test.mjs`
       (replace the assumed `You need The Airs of London 76 (you have 42)` case with the real one).
 
 ### Task 2 — `GET /api/plan` and the panel's Refresh (capture B)
 
-- [ ] Document the reply shape in `okf/fallen-london/api.md` (endpoint table row "shape not
+- [x] Document the reply shape in `okf/fallen-london/api.md` (endpoint table row "shape not
       studied" → a section like the storylet one).
-- [ ] `aolAirsFromPlanJson(json)`: pure; find every quality requirement whose `qualityName` is
+- [x] `aolAirsFromPlanJson(json)`: pure; find every quality requirement whose `qualityName` is
       `The Airs of London` and run its `tooltip` (HTML stripped with `TAG_RE`) through `aolAirsFrom`.
       Unit-test it on the captured JSON, trimmed.
-- [ ] The API client: Choice Helper has none yet (`ux-enhancers.js` has `FL_API` and the token
+- [x] The API client: Choice Helper has none yet (`ux-enhancers.js` has `FL_API` and the token
       reader, ~line 3499). Carry the minimal GET into Choice Helper **byte-identical** to UX
-      Enhancers' and add it to `tests/fl-shared-helpers.test.mjs`, or ask UX Enhancers for it through
-      the page window. Token rules from api.md: only to `api.fallenlondon.com`, never logged.
-- [ ] Panel: a **Refresh** button ("Read the Airs from your Plans") and the shared auto-refresh
+      Enhancers' (done: `FL_API`, `flToken`, `flFail`, `flApi`; the shared-helpers suite pins every
+      common declaration byte for byte). Token rules from api.md: only to `api.fallenlondon.com`, never logged.
+- [x] Panel: a **Refresh** button ("Read the Airs from your Plans") and the shared auto-refresh
       checkbox, as the Hallowmas panel has; on open, refresh if the banked Airs is not live. One
       request at a time; never on a timer.
-- [ ] If the reply carries no Airs (no Airs-gated plan bookmarked), the panel says which plan to
+- [x] If the reply carries no Airs (no Airs-gated plan bookmarked), the panel says which plan to
       bookmark, by name, with a wiki link.
 
 ### Task 3 — The new Airs beside an outcome (capture C)
 
-- [ ] Record what the outcome page shows in OKF.
+- [x] Record what the outcome page shows in OKF.
 - [ ] If it shows a number: a reader for that message, bank it as source `outcome`, and draw
       "→ 42" beside the message (its own class and dataset flag; `attachBadge`'s `value` carries the
       number). Add `outcome` to `AOL_SOURCES`.
-- [ ] If it shows the flavour text: transcribe the wiki's `{{Airs table}}` (41 rows, level → text,
+- [x] If it shows the flavour text: transcribe the wiki's `{{Airs table}}` (38 rows on the page, level → text,
       in `raw` form on the page) as `AOL_AIRS_TEXT`, match the shown text exactly, and draw the
       exact level or the range ("→ 1–10"). Bank a range as a range (`lo`/`hi`), not its middle; the
       panel then marks a notable window ● only when the whole range is inside it, `◐` when it is
@@ -141,8 +141,8 @@ disagree the option page wins and the entry's `note` says so.
 | Item | Guide | Option page / badge table | Kept |
 |---|---|---|---|
 | Confound the Constables | Suspicion −4 or −3 "in addition to" 2 Infernal Contracts and 1 Proscribed Material | −3 with them, −4 alone | page |
-| Prepare the ground | listed for cycling the Airs through 68–89 | `THIO_OPTIONS` records `re: 'none'` | both quoted; open question in `open-questions.md` |
-| Chat to a Tipsy Spy | changes the Airs | the option page lists no Airs change | listed, flagged; open question in `open-questions.md` |
+| Prepare the ground | listed for cycling the Airs through 68–89 | `THIO_OPTIONS` recorded `re: 'none'` | **guide right**: re-rolls on both outcomes (seen in game 2026-10-25, page corrected); `re: 'both'` |
+| Chat to a Tipsy Spy | changes the Airs | the option page lists no Airs change | **page right**: seen in game not re-rolling (2026-10-25); left out of the panel |
 | Confide in the Chandleress | Favours: The Docks +1 for 3 actions | also Dangerous −5 CP | both shown |
 | Dice! | Airs 3, 6 … 27 | Airs = Irrigo × 3 | the same rule |
 

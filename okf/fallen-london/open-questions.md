@@ -14,46 +14,6 @@ Each entry says what is unknown, why it matters, what the code does meanwhile,
 and what capture would settle it. When one is settled, move the fact into the
 right file and delete the entry.
 
-## The Airs of London: the Plans tab and the outcome page
-
-- **Unknown:** how the Plans tab (`/plans`, assumed) draws a bookmarked
-  branch's requirements: whether it uses the storylet's
-  `.quality-requirement [aria-label]` icons, and the exact wording of a
-  LOCKED Airs requirement (assumed `You need The Airs of London 76 (you have 42)`,
-  after the Renown wording in [api.md](api.md)).
-- **Unknown:** the reply shape of `GET /api/plan` (seen, never studied).
-- **Unknown:** what the outcome page shows after an option that re-rolls or
-  sets The Airs of London: nothing, a message naming the quality, the new
-  level, or the level's flavour text ("A bat zips past, not far overhead.",
-  which the wiki maps to 1-10).
-- **Matters:** the Airs of London panel banks the Airs it reads. Without the
-  Plans tab it is read only inside a storylet with an Airs-gated option, and
-  without the outcome page every banked value is stale after one action.
-- **Meanwhile:** the Plans tab is read with the storylet reader and filed as
-  `plans`; a locked text without "(you have N)" reads as nothing; the panel
-  labels every banked value "last read" with its age.
-- **Capture:** the outer HTML of one Airs-gated plan on the Plans tab, locked
-  and unlocked; the JSON of `GET /api/plan`; the outcome page of Confound the
-  Constables or any re-rolling option.
-
-## The Airs of London: options the guide names
-
-- **Unknown:** whether *Prepare the ground* (Hunting Dangerous Prey) re-rolls
-  The Airs of London. The guide lists it among the ways to move the Airs on
-  through 68-89; `THIO_OPTIONS` records it as not re-rolling (`re: 'none'`).
-- **Matters:** the badge's tooltip and the panel say different things about it.
-- **Meanwhile:** the panel quotes both and flags it.
-- **Settle:** re-read the option page on the wiki (no game capture needed);
-  if the page is unclear, play it and note whether an Airs-gated option's
-  icon changes.
-
-- **Unknown:** whether *Chat to a Tipsy Spy* (The Singing Mandrake) changes
-  The Airs of London. The guide says it does; its option page lists no Airs
-  change.
-- **Meanwhile:** the panel lists it, worded "re-rolls, says the guide", with
-  a note that the option page disagrees.
-- **Settle:** play it with an Airs-gated option or plan to read before and after.
-
 ## The Agents tab
 
 - **Unknown:** what `/agents` shows a character with no Agents, or one who has

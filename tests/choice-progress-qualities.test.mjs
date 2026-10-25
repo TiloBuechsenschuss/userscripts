@@ -234,9 +234,11 @@ check('the guide gives 1–33 and 1–50 for two of them and the pages are follo
   ['Stalk your prey subtly', 'Speak with other hunters'].map((n) => thio('Hunting Dangerous Prey', n).guide),
   ['The guide gives Airs 1–33.', 'The guide gives Airs 1–50.']);
 
-check('none of them lists re-rolling Airs, and the tooltip says so',
-  api.THIO_OPTIONS.filter((e) => e.airs).every((e) => e.re === 'none'
-    && /does not list this option re-rolling Airs/.test(api.pqSpec(e, api.THIO_CFG).title)), true);
+check('none of them lists re-rolling Airs but Prepare the ground (seen in game, 2026-10-25), and the tooltips say so',
+  [api.THIO_OPTIONS.filter((e) => e.airs && e.name !== 'Prepare the ground').every((e) => e.re === 'none'
+    && /does not list this option re-rolling Airs/.test(api.pqSpec(e, api.THIO_CFG).title)),
+    /Re-rolls Airs on a success and on a failure/.test(api.pqSpec(api.THIO_OPTIONS.find((e) => e.name === 'Prepare the ground'), api.THIO_CFG).title)],
+  [true, true]);
 
 check('Duelling the Black Ribbon: six windows that start at 1, so Airs 0 offers only the Whispering Duellist',
   [covered(airsOf(api.RUNB_OPTIONS, 'Duelling the Black Ribbon')).length,
