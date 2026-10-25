@@ -1869,7 +1869,7 @@ check('the feature list, in order',
 
 check('the panel list, in order',
   api.PANELS.map((p) => p.id),
-  ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory', 'economy', 'spending-secrets', 'philosofruits', 'hallowmas']);
+  ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory', 'economy', 'spending-secrets', 'philosofruits', 'hallowmas', 'airs-of-london']);
 
 check('every panel has an icon, a label and a render function',
   api.PANELS.every((p) => !!p.icon && !!p.label && typeof p.render === 'function'), true);

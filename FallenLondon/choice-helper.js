@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.65
+// @version      1.66
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -553,8 +553,13 @@
  *     Each option shows the Echoes per action of what a success gives at the Bazaar sell price, then
  *     what else it moves and any faction result; a redirect shows its best line inside, a random
  *     bundle is marked rather than priced, and the six dreams that share one Honey-Dens title carry
- *     a label with all six windows in the tooltip. Which Airs you are at is not read: Fallen London
- *     shows it only in a tooltip nobody has captured yet.
+ *     a label with all six windows in the tooltip. The Airs you are at is read off the requirement icon
+ *     of any Airs-gated option on screen, and remembered with where and when it was read.
+ *     The Airs of London panel behind ⚙ UX holds your Airs (read now, last read with its age, or set by
+ *     hand), what the six storylets offer at it, the guide's notable ranges with yours marked ● and the
+ *     rest ○, and every way to change the Airs, with which of them the script badges. Filterable. The
+ *     Plans tab is read the same way as a storylet if it draws the same requirement icons, which is not
+ *     yet confirmed; bookmark an Airs-gated plan and open it to try.
  *     The Hunt is On! and Running Battle are the first two of the progress qualities that many
  *     storylines raise and spend, one vocabulary for both: a gain reads "THiO +3? −1", a spend
  *     "THiO 5 ▼ → Jade 938? −5". They badge Hunting Dangerous Prey, the Labyrinth's odd jobs and
@@ -10135,9 +10140,22 @@
     return { text: aolNow !== null ? 'Airs ' + aolNow : 'Airs', color: CAROUSEL_COLOR_LABEL, title: lines.join('\n') };
   }
 
-  // The Airs of London a piece of requirement text states, or null.
+  // The Airs of London a piece of requirement text says you HAVE, or null.
+  // An unlocked requirement states your level first ("You unlocked this with
+  // The Airs of London 88 (you needed 76)"). A locked one states the level it
+  // NEEDS first, and the number after the name is not yours: the Plans tab
+  // shows locked requirements, where only "(you have 42)" is your Airs. That
+  // wording is the Renown one in okf/fallen-london/api.md, ASSUMED to hold for
+  // the Airs until a Plans capture shows it; without it, a locked text says nothing.
   function aolAirsFrom(text) {
-    const m = /The Airs of London\D{0,12}?(\d{1,3})\b/i.exec(String(text || ''));
+    const s = String(text || '');
+    const at = s.search(/The Airs of London/i);
+    if (at === -1) return null;
+    const rest = s.slice(at);
+    const have = /\(you have (\d{1,3})\)/i.exec(rest);
+    if (have) return +have[1] <= 100 ? +have[1] : null;
+    if (/\bYou need\b/i.test(s.slice(0, at))) return null;
+    const m = /^The Airs of London\D{0,12}?(\d{1,3})\b/i.exec(rest);
     return m && +m[1] <= 100 ? +m[1] : null;
   }
 
@@ -10161,11 +10179,381 @@
 
   function aolRatings() {
     aolNow = aolCurrentAirs();
+    if (aolNow !== null) aolBank(aolNow, aolSourceHere(), Date.now());
     carouselRatings({
       salt: '@airs' + (aolNow === null ? '-' : aolNow), storylets: AOL_STORYLETS, index: AOL_INDEX, storyletSpec: aolStoryletSpec,
       optionSpec: function (e) { return aolSpec(e); },
       cls: AOL_CLASS, flag: AOL_FLAG, branchCls: AOL_BRANCH_CLASS, branchFlag: AOL_BRANCH_FLAG,
     });
+  }
+
+  // --- the Airs, banked ----------------------------------------------------
+  //
+  // The Airs is read where it is shown -- a storylet with an Airs-gated option
+  // on offer, or the Plans tab with an Airs-gated plan bookmarked (the wiki's
+  // advice, line one of The Airs of London) -- and wanted in the panel, which
+  // is opened from anywhere. So every reading is banked with where and when it
+  // was taken. Almost every action re-rolls the Airs, so a banked figure is
+  // only ever "what it was when last read", and the panel says so every time.
+  //
+  // The Plans tab is ASSUMED to draw requirements with the same
+  // `.quality-requirement [aria-label]` icons a storylet does, so the reader
+  // that already runs on every scan picks it up there and files it under
+  // 'plans'. A capture of the tab replaces that assumption (see
+  // docs/superpowers/plans/2026-10-25-airs-of-london-guide.md).
+
+  const AOL_CACHE_KEY = 'fl-ux-aol-airs';
+  // Re-banking an unchanged figure from the same place more often than this is a write for nothing.
+  const AOL_BANK_MS = 60 * 1000;
+  const AOL_SOURCES = { storylet: 'a storylet', plans: 'the Plans tab', manual: 'set by hand' };
+
+  // The last reading this page banked, so a scan that sees the same Airs writes nothing, and the panel still
+  // knows the Airs where storage is unavailable.
+  let aolLastBank = null;
+
+  function aolSourceHere() {
+    const path = typeof location !== 'undefined' && location ? String(location.pathname || '') : '';
+    return /^\/plans\b/.test(path) ? 'plans' : 'storylet';
+  }
+
+  function aolBank(value, source, now, force) {
+    if (typeof value !== 'number' || !(value >= 0 && value <= 100)) return false;
+    const last = aolLastBank;
+    if (!force && last && last.value === value && last.source === source && now - last.at < AOL_BANK_MS) return false;
+    aolLastBank = { value: value, source: source, at: now };
+    saveCache(AOL_CACHE_KEY, { v: 1, at: now, character: characterName() || null, value: value, source: source });
+    return true;
+  }
+
+  function aolBanked() {
+    const rec = loadCache(AOL_CACHE_KEY, 1);
+    if (rec && typeof rec.value === 'number' && rec.value >= 0 && rec.value <= 100) {
+      return { value: rec.value, source: rec.source, at: rec.at };
+    }
+    return aolLastBank;
+  }
+
+  // Pure: what the panel shows. A figure on screen now is live; anything else is the last reading, never
+  // passed off as current.
+  function aolStateFrom(live, liveSource, banked, now) {
+    if (live !== null && live !== undefined) return { value: live, source: liveSource, at: now, live: true };
+    if (!banked) return null;
+    return { value: banked.value, source: banked.source, at: banked.at, live: false };
+  }
+
+  function aolState() {
+    return aolStateFrom(aolCurrentAirs(), aolSourceHere(), aolBanked(), Date.now());
+  }
+
+  function aolKeep() {
+    const n = aolCurrentAirs();
+    if (n !== null) aolBank(n, aolSourceHere(), Date.now());
+  }
+
+  function aolWindowHas(airs, v) {
+    return !!airs && v !== null && v !== undefined && airs.some(function (w) { return v >= w[0] && v <= w[1]; });
+  }
+
+  // --- the guide: notable ranges and the ways to change the Airs ------------
+  //
+  // From The Airs of London (fetched through the API, 2026-10-25): its
+  // "Notable Ranges" and "Ways to change your Airs", with every window and
+  // payout checked against the option pages and against the tables the
+  // badges already use (AOL_OPTIONS, AOL_DREAMS, THIO_OPTIONS, RUNB_OPTIONS,
+  // the Chandleress's and time in bed's); where they disagree the page wins
+  // and `note` says what the guide says. Corrections go here and nowhere else.
+  //
+  //   airs     [[lo, hi], ...] the window; `every3` instead for Dice! (Airs = Irrigo × 3).
+  //   name / where / gives   the option, where it is, what a success gives.
+  //   needs / actions / note / badged (the feature that badges it, or null).
+
+  const AOL_NOTABLE = [
+    { airs: [[0, 25]], name: 'Confound the Constables', where: AOL_SPITE,
+      gives: 'Suspicion −3 with 2 Infernal Contracts and a Proscribed Material, or Suspicion −4 alone',
+      needs: AOL_NAME_WHISPERED, badged: 'airs-of-london',
+      note: 'The guide: one of the most action-efficient storylet ways to lower Suspicion. It lists −4 or −3 '
+        + '"in addition to" the contracts; the option pages give −3 with them and −4 alone.' },
+    { airs: [[33, 67]], name: 'Attend an audience with the Gracious Widow', where: AOL_WIDOW,
+      gives: 'Connected: The Widow +10 CP and 36 Jade Fragments (Shadowy 57)', needs: 'Connected: The Widow 10',
+      badged: 'airs-of-london', note: 'The guide: the best farmable storylet for the Widow.' },
+    { airs: [[26, 75]], name: 'Arrange a duel outside the Black Ribbon', where: 'Duelling the Black Ribbon, The Blind Helmsman',
+      gives: 'Running Battle... +3 CP and 20 Rostygold', badged: 'running-battle',
+      note: 'One of the guide’s "best of the worst" for cycling the Airs through 68–89.' },
+    { airs: [[51, 100]], name: 'Prepare the ground', where: 'Hunting Dangerous Prey, Wolfstack Docks',
+      gives: 'The Hunt Is On! +3 CP, without touching the quirks', badged: 'the-hunt-is-on',
+      note: 'The guide lists it for cycling the Airs through 68–89; the table the badge uses records it as NOT '
+        + 're-rolling them. To be checked against the option page.' },
+    { airs: [[51, 100]], name: 'Scout a battlefield', where: 'Duelling the Black Ribbon, The Blind Helmsman',
+      gives: 'Running Battle... +3 CP', badged: 'running-battle',
+      note: 'One of the guide’s "best of the worst" for cycling the Airs through 68–89.' },
+    { airs: [[76, 100]], name: 'Waylay a Weasel-Seller', where: AOL_SPITE,
+      gives: '2 Lucky Weasels (Shadowy 53); a rare success gives an Araby Fighting-Weasel', needs: AOL_NAME_WHISPERED,
+      badged: 'airs-of-london' },
+    { airs: [[85, 100]], name: AOL_DREAM + ' (Dream of a Tempest)', where: AOL_HONEY,
+      gives: 'Wounds −1 CP, 2 Maniac’s Prayers, 2 Appalling Secrets, 5 Cryptic Clues (Persuasive 19)', actions: 2,
+      needs: 'Drops of Prisoner’s Honey as many as your A Connoisseur of Neathy Delights', badged: 'airs-of-london' },
+    { airs: [[90, 100]], name: 'A dreamless sleep', where: 'Time in bed (Wounds 2 or more)',
+      gives: 'Wounds −7 CP, Nightmares −2 CP, and the Airs set to 0', needs: 'Nightmares below 7',
+      badged: 'time-in-bed', note: 'The guide: 3 actions. Setting the Airs to 0 is the point when you want 0–25.' },
+    { airs: [[95, 100]], name: AOL_DREAM + ' (Dream of a City)', where: AOL_HONEY,
+      gives: 'a Phosphorescent Scarab and an Extraordinary Implication (Persuasive 25)', actions: 2,
+      needs: 'A Connoisseur of Neathy Delights 4, and Drops of Prisoner’s Honey as many as that level',
+      badged: 'airs-of-london' },
+    { airs: [[96, 100]], name: 'Confide in the Chandleress', where: 'The Chandleress’ Complaint, The Department of Menace Eradication',
+      gives: 'Favours: The Docks +1 (the option page adds Dangerous −5 CP)', badged: 'chandleress-complaint',
+      note: 'The guide: 3 actions for the Favour.' },
+    { every3: true, name: 'Dice!', where: 'A card game, The Cave of the Nadir',
+      gives: 'Irrigo +1 and a Devilbone Die', needs: 'The Airs of London exactly three times your Irrigo (3, 6, … 27)',
+      badged: 'cave-of-the-nadir' },
+    { airs: [[0, 100]], name: 'Sift through the pages', where: 'The Censored Census of 1862 (an item)',
+      gives: '41–55 Proscribed Material (Watchful 150); a failure gives 25', badged: null,
+      note: 'Re-rolls the Airs on a success and a failure, at any Airs: the guide’s fallback for cycling them.' },
+  ];
+
+  // The guide's 68–89: no notable option of its own.
+  const AOL_DEAD_RANGE = [68, 89];
+
+  const AOL_CHANGERS = [
+    { name: 'The six London storylets', where: 'Spite, Ladybones Road, Watchmaker’s Hill, Veilgarden',
+      how: 'most options re-roll', badged: 'airs-of-london',
+      note: AOL_TOP.join(', ') + '. Each option’s tooltip says whether it re-rolls.' },
+    { name: 'A cavalry officer', where: 'Spite', how: 're-rolls on a success, a rare success and a failure',
+      needs: 'The Airs of London 50–100; Shadowy 30', badged: null,
+      note: 'Pays a Nevercold Brass Sliver, a half-full Tincture of Vigour and Map Scraps. Whether it is a card or a '
+        + 'storylet, and its exact title, are not known yet, so it has no badge.' },
+    { name: 'Chat to a Tipsy Spy', where: 'The Singing Mandrake', how: 're-rolls, says the guide',
+      needs: 'a Bottle of Greyfields 1882', badged: null,
+      note: 'The option page lists no change to the Airs; the guide is the only source.' },
+    { name: 'Vertiginous Horticulture', where: 'The Flit', how: 'the plant-nurturing options re-roll',
+      needs: 'A Name Whispered in Darkness 4', badged: 'vertiginous-horticulture' },
+    { name: 'Duelling the Black Ribbon', where: 'The Blind Helmsman, Wolfstack Docks', how: 're-rolls',
+      badged: 'running-battle' },
+    { name: 'Hunting Dangerous Prey', where: 'Wolfstack Docks', how: 're-rolls, says the guide', badged: 'the-hunt-is-on' },
+    { name: 'Time in bed', where: 'any (Wounds 2 or more)', how: 'A dreamless sleep sets the Airs to 0',
+      badged: 'time-in-bed' },
+    { name: 'Unfinished Business', where: 'Ladybones Road, Spite, Watchmaker’s Hill, Veilgarden', how: 're-rolls',
+      needs: 'A Person of Some Importance', badged: null, note: 'Four storylets of about eight options each; not badged yet.' },
+    { name: 'The Censored Census of 1862', where: 'an item: Sift through the pages', how: 're-rolls, at any Airs',
+      needs: 'the item', badged: null },
+    { name: 'Brawling with Dockers', where: 'The Blind Helmsman', how: 'the fights re-roll',
+      needs: 'A Name Scrawled in Blood 7 and Acquaintance: The Garrulous Drunk 3', badged: 'brawling-dockers' },
+    { name: 'Stroll in the garden of bones', where: 'The Natural History Wing, the Museum', how: 're-rolls',
+      badged: 'prelapsarian-museum' },
+    { name: 'Visit the Wry Functionary (Conversation)', where: 'A Visit (a card)', how: 'cycles the Airs for no action',
+      needs: 'FATE; Acquaintance: the Wry Functionary 5 and A Functionary’s Confidant', badged: null,
+      note: 'The guide: a zero-action way to cycle the Airs until you hit the value you want, once you draw the card.' },
+  ];
+
+  function aolNotableHas(e, v) {
+    if (v === null || v === undefined) return false;
+    if (e.every3) return v >= 3 && v <= 27 && v % 3 === 0;
+    return aolWindowHas(e.airs, v);
+  }
+
+  function aolNotableWindow(e) {
+    return e.every3 ? '3, 6, … 27' : aolWindows(e.airs);
+  }
+
+  // The top-level options of the six storylets the Airs offers at `v`, best Echoes first (a redirect by its
+  // best line inside). Only the six: the other Airs-gated options live in tables of other shapes.
+  function aolOfferedAt(v) {
+    const worth = function (e) {
+      if (!e.open) return aolEpa(e);
+      const inner = aolInner(e);
+      return inner.length ? aolEpa(aolBest(inner)) : null;
+    };
+    return AOL_OPTIONS.filter(function (e) {
+      return AOL_TOP.indexOf(e.storylet) !== -1 && aolWindowHas(e.airs, v);
+    }).map(function (e) { return { e: e, epa: worth(e) }; }).sort(function (a, b) {
+      return (b.epa === null ? -Infinity : b.epa) - (a.epa === null ? -Infinity : a.epa);
+    }).map(function (x) { return x.e; });
+  }
+
+  // === panel: The Airs of London ===========================================
+  //
+  // Your Airs (live, banked with its age and where it was read, or set by
+  // hand), what the six storylets offer at it, the guide's notable ranges
+  // with yours marked, and every way to change it. ● is inside the window at
+  // the Airs shown, ○ outside, so nothing rests on a colour. One filter over
+  // all three tables.
+  //
+  // Not yet (each waits on a capture; see the plan in docs/superpowers/plans/
+  // 2026-10-25-airs-of-london-guide.md): a Refresh that reads the Plans tab
+  // without leaving the page, and the new Airs beside an outcome that changed it.
+
+  function aolAgeText(st) {
+    if (!st) return 'Never read. Open a storylet with an Airs-gated option on offer, or the Plans tab with an '
+      + 'Airs-gated plan bookmarked (Confound the Constables, say), or set it by hand below.';
+    if (st.live) return 'Read now, off ' + (AOL_SOURCES[st.source] || st.source) + '.';
+    return 'Last read ' + ageText(st.at) + ', off ' + (AOL_SOURCES[st.source] || st.source)
+      + '. Almost every action re-rolls the Airs, so this is what it WAS.';
+  }
+
+  function renderAolPanel(ctx) {
+    const st = aolState();
+    const v = st ? st.value : null;
+
+    const stat = function (label, value) {
+      return h('div', { css: 'min-width:92px;' }, [
+        h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [label]),
+        h('div', { css: 'font-size:16px;color:' + UI.text + ';' }, [value]),
+      ]);
+    };
+    const button = function (text, title, fn) {
+      return h('button', {
+        type: 'button', title: title,
+        css: 'padding:3px 9px;background:' + UI.bgAlt + ';color:' + UI.text + ';border:1px solid ' + UI.line
+          + ';border-radius:3px;font:12px ' + UI.font + ';cursor:pointer;',
+        on: { click: fn },
+      }, [text]);
+    };
+    const redraw = function () {
+      schedule();
+      if (ctx && ctx.rerender) ctx.rerender();
+    };
+
+    // --- your Airs ------------------------------------------------------------
+    const field = h('input', {
+      type: 'number', min: '0', max: '100', id: 'fl-ux-aol-by-hand', placeholder: '0–100',
+      css: 'width:72px;box-sizing:border-box;padding:3px 6px;background:' + UI.bgAlt + ';color:' + UI.text
+        + ';border:1px solid ' + UI.line + ';border-radius:3px;font:12px ' + UI.font + ';',
+    });
+    const yours = h('div', {
+      css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent + ';background:' + UI.bgAlt
+        + ';font-size:12px;line-height:1.6;',
+    }, [
+      h('div', { css: 'display:flex;flex-wrap:wrap;gap:16px;' }, [
+        stat('The Airs of London', v === null ? '–' : String(v) + (st.live ? '' : ' (last read)')),
+      ]),
+      h('div', { css: 'margin-top:6px;color:' + UI.dim + ';' }, [aolAgeText(st)]),
+      h('div', { css: 'margin-top:8px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;' }, [
+        h('span', { css: 'color:' + UI.dim + ';' }, ['Set by hand (the next reading replaces it):']),
+        field,
+        button('Save', 'Use this Airs until the next reading', function () {
+          const n = Number(String(field.value == null ? '' : field.value).trim());
+          if (String(field.value || '').trim() === '' || !isFinite(n)) return;
+          aolBank(Math.max(0, Math.min(100, Math.floor(n))), 'manual', Date.now(), true);
+          redraw();
+        }),
+      ]),
+    ]);
+
+    // --- one table, three groups -------------------------------------------------
+    const rows = [];
+    const mark = function (inside) {
+      if (v === null) return '';
+      return inside ? '● now' : '○';
+    };
+    const addGroup = function (label) {
+      const header = h('tr', null, [h('td', {
+        colSpan: 4,
+        css: 'padding:8px 8px 3px;font:bold 11px ' + UI.font + ';letter-spacing:.05em;text-transform:uppercase;'
+          + 'color:' + UI.dim + ';border-bottom:1px solid ' + UI.line + ';',
+      }, [label])]);
+      header.dataset.aolGroup = '1';
+      rows.push(header);
+    };
+    const addRow = function (cells, search) {
+      const row = h('tr', null, cells);
+      row.dataset.aolSearch = search.filter(Boolean).join(' ').toLowerCase();
+      rows.push(row);
+    };
+    const small = function (text) {
+      return text ? h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [text]) : null;
+    };
+    const badgedBy = function (id) {
+      return id ? 'Badged in the game (' + featureLabel(id) + ').' : 'Not badged yet.';
+    };
+
+    if (v !== null) {
+      addGroup('Offered at Airs ' + v + ' in the six storylets');
+      aolOfferedAt(v).forEach(function (e) {
+        addRow([
+          h('td', { css: TD }, [h('div', null, [wikiLink(e.name, e.name)]), small(e.storylet)]),
+          h('td', { css: TD + 'text-align:center;' }, [makeBadge(aolSpec(e), AOL_CLASS)]),
+          h('td', { css: TD + 'white-space:nowrap;' }, ['Airs ' + aolWindows(e.airs)]),
+          h('td', { css: TD + 'color:' + UI.dim + ';font-size:12px;' }, [aolRerolls(e), e.needs ? small('Needs ' + e.needs) : null]),
+        ], [e.name, e.storylet, e.needs, e.open]);
+      });
+    }
+
+    addGroup('Notable ranges (the guide)');
+    AOL_NOTABLE.forEach(function (e) {
+      addRow([
+        h('td', { css: TD }, [h('div', null, [wikiLink(e.name.replace(/ \(Dream of .*\)$/, ''), e.name)]), small(e.where)]),
+        h('td', { css: TD + 'text-align:center;white-space:nowrap;' }, [mark(aolNotableHas(e, v))]),
+        h('td', { css: TD + 'white-space:nowrap;' }, ['Airs ' + aolNotableWindow(e)]),
+        h('td', { css: TD + 'font-size:12px;' }, [
+          h('div', null, [e.gives + (e.actions ? ', for ' + e.actions + ' actions' : '') + '.']),
+          e.needs ? small('Needs ' + e.needs + '.') : null,
+          e.note ? small(e.note) : null,
+          small(badgedBy(e.badged)),
+        ]),
+      ], [e.name, e.where, e.gives, e.needs, e.note]);
+    });
+    addRow([
+      h('td', { css: TD }, ['(no notable option)']),
+      h('td', { css: TD + 'text-align:center;' }, [mark(v !== null && v >= AOL_DEAD_RANGE[0] && v <= AOL_DEAD_RANGE[1])]),
+      h('td', { css: TD + 'white-space:nowrap;' }, ['Airs ' + AOL_DEAD_RANGE[0] + '–' + AOL_DEAD_RANGE[1]]),
+      h('td', { css: TD + 'font-size:12px;' }, ['The guide’s dead range: nothing good to do but move the Airs on. '
+        + 'Its best of the worst are the duel, the battlefield, the ground and the Weasel-Seller above, '
+        + 'then the Census or Unfinished Business.']),
+    ], ['dead range', 'cycle']);
+
+    addGroup('Ways to change your Airs');
+    AOL_CHANGERS.forEach(function (e) {
+      addRow([
+        h('td', { css: TD }, [h('div', null, [wikiLink(e.name, e.name)]), small(e.where)]),
+        h('td', { css: TD }, ['']),
+        h('td', { css: TD + 'font-size:12px;' }, [e.how]),
+        h('td', { css: TD + 'font-size:12px;' }, [
+          e.needs ? h('div', null, ['Needs ' + e.needs + '.']) : null,
+          e.note ? small(e.note) : null,
+          small(badgedBy(e.badged)),
+        ]),
+      ], [e.name, e.where, e.how, e.needs, e.note]);
+    });
+
+    const search = h('input', {
+      type: 'text', placeholder: 'filter options, places, rewards…',
+      css: 'flex:1;min-width:140px;box-sizing:border-box;padding:3px 7px;background:' + UI.bgAlt + ';color:' + UI.text
+        + ';border:1px solid ' + UI.line + ';border-radius:3px;font:12px ' + UI.font + ';',
+      on: {
+        input: function (e) {
+          const term = String(e.currentTarget.value || '').trim().toLowerCase();
+          for (const row of rows) {
+            if (row.dataset.aolGroup) continue;
+            row.hidden = !!term && row.dataset.aolSearch.indexOf(term) === -1;
+          }
+          let group = null, count = 0;
+          for (const row of rows) {
+            if (row.dataset.aolGroup) {
+              if (group) group.hidden = count === 0;
+              group = row; count = 0;
+            } else if (!row.hidden) count++;
+          }
+          if (group) group.hidden = count === 0;
+        },
+      },
+    });
+
+    return h('div', { css: 'padding:0 12px 12px;' }, [
+      yours,
+      h('div', { css: 'margin-top:14px;' }, [
+        h('div', { css: 'display:flex;margin-bottom:6px;' }, [search]),
+        h('table', { css: 'width:100%;border-collapse:collapse;' }, [
+          h('thead', null, [h('tr', null, ['Option', '', 'Window', 'What it does'].map(function (t) {
+            return h('th', { css: TH }, [t]);
+          }))]),
+          h('tbody', null, rows),
+        ]),
+      ]),
+      h('div', { css: 'margin-top:12px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+        h('div', null, [h('b', null, ['●']), ' inside the window at the Airs above · ', h('b', null, ['○']), ' outside it.']),
+        h('div', { css: 'margin-top:6px;' }, ['Data from ', wikiLink('The Airs of London', 'The Airs of London'),
+          ' and the option pages on the Fallen London wiki.']),
+      ]),
+    ]);
   }
 
   // === shared: progress qualities ========================================
@@ -44576,7 +44964,8 @@
     { name: 'marigold-station', run: mrRatings },
     // Six London storylets gated on The Airs of London, and the storylets their
     // redirecting options open: the same titles reappear nowhere else.
-    { name: 'airs-of-london', run: aolRatings },
+    // `keep`: the Airs is banked for the panel even with the badges switched off.
+    { name: 'airs-of-london', run: aolRatings, keep: aolKeep },
     // The first two on the shared progress-quality helper. They stand in
     // different storylets and share no title with each other or with the Airs
     // feature: Hunting Dangerous Prey and Duelling the Black Ribbon are the two
@@ -44832,6 +45221,15 @@
       follows: { scriptId: 'choice', id: 'hallowmas-masques' },
       hint: 'Every Masque option by Airs, the dates, what Spirit buys, affiliations, and this year’s companion upgrades',
       render: renderHallowmasPanel,
+    },
+    {
+      id: 'airs-of-london',
+      icon: '☁',
+      label: 'Airs of London',
+      group: 'General',
+      follows: { scriptId: 'choice', id: 'airs-of-london' },
+      hint: 'Your Airs, what it offers now, the guide’s notable ranges and every way to change it',
+      render: renderAolPanel,
     },
   ];
 

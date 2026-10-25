@@ -701,15 +701,15 @@ check('the card is light, and every colour written on it is readable against it'
     button().dispatch('click');
   };
 
-  check('Choice Helper registered its six panels on the page, in order',
+  check('Choice Helper registered its panels on the page, in order',
     (win.__flUxPanels || []).map((p) => p.id),
-    ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory', 'economy', 'spending-secrets', 'philosofruits', 'hallowmas']);
+    ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory', 'economy', 'spending-secrets', 'philosofruits', 'hallowmas', 'airs-of-london']);
 
   // No festival marked running, so none floats to the top and the order is the groups'.
   open();
   check('the menu lists them in their groups, the launcher\'s own Factions first under General',
     labels().slice(0, 5),
-    ['⚔  Factions', '⚓  Zailing', '💰  Economy', '🐅  Port Carnelian', '🔬  Scientific Voyages']);
+    ['⚔  Factions', '⚓  Zailing', '💰  Economy', '☁  Airs of London', '🐅  Port Carnelian']);
   check('...under a heading per group, and Settings last, just above the dock toggle',
     [menu().querySelectorAll('div').map((d) => d.textContent)
       .filter((t) => ['General', 'Activities', 'Seasonal', 'In season'].includes(t)),

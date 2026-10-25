@@ -2534,6 +2534,18 @@ navigation. Two consequences:
   outside its window is not drawn. `aolCurrentAirs` reads it, the storylet heading says `Airs 88` and its tooltip marks each option
   ● offered now or ○ not, and an option's tooltip says whether the Airs is inside its window; the value of every Airs badge carries
   the Airs, so a re-roll redraws it. With no Airs-gated option on screen nothing is read and nothing changes.
+  **The guide panel (2026-10-25, a skeleton; plan in `docs/superpowers/plans/2026-10-25-airs-of-london-guide.md`).**
+  Every reading is banked (`aolBank`, `fl-ux-aol-airs`, `{ v: 1, at, character, value, source }`) with where it was taken:
+  `storylet`, `plans` (the path is `/plans`) or `manual`. An unchanged reading is not re-written within a minute; the
+  feature's `keep` banks even with the badges switched off. `aolAirsFrom` now takes a locked requirement's "(you have N)"
+  and returns null for a locked one without it, because the number after the name is then the level NEEDED -- the
+  Plans tab shows locked requirements. That wording is **assumed** from the Renown one in `okf/fallen-london/api.md`.
+  The panel (`airs-of-london`, `renderAolPanel`) holds your Airs (live, last read with its age, or set by hand), what the
+  six storylets offer at it (`aolOfferedAt`, best Echoes first), the guide's notable ranges (`AOL_NOTABLE`) marked
+  ● / ○ against it, and every way to change the Airs (`AOL_CHANGERS`), each saying which feature badges it.
+  **Not verified in-game:** that the Plans tab draws `.quality-requirement [aria-label]` icons at all, and the locked
+  wording; the panel's Refresh (read the Plans tab without leaving the page) and the new Airs beside an outcome are not
+  built, both waiting on captures listed in `okf/fallen-london/open-questions.md`.
 
   **Progress qualities: The Hunt is On! and Running Battle** (`the-hunt-is-on`, `THIO_OPTIONS`,
   `running-battle`, `RUNB_OPTIONS`, both on the shared `pq*` helper): the first two features from the
@@ -4587,7 +4599,10 @@ Current tests:
   price; the arithmetic of a range, a cost, a Luck option, a rare success and a bundle by hand; that
   the six dreams are one label and never a badge each; the `(gendertitle)`, `Accept the task` and
   `(5 FATE)` title traps; the two guide-versus-page disagreements; and that no option title is in
-  another feature’s table.
+  another feature’s table;
+  and for the guide panel: the locked "(you have N)" wording, banking and its one-minute throttle, the panel
+  state (live versus last read), that every notable window agrees with the table its badge uses, that every
+  `badged` names a registered feature, what the storylets offer at an Airs, and the whole panel built.
 - `tests/choice-progress-qualities.test.mjs` — the shared `pq*` helper and the two features on it:
   the gain/spend vocabulary by hand for a dozen options, that a rare success and the guide’s Echoes
   stay off the badge, every guide-versus-page disagreement by name, that Hunting Dangerous Prey offers

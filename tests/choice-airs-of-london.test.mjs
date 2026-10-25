@@ -125,6 +125,8 @@ const wrapped = src
     + ' aolEpa, aolBadgeText, aolSpec, aolStoryletSpec, aolAirsFrom, aolCurrentAirs, aolRatings, aolWindows, aolColor,'
     + ' LBI_STORYLETS, VH_STORYLET, LBI_OPTIONS, VH_OPTIONS, DME_OPTIONS, ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS,'
     + ' LAB_CARDS, ARBOR_OPTIONS, PC_OPTIONS, VSD_OPTIONS,'
+    + ' aolBank, aolBanked, aolStateFrom, aolWindowHas, aolNotableHas, aolOfferedAt, aolEpa, renderAolPanel,'
+    + ' AOL_NOTABLE, AOL_CHANGERS, AOL_DEAD_RANGE, THIO_OPTIONS, RUNB_OPTIONS, CHANDLERESS_COMPLAINT_OPTIONS, PANELS,'
     + ' normalizeName, BADGE_CLASS, FEATURES }; })();');
 const fn = new Function(
   'document', 'MutationObserver', 'requestAnimationFrame', 'getComputedStyle', 'console',
@@ -468,5 +470,81 @@ check('an option says the Airs is inside its window, and a changed Airs redraws 
     api.aolRatings();
     return [a, b];
   })(), [true, true]);
+
+// === the guide panel: the Airs read off the Plans tab, banked, and the guide's tables (2026-10-25) ======
+
+check('a locked requirement gives the "you have", never the level it needs; without one it says nothing',
+  [api.aolAirsFrom('You need The Airs of London 76 (you have 42)'),
+    api.aolAirsFrom('You need The Airs of London 76-100 (you have 0)'),
+    api.aolAirsFrom('You need The Airs of London 76'),
+    api.aolAirsFrom('You unlocked this with The Airs of London 1 (you needed 50 at most)'),
+    api.aolAirsFrom('You unlocked this with The Airs of London 88 (you needed 76)')],
+  [42, 0, null, 1, 88]);
+
+check('a reading is banked once, an unchanged one is not written again within the minute, a forced one always',
+  [api.aolBank(40, 'storylet', 1000), api.aolBank(40, 'storylet', 2000), api.aolBank(41, 'storylet', 3000),
+    api.aolBank(41, 'plans', 4000), api.aolBank(41, 'plans', 5000, true), api.aolBank(101, 'manual', 6000, true),
+    api.aolBank(null, 'storylet', 7000)],
+  [true, false, true, true, true, false, false]);
+check('...and with no storage the page still knows the last one', api.aolBanked(), { value: 41, source: 'plans', at: 5000 });
+
+check('the panel state: a figure on screen is live, a banked one never is, nothing is null',
+  [api.aolStateFrom(12, 'storylet', { value: 90, source: 'plans', at: 1 }, 50),
+    api.aolStateFrom(null, 'storylet', { value: 90, source: 'plans', at: 1 }, 50),
+    api.aolStateFrom(null, 'storylet', null, 50)],
+  [{ value: 12, source: 'storylet', at: 50, live: true }, { value: 90, source: 'plans', at: 1, live: false }, null]);
+
+check('every notable window is inside 0-100, and Dice! is the multiples of 3 up to 27',
+  [api.AOL_NOTABLE.filter((e) => !e.every3 && !e.airs.every((w) => w[0] >= 0 && w[1] <= 100 && w[0] <= w[1])).map((e) => e.name),
+    (() => { const d = api.AOL_NOTABLE.find((e) => e.every3); return [0, 3, 4, 27, 30].map((v) => api.aolNotableHas(d, v)); })()],
+  [[], [false, true, false, true, false]]);
+
+check('the guide\'s notable windows agree with the tables the badges use',
+  (() => {
+    const w = (name) => JSON.stringify(api.AOL_NOTABLE.find((e) => e.name === name).airs);
+    const opt = (name) => JSON.stringify(api.AOL_OPTIONS.find((e) => e.name === name && e.airs).airs);
+    const dream = (d) => JSON.stringify([api.AOL_DREAMS.find((e) => e.dream === d).airs]);
+    const pq = (list, name) => JSON.stringify(list.find((e) => e.name === name).airs);
+    const ch = api.CHANDLERESS_COMPLAINT_OPTIONS.find((e) => e.name === 'Confide in the Chandleress');
+    return [
+      w('Confound the Constables') === opt('Confound the Constables'),
+      w('Attend an audience with the Gracious Widow') === opt('Attend an audience with the Gracious Widow'),
+      w('Waylay a Weasel-Seller') === opt('Waylay a Weasel-Seller'),
+      w(api.AOL_DREAM + ' (Dream of a Tempest)') === dream('a Tempest'),
+      w(api.AOL_DREAM + ' (Dream of a City)') === dream('a City'),
+      w('Prepare the ground') === pq(api.THIO_OPTIONS, 'Prepare the ground'),
+      w('Scout a battlefield') === pq(api.RUNB_OPTIONS, 'Scout a battlefield'),
+      w('Arrange a duel outside the Black Ribbon') === pq(api.RUNB_OPTIONS, 'Arrange a duel outside the Black Ribbon'),
+      w('Confide in the Chandleress') === JSON.stringify([ch.airs]),
+    ];
+  })(), [true, true, true, true, true, true, true, true, true]);
+
+check('every "badged" names a registered feature',
+  api.AOL_NOTABLE.concat(api.AOL_CHANGERS).filter((e) => e.badged && !api.FEATURES.some((f) => f.name === e.badged))
+    .map((e) => e.name), []);
+
+check('what the six storylets offer at an Airs: only options whose window holds it, best Echoes first',
+  (() => {
+    const at = api.aolOfferedAt(30);
+    const inside = at.every((e) => api.aolWindowHas(e.airs, 30) && api.AOL_TOP.includes(e.storylet));
+    const all = api.AOL_OPTIONS.filter((e) => api.AOL_TOP.includes(e.storylet) && api.aolWindowHas(e.airs, 30)).length;
+    return [inside, at.length === all, at.length > 0];
+  })(), [true, true, true]);
+
+check('the panel is registered, follows the badges\' switch, and builds with and without an Airs',
+  (() => {
+    const p = api.PANELS.find((x) => x.id === 'airs-of-london');
+    const count = (n) => 1 + (n.childNodes || []).reduce((s, c) => s + count(c), 0);
+    const text = (n) => (n.text || n.textContent || '') + (n.childNodes || []).map(text).join('|');
+    // Earlier checks banked 41 off the Plans tab; nothing is on screen.
+    const a = api.renderAolPanel(null);
+    icons = [icon('You unlocked this with The Airs of London 20 (you needed 25 at most)')];
+    const b = api.renderAolPanel(null);
+    icons = [];
+    return [!!p, p && p.follows && p.follows.id, count(a) > 200,
+      text(a).includes('Last read'), text(a).includes('Offered at Airs 41'),
+      text(b).includes('Read now, off a storylet.'), text(b).includes('Offered at Airs 20'), text(b).includes('● now')];
+  })(), [true, 'airs-of-london', true, true, true, true, true, true]);
+
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall good');
 process.exit(failures ? 1 : 0);

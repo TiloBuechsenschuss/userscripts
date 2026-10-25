@@ -4,7 +4,7 @@ title: Open questions about Fallen London
 kind: open-questions
 domain: fallenlondon.com
 status: open
-updated: 2026-10-21
+updated: 2026-10-25
 see_also: [api.md, challenges.md, equipment.md, agents-tab.md]
 ---
 
@@ -13,6 +13,28 @@ see_also: [api.md, challenges.md, equipment.md, agents-tab.md]
 Each entry says what is unknown, why it matters, what the code does meanwhile,
 and what capture would settle it. When one is settled, move the fact into the
 right file and delete the entry.
+
+## The Airs of London: the Plans tab and the outcome page
+
+- **Unknown:** how the Plans tab (`/plans`, assumed) draws a bookmarked
+  branch's requirements: whether it uses the storylet's
+  `.quality-requirement [aria-label]` icons, and the exact wording of a
+  LOCKED Airs requirement (assumed `You need The Airs of London 76 (you have 42)`,
+  after the Renown wording in [api.md](api.md)).
+- **Unknown:** the reply shape of `GET /api/plan` (seen, never studied).
+- **Unknown:** what the outcome page shows after an option that re-rolls or
+  sets The Airs of London: nothing, a message naming the quality, the new
+  level, or the level's flavour text ("A bat zips past, not far overhead.",
+  which the wiki maps to 1-10).
+- **Matters:** the Airs of London panel banks the Airs it reads. Without the
+  Plans tab it is read only inside a storylet with an Airs-gated option, and
+  without the outcome page every banked value is stale after one action.
+- **Meanwhile:** the Plans tab is read with the storylet reader and filed as
+  `plans`; a locked text without "(you have N)" reads as nothing; the panel
+  labels every banked value "last read" with its age.
+- **Capture:** the outer HTML of one Airs-gated plan on the Plans tab, locked
+  and unlocked; the JSON of `GET /api/plan`; the outcome page of Confound the
+  Constables or any re-rolling option.
 
 ## The Agents tab
 
