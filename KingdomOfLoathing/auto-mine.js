@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/auto-mine.js
-// @version      0.7
+// @version      0.8
 // @description  Browser port of the oreo KoLmafia script for mining the Velvet / Gold Mine.
 // @match        https://www.kingdomofloathing.com/awesomemenu.php*
 // @match        https://kingdomofloathing.com/awesomemenu.php*
@@ -931,24 +931,87 @@
   // -- and 'unknown' only when all of them come up empty. api.php carries the
   // name too, and getStatus() feeds it in here; that is the authoritative
   // source and the one immune to what any frame happens to be doing.
+  //
+  // The name is folded to lower case before it becomes a key, and that is the
+  // second half of the same bug. KoL names are case-insensitive, and api.php
+  // and the charpane do not always spell one alike -- KoLmafia's captured
+  // pages have api.php answering "dEvstEr5" for a charpane that reads
+  // "Devster5". With the compact charpane the menu frame keyed by the
+  // charpane's spelling, every getStatus() put api.php's back, and during the
+  // heal's charpane reload nothing corrected it: the count read from a second,
+  // empty bucket and showed 0, and turns spent then went into that one.
   let knownCharacterName = null;
 
+  function normalizeName(name) {
+    return typeof name === 'string' ? name.trim().toLowerCase() : '';
+  }
+
   function rememberCharacterName(name) {
-    const trimmed = typeof name === 'string' ? name.trim() : '';
-    if (!trimmed || trimmed === knownCharacterName) return;
-    knownCharacterName = trimmed;
-    writeJson(CHARACTER_KEY, { name: trimmed });
+    const normalized = normalizeName(name);
+    if (!normalized || normalized === knownCharacterName) return;
+    knownCharacterName = normalized;
+    writeJson(CHARACTER_KEY, { name: normalized });
     forgetUnknownBuckets();
+    joinSpellings(normalized);
   }
 
   // Anything already written under `:unknown` was written by this bug. It
   // cannot be handed back to a character -- on a multi it could belong to
   // either -- so it is dropped rather than merged into someone's total.
   function forgetUnknownBuckets() {
+    if (knownCharacterName === 'unknown') return; // a character really called that
     try {
       window.localStorage.removeItem(DAILY_KEY + ':unknown');
       window.localStorage.removeItem(LAYOUT_KEY + ':unknown');
     } catch (e) { /* storage unavailable; nothing to clean up */ }
+  }
+
+  // Keys written before names were folded: the same character under each
+  // spelling the two sources produced. The turns in them are disjoint -- each
+  // bucket got what was spent while its spelling was in force -- so the
+  // latest day's buckets are added together and older days' are dropped. A
+  // cavern layout cannot be added up, so a lone one is kept and several, which
+  // cannot be told apart, are all dropped.
+  function joinSpellings(name) {
+    const keys = [];
+    try {
+      const storage = window.localStorage;
+      for (let i = 0; i < storage.length; i++) keys.push(storage.key(i));
+    } catch (e) {
+      return; // storage unavailable or not enumerable; nothing to join
+    }
+    const dayRank = (day) => {
+      const match = /^[rd](\d+)$/.exec(typeof day === 'string' ? day : '');
+      return match ? Number(match[1]) : 0;
+    };
+    [DAILY_KEY, LAYOUT_KEY].forEach((prefix) => {
+      const target = prefix + ':' + name;
+      const strays = keys.filter((key) =>
+        typeof key === 'string' && key !== target &&
+        key.indexOf(prefix + ':') === 0 &&
+        key.slice(prefix.length + 1).toLowerCase() === name
+      );
+      if (!strays.length) return;
+      const hasTarget = keys.indexOf(target) !== -1;
+      if (prefix === DAILY_KEY) {
+        const records = strays.concat(hasTarget ? [target] : [])
+          .map((key) => readJson(key, {}))
+          .filter((record) => typeof record.day === 'string');
+        if (records.length) {
+          const latest = records.reduce((best, record) =>
+            (dayRank(record.day) > dayRank(best.day) ? record : best)).day;
+          const turns = records
+            .filter((record) => sameDay(record.day, latest))
+            .reduce((sum, record) => sum + (Number(record.turns) > 0 ? Number(record.turns) : 0), 0);
+          writeJson(target, { day: latest, turns: turns });
+        }
+      } else if (!hasTarget && strays.length === 1) {
+        writeJson(target, readJson(strays[0], {}));
+      }
+      try {
+        strays.forEach((key) => window.localStorage.removeItem(key));
+      } catch (e) { /* storage unavailable; nothing to clean up */ }
+    });
   }
 
   function characterName() {
@@ -971,8 +1034,8 @@
     if (knownCharacterName) return knownCharacterName;
 
     const stored = readJson(CHARACTER_KEY, {});
-    if (typeof stored.name === 'string' && stored.name) {
-      knownCharacterName = stored.name;
+    if (normalizeName(stored.name)) {
+      rememberCharacterName(stored.name); // folds a name stored before 0.8
       return knownCharacterName;
     }
 
@@ -1077,14 +1140,32 @@
   // "Today" is KoL's day, not the browser's: turns belong to the day they were
   // spent in, and KoL's day ends at rollover (3:30am Arizona time), which for
   // most players is the middle of an afternoon. api.php's status block carries
-  // `rollover`, the unix time of the NEXT rollover -- one value, constant for
-  // the whole of a KoL day and different on the next one, which is a day key
-  // as it stands. `daynumber` is the fallback if a future api.php drops it,
+  // `rollover`, the unix time of the NEXT rollover -- near enough one value
+  // for the whole of a KoL day and a day's worth different on the next one,
+  // which makes it a day key (see sameDay() for "near enough"). `daynumber` is the fallback if a future api.php drops it,
   // and the browser's own date is the last resort.
   //
   // There is no midnight timer and nothing has to be running for the counter
   // to start over: reading it with a day key that does not match the stored
   // one IS the reset.
+  //
+  // "Does not match" is not string equality, though, because `rollover` is
+  // not quite constant: it wobbles by a few seconds from one request to the
+  // next. KoLmafia's captured responses have day 7036 reporting both
+  // 1652844597 and 1652844603. Compared as strings, every wobble was a new
+  // day -- the count showed 0 and the next dig started it over for good, and
+  // the heal poll, with its run of status reads, is where it kept happening.
+  // Two rollover keys within an hour of each other are the same day; real
+  // days are 86,400 seconds apart.
+  const ROLLOVER_SLACK_S = 3600;
+
+  function sameDay(a, b) {
+    if (a === b) return true;
+    const ra = /^r(\d+)$/.exec(typeof a === 'string' ? a : '');
+    const rb = /^r(\d+)$/.exec(typeof b === 'string' ? b : '');
+    return !!(ra && rb && Math.abs(Number(ra[1]) - Number(rb[1])) < ROLLOVER_SLACK_S);
+  }
+
   function localDayKey() {
     const now = new Date();
     return 'l' + now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate();
@@ -1117,14 +1198,19 @@
   // rather than a zero we cannot justify.
   function dailyTurns(dayKey) {
     const record = loadDaily();
-    if (dayKey && record.day !== dayKey) return 0;
+    if (dayKey && !sameDay(record.day, dayKey)) return 0;
     return record.turns;
   }
 
+  // A same-day write keeps the stored key rather than the wobbled one, so the
+  // day cannot creep a few seconds at a time.
   function addDailyTurns(dayKey, delta) {
     const record = loadDaily();
-    const base = dayKey && record.day !== dayKey ? 0 : record.turns;
-    const next = { day: dayKey || record.day, turns: base + Math.max(0, delta) };
+    const same = !dayKey || sameDay(record.day, dayKey);
+    const next = {
+      day: (same && record.day) || dayKey,
+      turns: (same ? record.turns : 0) + Math.max(0, delta),
+    };
     writeJson(dailyKey(), next);
     return next.turns;
   }

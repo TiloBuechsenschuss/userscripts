@@ -8,8 +8,9 @@
 // What's pinned here:
 //
 //   - "Today" is KoL's day, not the browser's. api.php's `rollover` (the unix
-//     time of the NEXT rollover) is constant across one KoL day and is used as
-//     the day key; `daynumber` and then the browser's date are fallbacks.
+//     time of the NEXT rollover) is used as the day key, compared with a few
+//     seconds' slack because it wobbles within a day; `daynumber` and then the
+//     browser's date are fallbacks.
 //     Getting this wrong resets the counter at local midnight, in the middle
 //     of a KoL day.
 //   - The counter is reset by READING it with a new day key. Nothing has to be
@@ -171,6 +172,33 @@ check('...while counting its own turns from zero', api.RUN.used, 3);
 const before = api.RUN.today;
 api.noteTurns({ adventures: null, dayKey: 'r1700259200' });
 check('an unreadable adventure count changes nothing', api.RUN.today, before);
+
+// --- rollover jitter ---------------------------------------------------------
+//
+// api.php's `rollover` is NOT constant across a KoL day: it wobbles by a few
+// seconds between requests. KoLmafia's captured responses have day 7036
+// reporting both 1652844597 and 1652844603, and day 7040 both 1653190201 and
+// 1653190199. Compared as strings, each wobble read as a new day: the count
+// showed 0, and the next dig started it over from 0 for good. Healing is the
+// busiest caller of api.php -- up to forty status reads per heal -- which is
+// how this was reported: "every time heal is clicked the count resets".
+
+const WOBBLE_A = 'r1652844597';
+const WOBBLE_B = 'r1652844603';
+api.RUN.startAdv = 200;
+api.RUN.lastAdv = null;
+api.RUN.used = 0;
+api.noteTurns({ adventures: 200, dayKey: WOBBLE_A });
+api.noteTurns({ adventures: 190, dayKey: WOBBLE_A });
+check('ten turns mined before the heal', api.RUN.today, 10);
+api.noteTurns({ adventures: 190, dayKey: WOBBLE_B }); // the heal's status read
+check('a wobbled rollover is still the same day', api.RUN.today, 10);
+api.noteTurns({ adventures: 189, dayKey: WOBBLE_B });
+check('...and the next dig adds to it rather than starting over', api.RUN.today, 11);
+api.noteTurns({ adventures: 188, dayKey: WOBBLE_A });
+check('...whichever way it wobbles back', api.RUN.today, 12);
+check('the day after is still a new day',
+  api.dailyTurns('r' + (1652844597 + 86400)), 0);
 
 // --- preferences ------------------------------------------------------------
 

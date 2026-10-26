@@ -834,6 +834,13 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   a charpane that says someone else is a multi switching characters, not noise, and the cache
   must not be sticky enough to hand character B character A's cavern. Stray `:unknown` buckets
   are deleted rather than merged, since on a multi they could belong to either character.
+  The same symptom survived that fix for a second reason: **the name is case-folded before it
+  becomes a key** (0.8). api.php and the charpane can spell one name differently (KoLmafia's
+  fixtures have api.php's `dEvstEr5` against the charpane's `Devster5`); with the compact
+  charpane the key alternated between the two spellings, and the heal's charpane reload left the
+  api.php one in force, so the count read from an empty bucket. On first resolving a name,
+  `joinSpellings()` folds pre-0.8 case-variant buckets into the lower-case key (same-day turns
+  summed, older days and ambiguous layouts dropped).
   `tests/auto-mine-character-key.test.mjs` covers all of it.
   There is no `mineLayout6` here, so what each opened square held is kept in `localStorage`
   under `tm-automine-layout` (suffixed with the character name, like the pyramid state in
@@ -846,11 +853,15 @@ Each script carries a `@downloadURL` pointing at its own raw GitHub path on `mai
   "free actions only" and stops the moment a dig costs an adventure.
   The panel also shows **turns mined today**, kept in `localStorage` under `tm-automine-daily`
   (character-suffixed like the layout) as `{ day, turns }`. "Today" is **KoL's** day, not the
-  browser's: the day key is `api.php`'s `rollover` — the unix time of the *next* rollover, one
-  value that holds for the whole of a KoL day — with `daynumber` and then the local date as
-  fallbacks. Resetting at local midnight would cut a KoL day in half. There is no timer: reading
-  the counter with a day key that doesn't match the stored one *is* the reset, so nothing has to
-  be running at rollover. The run's own total is measured from the adventure count it started
+  browser's: the day key is `api.php`'s `rollover` — the unix time of the *next* rollover —
+  with `daynumber` and then the local date as fallbacks. Resetting at local midnight would cut a
+  KoL day in half. There is no timer: reading the counter with a day key that doesn't match the
+  stored one *is* the reset, so nothing has to be running at rollover. **"Match" is
+  `sameDay()`, not `===`**: `rollover` wobbles by a few seconds between requests (KoLmafia's
+  fixtures have day 7036 as both `1652844597` and `1652844603`), and the exact comparison read
+  each wobble as a new day, zeroing the count for good. That surfaced as "heal resets the
+  count", because the heal poll makes the most status reads. Rollover keys within an hour are
+  one day, and a same-day write keeps the stored key so it cannot creep. The run's own total is measured from the adventure count it started
   with, but the day's is the **per-pass difference**, clamped at zero, so stopping and starting
   again keeps counting and eating a lasagna mid-run credits no turns. Opening the panel while
   idle spends one `api.php` read to learn the current day, or a panel opened the morning after a
@@ -4228,7 +4239,8 @@ Current tests:
   counter and its low-HP heal gate. The day key comes from `api.php`'s `rollover` first
   (`daynumber`, then the browser's date, are fallbacks), because resetting on the *browser's*
   midnight would cut a KoL day in half. It pins that reading the counter with a new day key is
-  the reset, that a free mining action adds nothing (the adventure total didn't move), that
+  the reset, that a rollover value wobbling by a few seconds is still the same day, that a free
+  mining action adds nothing (the adventure total didn't move), that
   eating adventures credits no turns, and that a run spanning rollover restarts the day's total
   without restarting its own. On the heal side it pins the two refusals that must not turn into
   a poll for something that cannot happen: a max HP at or below the floor, and no
