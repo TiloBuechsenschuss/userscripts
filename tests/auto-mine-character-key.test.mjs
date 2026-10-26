@@ -43,6 +43,8 @@ const fakeWindow = {
     getItem: (key) => (store.has(key) ? store.get(key) : null),
     setItem: (key, value) => { store.set(key, String(value)); },
     removeItem: (key) => { store.delete(key); },
+    get length() { return store.size; },
+    key: (i) => Array.from(store.keys())[i] ?? null,
   },
 };
 const fakeLocation = {
@@ -96,7 +98,7 @@ const DAY = 'r1700000000';
 
 const drawn = charpaneShowing('Tilo');
 let api = load(drawn);
-check('the name is read from the charpane', api.characterName(), 'Tilo');
+check('the name is read from the charpane', api.characterName(), 'tilo');
 
 check('turns are counted under it', api.addDailyTurns(DAY, 7), 7);
 api.recordLayout(28, 'gold');
@@ -105,7 +107,7 @@ check('so is the cavern layout', api.loadLayout()['28'], 'gold');
 // --- the charpane reload, which is what pressing heal causes ----------------
 
 drawn.document.querySelector = () => null; // ux-enhancers.js reloaded it
-check('a blank charpane does not change who we are', api.characterName(), 'Tilo');
+check('a blank charpane does not change who we are', api.characterName(), 'tilo');
 check('the day total survives the reload', api.dailyTurns(DAY), 7);
 check('so does the layout', api.loadLayout()['28'], 'gold');
 check('turns spent during the reload still land', api.addDailyTurns(DAY, 1), 8);
@@ -113,14 +115,14 @@ check('turns spent during the reload still land', api.addDailyTurns(DAY, 1), 8);
 // An unreachable charpane -- the cross-frame throw -- must behave the same.
 const unreachable = load(null);
 check('an unreachable charpane falls back to the stored name',
-  unreachable.characterName(), 'Tilo');
+  unreachable.characterName(), 'tilo');
 check('...and to the stored total', unreachable.dailyTurns(DAY), 8);
 
 // --- a frame that loads before the charpane draws ---------------------------
 
 const early = load(charpaneShowing(null));
 check('a frame that starts before the charpane still knows the name',
-  early.characterName(), 'Tilo');
+  early.characterName(), 'tilo');
 check('...and reads the right bucket', early.dailyTurns(DAY), 8);
 
 // --- api.php is the authority ----------------------------------------------
@@ -130,11 +132,11 @@ check('...and reads the right bucket', early.dailyTurns(DAY), 8);
 
 const blind = load(null);
 blind.rememberCharacterName('Someone Else');
-check('api.php can name the character', blind.characterName(), 'Someone Else');
+check('api.php can name the character', blind.characterName(), 'someone else');
 check('a different character has its own count', blind.dailyTurns(DAY), 0);
 check('...and its own layout', blind.loadLayout()['28'], undefined);
 blind.rememberCharacterName('   '); // a blank name is not an answer
-check('a blank name from api.php is ignored', blind.characterName(), 'Someone Else');
+check('a blank name from api.php is ignored', blind.characterName(), 'someone else');
 
 // --- a real switch of character still wins ----------------------------------
 //
@@ -142,7 +144,7 @@ check('a blank name from api.php is ignored', blind.characterName(), 'Someone El
 // cavern: a charpane that says someone else is evidence, not noise.
 
 const multi = load(charpaneShowing('Tilo'));
-check('a drawn charpane overrides the stored name', multi.characterName(), 'Tilo');
+check('a drawn charpane overrides the stored name', multi.characterName(), 'tilo');
 check('...and reads that character\'s total', multi.dailyTurns(DAY), 8);
 
 // --- the stray bucket the bug created is cleaned up -------------------------
@@ -156,6 +158,54 @@ check('...and the stray layout bucket',
   store.has('tm-automine-layout:unknown'), false);
 check('the stray turns are not handed to whoever resolved',
   cleaner.dailyTurns(DAY), 0);
+
+// --- api.php and the charpane disagree on capitalisation -------------------
+//
+// The bug that survived the fix above, still reported as "turns today resets
+// after pressing heal". KoL names are case-insensitive and the two sources do
+// not always spell one the same way: KoLmafia's captured pages have api.php
+// answering "dEvstEr5" for the player whose charpane reads "Devster5". The
+// menu frame normally keys by the charpane's spelling, every getStatus() puts
+// api.php's back, and while the heal's charpane reload is in flight nothing
+// corrects it -- so the count read from a second, empty bucket. Both
+// spellings must be the same key.
+
+store.clear();
+const mixed = charpaneShowing('Devster5');
+const devster = load(mixed);
+check('turns land under the charpane spelling', devster.addDailyTurns(DAY, 12), 12);
+devster.rememberCharacterName('dEvstEr5'); // getStatus() during the heal poll
+check('api.php spelling reads the same total while the charpane is drawn',
+  devster.dailyTurns(DAY), 12);
+mixed.document.querySelector = () => null; // the heal reloads the charpane
+devster.rememberCharacterName('dEvstEr5');
+check('...and while the charpane is reloading', devster.dailyTurns(DAY), 12);
+check('turns spent then add to the same total', devster.addDailyTurns(DAY, 1), 13);
+mixed.document.querySelector = (sel) =>
+  (/charsheet\.php/.test(sel) ? { textContent: 'Devster5' } : null);
+check('...which the redrawn charpane sees too', devster.dailyTurns(DAY), 13);
+
+// --- buckets split by the old keys are joined back up ------------------------
+//
+// Installs that already hit the bug hold the day under two spellings, and the
+// turns in each are disjoint, so same-day buckets are summed. A bucket from an
+// older day is stale and is dropped, as is a cavern layout that cannot be
+// told apart from another.
+
+store.clear();
+store.set('tm-automine-daily:Devster5', JSON.stringify({ day: DAY, turns: 40 }));
+store.set('tm-automine-daily:dEvstEr5', JSON.stringify({ day: DAY, turns: 3 }));
+store.set('tm-automine-daily:DEVSTER5', JSON.stringify({ day: 'r1699900000', turns: 99 }));
+store.set('tm-automine-layout:Devster5', JSON.stringify({ 28: 'gold' }));
+store.set('tm-automine-daily:Someone', JSON.stringify({ day: DAY, turns: 5 }));
+const joined = load(charpaneShowing('Devster5'));
+check('same-day turns from both spellings are added up', joined.dailyTurns(DAY), 43);
+check('the old spellings are removed',
+  ['tm-automine-daily:Devster5', 'tm-automine-daily:dEvstEr5', 'tm-automine-daily:DEVSTER5']
+    .some((key) => store.has(key)), false);
+check('a lone layout bucket is kept', joined.loadLayout()['28'], 'gold');
+check('another character is left alone',
+  JSON.parse(store.get('tm-automine-daily:Someone')).turns, 5);
 
 console.log(failures ? '\n' + failures + ' failure(s)' : '\nAll passed');
 process.exit(failures ? 1 : 0);
