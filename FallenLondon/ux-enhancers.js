@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      3.9
+// @version      3.10
 // @description  Small quality-of-life tweaks for Fallen London, behind a docked "UX" button.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -35,6 +35,8 @@
  *   gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose
  *   Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of
  *   7 and are being thrown away is called out too.
+ * A faction you are done with -- Renown 40 and all three Renown items held -- is listed last under
+ *   a "Done" divider and faded, and its Favours at the cap are only outlined, not called out.
  * Each row has a "use" button that opens that faction's item on the Possessions tab so its options
  *   appear.
  * Fallen London Choice Helper, a separate script, adds its own panels -- Zailing, Port Carnelian,
@@ -2458,6 +2460,8 @@
   // while you look at it. Orange, not the green of "you could do this" -- a
   // different kind of urgency.
   const COLOR_FULL = '#d4761c';
+  // How far a done faction's row fades (see factionDone).
+  const DONE_OPACITY = '.5';
 
   // What a single Renown item is to this character. Pure, so all six states
   // can be checked without a DOM.
@@ -2550,15 +2554,32 @@
     }, [glyph]);
   }
 
+  // A faction you have finished with: Renown at the last tier (40) and all
+  // three Renown items held. Nothing on its row asks anything of you any more,
+  // so the panel sorts it to the bottom and mutes it. Only a positive read
+  // counts -- an unread Renown or an unread possession list is never "done",
+  // or a faction we simply couldn't see would drop out of sight. Connected
+  // factions have no ladder and are never done.
+  function factionDone(faction, state) {
+    const s = state || {};
+    const top = RENOWN_TIERS[RENOWN_TIERS.length - 1].at;
+    return !faction.connectedNames && faction.items.length > 0
+      && typeof s.renown === 'number' && s.renown >= top
+      && Array.isArray(s.claimed) && s.claimed.length === faction.items.length
+      && s.claimed.every(function (c) { return c === true; });
+  }
+
   // Favours are capped (at 7), and anything gained past the cap is lost. A
   // faction sitting at the cap is therefore wasting every Favour it earns
   // until you spend some -- which is worth shouting about, not colouring in.
+  // Except on a done faction: there is no Renown item left to spend them on,
+  // so its cap stays on its own muted row and out of the banner.
   function fullFavours(state) {
     const out = [];
     if (!state) return out;
     for (const faction of FACTIONS) {
       const rec = state.values.get(faction.key);
-      if (!rec || faction.connectedNames) continue;
+      if (!rec || faction.connectedNames || factionDone(faction, rec)) continue;
       const cap = rec.favoursCap || 7;
       if (typeof rec.favours === 'number' && rec.favours >= cap) {
         out.push({ faction: faction, favours: rec.favours, cap: cap });
@@ -2623,15 +2644,44 @@
       ? dash
       : (typeof s.favours === 'number' ? s.favours + '/' + favoursCap : dash);
 
+    // A done faction recedes: every cell faded, and its capped Favours lose the
+    // orange alarm (see fullFavours). The fade is luminance, not hue, and the
+    // divider row above the done block says in words what it means.
+    const done = factionDone(faction, s);
+    const td = TD + (done ? 'opacity:' + DONE_OPACITY + ';' : '');
+
+    let favoursContent = favoursCell;
+    if (favoursFull && done) {
+      // Still marked, so a capped one is findable, but as an outline in the
+      // row's own dim colour rather than a glowing badge.
+      favoursContent = h('span', {
+        title: 'At the ' + favoursCap + '-Favour cap: any further Favour for ' + faction.name
+          + ' is thrown away. Not flagged, because this faction is done (Renown '
+          + RENOWN_TIERS[RENOWN_TIERS.length - 1].at + ' and all three Renown items held).',
+        css: 'display:inline-block;padding:0 4px;border-radius:3px;border:1px solid '
+          + UI.line + ';color:' + UI.dim + ';cursor:help;',
+      }, [favoursCell]);
+    } else if (favoursFull) {
+      // Filled, like the ready badge, because a plain colour change reads
+      // as decoration. This one means you are losing Favours right now.
+      favoursContent = h('span', {
+        title: 'FULL: at the ' + favoursCap + '-Favour cap. Every Favour you earn for '
+          + faction.name + ' from now on is thrown away. Spend some.',
+        css: 'display:inline-block;padding:0 5px;border-radius:3px;font-weight:bold;'
+          + 'color:#17190c;background:' + COLOR_FULL + ';cursor:help;'
+          + 'box-shadow:0 0 6px rgba(212,118,28,.6);',
+      }, [favoursCell]);
+    }
+
     return h('tr', null, [
       h('td', {
         // A row that wants something done gets an accent edge, so the eye finds
         // it without reading fourteen rows of pips. Ready wins over capped when
         // both are true, because then they are the same action: spend the
-        // Favours on the item.
-        css: TD + (anyReady
+        // Favours on the item. A done row never gets one.
+        css: td + (anyReady
           ? 'box-shadow:inset 3px 0 0 ' + COLOR_READY + ';'
-          : (favoursFull ? 'box-shadow:inset 3px 0 0 ' + COLOR_FULL + ';' : '')),
+          : (favoursFull && !done ? 'box-shadow:inset 3px 0 0 ' + COLOR_FULL + ';' : '')),
       }, [
         wikiLink(faction.connected ? faction.name : 'Faction: ' + faction.name, faction.name,
           { fontWeight: 'bold' }),
@@ -2640,29 +2690,17 @@
           : null,
       ]),
       h('td', {
-        css: TD + 'text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;',
+        css: td + 'text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;',
         title: renownTitle,
       }, [renownCell]),
       h('td', {
-        css: TD + 'text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;',
-      }, [
-        favoursFull
-          // Filled, like the ready badge, because a plain colour change reads
-          // as decoration. This one means you are losing Favours right now.
-          ? h('span', {
-            title: 'FULL: at the ' + favoursCap + '-Favour cap. Every Favour you earn for '
-              + faction.name + ' from now on is thrown away. Spend some.',
-            css: 'display:inline-block;padding:0 5px;border-radius:3px;font-weight:bold;'
-              + 'color:#17190c;background:' + COLOR_FULL + ';cursor:help;'
-              + 'box-shadow:0 0 6px rgba(212,118,28,.6);',
-          }, [favoursCell])
-          : favoursCell,
-      ]),
+        css: td + 'text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;',
+      }, [favoursContent]),
       h('td', {
-        css: TD + 'white-space:nowrap;' + (allClaimed ? 'color:' + UI.accent + ';' : ''),
+        css: td + 'white-space:nowrap;' + (allClaimed ? 'color:' + UI.accent + ';' : ''),
         title: allClaimed ? 'All three Renown items claimed.' : '',
       }, pips),
-      h('td', { css: TD }, [
+      h('td', { css: td }, [
         // A ✦ when you actually have the item. Without it the Favours can't be
         // converted at all, so it's the first thing worth knowing about a row.
         s.hasItem === true
@@ -2675,7 +2713,7 @@
         h('div', { css: 'color:' + UI.dim + ';font-size:11px;' },
           [it.shop + ' · £' + it.cost.toFixed(2)]),
       ]),
-      h('td', { css: TD }, [
+      h('td', { css: td }, [
         h('button', {
           type: 'button',
           title: s.hasItem === false
@@ -2693,6 +2731,25 @@
         }, ['use']),
       ]),
     ]);
+  }
+
+  // The table body: open factions first in FACTIONS order, then the done ones
+  // under a divider row that says what "done" means -- so the split is in
+  // words, not only in the fade.
+  function factionRows(get, ctx) {
+    const open = [];
+    const done = [];
+    for (const f of FACTIONS) (factionDone(f, get(f.key)) ? done : open).push(f);
+    const row = function (f) { return factionRow(f, get(f.key), ctx); };
+    if (!done.length) return open.map(row);
+    return open.map(row).concat([
+      h('tr', null, [h('td', {
+        colSpan: 6,
+        css: 'padding:10px 8px 4px;color:' + UI.dim + ';font-size:11px;letter-spacing:.05em;'
+          + 'text-transform:uppercase;border-bottom:1px solid ' + UI.line + ';',
+      }, ['✓ Done (' + done.length + ') — Renown '
+        + RENOWN_TIERS[RENOWN_TIERS.length - 1].at + ', all three Renown items held'])]),
+    ], done.map(row));
   }
 
   function renderFactionsPanel(ctx) {
@@ -2835,7 +2892,7 @@
           h('th', { css: TH, title: 'Spend Favours on this to raise Renown. It is NOT consumed.' }, ['Faction Item']),
           h('th', { css: TH }, ['']),
         ])]),
-        h('tbody', null, FACTIONS.map(function (f) { return factionRow(f, get(f.key), ctx); })),
+        h('tbody', null, factionRows(get, ctx)),
       ]),
 
       h('div', { css: 'margin-top:12px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
@@ -2866,6 +2923,9 @@
           }, ['7/7']),
           ' in the Favours column means you are at the cap and losing every '
           + 'Favour you earn for that faction.']),
+        h('div', null, ['Factions at Renown ' + RENOWN_TIERS[RENOWN_TIERS.length - 1].at
+          + ' with all three Renown items held are done: listed last, faded, and a full '
+          + 'Favours count there is only outlined.']),
         h('div', { css: 'margin-top:6px;' }, ['Data from ',
           wikiLink('Factions (Guide)', 'Factions (Guide)'), ' on the Fallen London wiki.']),
       ]),

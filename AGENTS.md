@@ -3207,6 +3207,14 @@ navigation. Two consequences:
   the same colour as `ready`. It reads the cap off what was scraped (`favoursCap`) rather than
   assuming 7. Both states want the row's left edge; **`ready` wins**, because when an item is
   collectable *and* the Favours are capped they are the same action.
+  **A done faction recedes** (3.10, on request): `factionDone()` is Renown at the last tier (40)
+  *and* all three Renown items held, from a positive read only — unread Renown or unread
+  possessions is never "done", or a faction we could not see would drop out of sight; Connected
+  factions are never done. `factionRows()` lists the open factions in `FACTIONS` order, then a
+  divider row that says in words what "done" means (the split is not left to the fade alone), then
+  the done ones with every cell at `DONE_OPACITY`. A done faction's capped Favours are only an
+  outline in the dim colour — no orange badge, no orange edge — and `fullFavours()` leaves it out
+  of the banner, since there is no Renown item left to spend them on.
 - **The "use" button** opens the Faction Item on Possessions rather than spending anything. Every
   item there wraps a `[role="button"][tabindex]` that FL's own React handler is bound to, so
   `findItemNode()` locates it by name and clicks it; the options panel is FL's own and *you* pick
@@ -3508,6 +3516,10 @@ Confirmed live by the author:
 
 **Not** verified in-game (reasoned about only):
 
+- The Factions panel's **done block** (UX Enhancers 3.10): that a faction at Renown 40 with all
+  three Renown items held sorts below the rest under the "✓ Done" divider, faded, and that the
+  fade still leaves it readable on the panel's dark background. Report a done faction listed
+  among the open ones (or an undone one in the block), or a `DONE_OPACITY` too faint to read.
 - The **Zailing card ratings and the Zailing panel**. They reuse machinery that *is* confirmed
   (`eachCardName`'s three card shapes, `attachBadge`, the launcher and its panel host), so the
   risk is not the markup -- it is the transcription and `ZEE_AREAS`. Nobody has yet read the
@@ -4797,7 +4809,9 @@ Current tests:
   disjoint, the cache round-trip (banked on load, offered as stale off-tab, discarded for another
   character), and above all the **no-fabricated-numbers** contract: absent means 0 only on an
   unfiltered list, a filtered one leaves absent unknown, and with nothing readable at all not one
-  cell shows a number. Treat those checks as load-bearing. Note the capture won't re-scrape an
+  cell shows a number. Treat those checks as load-bearing. It also pins the done block:
+  `factionDone()` in every unread state, the order and divider `factionRows()` builds, and that a
+  done faction's capped Favours leave the banner and lose the orange badge. Note the capture won't re-scrape an
   unchanged list, so the cache assertions ride on the IIFE's own first scan rather than calling
   it again. It also holds **verbatim `/possessions` markup** for all three owned-item shapes
   (inventory with a `× 2` quantity, the equip drawer, and the worn slot) and pins that all three

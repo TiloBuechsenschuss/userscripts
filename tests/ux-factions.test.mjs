@@ -226,7 +226,7 @@ const wrapped = src
     + ' characterName, CACHE_KEY, ITEMS_KEY, ageText, readPossessions, itemNameFromLabel,'
     + ' itemKey,'
     + ' autoRefreshEnabled, setAutoRefresh, stateIsFresh,'
-    + ' itemStatus, tierAt, readyItems, fullFavours, findItemNode, clickItem, openItem,'
+    + ' itemStatus, tierAt, readyItems, fullFavours, factionDone, factionRows, findItemNode, clickItem, openItem,'
     + ' runPendingItem, readPending, PENDING_KEY }; })();');
 const fn = new Function(
   'document', 'MutationObserver', 'requestAnimationFrame', 'getComputedStyle', 'console',
@@ -682,6 +682,63 @@ check('a row that is both ready and capped shows the ready edge',
   /#9ab73c/.test(bothRow.children[0].style.cssText), true);
 check('a capped row with nothing collectable shows the capped edge',
   /#d4761c/.test(cappedRow.children[0].style.cssText), true);
+
+// --- done factions ----------------------------------------------------------
+//
+// Renown 40 and all three Renown items held: nothing left to do on the row, so
+// it sorts last, fades, and its capped Favours stop shouting.
+
+const bohemians = api.FACTIONS.find((f) => f.key === 'bohemians');
+const DONE = { renown: 40, favours: 7, favoursCap: 7, claimed: [true, true, true] };
+
+check('Renown 40 with all three items held is done',
+  api.factionDone(bohemians, DONE), true);
+check('Renown 39 is not done, items or no',
+  api.factionDone(bohemians, Object.assign({}, DONE, { renown: 39 })), false);
+check('one item missing is not done',
+  api.factionDone(bohemians, Object.assign({}, DONE, { claimed: [true, false, true] })), false);
+// Not knowing is never "done" -- that would hide a faction we couldn't read.
+check('unread possessions are not done',
+  api.factionDone(bohemians, { renown: 55, favours: 7 }), false);
+check('unread Renown is not done',
+  api.factionDone(bohemians, { claimed: [true, true, true] }), false);
+check('nothing read is not done', api.factionDone(bohemians, undefined), false);
+check('a Connected faction is never done',
+  api.factionDone(api.FACTIONS.find((f) => f.key === 'widow'), { connected: [99] }), false);
+
+check('a done faction at the cap is not in the full-Favours banner',
+  api.fullFavours({ values: new Map([['bohemians', DONE],
+    ['criminals', { renown: 40, favours: 7, favoursCap: 7, claimed: [true, false, true] }]]) })
+    .map((f) => f.faction.key),
+  ['criminals']);
+
+const doneRow = api.factionRow(bohemians, DONE);
+check('a done row fades every cell',
+  doneRow.children.every((td) => /opacity:\.5/.test(td.style.cssText)), true);
+check('a done row has no alarm edge, even at the cap',
+  /box-shadow/.test(doneRow.children[0].style.cssText), false);
+check('its capped Favours are an outline, not the orange badge',
+  [doneRow.children[2].text,
+   /#d4761c/.test(doneRow.children[2].children[0].style.cssText),
+   /border:1px solid/.test(doneRow.children[2].children[0].style.cssText)],
+  ['7/7', false, true]);
+check('an open row does not fade',
+  cappedRow.children.some((td) => /opacity/.test(td.style.cssText)), false);
+
+// Order: the open factions in table order, then a divider, then the done ones.
+const doneState = new Map([['bohemians', DONE],
+  ['hell', { renown: 52, favours: 2, favoursCap: 7, claimed: [true, true, true] }]]);
+const rows = api.factionRows((k) => doneState.get(k));
+const names = rows.map((tr) => tr.children[0].text);
+const openNames = api.FACTIONS.filter((f) => f.key !== 'bohemians' && f.key !== 'hell')
+  .map((f) => f.name);
+check('done factions are listed after every open one, under a divider saying so',
+  [rows.length, names.slice(0, openNames.length).every((n, i) => n.startsWith(openNames[i])),
+   /Done \(2\)/.test(names[openNames.length]), rows[openNames.length].children[0].colSpan,
+   names.slice(openNames.length + 1).map((n) => n.startsWith('Bohemians') || n.startsWith('Hell'))],
+  [api.FACTIONS.length + 1, true, true, 6, [true, true]]);
+check('with nothing done there is no divider',
+  api.factionRows(() => undefined).length, api.FACTIONS.length);
 
 // --- the use button --------------------------------------------------------
 
