@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.77
+// @version      1.78
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -661,7 +661,7 @@
  *     band with the resting Masque last, what Spirit buys, the affiliations, the leftover-Confession turn-ins, and this year's
  *     companion upgrades), and what you hold off the Possessions tab (live, or banked and labelled with its age, with
  *     Refresh and auto like the other panels): Spirit of Hallowmas (a quality, off the Myself tab), the six Confessions, the
- *     masks, the Agents tab (for the one upgrade that is an Agent), what each option spends, and whether each upgrade is
+ *     masks (ticked for the plain mask or its gilded Fate one), the Agents tab (for the one upgrade that is an Agent), what each option spends, and whether each upgrade is
  *     done, short of something (with the quickest way to make a
  *     missing Confession out of a spare one), or ready; and the quickest route between every pair of Confessions through
  *     this year's running exchanges (fewest exchanges, then fewest moves between Masques). Everything that changes by year is one entry per year in HM_SEASONS (2025, 2026); a year with no
@@ -40883,7 +40883,8 @@
   //
   // **What you hold.** The panel reads the Possessions tab -- live when it is
   // open, banked (and labelled with its age) otherwise, refreshed in a hidden
-  // frame like every other panel's -- for the six Confessions, the four masks,
+  // frame like every other panel's -- for the six Confessions, the four masks
+  // (or their gilded Fate versions, HM_GILDED_MASK_ITEMS),
   // what each Masque option spends and what each upgrade needs, plus the
   // Agents tab (readAgents) for the one upgrade that is an Agent. Items only:
   // Spirit of Hallowmas is a quality, so it comes off the Myself tab instead
@@ -41225,6 +41226,21 @@
   }
 
   const HM_MASK_ITEMS = { Infant: 'The Infant', Crown: 'The Crown', Moth: 'The Moth', Demon: 'The Demon' };
+  // The gilded masks (30 Fate) keep after Hallowmas, where the plain ones go
+  // tattered. Each carries the same unlock quality as its plain mask
+  // (Captured by Innocence, Radiant-Crowned, Moth-Winged, Demon-Horned), so it
+  // opens the same card and counts as that mask at its Masque. Names off the
+  // guide's gilded-mask table and the four item pages, 2026-10-28.
+  const HM_GILDED_MASK_ITEMS = { Infant: 'The Ephebe, Manifold', Crown: 'The Cosmogone Crown', Moth: 'The Gant Moth',
+    Demon: 'The Violant Demon' };
+
+  // One mask's cell in "what you hold": a gilded one says so, since it is the
+  // one that outlasts the season. '–' when Possessions has never been read.
+  function hmMaskHeldText(held, m) {
+    if (!held) return '–';
+    if (held.count(HM_GILDED_MASK_ITEMS[m])) return '✓ gilded';
+    return held.count(HM_MASK_ITEMS[m]) ? '✓ held' : 'none';
+  }
 
   // Spirit of Hallowmas is a QUALITY (Myself), not an item. Absent means 0
   // only while the Myself tab's search box is empty, as for every quality.
@@ -41494,7 +41510,7 @@
     const runningMasks = season.masques.map(function (n) { return HM_MASQUES[n].mask; });
     const masks = Object.keys(HM_MASK_ITEMS).map(function (m) {
       const off = runningMasks.indexOf(m) === -1;
-      return stat(m + (off ? ' (resting)' : ''), held ? (held.count(HM_MASK_ITEMS[m]) ? '✓ held' : 'none') : '–');
+      return stat(m + (off ? ' (resting)' : ''), hmMaskHeldText(held, m));
     });
     const spiritText = spirit ? String(spirit.spirit) + (spirit.spirit > HM_KNIGHT_THRESHOLD
       ? ' (' + Math.floor((spirit.spirit - HM_KNIGHT_THRESHOLD) / HM_KNIGHT_RATIO) + ' Knight CP)' : '') : '–';

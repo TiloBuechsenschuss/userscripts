@@ -146,7 +146,7 @@ const wrapped = src
   .replace(/\}\)\(\);\s*$/,
     'return { HM_MASQUES, HM_MASQUE_OPTIONS, HM_SPIRIT_REWARDS, HM_SEASONS, hmSeason, hmMenaceRuns,'
     + ' HM_CONFESSION_COLUMNS, HM_AFFILIATIONS, HM_CONFESSION_REWARDS, HM_MARK_SPENDS,'
-    + ' hmHoldings, hmUpgradeStatus, COUNTS_KEY, AUTO_KEY, hmConfessionRoutes, hmRouteText, HM_CACHE_KEY,'
+    + ' hmHoldings, hmMaskHeldText, HM_GILDED_MASK_ITEMS, hmUpgradeStatus, COUNTS_KEY, AUTO_KEY, hmConfessionRoutes, hmRouteText, HM_CACHE_KEY,'
     + ' hmMasqueSpec, hmMasqueStoryletSpec, renderHallowmasPanel, hallowmasMasquesRatings,'
     + ' ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS, PC_OPTIONS, HALLOWMAS_OPTIONS, normalizeName,'
     + ' PANELS, FEATURES, BADGE_CLASS, CAROUSEL_COLOR_PROGRESS, CAROUSEL_COLOR_NEUTRAL }; })();');
@@ -501,16 +501,29 @@ check('nothing ever read: the panel shows dashes and says so, never a zero',
 
 store.set(api.COUNTS_KEY, JSON.stringify({ v: 2, at: Date.now() - 5 * 60000, character: null, held: [
   ['confession of curiosity', 'A Confession of Curiosity', 3], ['confession of whimsy', 'A Confession of Whimsy', 1],
-  ['confession of violence', 'A Confession of Violence', 2], ['moth', 'The Moth', 1],
+  ['confession of violence', 'A Confession of Violence', 2], ['moth', 'The Moth', 1], ['ephebe manifold', 'The Ephebe, Manifold', 1],
   ['cheerful goldfish', 'Cheerful Goldfish', 1], ['bottle of strangling willow absinthe', 'Bottle of Strangling Willow Absinthe', 7],
 ] }));
-check('banked counts: the Confession total, a held mask, a Masque spend and an upgrade ready, with the read labelled',
+check('banked counts: the Confession total, a held mask, a gilded one, a Masque spend and an upgrade ready, with the read labelled',
   (() => {
     const { text } = panelText(at(2026));
-    return ['Confessions — 6 in all', '✓ held', 'Crown (resting)', '5 × Bottle of Strangling Willow Absinthe (hold 7)',
+    return ['Confessions — 6 in all', '✓ held', '✓ gilded', 'Crown (resting)', '5 × Bottle of Strangling Willow Absinthe (hold 7)',
       'Possessions read 5 minutes ago', '★ ready', 'Whimsy (1)', 'keeps the original']
       .filter((x) => !text.includes(x));
   })(), []);
+// The gilded (Fate) masks carry the same unlock quality as the plain ones, so
+// either one ticks the mask; the gilded one says so.
+check('a mask is ticked for its plain or its gilded version, and never read is a dash',
+  [api.hmMaskHeldText(heldOf({ 'The Moth': 1 }), 'Moth'), api.hmMaskHeldText(heldOf({ 'The Gant Moth': 1 }), 'Moth'),
+   api.hmMaskHeldText(heldOf({ 'The Moth': 1, 'The Gant Moth': 1 }), 'Moth'),
+   api.hmMaskHeldText(heldOf({ 'The Ephebe, Manifold': 1 }), 'Infant'),
+   api.hmMaskHeldText(heldOf({ 'The Violant Demon': 1 }), 'Moth'), api.hmMaskHeldText(null, 'Moth')],
+  ['✓ held', '✓ gilded', '✓ gilded', '✓ gilded', 'none', '–']);
+check('every mask has exactly one gilded version, and none shares a name with a plain one',
+  [Object.keys(api.HM_GILDED_MASK_ITEMS).sort().join(), Object.keys(api.HM_MASQUES).map((n) => api.HM_MASQUES[n].mask).sort().join(),
+   new Set(Object.values(api.HM_GILDED_MASK_ITEMS).concat(['The Infant', 'The Crown', 'The Moth', 'The Demon'])).size],
+  ['Crown,Demon,Infant,Moth', 'Crown,Demon,Infant,Moth', 8]);
+
 check('hmHoldings reads the banked counts through itemKey, so the article does not matter',
   [api.hmHoldings().count('A Confession of Curiosity'), api.hmHoldings().count('Moth'), api.hmHoldings().count('The Crown')],
   [3, 1, 0]);
