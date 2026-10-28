@@ -2794,7 +2794,8 @@ navigation. Two consequences:
   of an open Masque the season says is resting. 2026: Roof Below, Pavilion, Sacristy (Scandal, Demon); the Wreck rests. **What you hold**
   (added 2026-10-21, `hmHoldings`, `hmUpgradeStatus`): the panel reads Possessions -- live, else the shared banked counts (`COUNTS_KEY`),
   labelled with their age, with Refresh and auto through `refreshBackgroundState` like the Philosofruit panel -- for the six Confessions
-  (and their total), the four masks, a "(hold N)" on every option's spend, and a "You hold" column on the upgrades: `✓ have X (locked)`,
+  (and their total), the four masks (`hmMaskHeldText`: `✓ gilded` for the Fate mask in `HM_GILDED_MASK_ITEMS`, which carries the same
+  unlock quality as the plain one, else `✓ held` / `none`), a "(hold N)" on every option's spend, and a "You hold" column on the upgrades: `✓ have X (locked)`,
   `needs …` (with `n/N` for a count), or `★ ready` (`★ ready if …` where the option also needs a quality). Items only; Spirit and the
   Menaces are qualities and are not shown; a never-read inventory is a dash, never 0. The 2026 upgrade rows carry `holds` / `unread` /
   `owned` / `agent` / `keeps` from the 13 option pages of *Unburden Yourself to an Attendant*, which win over the guide (Rats in the Walls also
@@ -4107,7 +4108,8 @@ Confirmed live by the author:
   changed. **(5) The 2026 companion upgrades** -- the panel's are the guide's of opening day (2026-10-19), whose tick-grid was not yet updated.
   **(6) The 2026 dates** -- only 19 October was confirmed; the other three are the guide's expectation. **(7) What you hold** (added
   2026-10-21) -- whether the Confessions read as *A Confession of X* and the masks as *The Moth* etc. on Possessions (a different name
-  reads as 0). The Parisian Infiltrator, an Agent, is read off the Agents tab (`readAgents`): done when listed, ready
+  reads as 0); likewise the gilded masks (added 2026-10-28): *The Gant Moth*, *The Violant Demon* and *The Ephebe, Manifold* are
+  **verified** against a real Possessions Hat slot the same day; *The Cosmogone Crown* (rests in 2026) is the wiki's name only. The Parisian Infiltrator, an Agent, is read off the Agents tab (`readAgents`): done when listed, ready
   outright only when the tab was read unfiltered; still to report is what the tab shows a character with no Agents. **(8) Spirit**
   -- whether the Myself tab lists it as *Spirit of Hallowmas*, and whether a veteran who still holds the retired 1892 quality of the
   same name sees the wrong number.
@@ -4961,7 +4963,7 @@ Current tests:
   a row looked up under the open storylet only; that no name is in another table; the registration under Seasonal; the seasons (one per year,
   three Masques each, 2025 resting the Sacristy and 2026 the Wreck, `hmSeason`'s fallback either side, each year's upgrades and grid where
   printed); and the whole panel built for 2025, 2026 and a 2027 with no entry; what you hold (dashes when never read, banked counts read
-  through `itemKey`, every `hmUpgradeStatus` state, the auto-refresh booked on open and not with auto off); banked Spirit and the rewards
+  through `itemKey`, a gilded mask ticked as `✓ gilded`, every `hmUpgradeStatus` state, the auto-refresh booked on open and not with auto off); banked Spirit and the rewards
   it ticks; the Confession routes for 2026 and 2025 (each a breadth-first shortest count, the 2026 dead ends, one-Masque runs) and the
   make-it hint never spending a Confession the upgrade needs.
 - `tests/choice-the-stacks.test.mjs` — 56 card options, 8 books, 8 finale options; every progress figure one of 5, 10 or 15; the
