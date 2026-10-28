@@ -146,7 +146,7 @@ const wrapped = src
   .replace(/\}\)\(\);\s*$/,
     'return { HM_MASQUES, HM_MASQUE_OPTIONS, HM_SPIRIT_REWARDS, HM_SEASONS, hmSeason, hmMenaceRuns,'
     + ' HM_CONFESSION_COLUMNS, HM_AFFILIATIONS, HM_CONFESSION_REWARDS, HM_MARK_SPENDS,'
-    + ' hmHoldings, hmMaskHeldText, HM_GILDED_MASK_ITEMS, hmUpgradeStatus, COUNTS_KEY, AUTO_KEY, hmConfessionRoutes, hmRouteText, HM_CACHE_KEY,'
+    + ' hmHoldings, hmMaskHeldText, HM_GILDED_MASK_ITEMS, itemNameFromLabel, itemKey, hmUpgradeStatus, COUNTS_KEY, AUTO_KEY, hmConfessionRoutes, hmRouteText, HM_CACHE_KEY,'
     + ' hmMasqueSpec, hmMasqueStoryletSpec, renderHallowmasPanel, hallowmasMasquesRatings,'
     + ' ZEE_CARDS, SPITE_CARDS, FOTZ_CARDS, PC_OPTIONS, HALLOWMAS_OPTIONS, normalizeName,'
     + ' PANELS, FEATURES, BADGE_CLASS, CAROUSEL_COLOR_PROGRESS, CAROUSEL_COLOR_NEUTRAL }; })();');
@@ -523,6 +523,15 @@ check('every mask has exactly one gilded version, and none shares a name with a 
   [Object.keys(api.HM_GILDED_MASK_ITEMS).sort().join(), Object.keys(api.HM_MASQUES).map((n) => api.HM_MASQUES[n].mask).sort().join(),
    new Set(Object.values(api.HM_GILDED_MASK_ITEMS).concat(['The Infant', 'The Crown', 'The Moth', 'The Demon'])).size],
   ['Crown,Demon,Infant,Moth', 'Crown,Demon,Infant,Moth', 8]);
+
+// Verbatim aria-labels off a real Possessions tab's Hat slot (2026-10-28).
+// The Cosmogone Crown was not in it.
+check('three gilded masks read off real Possessions labels under the names the table carries',
+  ["The Gant Moth; Shadowy +6; Dreaded -2; Bizarre +4; Glasswork +1; Moth-Winged +1; A Hallowmas Mask. A four-winged mask of tattered cloth, bearing four mournful, hungry eyes upon its Gant-tipped wings. Don this mask to see its Opportunity Card during Hallowmas.",
+   "The Violant Demon; Dangerous +6; Respectable -2; Dreaded +4; Artisan of the Red Science +1; Demon-Horned +1; A Hallowmas mask. The sinister mien of a Christian demon, illuminated in violant inks. See how similar it is to your own visage. Don this mask to see its Opportunity Card during Hallowmas.",
+   "The Ephebe, Manifold; Persuasive +6; Respectable -2; Bizarre +4; Shapeling Arts +1; Captured by Innocence +1; A face, growing. A crown of limbs, contorted. It is in all aspects horrid, and all the more powerful for it. Don this mask to see its Opportunity Card during Hallowmas."]
+    .map((l) => api.itemKey(api.itemNameFromLabel(l))),
+  ['Moth', 'Demon', 'Infant'].map((m) => api.itemKey(api.HM_GILDED_MASK_ITEMS[m])));
 
 check('hmHoldings reads the banked counts through itemKey, so the article does not matter',
   [api.hmHoldings().count('A Confession of Curiosity'), api.hmHoldings().count('Moth'), api.hmHoldings().count('The Crown')],

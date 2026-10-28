@@ -41230,7 +41230,8 @@
   // tattered. Each carries the same unlock quality as its plain mask
   // (Captured by Innocence, Radiant-Crowned, Moth-Winged, Demon-Horned), so it
   // opens the same card and counts as that mask at its Masque. Names off the
-  // guide's gilded-mask table and the four item pages, 2026-10-28.
+  // guide's gilded-mask table and the four item pages, 2026-10-28; the Moth,
+  // Demon and Infant ones confirmed on a real Possessions tab that day.
   const HM_GILDED_MASK_ITEMS = { Infant: 'The Ephebe, Manifold', Crown: 'The Cosmogone Crown', Moth: 'The Gant Moth',
     Demon: 'The Violant Demon' };
 

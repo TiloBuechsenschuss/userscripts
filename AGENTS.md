@@ -4108,8 +4108,8 @@ Confirmed live by the author:
   changed. **(5) The 2026 companion upgrades** -- the panel's are the guide's of opening day (2026-10-19), whose tick-grid was not yet updated.
   **(6) The 2026 dates** -- only 19 October was confirmed; the other three are the guide's expectation. **(7) What you hold** (added
   2026-10-21) -- whether the Confessions read as *A Confession of X* and the masks as *The Moth* etc. on Possessions (a different name
-  reads as 0); likewise the gilded masks as *The Ephebe, Manifold*, *The Gant Moth*, *The Violant Demon* and *The Cosmogone Crown*
-  (added 2026-10-28, names off the wiki only). The Parisian Infiltrator, an Agent, is read off the Agents tab (`readAgents`): done when listed, ready
+  reads as 0); likewise the gilded masks (added 2026-10-28): *The Gant Moth*, *The Violant Demon* and *The Ephebe, Manifold* are
+  **verified** against a real Possessions Hat slot the same day; *The Cosmogone Crown* (rests in 2026) is the wiki's name only. The Parisian Infiltrator, an Agent, is read off the Agents tab (`readAgents`): done when listed, ready
   outright only when the tab was read unfiltered; still to report is what the tab shows a character with no Agents. **(8) Spirit**
   -- whether the Myself tab lists it as *Spirit of Hallowmas*, and whether a veteran who still holds the retired 1892 quality of the
   same name sees the wrong number.
