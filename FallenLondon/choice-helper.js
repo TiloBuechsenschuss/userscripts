@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.78
+// @version      1.79
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -664,7 +664,7 @@
  *     masks (ticked for the plain mask or its gilded Fate one), the Agents tab (for the one upgrade that is an Agent), what each option spends, and whether each upgrade is
  *     done, short of something (with the quickest way to make a
  *     missing Confession out of a spare one), or ready; and the quickest route between every pair of Confessions through
- *     this year's running exchanges (fewest exchanges, then fewest moves between Masques). Everything that changes by year is one entry per year in HM_SEASONS (2025, 2026); a year with no
+ *     this year's exchanges, which move between Masques by year (fewest exchanges, then fewest moves between Masques). Everything that changes by year is one entry per year in HM_SEASONS (2025, 2026); a year with no
  *     entry shows the newest one, marked out of date. Each option in
  *     a Masque (the Roof Below, the Wreck of the St Elmo, the Pavilion of Butterflies, Saint Dunstan's Sacristy) shows the Menace CP it pays
  *     ("Nightmares +7 CP ▼ · Moth"): ▼ means it spends an item, and the mask it needs is a word, since the script cannot read your mask.
@@ -40861,11 +40861,19 @@
   // Generic names (Promenade!, Make merry!) cannot leak into another storylet.
   //
   // Transcribed 2026-10-13, through the API, from the four Masque pages and all
-  // 35 option pages they list, with the guide as cross-check. WHERE THEY
-  // DISAGREE the option pages won: the guide's Confession-exchange table files
-  // the Wreck's three exchanges under the Pavilion and the Sacristy's three
-  // under the Wreck. The Pavilion page lists only the same two exchanges as the
-  // Roof Below. Corrections go in HM_MASQUE_OPTIONS and nowhere else.
+  // 35 option pages they list, with the guide as cross-check. Corrections go in
+  // HM_MASQUE_OPTIONS and nowhere else.
+  //
+  // **The exchanges move between Masques from year to year**, so which ones
+  // run is per season (HM_SEASONS `exchanges`), not per row. The rows here are
+  // every exchange a Masque has an option page for, so a badge finds whichever
+  // one is on screen. The Pavilion has two sets: the Roof Below's two (option
+  // IDs 269348/9, its storylet page's "2024 update") and its own older three
+  // (IDs 235100, 235103, 244963), which a player re-checked at the Pavilion
+  // "as of 2025". Re-checked 2026-10-29: the guide's exchange table has given
+  // the Pavilion those three since 2025, and the Pavilion's storylet page is
+  // still the 2024 one. An earlier reading took that page over the guide and
+  // left 2026 with no way to make Curiosity or Whimsy.
   //
   // The Spirit rewards (HM_SPIRIT_REWARDS) carry both the stated Echoes and the
   // stated Echoes per Spirit; the companion upgrades are per season and say
@@ -40874,12 +40882,16 @@
   // 2026 re-checked 2026-10-19 (opening day) against the guide as edited that
   // day: the Sacristy (Scandal, Demon) is back and the Wreck (Suspicion,
   // Crown) is out; new upgrades. The four Masque pages are unchanged since
-  // 2024, so the option rows stand. The guide's exchange table still files
-  // the Wreck's three exchanges under the Pavilion; the option pages still win.
+  // 2024, so the option rows stand.
   // Re-checked 2026-10-21: the masks and Scandal are now confirmed rather
   // than expected, the four Masque pages and their option pages are still
   // unchanged, and the Fool's Judgement pages changed wording only. The
   // upgrade table changed; see HM_UPGRADES_2026.
+  // Re-checked 2026-10-29 against the guide as edited 2026-10-27: the
+  // exchanges are now per season and follow the guide (above); the
+  // affiliations lost their leading "A"; the guide names the Perforated Diver
+  // as free again for anyone who missed it in 2025. Upgrades, rewards,
+  // turn-ins, masks and dates unchanged.
   //
   // **What you hold.** The panel reads the Possessions tab -- live when it is
   // open, banked (and labelled with its age) otherwise, refreshed in a hidden
@@ -40892,12 +40904,13 @@
   // Menaces are not shown. A dash is "never read", never "none".
   //
   // **Converting Confessions.** Every exchange is one for one at Airs 34-66,
-  // and only the running Masques' exchanges exist, so what can become what
-  // changes by year. hmConfessionRoutes() takes this season's exchanges and
-  // finds, for every pair, the route with the fewest exchanges and then the
-  // fewest moves between Masques (a move is a Leave and a re-entry, which
-  // costs a Favour unless you wear that Masque's mask). In 2026 nothing makes
-  // Curiosity or Whimsy and Violence becomes nothing; the panel says so.
+  // and only this season's exchanges exist, so what can become what changes
+  // by year. hmConfessionRoutes() takes the season's `exchanges` and finds,
+  // for every pair, the route with the fewest exchanges and then the fewest
+  // moves between Masques (a move is a Leave and a re-entry, which costs a
+  // Favour unless you wear that Masque's mask). In 2026 all eight exchanges
+  // run, so every Confession can become every other; where a season leaves a
+  // dead end, the panel says so.
 
   const HM_MASQUES = {
     'The Roof Below': { menace: 'Wounds', mask: 'Infant', card: 'The Squall of Infants', short: 'the Roof Below',
@@ -40961,6 +40974,9 @@
       spends: ['Partial Map', 1], gains: ['Memory of Distant Shores', 1] }),
     hmExchange(HM_PAVILION, 'Whimsy', 'Guile'),
     hmExchange(HM_PAVILION, 'Curiosity', 'Pride'),
+    hmExchange(HM_PAVILION, 'Impropriety', 'Curiosity'),
+    hmExchange(HM_PAVILION, 'Violence', 'Whimsy'),
+    hmExchange(HM_PAVILION, 'Whimsy', 'Pride'),
     hmRow(HM_PAVILION, 'Exchange amusing tittle-tattle', { airs: HM_BANDS.high, cp: 3,
       spends: ['Scrap of Incendiary Gossip', 5], gains: ['Tale of Terror!!', 1] }),
     hmRow(HM_PAVILION, 'Toast the Queen of Air and Darkness', { airs: HM_BANDS.high, cp: 7, mask: 'Moth',
@@ -41081,12 +41097,14 @@
   const HM_KNIGHT_RATIO = 20;
 
   // All four; whether one is offered in a given year follows from that
-  // season's Masques (hmMenaceRuns), never from a note here.
+  // season's Masques (hmMenaceRuns), never from a note here. Names are the
+  // wiki's page titles, straight apostrophe included (no leading "A"; the
+  // guide dropped it 2026-10-26, and the "A ..." pages do not exist).
   const HM_AFFILIATIONS = [
-    { menace: 'Nightmares', first: 'A Member of the Order of Those Who Will Not Be Caught Red-Handed', repeat: 'Night-Whisper' },
+    { menace: 'Nightmares', first: 'Member of the Order of Those Who Will Not Be Caught Red-Handed', repeat: 'Night-Whisper' },
     { menace: 'Wounds', first: 'Inducted into the Inverted Stalactite Society', repeat: 'Primaeval Hint' },
-    { menace: 'Suspicion', first: 'A Member of the Crew of the St Elmo', repeat: 'Bottle of Fourth City Airag: Year of the Tortoise' },
-    { menace: 'Scandal', first: 'A Seat at the Bishop’s Table', repeat: 'Primaeval Hint' },
+    { menace: 'Suspicion', first: 'Member of the Crew of the St Elmo', repeat: 'Bottle of Fourth City Airag: Year of the Tortoise' },
+    { menace: 'Scandal', first: 'Seat at the Bishop\'s Table', repeat: 'Primaeval Hint' },
   ];
 
   const HM_CONFESSION_REWARDS = [
@@ -41193,18 +41211,36 @@
 
   // One entry per Hallowmas, oldest first. A new year is a new entry here:
   //   masques       the three running, by HM_MASQUES key (the fourth rests)
+  //   exchanges     the Confession exchanges that run, [masque, from, to], as
+  //                 the guide's exchange table gives them for that year
   //   newCompanion  the free companion that joins you this year
+  //   alsoFree      another free companion the guide names, and its condition
   //   upgrades      that year's upgrade list; `grid` its tick-grid, if printed
   //   timeline      [date, what happens], as the guide gives them
   //   checked       when the entry was last compared with the guide
   // hmSeason() picks the entry for the current year, or the newest one and
   // says it is out of date. The dates are for reading, never a gate: the
   // festival's dates shift and the launcher's "running" mark is the player's.
+  //
+  // 2025's Wreck ran the three exchanges the Sacristy runs in 2026 (the guide,
+  // as edited through the 2025 festival). No Wreck option page exists for
+  // them, so HM_MASQUE_OPTIONS has no row and they would go unbadged there.
   const HM_SEASONS = [
     { year: 2025, masques: [HM_ROOF, HM_WRECK, HM_PAVILION], newCompanion: 'Perforated Diver',
-      upgrades: HM_UPGRADES_2025, grid: HM_UPGRADE_GRID_2025, timeline: [], checked: '2026-10-13' },
+      exchanges: [
+        [HM_ROOF, 'Whimsy', 'Guile'], [HM_ROOF, 'Curiosity', 'Pride'],
+        [HM_PAVILION, 'Impropriety', 'Curiosity'], [HM_PAVILION, 'Violence', 'Whimsy'], [HM_PAVILION, 'Whimsy', 'Pride'],
+        [HM_WRECK, 'Impropriety', 'Violence'], [HM_WRECK, 'Pride', 'Impropriety'], [HM_WRECK, 'Guile', 'Violence'],
+      ],
+      upgrades: HM_UPGRADES_2025, grid: HM_UPGRADE_GRID_2025, timeline: [], checked: '2026-10-29' },
     { year: 2026, masques: [HM_ROOF, HM_PAVILION, HM_SACRISTY], newCompanion: 'Parisian Émigrée',
-      upgrades: HM_UPGRADES_2026, grid: HM_UPGRADE_GRID_2026, checked: '2026-10-21',
+      alsoFree: ['Perforated Diver', 'if you did not meet it in 2025; it cannot be upgraded this year'],
+      exchanges: [
+        [HM_ROOF, 'Whimsy', 'Guile'], [HM_ROOF, 'Curiosity', 'Pride'],
+        [HM_PAVILION, 'Impropriety', 'Curiosity'], [HM_PAVILION, 'Violence', 'Whimsy'], [HM_PAVILION, 'Whimsy', 'Pride'],
+        [HM_SACRISTY, 'Impropriety', 'Violence'], [HM_SACRISTY, 'Pride', 'Impropriety'], [HM_SACRISTY, 'Guile', 'Violence'],
+      ],
+      upgrades: HM_UPGRADES_2026, grid: HM_UPGRADE_GRID_2026, checked: '2026-10-29',
       timeline: [
         ['19 October', 'Masques open; the first 7 free Confessions.'],
         ['26 October', 'The second 7 free Confessions (guide: expected).'],
@@ -41274,11 +41310,17 @@
   // This season's Confession exchanges as from -> [{ to, masque }].
   function hmExchangeGraph(season) {
     const graph = {};
-    HM_MASQUE_OPTIONS.forEach(function (e) {
-      if (!e.swap || season.masques.indexOf(e.storylet) === -1) return;
-      (graph[e.swap[0]] = graph[e.swap[0]] || []).push({ to: e.swap[1], masque: e.storylet });
+    season.exchanges.forEach(function (x) {
+      (graph[x[1]] = graph[x[1]] || []).push({ to: x[2], masque: x[0] });
     });
     return graph;
+  }
+
+  // Whether an exchange row runs this season (a Masque option row with a swap).
+  function hmExchangeRuns(season, e) {
+    return season.exchanges.some(function (x) {
+      return x[0] === e.storylet && x[1] === e.swap[0] && x[2] === e.swap[1];
+    });
   }
 
   // Splits a path's steps into runs that can be done in one Masque: the
@@ -41467,7 +41509,10 @@
     const masques = order.map(function (name) {
       const m = HM_MASQUES[name];
       const resting = season.masques.indexOf(name) === -1;
-      const rows = HM_MASQUE_OPTIONS.filter(function (e) { return e.storylet === name && !e.leave; }).map(function (e) {
+      // A running Masque lists only this season's exchanges; a resting one all it has had.
+      const rows = HM_MASQUE_OPTIONS.filter(function (e) {
+        return e.storylet === name && !e.leave && (resting || !e.swap || hmExchangeRuns(season, e));
+      }).map(function (e) {
         const spec = hmMasqueSpec(e);
         const tr = h('tr', null, [
           cell(e.airs ? e.airs[0] + '–' + e.airs[1] : 'any'),
@@ -41605,7 +41650,9 @@
         return h('tr', null, [cell(r[0]), cell(wikiLink(r[1]))]);
       }))),
       section('Companion upgrades — ' + season.year + ' only', [
-        note('The free companion in ' + season.year + ' is the ' + season.newCompanion + '. Different companions are '
+        note('The free companion in ' + season.year + ' is the ' + season.newCompanion + '.'
+          + (season.alsoFree ? ' The ' + season.alsoFree[0] + ' is also free, ' + season.alsoFree[1] + '.' : '')
+          + ' Different companions are '
           + 'upgradeable each year' + (season.stale ? ': check the guide once this year’s list is up.' : '.')
           + ' Each upgrade takes one of each Confession listed, at Unburden Yourself to an Attendant.'),
         table(['Original', 'Confessions', 'Upgrade', 'You hold'], season.upgrades.map(function (u) {

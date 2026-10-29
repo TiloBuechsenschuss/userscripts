@@ -2774,23 +2774,30 @@ navigation. Two consequences:
 
   **Hallowmas Masques** (`hallowmas-masques`, `HM_MASQUE_OPTIONS`; panel `hallowmas`, `renderHallowmasPanel`, added 2026-10-13; filed
   under Seasonal, the panel follows the feature). The festival's main loop: raise a Masque's Menace to 7 (28 CP), hand it to the Fool's
-  Apostate for 28 Spirit of Hallowmas, cash the Spirit in at the end. Four Masques, 35 option pages: the Roof Below (Wounds, Infant), the
+  Apostate for 28 Spirit of Hallowmas, cash the Spirit in at the end. Four Masques, 38 option rows: the Roof Below (Wounds, Infant), the
   Wreck of the St Elmo (Suspicion, Crown), the Pavilion of Butterflies (Nightmares, Moth), Saint Dunstan's Sacristy (Scandal, Demon).
   **The badge** is the Menace CP the option pays, `▼` when it spends an item, the mask it needs as a trailing word (`Nightmares +7 CP ▼ ·
   Moth`) -- a word and not a hue, because the script cannot read your mask, so every option is badged and the game greys the ones you
   cannot take. A Confession exchange reads `Whimsy → Guile`; a Leave says which mask waives the Favour. The tooltip carries the Airs band, the
   item chain (Promenade! feeds the Toast; Walk the chambers feeds the amber vats) and the lock at Menace 7. **Gate:** none beyond the
   matching -- `carouselRatings` looks a row up under the OPEN storylet's title, so a Masque that is not running draws nothing and the generic
-  names (*Promenade!*, *Make merry!*) cannot leak. **Trap:** the guide's Confession-exchange table files the Wreck's three exchanges under the
-  Pavilion and the Sacristy's three under the Wreck; the option pages put them where the tests pin them, and the Pavilion has only the Roof
-  Below's two. The Spirit rewards carry both stated Echoes and stated Echoes per Spirit (cross-checked); the 2025 upgrades carry both the
+  names (*Promenade!*, *Make merry!*) cannot leak. **Trap: the Confession exchanges move between Masques from year to year**, so which
+  run is the season's `exchanges` (from the guide's exchange table), never the option rows. The rows carry every exchange a Masque has an
+  option page for, so a badge finds whichever is on screen: the Pavilion has both the Roof Below's two (its storylet page's 2024 set) and
+  its own three (Impropriety → Curiosity, Violence → Whimsy, Whimsy → Pride; seen there in 2025). The Pavilion's storylet page is still
+  2024's, so do not take it over the guide: that reading (until 2026-10-29) left 2026 with no way to make Curiosity or Whimsy. 2025's Wreck
+  ran the Sacristy's three, which have no Wreck option page and so no row. The panel lists a running Masque's exchanges for this season
+  only (`hmExchangeRuns`). The Spirit rewards carry both stated Echoes and stated Echoes per Spirit (cross-checked); the 2025 upgrades carry both the
   guide's list and its tick-grid (cross-checked). **Per year** (`HM_SEASONS`, added 2026-10-19 with the 2026 guide): everything that
-  changes by year is one entry per year -- the three running Masques (the fourth rests), the free companion, that year's upgrade list (and
+  changes by year is one entry per year -- the three running Masques (the fourth rests), the eight exchanges and where they run, the free
+  companion (and `alsoFree`, another the guide names: in 2026 the Perforated Diver for anyone who missed it in 2025), that year's upgrade list (and
   its tick-grid as `grid` when the guide prints one; 2026's was not yet updated), the dates, and when it was checked. `hmSeason()` takes the
   entry for the clock's year, or the newest one marked `stale` (the panel then says no entry exists for this year). **Next Hallowmas: add one
-  entry to `HM_SEASONS`** -- and new option rows only if a Masque page changed. The season never gates a badge (a resting Masque never shows,
+  entry to `HM_SEASONS`**, its `exchanges` off the guide's exchange table -- and new option rows only if an exchange runs somewhere with
+  no row yet, or a Masque page changed. The season never gates a badge (a resting Masque never shows,
   and a wrong season entry must not black a running one out); it orders the panel (running Masques first, the resting one dimmed and
-  marked), says which Menaces can be handed in, marks the affiliation not offered, and adds a "please report" line to the storylet tooltip
+  marked), says which Menaces can be handed in, marks the affiliation not offered (affiliations are linked by their wiki titles, with no
+  leading "A" since 2026-10-29), and adds a "please report" line to the storylet tooltip
   of an open Masque the season says is resting. 2026: Roof Below, Pavilion, Sacristy (Scandal, Demon); the Wreck rests. **What you hold**
   (added 2026-10-21, `hmHoldings`, `hmUpgradeStatus`): the panel reads Possessions -- live, else the shared banked counts (`COUNTS_KEY`),
   labelled with their age, with Refresh and auto through `refreshBackgroundState` like the Philosofruit panel -- for the six Confessions
@@ -2806,7 +2813,7 @@ navigation. Two consequences:
   above 2500) and ticks the rewards it covers. **Converting Confessions** (`hmConfessionRoutes`, `hmRouteText`): a table per Confession
   of the quickest route to it from every other and what it can become, built from the SEASON's running exchanges only -- fewest exchanges
   first, then fewest moves between Masques (greedy runs of one Masque; a move is a Leave and a re-entry, a Favour unless masked). In 2026
-  nothing makes Curiosity or Whimsy and Violence becomes nothing, and the table says so in words. An upgrade short of a Confession is told
+  all eight run, so every Confession can become every other; a season with a dead end says so in words. An upgrade short of a Confession is told
   how to make it from one it can spare (one it does not need, or a second of one it does; each spare used once per row). **Not modelled:**
   Menace-raising gear (scales the CP), the Fate Masque cards and the Visitors (the latter is `hallowmas-visitor`). Research:
   `docs/superpowers/research/2026-10-13-hallowmas.md`.
@@ -4105,7 +4112,9 @@ Confirmed live by the author:
   St Elmo*, *The Pavilion of Butterflies* and *Saint Dunstan's Sacristy* (a different title draws nothing). **(2) The option titles** -- whether
   the exchanges show as *Exchange a Confession of X for a Confession of Y* without the wiki's "(The Roof Below)". **(3) The real CP** against
   the badge, and with which gear. **(4) Which Masques and masks run in 2026** (Scandal and the Demon are due back) and whether any option
-  changed. **(5) The 2026 companion upgrades** -- the panel's are the guide's of opening day (2026-10-19), whose tick-grid was not yet updated.
+  changed. **(4a) The Pavilion's exchanges in 2026** (changed 2026-10-29): the script now follows the guide -- *Impropriety → Curiosity*,
+  *Violence → Whimsy*, *Whimsy → Pride* -- not the Pavilion's 2024 storylet page (*Whimsy → Guile*, *Curiosity → Pride*). Report which
+  exchanges the Pavilion offers at Airs 34-66; if they are the 2024 pair, the 2026 `exchanges` entry is wrong. **(5) The 2026 companion upgrades** -- the panel's are the guide's of opening day (2026-10-19), whose tick-grid was not yet updated.
   **(6) The 2026 dates** -- only 19 October was confirmed; the other three are the guide's expectation. **(7) What you hold** (added
   2026-10-21) -- whether the Confessions read as *A Confession of X* and the masks as *The Moth* etc. on Possessions (a different name
   reads as 0); likewise the gilded masks (added 2026-10-28): *The Gant Moth*, *The Violant Demon* and *The Ephebe, Manifold* are

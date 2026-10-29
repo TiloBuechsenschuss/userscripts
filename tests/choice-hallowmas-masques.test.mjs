@@ -4,7 +4,7 @@
 //
 // What is worth pinning:
 //
-//  - The table's shape: 35 option pages across four Masques, one Leave each, and
+//  - The table's shape: 38 option pages across four Masques, one Leave each, and
 //    every row's Menace and mask agreeing with the Masque it sits under.
 //  - The badge: Menace CP, a ▼ exactly when an item is spent, the mask as a WORD
 //    so the badge reads with the colour stripped.
@@ -19,7 +19,8 @@
 //    off banked Possessions counts, a dash (never a zero) when nothing has been
 //    read, each upgrade's done / short / ready, and the auto-refresh on open.
 //  - Spirit of Hallowmas, a quality, off the banked Myself reading.
-//  - Converting Confessions: only the season's running exchanges, the fewest
+//  - Converting Confessions: only the season's exchanges (per year, since they
+//    move between Masques), the fewest
 //    exchanges then the fewest moves between Masques, and an upgrade short of a
 //    Confession told how to make it from one it can spare.
 //  - That no Masque name is in another Choice Helper table, and the whole panel
@@ -179,9 +180,9 @@ const spec = (storylet, name) => api.hmMasqueSpec(opts.find((e) => e.storylet ==
 check('four Masques, in the guide order of mention',
   Object.keys(api.HM_MASQUES), [ROOF, WRECK, PAVILION, SACRISTY]);
 
-check('35 option pages: 9 + 9 + 8 + 9',
+check('38 option pages: 9 + 9 + 11 + 9 (the Pavilion has both of its exchange sets)',
   [opts.length, ...Object.keys(api.HM_MASQUES).map((s) => opts.filter((e) => e.storylet === s).length)],
-  [35, 9, 9, 8, 9]);
+  [38, 9, 9, 11, 9]);
 
 check('every row belongs to a known Masque, and each Masque has exactly one Leave',
   [opts.filter((e) => !api.HM_MASQUES[e.storylet]).length,
@@ -203,12 +204,12 @@ check('a Confession exchange is always the middle Airs band and carries no CP',
 check('CP is one of the four values the pages pay',
   [...new Set(opts.filter((e) => !e.swap && !e.leave).map((e) => e.cp))].sort((a, b) => a - b), [1, 3, 5, 7]);
 
-check('the exchanges the guide files under the wrong Masque are where the option pages put them',
+check('an exchange row for every option page: the Pavilion carries both the 2024 set and its own three',
   [WRECK, SACRISTY, ROOF, PAVILION].map((s) => opts.filter((e) => e.storylet === s && e.swap).map((e) => e.swap.join('>'))),
   [['Impropriety>Curiosity', 'Violence>Whimsy', 'Whimsy>Pride'],
    ['Impropriety>Violence', 'Guile>Violence', 'Pride>Impropriety'],
    ['Whimsy>Guile', 'Curiosity>Pride'],
-   ['Whimsy>Guile', 'Curiosity>Pride']]);
+   ['Whimsy>Guile', 'Curiosity>Pride', 'Impropriety>Curiosity', 'Violence>Whimsy', 'Whimsy>Pride']]);
 
 check('the +7 lines per Masque',
   [ROOF, WRECK, PAVILION, SACRISTY].map((s) => opts.filter((e) => e.storylet === s && e.cp === 7).map((e) => e.name)),
@@ -310,6 +311,19 @@ check('in 2026 Scandal is handed in and Suspicion is not',
   ['Scandal', 'Suspicion'].map((m) => api.hmMenaceRuns(api.hmSeason(at(2026)), m)), [true, false]);
 check('every season carries its upgrades, a free companion and a checked date',
   seasons.filter((s) => !s.upgrades.length || !s.newCompanion || !s.checked).map((s) => s.year), []);
+check('every season runs eight distinct exchanges, each at one of its running Masques',
+  seasons.map((s) => [s.year, s.exchanges.length, new Set(s.exchanges.map((x) => x[1] + '>' + x[2])).size,
+    s.exchanges.filter((x) => !s.masques.includes(x[0])
+      || !api.HM_CONFESSION_COLUMNS.includes(x[1]) || !api.HM_CONFESSION_COLUMNS.includes(x[2])).length]),
+  [[2025, 8, 8, 0], [2026, 8, 8, 0]]);
+check('2026, from the guide: the Pavilion runs its own three, not a copy of the Roof Below',
+  [ROOF, PAVILION, SACRISTY].map((m) => seasons[1].exchanges.filter((x) => x[0] === m).map((x) => x[1] + '>' + x[2])),
+  [['Whimsy>Guile', 'Curiosity>Pride'],
+   ['Impropriety>Curiosity', 'Violence>Whimsy', 'Whimsy>Pride'],
+   ['Impropriety>Violence', 'Pride>Impropriety', 'Guile>Violence']]);
+check('every 2026 exchange has an option row to badge it under its Masque',
+  seasons[1].exchanges.filter((x) => !opts.some((e) => e.storylet === x[0] && e.swap
+    && e.swap[0] === x[1] && e.swap[1] === x[2])).map((x) => x.join(' ')), []);
 check('twelve upgrades a year in 2025 and 2026',
   seasons.map((s) => s.upgrades.length), [12, 12]);
 check('where a season prints a tick-grid, every upgrade has a row and none is spare',
@@ -335,6 +349,10 @@ check('2026 re-checked against the option pages: the Goldfish takes Violence, Ra
 check('every 2026 upgrade says what it needs from Possessions, as [item, count >= 1] pairs',
   seasons[1].upgrades.filter((u) => !Array.isArray(u.holds)
     || u.holds.some((p) => typeof p[0] !== 'string' || !(p[1] >= 1))).map((u) => u.to), []);
+check('2026 also offers the Perforated Diver to anyone who missed it in 2025',
+  seasons.map((s) => s.alsoFree ? s.alsoFree[0] : null), [null, 'Perforated Diver']);
+check('affiliations are linked by their wiki page titles, with no leading "A"',
+  api.HM_AFFILIATIONS.filter((a) => /^A /.test(a.first)).map((a) => a.first), []);
 check('the free companion is spelt as the guide and its item page spell it',
   [seasons[1].newCompanion, seasons[1].upgrades.filter((u) => u.from === 'Parisian Émigrée').length], ['Parisian Émigrée', 2]);
 check('the leftover-Confession turn-ins cover all six Confessions once',
@@ -384,14 +402,14 @@ check('open the Pavilion: the storylet and each option are badged, Favour-only o
   (() => {
     const root = rootHeading(PAVILION);
     const names = ['Hunt for butterflies', 'Promenade!', 'Exchange a Confession of Curiosity for a Confession of Pride',
-      'Leave the Pavilion', 'Something the page does not list'];
+      'Exchange a Confession of Violence for a Confession of Whimsy', 'Leave the Pavilion', 'Something the page does not list'];
     const branches = names.map(branchHeading);
     stage = { storylet: [root], branch: branches };
     run();
     return [badgeTexts([root])[0], badgeTexts(branches)];
   })(),
   ['Hallowmas · Nightmares',
-   ['Nightmares +5 CP · Moth', 'Nightmares +1 CP', 'Curiosity → Pride',
+   ['Nightmares +5 CP · Moth', 'Nightmares +1 CP', 'Curiosity → Pride', 'Violence → Whimsy',
     'leave · Favour to re-enter unless Moth', null]]);
 
 check('the same exchange title under the Roof Below is its own row, not the Pavilion one',
@@ -445,11 +463,13 @@ check('the 2026 panel builds: a row per non-Leave option, every section, this ye
     const { text, rows } = panelText(at(2026));
     return [rows, ['Hallowmas 2026', 'Dates', '2 November', 'Menace to Spirit', 'Suspicion cannot be handed in',
       'What Spirit buys', 'Affiliations', 'Leftover Confessions', 'Companion upgrades — 2026 only', 'Morsel of Mignon',
-      'Parisian Émigré', 'not running in 2026', 'not offered in 2026']
+      'Parisian Émigré', 'The Perforated Diver is also free, if you did not meet it in 2025',
+      'not running in 2026', 'not offered in 2026']
       .filter((x) => !text.includes(x)),
-      ['Perforated Diver', 'No entry for'].filter((x) => text.includes(x))];
+      ['Perforated Zubmariner', 'No entry for'].filter((x) => text.includes(x))];
   })(),
-  [opts.filter((e) => !e.leave).length, [], []]);
+  // Every non-Leave option, less the Pavilion's two exchanges that do not run in 2026.
+  [opts.filter((e) => !e.leave).length - 2, [], []]);
 check('the panel lists the running Masques first and the resting one last',
   (() => {
     const { text } = panelText(at(2026));
@@ -542,28 +562,28 @@ check('hmHoldings reads the banked counts through itemKey, so the article does n
 const routes26 = api.hmConfessionRoutes(api.hmSeason(at(2026)));
 const routes25 = api.hmConfessionRoutes(api.hmSeason(at(2025)));
 check('2026: the direct exchanges are one step at the Masques that run them',
-  ['Whimsy>Guile', 'Curiosity>Pride', 'Guile>Violence', 'Impropriety>Violence', 'Pride>Impropriety']
+  ['Whimsy>Guile', 'Curiosity>Pride', 'Impropriety>Curiosity', 'Violence>Whimsy', 'Whimsy>Pride',
+   'Guile>Violence', 'Impropriety>Violence', 'Pride>Impropriety']
     .map((k) => api.hmRouteText(routes26[k])),
-  ['Whimsy → Guile (the Roof Below or the Pavilion)', 'Curiosity → Pride (the Roof Below or the Pavilion)',
+  ['Whimsy → Guile (the Roof Below)', 'Curiosity → Pride (the Roof Below)',
+   'Impropriety → Curiosity (the Pavilion)', 'Violence → Whimsy (the Pavilion)', 'Whimsy → Pride (the Pavilion)',
    'Guile → Violence (the Sacristy)', 'Impropriety → Violence (the Sacristy)', 'Pride → Impropriety (the Sacristy)']);
 check('2026: a longer route stays in one Masque where it can and says where it moves',
   [api.hmRouteText(routes26['Pride>Violence']), api.hmRouteText(routes26['Curiosity>Violence']),
    routes26['Curiosity>Violence'].steps, routes26['Curiosity>Violence'].runs.length],
   ['Pride → Impropriety → Violence (the Sacristy)',
-   'Curiosity → Pride → Impropriety → Violence (the Roof Below or the Pavilion, then the Sacristy)', 3, 2]);
-check('2026: nothing makes Curiosity or Whimsy, and Violence becomes nothing',
-  [Object.keys(routes26).filter((k) => /> ?(Curiosity|Whimsy)$/.test(k)).length,
-   Object.keys(routes26).filter((k) => k.startsWith('Violence>')).length],
-  [0, 0]);
-check('2025 used its own Masques: the Wreck turns Violence into Whimsy, and the Sacristy exchanges are absent',
-  [api.hmRouteText(routes25['Violence>Whimsy']), !!routes25['Guile>Violence']],
-  ['Violence → Whimsy (the Wreck)', false]);
+   'Curiosity → Pride → Impropriety → Violence (the Roof Below, then the Sacristy)', 3, 2]);
+check('2026: all eight exchanges run, so every Confession can become every other',
+  Object.keys(routes26).length, 30);
+check('2025 used its own exchanges: the Pavilion turns Violence into Whimsy, the Wreck Guile into Violence',
+  [api.hmRouteText(routes25['Violence>Whimsy']), api.hmRouteText(routes25['Guile>Violence'])],
+  ['Violence → Whimsy (the Pavilion)', 'Guile → Violence (the Wreck)']);
 check('every route is the fewest exchanges: no route is longer than a breadth-first count over the same exchanges',
   (() => {
     const bad = [];
     for (const [routes, year] of [[routes26, 2026], [routes25, 2025]]) {
       const season = api.hmSeason(at(year));
-      const edges = api.HM_MASQUE_OPTIONS.filter((e) => e.swap && season.masques.includes(e.storylet)).map((e) => e.swap);
+      const edges = season.exchanges.map((x) => [x[1], x[2]]);
       for (const from of api.HM_CONFESSION_COLUMNS) {
         const dist = { [from]: 0 };
         const queue = [from];
@@ -587,12 +607,17 @@ check('a missing Confession is made from one the upgrade can spare, never from o
      'A Confession of Guile': 3 }), routes26).text],
   ['needs Confession of Violence',
    'needs Confession of Violence (make it: Guile → Violence (the Sacristy))',
-   'needs Confession of Whimsy (no Masque makes it this year)']);
-check('the panel carries the conversion table for this year, with the dead ends said in words',
+   'needs Confession of Whimsy (make it: Guile → Violence → Whimsy (the Sacristy, then the Pavilion))']);
+check('a season with no exchange into a Confession says no Masque makes it',
+  api.hmUpgradeStatus(up('Memorious Goldfish'), heldOf({ 'Cheerful Goldfish': 1, 'A Confession of Violence': 1,
+    'A Confession of Guile': 3 }), api.hmConfessionRoutes({ exchanges: [[ROOF, 'Whimsy', 'Guile']] })).text,
+  'needs Confession of Whimsy (no Masque makes it this year)');
+check('the panel carries the conversion table for this year, with no dead end in 2026',
   (() => {
     const { text } = panelText(at(2026));
-    return ['Converting Confessions — 2026', 'no Masque makes it in 2026', 'nothing in 2026',
-      'Whimsy → Guile → Violence (the Roof Below or the Pavilion, then the Sacristy)'].filter((x) => !text.includes(x));
+    return ['Converting Confessions — 2026', 'Whimsy → Guile → Violence (the Roof Below, then the Sacristy)',
+      'Violence → Whimsy (the Pavilion)'].filter((x) => !text.includes(x))
+      .concat(['no Masque makes it in 2026', 'nothing in 2026'].filter((x) => text.includes(x)));
   })(), []);
 
 // --- Spirit of Hallowmas -----------------------------------------------------------
