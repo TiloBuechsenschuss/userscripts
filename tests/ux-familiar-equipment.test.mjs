@@ -1,6 +1,6 @@
 // Ad-hoc test for KingdomOfLoathing/ux-enhancers.js's familiar equipment
 // feature: the familiar.php dropdown order and effect labels, and the state
-// the charpane's "equip your familiar's own item" button shows.
+// familiar.php's "equip your familiar's own item" button shows.
 //
 // There's no test runner in this repo (see AGENTS.md). This is a standalone
 // Node script: it reads the userscript, evaluates its IIFE against a stub DOM
@@ -34,7 +34,7 @@ const wrapped = src
   .replace('(function () {', 'globalThis.__ux = (function () {')
   .replace(/\}\)\(\);\s*$/,
     'return { parseFamEquipMods, famEquipEffect, famEquipSortKey, orderFamEquip, ' +
-    'famOwnItemState, FAM_OWN_ITEM, FAM_EQUIP_MODS }; })();');
+    'famOwnItemState, famPageHeld, FAM_OWN_ITEM, FAM_EQUIP_MODS }; })();');
 if (wrapped === src) throw new Error('could not rewrite ux-enhancers.js for testing');
 
 const fn = new Function('document', 'location', 'window', wrapped + '\nreturn globalThis.__ux;');
@@ -134,7 +134,7 @@ check('within a group the bigger number wins',
   ], 0).map((o) => o.name),
   ['pet rock "Groucho" disguise', 'tiny bust of Pallas', 'b']);
 
-// --- charpane button state ---------------------------------------------------
+// --- own-item button state ---------------------------------------------------
 
 const status = (fam, worn) => ({ familiar: String(fam), equipment: { familiarequip: String(worn) } });
 check('worn already', api.famOwnItemState(status(59, 2053), null),
@@ -177,6 +177,17 @@ check('KoLmafia\'s modifiers win over a wiki note', api.famEquipEffect(2053), '+
 check('an item with only a wiki note sorts with the described effects',
   api.famEquipSortKey(857).rank, api.famEquipSortKey(3822).rank);
 check('no status: no button', api.famOwnItemState(null, {}), null);
+
+// What you hold, off the page's own two selects (stubbed: just values).
+const sel = (values) => ({ querySelectorAll: () => values.map((value) => ({ value })) });
+const pageDoc = (byId) => ({ getElementById: (id) => byId[id] || null });
+check('held items are the union of both selects, placeholder dropped',
+  api.famPageHeld(pageDoc({ shower: sel(['0', '2053', '4566']), grower: sel(['0', '2053', '12322']) })),
+  { 2053: 1, 4566: 1, 12322: 1 });
+check('no selects on the page: null, so the button reads "unknown"',
+  api.famPageHeld(pageDoc({})), null);
+check('held map feeds the button state',
+  api.famOwnItemState(status(332, 0), api.famPageHeld(pageDoc({ grower: sel(['12322']) }))).state, 'ready');
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall passed');
 process.exit(failures ? 1 : 0);

@@ -109,9 +109,9 @@
  *   goes to Cobb's Knob, the Haunted Gallery to the second floor of Spookyraven Manor. It
  *   never links the zone itself, since a click there would spend a turn. The Bad Trip has no
  *   map, so it stays plain text. Confirmed against the live game on 2026-10-19 (1.31).
- *   In the character pane, under your familiar, a button that equips the familiar's own item (the
- *   one only it can wear). When it can't, it is greyed out, disabled, and says why: "equipped" or
- *   "not owned". On the familiar page (familiar.php) the Familiar Equipment dropdown lists the
+ *   On the familiar page (familiar.php) a button above the Familiar Equipment form that equips
+ *   your current familiar's own item (the one only it can wear). When it can't, it is greyed out,
+ *   disabled, and says why: "equipped" or "not owned". The Familiar Equipment dropdown lists the
  *   familiar's own item first, marked with a star, then everything else grouped by enchantment
  *   (familiar weight, familiar experience, item, Meat, stats, ML, then the rest), with each item's
  *   effect written into its option. Item data from KoLmafia, cross-checked against the KoL wiki
@@ -5802,11 +5802,12 @@
     });
   }
 
-  // === feature: familiar equipment (familiar.php list, charpane button) ===
+  // === feature: familiar equipment (familiar.php list and button) ==========
   //
-  // Two halves over one table.
+  // Both on familiar.php: a reordered equipment dropdown and a button for the
+  // familiar's own item.
   //
-  // familiar.php: the "Familiar Equipment" form's item dropdown comes in
+  // The "Familiar Equipment" form's item dropdown comes in
   // inventory (alphabetical) order with nothing but names. This puts the
   // familiar's own item first, marked with a star, then everything else
   // grouped by what it does, and writes each item's effect into its option.
@@ -5833,22 +5834,23 @@
   // then items with only penalties, then items KoLmafia lists no modifier for.
   // Ties go by name.
   //
-  // Charpane: a button under the familiar that equips the familiar's own item
-  // (familiars.txt's "equipment" column -- the item the game's own `fams`
-  // marks as that familiar's). It reads api.php's status for the current
-  // familiar and the worn familiar item, and the inventory only when that
-  // item is not already worn. When the item can't be equipped, the button is
+  // The button sits above the "Familiar Equipment" form and equips the current
+  // familiar's own item (familiars.txt's "equipment" column -- the item the
+  // game's own `fams` marks as that familiar's). It reads api.php's status for
+  // the current familiar and the worn familiar item. What you hold it reads
+  // off the page's own item dropdown, which lists every piece of familiar
+  // equipment in your inventory. When the item can't be equipped, the button is
   // greyed out and disabled, and its label says why: "equipped" or "not
   // owned". The words carry that, not the grey. An unreadable inventory
   // leaves the button usable and says it couldn't check. It never claims
   // you have none. The click posts familiar.php's own equip form
   // (action=equip, whichfam, whichitem, pwd: the capture's form, and
   // KoLmafia's FamiliarRequest), then asks api.php whether the item is on.
-  // The reply text is not trusted for that. On success it reloads the charpane,
-  // and familiar.php too if the mainpane is showing it.
+  // The reply text is not trusted for that. On success it reloads the page,
+  // and the charpane, whose familiar weight changes with it.
   // A familiar can have more than one item that is its own (FAM_OWN_ALT: the
   // pet rock family wears either disguise). Then whichever is worn counts as
-  // "equipped", and the first one in the inventory is the one equipped.
+  // "equipped", and the first one held is the one equipped.
   // Known gap: a disguise worn by another rock in the terrarium is not in
   // the inventory, so it reads "not owned".
   //
@@ -6613,8 +6615,8 @@
     return own;
   }
 
-  // What the charpane button should say, from api.php's status and (when it
-  // was needed) inventory. Null when the familiar has no item of its own, or
+  // What the own-item button should say, from api.php's status and what you
+  // hold ({ item id: count }). Null when the familiar has no item of its own, or
   // there is no familiar. state: 'equipped' | 'missing' | 'ready' | 'unknown'.
   // With several own items: the worn one, else the first one held, else the
   // first one listed.
@@ -6685,23 +6687,28 @@
     }
   }
 
-  // --- charpane ----------------------------------------------------------------
+  // --- familiar.php: the own-item button ----------------------------------------
 
-  // Under the familiar: after the expanded pane's familiar table, or at the end
-  // of the compact pane's <center>. Both from KoLmafia's charpane fixtures
-  // (test_charpane_shrunken_head.html / _compact.html, test_charpane_snowsuit).
-  // Whichever of the two encloses the link more tightly is the familiar block.
-  function famItemSpot(pick) {
-    const table = pick.closest('table');
-    const center = pick.closest('center');
-    if (table && (!center || center.contains(table))) return { after: table };
-    if (center) return { inside: center };
-    return { after: pick };
+  // What you hold, as an inventory-style map, read off the page's own equipment
+  // dropdown: it lists every piece of familiar equipment in your inventory (the
+  // hidden #grower all of them, the visible #shower those the picked familiar
+  // can wear), so the union of the two is what the server will accept. Null
+  // when neither is on the page.
+  function famPageHeld(doc) {
+    const sels = ['shower', 'grower'].map((id) => doc.getElementById(id)).filter(Boolean);
+    if (!sels.length) return null;
+    const held = {};
+    for (const sel of sels) {
+      for (const o of sel.querySelectorAll('option')) {
+        if (/^\d+$/.test(o.value) && o.value !== '0') held[o.value] = 1;
+      }
+    }
+    return held;
   }
 
   async function equipFamOwnItem(btn, info) {
     btn.disabled = true;
-    btn.textContent = 'Equipping…';
+    btn.value = 'Equipping…';
     try {
       const status = await apiJson('status');
       if (!status || !status.pwd) throw new Error('no pwd hash from api.php');
@@ -6718,67 +6725,53 @@
         throw new Error('KoL does not report the ' + info.name + ' as equipped');
       }
       try {
-        const main = top.frames.mainpane;
-        if (main && /\/familiar\.php/i.test(main.location.pathname)) main.location.reload();
+        const pane = top.frames.charpane;
+        if (pane && pane !== window) pane.location.reload();
       } catch (e) { /* another origin or no frameset: nothing to refresh */ }
       location.reload();
     } catch (e) {
       console.error('UX Enhancers: equipping the familiar item failed.', e);
       alert('Could not equip the ' + info.name + ': ' + (e && e.message ? e.message : e));
       btn.disabled = false;
-      btn.textContent = 'Equip ' + info.name;
+      btn.value = 'Equip ' + info.name;
     }
   }
 
+  // Above the "Familiar Equipment" form, styled as KoL's own buttons.
   async function familiarItemButton() {
-    if (document.getElementById(FAM_ITEM_BTN_ID) || !document.body) return;
-    const pick = document.querySelector('a.familiarpick');
-    if (!pick) return;   // no familiar block in this pane
+    if (document.getElementById(FAM_ITEM_BTN_ID)) return;
+    const form = document.querySelector('form[name="famequip"]');
+    if (!form) return;   // no familiar out, so no equipment form
 
-    const status = await apiJson('status');
-    let info = famOwnItemState(status, null);
+    const info = famOwnItemState(await apiJson('status'), famPageHeld(document));
     if (!info) return;   // no familiar, or one without an item of its own
-    if (info.state !== 'equipped') info = famOwnItemState(status, await apiJson('inventory'));
     if (document.getElementById(FAM_ITEM_BTN_ID)) return;   // a parallel run won
 
-    const btn = document.createElement('button');
+    const btn = document.createElement('input');
     btn.id = FAM_ITEM_BTN_ID;
     btn.type = 'button';
+    btn.className = 'button';
     const usable = info.state === 'ready' || info.state === 'unknown';
-    btn.textContent = info.state === 'equipped' ? info.name + ': equipped'
+    btn.value = info.state === 'equipped' ? info.name + ': equipped'
       : info.state === 'missing' ? info.name + ': not owned'
         : 'Equip ' + info.name;
     btn.title = info.state === 'unknown'
-      ? 'Couldn\'t read your inventory, so this may fail: equip the ' + info.name
-      : usable ? 'Equip your familiar with the ' + info.name
+      ? 'Couldn\'t read what you hold, so this may fail: equip the ' + info.name
+      : usable ? 'Equip your familiar with its own item, the ' + info.name
         : info.state === 'equipped' ? 'Your familiar is already wearing the ' + info.name
           : 'The ' + info.name + ' is not in your inventory';
     btn.disabled = !usable;
-    btn.style.cssText = [
-      'padding:0 3px',
-      'font-size:9px',
-      'font-family:arial,helvetica,sans-serif',
-      'line-height:12px',
-      'max-width:100%',
-      'white-space:normal',
-      'border:1px solid #888',
-      'border-radius:2px',
-      usable ? 'background:#eee' : 'background:#f4f4f4',
-      usable ? 'color:#000' : 'color:#888',
-      usable ? 'cursor:pointer' : 'cursor:default',
-    ].join(';');
+    // The grey is a second channel; the words already say why it is off.
+    if (!usable) btn.style.cssText = 'color:#888;border-color:#bbb;background:#f4f4f4;cursor:default';
     btn.addEventListener('click', function (e) {
       e.preventDefault();
-      e.stopPropagation();
       if (!btn.disabled) equipFamOwnItem(btn, info);
     });
 
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'text-align:center;margin:2px 0';
+    wrap.style.cssText = 'margin:0 0 6px';
     wrap.appendChild(btn);
-    const spot = famItemSpot(pick);
-    if (spot.inside) spot.inside.appendChild(wrap);
-    else spot.after.insertAdjacentElement('afterend', wrap);
+    form.parentNode.insertBefore(wrap, form);
   }
 
   // === feature registry =================================================
@@ -6813,7 +6806,7 @@
     { name: 'charpane-cast-max', path: /\/charpane\.php/i, run: enhance },
     { name: 'charpane-autoattack', path: /\/charpane\.php/i, run: autoAttackFeature },
     { name: 'familiar-equip-list', path: /\/familiar\.php/i, run: familiarEquipList },
-    { name: 'charpane-familiar-item', path: /\/charpane\.php/i, run: familiarItemButton },
+    { name: 'familiar-own-item', path: /\/familiar\.php/i, run: familiarItemButton },
   ];
 
   function run() {

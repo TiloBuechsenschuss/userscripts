@@ -4181,7 +4181,7 @@ on a report.
   `UX_HIDEABLE` and drawn as "Show …" checkboxes at the top of its account.php fieldset (now titled
   "KoL UX Enhancers", rare monsters below). The id is `ux-enhancers.autoattack`; the charpane
   listens for `storage` and hides the box or builds it without a reload.
-- **Familiar equipment** (`familiar.php` + `charpane.php`, ux-enhancers 1.32). Two features over
+- **Familiar equipment** (`familiar.php`, ux-enhancers 1.32). Two features over
   two generated tables, `FAM_OWN_ITEM` (familiar id -> [item id, name], from KoLmafia's
   `familiars.txt` "equipment" column, resolved through `items.txt`) and `FAM_EQUIP_MODS` (item id
   -> KoLmafia's `modifiers.txt` string, for every item `items.txt` types as `familiar`, with
@@ -4205,14 +4205,17 @@ on a report.
   script, the userscript run before jQuery-ready and after load). The label guard is the
   `data-tm-fe` attribute, which is copied along. The option's `name` attribute is broken on an
   apostrophe (`name="Li" l="" businessman=""`), so sorting uses the text.
-  **Charpane**: a `#tm-fam-own-item` button after the expanded pane's familiar table, or at the end
-  of the compact pane's familiar `<center>` (the tighter of the two around `a.familiarpick`). State
-  comes from api.php `status` (`familiar`, `equipment.familiarequip`), plus `inventory` only when
-  the item isn't worn. "equipped" / "not owned" are disabled and say so in words. An unreadable
-  inventory leaves the button enabled with a hedged title, never "not owned". Equipping POSTs
+  **The own-item button** (`#tm-fam-own-item`, an `input.button` like KoL's own) goes right
+  before `form[name=famequip]`. It was in the charpane first and moved here on request: only on
+  the familiar page. The current familiar and its worn item come from api.php `status` (`familiar`,
+  `equipment.familiarequip`). What you hold is read off the page's own item dropdown (the union
+  of `#shower` and `#grower`), which lists every piece of familiar equipment in the inventory, so
+  there is no `api.php?what=inventory` request. "equipped" / "not owned" are disabled and say so
+  in words. A page with neither select gives "unknown": the button stays enabled with a hedged
+  title, never "not owned". Equipping POSTs
   `familiar.php action=equip&pwd&whichfam=<id>&whichitem=<id>` (the page's own form, and
-  KoLmafia's `FamiliarRequest`) and is confirmed by re-reading api.php, not by the reply. **Not yet
-  run in the live game.**
+  KoLmafia's `FamiliarRequest`), is confirmed by re-reading api.php, not by the reply, then
+  reloads the page and the charpane. **Not yet run in the live game.**
 - **Ascension checklist** (`ascend.php`). One `form[name=ascend]` (an Ascend button plus the
   "confirm" and "seriously" checkboxes); a panel goes above it and a `submit` listener asks while a
   line is open. Coins are counted by *name* off the inventory tabs (`inventoryCountByName`) because
@@ -4349,7 +4352,7 @@ Current tests:
   tables against the familiar.php capture's `fams` pairings, the effect labels (quoted effects
   keep their commas, expressions read "varies"), the dropdown order (placeholder, the picked
   familiar's own item, other familiars' items, then by enchantment, with penalties not naming a
-  group), and the charpane button's states, where an unreadable inventory is "unknown", never
+  group), and the own-item button's states, where an unreadable inventory is "unknown", never
   "not owned".
 - `tests/ux-daily-dungeon.test.mjs` — asserts `ux-enhancers.js`'s Daily
   Dungeon skip marker. The half that matters is negative: every *other* label the wiki lists
