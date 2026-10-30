@@ -4181,6 +4181,31 @@ on a report.
   `UX_HIDEABLE` and drawn as "Show …" checkboxes at the top of its account.php fieldset (now titled
   "KoL UX Enhancers", rare monsters below). The id is `ux-enhancers.autoattack`; the charpane
   listens for `storage` and hides the box or builds it without a reload.
+- **Familiar equipment** (`familiar.php` + `charpane.php`, ux-enhancers 1.32). Two features over
+  two generated tables, `FAM_OWN_ITEM` (familiar id -> [item id, name], from KoLmafia's
+  `familiars.txt` "equipment" column, resolved through `items.txt`) and `FAM_EQUIP_MODS` (item id
+  -> KoLmafia's `modifiers.txt` string, for every item `items.txt` types as `familiar`, with
+  bookkeeping keys dropped). Generated at KoLmafia commit `e03570da5c83`. The requested primary
+  source, the KoL wiki's Familiar Equipment page, could not be reached from the session that wrote
+  this, so the tables are **KoLmafia's**. Eight pairings are **verified** against the `fams`
+  attributes of a live familiar.php capture (2026-10-30) and pinned in the test, and the capture's
+  22 option ids all match `items.txt`. Regenerate the tables, don't hand-edit them.
+  **familiar.php** keeps two copies of the item dropdown. `#shower` is the visible
+  `select[name=whichitem]` and `#grower` a hidden twin. jQuery-ready copies shower -> grower, and
+  the page's `changer()` copies grower -> shower and drops options whose `fams` doesn't name the
+  picked familiar. Both copies are by innerHTML, so the feature sorts **both** selects and the order
+  and labels survive whichever page step runs after it (checked in a browser with the page's own
+  script, the userscript run before jQuery-ready and after load). The label guard is the
+  `data-tm-fe` attribute, which is copied along. The option's `name` attribute is broken on an
+  apostrophe (`name="Li" l="" businessman=""`), so sorting uses the text.
+  **Charpane**: a `#tm-fam-own-item` button after the expanded pane's familiar table, or at the end
+  of the compact pane's familiar `<center>` (the tighter of the two around `a.familiarpick`). State
+  comes from api.php `status` (`familiar`, `equipment.familiarequip`), plus `inventory` only when
+  the item isn't worn. "equipped" / "not owned" are disabled and say so in words. An unreadable
+  inventory leaves the button enabled with a hedged title, never "not owned". Equipping POSTs
+  `familiar.php action=equip&pwd&whichfam=<id>&whichitem=<id>` (the page's own form, and
+  KoLmafia's `FamiliarRequest`) and is confirmed by re-reading api.php, not by the reply. **Not yet
+  run in the live game.**
 - **Ascension checklist** (`ascend.php`). One `form[name=ascend]` (an Ascend button plus the
   "confirm" and "seriously" checkboxes); a panel goes above it and a `submit` listener asks while a
   line is open. Coins are counted by *name* off the inventory tabs (`inventoryCountByName`) because
@@ -4313,6 +4338,12 @@ Current tests:
   both panes' labels for a device are recognised so the line is never duplicated, that a
   last-adventure link to Hey Deze is *not* mistaken for the Heartbreaker's line (which is
   why the label rather than the href identifies it), and the compact/expanded discriminator.
+- `tests/ux-familiar-equipment.test.mjs` — asserts `ux-enhancers.js`'s familiar equipment
+  tables against the familiar.php capture's `fams` pairings, the effect labels (quoted effects
+  keep their commas, expressions read "varies"), the dropdown order (placeholder, the picked
+  familiar's own item, other familiars' items, then by enchantment, with penalties not naming a
+  group), and the charpane button's states, where an unreadable inventory is "unknown", never
+  "not owned".
 - `tests/ux-daily-dungeon.test.mjs` — asserts `ux-enhancers.js`'s Daily
   Dungeon skip marker. The half that matters is negative: every *other* label the wiki lists
   on those four screens is pinned as unmatched, above all **Try the doorknob** and **Proceed

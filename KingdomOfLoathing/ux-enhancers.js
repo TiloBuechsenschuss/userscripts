@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js
-// @version      1.31
+// @version      1.32
 // @description  Grab-bag of quality-of-life tweaks for Kingdom of Loathing pages.
 // @match        https://www.kingdomofloathing.com/hermit.php*
 // @match        https://kingdomofloathing.com/hermit.php*
@@ -37,6 +37,8 @@
 // @match        https://kingdomofloathing.com/ascend.php*
 // @match        https://www.kingdomofloathing.com/account.php*
 // @match        https://kingdomofloathing.com/account.php*
+// @match        https://www.kingdomofloathing.com/familiar.php*
+// @match        https://kingdomofloathing.com/familiar.php*
 // @grant        none
 // ==/UserScript==
 
@@ -107,6 +109,12 @@
  *   goes to Cobb's Knob, the Haunted Gallery to the second floor of Spookyraven Manor. It
  *   never links the zone itself, since a click there would spend a turn. The Bad Trip has no
  *   map, so it stays plain text. Confirmed against the live game on 2026-10-19 (1.31).
+ *   In the character pane, under your familiar, a button that equips the familiar's own item (the
+ *   one only it can wear). When it can't, it is greyed out, disabled, and says why: "equipped" or
+ *   "not owned". On the familiar page (familiar.php) the Familiar Equipment dropdown lists the
+ *   familiar's own item first, marked with a star, then everything else grouped by enchantment
+ *   (familiar weight, familiar experience, item, Meat, stats, ML, then the rest), with each item's
+ *   effect written into its option. Item data from KoLmafia (1.32); not yet tried in the live game.
  *
  * Confirmed against the live game on 2026-10-07 (1.27; the 1.28 lines and ultra-rares are not yet): the store multibuy, the daily shopping list,
  *   the rare-monster banner and its account.php list, and the ascension checklist.
@@ -5793,6 +5801,897 @@
     });
   }
 
+  // === feature: familiar equipment (familiar.php list, charpane button) ===
+  //
+  // Two halves over one table.
+  //
+  // familiar.php: the "Familiar Equipment" form's item dropdown comes in
+  // inventory (alphabetical) order with nothing but names. This puts the
+  // familiar's own item first, marked with a star, then everything else
+  // grouped by what it does, and writes each item's effect into its option.
+  //
+  // The page keeps TWO copies of that dropdown and copies between them, so
+  // both are sorted. From the capture (familiar.php, 2026-10-30): #shower is
+  // the visible <select name="whichitem">, #grower a hidden twin. On jQuery
+  // ready the page copies #shower into #grower, and its changer() (run on load
+  // and when another familiar is picked) copies #grower back into #shower and
+  // removes every option whose `fams` attribute does not name the picked
+  // familiar. `fams` is the game's own list of familiar ids an item is
+  // specific to, empty for items any familiar can wear. Because the copies go
+  // through innerHTML, an order and a label set on either select survive the
+  // copy, whichever of the page's steps runs before this script and which
+  // after. That is also why the label change is guarded by a data- flag
+  // (data-tm-fe): the flag is copied with the option, so nothing gets its
+  // effect appended twice.
+  //
+  // "By enchantment" means: an item's first positive numeric modifier names
+  // its group. Familiar weight, familiar experience, item drop, Meat drop,
+  // stats per fight and ML come first, in that order, the rest A-Z by modifier
+  // name. Within a group the largest number comes first. Then come items with
+  // only a described effect (das boot: -10 lbs but "adventure underwater"),
+  // then items with only penalties, then items KoLmafia lists no modifier for.
+  // Ties go by name.
+  //
+  // Charpane: a button under the familiar that equips the familiar's own item
+  // (familiars.txt's "equipment" column -- the item the game's own `fams`
+  // marks as that familiar's). It reads api.php's status for the current
+  // familiar and the worn familiar item, and the inventory only when that
+  // item is not already worn. When the item can't be equipped, the button is
+  // greyed out and disabled, and its label says why: "equipped" or "not
+  // owned". The words carry that, not the grey. An unreadable inventory
+  // leaves the button usable and says it couldn't check. It never claims
+  // you have none. The click posts familiar.php's own equip form
+  // (action=equip, whichfam, whichitem, pwd: the capture's form, and
+  // KoLmafia's FamiliarRequest), then asks api.php whether the item is on.
+  // The reply text is not trusted for that. On success it reloads the charpane,
+  // and familiar.php too if the mainpane is showing it.
+  // Known gap: an item that fits several familiars (the pet rock disguises)
+  // and is on one of the others in the terrarium is not in the inventory, so
+  // it reads "not owned".
+  //
+  // DATA. Both tables are generated from KoLmafia's data files
+  // (src/main/resources/data/familiars.txt, items.txt and modifiers.txt at
+  // commit e03570da5c83, 2026-10-29). FAM_OWN_ITEM is familiar id -> [item id,
+  // item name]. FAM_EQUIP_MODS is item id -> KoLmafia's modifier string for
+  // every item KoLmafia types as familiar equipment, with bookkeeping keys
+  // dropped (Generic, Last Available, Softcore Only, Lasts Until Rollover,
+  // Equips On, Breakable, Conditional Skill, Drops Items, Underwater Familiar
+  // -- the last always comes with a Familiar Effect that says it in words).
+  // The KoL wiki's Familiar Equipment page was the requested primary source,
+  // but it could not be reached when this was written. Instead, eight of the
+  // pairings were checked against the `fams` attributes of the familiar.php
+  // capture: 2, 12, 59, 171, 186, 302, 332, 333. The rest are KoLmafia's.
+  // Item ids are from the same items.txt; the capture's option values agree
+  // for every item it shows.
+
+  const FAM_OWN_ITEM = {
+    1: [848, 'hypodermic needle'],   // Mosquito
+    2: [849, 'Meat detector'],   // Leprechaun
+    3: [850, 'many-eyed glasses'],   // Levitating Potato
+    4: [851, 'prosthetic forehead'],   // Angry Goat
+    5: [852, 'tiny shaker of salt'],   // Sabre-Toothed Lime
+    6: [871, 'meatcar model'],   // Fuzzy Dice
+    7: [853, 'blundarrrbus'],   // Spooky Pirate Skeleton
+    8: [854, 'sucky decal'],   // Barrrnacle
+    9: [855, 'tiny balloon knife'],   // Howling Balloon Monkey
+    10: [856, 'shock collar'],   // Stab Bat
+    11: [857, 'moonglasses'],   // Grue
+    12: [858, 'palm-frond toupee'],   // Blood-Faced Volleyball
+    14: [859, 'tiny knife and fork'],   // Ghuol Whelp
+    15: [860, 'eye-pod'],   // Baby Gravy Fairy
+    16: [861, 'chocolate spurs'],   // Cocoabo
+    17: [862, 'magnifying glass'],   // Star Starfish
+    18: [1166, 'tiny maracas'],   // Hovering Sombrero
+    19: [863, 'skewer-mounted razor blade'],   // Ghost Pickle on a Stick
+    20: [864, 'brass stinger'],   // Killer Bee
+    21: [1104, 'tiny Mountie hat'],   // Whirling Maple Leaf
+    22: [901, 'miniature espresso maker'],   // Coffee Pixie
+    23: [900, 'smile-sharpening stone'],   // Cheshire Bat
+    24: [902, '100-Watt bulb'],   // Jill-O-Lantern
+    25: [915, 'candied yam pinky ring'],   // Hand Turkey
+    26: [925, 'dental pliers'],   // Crimbo Elf
+    27: [937, 'menorette'],   // Hanukkimbo Dreidl
+    28: [953, 'penguin-smacking club'],   // Baby Yeti
+    29: [962, 'velvet choker'],   // Feather Boa Constrictor
+    30: [1082, 'gazing shoes'],   // Emo Squid
+    31: [1084, 'rainbow tie'],   // Personal Raincloud
+    32: [1101, 'false eyelashes'],   // Clockwork Grapefruit
+    33: [1102, 'targeting chip'],   // MagiMechTech MicroMechaMech
+    34: [1238, 'flaming glowsticks'],   // Flaming Gravy Fairy
+    35: [1239, 'iced-out bling'],   // Frozen Gravy Fairy
+    36: [1240, 'limburger biker boots'],   // Stinky Gravy Fairy
+    37: [1241, 'miniature carton of clove cigarettes'],   // Spooky Gravy Fairy
+    38: [1243, 'toy six-seater hovercraft'],   // Inflatable Dodecapede
+    39: [1264, 'tiny nose-bone fetish'],   // Pygmy Bugbear Shaman
+    40: [1305, 'tiny makeup kit'],   // Doppelshifter
+    41: [1309, 'attention spanner'],   // Attention-Deficit Demon
+    42: [1310, 'funky brass fez'],   // Cymbal-Playing Monkey
+    43: [1350, '1.21 jigawatts'],   // Temporal Riftlet
+    44: [1374, 'metal mandible'],   // Sweet Nutcracker
+    45: [1526, 'pet rock "Snooty" disguise'],   // Pet Rock
+    46: [1418, 'Pretty Predator Clawicure Kit'],   // Snowy Owl
+    47: [1419, 'teddy bear sewing kit'],   // Teddy Bear
+    48: [1364, 'rhesus monkey'],   // Ninja Pirate Zombie Robot
+    49: [1435, 'hot pink lipstick'],   // Sleazy Gravy Fairy
+    50: [1489, 'miniature dormouse'],   // Wild Hare
+    51: [1527, 'diamond-studded fronts'],   // Wind-up Chattering Teeth
+    52: [1537, 'weegee sqouija'],   // Spirit Hobo
+    53: [1623, 'badger badge'],   // Astral Badger
+    55: [1796, 'bone collar'],   // Misshapen Animal Skeleton
+    56: [1928, 'tuning fork'],   // Scary Death Orb
+    57: [1968, 'bottle of perfume'],   // Jitterbug
+    58: [1969, 'spoon!'],   // Nervous Tick
+    59: [2053, 'tiny bust of Pallas'],   // Reassembled Blackbird
+    60: [2084, 'can of starch'],   // Origami Towel Crane
+    61: [2230, 'icicle katana'],   // Ninja Snowflake
+    62: [2147, 'evil teddy bear sewing kit'],   // Evil Teddy Bear
+    63: [1678, 'pet rock "Groucho" disguise'],   // Toothsome Rock
+    65: [2191, 'giant book of ancient carols'],   // Ancient Yuletide Troll
+    66: [2381, 'woolen cravat'],   // Dandy Lion
+    67: [2446, 'hardware upgrade'],   // O.A.F.
+    68: [2448, 'tasteful black bow tie'],   // Penguin Goodfella
+    69: [2467, 'blue suede shoes'],   // Jumpsuited Hound Dog
+    70: [2651, 'green pixie spog'],   // Green Pixie
+    72: [2710, 'cracker'],   // Exotic Parrot
+    73: [2837, 'mint-condition magic wand'],   // Wizard Action Figure
+    74: [2846, 'plastic bib'],   // Gluttonous Green Ghost
+    75: [2936, 'miniature castagnets'],   // Casagnova Gnome
+    76: [2938, 'miniature Jacob\'s ladder'],   // Hunchbacked Minion
+    77: [3043, 'metallic foil bow'],   // Crimbo P. R. E. S. S. I. E.
+    79: [3087, 'teddy borg sewing kit'],   // Teddy Borg
+    80: [3108, 'overclocked avian microprocessor'],   // RoboGoose
+    83: [3298, 'pretty pink bow'],   // Adorable Seal Larva
+    84: [3299, 'smiley-face sticker'],   // Untamed Turtle
+    85: [3300, 'farfalle bow tie'],   // Animated Macaroni Duck
+    86: [3301, 'jalapeño slices'],   // Pet Cheezling
+    87: [3302, 'stick-on mini solar panels'],   // Autonomous Disco Ball
+    88: [3303, 'tiny sombrero'],   // Mariachi Chihuahua
+    89: [3343, 'tiny bindle'],   // Hobo Monkey
+    90: [3352, 'zen motorcycle'],   // Llama Lama
+    91: [3432, 'cotton candy cordial'],   // Cotton Candy Carnie
+    94: [3484, 'eye \'n\' horn shampoo'],   // Uniclops
+    95: [3483, 'psychedelic bubble wand'],   // Psychedelic Bear
+    96: [3531, 'rattlesnake enrager'],   // Baby Mutant Rattlesnake
+    97: [3532, 'ant antidepressant'],   // Mutant Fire Ant
+    98: [3533, 'cactus monocle'],   // Mutant Cactus Bud
+    99: [3534, 'Jawmaster 2000™'],   // Mutant Gila Monster
+    100: [3573, 'six-armed sweater'],   // Cuddlefish
+    101: [3579, 'tiny ballet slippers'],   // Sugar Fruit Fairy
+    102: [3610, 'imitation whetstone'],   // Imitation Crab
+    103: [3632, 'radioactive chew toy'],   // Pair of Ragged Claws
+    104: [3655, 'fin-bit wax'],   // Magic Dragonfish
+    105: [3800, 'aquaviolet jub-jub bird'],   // Frumious Bandersnatch
+    106: [3816, 'half-height unicycle'],   // Midget Clownfish
+    107: [3998, 'metrognome'],   // Syncopated Turtle
+    108: [3994, 'security blankie'],   // Grinning Turtle
+    109: [3964, 'tiny cell phone'],   // Purse Rat
+    110: [4003, 'bottle of moontan lotion'],   // Wereturtle
+    111: [4000, 'string of dingle balls'],   // Baby Sandworm
+    112: [4019, 'undissolvable contact lenses'],   // Slimeling
+    113: [4149, 'quadroculars'],   // He-Boulder
+    114: [4162, 'extra-strength rubber bands'],   // Rock Lobster
+    115: [4203, 'pet anemone'],   // Urchin Urchin
+    116: [4201, 'gill rings'],   // Grouper Groupie
+    117: [4224, 'unspeakable lozenges'],   // Squamous Gibberer
+    118: [4249, 'miniature tophat'],   // Dancing Frog
+    119: [4230, 'bottle of Cochon Noir'],   // Chauvinist Pig
+    120: [4329, 'bag of many confections'],   // Stocking Mimic
+    121: [4362, 'snow halo'],   // Snow Angel
+    122: [4397, 'brass crank handle'],   // Jack-in-the-Box
+    123: [4496, 'extra-heavy BRICKO brick'],   // BRICKO chick
+    124: [4575, 'bugged beanie'],   // Baby Bugged Bugbear
+    134: [4617, 'miniature pruning shears'],   // Underworld Bonsai
+    135: [4620, 'portable motorcycle'],   // Rogue Program
+    136: [4651, 'ironic moustache'],   // Mini-Hipster
+    137: [4695, 'affordable teak perch'],   // Pottery Barn Owl
+    138: [4710, 'immense ballet shoes'],   // Hippo Ballerina
+    139: [4721, 'microwave stogie'],   // Knob Goblin Organ Grinder
+    140: [4733, 'kitty sheet music'],   // Piano Cat
+    141: [4735, 'tiny prop sword'],   // Dramatic Hedgehog
+    142: [4742, 'rat tooth polish'],   // Smiling Rat
+    143: [4828, 'S.L.E.I.G.H.B.E.L.L.S.'],   // Robot Reindeer
+    146: [4938, 'quake of arrows'],   // Obtuse Angel
+    148: [5166, 'tiny top hat and cane'],   // Li'l Xenomorph
+    149: [4963, 'solid state loom'],   // Dataspider
+    150: [5114, 'stomp box'],   // Pair of Stomping Boots
+    151: [5296, 'slightly thicker filthy rags'],   // Feral Kobold
+    154: [5378, 'spruce juice'],   // Bloovian Groose
+    155: [5443, 'miniscule beatbox'],   // Blavious Kloop
+    156: [5414, 'licorice boa'],   // Peppermint Rhino
+    157: [5527, 'tiny do-rag'],   // Tickle-Me Emilio
+    158: [6660, 'school spirit socket set'],   // Steam-Powered Cheerleader
+    159: [5640, 'crystal decanter'],   // Happy Medium
+    160: [5702, 'little wooden mannequin'],   // Artistic Goth Kid
+    161: [5762, 'flaming nose'],   // Flaming Face
+    163: [5775, 'shiny gold fronts'],   // Hovering Skull
+    164: [5891, 'ribcage rollcage'],   // Mini-Skulldozer
+    165: [5894, 'Little Crimson Book'],   // Angry Jung Man
+    166: [5896, 'blue canary nightlight'],   // Unconscious Collective
+    167: [5911, 'nanorhino credit card'],   // Nanorhino
+    168: [6050, 'woimbook'],   // Oily Woim
+    169: [6102, 'homemade robot gear'],   // Homemade Robot
+    170: [6149, 'MiniMechaElf Laser Punch Missile Launcher'],   // MiniMechaElf
+    171: [6257, 'pile of dungeon junk'],   // Gelatinous Cubeling
+    172: [6410, 'cute bow from beyond the stars'],   // Adorable Space Buddy
+    173: [6461, 'nosy nose ringy ring'],   // Nosy Nose
+    174: [6562, 'mini-Mr. Accessory'],   // Mini-Adventurer
+    175: [6491, 'shiny brass tailfeathers'],   // Mechanical Songbird
+    176: [6785, 'flask of embalming fluid'],   // Reanimated Reanimator
+    177: [7054, 'warbear drone codes'],   // Warbear Drone
+    178: [7066, 'grimstone galoshes'],   // Grimstone Golem
+    179: [7063, 'Grim Brothers\' story book'],   // Grim Brother
+    180: [7254, 'really tiny cocktail shaker'],   // Miniature Sword & Martini Guy
+    181: [7292, 'putty coat'],   // Putty Buddy
+    182: [7538, 'ramekin of space nuts'],   // Twitching Space Critter
+    183: [7313, 'box of hickory chips'],   // Galloping Grill
+    185: [7587, 'S.S. Ticket'],   // Helix Fossil
+    186: [7751, 'Xiblaxian holo-bowtie'],   // Xiblaxian Holo-Companion
+    187: [7823, 'french-fry grabber'],   // Baby Z-Rex
+    188: [7921, 'brass turkey knuckles'],   // Fist Turkey
+    189: [7957, 'even more tinsel'],   // Crimbo Shrub
+    190: [8011, 'heavy-duty Crimbot aerial'],   // Mini-Crimbot
+    191: [8039, 'topiary noseplugs'],   // Topiary Skunk
+    192: [8065, 'golden banana'],   // Golden Monkey
+    193: [8069, 'Stembridge sidearm'],   // Adventurous Spelunker
+    194: [8225, 'lead collar'],   // Sludgepuppy
+    195: [8276, 'mayo pump'],   // Baby Mayonnaise Wasp
+    196: [8289, 'orange boxing gloves'],   // Puck Man
+    197: [8305, 'blue pumps'],   // Ms. Puck Man
+    198: [8593, 'brass bung spigot'],   // Lil' Barrel Mimic
+    199: [8707, 'self-dribbling basketball'],   // Machine Elf
+    200: [8769, 'chocolate bowtie'],   // Choctopus
+    201: [8832, 'tiny domino mask'],   // Rockin' Robin
+    202: [8944, 'rhinestone cowhorn'],   // Restless Cow Skull
+    203: [9028, 'high-speed upgrade'],   // Intergnat
+    204: [9039, 'missing semicolon'],   // Software Bug
+    205: [9149, 'tiny baby scorpion'],   // Bark Scorpion
+    206: [9137, 'li\'l knight costume'],   // Trick-or-Treating Tot
+    207: [9257, 'chocolate leash'],   // Chocolate Lab
+    208: [9288, 'black gallstone'],   // Bad Vibe
+    209: [9302, 'space jellybicycle'],   // Space Jellyfish
+    210: [9304, 'pewter candlestick'],   // Optimistic Candle
+    211: [9402, 'toggle switch (Bartend)'],   // Robortender
+    212: [9524, 'meteor shower cap'],   // Cute Meteor
+    213: [9542, 'exo-xo-skeleton-skeleton'],   // XO Skeleton
+    214: [9680, 'fireproof skip lid'],   // Garbage Fire
+    260: [9822, 'shell bell'],   // Unspeakachu
+    261: [9825, 'razor fang'],   // Stooper
+    262: [9826, 'smoke ball'],   // Disgeist
+    263: [9823, 'muscle band'],   // Bowlet
+    264: [9824, 'amulet coin'],   // Cornbeefadon
+    265: [9821, 'luck incense'],   // Mu
+    267: [9940, 'burglar/sleep mask'],   // Cat Burglar
+    268: [9986, 'party mouse hat'],   // Party Mouse
+    269: [10032, 'Crimbo dog sweater'],   // Yule Hound
+    270: [10064, 'jar of magical relish'],   // Sausage Golem
+    271: [10147, 'red-and-green microcamera'],   // Elf Operative
+    272: [10243, 'plastic pirate hat'],   // Plastic Pirate Skull
+    274: [10324, 'Pocket Professor memory chip'],   // Pocket Professor
+    275: [10396, 'tinsel fin'],   // Red-Nosed Snapper
+    276: [10430, 'nutcracking pliers'],   // Antique Nutcracker
+    277: [10499, 'plastic piranha pot'],   // Piranha Plant
+    279: [10580, 'dromedary drinking helmet'],   // Melodramedary
+    283: [10751, 'blue plate'],   // Shorter-Order Cook
+    284: [10802, 'French-Transylvanian Dictionary'],   // Vampire Vintner
+    285: [10874, 'Site Alpha ID badge'],   // Arachnelf
+    287: [10896, 'grey down vest'],   // Grey Goose
+    288: [10998, 'cookbookbat book'],   // Cookbookbat
+    289: [11086, 'overloaded Yule battery'],   // Mini-Trainbot
+    290: [11090, 'half-height cigar'],   // Hobo in Sheep's Clothing
+    293: [11301, 'claw-held flag'],   // Patriotic Eagle
+    294: [11336, 'LED candle'],   // Jill-of-All-Trades
+    296: [11479, 'rigging knot'],   // Rigging Snake
+    299: [11541, 'googly chest eyes'],   // Chest Mimic
+    300: [11592, 'aviator goggles'],   // Mini Kiwi
+    301: [11627, 'extra ooze'],   // Proto-Protozoa
+    302: [11628, 'extra DNA'],   // Evolving Organism
+    303: [11638, 'bodyguard badge'],   // Burly Bodyguard
+    304: [11633, 'tiny Tina gun'],   // Doll Moll
+    305: [11660, 'tiny ember'],   // Emberiza Aureola
+    306: [11673, 'tie-dye headband'],   // Peace Turkey
+    307: [11680, 'quantum watch'],   // Quantum Entangler
+    310: [11708, 'profane eye patch'],   // Profane Parrot
+    311: [11825, 'parity bit'],   // Significant Bit
+    312: [11849, 'heat particle'],   // Heat Wave
+    313: [11850, 'cold sore'],   // Cold Cut
+    314: [11851, 'stomach churner'],   // Shame Spiral
+    315: [11852, 'phantom brace'],   // Phantom Limb
+    316: [11853, 'foul cozy'],   // Foul Ball
+    317: [11854, 'grim cellophane'],   // Dire Cassava
+    318: [11855, 'rift oculus'],   // Observer
+    319: [11856, 'sweaty egg'],   // Cool Cucumber
+    320: [11857, 'carton of extra-sharp, rusty staples'],   // Defective Childrens' Stapler
+    321: [11858, 'glover liners'],   // Glover
+    322: [11859, 'mosquito speakers'],   // Zapper Bug
+    323: [11896, 'wet paper eye'],   // Wet Paper Tiger
+    324: [11923, 'cold exchanger'],   // Cooler Yeti
+    325: [11943, 'bone pacifier'],   // Baby Skeleton
+    326: [12050, 'small peppermint-flavored sugar walking crook'],   // Skeleton of Crimbo Past
+    327: [12148, 'miniature sleigh'],   // Tiny Plastic Santa Claus Skeleton
+    328: [12190, 'fossilized cow femur'],   // Cute Skeletal Dinosaur
+    330: [12246, 'second-hand synthetic sloth skin scabbard'],   // Sword of S Words
+    331: [12314, 'cast entrails'],   // Gross Prophet
+    332: [12322, 'can of shield tenderizer'],   // Meat Shield Maiden
+    333: [12342, 'tiny stone harp'],   // Weeping Cherub Statue
+  };
+
+  const FAM_EQUIP_MODS = {
+    745: 'Familiar Weight: +20',   // serrated proboscis extension
+    848: 'Familiar Weight: +5',   // hypodermic needle
+    849: 'Familiar Weight: +5',   // Meat detector
+    850: 'Familiar Weight: +5',   // many-eyed glasses
+    851: 'Familiar Weight: +5',   // prosthetic forehead
+    852: 'Familiar Weight: +5',   // tiny shaker of salt
+    853: 'Familiar Weight: +5',   // blundarrrbus
+    854: 'Familiar Weight: +5',   // sucky decal
+    855: 'Familiar Weight: +5',   // tiny balloon knife
+    858: 'Familiar Weight: +5',   // palm-frond toupee
+    859: 'Familiar Weight: +5',   // tiny knife and fork
+    860: 'Familiar Weight: +5',   // eye-pod
+    861: 'Familiar Weight: +5',   // chocolate spurs
+    862: 'Familiar Weight: +5',   // magnifying glass
+    863: 'Familiar Weight: +5',   // skewer-mounted razor blade
+    864: 'Familiar Weight: +5',   // brass stinger
+    865: 'Familiar Weight: +3',   // lead necklace
+    871: 'Familiar Weight: +5',   // meatcar model
+    900: 'Familiar Weight: +5',   // smile-sharpening stone
+    901: 'Familiar Weight: +5',   // miniature espresso maker
+    902: 'Familiar Weight: +5',   // 100-Watt bulb
+    915: 'Familiar Weight: +5',   // candied yam pinky ring
+    925: 'Familiar Weight: +5',   // dental pliers
+    937: 'Familiar Weight: +5',   // menorette
+    953: 'Familiar Damage: +15',   // penguin-smacking club
+    962: 'Familiar Weight: +5',   // velvet choker
+    1040: 'Meat Drop: +50',   // lucky Tam O'Shanter
+    1082: 'Familiar Weight: +5',   // gazing shoes
+    1084: 'Familiar Weight: +5',   // rainbow tie
+    1101: 'Familiar Weight: +5',   // false eyelashes
+    1104: 'Familiar Weight: +5',   // tiny Mountie hat
+    1116: 'Monster Level: +5',   // annoying pitchfork
+    1152: 'Item Drop: +25',   // miniature gravy-covered maypole
+    1166: 'Familiar Weight: +5',   // tiny maracas
+    1218: 'Familiar Weight: -3',   // rat head balloon
+    1238: 'Familiar Weight: +5',   // flaming glowsticks
+    1239: 'Familiar Weight: +5',   // iced-out bling
+    1240: 'Familiar Weight: +5',   // limburger biker boots
+    1241: 'Familiar Weight: +5',   // miniature carton of clove cigarettes
+    1243: 'Familiar Weight: -5',   // toy six-seater hovercraft
+    1260: 'Experience: +3',   // wax lips
+    1305: 'Familiar Weight: +15',   // tiny makeup kit
+    1309: 'Familiar Weight: +5',   // attention spanner
+    1310: 'Familiar Weight: +5',   // funky brass fez
+    1350: 'Familiar Weight: +5',   // 1.21 jigawatts
+    1364: 'Familiar Weight: +5',   // rhesus monkey
+    1374: 'Familiar Weight: +5',   // metal mandible
+    1418: 'Familiar Weight: +5',   // Pretty Predator Clawicure Kit
+    1435: 'Familiar Weight: +5',   // hot pink lipstick
+    1526: 'Familiar Weight: +11',   // pet rock "Snooty" disguise
+    1527: 'Familiar Weight: +5',   // diamond-studded fronts
+    1539: 'Meat Drop: +50',   // lucky Tam O'Shatner
+    1636: 'Familiar Weight: +5, Item Drop: +5',   // Toddler-sized Dragon Costume
+    1678: 'Familiar Weight: +11',   // pet rock "Groucho" disguise
+    1796: 'Familiar Weight: +5',   // bone collar
+    1968: 'Familiar Weight: +5',   // bottle of perfume
+    1969: 'Familiar Weight: +5',   // spoon!
+    1971: 'Familiar Weight: +5, Item Drop: +13, Sporadic Damage Aura: 0.35',   // plastic pumpkin bucket
+    2053: 'Familiar Weight: +5',   // tiny bust of Pallas
+    2225: 'Monster Level: +5, Familiar Experience: +1.5',   // flaming familiar doppelgänger
+    2230: 'Familiar Weight: +5',   // icicle katana
+    2381: 'Familiar Weight: +5',   // woolen cravat
+    2406: 'Familiar Weight: +5, Item Drop: +5',   // Panda outfit
+    2446: 'Familiar Weight: +5',   // hardware upgrade
+    2448: 'Familiar Weight: +5',   // tasteful black bow tie
+    2467: 'Familiar Weight: +5',   // blue suede shoes
+    2541: 'Familiar Weight: +5, Experience: +0.625, Sporadic Meat Drop: +5, Sporadic Item Drop: +2.5, Familiar Experience: +0.375',   // Mayflower bouquet
+    2570: 'Familiar Effect: "sleaze damage, meat", Meat Bonus: +12.5, Sporadic Damage Aura: 0.4',   // ant hoe
+    2571: 'Familiar Effect: "hot damage, meat", Meat Bonus: +12.5, Sporadic Damage Aura: 0.4',   // ant rake
+    2572: 'Familiar Effect: "stench damage, meat", Meat Bonus: +12.5, Sporadic Damage Aura: 0.4',   // ant pitchfork
+    2573: 'Familiar Effect: "spooky damage, meat", Meat Bonus: +12.5, Sporadic Damage Aura: 0.4',   // ant sickle
+    2574: 'Familiar Effect: "cold damage, meat", Meat Bonus: +12.5, Sporadic Damage Aura: 0.4',   // ant pick
+    2651: 'Familiar Weight: +5',   // green pixie spog
+    2710: 'Familiar Weight: +15',   // cracker
+    2837: 'Volleyball: 0.3334, Fairy: 0.3334',   // mint-condition magic wand
+    2936: 'Familiar Weight: +5',   // miniature castagnets
+    2938: 'Familiar Weight: +5',   // miniature Jacob's ladder
+    3043: 'Familiar Weight: +5',   // metallic foil bow
+    3044: 'Familiar Weight: +5, Volleyball: -1, Sombrero: +1',   // metallic foil radar dish
+    3097: 'Sporadic Damage Aura: 0.33',   // oversized fish scaler
+    3108: 'Familiar Weight: +5',   // overclocked avian microprocessor
+    3299: 'Experience: +3.16',   // smiley-face sticker
+    3301: 'Meat Drop: +60.9',   // jalapeño slices
+    3303: 'Sombrero Bonus: +10',   // tiny sombrero
+    3343: 'Familiar Weight: +5',   // tiny bindle
+    3421: 'Familiar Weight: +5, Experience: +1.5, Sporadic Item Drop: +12.5',   // little box of fireworks
+    3432: 'Familiar Weight: +5',   // cotton candy cordial
+    3470: 'Familiar Weight: -20, Familiar Effect: "adventure underwater"',   // little bitty bathysphere
+    3483: 'Familiar Weight: +5',   // psychedelic bubble wand
+    3484: 'Familiar Weight: +5',   // eye 'n' horn shampoo
+    3531: 'Familiar Weight: +5',   // rattlesnake enrager
+    3532: 'Familiar Weight: +5',   // ant antidepressant
+    3533: 'Familiar Weight: +5',   // cactus monocle
+    3534: 'Familiar Weight: +5',   // Jawmaster 2000™
+    3573: 'Familiar Weight: +5',   // six-armed sweater
+    3579: 'Familiar Weight: +5',   // tiny ballet slippers
+    3609: 'Familiar Weight: -10, Familiar Effect: "adventure underwater"',   // das boot
+    3632: 'Familiar Weight: +5',   // radioactive chew toy
+    3651: 'Familiar Weight: [1+ceil(M/2)]',   // miniature antlers
+    3655: 'Familiar Weight: +5',   // fin-bit wax
+    3800: 'Familiar Weight: +5, Familiar Tuning Mysticality: 100, Familiar Effect: "mys stats"',   // aquaviolet jub-jub bird
+    3801: 'Familiar Weight: +5, Familiar Tuning Muscle: 100, Familiar Effect: "mus stats"',   // crimsilion jub-jub bird
+    3802: 'Familiar Weight: +5, Familiar Tuning Moxie: 100, Familiar Effect: "mox stats"',   // charpuce jub-jub bird
+    3816: 'Familiar Weight: +5',   // half-height unicycle
+    3822: 'Familiar Effect: "fishy spells", Sporadic Damage Aura: [0.2475*env(underwater)]',   // fishy wand
+    3835: 'Familiar Weight: [25*fam(doppelshifter)]',   // tiny costume wardrobe
+    3840: 'Familiar Weight: +1',   // anniversary tiny latex mask
+    3964: 'Familiar Weight: +10',   // tiny cell phone
+    3994: 'Familiar Weight: +5',   // security blankie
+    3998: 'Familiar Weight: +5',   // metrognome
+    4000: 'Familiar Weight: +5',   // string of dingle balls
+    4135: 'Familiar Weight: +5, Familiar Experience: +1, Sporadic Damage Aura: 0.35',   // moveable feast
+    4149: 'Familiar Weight: +5',   // quadroculars
+    4162: 'Familiar Weight: +5',   // extra-strength rubber bands
+    4183: 'Familiar Weight: +10',   // sugar shield
+    4201: 'Familiar Weight: +5',   // gill rings
+    4203: 'Familiar Weight: +5',   // pet anemone
+    4224: 'Familiar Weight: +5',   // unspeakable lozenges
+    4229: 'Familiar Effect: "adventure underwater"',   // amphibious tophat
+    4230: 'Familiar Weight: +5',   // bottle of Cochon Noir
+    4249: 'Familiar Weight: +5',   // miniature tophat
+    4362: 'Familiar Weight: +5',   // snow halo
+    4397: 'Familiar Weight: +5',   // brass crank handle
+    4444: 'Familiar Damage: +10',   // guard turtle collar
+    4496: 'Familiar Weight: +5',   // extra-heavy BRICKO brick
+    4519: 'Familiar Weight: +5',   // ittah bittah hookah
+    4566: 'Familiar Experience: +1',   // tiny fly glasses
+    4575: 'Familiar Weight: +10',   // bugged beanie
+    4576: 'Monster Level: +20, Volleyball: 1.0',   // bugged balaclava
+    4577: 'Food Drop: +5, Pants Drop: +5, Candy Drop: +5, Fairy: 1.0',   // bugged bÃ¶n±Ã©t
+    4617: 'Familiar Weight: +5',   // miniature pruning shears
+    4620: 'Familiar Weight: +5',   // portable motorcycle
+    4649: 'Item Drop: +25, Familiar Effect: "item drop"',   // chiptune guitar
+    4650: 'Experience: +3, Familiar Effect: "stats"',   // fixed-gear bicycle
+    4651: 'Familiar Weight: +10, Familiar Effect: "+10 lbs"',   // ironic moustache
+    4695: 'Familiar Weight: +5',   // affordable teak perch
+    4710: 'Familiar Weight: +5',   // immense ballet shoes
+    4733: 'Familiar Weight: +5',   // kitty sheet music
+    4735: 'Familiar Weight: +5',   // tiny prop sword
+    4742: 'Familiar Weight: +5',   // rat tooth polish
+    4828: 'Familiar Weight: +5',   // S.L.E.I.G.H.B.E.L.L.S.
+    4924: 'Familiar Weight: +5, Familiar Action Bonus: +25',   // Loathing Legion helicopter
+    4963: 'Familiar Weight: +10',   // solid state loom
+    5040: 'Familiar Weight: +10',   // astral pet sweater
+    5110: 'Meat Drop: +5, Item Drop: +5',   // Li'l Businessman Kit
+    5114: 'Familiar Weight: +5',   // stomp box
+    5166: 'Fairy: 1.0',   // tiny top hat and cane
+    5296: 'Familiar Weight: +5',   // slightly thicker filthy rags
+    5378: 'Familiar Weight: +5',   // spruce juice
+    5414: 'Familiar Weight: +5',   // licorice boa
+    5443: 'Familiar Weight: +5',   // miniscule beatbox
+    5527: 'Familiar Weight: +5',   // tiny do-rag
+    5640: 'Familiar Weight: +5',   // crystal decanter
+    5702: 'Familiar Weight: +5',   // little wooden mannequin
+    5768: 'Better Diver: 10, Familiar Effect: "underwater"',   // gnomish swimmer's ears
+    5769: 'Familiar Effect: "block"',   // gnomish coal miner's lung
+    5770: 'Familiar Effect: "damage"',   // gnomish tennis elbow
+    5771: 'Familiar Effect: "gain advs"',   // gnomish housemaid's kgnee
+    5772: 'Familiar Effect: "delevel"',   // gnomish athlete's foot
+    5775: 'Familiar Weight: +5',   // shiny gold fronts
+    5891: 'Familiar Weight: +5',   // ribcage rollcage
+    5894: 'Familiar Weight: +5',   // Little Crimson Book
+    5896: 'Familiar Weight: +5',   // blue canary nightlight
+    6050: 'Familiar Weight: +5',   // woimbook
+    6150: 'Familiar Weight: [max(5,20-floor(pref(_snowSuitCount)/5))]',   // Snow Suit
+    6257: 'Familiar Weight: +5',   // pile of dungeon junk
+    6410: 'Familiar Weight: +5',   // cute bow from beyond the stars
+    6461: 'Familiar Weight: +15',   // nosy nose ringy ring
+    6491: 'Familiar Weight: +5',   // shiny brass tailfeathers
+    6562: 'Familiar Weight: +5',   // mini-Mr. Accessory
+    6583: 'Familiar Damage: +20',   // vicious spiked collar
+    6702: 'Damage Aura: 1',   // tiny bowler
+    7063: 'Familiar Weight: +5',   // Grim Brothers' story book
+    7066: 'Familiar Weight: +5',   // grimstone galoshes
+    7110: 'Candy Drop: +25',   // chocolate-stained collar
+    7254: 'Familiar Weight: +5',   // really tiny cocktail shaker
+    7292: 'Familiar Weight: +5',   // putty coat
+    7313: 'Familiar Weight: +5',   // box of hickory chips
+    7538: 'Familiar Weight: +5',   // ramekin of space nuts
+    7581: 'Adventures: +4, PvP Fights: +4',   // solid shifting time weirdness
+    7587: 'Familiar Weight: +5',   // S.S. Ticket
+    7751: 'Familiar Weight: +5',   // Xiblaxian holo-bowtie
+    7823: 'Familiar Weight: +5',   // french-fry grabber
+    7864: 'Adventures: +1',   // Petite Paintbrush
+    7921: 'Familiar Weight: +10',   // brass turkey knuckles
+    7957: 'Familiar Weight: +5',   // even more tinsel
+    8011: 'Familiar Weight: +5',   // heavy-duty Crimbot aerial
+    8039: 'Familiar Weight: +5',   // topiary noseplugs
+    8065: 'Familiar Weight: +5',   // golden banana
+    8069: 'Familiar Weight: +5',   // Stembridge sidearm
+    8209: 'Familiar Weight: +5, Damage Aura: 1',   // filthy child leash
+    8225: 'Familiar Weight: +5',   // lead collar
+    8276: 'Familiar Weight: +5',   // mayo pump
+    8288: 'Random Monster Modifiers: +1',   // kill screen
+    8707: 'Familiar Weight: +10',   // self-dribbling basketball
+    8769: 'Familiar Weight: +5',   // chocolate bowtie
+    8832: 'Familiar Weight: +5',   // tiny domino mask
+    8944: 'Familiar Weight: +5',   // rhinestone cowhorn
+    9028: 'Familiar Weight: +5',   // high-speed upgrade
+    9039: 'Familiar Weight: +11',   // missing semicolon
+    9137: 'All Attributes: +15',   // li'l knight costume
+    9138: 'Adventures: +5, PvP Fights: +5',   // li'l unicorn costume
+    9139: 'All Resistance: +5',   // li'l candy corn costume
+    9140: 'Item Drop: +150',   // li'l ninja costume
+    9141: 'Meat Drop: +300',   // li'l pirate costume
+    9142: 'Experience: +15',   // li'l clown costume
+    9143: 'Experience: +10',   // li'l robot costume
+    9144: 'Combat Rate: -10',   // li'l eyeball costume
+    9145: 'Item Drop: +100, Meat Drop: +200',   // li'l liberty costume
+    9149: 'Familiar Weight: +10',   // tiny baby scorpion
+    9152: 'Initiative: +100',   // li'l ghost costume
+    9208: 'Sprinkle Drop: +25',   // candy dog collar
+    9257: 'Familiar Weight: +10',   // chocolate leash
+    9288: 'Familiar Weight: +5',   // black gallstone
+    9302: 'Familiar Weight: +5',   // space jellybicycle
+    9304: 'Familiar Weight: +10',   // pewter candlestick
+    9402: 'Familiar Weight: +5',   // toggle switch (Bartend)
+    9403: 'Familiar Weight: +5',   // toggle switch (Bounce)
+    9524: 'Familiar Weight: +5',   // meteor shower cap
+    9542: 'Familiar Weight: +5',   // exo-xo-skeleton-skeleton
+    9680: 'Familiar Weight: +5',   // fireproof skip lid
+    9821: 'Familiar Weight: +10, Item Drop: +25',   // luck incense
+    9822: 'Familiar Weight: +10',   // shell bell
+    9823: 'Familiar Weight: +10',   // muscle band
+    9824: 'Familiar Weight: +10, Meat Drop: +50',   // amulet coin
+    9825: 'Familiar Weight: +10',   // razor fang
+    9826: 'Familiar Weight: +10',   // smoke ball
+    9903: 'Leprechaun: 0.5, Fairy: 0.5, Familiar Effect: "small fairy/lep"',   // God Lobster's Scepter
+    9904: 'Volleyball: -1, Sombrero: +1, Familiar Effect: "sombrero"',   // God Lobster's Ring
+    9905: 'Familiar Effect: "whelp"',   // God Lobster's Rod
+    9906: 'Familiar Effect: "block"',   // God Lobster's Robe
+    9907: 'Fairy: 1, Familiar Effect: "fairy"',   // God Lobster's Crown
+    9986: 'Familiar Weight: +5',   // party mouse hat
+    10032: 'Familiar Weight: +5',   // Crimbo dog sweater
+    10064: 'Familiar Weight: +5',   // jar of magical relish
+    10147: 'Familiar Weight: +5',   // red-and-green microcamera
+    10243: 'Familiar Weight: +5',   // plastic pirate hat
+    10396: 'Familiar Weight: +5',   // tinsel fin
+    10499: 'Familiar Weight: +5',   // plastic piranha pot
+    10717: 'Familiar Weight: +5, Muscle Experience: +3',   // fuzzy polar bear ears
+    10718: 'Familiar Weight: +5, Mysticality Experience: +3',   // tiny glowing red nose
+    10719: 'Familiar Weight: +5, Moxie Experience: +3',   // miniature goose mask
+    10730: 'Initiative: +50, Sporadic Item Drop: +25, Experience: +2.5',   // miniature crystal ball
+    10751: 'Familiar Weight: +5',   // blue plate
+    10802: 'Familiar Weight: +5',   // French-Transylvanian Dictionary
+    10874: 'Familiar Weight: +5',   // Site Alpha ID badge
+    10896: 'Familiar Experience: +2',   // grey down vest
+    10932: 'Familiar Weight: +5, Familiar Experience: +1, Familiar Damage: +10',   // tiny stillsuit
+    10998: 'Familiar Weight: +5',   // cookbookbat book
+    11086: 'Familiar Weight: +25',   // overloaded Yule battery
+    11090: 'Familiar Weight: +5',   // half-height cigar
+    11195: 'Item Drop: +25',   // replica miniature gravy-covered maypole
+    11196: 'Experience: +3',   // replica wax lips
+    11204: 'Familiar Weight: +5, Experience: +1.5, Sporadic Item Drop: +12.5',   // replica little box of fireworks
+    11247: 'Initiative: +50, Sporadic Item Drop: +25, Experience: +2.5',   // replica miniature crystal ball
+    11252: 'Familiar Weight: +5, Item Drop: +13, Sporadic Damage Aura: 0.35',   // replica plastic pumpkin bucket
+    11301: 'Familiar Weight: +5',   // claw-held flag
+    11319: 'Familiar Weight: +10, Familiar Experience: +1',   // tiny gold medal
+    11324: 'Familiar Weight: -10, Familiar Experience: -1',   // tiny consolation ribbon
+    11336: 'Familiar Weight: +5',   // LED candle
+    11342: 'Item Drop: +1, Leaves: +1.5',   // tiny rake
+    11479: 'Familiar Weight: +5',   // rigging knot
+    11541: 'Familiar Weight: +5',   // googly chest eyes
+    11570: 'Familiar Weight: +10',   // Apriling band piccolo
+    11581: 'Initiative: +50',   // tiny yam cannon
+    11597: 'Familiar Weight: -20',   // mini kiwi invisible dirigible
+    11628: 'Familiar Experience: +1',   // extra DNA
+    11633: 'Familiar Weight: +5',   // tiny Tina gun
+    11660: 'Cold Resistance: +1',   // tiny ember
+    11680: 'Adventures: +2',   // quantum watch
+    11708: 'Sleaze Damage: +3',   // profane eye patch
+    11825: 'Familiar Weight: +5',   // parity bit
+    11837: 'Familiar Experience: +2',   // toy Cupid bow
+    11849: 'Hot Damage: +10, Hot Spell Damage: +10',   // heat particle
+    11850: 'Cold Damage: +10, Cold Spell Damage: +10',   // cold sore
+    11851: 'Sleaze Damage: +10, Sleaze Spell Damage: +10',   // stomach churner
+    11852: 'Spooky Damage: +10, Spooky Spell Damage: +10',   // phantom brace
+    11853: 'Stench Damage: +10, Stench Spell Damage: +10',   // foul cozy
+    11854: 'Combat Rate: -5',   // grim cellophane
+    11855: 'Combat Rate: +5',   // rift oculus
+    11856: 'HP Regen Min: 4, HP Regen Max: 8',   // sweaty egg
+    11857: 'Weapon Damage: +10, Spell Damage: +10',   // carton of extra-sharp, rusty staples
+    11858: 'Pickpocket Chance: +10',   // glover liners
+    11859: 'Monster Level: +5',   // mosquito speakers
+    11896: 'Familiar Weight: +15',   // wet paper eye
+    11923: 'Cold Damage: +10, Cold Spell Damage: +10, Familiar Weight: +3',   // cold exchanger
+    11943: 'Familiar Weight: +5',   // bone pacifier
+    12148: 'Familiar Weight: +10',   // miniature sleigh
+    12190: 'Familiar Weight: +5',   // fossilized cow femur
+    12246: 'Familiar Weight: +5',   // second-hand synthetic sloth skin scabbard
+    12314: 'Familiar Weight: +5',   // cast entrails
+    12322: 'Familiar Weight: +3',   // can of shield tenderizer
+    12342: 'Familiar Weight: +5',   // tiny stone harp
+  };
+
+  const FAM_ITEM_BTN_ID = 'tm-fam-own-item';
+
+  // Groups that come first, in this order; every other modifier sorts after
+  // them by name.
+  const FAM_MOD_ORDER = [
+    'Familiar Weight', 'Familiar Experience', 'Item Drop', 'Meat Drop', 'Experience',
+    'Monster Level',
+  ];
+
+  // How a modifier reads in the dropdown. A leading % is glued to the number.
+  const FAM_MOD_LABEL = {
+    'Familiar Weight': 'lbs',
+    'Familiar Experience': 'fam exp',
+    'Experience': 'stats/fight',
+    'Item Drop': '% item',
+    'Meat Drop': '% meat',
+    'Monster Level': 'ML',
+    'Familiar Damage': 'fam dmg',
+    'Initiative': '% init',
+    'Combat Rate': '% combat',
+    'Adventures': 'adv',
+    'PvP Fights': 'PvP fights',
+  };
+
+  // --- pure helpers (unit-tested) ------------------------------------------
+
+  // KoLmafia's "Key: value, Key: \"text\", Key: [expr]" -> [{ key, num, text,
+  // expr }]. Commas inside quotes or brackets do not split.
+  function parseFamEquipMods(str) {
+    const parts = [];
+    let cur = '';
+    let quoted = false;
+    let depth = 0;
+    for (const ch of String(str || '')) {
+      if (ch === '"') quoted = !quoted;
+      else if (ch === '[' && !quoted) depth++;
+      else if (ch === ']' && !quoted) depth--;
+      if (ch === ',' && !quoted && depth === 0) { parts.push(cur); cur = ''; } else cur += ch;
+    }
+    parts.push(cur);
+    const out = [];
+    for (const raw of parts) {
+      const p = raw.trim();
+      if (!p) continue;
+      const i = p.indexOf(':');
+      const key = (i < 0 ? p : p.slice(0, i)).trim();
+      const val = i < 0 ? '' : p.slice(i + 1).trim();
+      const m = { key: key, num: null, text: null, expr: false };
+      if (/^".*"$/.test(val)) m.text = val.slice(1, -1);
+      else if (/^\[.*\]$/.test(val)) m.expr = true;
+      else if (/^[+-]?\d+(\.\d+)?$/.test(val)) m.num = parseFloat(val);
+      else if (val) m.text = val;
+      out.push(m);
+    }
+    return out;
+  }
+
+  function formatFamEquipMod(m) {
+    if (m.key === 'Familiar Effect') return '"' + m.text + '"';
+    if (m.expr) return m.key + ' (varies)';
+    if (m.num === null) return m.text ? m.key + ': ' + m.text : m.key;
+    const n = (m.num > 0 ? '+' : '') + String(m.num);
+    const label = FAM_MOD_LABEL[m.key];
+    if (!label) return n + ' ' + m.key;
+    return label.charAt(0) === '%' ? n + label : n + ' ' + label;
+  }
+
+  // The effect line for one item id, or '' when KoLmafia lists none.
+  function famEquipEffect(itemId) {
+    const s = FAM_EQUIP_MODS[itemId];
+    return s ? parseFamEquipMods(s).map(formatFamEquipMod).join(', ') : '';
+  }
+
+  // { rank, group, num } -- smaller rank first; see the block comment. Only a
+  // bonus names a group: das boot's -10 lbs is the price of breathing
+  // underwater, not what it is for, so it sorts with the described effects.
+  function famEquipSortKey(itemId) {
+    const mods = parseFamEquipMods(FAM_EQUIP_MODS[itemId]);
+    const first = mods.find((m) => m.num !== null && m.num > 0);
+    const n = FAM_MOD_ORDER.length;
+    if (first) {
+      const at = FAM_MOD_ORDER.indexOf(first.key);
+      return { rank: at < 0 ? n : at, group: at < 0 ? first.key : '', num: first.num };
+    }
+    if (mods.some((m) => m.text !== null || m.expr)) return { rank: n + 1, group: '', num: 0 };
+    if (mods.length) return { rank: n + 2, group: '', num: 0 };
+    return { rank: n + 3, group: '', num: 0 };
+  }
+
+  // [{ value, fams: [ids], name }] -> the same objects in display order:
+  // the placeholder (value 0), the current familiar's own items, other
+  // familiars' own items (only the hidden full list has those), then the
+  // rest by enchantment.
+  function orderFamEquip(opts, currentFam) {
+    const cur = String(currentFam);
+    const tier = (o) => {
+      if (String(o.value) === '0') return 0;
+      if (o.fams.length) return o.fams.indexOf(cur) >= 0 ? 1 : 2;
+      return 3;
+    };
+    const keyed = opts.map((o, i) => ({ o: o, i: i, t: tier(o), k: famEquipSortKey(Number(o.value)) }));
+    keyed.sort((a, b) => {
+      if (a.t !== b.t) return a.t - b.t;
+      if (a.t === 3) {
+        if (a.k.rank !== b.k.rank) return a.k.rank - b.k.rank;
+        if (a.k.group !== b.k.group) return a.k.group < b.k.group ? -1 : 1;
+        if (a.k.num !== b.k.num) return b.k.num - a.k.num;
+      }
+      const an = String(a.o.name).toLowerCase();
+      const bn = String(b.o.name).toLowerCase();
+      if (an !== bn) return an < bn ? -1 : 1;
+      return a.i - b.i;
+    });
+    return keyed.map((x) => x.o);
+  }
+
+  // What the charpane button should say, from api.php's status and (when it
+  // was needed) inventory. Null when the familiar has no item of its own, or
+  // there is no familiar. state: 'equipped' | 'missing' | 'ready' | 'unknown'.
+  function famOwnItemState(status, inventory) {
+    const famId = parseInt(status && status.familiar, 10);
+    const own = Number.isFinite(famId) ? FAM_OWN_ITEM[famId] : null;
+    if (!own) return null;
+    const out = { famId: famId, itemId: own[0], name: own[1], state: 'unknown' };
+    const worn = parseInt(status.equipment && status.equipment.familiarequip, 10);
+    if (worn === own[0]) out.state = 'equipped';
+    else if (inventory && typeof inventory === 'object' && !Array.isArray(inventory)) {
+      const n = parseInt(inventory[String(own[0])], 10);
+      out.state = Number.isFinite(n) && n > 0 ? 'ready' : 'missing';
+    }
+    return out;
+  }
+
+  // --- familiar.php ----------------------------------------------------------
+
+  function famPageCurrentFam() {
+    if (typeof window.currentfam === 'number' || /^\d+$/.test(String(window.currentfam))) {
+      return String(window.currentfam);
+    }
+    for (const s of document.querySelectorAll('script')) {
+      const m = /var\s+currentfam\s*=\s*(\d+)/.exec(s.textContent || '');
+      if (m) return m[1];
+    }
+    const img = document.querySelector('img[onclick^="fam("]');
+    const m = img && /fam\((\d+)\)/.exec(img.getAttribute('onclick') || '');
+    return m ? m[1] : '';
+  }
+
+  function sortFamEquipOptions(container, currentFam) {
+    const opts = Array.from(container.children).filter((el) => el.tagName === 'OPTION');
+    if (!opts.length) return;
+    const rows = opts.map((el) => {
+      const fams = String(el.getAttribute('fams') || '').split(',')
+        .map((s) => s.trim()).filter(Boolean);
+      if (!el.getAttribute('data-tm-fe') && el.value !== '0') {
+        const effect = famEquipEffect(Number(el.value));
+        let label = el.textContent;
+        if (fams.length) label = '★ ' + label;
+        if (effect) label += ' — ' + effect;
+        el.textContent = label;
+        el.setAttribute('data-tm-fe', '1');
+      }
+      // The option's `name` attribute breaks on an apostrophe (the capture has
+      // name="Li" l="" businessman="" kit'=""), so sort by its text instead.
+      return { value: el.value, fams: fams, name: el.textContent.replace(/^★ /, ''), el: el };
+    });
+    // Options go back before the first optgroup, so the placeholder stays on top.
+    const anchor = Array.from(container.children).find((el) => el.tagName !== 'OPTION') || null;
+    for (const r of orderFamEquip(rows, currentFam)) container.insertBefore(r.el, anchor);
+  }
+
+  function familiarEquipList() {
+    const form = document.forms.famequip || document.querySelector('form[name="famequip"]');
+    if (!form) return;
+    const cur = famPageCurrentFam();
+    for (const id of ['shower', 'grower']) {
+      const sel = document.getElementById(id);
+      if (!sel) continue;
+      const selected = sel.value;
+      sortFamEquipOptions(sel, cur);
+      for (const g of sel.querySelectorAll('optgroup')) sortFamEquipOptions(g, cur);
+      sel.value = selected;
+    }
+  }
+
+  // --- charpane ----------------------------------------------------------------
+
+  // Under the familiar: after the expanded pane's familiar table, or at the end
+  // of the compact pane's <center>. Both from KoLmafia's charpane fixtures
+  // (test_charpane_shrunken_head.html / _compact.html, test_charpane_snowsuit).
+  // Whichever of the two encloses the link more tightly is the familiar block.
+  function famItemSpot(pick) {
+    const table = pick.closest('table');
+    const center = pick.closest('center');
+    if (table && (!center || center.contains(table))) return { after: table };
+    if (center) return { inside: center };
+    return { after: pick };
+  }
+
+  async function equipFamOwnItem(btn, info) {
+    btn.disabled = true;
+    btn.textContent = 'Equipping…';
+    try {
+      const status = await apiJson('status');
+      if (!status || !status.pwd) throw new Error('no pwd hash from api.php');
+      const body = new URLSearchParams({
+        action: 'equip', pwd: status.pwd, whichfam: String(info.famId),
+        whichitem: String(info.itemId),
+      });
+      const res = await fetch(ORIGIN + '/familiar.php', {
+        method: 'POST', credentials: 'same-origin', body: body,
+      });
+      if (!res.ok) throw new Error('familiar.php answered ' + res.status);
+      const after = famOwnItemState(await apiJson('status'), null);
+      if (!after || after.state !== 'equipped') {
+        throw new Error('KoL does not report the ' + info.name + ' as equipped');
+      }
+      try {
+        const main = top.frames.mainpane;
+        if (main && /\/familiar\.php/i.test(main.location.pathname)) main.location.reload();
+      } catch (e) { /* another origin or no frameset: nothing to refresh */ }
+      location.reload();
+    } catch (e) {
+      console.error('UX Enhancers: equipping the familiar item failed.', e);
+      alert('Could not equip the ' + info.name + ': ' + (e && e.message ? e.message : e));
+      btn.disabled = false;
+      btn.textContent = 'Equip ' + info.name;
+    }
+  }
+
+  async function familiarItemButton() {
+    if (document.getElementById(FAM_ITEM_BTN_ID) || !document.body) return;
+    const pick = document.querySelector('a.familiarpick');
+    if (!pick) return;   // no familiar block in this pane
+
+    const status = await apiJson('status');
+    let info = famOwnItemState(status, null);
+    if (!info) return;   // no familiar, or one without an item of its own
+    if (info.state !== 'equipped') info = famOwnItemState(status, await apiJson('inventory'));
+    if (document.getElementById(FAM_ITEM_BTN_ID)) return;   // a parallel run won
+
+    const btn = document.createElement('button');
+    btn.id = FAM_ITEM_BTN_ID;
+    btn.type = 'button';
+    const usable = info.state === 'ready' || info.state === 'unknown';
+    btn.textContent = info.state === 'equipped' ? info.name + ': equipped'
+      : info.state === 'missing' ? info.name + ': not owned'
+        : 'Equip ' + info.name;
+    btn.title = info.state === 'unknown'
+      ? 'Couldn\'t read your inventory, so this may fail: equip the ' + info.name
+      : usable ? 'Equip your familiar with the ' + info.name
+        : info.state === 'equipped' ? 'Your familiar is already wearing the ' + info.name
+          : 'The ' + info.name + ' is not in your inventory';
+    btn.disabled = !usable;
+    btn.style.cssText = [
+      'padding:0 3px',
+      'font-size:9px',
+      'font-family:arial,helvetica,sans-serif',
+      'line-height:12px',
+      'max-width:100%',
+      'white-space:normal',
+      'border:1px solid #888',
+      'border-radius:2px',
+      usable ? 'background:#eee' : 'background:#f4f4f4',
+      usable ? 'color:#000' : 'color:#888',
+      usable ? 'cursor:pointer' : 'cursor:default',
+    ].join(';');
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!btn.disabled) equipFamOwnItem(btn, info);
+    });
+
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'text-align:center;margin:2px 0';
+    wrap.appendChild(btn);
+    const spot = famItemSpot(pick);
+    if (spot.inside) spot.inside.appendChild(wrap);
+    else spot.after.insertAdjacentElement('afterend', wrap);
+  }
+
   // === feature registry =================================================
 
   const FEATURES = [
@@ -5824,6 +6723,8 @@
     { name: 'charpane-heal', path: /\/charpane\.php/i, run: addHealButton },
     { name: 'charpane-cast-max', path: /\/charpane\.php/i, run: enhance },
     { name: 'charpane-autoattack', path: /\/charpane\.php/i, run: autoAttackFeature },
+    { name: 'familiar-equip-list', path: /\/familiar\.php/i, run: familiarEquipList },
+    { name: 'charpane-familiar-item', path: /\/charpane\.php/i, run: familiarItemButton },
   ];
 
   function run() {
