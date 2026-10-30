@@ -4193,9 +4193,9 @@ on a report.
   `items.txt`. Two small hand-written tables hold what only the wiki gives: `FAM_OWN_ALT` (either
   pet rock disguise on the six rocks; the button equips whichever is held) and `FAM_EQUIP_NOTE`
   (a shortened wiki note for 40 items KoLmafia lists no modifier for, shown only when
-  `FAM_EQUIP_MODS` has nothing). **Unsettled**: pewter candlestick (KoLmafia +10 lbs, wiki +5) and
-  penguin-smacking club (KoLmafia +15 familiar damage, wiki +5); KoLmafia's numbers are shown
-  until an in-game description decides. God Lobster and Reagnimated Gnome have five items each and
+  `FAM_EQUIP_MODS` has nothing). The wiki is **wrong** on two numbers, checked against the in-game
+  item descriptions (2026-10-30): pewter candlestick is +10 lbs and penguin-smacking club +15
+  familiar damage, as KoLmafia has them (the wiki says +5 for both). God Lobster and Reagnimated Gnome have five items each and
   get no button.
   **familiar.php** keeps two copies of the item dropdown. `#shower` is the visible
   `select[name=whichitem]` and `#grower` a hidden twin. jQuery-ready copies shower -> grower, and

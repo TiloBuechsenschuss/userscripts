@@ -5869,11 +5869,11 @@
   // 332, 333), and the capture's item ids all match items.txt. The wiki
   // filled two gaps, each in a hand-written table below: FAM_OWN_ALT (the
   // pet rock disguises) and FAM_EQUIP_NOTE (effects KoLmafia lists no
-  // modifier for). Where the two sources give different numbers, KoLmafia's
-  // stand: pewter candlestick (KoLmafia +10 lbs, wiki +5) and
-  // penguin-smacking club (KoLmafia +15 familiar damage, wiki +5) are
-  // unsettled. God Lobster and Reagnimated Gnome have five items each, with
-  // different effects and none of them their default, so they get no button.
+  // modifier for). The two sources disagreed on two numbers, and the in-game
+  // item descriptions side with KoLmafia: pewter candlestick +10 lbs (wiki
+  // +5) and penguin-smacking club +15 familiar damage (wiki +5). God Lobster
+  // and Reagnimated Gnome have five items each, with different effects and
+  // none of them their default, so they get no button.
 
   const FAM_OWN_ITEM = {
     1: [848, 'hypodermic needle'],   // Mosquito
