@@ -4185,11 +4185,18 @@ on a report.
   two generated tables, `FAM_OWN_ITEM` (familiar id -> [item id, name], from KoLmafia's
   `familiars.txt` "equipment" column, resolved through `items.txt`) and `FAM_EQUIP_MODS` (item id
   -> KoLmafia's `modifiers.txt` string, for every item `items.txt` types as `familiar`, with
-  bookkeeping keys dropped). Generated at KoLmafia commit `e03570da5c83`. The requested primary
-  source, the KoL wiki's Familiar Equipment page, could not be reached from the session that wrote
-  this, so the tables are **KoLmafia's**. Eight pairings are **verified** against the `fams`
-  attributes of a live familiar.php capture (2026-10-30) and pinned in the test, and the capture's
-  22 option ids all match `items.txt`. Regenerate the tables, don't hand-edit them.
+  bookkeeping keys dropped). Generated at KoLmafia commit `e03570da5c83`; regenerate them, don't
+  hand-edit them. **Cross-checked** against the KoL wiki's Familiar Equipment page (its source,
+  2026-10-30): all 197 familiars on both lists have the same item. 51 newer familiars are missing
+  from the wiki page. Eight pairings are also **verified** against the `fams` attributes of a live
+  familiar.php capture and pinned in the test, and the capture's 22 option ids all match
+  `items.txt`. Two small hand-written tables hold what only the wiki gives: `FAM_OWN_ALT` (either
+  pet rock disguise on the six rocks; the button equips whichever is held) and `FAM_EQUIP_NOTE`
+  (a shortened wiki note for 40 items KoLmafia lists no modifier for, shown only when
+  `FAM_EQUIP_MODS` has nothing). **Unsettled**: pewter candlestick (KoLmafia +10 lbs, wiki +5) and
+  penguin-smacking club (KoLmafia +15 familiar damage, wiki +5); KoLmafia's numbers are shown
+  until an in-game description decides. God Lobster and Reagnimated Gnome have five items each and
+  get no button.
   **familiar.php** keeps two copies of the item dropdown. `#shower` is the visible
   `select[name=whichitem]` and `#grower` a hidden twin. jQuery-ready copies shower -> grower, and
   the page's `changer()` copies grower -> shower and drops options whose `fams` doesn't name the

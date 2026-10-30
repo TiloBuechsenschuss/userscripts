@@ -114,7 +114,8 @@
  *   "not owned". On the familiar page (familiar.php) the Familiar Equipment dropdown lists the
  *   familiar's own item first, marked with a star, then everything else grouped by enchantment
  *   (familiar weight, familiar experience, item, Meat, stats, ML, then the rest), with each item's
- *   effect written into its option. Item data from KoLmafia (1.32); not yet tried in the live game.
+ *   effect written into its option. Item data from KoLmafia, cross-checked against the KoL wiki
+ *   (1.32); not yet tried in the live game.
  *
  * Confirmed against the live game on 2026-10-07 (1.27; the 1.28 lines and ultra-rares are not yet): the store multibuy, the daily shopping list,
  *   the rare-monster banner and its account.php list, and the ascension checklist.
@@ -5845,24 +5846,34 @@
   // KoLmafia's FamiliarRequest), then asks api.php whether the item is on.
   // The reply text is not trusted for that. On success it reloads the charpane,
   // and familiar.php too if the mainpane is showing it.
-  // Known gap: an item that fits several familiars (the pet rock disguises)
-  // and is on one of the others in the terrarium is not in the inventory, so
-  // it reads "not owned".
+  // A familiar can have more than one item that is its own (FAM_OWN_ALT: the
+  // pet rock family wears either disguise). Then whichever is worn counts as
+  // "equipped", and the first one in the inventory is the one equipped.
+  // Known gap: a disguise worn by another rock in the terrarium is not in
+  // the inventory, so it reads "not owned".
   //
-  // DATA. Both tables are generated from KoLmafia's data files
-  // (src/main/resources/data/familiars.txt, items.txt and modifiers.txt at
-  // commit e03570da5c83, 2026-10-29). FAM_OWN_ITEM is familiar id -> [item id,
-  // item name]. FAM_EQUIP_MODS is item id -> KoLmafia's modifier string for
-  // every item KoLmafia types as familiar equipment, with bookkeeping keys
-  // dropped (Generic, Last Available, Softcore Only, Lasts Until Rollover,
-  // Equips On, Breakable, Conditional Skill, Drops Items, Underwater Familiar
-  // -- the last always comes with a Familiar Effect that says it in words).
-  // The KoL wiki's Familiar Equipment page was the requested primary source,
-  // but it could not be reached when this was written. Instead, eight of the
-  // pairings were checked against the `fams` attributes of the familiar.php
-  // capture: 2, 12, 59, 171, 186, 302, 332, 333. The rest are KoLmafia's.
-  // Item ids are from the same items.txt; the capture's option values agree
-  // for every item it shows.
+  // DATA. FAM_OWN_ITEM and FAM_EQUIP_MODS are generated from KoLmafia's data
+  // files (src/main/resources/data/familiars.txt, items.txt and modifiers.txt
+  // at commit e03570da5c83, 2026-10-29). FAM_OWN_ITEM is familiar id ->
+  // [item id, item name]. FAM_EQUIP_MODS is item id -> KoLmafia's modifier
+  // string for every item KoLmafia types as familiar equipment, with
+  // bookkeeping keys dropped (Generic, Last Available, Softcore Only, Lasts
+  // Until Rollover, Equips On, Breakable, Conditional Skill, Drops Items,
+  // Underwater Familiar -- the last always comes with a Familiar Effect that
+  // says it in words).
+  // Cross-checked against the KoL wiki's Familiar Equipment page (its
+  // source, 2026-10-30). Every familiar on both lists has the same item
+  // (197). 51 newer familiars are not on the wiki page, so for those
+  // KoLmafia is the only source. Eight pairings are also confirmed by the
+  // `fams` attributes of a familiar.php capture (2, 12, 59, 171, 186, 302,
+  // 332, 333), and the capture's item ids all match items.txt. The wiki
+  // filled two gaps, each in a hand-written table below: FAM_OWN_ALT (the
+  // pet rock disguises) and FAM_EQUIP_NOTE (effects KoLmafia lists no
+  // modifier for). Where the two sources give different numbers, KoLmafia's
+  // stand: pewter candlestick (KoLmafia +10 lbs, wiki +5) and
+  // penguin-smacking club (KoLmafia +15 familiar damage, wiki +5) are
+  // unsettled. God Lobster and Reagnimated Gnome have five items each, with
+  // different effects and none of them their default, so they get no button.
 
   const FAM_OWN_ITEM = {
     1: [848, 'hypodermic needle'],   // Mosquito
@@ -6411,6 +6422,67 @@
     12342: 'Familiar Weight: +5',   // tiny stone harp
   };
 
+  // More items a familiar counts as its own, from the wiki: either pet rock
+  // disguise on any of the rocks. KoLmafia gives Pet Rock and Toothsome Rock
+  // one each, and its "Equips On" for both disguises also names Bulky Buddy
+  // Box and Holiday Log. Pet Coral and Software Bug are the wiki's alone.
+  const FAM_PET_ROCK_DISGUISES = [
+    [1526, 'pet rock "Snooty" disguise'], [1678, 'pet rock "Groucho" disguise'],
+  ];
+  const FAM_OWN_ALT = {
+    45: [FAM_PET_ROCK_DISGUISES[1]],   // Pet Rock (Snooty is its own)
+    63: [FAM_PET_ROCK_DISGUISES[0]],   // Toothsome Rock (Groucho is its own)
+    78: FAM_PET_ROCK_DISGUISES,        // Bulky Buddy Box
+    144: FAM_PET_ROCK_DISGUISES,       // Holiday Log
+    204: FAM_PET_ROCK_DISGUISES,       // Software Bug (after its missing semicolon)
+    273: FAM_PET_ROCK_DISGUISES,       // Pet Coral
+  };
+
+  // What an item does, shortened from the wiki page's notes, for the items
+  // KoLmafia lists no modifier for. Shown only when FAM_EQUIP_MODS has nothing.
+  const FAM_EQUIP_NOTE = {
+    7645: 'helps with the rain (Heavy Rains path)',   // miniature life preserver
+    3194: '+10 lbs. of Ghuol Whelp',   // origami "gentlemen's" magazine
+    3298: '+10 lbs. of Ghuol Whelp',   // pretty pink bow
+    2191: 'drops disintegrating sheet music more often',   // giant book of ancient carols
+    3300: '+10 lbs. of Barrrnacle',   // farfalle bow tie
+    10430: 'drops nuts more often',   // nutcracking pliers
+    1623: 'more astral mushroom drops',   // badger badge
+    3302: '+10 lbs. of Star Starfish',   // stick-on mini solar panels
+    9940: 'naps better: heist charges 1.5x faster',   // burglar/sleep mask
+    2147: 'loses less stuffing when hit',   // evil teddy bear sewing kit
+    5762: 'makes Flaming Face more complete',   // flaming nose
+    2846: 'better at eating stuff',   // plastic bib
+    857: 'less sensitive to light',   // moonglasses
+    6102: '+1 Gear',   // homemade robot gear
+    3610: 'sharper claws',   // imitation whetstone
+    4721: 'bakes pies faster',   // microwave stogie
+    8593: 'restores HP and MP after combat',   // brass bung spigot
+    3352: 'makes Llama Lamas friendlier',   // zen motorcycle
+    1102: 'more likely to use more powerful attacks',   // targeting chip
+    10580: 'occasionally gains extra spit',   // dromedary drinking helmet
+    6149: 'more likely to use more powerful attacks',   // MiniMechaElf Laser Punch Missile Launcher
+    8305: 'sometimes drops extra yellow pixels',   // blue pumps
+    5911: 'helps your Nanorhino charge',   // nanorhino credit card
+    4938: 'stronger arrows',   // quake of arrows
+    2084: 'more resistant to wear and tear',   // can of starch
+    10324: '+2 lecture uses, regardless of weight',   // Pocket Professor memory chip
+    8289: 'sometimes drops extra yellow pixels',   // orange boxing gloves
+    1264: 'spends 2-4 less MP',   // tiny nose-bone fetish
+    6785: 'collects body parts faster',   // flask of embalming fluid
+    1928: 'attacks you less often',   // tuning fork
+    4019: 'sees better',   // undissolvable contact lenses
+    1537: 'its booze is more effective',   // weegee sqouija
+    856: 'attacks you less often',   // shock collar
+    6660: 'keeps more steam in',   // school spirit socket set
+    4329: 'can gain weight; sometimes drops candy buffs after combat',   // bag of many confections
+    1419: 'loses less stuffing when hit',   // teddy bear sewing kit
+    3087: 'loses less stuffing when hit',   // teddy borg sewing kit
+    7054: 'better, faster, stronger',   // warbear drone codes
+    4003: 'more sensitive to light',   // bottle of moontan lotion
+    1489: 'makes March Hare more better',   // miniature dormouse
+  };
+
   const FAM_ITEM_BTN_ID = 'tm-fam-own-item';
 
   // Groups that come first, in this order; every other modifier sorts after
@@ -6478,10 +6550,12 @@
     return label.charAt(0) === '%' ? n + label : n + ' ' + label;
   }
 
-  // The effect line for one item id, or '' when KoLmafia lists none.
+  // The effect line for one item id: KoLmafia's modifiers, else the wiki's
+  // note, else ''.
   function famEquipEffect(itemId) {
     const s = FAM_EQUIP_MODS[itemId];
-    return s ? parseFamEquipMods(s).map(formatFamEquipMod).join(', ') : '';
+    if (s) return parseFamEquipMods(s).map(formatFamEquipMod).join(', ');
+    return FAM_EQUIP_NOTE[itemId] || '';
   }
 
   // { rank, group, num } -- smaller rank first; see the block comment. Only a
@@ -6495,7 +6569,9 @@
       const at = FAM_MOD_ORDER.indexOf(first.key);
       return { rank: at < 0 ? n : at, group: at < 0 ? first.key : '', num: first.num };
     }
-    if (mods.some((m) => m.text !== null || m.expr)) return { rank: n + 1, group: '', num: 0 };
+    if (mods.some((m) => m.text !== null || m.expr) || FAM_EQUIP_NOTE[itemId]) {
+      return { rank: n + 1, group: '', num: 0 };
+    }
     if (mods.length) return { rank: n + 2, group: '', num: 0 };
     return { rank: n + 3, group: '', num: 0 };
   }
@@ -6527,21 +6603,34 @@
     return keyed.map((x) => x.o);
   }
 
+  // A familiar's own items, [[id, name], ...]: KoLmafia's first, then the
+  // wiki's extras. Empty for a familiar with none.
+  function famOwnItems(famId) {
+    const own = FAM_OWN_ITEM[famId] ? [FAM_OWN_ITEM[famId]] : [];
+    for (const alt of FAM_OWN_ALT[famId] || []) {
+      if (!own.some((o) => o[0] === alt[0])) own.push(alt);
+    }
+    return own;
+  }
+
   // What the charpane button should say, from api.php's status and (when it
   // was needed) inventory. Null when the familiar has no item of its own, or
   // there is no familiar. state: 'equipped' | 'missing' | 'ready' | 'unknown'.
+  // With several own items: the worn one, else the first one held, else the
+  // first one listed.
   function famOwnItemState(status, inventory) {
     const famId = parseInt(status && status.familiar, 10);
-    const own = Number.isFinite(famId) ? FAM_OWN_ITEM[famId] : null;
-    if (!own) return null;
-    const out = { famId: famId, itemId: own[0], name: own[1], state: 'unknown' };
+    const own = Number.isFinite(famId) ? famOwnItems(famId) : [];
+    if (!own.length) return null;
+    const pick = (o, state) => ({ famId: famId, itemId: o[0], name: o[1], state: state });
     const worn = parseInt(status.equipment && status.equipment.familiarequip, 10);
-    if (worn === own[0]) out.state = 'equipped';
-    else if (inventory && typeof inventory === 'object' && !Array.isArray(inventory)) {
-      const n = parseInt(inventory[String(own[0])], 10);
-      out.state = Number.isFinite(n) && n > 0 ? 'ready' : 'missing';
+    const wearing = own.find((o) => o[0] === worn);
+    if (wearing) return pick(wearing, 'equipped');
+    if (!inventory || typeof inventory !== 'object' || Array.isArray(inventory)) {
+      return pick(own[0], 'unknown');
     }
-    return out;
+    const held = own.find((o) => parseInt(inventory[String(o[0])], 10) > 0);
+    return held ? pick(held, 'ready') : pick(own[0], 'missing');
   }
 
   // --- familiar.php ----------------------------------------------------------

@@ -145,6 +145,37 @@ check('an unreadable inventory is "unknown", not "missing"',
   api.famOwnItemState(status(59, 0), null).state, 'unknown');
 check('an array is not an inventory', api.famOwnItemState(status(59, 0), []).state, 'unknown');
 check('no familiar: no button', api.famOwnItemState(status(0, 0), {}), null);
+
+// The pet rock family, from the wiki: either disguise (Snooty 1526, Groucho
+// 1678) is a rock's own item.
+check('Pet Rock wearing the other disguise is "equipped"',
+  [api.famOwnItemState(status(45, 1678), null).state, api.famOwnItemState(status(45, 1678), null).itemId],
+  ['equipped', 1678]);
+check('Pet Rock holding only Groucho equips Groucho',
+  api.famOwnItemState(status(45, 0), { 1678: '1' }).itemId, 1678);
+check('Pet Rock holding both prefers its own (Snooty)',
+  api.famOwnItemState(status(45, 0), { 1526: '1', 1678: '1' }).itemId, 1526);
+check('Holiday Log (no KoLmafia item) gets the disguises',
+  api.famOwnItemState(status(144, 0), { 1678: '2' }).state, 'ready');
+check('Software Bug keeps its missing semicolon first',
+  api.famOwnItemState(status(204, 0), null).name, 'missing semicolon');
+check('God Lobster (five different items) gets no button', api.famOwnItemState(status(266, 0), {}), null);
+
+// --- wiki cross-check -----------------------------------------------------
+// Pairings from the wiki's Familiar Equipment page (2026-10-30), a sample of
+// rows across the table; the whole table was compared when the data was made.
+const WIKI_PAIRS = {
+  1: 'hypodermic needle', 4: 'prosthetic forehead', 15: 'eye-pod', 72: 'cracker',
+  116: 'gill rings', 138: 'immense ballet shoes', 198: 'brass bung spigot', 18: 'tiny maracas',
+};
+for (const [fam, name] of Object.entries(WIKI_PAIRS)) {
+  check('familiar ' + fam + ' matches the wiki', api.FAM_OWN_ITEM[fam] && api.FAM_OWN_ITEM[fam][1], name);
+}
+check('a wiki note fills in where KoLmafia has no modifier', api.famEquipEffect(857),
+  'less sensitive to light');
+check('KoLmafia\'s modifiers win over a wiki note', api.famEquipEffect(2053), '+5 lbs');
+check('an item with only a wiki note sorts with the described effects',
+  api.famEquipSortKey(857).rank, api.famEquipSortKey(3822).rank);
 check('no status: no button', api.famOwnItemState(null, {}), null);
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall passed');
