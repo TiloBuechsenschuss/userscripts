@@ -4195,8 +4195,8 @@ on a report.
   (a shortened wiki note for 40 items KoLmafia lists no modifier for, shown only when
   `FAM_EQUIP_MODS` has nothing). The wiki is **wrong** on two numbers, checked against the in-game
   item descriptions (2026-10-30): pewter candlestick is +10 lbs and penguin-smacking club +15
-  familiar damage, as KoLmafia has them (the wiki says +5 for both). God Lobster and Reagnimated Gnome have five items each and
-  get no button.
+  familiar damage, as KoLmafia has them (the wiki says +5 for both). God Lobster and Reagnimated
+  Gnome have five items each and get no button.
   **familiar.php** keeps two copies of the item dropdown. `#shower` is the visible
   `select[name=whichitem]` and `#grower` a hidden twin. jQuery-ready copies shower -> grower, and
   the page's `changer()` copies grower -> shower and drops options whose `fams` doesn't name the
