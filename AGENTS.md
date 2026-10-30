@@ -4201,12 +4201,18 @@ on a report.
   `data-tm-fe` attribute, which is copied along. The option's `name` attribute is broken on an
   apostrophe (`name="Li" l="" businessman=""`), so sorting uses the text.
   **The own-item button is gone** (1.33, on request: the reordering is enough). 1.32 had a
-  `#tm-fam-own-item` button above `form[name=famequip]` that equipped the current familiar's own
-  item, with a familiar -> item table (`FAM_OWN_ITEM`, from `familiars.txt`, which matched the
-  wiki for all 197 familiars on both lists) and the pet rock disguises as alternatives
-  (`FAM_OWN_ALT`). Both tables went with it; git history has them if the button comes back. The
-  button posted `familiar.php action=equip&pwd&whichfam=<id>&whichitem=<id>` and confirmed the
-  result by re-reading api.php. **Not yet run in the live game** (the dropdown included).
+  button above `form[name=famequip]` that equipped the current familiar's own item.
+  **The not-owned line** (1.34, `#tm-fam-own-item`, the id the button had) took its place: when
+  the current familiar's own item is neither worn nor held, a line above `form[name=famequip]`
+  reads "Own item not owned: <name> [mall]", the link being the inventory feature's
+  `mallSearchUrl` exact search; an untradeable item reads "(not tradeable)" instead. It brings
+  back `FAM_OWN_ITEM` (familiar id -> [item id, name, tradeable], from `familiars.txt` and
+  `items.txt`'s `t` access flag; matched the wiki for all 197 familiars on both lists and the
+  capture's eight `fams`) and `FAM_OWN_ALT` (either pet rock disguise, both untradeable; the line
+  names both). Worn comes from api.php `status` (`familiar`, `equipment.familiarequip`), held from
+  the page's own dropdowns (the union of `#shower` and `#grower`, which list every piece of
+  familiar equipment in the inventory). Either unreadable means no line, never "not owned" on a
+  guess. **Not yet run in the live game** (the dropdown included).
 - **Ascension checklist** (`ascend.php`). One `form[name=ascend]` (an Ascend button plus the
   "confirm" and "seriously" checkboxes); a panel goes above it and a `submit` listener asks while a
   line is open. Coins are counted by *name* off the inventory tabs (`inventoryCountByName`) because
@@ -4343,7 +4349,9 @@ Current tests:
   dropdown: the modifier table, the effect labels (quoted effects keep their commas, expressions
   read "varies", a wiki note fills in only where KoLmafia has nothing), and the order
   (placeholder, the picked familiar's own item, other familiars' items, then by enchantment,
-  with penalties not naming a group).
+  with penalties not naming a group), the familiar -> own item table against the capture's
+  `fams`, and when the not-owned line shows: never when the item is worn or held, nor when
+  either input couldn't be read; a pet rock lists both disguises.
 - `tests/ux-daily-dungeon.test.mjs` — asserts `ux-enhancers.js`'s Daily
   Dungeon skip marker. The half that matters is negative: every *other* label the wiki lists
   on those four screens is pinned as unmatched, above all **Try the doorknob** and **Proceed

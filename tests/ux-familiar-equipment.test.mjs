@@ -1,5 +1,6 @@
 // Ad-hoc test for KingdomOfLoathing/ux-enhancers.js's familiar equipment
-// dropdown on familiar.php: its order and its effect labels.
+// dropdown on familiar.php (its order and its effect labels) and the line
+// that names the current familiar's own item when you don't have it.
 //
 // There's no test runner in this repo (see AGENTS.md). This is a standalone
 // Node script: it reads the userscript, evaluates its IIFE against a stub DOM
@@ -33,7 +34,7 @@ const wrapped = src
   .replace('(function () {', 'globalThis.__ux = (function () {')
   .replace(/\}\)\(\);\s*$/,
     'return { parseFamEquipMods, famEquipEffect, famEquipSortKey, orderFamEquip, ' +
-    'FAM_EQUIP_MODS }; })();');
+    'FAM_EQUIP_MODS, FAM_OWN_ITEM, famOwnItemsMissing, famPageHeld }; })();');
 if (wrapped === src) throw new Error('could not rewrite ux-enhancers.js for testing');
 
 const fn = new Function('document', 'location', 'window', wrapped + '\nreturn globalThis.__ux;');
@@ -127,6 +128,41 @@ check('a wiki note fills in where KoLmafia has no modifier', api.famEquipEffect(
 check('KoLmafia\'s modifiers win over a wiki note', api.famEquipEffect(2053), '+5 lbs');
 check('an item with only a wiki note sorts with the described effects',
   api.famEquipSortKey(857).rank, api.famEquipSortKey(3822).rank);
+
+// --- the own item --------------------------------------------------------------
+
+// Every `fams` pairing in the capture's hidden full list (#grower): the game's
+// own word on which familiar an item belongs to.
+const CAPTURE_FAMS = { 2: 849, 12: 858, 59: 2053, 171: 6257, 186: 7751, 302: 11628, 332: 12322, 333: 12342 };
+for (const [fam, item] of Object.entries(CAPTURE_FAMS)) {
+  check('familiar ' + fam + "'s own item matches the capture",
+    api.FAM_OWN_ITEM[fam] && api.FAM_OWN_ITEM[fam][0], item);
+}
+check('an entry is [id, name, tradeable]', api.FAM_OWN_ITEM[59], [2053, 'tiny bust of Pallas', 1]);
+check('an untradeable one says so', api.FAM_OWN_ITEM[262], [9826, 'smoke ball', 0]);
+
+const status = (fam, worn) => ({ familiar: String(fam), equipment: { familiarequip: String(worn) } });
+check('not worn, not held: the line names it',
+  api.famOwnItemsMissing(status(1, 0), { 2053: 1 }),
+  [{ id: 848, name: 'hypodermic needle', tradeable: true }]);
+check('held: no line', api.famOwnItemsMissing(status(59, 0), { 2053: 1 }), null);
+check('worn: no line', api.famOwnItemsMissing(status(59, 2053), {}), null);
+check('what you hold unreadable: no line, never a guess', api.famOwnItemsMissing(status(1, 0), null), null);
+check('status unreadable: no line', api.famOwnItemsMissing(null, {}), null);
+check('no familiar: no line', api.famOwnItemsMissing(status(0, 0), {}), null);
+check('a familiar with no own item: no line', api.famOwnItemsMissing(status(266, 0), {}), null);
+check('a pet rock lists both disguises',
+  api.famOwnItemsMissing(status(45, 0), {}).map((o) => [o.id, o.tradeable]), [[1526, false], [1678, false]]);
+check('a pet rock wearing the other disguise: no line', api.famOwnItemsMissing(status(45, 1678), {}), null);
+check('a pet rock holding the other disguise: no line', api.famOwnItemsMissing(status(45, 0), { 1678: 1 }), null);
+
+// What you hold, off the page's own two selects (stubbed: just values).
+const sel = (values) => ({ querySelectorAll: () => values.map((value) => ({ value })) });
+const pageDoc = (byId) => ({ getElementById: (id) => byId[id] || null });
+check('held items are the union of both selects, placeholder dropped',
+  api.famPageHeld(pageDoc({ shower: sel(['0', '2053', '4566']), grower: sel(['0', '2053', '12322']) })),
+  { 2053: 1, 4566: 1, 12322: 1 });
+check('no selects on the page: null', api.famPageHeld(pageDoc({})), null);
 
 console.log(failures ? '\n' + failures + ' FAILED' : '\nall passed');
 process.exit(failures ? 1 : 0);
