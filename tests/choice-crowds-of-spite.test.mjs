@@ -353,7 +353,7 @@ area = 'The Crowds of Spite';
 
 check('the card ratings are registered alongside the other features',
   api.FEATURES.map((f) => f.name),
-  ['fotz-capture', 'spite-card-ratings', 'zee-card-ratings',
+  ['fotz-capture', 'spite-card-ratings', 'zee-card-ratings', 'zee-map-regions',
     'fotz-card-ratings', 'fotz-depth-control', 'fotz-supplication', 'port-carnelian',
     'scientific-voyages', 'university-laboratory', 'arbor',
     'lb-industries', 'menace-eradication', 'vertiginous-horticulture',

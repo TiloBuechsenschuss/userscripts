@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.79
+// @version      1.80
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -41,6 +41,9 @@
  *     the one-time destinations marked as the different things they are, since a port that resets
  *     nothing and a place that is not a dock are two different answers -- the three winds and the
  *     dreams they start, and the whole card table, searchable.
+ *     On the Unterzee map, every destination also shows its region and Zee Peril under its name,
+ *     such as Stormbones · 110, both on the map you zail from and on the one you only look at, so
+ *     you can plan a route without leaving the map.
  *
  * (3) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the
  *     Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for
@@ -3756,6 +3759,97 @@
   function inZee() {
     const area = normalizeName(currentArea());
     return !!area && ZEE_AREAS.indexOf(area) !== -1;
+  }
+
+  // === feature: region and peril on the zee map ==============================
+  //
+  // The Unterzee map names its destinations in ordinary DOM, but nothing in that
+  // markup says which region a destination is in: the regions are painted into
+  // the pixi canvas. So the region comes from these tables, and the peril from
+  // ZEE_REGIONS, and every destination label gets one more line under its name.
+  //
+  // The map's labels are not ZEE_PORTS' names. A label can be a whole district
+  // holding several docks (The Elder Continent) or use a name the dock does not
+  // (The Khanate for Khan's Heart). ZEE_MAP_DISTRICTS carries those, read off
+  // the region wheel on Zailing (Guide) (File:Unterzee map fancy.png). Every
+  // other label is looked up in ZEE_PORTS by the name it appears as, so a port's
+  // region is written in one place only. A port in more than one region (the
+  // Lifeberg's grounds) gets no line: the label cannot say which one it means.
+  // To correct a district: edit ZEE_MAP_DISTRICTS.
+  //
+  // Confirmed against the live map in 1.80 (2026-11-02): a line shows below each
+  // destination. Abbey Rock's label is still unseen, its unlock being unmet.
+  const ZEE_MAP_DISTRICTS = {
+    'The Elder Continent': "Shepherd's Wash",
+    'The Tomb Colonies': 'Stormbones',
+    'The Principles of Coral': 'Stormbones',
+    "Void's Approach": 'Stormbones',
+    'The Khanate': 'The Salt Steppe',
+    "The Corsair's Forest": 'The Snares',
+  };
+  const ZEE_MAP_LABEL = '.leaflet-container--unterzee .leaflet-tooltip--fbg__name > div';
+  const ZEE_MAP_LINE_CLASS = 'fl-zee-map-region';
+  const ZEE_MAP_DESTINATION_CLASSES = [
+    'leaflet-tooltip--fbg__name--destination',
+    'leaflet-tooltip--fbg__name--district',
+  ];
+
+  // label name -> region name, or null where there is nothing to claim.
+  function zeeMapRegion(label) {
+    const key = normalizeName(label);
+    if (!key) return null;
+    for (const district of Object.keys(ZEE_MAP_DISTRICTS)) {
+      if (normalizeName(district) === key) return ZEE_MAP_DISTRICTS[district];
+    }
+    const port = ZEE_PORTS.find(function (p) { return normalizeName(p.as || p.name) === key; });
+    return port && port.regions.length === 1 ? port.regions[0] : null;
+  }
+
+  // The line itself, pure: "Stormbones · 110".
+  function zeeMapLine(label) {
+    const name = zeeMapRegion(label);
+    const region = name && ZEE_REGIONS.find(function (r) { return r.name === name; });
+    return region ? region.name + ' · ' + region.peril : null;
+  }
+
+  // The same map has two modes. Chosen at zee to set a course, destinations have
+  // `cursor: pointer`. Opened anywhere else just to look, nothing is clickable:
+  // every label has `cursor: grab` and the --landmark class. So neither says what
+  // is a destination. The --destination and --district classes do, in both modes;
+  // The Cumaean Canal and Station III have neither, in either mode. The
+  // visitable-island class is no use: the Canal has it and locked Irem does not.
+  //
+  // The line is a span because the label selector takes a div. It resets what it
+  // would inherit from a district label, which is bold and upper case. It goes
+  // behind React's own child, as the launcher does, and is only written when it
+  // would change, or the MutationObserver this feeds would redraw it forever.
+  function zeeMapRegions() {
+    document.querySelectorAll(ZEE_MAP_LABEL).forEach(function (label) {
+      const host = label.parentNode;
+      if (!host) return;
+      const isDestination = ZEE_MAP_DESTINATION_CLASSES.some(function (c) {
+        return host.classList.contains(c);
+      });
+      const text = isDestination ? zeeMapLine(label.textContent) : null;
+      let line = host.querySelector('.' + ZEE_MAP_LINE_CLASS);
+      if (!text) {
+        if (line) line.remove();
+        return;
+      }
+      if (!line) {
+        line = document.createElement('span');
+        line.className = ZEE_MAP_LINE_CLASS;
+        line.style.cssText = 'display: block; font-size: 10px; font-weight: 400; line-height: 1.2;'
+          + ' letter-spacing: 0; text-transform: none; opacity: 0.85; text-align: center;'
+          + ' pointer-events: none;';
+        host.appendChild(line);
+      }
+      if (line.textContent !== text) line.textContent = text;
+    });
+  }
+
+  function zeeMapRegionsOff() {
+    document.querySelectorAll('.' + ZEE_MAP_LINE_CLASS).forEach(function (line) { line.remove(); });
   }
 
   // One card is named "The Sound of Wings" and Fallen London deals a different
@@ -45210,6 +45304,8 @@
     { name: 'fotz-capture', run: captureFotzState },
     { name: 'spite-card-ratings', run: spiteCardRatings },
     { name: 'zee-card-ratings', run: zeeCardRatings },
+    // Draws no badge: one more line inside each destination label on the zee map.
+    { name: 'zee-map-regions', run: zeeMapRegions, off: zeeMapRegionsOff },
     { name: 'fotz-card-ratings', run: fotzCardRatings, keep: forgetStaleDepth },
     // How deep you are, set in the page rather than behind the launcher. AFTER
     // the ratings, because `fotzCardRatings` is where `forgetStaleDepth` runs:
@@ -45524,7 +45620,8 @@
       'chandleress-complaint',
     ],
     'Zailing': [
-      'zee-card-ratings', 'port-carnelian', 'scientific-voyages', 'hunters-keep', 'mutton-island',
+      'zee-card-ratings', 'zee-map-regions', 'port-carnelian', 'scientific-voyages', 'hunters-keep',
+      'mutton-island',
       'venderbight', 'godfall', 'maze-garden', 'promenade', 'port-cecil', 'zee-beasts', 'piracy',
       'irem', 'khaganian-intrigue',
     ],

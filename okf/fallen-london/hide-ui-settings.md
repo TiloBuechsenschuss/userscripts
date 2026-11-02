@@ -84,7 +84,7 @@ and the captures `faction-capture`, `pending-item` and `fotz-capture`, which dra
   `attachBadge` would otherwise see an unchanged key and never redraw. Switching on draws again on
   the next scan.
 - A feature that draws other things has an `off()` that does the same for them
-  (`fotz-depth-control`, `equipment-helper`, `equipment-optimizer`).
+  (`fotz-depth-control`, `zee-map-regions`, `equipment-helper`, `equipment-optimizer`).
 - Hidden `port-carnelian` and `university-laboratory` no longer start their background refresh,
   since it exists only to feed their badges.
 

@@ -1305,6 +1305,22 @@ navigation. Two consequences:
   Peril per region, the Troubled Waters ladder and the six zee-threat/black-card pairs, the
   **ports** table, the three winds, your current hand ranked, and the whole card table with a live
   text filter.
+  `zee-map-regions` is the map half, and it draws no badge. Each destination label on the Unterzee
+  map gets a line such as `Stormbones · 110` under its name; there is no panel of its own, since
+  the Zailing panel already holds these numbers. Labels are found by
+  `.leaflet-container--unterzee .leaflet-tooltip--fbg__name > div`, captured at both minimum and
+  zoomed-in levels with identical label names, and the unterzee class is what keeps the London
+  map out. **The map has two modes and only the classes hold in both.** Setting a course at zee,
+  destinations have `cursor: pointer`; opened anywhere else just to look, every label has
+  `cursor: grab` and `--landmark`. A destination is a label with `--destination` or `--district`.
+  The Cumaean Canal and Station III have neither, and `visitable-island` is no use: the Canal has
+  it and locked Irem does not.
+  The regions are only in the map's canvas, so `ZEE_MAP_DISTRICTS` carries the six labels that are
+  not a `ZEE_PORTS` display name, read off the wiki's region wheel, and every other label is looked
+  up in `ZEE_PORTS`. Abbey Rock's label has not been captured, because its unlock was unmet; its
+  name is the one `ZEE_PORTS` uses. A multi-region port (the Lifeberg grounds) gets no line.
+  Tested in-game in 1.80 (2026-11-02): a line shows below each destination.
+  **Not verified in-game:** whether Abbey Rock's label really reads that, since its unlock was unmet.
   `ZEE_PORTS` replaced the old `ZEE_SAFE_DOCKS` list, and the reason is the `safe` field: it is
   **three-valued on purpose**. `true` is a dock that wipes Troubled Waters and every zee-threat;
   `false` is a real dock that resets nothing (Port Cecil, Godfall, Irem, Gaider's Mourn,
@@ -4470,6 +4486,9 @@ Current tests:
   and a badge drawn in Spite actually coming off when you leave. Extend it whenever you touch
   `SPITE_CARDS`; a new feature with its own pure logic gets its own `choice-*.test.mjs` (or, for
   a UX Enhancers feature, `ux-*.test.mjs`) beside it.
+- `tests/choice-zee-map-regions.test.mjs` — pins the region and peril line on the zee map: every
+  destination label in the captures has the right line in both map modes, a landmark and an unknown label have none,
+  the scan is idempotent, and switching the feature off removes the lines.
 - `tests/choice-zailing.test.mjs` — asserts `choice-helper.js`'s Zailing feature. Two
   halves. The first is the transcription: the routes, the Zee Peril per region, the eight black
   cards, that every zee-threat names a card that actually exists, and the handful of numbers a

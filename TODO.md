@@ -28,3 +28,7 @@ Fallen London Choice Helper:
       shows it
 
 # Maybe
+
+# Done
+
+- `zee-map-regions`, `FallenLondon/choice-helper.js` 1.80: region and Zee Peril under each destination on the Unterzee map. Tested in-game 2026-11-02: a line shows below each destination. Abbey Rock's label not seen, its unlock being unmet.
