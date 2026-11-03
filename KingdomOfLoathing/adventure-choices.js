@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           KoL Choice Adventure Rewards Updated
-// @version        3.21
+// @version        3.23
 // @description    Spoiler text on Kingdom of Loathing choice adventure buttons, plus a few other pages.
 // @author	       Tilo
 // @namespace      https://github.com/TiloBuechsenschuss
@@ -42,6 +42,8 @@
 // @grant 	GM_setValue
 // @grant	GM_xmlhttpRequest
 // @grant   GM_registerMenuCommand
+// @history 3.23 Giant castle: equipment-dependent outcomes (umbrella in 669, mohawk wig in 678, amulet in 670), item conditions on the top floor, 671's fifth option
+// @history 3.22 Epic Weapon / Nemesis quest: mark your class's right answer in the Unknown Tomb riddle (1049) and the Sinister Cave Entrance (1087)
 // @history 3.21 added the Spookyraven Manor Lights Out choices (890-903), Elizabeth and Stephen quest steps
 // @history 3.20 added a short @description
 // @history 3.19 moved the Play Ball! (1598) pitch button highlighting to the IotM menu script (still adds the pitch spoiler text)
@@ -113,8 +115,82 @@ if (window.name == "mainpane") {
             if (debug) ShowButtonIDs(inputs);
         }
     }
+    MarkClassAnswer(inputs, adventureChoiceNumber);
 }
 return;
+
+// Two Epic Weapon / Nemesis quest choices offer each class its own set of buttons, of which
+// exactly one is right. KoL shuffles the button order on every load, so the option number means
+// nothing here -- the answer is matched on the button's label instead.
+// Answers: KoLmafia ChoiceManager.getDecision (cases 1049 and 1087), cross-checked against
+// TourGuide's Nemesis.ash and kolproxy's nemesis.lua. Not verified in-game by this script.
+//   1049 Tomb of the Unknown Your Class Here -- the riddle; labels are quoted, e.g. "Music."
+//   1087 The Dark and Dank and Sinister Cave Entrance -- the wall; a wrong pick costs a turn.
+// A function, not a var: this sits after the top-level return, where a var is still undefined.
+function GetClassAnswers(cNum) {
+  var table = {
+    "1049": {
+        "Seal Clubber":    "Boredom.",
+        "Turtle Tamer":    "Friendship.",
+        "Pastamancer":     "Binding pasta thralls.",
+        "Sauceror":        "Power.",
+        "Disco Bandit":    "Me. Duh.",
+        "Accordion Thief": "Music."
+    },
+    "1087": {
+        "Seal Clubber":    "Freak the hell out like a wrathful wolverine.",
+        "Turtle Tamer":    "Sympathize with an amphibian.",
+        "Pastamancer":     "Entangle the wall with noodles.",
+        "Sauceror":        "Shoot a stream of sauce at the wall.",
+        "Disco Bandit":    "Focus on your disco state of mind.",
+        "Accordion Thief": "Bash the wall with your accordion."
+    }
+  };
+  return table[cNum] || null;
+}
+
+// Lower case, quotes and a trailing period dropped, whitespace squashed, and anything this
+// script or KoL appended (" -- spoiler", " [cost]") cut off.
+function NormalizeAnswerLabel(text) {
+    var s = String(text);
+    var i = s.indexOf(" -- ");
+    if (i !== -1) s = s.substring(0, i);
+    i = s.indexOf(" [");
+    if (i !== -1) s = s.substring(0, i);
+    return s.toLowerCase()
+        .replace(/["“”]/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .replace(/\.+$/, "");
+}
+
+// Suffix (and outline) the button whose label is a class's right answer. The class is named in
+// the suffix rather than guessed from the charpane, so if one class's right answer ever shows up
+// as another class's wrong one, the player can still tell which mark is theirs.
+function MarkClassAnswer(inputs, cNum) {
+    var MARK = "\u2714 correct";
+    var answers = GetClassAnswers(cNum);
+    if (!answers) return 0;
+    var marked = 0, n, btn, label, cls;
+    for (n = 0; n < inputs.length; n++) {
+        btn = inputs[n];
+        if (btn.type !== "submit" || String(btn.value).indexOf(MARK) !== -1) continue;
+        label = NormalizeAnswerLabel(btn.value);
+        for (cls in answers) {
+            if (label === NormalizeAnswerLabel(answers[cls])) {
+                btn.value += " -- " + MARK + " (" + cls + ")";
+                if (btn.style) {
+                    btn.style.fontWeight = "bold";
+                    btn.style.outline = "3px solid #d4a017";
+                    btn.style.outlineOffset = "1px";
+                }
+                marked++;
+                break;
+            }
+        }
+    }
+    return marked;
+}
 
 function ShowButtonIDs(inputs) {
 	var cval = -1, n;
@@ -1041,37 +1117,47 @@ function GetSpoilersForAdvNumber(advNumber) {
         "693":["It's Almost Certainly a Trap","\nwith appropriate resistance: 1/2 of Max HP in damage, +(some) stats (based on resistance level)\nwithout: Ow.","pass (no adv loss)","leave (no adv loss)"],
 
 		//New giant castle
-		"669":["The Fast and the Furry-ous","proceed to Out in the Open Source","gain ~210 Moxie","?","nothing (no adv loss?)"],
+		// Equipment/item conditions cross-checked against KoLmafia ChoiceAdventures.java (static and
+		// dynamic spoilers for 669, 670, 671, 675, 677, 678); not verified in-game by this script.
+		//Basement
+		"669":["The Fast and the Furry-ous",
+			"\nwith titanium assault umbrella or unbreakable umbrella equipped: unlock ground floor\nwithout: proceed to Out in the Open Source",
+			"gain ~210 Moxie",
+			"?",
+			"skip (no adv loss), guarantees this adventure will reoccur"],
 		"670":["You Don't Mess Around with Gym","\nfirst time: massive dumbbell\nafter: nothing (no adv loss)",
 			"\nGain ~200 Muscle",
 			"\nany 2 of: pec oil, Squat-Thrust Magazine, Giant Jar of Protein Powder",
-			"\nwith amulet of plot significant equipped: unlock ground floor\nwithout: nothing (no adv loss)",
-			"\nLeave (no adv loss)"],
+			"\nwith amulet of extreme plot significance equipped: unlock ground floor\nwithout: nothing (no adv loss)",
+			"\nskip (no adv loss), guarantees this adventure will reoccur"],
 		"671":["Out in the Open Source",
-			"\nwith massive dumbbell: unlock ground floor\nwithout: nothing\nwith dumbbell and ground floor unlocked: snide message (no adv loss)",
+			"\nwith massive dumbbell (in inventory): unlock ground floor\nwithout: nothing\nwith dumbbell and ground floor unlocked: snide message (no adv loss)",
 			"Gain ~200 Mysticality",
 			"O'RLY manual, open sauce",
-			"Proceed to You Don't Mess Around with Gym"],
+			"Proceed to You Don't Mess Around with Gym",
+			"999 meat, ~150 substats of each stat"],
+		//Ground floor
 		"672":["There's No Ability Like Possibility","\nacquire 3 of:\ngiant heirloom grape tomato, open sauce, pec oil, probability potion,\nstolen sushi, worthless gewgaw, worthless knick-knack, worthless trinket, Ye Olde Meade",
 			"\neffect: Nothing is Impossible (30 turns of +100% spell damage)",
 			"Leave (no adv loss)"],
 		"673":["Putting Off is Off-Putting","very overdue library book","effect: Trash-wrapped (30 turns of +10 DR)","nothing (no adv loss)"],
-		"674":["Huzzah!","pewter claymore","\neffect: Pretending to Pretend (30 turns of +100% weapon damage","nothing (no adv loss)"],
+		"674":["Huzzah!","pewter claymore","\neffect: Pretending to Pretend (30 turns of +100% weapon damage)","nothing (no adv loss)"],
+		//Top floor
 		"675":["Melon Collie and the Infinite Lameness",
 			"\nmonster: Goth Giant",
-			"\nwith drum 'n' bass 'n' drum 'n' bass record: proceed to Chore Wheel\nwith record and Chore wheel done: waste turn\nwithout: ?",
+			"\nwith drum 'n' bass 'n' drum 'n' bass record (in inventory, used up): proceed to Chore Wheel (complete quest)\nwith record and Chore wheel done: waste turn\nwithout: ?",
 			"3 thin black candles",
-			"Proceed to Copper Feel\n(complete quest/open HitS/gear)"],
+			"Proceed to Copper Feel\n(complete quest with model airship/open HitS/gear)"],
 		"676":["Flavor of a Raver","Monster: Raver Giant","+1,000 MP, +1,000 HP",
 			"\nfirst time: drum 'n' bass 'n' drum 'n' bass record\nafter: nothing (no adv loss)",
 			"\nProceed to Yeah, You're for Me, Punk Rock Giant"],
 		"677":["Copper Feel",
-			"\nwith model airship: proceed to Chore Wheel\nwith model airship and Chore wheel done: waste turn\nwithout model airship: fight Steampunk Giant",
-			"\nfirst time:steam-powered model rocketship (opens Hole in the Sky)\nafter: nothing (no adv loss)",
+			"\nwith model airship (in inventory, used up): proceed to Chore Wheel (complete quest)\nwith model airship and Chore wheel done: waste turn\nwithout model airship: fight Steampunk Giant",
+			"\nfirst time: steam-powered model rocketship (opens Hole in the Sky)\nafter: nothing (no adv loss)",
 			"\nbrass gear",
-			"\nProceed to Melon Collie and the Infinite Lameness\n(Goth Giant/complete quest/3 thin black candles)"],
+			"\nProceed to Melon Collie and the Infinite Lameness\n(Goth Giant/complete quest with record/3 thin black candles)"],
 		"678":["Yeah, You're For Me, Punk Rock Giant",
-			"\nmonster: Punk Rock Giant","500-550 meat","Proceed to Copper Feel \n(complete quest/open HitS/fight Steampunk Giant)","Proceed to Flavor of a Raver \n(Raver Giant/+MP,HP/acquire quest item)"],
+			"\nwith mohawk wig equipped: proceed to Chore Wheel (complete quest)\nwithout: monster: Punk Rock Giant","500-550 meat","Proceed to Copper Feel \n(complete quest with model airship/open HitS/fight Steampunk Giant)","Proceed to Flavor of a Raver \n(Raver Giant/+MP,HP/acquire quest item)"],
 		"679":["Keep On Turnin' the Wheel in the Sky","\ncomplete giant trash quest"],
 		"680":["Are You a Man or a Mouse?","proceed to Chore Wheel (complete giant trash quest)"],
 
