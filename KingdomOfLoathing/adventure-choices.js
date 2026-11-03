@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           KoL Choice Adventure Rewards Updated
-// @version        3.21
+// @version        3.22
 // @description    Spoiler text on Kingdom of Loathing choice adventure buttons, plus a few other pages.
 // @author	       Tilo
 // @namespace      https://github.com/TiloBuechsenschuss
@@ -42,6 +42,7 @@
 // @grant 	GM_setValue
 // @grant	GM_xmlhttpRequest
 // @grant   GM_registerMenuCommand
+// @history 3.22 Epic Weapon / Nemesis quest: mark your class's right answer in the Unknown Tomb riddle (1049) and the Sinister Cave Entrance (1087)
 // @history 3.21 added the Spookyraven Manor Lights Out choices (890-903), Elizabeth and Stephen quest steps
 // @history 3.20 added a short @description
 // @history 3.19 moved the Play Ball! (1598) pitch button highlighting to the IotM menu script (still adds the pitch spoiler text)
@@ -113,8 +114,82 @@ if (window.name == "mainpane") {
             if (debug) ShowButtonIDs(inputs);
         }
     }
+    MarkClassAnswer(inputs, adventureChoiceNumber);
 }
 return;
+
+// Two Epic Weapon / Nemesis quest choices offer each class its own set of buttons, of which
+// exactly one is right. KoL shuffles the button order on every load, so the option number means
+// nothing here -- the answer is matched on the button's label instead.
+// Answers: KoLmafia ChoiceManager.getDecision (cases 1049 and 1087), cross-checked against
+// TourGuide's Nemesis.ash and kolproxy's nemesis.lua. Not verified in-game by this script.
+//   1049 Tomb of the Unknown Your Class Here -- the riddle; labels are quoted, e.g. "Music."
+//   1087 The Dark and Dank and Sinister Cave Entrance -- the wall; a wrong pick costs a turn.
+// A function, not a var: this sits after the top-level return, where a var is still undefined.
+function GetClassAnswers(cNum) {
+  var table = {
+    "1049": {
+        "Seal Clubber":    "Boredom.",
+        "Turtle Tamer":    "Friendship.",
+        "Pastamancer":     "Binding pasta thralls.",
+        "Sauceror":        "Power.",
+        "Disco Bandit":    "Me. Duh.",
+        "Accordion Thief": "Music."
+    },
+    "1087": {
+        "Seal Clubber":    "Freak the hell out like a wrathful wolverine.",
+        "Turtle Tamer":    "Sympathize with an amphibian.",
+        "Pastamancer":     "Entangle the wall with noodles.",
+        "Sauceror":        "Shoot a stream of sauce at the wall.",
+        "Disco Bandit":    "Focus on your disco state of mind.",
+        "Accordion Thief": "Bash the wall with your accordion."
+    }
+  };
+  return table[cNum] || null;
+}
+
+// Lower case, quotes and a trailing period dropped, whitespace squashed, and anything this
+// script or KoL appended (" -- spoiler", " [cost]") cut off.
+function NormalizeAnswerLabel(text) {
+    var s = String(text);
+    var i = s.indexOf(" -- ");
+    if (i !== -1) s = s.substring(0, i);
+    i = s.indexOf(" [");
+    if (i !== -1) s = s.substring(0, i);
+    return s.toLowerCase()
+        .replace(/["“”]/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .replace(/\.+$/, "");
+}
+
+// Suffix (and outline) the button whose label is a class's right answer. The class is named in
+// the suffix rather than guessed from the charpane, so if one class's right answer ever shows up
+// as another class's wrong one, the player can still tell which mark is theirs.
+function MarkClassAnswer(inputs, cNum) {
+    var MARK = "\u2714 correct";
+    var answers = GetClassAnswers(cNum);
+    if (!answers) return 0;
+    var marked = 0, n, btn, label, cls;
+    for (n = 0; n < inputs.length; n++) {
+        btn = inputs[n];
+        if (btn.type !== "submit" || String(btn.value).indexOf(MARK) !== -1) continue;
+        label = NormalizeAnswerLabel(btn.value);
+        for (cls in answers) {
+            if (label === NormalizeAnswerLabel(answers[cls])) {
+                btn.value += " -- " + MARK + " (" + cls + ")";
+                if (btn.style) {
+                    btn.style.fontWeight = "bold";
+                    btn.style.outline = "3px solid #d4a017";
+                    btn.style.outlineOffset = "1px";
+                }
+                marked++;
+                break;
+            }
+        }
+    }
+    return marked;
+}
 
 function ShowButtonIDs(inputs) {
 	var cval = -1, n;
