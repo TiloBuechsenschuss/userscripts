@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.80
+// @version      1.81
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -43,7 +43,8 @@
  *     dreams they start, and the whole card table, searchable.
  *     On the Unterzee map, every destination also shows its region and Zee Peril under its name,
  *     such as Stormbones · 110, both on the map you zail from and on the one you only look at, so
- *     you can plan a route without leaving the map.
+ *     you can plan a route without leaving the map. A safe port -- one whose dock wipes Troubled
+ *     Waters and the zee-threats -- also gets an anchor after the peril: Home Waters · 100 · ⚓.
  *
  * (3) During the Fruits of the Zee Festival every wreck-diving card gets a badge showing the
  *     Thalassic Favour its treasure trades for at the Fruit Market, with a colour of its own for
@@ -3794,6 +3795,58 @@
     'leaflet-tooltip--fbg__name--district',
   ];
 
+  // A district label that stands for exactly ONE dock in ZEE_PORTS, by that
+  // dock's `name`, so the safe-port mark below can read the dock's `safe`.
+  const ZEE_MAP_DISTRICT_DOCKS = {
+    'The Khanate': 'The Copper Quarter',
+    'The Tomb Colonies': 'Set a course for the tomb colony of Tanah-Chook',
+    'The Principles of Coral': 'Port Cecil',
+    "The Corsair's Forest": "Gaider's Mourn",
+  };
+
+  // The two districts that stand for no single dock, given a `safe` outright.
+  // This is the player's call (2026-11-05), not the wiki's: The Elder Continent
+  // holds several docks and most of them are safe (Heartscross House, the Court
+  // of the Wakeful Eye, Apis Meet); Void's Approach is, most of the time, not.
+  // "True enough" is the standard here, not "always". To correct one: edit
+  // ZEE_MAP_DISTRICT_SAFE.
+  const ZEE_MAP_DISTRICT_SAFE = {
+    'The Elder Continent': true,
+    "Void's Approach": false,
+  };
+
+  // label name -> true / false / null (no claim), from ZEE_MAP_DISTRICT_SAFE
+  // first and the label's ZEE_PORTS row otherwise.
+  function zeeMapSafe(label) {
+    const key = normalizeName(label);
+    if (!key) return null;
+    for (const district of Object.keys(ZEE_MAP_DISTRICT_SAFE)) {
+      if (normalizeName(district) === key) return ZEE_MAP_DISTRICT_SAFE[district];
+    }
+    const port = zeeMapPort(label);
+    return port ? port.safe : null;
+  }
+
+  // The safe-port mark: an anchor, after the peril. A shape rather than a
+  // colour, so it reads the same to a red-green-weak eye; U+FE0E asks for the
+  // text glyph, so it takes the line's colour instead of a phone's blue emoji.
+  // It is drawn only where zeeMapSafe says `true` -- an unsafe dock, a
+  // hunting ground and an unknown label all go without, since a missing anchor
+  // claims nothing.
+  const ZEE_MAP_SAFE_MARK = '⚓︎';
+
+  // label name -> the ZEE_PORTS row it stands for, or null.
+  function zeeMapPort(label) {
+    const key = normalizeName(label);
+    if (!key) return null;
+    for (const district of Object.keys(ZEE_MAP_DISTRICT_DOCKS)) {
+      if (normalizeName(district) !== key) continue;
+      const dock = ZEE_MAP_DISTRICT_DOCKS[district];
+      return ZEE_PORTS.find(function (p) { return p.name === dock; }) || null;
+    }
+    return ZEE_PORTS.find(function (p) { return normalizeName(p.as || p.name) === key; }) || null;
+  }
+
   // label name -> region name, or null where there is nothing to claim.
   function zeeMapRegion(label) {
     const key = normalizeName(label);
@@ -3801,15 +3854,17 @@
     for (const district of Object.keys(ZEE_MAP_DISTRICTS)) {
       if (normalizeName(district) === key) return ZEE_MAP_DISTRICTS[district];
     }
-    const port = ZEE_PORTS.find(function (p) { return normalizeName(p.as || p.name) === key; });
+    const port = zeeMapPort(label);
     return port && port.regions.length === 1 ? port.regions[0] : null;
   }
 
-  // The line itself, pure: "Stormbones · 110".
+  // The line itself, pure: "Stormbones · 110", or "Home Waters · 100 · ⚓"
+  // at a dock that wipes Troubled Waters and the zee-threats.
   function zeeMapLine(label) {
     const name = zeeMapRegion(label);
     const region = name && ZEE_REGIONS.find(function (r) { return r.name === name; });
-    return region ? region.name + ' · ' + region.peril : null;
+    if (!region) return null;
+    return region.name + ' · ' + region.peril + (zeeMapSafe(label) === true ? ' · ' + ZEE_MAP_SAFE_MARK : '');
   }
 
   // The same map has two modes. Chosen at zee to set a course, destinations have

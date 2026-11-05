@@ -84,7 +84,7 @@ class FakeObserver { observe() {} }
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { ZEE_MAP_DISTRICTS, ZEE_MAP_LABEL, ZEE_REGIONS, ZEE_PORTS, FEATURES, FEATURE_GROUPS,'
+    'return { ZEE_MAP_DISTRICTS, ZEE_MAP_DISTRICT_DOCKS, ZEE_MAP_SAFE_MARK, zeeMapPort, zeeMapSafe, ZEE_MAP_DISTRICT_SAFE, ZEE_MAP_LABEL, ZEE_REGIONS, ZEE_PORTS, FEATURES, FEATURE_GROUPS,'
     + ' zeeMapRegion, zeeMapLine, zeeMapRegions, zeeMapRegionsOff }; })();');
 const fn = new Function(
   'document', 'MutationObserver', 'requestAnimationFrame', 'getComputedStyle', 'console',
@@ -119,23 +119,24 @@ const lineOf = (el) => el.parentNode.querySelector('.fl-zee-map-region');
 // Every destination label in the map captures, with what the region wheel on
 // Zailing (Guide) says, and Abbey Rock, whose label has not been captured because
 // its unlock was unmet.
+const SAFE = ' · ⚓︎';
 const EXPECTED = {
   "Hunter's Keep": 'Home Waters · 100',
-  'Mutton Island': 'Home Waters · 100',
+  'Mutton Island': 'Home Waters · 100' + SAFE,
   'Bullbone Island': 'Home Waters · 100',
-  London: 'Home Waters · 100',
+  London: 'Home Waters · 100' + SAFE,
   'The Iron Republic': "Shepherd's Wash · 110",
-  'The Elder Continent': "Shepherd's Wash · 110",
+  'The Elder Continent': "Shepherd's Wash · 110" + SAFE,
   Godfall: "Shepherd's Wash · 110",
-  'Abbey Rock': "Shepherd's Wash · 110",
+  'Abbey Rock': "Shepherd's Wash · 110" + SAFE,
   'Corpsecage Island': 'Stormbones · 110',
   'The Tomb Colonies': 'Stormbones · 110',
   'The Principles of Coral': 'Stormbones · 110',
   "Void's Approach": 'Stormbones · 110',
   'Grunting Fen': 'The Sea of Voices · 150',
-  Polythreme: 'The Sea of Voices · 150',
+  Polythreme: 'The Sea of Voices · 150' + SAFE,
   'Mangrove College': 'The Sea of Voices · 150',
-  'The Khanate': 'The Salt Steppe · 200',
+  'The Khanate': 'The Salt Steppe · 200' + SAFE,
   Irem: 'The Pillared Sea · 210',
   "The Corsair's Forest": 'The Snares · 250',
 };
@@ -150,6 +151,24 @@ check('the hunting grounds on the wheel take their region from ZEE_PORTS',
   ['Home Waters · 100', 'Stormbones · 110']);
 check('a port in several regions claims none of them',
   api.zeeMapLine('Lifeberg Hunting Grounds'), null);
+check('every district dock names a ZEE_PORTS row',
+  Object.entries(api.ZEE_MAP_DISTRICT_DOCKS).filter(([, d]) => !api.ZEE_PORTS.some((p) => p.name === d)), []);
+check('every district dock is also a district with a region',
+  Object.keys(api.ZEE_MAP_DISTRICT_DOCKS).filter((d) => !(d in api.ZEE_MAP_DISTRICTS)), []);
+check('the anchor is drawn exactly where zeeMapSafe says true',
+  Object.keys(EXPECTED).filter((n) => {
+    return (api.zeeMapSafe(n) === true) !== api.zeeMapLine(n).endsWith(SAFE);
+  }), []);
+check('the player\'s call on the two multi-dock districts',
+  [api.zeeMapSafe('The Elder Continent'), api.zeeMapSafe("Void's Approach")], [true, false]);
+check('every district given a safe outright is a district with a region',
+  Object.keys(api.ZEE_MAP_DISTRICT_SAFE).filter((d) => !(d in api.ZEE_MAP_DISTRICTS)), []);
+check('no district is both a one-dock district and given a safe outright',
+  Object.keys(api.ZEE_MAP_DISTRICT_SAFE).filter((d) => d in api.ZEE_MAP_DISTRICT_DOCKS), []);
+check('a hunting ground (safe: null) gets no anchor',
+  api.zeeMapLine('Feral Crocodile Hunting Grounds').includes('⚓'), false);
+check('the anchor is a shape, not a colour: the text alone carries it',
+  api.ZEE_MAP_SAFE_MARK, '⚓︎');
 check('an unknown name claims nothing', api.zeeMapLine('Somewhere New'), null);
 check('an empty name claims nothing', api.zeeMapLine(''), null);
 
@@ -184,7 +203,7 @@ labels = [viewDistrict, viewDestination, viewLocked];
 api.zeeMapRegions();
 check('the map you only look at gets its lines too',
   [lineOf(viewDistrict).textContent, lineOf(viewDestination).textContent, lineOf(viewLocked).textContent],
-  ['Home Waters · 100', 'Home Waters · 100', 'The Pillared Sea · 210']);
+  ['Home Waters · 100' + SAFE, 'Home Waters · 100', 'The Pillared Sea · 210']);
 labels = [irem, canal, station, unknown];
 check('a destination with no known region gets no line', lineOf(unknown), null);
 

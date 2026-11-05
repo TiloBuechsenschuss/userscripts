@@ -1320,7 +1320,16 @@ navigation. Two consequences:
   up in `ZEE_PORTS`. Abbey Rock's label has not been captured, because its unlock was unmet; its
   name is the one `ZEE_PORTS` uses. A multi-region port (the Lifeberg grounds) gets no line.
   Tested in-game in 1.80 (2026-11-02): a line shows below each destination.
-  **Not verified in-game:** whether Abbey Rock's label really reads that, since its unlock was unmet.
+  Since 1.81 a **safe port** gets an anchor after the peril (`Home Waters · 100 · ⚓︎`), drawn
+  exactly where the label's `ZEE_PORTS` row has `safe: true`: an unsafe dock (`false`), a hunting
+  ground (`null`) and an unknown label all go without, so a missing anchor claims nothing. The
+  anchor is a shape, not a colour, and carries U+FE0E so phones draw the text glyph rather than a
+  blue emoji. A district label reaches its dock through `ZEE_MAP_DISTRICT_DOCKS`, which lists only
+  districts that stand for one dock. The two that do not are given a `safe` outright in
+  `ZEE_MAP_DISTRICT_SAFE`, on the player's call (2026-11-05), not the wiki's: The Elder Continent
+  safe (most of its docks are), Void's Approach not (true most of the time).
+  **Not verified in-game:** whether Abbey Rock's label really reads that, since its unlock was unmet;
+  and whether the anchor renders as a plain glyph (not a coloured emoji) on mobile.
   `ZEE_PORTS` replaced the old `ZEE_SAFE_DOCKS` list, and the reason is the `safe` field: it is
   **three-valued on purpose**. `true` is a dock that wipes Troubled Waters and every zee-threat;
   `false` is a real dock that resets nothing (Port Cecil, Godfall, Irem, Gaider's Mourn,
