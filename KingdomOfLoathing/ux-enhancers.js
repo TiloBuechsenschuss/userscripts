@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js
-// @version      1.34
+// @version      1.35
 // @description  Grab-bag of quality-of-life tweaks for Kingdom of Loathing pages.
 // @match        https://www.kingdomofloathing.com/hermit.php*
 // @match        https://kingdomofloathing.com/hermit.php*
@@ -3643,7 +3643,8 @@
     ['place.php?whichplace=town_right', ['Madness Bakery']],
     ['place.php?whichplace=knoll_hostile', ['Degrassi Knoll Restroom', 'Degrassi Knoll Gym']],
     ['place.php?whichplace=desertbeach', ['South of the Border', 'Oasis', 'Arid, Extra-Dry Desert']],
-    ['tavern.php', ['A Barroom Brawl', 'Barroom Brawl']],
+    ['tavern.php', ['Typical Tavern Cellar', 'Typical Tavern', 'Tavern Cellar', 'A Barroom Brawl',
+      'Barroom Brawl']],
     ['place.php?whichplace=manor1', ['Haunted Conservatory', 'Haunted Kitchen', 'Haunted Pantry']],
     ['place.php?whichplace=manor2', ['Haunted Gallery', 'Haunted Bathroom']],
     ['place.php?whichplace=manor3', ['Haunted Nursery', 'Haunted Laboratory']],

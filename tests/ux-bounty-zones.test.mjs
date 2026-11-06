@@ -92,6 +92,18 @@ check('curly quotes still match the "Fun" House',
     'House (0 of 7 collected so far)'),
   ['“Fun” House', 'place.php?whichplace=plains']);
 
+// The two Typical Tavern lines are constructed (item and monster made up), not
+// copied from the game: only the zone wording matters here.
+check('the Typical Tavern goes to the tavern, not the cellar maze',
+  link(head + '6 bits of wilted cabbage from drunken rats in the Typical Tavern ' +
+    '(0 of 6 collected so far)'),
+  ['Typical Tavern', 'tavern.php']);
+
+check('"Typical Tavern Cellar" is linked whole',
+  link(head + '6 bits of wilted cabbage from drunken rats in the Typical Tavern ' +
+    'Cellar (0 of 6 collected so far)'),
+  ['Typical Tavern Cellar', 'tavern.php']);
+
 check('a zone with no map is left alone',
   link(head + '8 piles of country guano from Swarms of Country Bats in An ' +
     'Incredibly Strange Place (Bad Trip) (0 of 8 collected so far)'),
