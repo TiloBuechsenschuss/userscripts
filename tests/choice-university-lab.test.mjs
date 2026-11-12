@@ -130,7 +130,7 @@ const wrapped = src
     'return { LAB_CARDS, LAB_GROUPS, LAB_Q, LAB_STUDENTS, LAB_STAFF, LAB_SKILLS, LAB_QUALITIES,'
     + ' LAB_TEAM_EXAMPLES, LAB_RAMP, LAB_COLOR_RANGE, LAB_COLOR_PR, LAB_COLOR_LABEL,'
     + ' LAB_CLASS, LAB_FLAG, LAB_BRANCH_CLASS, LAB_BRANCH_FLAG, LAB_PROJECTS, LAB_EQUIPMENT,'
-    + ' LAB_EXPERTS, LAB_AREAS, LAB_BRIEF_CURVE, LAB_SKILL_WIN, LAB_SKILL_FAIL,'
+    + ' LAB_EXPERTS, LAB_AREAS, LAB_BRIEF_CURVE, LAB_SKILL_WIN, LAB_SKILL_FAIL, LAB_CORR_CURVE, LAB_STAFF_Q,'
     + ' labRound, labCurve, labDraft, labCollated, labCompute, labOutcome, labOptionValue,'
     + ' labStatus, labStateFrom, labHighest, labCardSpec, labOptionSpec, labCardFor,'
     + ' labBranchRows, labDisambiguate, labConfirmed, labFromQualities, labRatings,'
@@ -192,9 +192,9 @@ check('every group has at least one card, so no panel heading stands empty',
 check('card names are unique', new Set(api.LAB_CARDS.map((c) => api.normalizeName(c.name))).size,
   api.LAB_CARDS.length);
 
-check('within a card, the wiki page identifies an option uniquely',
-  api.LAB_CARDS.filter((c) => new Set(c.opts.map((o) => o.page || o.branch)).size !== c.opts.length)
-    .map((c) => c.name), []);
+check('within a card, the wiki page (and its variant, where one page lists two) identifies an option uniquely',
+  api.LAB_CARDS.filter((c) => new Set(c.opts.map((o) => (o.page || o.branch) + '#' + (o.variant || ''))).size
+    !== c.opts.length).map((c) => c.name), []);
 
 const formulaKind = (f) => f == null ? 'none'
   : f.range ? 'range' : f.draft ? 'draft' : f.team != null ? 'team' : f.curve ? 'curve'
@@ -214,7 +214,7 @@ check('every requirement names a quality the scrape reads',
   api.LAB_CARDS.flatMap((c) => c.opts.flatMap((o) => (o.req || [])
     .filter((r) => !api.LAB_QUALITIES.includes(r[0])).map((r) => o.branch + ': ' + r[0]))), []);
 
-check('every S-curve on a skill is on one of the four advanced skills',
+check('every S-curve on a skill is on a skill the scrape reads (LAB_SKILLS)',
   api.LAB_CARDS.flatMap((c) => c.opts.flatMap((o) => ['win', 'fail'].map((k) => o[k])
     .filter((f) => f && f.curve && f.of !== 'el' && !api.LAB_SKILLS.includes(f.of)).map(() => o.branch))), []);
 
@@ -222,11 +222,11 @@ check('every student card names its student, and only student cards do',
   api.LAB_CARDS.filter((c) => (c.group === 'students') !== api.LAB_STUDENTS.some((s) => s.quality === c.student))
     .map((c) => c.name), []);
 
-check('the thirteen ordinary-English card names are the strict ones',
+check('the sixteen ordinary-English card names are the strict ones',
   api.LAB_CARDS.filter((c) => c.strict).map((c) => c.name).sort(),
-  ['Blank Walls', 'Directing your Team', 'Eureka!', 'One Day...', 'Running out of Steam', 'See a Doctor',
-    'Student Complaints', 'Student Fury', 'Unorthodox Methods', 'Unpacking crates', 'Washing Up',
-    'Work with your Equipment', 'Write Up Your Findings']);
+  ['Blank Walls', 'Directing your Team', 'Eureka!', 'Interference', 'One Day...', 'Realisation',
+    'Running out of Steam', 'See a Doctor', 'Sleep', 'Student Complaints', 'Student Fury', 'Unorthodox Methods',
+    'Unpacking crates', 'Washing Up', 'Work with your Equipment', 'Write Up Your Findings']);
 
 check('no laboratory name is in any other feature\'s table, so nothing is badged twice',
   api.LAB_CARDS.flatMap((c) => [c.name].concat(c.opts.map((o) => o.branch))).map(api.normalizeName)
@@ -567,6 +567,81 @@ check('four features can badge one option heading, and each clears only its own'
     return [four, redrawn, after.length, after.includes(api.LAB_BRANCH_CLASS)];
   })(),
   [4, 4, 3, false]);
+
+
+// --- the 2026-11-12 pass: focus cards, the ambition and Fate staff ------------
+//
+// Draw on your Knowledge of Poisons was the card the player reported missing.
+// The second pass diffed the wiki's Category:Cards - University Laboratory
+// (Place) against LAB_CARDS. These are the cards on that list deliberately NOT
+// transcribed, and why -- a test so that a later pass sees the decision rather
+// than re-making it.
+const LAB_LEFT_OUT = {
+  'Direct Your Own Research': 'retired on the wiki',
+  'Draw on your Knowledge of the Correspondence': 'retired on the wiki',
+  'Consider your Aquaria': 'pays Piscine Research, not Laboratory Research; every option needs a creature',
+  'Search your Terraria': 'pays Amphibian Research, not Laboratory Research; every option needs a creature',
+  'The Sound of Wings (Laboratory)': 'its title is already badged by the zee, Nadir and Tracklayers tables',
+};
+check('the cards left out are not in the table',
+  Object.keys(LAB_LEFT_OUT).filter((n) => api.labCardFor(n.replace(/ \((Laboratory|Bag a Legend)\)$/, ''))), []);
+
+check('the card the player reported is there, with all five options',
+  card('Draw on your Knowledge of Poisons').opts.map((o) => o.branch),
+  ['Dose yourself', 'Understand the toxins swimming in your veins', 'Use what you know of the Second City',
+    'Use your Cantigaster Venom in the process of studying', 'Dose somebody else']);
+
+check('the skill S-curves at Kataleptic Toxicology 5 and 7, and the Venom\'s offset of 2',
+  [api.labCompute(opt('Draw on your Knowledge of Poisons', 'Dose yourself').win, { skills: { 'Kataleptic Toxicology': 5 } }),
+    api.labCompute(opt('Draw on your Knowledge of Poisons', 'Dose yourself').win, { skills: { 'Kataleptic Toxicology': 7 } }),
+    api.labCompute(opt('Draw on your Knowledge of Poisons', 'Use your Cantigaster Venom in the process of studying').win,
+      { skills: { 'Kataleptic Toxicology': 7 } })],
+  [15, 20, 22]);
+
+const KT = 'Kataleptic Toxicology';
+check('Poisons with no Wounds: Dose yourself, ▾ for the Venom and the Second City behind items',
+  cardText('Draw on your Knowledge of Poisons', LAB7({ [KT]: 7 })), '20?▾');
+check('Poisons at Wounds 3: Dose yourself is locked, Understand the toxins is open and gives an Epiphany',
+  [cardText('Draw on your Knowledge of Poisons', LAB7({ [KT]: 7, [Q.wounds]: 3 })),
+    api.labStatus(opt('Draw on your Knowledge of Poisons', 'Dose yourself'),
+      card('Draw on your Knowledge of Poisons'), LAB7({ [KT]: 7, [Q.wounds]: 3 }))],
+  ['20✦?▾', 'shut']);
+check('Poisons with the skill unread says so rather than guess it',
+  api.labOptionSpec(opt('Draw on your Knowledge of Poisons', 'Dose yourself'),
+    card('Draw on your Knowledge of Poisons'), LAB7({ [KT]: undefined })).text, 'skill?');
+check('the Wounds lock reads as a ceiling, not "0–2"',
+  api.labOptionSpec(opt('Draw on your Knowledge of Poisons', 'Dose yourself'),
+    card('Draw on your Knowledge of Poisons'), LAB7({ [KT]: 7 })).title.includes('Needs: Wounds below 3'), true);
+
+check('the Correspondence formula: Equipment ÷ 9 × the curve, at Equipment 9, 7 and 4 and ASotC 12',
+  [9, 7, 4].map((el) => api.labCompute({ curve: api.LAB_CORR_CURVE, of: 'A Scholar of the Correspondence', perEl: 9 },
+    { el, skills: { 'A Scholar of the Correspondence': 12 } })), [22, 18, 10]);
+check('...and with the Equipment unread it is a range over Equipment 1–9',
+  api.labOptionValue(opt('Read the Books that Others Cannot', 'Discover what is mandated'),
+    card('Read the Books that Others Cannot'),
+    state({ [Q.equipment]: undefined, 'A Scholar of the Correspondence': 12 })), { lo: 2, hi: 22, elUnknown: true });
+
+check('a requirement the helper cannot read (the project\'s focus) leaves the option in, as unknown',
+  api.labStatus(opt('Rely on April', 'Ask her to help with research into the Red Science'), card('Rely on April'),
+    LAB7()), 'unknown');
+check('so April\'s card is a range across both focuses, not a claim about either',
+  cardText('Rely on April', LAB7({ [Q.eo]: 150 })), '12–18✦▾');
+
+check('the Silk-Clad pairing is told apart by the student\'s level',
+  [1, 5].map((lvl) => api.labDisambiguate(api.labBranchRows(card('Work with your Gifted Student'),
+    'Pair her with the Silk-Clad Expert'), card('Work with your Gifted Student'),
+  LAB7({ [S.gifted]: lvl, [api.LAB_STAFF_Q['the Silk-clad Expert']]: 1, [Q.eo]: 450 })).variant),
+  ['student level 1–4', 'student level 5']);
+
+check('an open-ended project range reads "or more", not "Infinity"',
+  api.labOptionSpec(opt('Rely on Cora Bagley', 'See whether she has anything to offer (Cora)'),
+    card('Rely on Cora Bagley'), LAB7()).title.includes('Experimental Object 1–1000 or 1201 or more'), true);
+
+check('every new staff member\'s reflection pays 5 + Glass Studies Parabolan Research',
+  ['April', 'Mother Superior', 'Cora Bagley', 'Hephaesta', 'the Esurient Smith', 'the Silk-clad Expert',
+    'the Percipient Cricketer', 'the Eldest Daughter', 'the Protester', 'the Classicist']
+    .map((n) => opt('The Reflection of Research', 'Employ the Reflection of ' + n))
+    .filter((o) => !o || o.cur !== 'pr' || o.win.k !== 5 || o.win.glass !== 1).length, 0);
 
 // --- reference tables ------------------------------------------------------
 
