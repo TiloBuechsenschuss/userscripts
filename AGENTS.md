@@ -1854,9 +1854,37 @@ navigation. Two consequences:
   research done that is over a minute old is marked `~`, and a lab card on screen with no reading
   or a stale one books a throttled background refresh, off with the auto toggle.
   **Scope**: the core deck, all five students, the Numismatrix, Lettice, Gebrandt, the Urchin, the
-  Struggling Artist and The Reflection of Research for those staff. Not transcribed: the ambition
-  and Fate-locked experts' cards, the Correspondence / Secret College / Long-Dead Priests cards and
-  project focus cards — most of those options are "(see page)" logistic formulas on the wiki.
+  Struggling Artist and The Reflection of Research for those staff. **Extended 2026-11-12**, after a
+  player reported *Draw on your Knowledge of Poisons* unbadged: a diff of the wiki's
+  *Category:Cards - University Laboratory (Place)* against `LAB_CARDS` found 26 cards missing. The
+  earlier reason for leaving them out ("(see page)" logistic formulas) did not hold up — the
+  option pages carry the S-curve parameters, and the experts' figures are the same linear
+  Equipment formulas as the staff already covered. Added: the five **project focus** cards
+  (`focus` group — Poisons, Red Science, Shapeling Arts, Monsters, nautical knowledge), the
+  **ambition and Fate staff** (April, the Mother Superior, *Papers in the Night*, Cora Bagley,
+  Hephaesta, the Esurient Smith, Mr Spices), their rows on The Reflection of Research plus the
+  Silk-clad Expert, Percipient Cricketer, Eldest Daughter, Protester, Classicist, Ushabti and
+  Priests rows, the two Fate student options (*Pair her with the Silk-Clad Expert*, two versions
+  by student level told apart by `variant`; *Encourage your student to work with the Percipient
+  Cricketer*), the one-project cards *Realisation*, *Interference* and *Sleep* (`project`), the
+  Correspondence / Secret College / Long-Dead Priests cards (`outside`), and *Think up a new
+  experiment* and the two labcoat cards (`misc`). Three mechanisms came with them: `LAB_SKILLS`
+  grew by **Zeefaring, Monstrous Anatomy and A Scholar of the Correspondence**; a curve can carry
+  `perEl` (the Correspondence options' "Equipment ÷ 9 × curve", rounded half to even because the
+  pages do not say); and an option can carry **`unread`** — a requirement this helper cannot read,
+  above all *which focus the project has* (April's and Hephaesta's ordinary options are locked by a
+  focus their specialist option needs). `unread` makes the option `unknown`, so the badge is a
+  range across both rather than a claim about either; focus qualities are never read, because
+  whether Myself shows them is unknown and a missing one would read as 0. `LAB_Q` also reads
+  **Wounds** and **Nightmares** now, for the menace-gated options. **Still left out**, and pinned by
+  name in the test (`LAB_LEFT_OUT`): *Direct Your Own Research* and *Draw on your Knowledge of the
+  Correspondence* (retired), *Consider your Aquaria* and *Search your Terraria* (they pay Piscine /
+  Amphibian Research, a separate currency, and every option needs a specific creature), and *The
+  Sound of Wings (Laboratory)* (its in-game title is already in the zee, Nadir and Tracklayers'
+  tables, and one name may sit in one table). The same pass found the 16 October 2026 patch had
+  dropped the leading article from several item names (*Robe of Mr Cards*, *Kitten-Sized Diamond…*,
+  *Vast Network of Connections…*, *Palatial Holiday Home…*); the lab's `gate` words were updated,
+  other features' tooltips still quote the old names.
   The `university-laboratory` panel opens on your lab (Equipment, workers, top worker level,
   project, research, students, staff, items), what *Circulate a draft of your findings* would pay
   now (`labDraft`) and what your leftovers would collate into (`labCollated`), then the lab cards
@@ -3607,6 +3635,14 @@ Confirmed live by the author:
   a badge against what the game actually paid, especially a student failure — the option pages and
   the guide's Student Table disagree in nine places and the pages were followed. Also unknown:
   whether the Struggling Artist and the Urchin count as level 5 for the team options.
+  **Added 2026-11-12 and not seen in-game either**: whether Myself lists *Zeefaring*, *Monstrous
+  Anatomy*, *A Scholar of the Correspondence*, *Wounds* and *Nightmares* under those names (a
+  mismatch reads as 0: a focus card would show 5 where it should show ~20, and a Wounds-locked option
+  like *Dose yourself* would wrongly look open); the ambition staff's quality names
+  (*Laboratory Services from April*, … *from an Esurient Smith*), taken from wiki unlock links; a
+  *Draw on your Knowledge of Poisons* badge against what *Dose yourself* actually paid at your
+  Kataleptic Toxicology; and what *Discover what is mandated* / *Write to your Secret College for
+  help* paid, since the pages do not say how that Equipment ÷ 9 formula rounds.
 
 - The **Arbor badges** (added 2026-09-14). Nothing about them has been seen in the game. Worth
   reporting, in order: whether a stay really shows **Near Arbor** / **Far Arbor** as an opened
@@ -4572,6 +4608,12 @@ Current tests:
   three greeting states and the deck confirming the lab; `labRatings` end to end on an opened card
   (options badged only inside a lab card, a strict card silent until confirmed); **four** features
   on one `.branch__title`; no name in another table; the reference tables; and the whole panel.
+  The 2026-11-12 block pins the focus cards (the skill curves at Kataleptic Toxicology 5 and 7, the
+  Venom's offset, the Wounds lock in both directions, "skill" when the skill is unread), the
+  Correspondence `perEl` formula at Equipment 9/7/4 and as a range, `unread` making an option
+  `unknown` and April's card a range, the Silk-Clad `variant`s told apart by student level, the
+  open-ended Experimental Object wording, every new Reflection row, and `LAB_LEFT_OUT` — the
+  cards deliberately not transcribed, with the reason for each.
   It passes a `localStorage` stub with auto-refresh off, so no hidden frame or timer is started.
 - `tests/choice-arbor.test.mjs` — asserts `choice-helper.js`'s Arbor feature. The
   transcription row by row (challenges, flat outcomes, the six scaling rows, the options costing no

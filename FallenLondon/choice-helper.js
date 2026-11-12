@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.81
+// @version      1.82
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -194,6 +194,13 @@
  *     Open a card and every option on it is badged in its own right, each tooltip carrying the
  *     requirement, the challenge, every outcome with its formula and your figure, and where the
  *     guide's student table disagrees with the option page, both.
+ *     The project focus cards (Draw on your Knowledge of Poisons, of the Red Science, of the
+ *     Shapeling Arts, of Monsters, and your nautical knowledge) are worked out on the skill each
+ *     one names, read off Myself the same way; with the skill unread the badge says "skill".
+ *     The ambition and Fate-locked staff (April, Cora Bagley, Hephaesta, the Mother Superior, the
+ *     Esurient Smith, Mr Spices) are covered too. Where an option depends on something the script
+ *     cannot read -- most often which focus your project has -- the badge shows the range across
+ *     both possibilities.
  *     Its panel, University Laboratory, shows your Equipment, staff, students, project and what
  *     Circulate a draft of your findings would pay right now, every laboratory card searchable, the
  *     repeatable projects, the equipment ladder, and which experts suit which projects.
@@ -7214,6 +7221,13 @@
   //     gate      a requirement on something special -- an item, a quality
   //               this feature does not read, Fate. Such an option is never
   //               the card's badge.
+  //     unread    [words, ...] -- an ordinary requirement this feature cannot
+  //               read, most often which focus the project has ("no Red
+  //               Science Focus"). The option stays in the ranking but as
+  //               'unknown', so the badge becomes a range across it rather
+  //               than claiming it either way.
+  //     variant   two options with one title and one wiki page (the page
+  //               lists both versions): what tells this one apart.
   //     ch        the challenge in words; rp: Research Preparations lower it.
   //     luck      the odds of success, for a Luck challenge.
   //     win / rare / alt / fail
@@ -7237,6 +7251,8 @@
     disgruntlement: 'Disgruntlement among the Students',
     prestige: 'The Prestige of your Laboratory',
     glass: 'Glass Studies',
+    wounds: 'Wounds',
+    nightmares: 'Nightmares',
   };
 
   const LAB_STUDENTS = [
@@ -7247,19 +7263,40 @@
     { key: 'visionary', name: 'Visionary Student', quality: 'Laboratory Services from a Visionary Student' },
   ];
 
-  // The staff this feature transcribes cards for. The ambition and Fate-locked
-  // experts are not among them: most of their options are "(see page)" on the
-  // wiki, and a badge with half its options missing would rank the wrong one.
+  // The staff whose quality this feature reads, for the requirements and the
+  // panel. The first five were transcribed on 2026-09-14; the ambition and
+  // Fate-locked experts after them on 2026-11-12, once their option pages had
+  // been read and turned out to be the same linear formulas as the rest. The
+  // quality names are the wiki's `Unlocked with` links, not captured in-game.
+  // Mr Spices is left out: his quality is written with quotation marks
+  // ("Laboratory 'Services' from Mr Spices") whose in-game form is not known,
+  // and no requirement here needs it.
   const LAB_STAFF = [
     { name: 'the Numismatrix', quality: 'Laboratory Services from the Numismatrix' },
     { name: 'Lettice, the Mercy', quality: 'Laboratory Services of Lettice the Mercy' },
     { name: 'F.F. Gebrandt', quality: 'Laboratory Services from F.F. Gebrandt' },
     { name: 'a Grubby Urchin', quality: 'Laboratory Services from a Grubby Urchin' },
     { name: 'the Struggling Artist', quality: 'Found Employment for an Old Friend' },
+    { name: 'April', quality: 'Laboratory Services from April' },
+    { name: 'the Mother Superior', quality: 'Laboratory Services from the Mother Superior' },
+    { name: 'Cora Bagley', quality: 'Laboratory Services from Cora Bagley' },
+    { name: 'Hephaesta', quality: 'Laboratory Services from Hephaesta' },
+    { name: 'the Esurient Smith', quality: 'Laboratory Services from an Esurient Smith' },
+    { name: 'the Silk-clad Expert', quality: 'Laboratory Services from the Silk-clad Expert' },
+    { name: 'the Percipient Cricketer', quality: 'Laboratory Services from the Percipient Cricketer' },
+    { name: 'the Eldest Daughter', quality: 'Laboratory Services from the Eldest Daughter' },
+    { name: 'the Protester', quality: 'Laboratory Services from the Protester' },
+    { name: 'the Classicist', quality: 'Laboratory Services from the Classicist' },
   ];
+  const LAB_STAFF_Q = {};
+  for (const s of LAB_STAFF) LAB_STAFF_Q[s.name] = s.quality;
 
-  // The advanced skills Unorthodox Methods scales off.
-  const LAB_SKILLS = ['Artisan of the Red Science', 'Glasswork', 'Shapeling Arts', 'Kataleptic Toxicology'];
+  // The skills an S-curve here runs on: the four advanced skills Unorthodox
+  // Methods scales off, the two more the focus cards use, and A Scholar of the
+  // Correspondence for the Correspondence cards. None of the last three has
+  // been seen on a Myself capture yet -- see AGENTS.md's "Not verified" list.
+  const LAB_SKILLS = ['Artisan of the Red Science', 'Glasswork', 'Shapeling Arts', 'Kataleptic Toxicology',
+    'Zeefaring', 'Monstrous Anatomy', 'A Scholar of the Correspondence'];
 
   const LAB_QUALITIES = Object.keys(LAB_Q).map(function (k) { return LAB_Q[k]; })
     .concat(LAB_STUDENTS.map(function (s) { return s.quality; }))
@@ -7283,9 +7320,11 @@
   //       k + el × Equipment + glass × Glass Studies + student × the card's
   //       student level + workers × Number of Workers + ideas × Unwise Ideas.
   //       `round` is 'up' or 'down' where the page says so.
-  //   { curve: { height, k, mid, y }, of }
+  //   { curve: { height, k, mid, y }, of, perEl }
   //       the wiki's SCurveTable: y + height / (1 + e^(−k × (x − mid))), on
-  //       Equipment (`of: 'el'`) or on an advanced skill.
+  //       Equipment (`of: 'el'`) or on a skill in LAB_SKILLS. With `perEl`,
+  //       the curve is multiplied by Equipment ÷ perEl before rounding (the
+  //       Correspondence options; their pages do not say how they round).
   //   { team, k }
   //       (k + team × Equipment) × √Workers × highest worker level.
   //   { draft: true }
@@ -7305,6 +7344,17 @@
   const LAB_BRIEF_CURVE = { height: 42, k: 0.4, mid: 7, y: -1 };
   const LAB_SKILL_WIN = { height: 35, k: 0.3, mid: 6, y: 0 };
   const LAB_SKILL_FAIL = { height: 20, k: 0.3, mid: 7, y: 0 };
+  // The Red Science focus card's failures with an item in hand.
+  const LAB_SKILL_FAIL_LOW = { height: 16.5, k: 0.4, mid: 6, y: 0 };
+  // The Correspondence pages' "Eq / 9 × [5 + 35 / (1 + e^(−½ (ASotC − 12)))]":
+  // this curve on A Scholar of the Correspondence, scaled by Equipment ÷ 9
+  // (`perEl: 9` on the formula).
+  const LAB_CORR_CURVE = { height: 35, k: 0.5, mid: 12, y: 5 };
+  const LAB_ASOTC = 'A Scholar of the Correspondence';
+
+  function labSkill(skill, curve) {
+    return { curve: curve || LAB_SKILL_WIN, of: skill };
+  }
 
   const LAB_UE = 'an Unavoidable Epiphany';
 
@@ -7394,13 +7444,13 @@
           note: 'Alternative success chance is 30%.' },
         { branch: 'Rely on illicit contacts', gate: 'Connected: The Widow 5', ch: 'Shadowy 200',
           win: labLin(-8, 4), failAlso: 'Suspicion +1–2 CP, and no research' },
-        { branch: 'Demand a delivery', gate: 'The Robe of Mr Cards', win: labLin(12, 2),
+        { branch: 'Demand a delivery', gate: 'Robe of Mr Cards', win: labLin(12, 2),
           winAlso: 'Unexpected Result +1' },
         { branch: 'Allow your possessions to propagate on your own',
-          gate: 'A Kitten-Sized Diamond, Liberated from the Mountain', win: labLin(12, 2),
+          gate: 'Kitten-Sized Diamond, Liberated from the Mountain', win: labLin(12, 2),
           winAlso: 'Unexpected Result +1' },
         { branch: 'Appropriate whatever you need',
-          gate: 'A Vast Network of Connections Wherever the Bazaar\'s Influence can be Found',
+          gate: 'Vast Network of Connections Wherever the Bazaar\'s Influence can be Found',
           win: labLin(12, 2), winAlso: 'Unexpected Result +1' },
       ],
     },
@@ -7484,7 +7534,7 @@
             + 'not give the odds of the alternative success, which pays the failure\'s figure, so '
             + 'the true expectation is somewhat lower.' },
         { branch: 'Brew another pot of tea', win: labLin(5, 2), winAlso: 'Research Preparations +10' },
-        { branch: 'Take an extended sabbatical', gate: 'A Palatial Holiday Home in the Arctic Circle',
+        { branch: 'Take an extended sabbatical', gate: 'Palatial Holiday Home in the Arctic Circle',
           win: labLin(18, 3), epiphany: true,
           winAlso: 'Research Preparations +10, Wounds −2 CP, Nightmares −2 CP' },
       ],
@@ -7662,7 +7712,6 @@
     {
       name: 'Work with your Gifted Student', group: 'students', freq: 'Standard',
       student: LAB_STUDENTS[2].quality, needs: 'a Gifted Student',
-      note: 'Pair her with the Silk-Clad Expert is Fate-locked and not transcribed.',
       opts: [
         { branch: 'Shepherd your student through some research', page: 'Shepherd your student through some research (Gifted)',
           req: [[LAB_STUDENTS[2].quality, 1, 2]], ch: 'Watchful 210', rp: true, win: labLin(2, 1),
@@ -7682,12 +7731,20 @@
           req: [[LAB_STUDENTS[2].quality, 5, 5]], gate: LAB_UE, consumes: LAB_UE,
           ch: 'Watchful 220', rp: true, win: labLin(18, 3), rare: labLin(18, 3),
           rareAlso: 'Unexpected Result +1, Disgruntlement +1 CP', fail: labLin(8, 2) },
+        // One page, two versions by the student's level (the page says so).
+        { branch: 'Pair her with the Silk-Clad Expert', variant: 'student level 1–4',
+          req: [[LAB_STAFF_Q['the Silk-clad Expert'], 1], [LAB_STUDENTS[2].quality, 1, 4]], eo: [[401, 500]],
+          ch: 'Persuasive 180', win: labLin(12, 1), winAlso: 'the student goes up a level',
+          fail: labLin(4, 1.5) },
+        { branch: 'Pair her with the Silk-Clad Expert', variant: 'student level 5',
+          req: [[LAB_STAFF_Q['the Silk-clad Expert'], 1], [LAB_STUDENTS[2].quality, 5, 5]], eo: [[401, 500]],
+          ch: 'Persuasive 180', win: labLin(12, 2), winAlso: 'Unlikely Connection +1, Unexpected Result +1',
+          fail: labLin(4, 1.5) },
       ],
     },
     {
       name: 'Work with your Profound Student', group: 'students', freq: 'Standard',
       student: LAB_STUDENTS[3].quality, needs: 'a Profound Student',
-      note: 'Encourage your student to work with the Percipient Cricketer is Fate-locked and not transcribed.',
       opts: [
         { branch: 'Shepherd your student through some research', page: 'Shepherd your student through some research (Profound)',
           req: [[LAB_STUDENTS[3].quality, 1, 2]], ch: 'Watchful 210', rp: true, win: labLin(4, 1),
@@ -7705,6 +7762,12 @@
           req: [[LAB_STUDENTS[3].quality, 5, 5]], gate: LAB_UE, consumes: LAB_UE,
           ch: 'Watchful 220', rp: true, win: labLin(18, 3), rare: labLin(18, 3),
           rareAlso: 'Unwise Idea +1, Nightmares +1 CP, Disgruntlement +1 CP', fail: labLin(8, 2) },
+        { branch: 'Encourage your student to work with the Percipient Cricketer',
+          req: [[LAB_STAFF_Q['the Percipient Cricketer'], 1], [LAB_STUDENTS[3].quality, 5, 5]],
+          ch: 'Watchful 250 and A Player of Chess 3 (narrow)', rp: true, win: labLin(12, 2),
+          winAlso: 'Unexpected Result +1', rareAlso: 'Unwise Idea +1 and some Nightmares; the page does not '
+            + 'record the research', fail: labLin(6, 1.75),
+          note: 'The page writes the success figure with a question mark.' },
       ],
     },
     {
@@ -7841,11 +7904,134 @@
       ],
     },
 
+    // --- ambition and Fate-locked staff (2026-11-12) -----------------------
+    {
+      name: 'Rely on April', group: 'staff', freq: 'Standard', needs: 'April in the lab',
+      opts: [
+        { branch: 'Ask her to help with ordinary research', page: 'Ask her to help with ordinary research (April)',
+          unread: ['no Red Science Focus'], win: labLin(0, 5 / 3) },
+        { branch: 'Ask her to help with research into the Red Science', unread: ['a Red Science Focus'],
+          win: labLin(4, 2), epiphany: true },
+        { branch: 'Apply her particular expertise in a novel way',
+          page: 'Apply her particular expertise in a novel way (April)', unread: ['no Red Science Focus'],
+          gate: 'an Unlikely Connection', consumes: 'an Unlikely Connection', ch: 'Watchful 220', rp: true,
+          win: labLin(7, 2), winAlso: 'Unexpected Result +1', fail: labLin(5, 2) },
+        { branch: 'Have her supervise the Profound Student', req: [[LAB_STUDENTS[3].quality, 5]],
+          unread: ['a Red Science Focus'], ch: 'Watchful 220', rp: true, win: labLin(12, 2), epiphany: true,
+          winAlso: 'Unexpected Result +1', fail: labLin(8, 2) },
+        { branch: 'Have her and Lettice work together', req: [[LAB_STAFF[1].quality, 1]], eo: [[101, 200]],
+          ch: 'Watchful 220', rp: true, win: labLin(12, 2), fail: labLin(8, 2) },
+        { branch: 'Allow her to see to your wounds', req: [[LAB_Q.wounds, 1]], label: 'Wounds −2',
+          winAlso: 'Wounds −2 CP' },
+        { branch: 'Ask her about Perfumed Gunpowder', gate: 'Perfumed Gunpowder', label: 'Clues ×150',
+          winAlso: 'Cryptic Clue +150' },
+        { branch: 'Ask her to teach you what she knows about the Red Science', gate: 'Ambition: Bag a Legend! 1000',
+          ch: 'Watchful 200', label: 'Red Science +1', winAlso: 'Artisan of the Red Science +1 CP; the card stays',
+          failAlso: 'Nightmares +2 CP; the card stays' },
+        { branch: 'Seek her special expertise', eo: [[10, 19]], label: 'Weapons +10',
+          winAlso: 'April\'s Weapons Research +10' },
+        { branch: 'Talk to her about the Khans\' workshop', gate: 'Ambition: Bag a Legend! 300–400',
+          label: 'Clues ×150', winAlso: 'Cryptic Clue +150' },
+      ],
+    },
+    {
+      name: 'Rely on Mother Superior', group: 'staff', freq: 'Standard',
+      needs: 'the Mother Superior in the lab',
+      opts: [
+        { branch: 'Ask her to lend her special expertise', eo: [[10, 19]], label: 'Theology +10',
+          winAlso: 'Mother Superior\'s Semi-Theological Research +10' },
+        { branch: 'Ask her to help with ordinary research', page: 'Ask her to help with ordinary research (Mother Superior)',
+          win: { k: 3 } },
+        { branch: 'Let her guard your sleep', req: [[LAB_Q.nightmares, 1]], label: 'Nightmares −2',
+          winAlso: 'Nightmares −2 CP' },
+      ],
+    },
+    {
+      name: 'Papers in the Night', group: 'staff', freq: 'Standard',
+      needs: 'both April and the Mother Superior in the lab',
+      opts: [
+        { branch: 'Ask the Mother Superior', label: 'story', winAlso: 'nothing but the story' },
+        { branch: 'Ask April', label: 'story', winAlso: 'nothing but the story' },
+        { branch: 'Ask nothing, and focus on your research instead', win: labLin(0, 4),
+          winAlso: 'Nightmares +1 CP' },
+      ],
+    },
+    {
+      name: 'Rely on Cora Bagley', group: 'staff', freq: 'Standard', needs: 'Cora Bagley in the lab',
+      opts: [
+        { branch: 'See whether she has anything to offer', page: 'See whether she has anything to offer (Cora)',
+          eo: [[1, 1000], [1201, Infinity]], win: labLin(0, 5 / 3) },
+        { branch: 'Rely on her knowledge of numbers', eo: [[1001, 1200]], win: labLin(8, 1.5), epiphany: true },
+        { branch: 'Have Cora supervise your Visionary Student', req: [[LAB_STUDENTS[4].quality, 5]],
+          eo: [[1001, 1200]], ch: 'Watchful 220', rp: true, win: labLin(12, 2), winAlso: 'Unexpected Result +1',
+          fail: labLin(10, 2) },
+        { branch: 'Apply her particular expertise in a novel way',
+          page: 'Apply her particular expertise in a novel way (Cora)', eo: [[1, 1000], [1201, Infinity]],
+          gate: 'an Unlikely Connection', consumes: 'an Unlikely Connection', ch: 'Watchful 220', rp: true,
+          win: labLin(7, 2), winAlso: 'Unexpected Result +1', fail: labLin(5, 2) },
+      ],
+    },
+    {
+      name: 'Rely on Hephaesta', group: 'staff', freq: 'Standard', needs: 'Hephaesta in the lab',
+      note: 'The wiki: Hephaesta\'s own expertise is Experimental Object 201–300 and exactly 820.',
+      opts: [
+        { branch: 'Seek her research opinion', eo: [[1, 200], [301, 819], [821, Infinity]],
+          unread: ['no Nautical Focus'], win: labLin(0, 5 / 3) },
+        { branch: 'Apply her particular expertise in a novel way',
+          page: 'Apply her particular expertise in a novel way (Hephaesta)', eo: [[1, 200], [301, 819], [821, Infinity]],
+          gate: 'an Unlikely Connection', consumes: 'an Unlikely Connection', ch: 'Watchful 220', rp: true,
+          win: labLin(7, 2), winAlso: 'Unexpected Result +1', fail: labLin(5, 2) },
+        { branch: 'Ask for her help with your Nightmares', req: [[LAB_Q.nightmares, 1]], label: 'Nightmares −2',
+          winAlso: 'Nightmares −2 CP' },
+        { branch: 'Seek her insight on maps', eo: [[201, 300]], unread: ['no Nautical Focus'],
+          win: labLin(8, 1.5), epiphany: true },
+        { branch: 'Seek her insight on nautical matters', unread: ['a Nautical Focus'], win: labLin(4, 2),
+          epiphany: true },
+        { branch: 'Seek her insight on charting of geology and bone strata', eo: [[820, 820]], win: labLin(4, 2),
+          epiphany: true },
+        { branch: 'Have Hephaesta supervise your Visionary Student', req: [[LAB_STUDENTS[4].quality, 5]],
+          eo: [[201, 300], [820, 820]], ch: 'Watchful 220', rp: true, win: labLin(12, 2),
+          winAlso: 'Unexpected Result +1', alt: labLin(12, 2), altAlso: 'Unexpected Result +1, Disgruntlement +1 CP',
+          fail: labLin(10, 2), note: 'The page gives no chance for the second success.' },
+      ],
+    },
+    {
+      name: 'Rely on your Esurient Smith', group: 'staff', freq: 'Standard',
+      needs: 'the Esurient Smith in the lab',
+      note: 'The pages give "400+" for the ordinary options and "301–400" for metals, so at exactly 400 both '
+        + 'are listed here.',
+      opts: [
+        { branch: 'Show him your bird collection', gate: 'Seven-Throated Warbler ×11', label: 'Nightmares −4',
+          winAlso: 'Nightmares −4 CP' },
+        { branch: 'See whether he has anything to offer', eo: [[1, 100], [201, 300], [400, Infinity]],
+          win: labLin(0, 5 / 3) },
+        { branch: 'Apply his particular expertise in a novel way', eo: [[1, 100], [201, 300], [400, Infinity]],
+          gate: 'an Unlikely Connection', consumes: 'an Unlikely Connection', ch: 'Watchful 220', rp: true,
+          win: labLin(7, 2), winAlso: 'Unexpected Result +1', fail: labLin(5, 2) },
+        { branch: 'Rely on his knowledge of metals and devices', eo: [[301, 400]], win: labLin(8, 1.5), epiphany: true },
+        { branch: 'Rely on his knowledge of weapons', eo: [[101, 200]], win: labLin(8, 1.5), epiphany: true },
+        { branch: 'Have him collaborate with Lettice', req: [[LAB_STAFF[1].quality, 1]], eo: [[101, 200]],
+          ch: 'Watchful 220', rp: true, win: labLin(12, 2), epiphany: true, winAlso: 'Unexpected Result +1',
+          fail: labLin(8, 2) },
+        { branch: 'Have him supervise the Profound Student', req: [[LAB_STUDENTS[3].quality, 5]], eo: [[301, 400]],
+          ch: 'Watchful 220', rp: true, win: labLin(12, 2), winAlso: 'Unexpected Result +1', fail: labLin(8, 2) },
+      ],
+    },
+    {
+      name: 'Mr Spices Relies on You', group: 'staff', freq: 'Standard',
+      needs: 'Mr Spices in the lab',
+      opts: [
+        { branch: 'Accept Mr Spices\' advice on the device\'s mechanics', ch: 'Watchful 220', rp: true,
+          win: labSkill('Artisan of the Red Science'), fail: labSkill('Artisan of the Red Science', LAB_SKILL_FAIL) },
+        { branch: 'Listen to Mr Spices\' wisdom on the subject of metallurgy', ch: 'Watchful 220', rp: true,
+          win: labSkill('Kataleptic Toxicology'), fail: labSkill('Kataleptic Toxicology', LAB_SKILL_FAIL) },
+      ],
+    },
+
     // === Parabolan research ===============================================
     {
       name: 'The Reflection of Research', group: 'parabola', freq: 'Standard',
       needs: 'Parabolan Methods, Glass Studies and 2 workers',
-      note: 'The ambition and Fate-locked staff have options here too, and they are not transcribed.',
       opts: [
         { branch: 'Employ the Reflection of a Future Dean', req: [[LAB_STUDENTS[0].quality, 1]], cur: 'pr', win: { k: 4 } },
         { branch: 'Employ the Reflection of a Potential Librarian', req: [[LAB_STUDENTS[1].quality, 1]], cur: 'pr', win: { k: 1, glass: 1 } },
@@ -7858,8 +8044,244 @@
         { branch: 'Employ the Reflection of Lettice, the Mercy', req: [[LAB_STAFF[1].quality, 1]], cur: 'pr', win: { range: [1, 8] } },
         { branch: 'Employ the Reflection of the Numismatrix', req: [[LAB_STAFF[0].quality, 1]], cur: 'pr', win: { k: 5, glass: 1 } },
         { branch: 'Employ the Reflection of F.F. Gebrandt', req: [[LAB_STAFF[2].quality, 1]], cur: 'pr', win: { k: 2, glass: 1 } },
+        { branch: 'Consult your Antediluvian Ushabti', gate: 'an Antediluvian Ushabti', ch: 'Antediluvian Ushabti 5',
+          cur: 'pr', win: { k: 3, glass: 1 }, winAlso: 'Expertise of the Second City +5',
+          failAlso: 'nothing recorded' },
+        { branch: 'Consult the Priests of the Red Bird', gate: 'The Long-Dead Priests of the Red Bird', cur: 'pr',
+          win: { k: 3, glass: 1 }, winAlso: 'Expertise of the Third City +5',
+          note: 'The page writes the figure with a question mark.' },
+        { branch: 'Employ the Reflection of April', req: [[LAB_STAFF_Q.April, 1]], cur: 'pr', win: { k: 5, glass: 1 } },
+        { branch: 'Employ the Reflection of Mother Superior', req: [[LAB_STAFF_Q['the Mother Superior'], 1]], cur: 'pr',
+          win: { k: 5, glass: 1 } },
+        { branch: 'Employ the Reflection of Cora Bagley', req: [[LAB_STAFF_Q['Cora Bagley'], 1]], cur: 'pr',
+          win: { k: 5, glass: 1 } },
+        { branch: 'Employ the Reflection of Hephaesta', req: [[LAB_STAFF_Q.Hephaesta, 1]],
+          unread: ['no Hephaesta\'s Obsession'], cur: 'pr', win: { k: 5, glass: 1 } },
+        { branch: 'Employ the Reflection of the Esurient Smith', req: [[LAB_STAFF_Q['the Esurient Smith'], 1]], cur: 'pr',
+          win: { k: 5, glass: 1 } },
+        { branch: 'Employ the Reflection of the Silk-clad Expert', req: [[LAB_STAFF_Q['the Silk-clad Expert'], 1]],
+          cur: 'pr', win: { k: 5, glass: 1 } },
+        { branch: 'Employ the Reflection of the Percipient Cricketer',
+          req: [[LAB_STAFF_Q['the Percipient Cricketer'], 1]], cur: 'pr', win: { k: 5, glass: 1 } },
+        { branch: 'Employ the Reflection of the Eldest Daughter', req: [[LAB_STAFF_Q['the Eldest Daughter'], 1]],
+          cur: 'pr', win: { k: 5, glass: 1 } },
+        { branch: 'Employ the Reflection of the Protester', req: [[LAB_STAFF_Q['the Protester'], 1]], cur: 'pr',
+          win: { k: 5, glass: 1 } },
+        { branch: 'Employ the Reflection of the Classicist', req: [[LAB_STAFF_Q['the Classicist'], 1]], cur: 'pr',
+          win: { k: 5, glass: 1 } },
         { branch: 'No more of this', page: 'No more of this (The Reflection of Research)', label: 'discard',
           winAlso: 'removes this card for the rest of the project' },
+      ],
+    },
+
+    // === project focus: research on one of your skills (2026-11-12) ========
+    //
+    // A project's focus deals one of these. Nearly every option is an S-curve on
+    // the skill the card names -- the same two curves as Unorthodox Methods,
+    // except where a page gives others -- so with the skill unread the badge
+    // says "skill" rather than guess it.
+    {
+      name: 'Draw on your Knowledge of Poisons', group: 'focus', freq: 'Standard',
+      needs: 'a Toxicological Focus project and Kataleptic Toxicology Studies',
+      opts: [
+        { branch: 'Dose yourself', req: [[LAB_Q.wounds, 0, 2]], ch: 'Kataleptic Toxicology 5 (narrow)',
+          win: labSkill('Kataleptic Toxicology'), winAlso: 'Wounds +4 CP',
+          fail: labSkill('Kataleptic Toxicology', LAB_SKILL_FAIL), failAlso: 'Wounds +1 CP' },
+        { branch: 'Understand the toxins swimming in your veins', req: [[LAB_Q.wounds, 3]],
+          ch: 'Kataleptic Toxicology 3 (narrow)', win: labSkill('Kataleptic Toxicology'), epiphany: true,
+          winAlso: 'Wounds −2 CP', fail: labSkill('Kataleptic Toxicology', LAB_SKILL_FAIL),
+          failAlso: 'Wounds +2 CP' },
+        { branch: 'Use what you know of the Second City', gate: 'Expertise of the Second City 30',
+          consumes: '30 Expertise of the Second City', win: { k: 25 } },
+        { branch: 'Use your Cantigaster Venom in the process of studying', req: [[LAB_Q.wounds, 0, 2]],
+          gate: 'a Vial of Cantigaster Venom', ch: 'Kataleptic Toxicology 6 (narrow)',
+          win: labSkill('Kataleptic Toxicology', { height: 35, k: 0.3, mid: 6, y: 2 }), winAlso: 'Wounds +4 CP',
+          fail: labSkill('Kataleptic Toxicology', LAB_SKILL_FAIL),
+          failAlso: 'Wounds +2 CP; the page marks this failure figure tentative',
+          note: 'The page lists no loss of the Venom.' },
+        { branch: 'Dose somebody else', gate: 'a Telsonic Signet', ch: 'Kataleptic Toxicology 3 (narrow)',
+          win: labSkill('Kataleptic Toxicology'), winAlso: 'Scandal +2 CP',
+          fail: labSkill('Kataleptic Toxicology', LAB_SKILL_FAIL), failAlso: 'Scandal +3 CP' },
+      ],
+    },
+    {
+      name: 'Draw on your Knowledge of the Red Science', group: 'focus', freq: 'Infrequent',
+      needs: 'a Red Science Focus project and Artisan Studies',
+      opts: [
+        { branch: 'Formulate a theory', unread: ['Artisan Studies exactly 1'],
+          ch: 'Artisan of the Red Science 4 (narrow)', win: labSkill('Artisan of the Red Science'),
+          rare: labSkill('Artisan of the Red Science'), rareAlso: 'Unwise Idea +1, Nightmares +4 CP',
+          fail: labLin(0, 1), failAlso: 'Nightmares +4 CP', note: 'Rare success chance is 5%.' },
+        { branch: 'Resolve a paradox', unread: ['Artisan Studies 2'], ch: 'Artisan of the Red Science 5 (narrow)',
+          win: labSkill('Artisan of the Red Science'), rare: labSkill('Artisan of the Red Science'),
+          rareAlso: 'Unwise Idea +1, Nightmares +6 CP',
+          fail: labSkill('Artisan of the Red Science', LAB_SKILL_FAIL), failAlso: 'Nightmares +6 CP',
+          note: 'Rare success chance is 5%.' },
+        { branch: 'Contemplate your Element of Dawn', gate: 'an Element of Dawn',
+          ch: 'Watchful 230 and Artisan of the Red Science 5 (narrow)', rp: true,
+          win: labSkill('Artisan of the Red Science'), rare: labSkill('Artisan of the Red Science'),
+          rareAlso: 'Nightmares +7 CP', fail: labSkill('Artisan of the Red Science', LAB_SKILL_FAIL_LOW) },
+        { branch: 'Contemplate your Impossible Theorem', gate: 'an Impossible Theorem (not used up)',
+          ch: 'Artisan of the Red Science 3 (narrow)', win: labSkill('Artisan of the Red Science'),
+          rare: labSkill('Artisan of the Red Science'), rareAlso: 'Unwise Idea +1, Nightmares +7 CP',
+          fail: labSkill('Artisan of the Red Science', LAB_SKILL_FAIL_LOW) },
+        { branch: 'Study the Blueprint for a Seal of Red Science', gate: 'a Blueprint for a Seal of Red Science (Fate)',
+          ch: 'Watchful 230 and Artisan of the Red Science 5 (narrow)', rp: true,
+          win: labSkill('Artisan of the Red Science'), fail: labSkill('Artisan of the Red Science', LAB_SKILL_FAIL_LOW) },
+        { branch: 'Recall the Blueprint for a Seal of Red Science',
+          gate: 'Confronting the Lighthearted Polymath (Fate)',
+          ch: 'Watchful 230 and Artisan of the Red Science 5 (narrow)', rp: true,
+          win: labSkill('Artisan of the Red Science'), fail: labSkill('Artisan of the Red Science', LAB_SKILL_FAIL_LOW) },
+        { branch: 'Consult with the Smouldering Lexicographer', gate: 'the Smouldering Lexicographer (Fate)',
+          ch: 'Watchful 220 and Artisan of the Red Science 5 (narrow)', rp: true,
+          win: labSkill('Artisan of the Red Science'), fail: labSkill('Artisan of the Red Science', LAB_SKILL_FAIL_LOW) },
+        { branch: 'Perform a trial in the vicinity of a statistical distortion', gate: 'a Sullier of Probabilities (Fate)',
+          ch: 'Watchful 300, each point of Artisan of the Red Science adding 15', rp: true,
+          win: labSkill('Artisan of the Red Science'), fail: labSkill('Artisan of the Red Science', LAB_SKILL_FAIL_LOW) },
+      ],
+    },
+    {
+      name: 'Draw on your Knowledge of the Shapeling Arts', group: 'focus', freq: 'Standard',
+      needs: 'a Shapeling Focus project and Shapeling Studies',
+      opts: [
+        { branch: 'Meditate on your present shape', ch: 'Watchful 220 and Shapeling Arts 5 (narrow)', rp: true,
+          win: labSkill('Shapeling Arts'), winAlso: 'Watchful up and Dangerous down by the same 30–126 CP',
+          fail: labSkill('Shapeling Arts', LAB_SKILL_FAIL), failAlso: 'Dangerous down by some CP (53 recorded)',
+          note: 'Research Preparations lower only the Watchful half.' },
+        { branch: 'Explore a divergent form', ch: 'Dangerous 180 and Shapeling Arts 5 (narrow)',
+          win: labSkill('Shapeling Arts'), winAlso: 'Dangerous up and Watchful down by the same 33–106 CP',
+          fail: labSkill('Shapeling Arts', LAB_SKILL_FAIL),
+          failAlso: 'Dangerous up and Watchful down by some CP (22 recorded)',
+          note: 'Research Preparations do not lower this one.' },
+        { branch: 'Extract regretful shapes from a Fluke-Core', gate: 'a Fluke-Core',
+          ch: 'Kataleptic Toxicology 3 and Shapeling Arts 4 (narrow)', win: labSkill('Shapeling Arts'),
+          epiphany: true, fail: labSkill('Shapeling Arts', LAB_SKILL_FAIL), failAlso: 'Nightmares +2 CP' },
+      ],
+    },
+    {
+      name: 'Draw on your Knowledge of Monsters', group: 'focus', freq: 'Infrequent',
+      needs: 'a Monstrous Focus project and Monstrous Studies',
+      opts: [
+        { branch: 'Apply your understanding of monsters', page: 'Apply your understanding of monsters 3',
+          ch: 'Monstrous Anatomy 5 (narrow)', win: labSkill('Monstrous Anatomy'),
+          fail: labSkill('Monstrous Anatomy', { height: 17.5, k: 0.3, mid: 6, y: 0 }), failAlso: 'Wounds +2 CP' },
+        { branch: 'Meditate on what it means to be monstrous', gate: 'a Notched Bone Harpoon',
+          win: labSkill('Monstrous Anatomy'), epiphany: true,
+          winAlso: 'Ruthless, Steadfast and Heartless +1 CP each (to 4), Dangerous +5 CP' },
+        { branch: 'Feed your Acute Squirrel a sample', gate: 'an Acute Squirrel (not used up)',
+          ch: 'Kataleptic Toxicology 5 (narrow)', win: labSkill('Kataleptic Toxicology'),
+          fail: labSkill('Kataleptic Toxicology', { height: 40, k: 0.3, mid: 7, y: 0 }), failAlso: 'Wounds +2 CP',
+          note: 'The page\'s failure curve is taller than its success curve; transcribed as given.' },
+      ],
+    },
+    {
+      name: 'Draw on your nautical knowledge', group: 'focus', freq: 'Standard',
+      needs: 'a Nautical Focus project and Zeefaring',
+      opts: [
+        { branch: 'Examine your past charts and logs', ch: 'Zeefaring 5 (narrow)', win: labSkill('Zeefaring'),
+          fail: labSkill('Zeefaring', LAB_SKILL_FAIL) },
+        { branch: 'Get help from Hephaesta', req: [[LAB_STAFF_Q.Hephaesta, 1]], ch: 'Zeefaring 4 (narrow)',
+          win: labLin(12, 2), epiphany: true, winAlso: 'Unexpected Result +1', fail: labLin(5, 2) },
+        { branch: 'Recall a recent zee-voyage', req: [['Zeefaring', 5]], gate: '5 Zee Legs',
+          consumes: '5 Zee Legs', ch: 'Zeefaring 5 (narrow)', win: labSkill('Zeefaring'), epiphany: true,
+          fail: labSkill('Zeefaring', LAB_SKILL_FAIL),
+          note: 'The page asks for base Zeefaring 5; the Myself reading may include your equipment.' },
+      ],
+    },
+
+    // === one project only ==================================================
+    {
+      name: 'Realisation', group: 'project', freq: 'Standard', strict: true,
+      needs: 'Experimental Object 210 (Find a Route to Parabola)',
+      opts: [
+        { branch: 'Provide gifts to the powers that decide such matters', gate: 'Memory of Distant Shores 5',
+          consumes: '5 Memories of Distant Shores', win: { k: 10 } },
+        { branch: 'Apply what you have heard', unread: ['no Set of Cosmogone Spectacles'], ch: 'Glasswork 5 (narrow)',
+          win: { k: 5 }, winAlso: 'Glasswork +1 CP (once)', failAlso: 'Glasswork +1 CP (once), Nightmares +2 CP, '
+            + 'and no research' },
+        { branch: 'Consult with your Parabolan Kitten', gate: 'a Parabolan Kitten', win: { k: 5 } },
+        { branch: 'Research what you already know', gate: 'a Set of Cosmogone Spectacles', win: { k: 5 } },
+        { branch: 'Consult with your Midnight Matriarch', gate: 'a Midnight Matriarch', win: { k: 5 } },
+      ],
+    },
+    {
+      name: 'Interference', group: 'project', freq: 'Standard', strict: true,
+      needs: 'Experimental Object 470 (Test Spices\' drug on various animals) and a Storm-bird',
+      opts: [
+        { branch: 'Observe', page: 'Observe (the Storm-bird)', win: { range: [16, 25] }, winAlso: 'Wounds +1–3 CP' },
+      ],
+    },
+    {
+      name: 'Sleep', group: 'project', freq: 'Standard', strict: true,
+      needs: 'a project under way and Ambition: Bag a Legend! 160–300. The wiki titles it Sleep (Bag a Legend)',
+      opts: [
+        { branch: 'See your opponent', win: { k: 10 }, winAlso: 'Nightmares +3 CP' },
+      ],
+    },
+
+    // === from outside the lab ==============================================
+    {
+      name: 'Read the Books that Others Cannot', group: 'outside', freq: 'Infrequent',
+      needs: 'a Pot of Violant Ink',
+      opts: [
+        { branch: 'Discover what is mandated', ch: 'Watchful 175', rp: true,
+          win: { curve: LAB_CORR_CURVE, of: LAB_ASOTC, perEl: 9 }, rare: { curve: LAB_CORR_CURVE, of: LAB_ASOTC, perEl: 9 },
+          rareAlso: 'Unwise Idea +1', fail: { curve: LAB_CORR_CURVE, of: LAB_ASOTC, perEl: 9 },
+          failAlso: 'Wounds +2 CP', note: 'Rare success chance is 5%. Every outcome pays the same research.' },
+        { branch: 'Pursue truths through the Red Science', req: [[LAB_ASOTC, 5]],
+          ch: 'Watchful 150 and Artisan of the Red Science 5 (narrow)', rp: true,
+          win: labSkill('Artisan of the Red Science'), rare: labSkill('Artisan of the Red Science'),
+          rareAlso: 'A Scholar of the Correspondence +1 CP, Wounds +2–3 CP',
+          fail: labSkill('Artisan of the Red Science', LAB_SKILL_FAIL),
+          failAlso: 'Wounds +1 CP; one failure in five also A Scholar of the Correspondence +1 CP',
+          note: 'Rare success chance is 20%. Research Preparations lower only the Watchful half.' },
+      ],
+    },
+    {
+      name: 'Involve Your Secret College', group: 'outside', freq: 'Very Infrequent',
+      needs: 'a Secret College',
+      opts: [
+        { branch: 'Write to your Secret College for help',
+          ch: 'Watchful 175 (the page also lists A Scholar of the Correspondence 5)', rp: true,
+          win: { curve: LAB_CORR_CURVE, of: LAB_ASOTC, perEl: 9 }, winAlso: 'Unexpected Result +1',
+          rare: { curve: LAB_CORR_CURVE, of: LAB_ASOTC, perEl: 9 }, rareAlso: 'Unwise Idea +1',
+          fail: labLin(8, 1), failAlso: 'Nightmares +2 CP' },
+        { branch: 'Broaden your research', ch: 'Watchful 300', rp: true, win: { curve: LAB_BRIEF_CURVE, of: 'el' },
+          epiphany: true, winAlso: 'Unlikely Connection +3', rare: { curve: LAB_BRIEF_CURVE, of: 'el' },
+          rareAlso: 'Unwise Idea +1', fail: labLin(4, 1), failAlso: 'Unlikely Connection +2' },
+      ],
+    },
+    {
+      name: 'Invoke the Long-Dead Priests', group: 'outside', freq: 'Infrequent',
+      needs: 'Nightmares 2 and the Long-Dead Priests of the Red Bird',
+      opts: [
+        { branch: 'Phobophagic rites', ch: 'Watchful 145', win: labSkill('Glasswork'),
+          winAlso: 'removes all your Nightmares',
+          failAlso: 'Nightmares +2 CP; the page records 15 research at Equipment 7 and Glasswork 7, with no formula' },
+      ],
+    },
+    // === odds and ends =====================================================
+    {
+      name: 'Think up a new experiment', group: 'misc', freq: 'Standard',
+      needs: 'no project in hand. No other lab card is dealt until you begin one',
+      opts: [
+        { branch: 'Investigate the possibilities', label: 'new project',
+          winAlso: 'takes no action; opens Begin a Scientific Investigation' },
+      ],
+    },
+    {
+      name: 'Preparing for further experimentation', group: 'misc', freq: 'Very Infrequent',
+      needs: 'Prestige 3, Equipment 2 and a project, once',
+      opts: [
+        { branch: 'Don your labcoat', label: 'labcoat', winAlso: 'a Protective Labcoat' },
+      ],
+    },
+    {
+      name: 'An Old Labcoat', group: 'misc', freq: 'Very Infrequent',
+      needs: 'a Protective Labcoat, Prestige 20, Laboratory Research 350, 3 workers and Watchful Gains 21',
+      opts: [
+        { branch: 'Don your Stained Labcoat', label: 'labcoat', consumes: 'your Protective Labcoat',
+          winAlso: 'a Reliable Labcoat in place of the Protective one' },
       ],
     },
   ];
@@ -7959,7 +8381,13 @@
     }
     if (f.curve) {
       const x = f.of === 'el' ? inp.el : (inp.skills ? inp.skills[f.of] : null);
-      return x == null ? null : labCurve(f.curve, x);
+      if (x == null) return null;
+      if (f.perEl) {
+        if (inp.el == null) return null;
+        const c = f.curve;
+        return labRound(inp.el / f.perEl * ((c.y || 0) + c.height / (1 + Math.exp(-c.k * (x - c.mid)))));
+      }
+      return labCurve(f.curve, x);
     }
     let sum = f.k || 0;
     for (const key of LAB_LINEAR_KEYS) {
@@ -7971,7 +8399,7 @@
   }
 
   function labUsesEl(f) {
-    return !!f && (!!f.el || f.team != null || (!!f.curve && f.of === 'el'));
+    return !!f && (!!f.el || f.team != null || (!!f.curve && (f.of === 'el' || !!f.perEl)));
   }
 
   function labInputs(state, card) {
@@ -8054,7 +8482,7 @@
       if (opt.notEo && inside(opt.notEo)) return 'shut';
     }
     if (opt.gate) return 'gated';
-    return unknown ? 'unknown' : 'open';
+    return unknown || (opt.unread && opt.unread.length) ? 'unknown' : 'open';
   }
 
   // A figure that rests on something that moves every few actions, read more
@@ -8090,7 +8518,8 @@
       return '(' + (f.k == null ? 2 : f.k) + ' + ' + f.team + ' × Equipment) × √Workers × highest worker level';
     }
     if (f.curve) {
-      return 'an S-curve on ' + (f.of === 'el' ? 'Equipment' : f.of) + ' (height ' + f.curve.height
+      return (f.perEl ? 'Equipment ÷ ' + f.perEl + ' × ' : '')
+        + 'an S-curve on ' + (f.of === 'el' ? 'Equipment' : f.of) + ' (height ' + f.curve.height
         + ', midpoint ' + f.curve.mid + (f.curve.y ? ', offset ' + f.curve.y : '') + ')';
     }
     const parts = [];
@@ -8130,12 +8559,17 @@
     const words = (opt.req || []).map(function (r) {
       if (r[0] === LAB_Q.disgruntlement && r[1] === 0 && r[2] === 0) return 'no Disgruntlement among the Students';
       if (r[2] == null) return r[0] + ' ' + r[1];
+      if (r[1] === 0) return r[0] + ' below ' + (r[2] + 1);
       return r[0] + ' ' + (r[1] === r[2] ? 'exactly ' + r[1] : r[1] + '–' + r[2]);
     });
-    const range = function (g) { return g[0] === g[1] ? String(g[0]) : g[0] + '–' + g[1]; };
+    const range = function (g) {
+      if (g[1] === Infinity) return g[0] + ' or more';
+      return g[0] === g[1] ? String(g[0]) : g[0] + '–' + g[1];
+    };
     if (opt.eo) words.push('Experimental Object ' + opt.eo.map(range).join(' or '));
     if (opt.notEo) words.push('Experimental Object outside ' + opt.notEo.map(range).join(' and '));
     if (opt.gate) words.push(opt.gate);
+    for (const w of opt.unread || []) words.push(w + ' (not something this helper can read)');
     return words.join('; ');
   }
 
@@ -36255,6 +36689,10 @@
     { key: 'parabola', label: 'Parabolan research' },
     { key: 'menace', label: 'Menaces and disgruntled students' },
     { key: 'early', label: 'A new or small laboratory' },
+    { key: 'focus', label: 'Project focus — research on one of your skills' },
+    { key: 'project', label: 'One project only' },
+    { key: 'outside', label: 'From outside the lab — the Correspondence and its allies' },
+    { key: 'misc', label: 'Odds and ends' },
   ];
 
   // The guide's Repeatable Research table, row for row. `value` is its
