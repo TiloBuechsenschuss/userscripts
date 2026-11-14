@@ -104,6 +104,16 @@ check('"Typical Tavern Cellar" is linked whole',
     'Cellar (0 of 6 collected so far)'),
   ['Typical Tavern Cellar', 'tavern.php']);
 
+check('the bare Castle (Ground Floor bounty) goes to the castle map',
+  link(head + '10 piles of beard crumbs from Neckbeard Giants in the Castle in the ' +
+    'Clouds in the Sky (0 of 10 collected so far)'),
+  ['Castle in the Clouds in the Sky', 'place.php?whichplace=giantcastle']);
+
+check('a floor in parentheses stays part of the Castle link',
+  link(head + '10 piles of beard crumbs from Neckbeard Giants in the Castle in the ' +
+    'Clouds in the Sky (Basement) (0 of 10 collected so far)'),
+  ['Castle in the Clouds in the Sky (Basement)', 'place.php?whichplace=giantcastle']);
+
 check('a zone with no map is left alone',
   link(head + '8 piles of country guano from Swarms of Country Bats in An ' +
     'Incredibly Strange Place (Bad Trip) (0 of 8 collected so far)'),

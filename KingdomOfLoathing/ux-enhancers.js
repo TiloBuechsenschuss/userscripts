@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js
-// @version      1.35
+// @version      1.36
 // @description  Grab-bag of quality-of-life tweaks for Kingdom of Loathing pages.
 // @match        https://www.kingdomofloathing.com/hermit.php*
 // @match        https://kingdomofloathing.com/hermit.php*
@@ -3651,7 +3651,8 @@
     ['place.php?whichplace=manor4', ['Haunted Wine Cellar']],
     ['place.php?whichplace=woods', ['Spooky Forest', 'Black Forest']],
     ['place.php?whichplace=giantcastle', ['Castle in the Clouds in the Sky (Basement)',
-      'Castle in the Clouds in the Sky (Top Floor)']],
+      'Castle in the Clouds in the Sky (Ground Floor)', 'Castle in the Clouds in the Sky (Top Floor)',
+      'Castle in the Clouds in the Sky']],
     ['place.php?whichplace=beanstalk', ['Penultimate Fantasy Airship', 'Hole in the Sky']],
     ['place.php?whichplace=palindome', ['Inside the Palindome', 'Palindome']],
     ['place.php?whichplace=mclargehuge', ['Lair of the Ninja Snowmen', 'eXtreme Slope', 'Mt. McLargeHuge']],
