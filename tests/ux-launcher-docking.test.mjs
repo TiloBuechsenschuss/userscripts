@@ -703,7 +703,7 @@ check('the card is light, and every colour written on it is readable against it'
 
   check('Choice Helper registered its panels on the page, in order',
     (win.__flUxPanels || []).map((p) => p.id),
-    ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory', 'economy', 'spending-secrets', 'philosofruits', 'hallowmas', 'airs-of-london']);
+    ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory', 'economy', 'spending-secrets', 'philosofruits', 'whisker-ways', 'hallowmas', 'airs-of-london']);
 
   // No festival marked running, so none floats to the top and the order is the groups'.
   open();

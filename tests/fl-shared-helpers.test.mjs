@@ -206,11 +206,11 @@ const CHOICE_NAMES = ['PANELS', 'registerPanels', 'shareFrame', 'PC_CACHE_KEY', 
 
 // --- the panel registry ----------------------------------------------------
 
-const CHOICE_PANELS = ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory', 'economy', 'spending-secrets', 'philosofruits', 'hallowmas', 'airs-of-london'];
+const CHOICE_PANELS = ['zailing', 'port-carnelian', 'scientific-voyages', 'fruits-of-the-zee', 'university-laboratory', 'economy', 'spending-secrets', 'philosofruits', 'whisker-ways', 'hallowmas', 'airs-of-london'];
 // The menu sorts them into its groups. With no festival running that is General, Activities, Seasonal.
 const OFF_SEASON = [];
 const MENU_ORDER = ['factions', 'zailing', 'economy', 'airs-of-london',
-  'port-carnelian', 'scientific-voyages', 'university-laboratory', 'spending-secrets', 'philosofruits',
+  'port-carnelian', 'scientific-voyages', 'university-laboratory', 'spending-secrets', 'philosofruits', 'whisker-ways',
   'fruits-of-the-zee', 'hallowmas', 'settings'];
 
 for (const first of [UX, CHOICE]) {
@@ -237,7 +237,7 @@ for (const first of [UX, CHOICE]) {
   check('out of season: General, Activities, Seasonal, each panel under its own',
     groups(OFF_SEASON),
     [['General', ['factions', 'zailing', 'economy', 'airs-of-london']],
-     ['Activities', ['port-carnelian', 'scientific-voyages', 'university-laboratory', 'spending-secrets', 'philosofruits']],
+     ['Activities', ['port-carnelian', 'scientific-voyages', 'university-laboratory', 'spending-secrets', 'philosofruits', 'whisker-ways']],
      ['Seasonal', ['fruits-of-the-zee', 'hallowmas']]]);
 
   check('every registered panel names a group the menu knows',
@@ -246,7 +246,7 @@ for (const first of [UX, CHOICE]) {
   check('with Hallowmas marked running it is at the top, In season, and Fruits of the Zee stays Seasonal',
     groups(['hallowmas']).map((g) => g[0] + ':' + g[1].join(',')),
     ['In season:hallowmas', 'General:factions,zailing,economy,airs-of-london',
-     'Activities:port-carnelian,scientific-voyages,university-laboratory,spending-secrets,philosofruits',
+     'Activities:port-carnelian,scientific-voyages,university-laboratory,spending-secrets,philosofruits,whisker-ways',
      'Seasonal:fruits-of-the-zee']);
 
   check('with Fruits of the Zee marked running, the menu order follows',

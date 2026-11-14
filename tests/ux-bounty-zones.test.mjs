@@ -114,6 +114,11 @@ check('a floor in parentheses stays part of the Castle link',
     'Clouds in the Sky (Basement) (0 of 10 collected so far)'),
   ['Castle in the Clouds in the Sky (Basement)', 'place.php?whichplace=giantcastle']);
 
+check('the third level of the Menagerie goes to the Menagerie',
+  link(head + '13 suspicious moles from portly abominations on the third level of ' +
+    'Cobb\'s Knob Menagerie (0 of 13 collected so far)'),
+  ['third level of Cobb\'s Knob Menagerie', 'cobbsknob.php?action=tomenagerie']);
+
 check('a zone with no map is left alone',
   link(head + '8 piles of country guano from Swarms of Country Bats in An ' +
     'Incredibly Strange Place (Bad Trip) (0 of 8 collected so far)'),

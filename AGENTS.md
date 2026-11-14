@@ -2825,6 +2825,32 @@ navigation. Two consequences:
   storylets (the guide gives neither titles nor pictures for their options). Research:
   `docs/superpowers/research/2026-09-29-fate-locked-guides.md` §7.
 
+  **The Whisker-Ways** (`whisker-ways`, `WW_GENERATE`, `WW_REFINE`, added 2026-11-14; filed under Parabola; panel `whisker-ways`, `renderWwPanel`,
+  added the same day at the user's request -- reversing the plan's no-panel decision -- listed right after Philosofruits under
+  Activities and following the feature: Mythic Potential, the three Balance qualities and A Hole In Your Story read off the Myself tab
+  and banked (`WW_CACHE_KEY`), what finishing now would pay (`wwVirtuePayout` / `wwBalancePayout`, the guide's tables as one
+  rule, checked against printed rows) and what is still short, every Generate and Refine option, the payout items, the strategies).
+  The Fate-locked dream-myth activity (*A Dream of a Thousand Tails*): pick a Ratty Virtue, Generate Mythic Potential (MP), Refine it
+  or items into three Balance qualities (Moralising Development, Heroic Rally, Inscrutable Twist), finish. Plan, mappings and the
+  in-game checklist: `docs/whisker-ways/plan.md`. **The badge** is the story change only: `+17–21 MP?` (success to rare success),
+  `+25 MP?` where no rare is recorded, `−10 MP · +3–4 Dev?` / `−Implication ×2 · +4–6 Dev?` for a Refine; `?` is a challenge and the
+  quality is a word, so colour carries nothing alone. **No ranking**: the best Generate and the free Refine both come to about 5
+  Echoes an action. The tooltip: challenges with their certain level (Broad by `broadCertainAt`, Narrow difficulty + 5, both matching
+  the guide's strategies), success, rare/alternate at the guide's rough odds, failure, the Echo value (MP is 0.2 Echoes a point) or
+  the Refine net (`wwRefineNet`, from each input's sale value; Memory of a Much Lesser Self has none), and the caps (Generate closes
+  at 100+ MP -- the options disappear, seen in game 2026-11-14 -- the story needs 50; Refine closes at 20+ Balance, needs 11). **Matching** reuses Philosofruits' `phfImageKey` and
+  `phfBranches`: a titled row by title only, an untitled one by picture. Twelve titles were read off the game's HTML on 2026-11-14:
+  three Generate (*Gnaw towards secluded dreamings*, bazaardoor_teeth; *Sift dreams of lost mail*, chesspiece_apocyan; *Navigate the
+  needy islands of the zee*, crowd2) and all nine Refine, from the Refine storylet *Refining your Unrefined Myth* (enginegreen). **The gate** is (1) the greeting in `WW_AREAS` (*The Whisker-Ways*, captured verbatim 2026-11-14, confirm-only) or
+  the open storylet in `WW_STORYLETS` (*Dreams and Recollections* and *Refining your Unrefined Myth*, both captured), and (2) at least two options on
+  screen found in the tables (`WW_MIN_MATCHES`); an unlisted option (Refine your nascent myth, Abandon the whole endeavour) does not
+  veto. **Traps:** `crowd2` is also a Philosofruits card; the suite pins that neither feature fires in the other's area. Generate and
+  Refine are separate storylets: *Refine your nascent myth* (stationVIII, needs 50 MP) leads in, *Gather more mythic potential*
+  (diamondpurple) back. The Finish, *Declare the Unrefined Myth of <myth> complete* (firequill), is locked while *A Hole In Your
+  Story* is above 9; the Hole starts at 20 and drops by the Balance a Refine raises (seen 2026-11-14), so 9 is the guide's
+  11 Balance. A failed MP Refine still takes its 10 MP and pays +1 (seen 2026-11-14). Left out: the
+  Virtue pick, the Finish, and the five one-action options (stage 4 of the plan).
+
   **Hallowmas Masques** (`hallowmas-masques`, `HM_MASQUE_OPTIONS`; panel `hallowmas`, `renderHallowmasPanel`, added 2026-10-13; filed
   under Seasonal, the panel follows the feature). The festival's main loop: raise a Masque's Menace to 7 (28 CP), hand it to the Fool's
   Apostate for 28 Spirit of Hallowmas, cash the Spirit in at the end. Four Masques, 38 option rows: the Roof Below (Wounds, Infant), the
@@ -4168,6 +4194,11 @@ Confirmed live by the author:
   not (checklist: `docs/philosofruits/cards.md`). **(4) The "Skill 2" figures** -- whether *Shapeling Arts 2* and the like are the difficulty. **(5) A locked Rot
   option** -- drawn greyed or not at all before the Hintershroom.
 
+- **The Whisker-Ways** (`whisker-ways`, added 2026-11-14). **Confirmed in game 2026-11-14:** badges on both steps (Generate,
+  Refine), the greeting, all nine Refine titles, Generate options hidden at 100+ MP. Still to report: **(1) Locked Refine options**
+  at 20+ Balance: greyed or hidden. **(2) A failed item Refine** -- does it still take the items (a failed MP Refine takes its MP,
+  seen). The panel's quality reading is confirmed (2026-11-14): all five `WW_QUALITIES` names read off the Myself tab.
+
 - **Hallowmas Masques** (`hallowmas-masques`, added 2026-10-13, prepared from 2025's pages before the festival opened). Nothing has been seen
   in game. Report first: **(1) The storylet headings** -- whether each Masque's open heading is exactly *The Roof Below*, *The Wreck of the
   St Elmo*, *The Pavilion of Butterflies* and *Saint Dunstan's Sacristy* (a different title draws nothing). **(2) The option titles** -- whether
@@ -5075,6 +5106,12 @@ Current tests:
   the picture key for a game URL and a wiki file name; the badge texts and that the letter alone carries the claim; the gate in all
   three greeting states and that leaving clears; the opened card, a storylet sharing its picture but not its options, and a picture
   shared by two cards; and a filled-in title winning over the picture.
+- `tests/choice-whisker-ways.test.mjs` — the payout rule against the guide's printed rows, what finishing now pays and lacks, the
+  whole panel built; the captured Generate and Refine steps badged with no greeting; 14 Generate and 9 Refine rows, keys unique and each the plan's picture; the +25 rows
+  two challenges with no Airs range; Generate Echoes and the Refine nets against the plan's columns; the three titles read off the
+  game, matched by title alone; the badge texts and that the word alone carries the quality; tooltip certain levels, odds, caps,
+  net; the gate in all greeting states, by the captured storylet heading with no greeting, one match not enough, an unlisted option
+  no veto, leaving clears; and the Wisp-Ways / Whisker-Ways separation from Philosofruits on the shared crowd2.
 - `tests/choice-hallowmas-masques.test.mjs` — 35 options across four Masques, one Leave each, every row's mask and Menace agreeing with its Masque;
   the badge (Menace CP, `▼` exactly when an item is spent, the mask as a trailing word, the exchange and Leave texts); the Spirit rewards' stated
   Echoes against their stated Echoes per Spirit; the guide's upgrade list against its tick-grid; the exchanges filed where the option pages put them;

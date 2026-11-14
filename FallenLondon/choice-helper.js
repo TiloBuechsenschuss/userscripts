@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.82
+// @version      1.83
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -682,6 +682,14 @@
  *     Confession exchanges read "Whimsy → Guile" and a Leave says which mask waives the Favour to re-enter. Rows are matched
  *     under the OPEN storylet only, so a Masque that is not running this year draws nothing. The CP is the page's base
  *     figure; Menace-raising gear scales it and is not modelled. 0 → 7 is 28 CP, handed in for 28 Spirit.
+ *     (26) The Whisker-Ways, the Fate-locked dream-myth activity (A Dream of a Thousand Tails). Each Generate option shows
+ *     the Mythic Potential it raises, success to rare success ("+17–21 MP?"), and each Refine option its cost and the
+ *     Balance it raises ("−10 MP · +3–4 Dev?", "−Implication ×2 · +4–6 Dev?"). No ranking: the good lines all come to about
+ *     5 Echoes an action. The tooltip has the challenges and their certain levels, the failure, the Echo value or net, and
+ *     the caps. Options are matched by title where one was read off the game, else by picture, and only where the greeting
+ *     names the Whisker-Ways or the open storylet is one of the activity's, with two options on screen from the tables.
+ *     A panel behind ⚙ UX shows your Mythic Potential, Balance and A Hole In Your Story, what finishing now would pay and
+ *     what is still short, every Generate and Refine option, the payout items by Virtue and Balance, and the guide's strategies.
  *     Built as a feature registry so further advice can be added as entries.
  */
 
@@ -1914,6 +1922,7 @@
         if (bankLabQualities(scan)) changed = true;
         if (bankCtdQualities(scan)) changed = true;
         if (bankPhfQualities(scan)) changed = true;
+        if (bankWwQualities(scan)) changed = true;
         if (bankHmQualities(scan)) changed = true;
       }
       const here = readPossessionCounts();
@@ -37230,6 +37239,7 @@
       bankLabQualities(scan);
       bankCtdQualities(scan);
       bankPhfQualities(scan);
+      bankWwQualities(scan);
       bankHmQualities(scan);
     }
     if (owned.length) bankItemCounts(readPossessionCounts());
@@ -45787,6 +45797,547 @@
     ]);
   }
 
+  // === The Whisker-Ways (Fate: A Dream of a Thousand Tails) ===============
+  //
+  // A dream-myth activity: pick a Ratty Virtue (Cunning, Invention or
+  // Community), raise Mythic Potential (Generate), spend it or items on three
+  // Balance qualities (Refine), then finish for a payout. Plan, mappings and the
+  // in-game checklist: docs/whisker-ways/plan.md.
+  //
+  // **What the badge says.** The story change and nothing else: "+17–21 MP?"
+  // (success to rare success; "?" is a challenge), "−10 MP · +3–4 Dev?" for a
+  // Refine. No ranking -- the guide's own numbers put the best Generate and the
+  // free Refine at about 5 Echoes an action, so which line is best depends on
+  // the player's stats and spare items. The Echo value and the net go in the
+  // tooltip. The quality is named in words (MP, Dev, Rally, Twist), so colour is
+  // never the only carrier. Nothing here moves a Faction: no faction part.
+  // A panel behind ⚙ UX (renderWwPanel, added 2026-11-14 at the user's request,
+  // reversing the plan's no-panel decision) carries the tables and the payout.
+  //
+  // **Seen in game 2026-11-14:** a failed Refine still takes its 10 Mythic
+  // Potential and pays +1, as the guide's failure column says; whether a failed
+  // item Refine takes the items is not known yet. A Hole In Your Story starts at
+  // 20 and drops by the Balance a Refine raises, so the Finish's "9 or less" is
+  // the guide's 11 Balance.
+  //
+  // **Matching.** Like Philosofruits: the wiki has no storylet or option pages,
+  // only the guide's option PICTURES, so an untitled row is matched by picture
+  // and a titled row by its title alone. Three titles were read off the game's
+  // HTML on 2026-11-14 (the Generate storylet, Dreams and Recollections, at
+  // Ratty Airs 31): bazaardoor_teeth, chesspiece_apocyan and crowd2. The same
+  // capture showed Generate and Refine are NOT one storylet: Generate offers
+  // "Refine your nascent myth" (stationVIII, needs 50 MP) and "Abandon the whole
+  // endeavour" (handstop), neither in these tables.
+  // The Refine storylet, Refining your Unrefined Myth (enginegreen), was
+  // captured the same day at 100 MP: all nine Refine titles are from it. It
+  // also offers "Consider your options" (crypticsecret, an explainer), "Gather
+  // more mythic potential" (diamondpurple, back to Generate), Abandon, and the
+  // Finish, "Declare the Unrefined Myth of <myth> complete" (firequill), locked
+  // while A Hole In Your Story is above 9 (it read 20 at Balance 0).
+  //
+  // **The gate counts.** These pictures say nothing alone (`clouds` and `map`
+  // are on 500+ wiki pages each). Badges need (1) the greeting to be one of
+  // WW_AREAS or the opened storylet to be one of WW_STORYLETS, and (2) at least
+  // WW_MIN_MATCHES options on screen found in these tables. A real step always
+  // clears that (3–5 Generate options, 9 Refine). Unlisted options do not veto:
+  // Refine/Abandon sit on the same storylet. The Wisp-Ways (Philosofruits) is
+  // another place: `crowd2` is in both features, and neither fires in the other's.
+  //
+  // Transcribed from The Whisker-Ways (Guide), fetched through the API on
+  // 2026-11-03; item values from each item's own page. Corrections -- and
+  // titles, once read off the game -- go in WW_GENERATE / WW_REFINE and nowhere
+  // else.
+  //
+  // **Confirmed in game (2026-11-14 capture):** the three titles above; the +25
+  // row (crowd2) is two challenges (A Player of Chess, Persuasive) with no Airs
+  // requirement; the General and Community 0–50 rows show a Ratty Airs 0–50
+  // requirement; Generate options need Mythic Potential 99 at most. The Virtue
+  // is the quality "Concerning A Ratty Virtue", the local Airs "Ratty Airs".
+
+  // The area greeting, captured verbatim 2026-11-14 ("Welcome to / The
+  // Whisker-Ways, / delicious friend!", split over three lines). Only the
+  // "yes" half is captured, so it may only ever say yes.
+  const WW_AREAS = ['The Whisker-Ways'];
+  // Opened storylets that are the activity, read off the game 2026-11-14.
+  const WW_STORYLETS = ['Dreams and Recollections', 'Refining your Unrefined Myth'];
+  const WW_MIN_MATCHES = 2;
+
+  const WW_SKILLS = ['Mithridacy', 'Monstrous Anatomy', 'Artisan of the Red Science', 'A Player of Chess'];
+  const WW_ECHOES_PER_MP = 0.2;
+  const WW_ECHOES_PER_BALANCE = 2;
+  // Generate options are HIDDEN at this much Mythic Potential (seen in game 2026-11-14):
+  // only the way into Refine is left.
+  const WW_MP_CAP = 100;
+  const WW_MP_TO_END = 50;
+  const WW_BALANCE_CAP = 20;   // Refine closes at this much combined Balance
+  const WW_BALANCE_TO_END = 11;
+  // The guide's rough odds of the rare (Generate) and alternate (Refine) success.
+  const WW_RARE_ODDS = { General: 0.1, Cunning: 0.5, Invention: 0.5, Community: 0.5 };
+  const WW_ALT_ODDS = 0.5;
+
+  // A Generate row: picture key, Virtue group, challenges ([stat, difficulty]),
+  // the Ratty Airs ranges it is offered at (null: the guide records none), and
+  // Mythic Potential on success, rare success and failure. A null `rare` is
+  // "none recorded", a null `fail` "nothing the guide records" -- not zero.
+  function wwGen(key, group, ch, airs, win, rare, fail, o) {
+    return Object.assign({ key: key, title: null, group: group, ch: ch, airs: airs, win: win, rare: rare, fail: fail }, o);
+  }
+
+  const WW_GENERATE = [
+    wwGen('bazaardoor_teeth', 'General', [['Dangerous', 120]], [[0, 50]], 13, 18, 5,
+      { title: 'Gnaw towards secluded dreamings' }),
+    // The guide writes "Mithridacy 5 (50%)"; 5 is read as the difficulty.
+    wwGen('generic_unterzee4', 'General', [['Mithridacy', 5]], [[51, 100]], 13, 18, 5),
+    wwGen('mirrormonster', 'Cunning', [['Monstrous Anatomy', 6]], [[0, 50]], 17, 21, null),
+    wwGen('evade2', 'Cunning', [['Shadowy', 130]], [[51, 100]], 17, 21, null),
+    wwGen('nightmares_red', 'Cunning', [['Shadowy', 160]], [[0, 12], [89, 100]], 22, 27, 5),
+    wwGen('foliageorange', 'Cunning', [['Monstrous Anatomy', 8], ['Shadowy', 150]], null, 25, null, null),
+    wwGen('lawfurnace', 'Invention', [['Artisan of the Red Science', 6]], [[0, 50]], 17, 21, null),
+    wwGen('tattoo_eye_hallowmas', 'Invention', [['Watchful', 130]], [[51, 100]], 17, 21, null),
+    wwGen('mechanism', 'Invention', [['Watchful', 160]], [[0, 12], [89, 100]], 22, 27, 5),
+    wwGen('dawnmachine', 'Invention', [['Artisan of the Red Science', 8], ['Watchful', 150]], null, 25, null, null),
+    wwGen('chesspiece_apocyan', 'Community', [['A Player of Chess', 6]], [[0, 50]], 17, 21, null,
+      { title: 'Sift dreams of lost mail' }),
+    wwGen('ballotbox', 'Community', [['Persuasive', 130]], [[51, 100]], 17, 21, null),
+    wwGen('formerlytalkativebearer', 'Community', [['Persuasive', 160]], [[0, 12], [89, 100]], 22, 27, 5),
+    wwGen('crowd2', 'Community', [['A Player of Chess', 8], ['Persuasive', 150]], null, 25, null, null,
+      { title: 'Navigate the needy islands of the zee' }),
+  ];
+
+  // The three Balance qualities a Refine raises: badge word, full name.
+  const WW_BALANCE = { Dev: 'Moralising Development', Rally: 'Heroic Rally', Twist: 'Inscrutable Twist' };
+  const WW_COLOR = { MP: '#5f4b8b', Dev: '#3f5f8a', Rally: '#8a3b2e', Twist: '#1b6f5c' };
+
+  // A Refine row: picture key, challenge, its cost (`mp`, or an item: full
+  // name, badge word, count and sale value in Echoes -- null where the wiki
+  // has none), the quality it raises, and success / alternate / failure.
+  function wwRef(key, ch, cost, gives, win, alt, fail, o) {
+    return Object.assign({ key: key, title: null, ch: ch, cost: cost, gives: gives, win: win, alt: alt, fail: fail }, o);
+  }
+  const WW_MP_COST = { mp: 10 };
+  function wwItem(item, short, n, value) {
+    return { item: item, short: short, n: n, value: value };
+  }
+
+  const WW_REFINE = [
+    wwRef('hoofprint', ['Mithridacy', 9], WW_MP_COST, 'Dev', 3, 4, 1,
+      { title: 'Impress a moral upon the tale' }),
+    wwRef('snakehead2', ['Dangerous', 130], wwItem('Extraordinary Implication', 'Implication', 2, 2.5), 'Dev', 4, 6, null,
+      { title: 'Implant unsettling implications' }),
+    // Emetic Revelation sells for 625 Cryptic Clues: 12.5 Echoes.
+    wwRef('beeface', ['Mithridacy', 7], wwItem('Emetic Revelation', 'Revelation', 1, 12.5), 'Dev', 8, 9, 1,
+      { title: 'Elucidate unpleasant consequences' }),
+    wwRef('fist2', ['Mithridacy', 9], WW_MP_COST, 'Rally', 3, 4, 1,
+      { title: 'Invigorate the story with heroic values' }),
+    wwRef('delirium', ['Dangerous', 130], wwItem('Memory of a Much Lesser Self', 'Memory', 2, null), 'Rally', 4, 6, null,
+      { title: 'Make room for impressive developments' }),
+    wwRef('currency1_gold', ['Mithridacy', 7], wwItem('Magnificent Diamond', 'Diamond', 1, 12.5), 'Rally', 8, 9, 1,
+      { title: 'Socket promises of riches and treasure' }),
+    wwRef('clouds', ['Mithridacy', 9], WW_MP_COST, 'Twist', 3, 4, 1,
+      { title: 'Obscure the facts of the narrative' }),
+    wwRef('cross', ['Dangerous', 130], wwItem('Mourning Candle', 'Candle', 2, 2.5), 'Twist', 4, 6, null,
+      { title: 'Eliminate a dogmatic reading' }),
+    wwRef('map', ['Mithridacy', 7], wwItem('Puzzling Map', 'Map', 1, 12.5), 'Twist', 8, 9, 1,
+      { title: 'Muddle familiar routes and events' }),
+  ];
+
+  const WW_CLASS = 'fl-ux-whisker-ways';
+  const WW_FLAG = 'flUxWhiskerWays';
+
+  function wwHere() {
+    const strip = function (n) { return normalizeName(n).replace(/^the /, ''); };
+    const area = strip(currentArea());
+    return !!area && WW_AREAS.some(function (a) { return strip(a) === area; });
+  }
+
+  function wwIsGenerate(row) { return row.cost === undefined; }
+
+  function wwEchoes(n) { return (Math.round(n * 10) / 10).toFixed(1); }
+
+  // The net of a Refine in Echoes: Balance gained at the expected success
+  // (alternate at the guide's rough odds) less the input. Null where the
+  // input has no sale value.
+  function wwRefineNet(row) {
+    const cost = row.cost.mp != null ? row.cost.mp * WW_ECHOES_PER_MP
+      : row.cost.value == null ? null : row.cost.n * row.cost.value;
+    if (cost == null) return null;
+    const gained = (row.win * (1 - WW_ALT_ODDS) + row.alt * WW_ALT_ODDS) * WW_ECHOES_PER_BALANCE;
+    return Math.round((gained - cost) * 100) / 100;
+  }
+
+  function wwRange(a, b) {
+    return b == null || b === a ? '+' + a : '+' + a + '–' + b;
+  }
+
+  function wwOptionText(row) {
+    if (wwIsGenerate(row)) return wwRange(row.win, row.rare) + ' MP' + CAROUSEL_MARK_CHALLENGE;
+    const cost = row.cost.mp != null ? '−' + row.cost.mp + ' MP' : '−' + row.cost.short + ' ×' + row.cost.n;
+    return cost + ' · ' + wwRange(row.win, row.alt) + ' ' + row.gives + CAROUSEL_MARK_CHALLENGE;
+  }
+
+  function wwChallengeWords(ch) {
+    if (WW_SKILLS.indexOf(ch[0]) !== -1) return 'Narrow ' + ch[0] + ' ' + ch[1] + ', certain at ' + (ch[1] + 5);
+    return 'Broad ' + ch[0] + ' ' + ch[1] + ', certain at ' + broadCertainAt(ch[1]);
+  }
+
+  function wwOptionSpec(row, seen) {
+    const gen = wwIsGenerate(row);
+    const lines = [row.title || seen || 'The option pictured ' + row.key,
+      'The Whisker-Ways · ' + (gen ? 'Generate Mythic Potential (' + row.group + ')' : 'Refine: ' + WW_BALANCE[row.gives]), ''];
+    if (gen) {
+      lines.push(row.airs
+        ? 'Offered at Ratty Airs ' + row.airs.map(function (r) { return r[0] + '–' + r[1]; }).join(' and ') + '.'
+        : 'The guide records no Ratty Airs range for it.');
+    }
+    const chs = gen ? row.ch : [row.ch];
+    lines.push((chs.length > 1 ? 'Challenges: ' : 'Challenge: ') + chs.map(wwChallengeWords).join('; ') + '.');
+    if (gen) {
+      lines.push('Success: Mythic Potential +' + row.win + ' (' + wwEchoes(row.win * WW_ECHOES_PER_MP) + ' Echoes at the payout).');
+      lines.push(row.rare == null ? 'Rare success: none recorded.'
+        : 'Rare success (about ' + Math.round(WW_RARE_ODDS[row.group] * 100) + '%, the guide’s rough figure): Mythic Potential +'
+          + row.rare + '.');
+      lines.push('Failure: ' + (row.fail == null ? 'nothing the guide records' : 'Mythic Potential +' + row.fail) + '.');
+      lines.push('', 'Generate options disappear at ' + WW_MP_CAP + '+ Mythic Potential, leaving only Refine; the story needs ' + WW_MP_TO_END
+        + ' to end. Mythic Potential pays ' + WW_ECHOES_PER_MP + ' Echoes a point at the end.');
+    } else {
+      const q = WW_BALANCE[row.gives];
+      lines.push('Costs: ' + (row.cost.mp != null ? row.cost.mp + ' Mythic Potential' : row.cost.item + ' ×' + row.cost.n) + '.');
+      lines.push('Success: ' + q + ' +' + row.win + '; alternate success (about ' + Math.round(WW_ALT_ODDS * 100)
+        + '%, the guide’s rough figure): +' + row.alt + '.');
+      lines.push('Failure: ' + (row.fail == null ? 'nothing the guide records' : q + ' +' + row.fail) + '. '
+        + (row.cost.mp != null ? 'A failure still takes the ' + row.cost.mp + ' Mythic Potential (seen in game).'
+          : 'Whether a failure still takes the ' + row.cost.item + ' is not known yet.'));
+      lines.push('Each point of Balance also lowers A Hole In Your Story by one; the Finish needs it at '
+        + WW_HOLE_TO_END + ' or less.');
+      const net = wwRefineNet(row);
+      lines.push(net == null
+        ? 'Net: none -- ' + row.cost.item + ' has no sale value on the wiki.'
+        : 'Net about ' + (net >= 0 ? '+' : '−') + wwEchoes(Math.abs(net)) + ' Echoes (the alternate at its rough odds, the cost at '
+          + (row.cost.mp != null ? WW_ECHOES_PER_MP + ' Echoes per Mythic Potential' : 'its sale value, ' + row.cost.value + ' Echoes each') + ').');
+      lines.push('', 'Refine options close at ' + WW_BALANCE_CAP + '+ Balance (Moralising Developments, Heroic Rallies and '
+        + 'Inscrutable Twists together); the story needs ' + WW_BALANCE_TO_END + ' to end. Each point pays '
+        + WW_ECHOES_PER_BALANCE + ' Echoes; a 12.5 Echo item arrives at 7, 13, 19 and 25 of one quality.');
+    }
+    if (!row.title) {
+      lines.push('', 'Matched by its picture (' + row.key + '); the option’s title is not recorded yet.'
+        + (seen ? ' The game shows “' + seen + '”: that is the title to copy into ' + (gen ? 'WW_GENERATE' : 'WW_REFINE') + '.' : ''));
+    }
+    return { text: wwOptionText(row), color: WW_COLOR[gen ? 'MP' : row.gives], title: lines.join('\n') };
+  }
+
+  // A row by its title, else (untitled rows only) by its picture.
+  function wwFindRow(name, key) {
+    const rows = WW_GENERATE.concat(WW_REFINE);
+    const n = normalizeName(name);
+    const titled = n ? rows.find(function (r) { return r.title && normalizeName(r.title) === n; }) : null;
+    if (titled) return titled;
+    if (!key) return null;
+    return rows.find(function (r) { return !r.title && r.key === key; }) || null;
+  }
+
+  function wwRatings() {
+    const root = document.querySelector('.storylet-root__heading');
+    const rootName = root ? normalizeName(headingName(root)) : '';
+    const here = wwHere() || (!!rootName && WW_STORYLETS.some(function (s) { return normalizeName(s) === rootName; }));
+    const branches = phfBranches();
+    const hits = branches.map(function (b) { return here ? wwFindRow(b.name, b.key) : null; });
+    const on = hits.filter(Boolean).length >= WW_MIN_MATCHES;
+    branches.forEach(function (b, i) {
+      const row = on ? hits[i] : null;
+      attachBadge(b.head, {
+        cls: WW_CLASS, flag: WW_FLAG, value: b.name + '|' + (b.key || '-') + '|' + (on ? 'on' : 'off'),
+        spec: row ? wwOptionSpec(row, b.name) : null, place: 'after',
+      });
+    });
+  }
+
+  // === panel: The Whisker-Ways ==============================================
+  //
+  // Where your myth stands (Mythic Potential, the three Balance qualities and A
+  // Hole In Your Story, read off the Myself tab and banked like Philosofruits'),
+  // what it would pay if finished now, then every Generate and Refine option,
+  // the payout tables and the guide's strategies.
+  //
+  // **Confirmed in game (2026-11-14):** the panel reads all five qualities off
+  // the Myself tab under the names in WW_QUALITIES. An unread value shows a
+  // dash, never 0.
+  //
+  // Payout: The Whisker-Ways (Guide), "Payout" (fetched through the API on
+  // 2026-11-14). Its tables are one rule, carried here as wwVirtuePayout and
+  // wwBalancePayout; the suite checks the rule against printed rows. Item names
+  // go in WW_VIRTUE_ITEMS / WW_BALANCE_ITEMS and nowhere else.
+
+  const WW_CACHE_KEY = 'fl-ux-ww';
+  const WW_QUALITIES = [
+    ['MP', 'Mythic Potential'], ['Dev', 'Moralising Development'], ['Rally', 'Heroic Rally'],
+    ['Twist', 'Inscrutable Twist'], ['Hole', 'A Hole In Your Story'],
+  ];
+  // The Finish is locked while A Hole In Your Story is above this (captured 2026-11-14).
+  const WW_HOLE_TO_END = 9;
+  const WW_BASE_CLUES = 300;
+  const WW_ECHOES_PER_CLUE = 0.02;
+
+  // What each Virtue's myth pays: its 12.5 Echo item and its 2.5 Echo item.
+  const WW_VIRTUE_ITEMS = [
+    ['Cunning', 'Antique Mystery', 'Extraordinary Implication'],
+    ['Invention', 'Bejewelled Lens', 'Volume of Collated Research'],
+    ['Community', 'Storm-Threnody', 'Touching Love Story'],
+  ];
+  // What each Balance quality pays: its 12.5 Echo item and its 0.5 Echo item.
+  const WW_BALANCE_ITEMS = {
+    Dev: ['Blackmail Material', 'Scrap of Incendiary Gossip'],
+    Rally: ['Direful Reflection', 'Tale of Terror!!'],
+    Twist: ['Puzzle-Damask Scrap', 'Journal of Infamy'],
+  };
+
+  // The guide's strategies, as it states them.
+  const WW_STRATEGIES = [
+    { name: 'Free Moralising Community', actions: '10', needs: 'Mithridacy 14, A Player of Chess 13, Persuasive 250',
+      steps: 'Community; Generate +25 ×4; Refine −10 MP for Moralising ×4; Generate +25 ×1',
+      result: '85 MP, 12–16 Moralising', epa: '5.10 (up to 5.50 with the Rat Market)' },
+    { name: 'Memory of a Much Lesser Self Disposal', actions: '6–7',
+      needs: '4 or 6 Memories of a Much Lesser Self, A Player of Chess 13, Dangerous 217, Persuasive 250',
+      steps: 'Community; Generate +25 ×3; Refine 2 Memories for Heroic Rallies ×2, a third time below 11',
+      result: '75 MP, 12–16 Heroic Rally', epa: '~5.17 (up to ~5.77 with the Rat Market)' },
+    { name: 'Making Waves', actions: '7 with the Lodgings action',
+      needs: 'Reservation at the Royal Bethlehem, Artisan of the Red Science 13, Mithridacy 14, a 12.5 Echo input',
+      steps: 'Invention; Generate +25 ×3; Refine −10 MP (Mithridacy 9); Refine a 12.5 Echo item (Mithridacy 7)',
+      result: '65 MP, about 12 Balance, 1 Bejewelled Lens', epa: '2.57, plus 10 CP Making Waves an action' },
+  ];
+
+  // The Virtue payout for a Mythic Potential: 12.5 Echo items, 2.5 Echo items,
+  // Cryptic Clues. In hundredths of an Echo, so no float error.
+  function wwVirtuePayout(mp) {
+    const v = mp * 20;
+    const top = Math.floor(v / 1250);
+    const mid = Math.floor((v - top * 1250) / 250);
+    return { top: top, mid: mid, clues: WW_BASE_CLUES + (v - top * 1250 - mid * 250) / 2 };
+  }
+
+  // One Balance quality's payout: 12.5 Echo items, then 0.5 Echo items.
+  function wwBalancePayout(n) {
+    const top = Math.floor(n * 200 / 1250);
+    return { top: top, low: (n * 200 - top * 1250) / 50 };
+  }
+
+  // The whole payout's value in Echoes, at the items' base values.
+  function wwPayoutEchoes(mp, balance) {
+    return mp * WW_ECHOES_PER_MP + WW_BASE_CLUES * WW_ECHOES_PER_CLUE + balance * WW_ECHOES_PER_BALANCE;
+  }
+
+  function wwFromQualities(scan) {
+    const values = {};
+    const zeroIsSafe = !scan.filtered;
+    for (const q of WW_QUALITIES) {
+      const got = scan.values.get(q[1]);
+      if (got) values[q[0]] = got.level;
+      else if (zeroIsSafe) values[q[0]] = 0;
+    }
+    return values;
+  }
+
+  function bankWwQualities(scan) {
+    if (!scan) return false;
+    const values = wwFromQualities(scan);
+    if (!Object.keys(values).length) return false;
+    saveCache(WW_CACHE_KEY, { v: 1, at: Date.now(), character: characterName() || null, values: values });
+    return true;
+  }
+
+  function readWwState() {
+    const scan = readQualities();
+    if (scan) {
+      const values = wwFromQualities(scan);
+      if (Object.keys(values).length) return { live: true, at: Date.now(), values: values };
+    }
+    const rec = loadCache(WW_CACHE_KEY, 1);
+    return rec && rec.values ? { live: false, at: rec.at, values: rec.values } : null;
+  }
+
+  // What finishing now would pay, as lines of text; null where MP is unread.
+  function wwPayoutLines(values) {
+    const mp = values && typeof values.MP === 'number' ? values.MP : null;
+    if (mp == null) return null;
+    const balance = ['Dev', 'Rally', 'Twist'].reduce(function (n, k) {
+      return n + (typeof values[k] === 'number' ? values[k] : 0);
+    }, 0);
+    const v = wwVirtuePayout(mp);
+    const lines = ['Your Virtue: its 12.5 Echo item ×' + v.top + ', its 2.5 Echo item ×' + v.mid
+      + ', Cryptic Clue ×' + v.clues + ' (the items by Virtue are in the table below).'];
+    ['Dev', 'Rally', 'Twist'].forEach(function (k) {
+      const n = typeof values[k] === 'number' ? values[k] : 0;
+      if (!n) return;
+      const p = wwBalancePayout(n);
+      lines.push(WW_BALANCE[k] + ' ' + n + ': ' + WW_BALANCE_ITEMS[k][0] + ' ×' + p.top + ', '
+        + WW_BALANCE_ITEMS[k][1] + ' ×' + p.low + '.');
+    });
+    lines.push('About ' + wwEchoes(wwPayoutEchoes(mp, balance)) + ' Echoes at base values.');
+    const short = [];
+    if (mp < WW_MP_TO_END) short.push((WW_MP_TO_END - mp) + ' more Mythic Potential');
+    if (balance < WW_BALANCE_TO_END) short.push((WW_BALANCE_TO_END - balance) + ' more Balance');
+    if (typeof values.Hole === 'number' && values.Hole > WW_HOLE_TO_END) {
+      short.push('A Hole In Your Story at ' + WW_HOLE_TO_END + ' or less (now ' + values.Hole + ')');
+    }
+    lines.push(short.length ? 'Cannot finish yet: needs ' + short.join(', ') + '.' : 'Ready to finish.');
+    return lines;
+  }
+
+  function renderWwPanel(ctx) {
+    const st = readWwState();
+    const stale = !st || (!st.live && Date.now() - st.at > FRESH_MS);
+    let busy = false;
+    if (ctx && autoRefreshEnabled() && stale) {
+      busy = true;
+      refreshBackgroundState().then(function () { ctx.rerender(); });
+    }
+    busy = busy || !!refreshing;
+
+    const dim = function (text) { return h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [text]); };
+    const section = function (title, children) {
+      return h('div', { css: 'margin-top:14px;' }, [
+        h('div', {
+          css: 'font:bold 11px ' + UI.font + ';letter-spacing:.06em;text-transform:uppercase;'
+            + 'color:' + UI.accent + ';margin-bottom:5px;',
+        }, [title]),
+        children,
+      ]);
+    };
+    const stat = function (label, value) {
+      return h('div', { css: 'min-width:92px;' }, [
+        dim(label), h('div', { css: 'font-size:16px;color:' + UI.text + ';' }, [value]),
+      ]);
+    };
+    const table = function (heads, rows) {
+      return h('table', { css: 'width:100%;border-collapse:collapse;' }, [
+        h('thead', null, [h('tr', null, heads.map(function (t) { return h('th', { css: TH }, [t]); }))]),
+        h('tbody', null, rows),
+      ]);
+    };
+    const cell = function (children, extra) {
+      return h('td', { css: TD + (extra || '') }, Array.isArray(children) ? children : [children]);
+    };
+
+    const now = WW_QUALITIES.map(function (q) {
+      const v = st && typeof st.values[q[0]] === 'number' ? st.values[q[0]] : null;
+      return stat(q[1], v == null ? '–' : String(v));
+    });
+    const payout = st ? wwPayoutLines(st.values) : null;
+
+    const top = h('div', {
+      css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.accent + ';background:' + UI.bgAlt
+        + ';font-size:12px;line-height:1.6;',
+    }, [
+      dim('Your myth now'),
+      h('div', { css: 'display:flex;flex-wrap:wrap;gap:16px;' }, now),
+      payout ? h('div', { css: 'margin-top:8px;' }, [dim('If you finished now')].concat(
+        payout.map(function (l) { return h('div', null, [l]); }))) : null,
+      h('div', { css: 'margin-top:6px;color:' + UI.dim + ';display:flex;flex-wrap:wrap;align-items:center;gap:8px;' }, [
+        h('span', null, [st ? 'Read ' + ageText(st.at) + (busy ? ' — refreshing from the Myself tab…' : '.')
+          : 'Nothing has been read yet. Open the Myself tab once.']),
+        h('button', {
+          type: 'button',
+          disabled: busy,
+          title: 'Load /myself and /possessions in a hidden frame and re-read them.',
+          css: 'border:1px solid ' + UI.line + ';border-radius:3px;background:transparent;color:'
+            + (busy ? UI.dim : UI.accent) + ';font:11px ' + UI.font + ';padding:1px 7px;'
+            + 'cursor:' + (busy ? 'default' : 'pointer') + ';',
+          on: {
+            click: function () {
+              if (busy || !ctx) return;
+              const done = refreshBackgroundState();
+              ctx.rerender();
+              done.then(function () { ctx.rerender(); });
+            },
+          },
+        }, [busy ? 'Refreshing…' : 'Refresh']),
+      ]),
+    ]);
+
+    const rules = h('div', {
+      css: 'margin:10px 0 0;padding:8px 10px;border-left:3px solid ' + UI.line + ';background:' + UI.bgAlt
+        + ';color:' + UI.dim + ';font-size:12px;line-height:1.6;',
+    }, [
+      'Pick a Virtue (1 action). Generate Mythic Potential; those options disappear at ' + WW_MP_CAP + '+. Refine it or '
+        + 'items into Balance (Moralising Development, Heroic Rally, Inscrutable Twist); Refine closes at '
+        + WW_BALANCE_CAP + '+ Balance. You can go back from Refine to Generate while below ' + WW_MP_CAP + ' MP.',
+      'To finish: ' + WW_MP_TO_END + '+ Mythic Potential and ' + WW_BALANCE_TO_END + '+ Balance. A Hole In Your Story '
+        + 'starts at 20 and drops one for each point of Balance; the Finish needs it at ' + WW_HOLE_TO_END + ' or less.'
+        + ' A failed Refine still takes its 10 Mythic Potential and pays +1. Mythic Potential pays ' + WW_ECHOES_PER_MP + ' Echoes a point, Balance '
+        + WW_ECHOES_PER_BALANCE + ', plus ' + WW_BASE_CLUES + ' Cryptic Clues every time. No level wastes value; a '
+        + '12.5 Echo Balance item arrives at 7, 13, 19 and 25 of one quality, a Virtue one at 63 and 125 MP.',
+      'No ranking: the best Generate and the free Refine both come to about 5 Echoes an action.',
+    ].map(function (l) { return h('div', { css: 'margin-bottom:4px;' }, [l]); }));
+
+    const name = function (r) { return r.title || 'Pictured ' + r.key + ' (title not recorded yet)'; };
+    const genRows = [];
+    ['General', 'Cunning', 'Invention', 'Community'].forEach(function (g) {
+      genRows.push(h('tr', null, [h('td', {
+        css: TD + 'color:' + UI.accent + ';font-weight:bold;', colspan: '4',
+      }, [g === 'General' ? 'Any Virtue' : g])]));
+      WW_GENERATE.filter(function (r) { return r.group === g; }).forEach(function (r) {
+        genRows.push(h('tr', null, [
+          cell([h('div', null, [name(r)]), h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [
+            r.airs ? 'Ratty Airs ' + r.airs.map(function (a) { return a[0] + '–' + a[1]; }).join(', ') : 'Any Ratty Airs'])]),
+          cell(r.ch.map(function (c) { return h('div', null, [wwChallengeWords(c)]); }), 'font-size:12px;'),
+          cell([wwRange(r.win, r.rare) + (r.fail != null ? ' (fail +' + r.fail + ')' : '')], 'white-space:nowrap;'),
+          cell([wwEchoes(r.win * WW_ECHOES_PER_MP)]),
+        ]));
+      });
+    });
+
+    const refRows = [];
+    ['Dev', 'Rally', 'Twist'].forEach(function (k) {
+      refRows.push(h('tr', null, [h('td', {
+        css: TD + 'color:' + UI.accent + ';font-weight:bold;', colspan: '4',
+      }, [WW_BALANCE[k]])]));
+      WW_REFINE.filter(function (r) { return r.gives === k; }).forEach(function (r) {
+        const net = wwRefineNet(r);
+        refRows.push(h('tr', null, [
+          cell([h('div', null, [name(r)]), h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [
+            'Costs ' + (r.cost.mp != null ? r.cost.mp + ' Mythic Potential' : r.cost.item + ' ×' + r.cost.n)])]),
+          cell([wwChallengeWords(r.ch)], 'font-size:12px;'),
+          cell([wwRange(r.win, r.alt) + (r.fail != null ? ' (fail +' + r.fail + ')' : '')], 'white-space:nowrap;'),
+          cell([net == null ? '–' : (net >= 0 ? '+' : '−') + wwEchoes(Math.abs(net))]),
+        ]));
+      });
+    });
+
+    const payRows = WW_VIRTUE_ITEMS.map(function (v) {
+      return h('tr', null, [cell(['Myth of ' + v[0]]), cell([wikiLink(v[1], v[1])]), cell([wikiLink(v[2], v[2])])]);
+    }).concat(['Dev', 'Rally', 'Twist'].map(function (k) {
+      return h('tr', null, [cell([WW_BALANCE[k]]), cell([wikiLink(WW_BALANCE_ITEMS[k][0], WW_BALANCE_ITEMS[k][0])]),
+        cell([wikiLink(WW_BALANCE_ITEMS[k][1], WW_BALANCE_ITEMS[k][1])])]);
+    }));
+
+    const stratRows = WW_STRATEGIES.map(function (s) {
+      return h('tr', null, [
+        cell([h('div', null, [s.name]), h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [s.steps])]),
+        cell([s.needs], 'font-size:12px;'),
+        cell([s.result + ' · ' + s.actions + ' actions'], 'font-size:12px;'),
+        cell([s.epa], 'font-size:12px;'),
+      ]);
+    });
+
+    return h('div', { css: 'padding:0 12px 12px;' }, [
+      top,
+      rules,
+      section('Generate Mythic Potential', table(['Option', 'Challenge', 'MP (rare)', 'Echoes'], genRows)),
+      section('Refine into Balance', table(['Option', 'Challenge', 'Balance (alt)', 'Net Echoes'], refRows)),
+      section('Payout', h('div', null, [
+        h('div', { css: 'color:' + UI.dim + ';font-size:12px;margin-bottom:5px;' }, [
+          'Your Virtue’s row pays on Mythic Potential (12.5 Echo items first, then 2.5 Echo items, the rest in Cryptic '
+            + 'Clues on top of ' + WW_BASE_CLUES + '); all three Balance rows pay on their own quality (12.5 Echo items, '
+            + 'then 0.5 Echo items). A Storm-Threnody can sell for up to 16.5 Echoes at the Rat Market in a week’s first 52.']),
+        table(['Quality', '12.5 Echo item', 'Lesser item'], payRows),
+      ])),
+      section('Strategies from the guide', table(['Strategy', 'Needs', 'Result', 'EPA'], stratRows)),
+      h('div', { css: 'margin-top:12px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
+        'Rare and alternate odds are the guide’s rough figures. Data from ',
+        wikiLink('The Whisker-Ways (Guide)', 'The Whisker-Ways (Guide)'), ' on the Fallen London wiki.',
+      ]),
+    ]);
+  }
+
   // === feature registry ==================================================
 
   const FEATURES = [
@@ -46080,6 +46631,9 @@
     // names for this Fate-locked deck, so every row waits for its title and is
     // badged only under the Wisp-Ways greeting meanwhile.
     { name: 'philosofruits', run: phfRatings },
+    // Matched by picture too (the wiki has no option pages), and gated by a count:
+    // at least two options on screen must be the activity's own.
+    { name: 'whisker-ways', run: wwRatings },
   ];
 
   // === switches (tm-fl-ui-settings) ======================================
@@ -46120,7 +46674,7 @@
     ],
     'Parabola': [
       'chessboard', 'parabolan-hunting', 'oneiropomp', 'sacroboscan', 'parabolan-war',
-      'cubs-education', 'parabolan-camp',
+      'cubs-education', 'parabolan-camp', 'whisker-ways',
     ],
     'Firmament': [
       'firmament', 'discordant-studies', 'plaster-face', 'ecdysis', 'midnight-trade', 'high-sancta',
@@ -46151,6 +46705,7 @@
     'fotz-supplication': 'Fruits of the Zee supplication options',
     'lb-industries': 'L. B. Industries',
     'sacroboscan': 'The Sacroboscan Calendar',
+    'whisker-ways': 'The Whisker-Ways',
     'cubs-education': 'A Cub’s Education',
     'hunters-keep': 'Hunter’s Keep',
     'wilmots-business': 'Wilmot’s End business',
@@ -46262,6 +46817,15 @@
       render: renderPhfPanel,
     },
     {
+      id: 'whisker-ways',
+      icon: '🐀',
+      label: 'The Whisker-Ways',
+      group: 'Activities',
+      follows: { scriptId: 'choice', id: 'whisker-ways' },
+      hint: 'Your myth now and what it would pay, every Generate and Refine option, the payout and strategies',
+      render: renderWwPanel,
+    },
+    {
       id: 'hallowmas',
       icon: '🎭',
       label: 'Hallowmas',
@@ -46350,6 +46914,7 @@
       bankLabQualities(got);
       bankCtdQualities(got);
       bankPhfQualities(got);
+      bankWwQualities(got);
       bankHmQualities(got);
     } else if (path === '/possessions') {
       bankItemCounts(readPossessionCounts(doc));

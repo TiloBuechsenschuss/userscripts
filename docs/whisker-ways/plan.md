@@ -1,7 +1,7 @@
 # The Whisker-Ways: Choice Helper plan and mappings
 
-Plan and fill-in list for a `whisker-ways` feature in `FallenLondon/choice-helper.js`. Nothing is
-implemented yet. Work through the stages in order; each one ships on its own.
+Plan and fill-in list for the `whisker-ways` feature in `FallenLondon/choice-helper.js`. Stage 1 shipped in
+Choice Helper 1.83 (2026-11-14), with three titles from a capture. Work through the rest in order; each one ships on its own.
 
 - **Source:** [The Whisker-Ways (Guide)](https://fallenlondon.wiki/wiki/The_Whisker-Ways_(Guide)),
   fetched through the API on 2026-11-03. Item values come from each item's own page.
@@ -10,17 +10,19 @@ implemented yet. Work through the stages in order; each one ships on its own.
   wiki's comments found nothing useful on the activity either. This is the Philosofruits situation; see `docs/philosofruits/cards.md`.
 - **Pictures:** the game's own icons (`images.fallenlondon.com/icons/<key>small.png`), kept in `img/`.
   All 28 exist under exactly the names the guide gives, but none has been seen on these options in game.
-- Last updated 2026-11-03.
+- **Captures (2026-11-14):** the Generate storylet's HTML, *Dreams and Recollections*, at Ratty Airs 31, Community Virtue; the Refine
+  storylet's, *Refining your Unrefined Myth* (picture `enginegreen`), at 100 MP and Balance 0. Badges seen on both.
+- Last updated 2026-11-14.
 
 ## Decisions
 
 | # | Question | Answer | Status |
 |---|---|---|---|
-| 1 | Panel behind ⚙ UX? | **No panel.** Badges and tooltips only | Decided 2026-11-03 |
+| 1 | Panel behind ⚙ UX? | **Yes**, after Philosofruits: your myth now, payout now, every option, payout items, strategies. Reverses the 2026-11-03 "no panel" | Decided 2026-11-14 |
 | 2 | Scope first? | Generate and Refine rows only (23 options) | Decided 2026-11-03 |
 | 3 | What does a badge say? | The story change: `+17–21 MP?`. Echo values go in the tooltip. No ranking | Decided 2026-11-03 |
 | 4 | What does an unread input show? | Unread is a dash, never 0. An unknown Virtue shows item tiers | Proposed |
-| 5 | Greeting | Not known yet: the user has not been to the Whisker-Ways. `The Whisker-Ways` stays a guess | **Open** |
+| 5 | Greeting | *The Whisker-Ways*, captured verbatim ("Welcome to / The Whisker-Ways, / delicious friend!"). Gate also accepts the open storylet *Dreams and Recollections* | Confirmed 2026-11-14 |
 
 **Why no ranking.** Echo values barely separate the good lines: the best Generate and the free Refine
 both come to about 5 Echoes an action. Which line is best depends on the player's stats and spare items.
@@ -28,7 +30,7 @@ both come to about 5 Echoes an action. Which line is best depends on the player'
 ## How the activity plays
 
 1. Pick one of three Virtues: Cunning, Invention or Community. This costs 1 action.
-2. Generate Mythic Potential (MP). Options close at 100+ MP. The story needs at least 50 MP to end.
+2. Generate Mythic Potential (MP). Options disappear at 100+ MP (seen in game 2026-11-14), leaving only the way into Refine. The story needs at least 50 MP to end.
 3. Refine: spend MP or items for Moralising Developments, Heroic Rallies or Inscrutable Twists
    ("Balance" below). Options close at 20+ combined Balance. The story needs at least 11 to end.
 4. Finish and collect the payout. The guide counts no action for this step (`Ending Actions=0`).
@@ -83,7 +85,7 @@ Tick a row once its title is read off the game, and write the title in.
 
 | Title | Picture | Key | Challenge | Airs | Success | Rare | Fail | Echoes |
 |---|---|---|---|---|---|---|---|---|
-| [ ] | ![](img/bazaardoor_teethsmall.png) | `bazaardoor_teeth` | Dangerous 120 | 0–50 | +13 | +18 | +5 | 2.6 |
+| [x] Gnaw towards secluded dreamings | ![](img/bazaardoor_teethsmall.png) | `bazaardoor_teeth` | Dangerous 120 | 0–50 | +13 | +18 | +5 | 2.6 |
 | [ ] | ![](img/generic_unterzee4small.png) | `generic_unterzee4` | Mithridacy 5 | 51–100 | +13 | +18 | +5 | 2.6 |
 
 ### Cunning
@@ -108,10 +110,10 @@ Tick a row once its title is read off the game, and write the title in.
 
 | Title | Picture | Key | Challenge | Airs | Success | Rare | Fail | Echoes |
 |---|---|---|---|---|---|---|---|---|
-| [ ] | ![](img/chesspiece_apocyansmall.png) | `chesspiece_apocyan` | A Player of Chess 6 | 0–50 | +17 | +21 | – | 3.4 |
+| [x] Sift dreams of lost mail | ![](img/chesspiece_apocyansmall.png) | `chesspiece_apocyan` | A Player of Chess 6 | 0–50 | +17 | +21 | – | 3.4 |
 | [ ] | ![](img/ballotboxsmall.png) | `ballotbox` | Persuasive 130 | 51–100 | +17 | +21 | – | 3.4 |
 | [ ] | ![](img/formerlytalkativebearersmall.png) | `formerlytalkativebearer` | Persuasive 160 | 0–12, 89–100 | +22 | +27 | +5 | 4.4 |
-| [ ] | ![](img/crowd2small.png) | `crowd2` | A Player of Chess 8 + Persuasive 150 | not recorded | +25 | none recorded | – | 5.0 |
+| [x] Navigate the needy islands of the zee | ![](img/crowd2small.png) | `crowd2` | A Player of Chess 8 + Persuasive 150 | not recorded | +25 | none recorded | – | 5.0 |
 
 **Readings to confirm.** The guide puts a second challenge where the Airs range goes on the +25 rows. I read
 that as two checks with no Airs condition: its strategies take the +25 five times running and ask for both
@@ -126,15 +128,15 @@ guide does not say whether a failure still consumes the input.
 
 | Title | Picture | Key | Challenge | Costs | Gives | Success | Alt | Fail | Net |
 |---|---|---|---|---|---|---|---|---|---|
-| [ ] | ![](img/hoofprintsmall.png) | `hoofprint` | Mithridacy 9 | 10 MP | Moralising Development | +3 | +4 | +1 | +5.0 |
-| [ ] | ![](img/snakehead2small.png) | `snakehead2` | Dangerous 130 | Extraordinary Implication ×2 | Moralising Development | +4 | +6 | – | +5.0 |
-| [ ] | ![](img/beefacesmall.png) | `beeface` | Mithridacy 7 | Emetic Revelation ×1 | Moralising Development | +8 | +9 | +1 | +4.5 |
-| [ ] | ![](img/fist2small.png) | `fist2` | Mithridacy 9 | 10 MP | Heroic Rally | +3 | +4 | +1 | +5.0 |
-| [ ] | ![](img/deliriumsmall.png) | `delirium` | Dangerous 130 | Memory of a Much Lesser Self ×2 | Heroic Rally | +4 | +6 | – | none |
-| [ ] | ![](img/currency1_goldsmall.png) | `currency1_gold` | Mithridacy 7 | Magnificent Diamond ×1 | Heroic Rally | +8 | +9 | +1 | +4.5 |
-| [ ] | ![](img/cloudssmall.png) | `clouds` | Mithridacy 9 | 10 MP | Inscrutable Twist | +3 | +4 | +1 | +5.0 |
-| [ ] | ![](img/crosssmall.png) | `cross` | Dangerous 130 | Mourning Candle ×2 | Inscrutable Twist | +4 | +6 | – | +5.0 |
-| [ ] | ![](img/mapsmall.png) | `map` | Mithridacy 7 | Puzzling Map ×1 | Inscrutable Twist | +8 | +9 | +1 | +4.5 |
+| [x] Impress a moral upon the tale | ![](img/hoofprintsmall.png) | `hoofprint` | Mithridacy 9 | 10 MP | Moralising Development | +3 | +4 | +1 | +5.0 |
+| [x] Implant unsettling implications | ![](img/snakehead2small.png) | `snakehead2` | Dangerous 130 | Extraordinary Implication ×2 | Moralising Development | +4 | +6 | – | +5.0 |
+| [x] Elucidate unpleasant consequences | ![](img/beefacesmall.png) | `beeface` | Mithridacy 7 | Emetic Revelation ×1 | Moralising Development | +8 | +9 | +1 | +4.5 |
+| [x] Invigorate the story with heroic values | ![](img/fist2small.png) | `fist2` | Mithridacy 9 | 10 MP | Heroic Rally | +3 | +4 | +1 | +5.0 |
+| [x] Make room for impressive developments | ![](img/deliriumsmall.png) | `delirium` | Dangerous 130 | Memory of a Much Lesser Self ×2 | Heroic Rally | +4 | +6 | – | none |
+| [x] Socket promises of riches and treasure | ![](img/currency1_goldsmall.png) | `currency1_gold` | Mithridacy 7 | Magnificent Diamond ×1 | Heroic Rally | +8 | +9 | +1 | +4.5 |
+| [x] Obscure the facts of the narrative | ![](img/cloudssmall.png) | `clouds` | Mithridacy 9 | 10 MP | Inscrutable Twist | +3 | +4 | +1 | +5.0 |
+| [x] Eliminate a dogmatic reading | ![](img/crosssmall.png) | `cross` | Dangerous 130 | Mourning Candle ×2 | Inscrutable Twist | +4 | +6 | – | +5.0 |
+| [x] Muddle familiar routes and events | ![](img/mapsmall.png) | `map` | Mithridacy 7 | Puzzling Map ×1 | Inscrutable Twist | +8 | +9 | +1 | +4.5 |
 
 ## Mapping: One-action options (5 options, stage 4)
 
@@ -264,14 +266,16 @@ Kept for the tooltips. I re-derived the first two Echo sums from the payout form
 
 Nothing here can be found on the wiki.
 
-- [ ] **Greeting:** what does the sidebar say inside the Whisker-Ways? Open: the user has not been there yet. Until then no badge is confirmed to appear.
-- [ ] **Storylet headings:** the Virtue pick, Generate, Refine and Finish. Are Generate and Refine one storylet?
-- [ ] **Unmapped pictures:** the three Virtue options, the Finish option and any go-back option.
-- [ ] **Virtue quality:** which quality, if any, records the Virtue on the Myself tab?
-- [ ] **Airs:** the name of the local Airs quality. Not needed for badges.
-- [ ] **Locked options:** greyed or hidden, at MP 100+ and at Balance 20+?
-- [ ] **Refine failure:** does a failed Refine still consume its 10 MP or items?
-- [ ] **+25 rows:** two checks or one, and is any Airs condition present?
+- [x] **Greeting:** "Welcome to / The Whisker-Ways, / delicious friend!" (captured 2026-11-14, split over three lines).
+- [ ] **Storylet headings:** Generate is *Dreams and Recollections* (picture `ratofglory`). Not one storylet with Refine: Generate offers *Refine your nascent myth* (`stationVIII`, needs 50 MP) and *Abandon the whole endeavour* (`handstop`). Refine is *Refining your Unrefined Myth*. Still open: the Virtue pick heading.
+- [ ] **Unmapped pictures:** the three Virtue options. Seen on Refine: *Consider your options* (`crypticsecret`, an explainer), *Gather more mythic potential* (`diamondpurple`, back to Generate), *Abandon the whole endeavour* (`handstop`), and the Finish, *Declare the Unrefined Myth of The First Postal Rat of Nuncio complete* (`firequill`). The Finish is locked while *A Hole In Your Story* is above 9; it read 20 at Balance 0.
+- [x] **Virtue quality:** *Concerning A Ratty Virtue* (a requirement tooltip reads "is: Community"). Whether the Myself tab shows it is still open.
+- [x] **Airs:** *Ratty Airs*.
+- [ ] **Locked options:** at MP 100+ the Generate options disappear and only Refine can be entered (seen 2026-11-14). Still open: Refine options at Balance 20+, greyed or hidden?
+- [ ] **Refine failure:** a failed MP Refine still takes its 10 MP and pays +1 (seen 2026-11-14). Items: not known yet.
+- [x] **Panel reading:** the Myself tab names Mythic Potential, Moralising Development, Heroic Rally, Inscrutable Twist and A Hole In Your Story as `WW_QUALITIES` has them; the panel shows them (2026-11-14).
+- [x] **A Hole In Your Story:** starts at 20, drops by the Balance a Refine raises; the Finish needs it at 9 or less (seen 2026-11-14).
+- [x] **+25 rows:** two checks (A Player of Chess, Persuasive) and no Airs condition, seen on `crowd2`.
 - [ ] **Finish:** does it really cost no action?
 - [ ] **Odds:** rare and alternate frequencies. The guide asks for reports too.
 - [ ] **Second ending:** the quality level of the story's other main ending, for `mrcheese`. The guide lacks it.
@@ -290,5 +294,5 @@ Kept as cross-checks. The guide's tables win unless the game disagrees.
 
 ## Totals
 
-- Options titled: 0 of 28 (Generate 0 of 14, Refine 0 of 9, One-action 0 of 5)
+- Options titled: 12 of 28 (Generate 3 of 14, Refine 9 of 9, One-action 0 of 5)
 - Unmapped options: 3 Virtue, Finish, any go-back

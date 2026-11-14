@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/KingdomOfLoathing/ux-enhancers.js
-// @version      1.36
+// @version      1.37
 // @description  Grab-bag of quality-of-life tweaks for Kingdom of Loathing pages.
 // @match        https://www.kingdomofloathing.com/hermit.php*
 // @match        https://kingdomofloathing.com/hermit.php*
@@ -3637,7 +3637,10 @@
     ['place.php?whichplace=plains', ['Outskirts of Cobb\'s Knob', '"Fun" House']],
     ['cobbsknob.php', ['Cobb\'s Knob Treasury']],
     ['cobbsknob.php?action=tolabs', ['Cobb\'s Knob Laboratory']],
-    ['cobbsknob.php?action=tomenagerie', ['Cobb\'s Knob Menagerie, Level 3', 'Menagerie Level 3']],
+    // The game words the Menagerie bounty "on the third level of Cobb's Knob
+    // Menagerie"; the other two are KoLmafia's and the wiki's names for it.
+    ['cobbsknob.php?action=tomenagerie', ['third level of Cobb\'s Knob Menagerie',
+      'Cobb\'s Knob Menagerie, Level 3', 'Menagerie Level 3']],
     ['place.php?whichplace=town_wrong', ['Overgrown Lot', 'Sleazy Back Alley', 'Copperhead Club']],
     ['place.php?whichplace=town_market', ['Skeleton Store']],
     ['place.php?whichplace=town_right', ['Madness Bakery']],
