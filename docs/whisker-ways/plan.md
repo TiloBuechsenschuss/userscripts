@@ -32,7 +32,7 @@ both come to about 5 Echoes an action. Which line is best depends on the player'
 1. Pick one of three Virtues: Cunning, Invention or Community. This costs 1 action.
 2. Generate Mythic Potential (MP). Options disappear at 100+ MP (seen in game 2026-11-14), leaving only the way into Refine. The story needs at least 50 MP to end.
 3. Refine: spend MP or items for Moralising Developments, Heroic Rallies or Inscrutable Twists
-   ("Balance" below). Options close at 20+ combined Balance. The story needs at least 11 to end.
+   ("Balance" below). Options disappear at 20+ combined Balance (seen in game 2026-11-14). The story needs at least 11 to end.
 4. Finish and collect the payout. The guide counts no action for this step (`Ending Actions=0`).
 
 Going back from step 3 to step 2 is allowed whenever MP is below 100.
@@ -271,8 +271,8 @@ Nothing here can be found on the wiki.
 - [ ] **Unmapped pictures:** the three Virtue options. Seen on Refine: *Consider your options* (`crypticsecret`, an explainer), *Gather more mythic potential* (`diamondpurple`, back to Generate), *Abandon the whole endeavour* (`handstop`), and the Finish, *Declare the Unrefined Myth of The First Postal Rat of Nuncio complete* (`firequill`). The Finish is locked while *A Hole In Your Story* is above 9; it read 20 at Balance 0.
 - [x] **Virtue quality:** *Concerning A Ratty Virtue* (a requirement tooltip reads "is: Community"). Whether the Myself tab shows it is still open.
 - [x] **Airs:** *Ratty Airs*.
-- [ ] **Locked options:** at MP 100+ the Generate options disappear and only Refine can be entered (seen 2026-11-14). Still open: Refine options at Balance 20+, greyed or hidden?
-- [ ] **Refine failure:** a failed MP Refine still takes its 10 MP and pays +1 (seen 2026-11-14). Items: not known yet.
+- [x] **Locked options:** at MP 100+ the Generate options disappear and only Refine can be entered; at Balance 20+ the Refine options disappear too (both seen 2026-11-14).
+- [x] **Refine failure:** a failed MP Refine still takes its 10 MP and pays +1; a failed Implication Refine still takes the Implications (both seen 2026-11-14). The other item Refines are assumed the same.
 - [x] **Panel reading:** the Myself tab names Mythic Potential, Moralising Development, Heroic Rally, Inscrutable Twist and A Hole In Your Story as `WW_QUALITIES` has them; the panel shows them (2026-11-14).
 - [x] **A Hole In Your Story:** starts at 20, drops by the Balance a Refine raises; the Finish needs it at 9 or less (seen 2026-11-14).
 - [x] **+25 rows:** two checks (A Player of Chess, Persuasive) and no Airs condition, seen on `crowd2`.

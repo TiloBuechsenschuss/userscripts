@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.83
+// @version      1.84
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -45815,8 +45815,9 @@
   // reversing the plan's no-panel decision) carries the tables and the payout.
   //
   // **Seen in game 2026-11-14:** a failed Refine still takes its 10 Mythic
-  // Potential and pays +1, as the guide's failure column says; whether a failed
-  // item Refine takes the items is not known yet. A Hole In Your Story starts at
+  // Potential and pays +1, as the guide's failure column says, and a failed
+  // Extraordinary Implication Refine still takes the Implications (the other
+  // item Refines are assumed to do the same). A Hole In Your Story starts at
   // 20 and drops by the Balance a Refine raises, so the Finish's "9 or less" is
   // the guide's 11 Balance.
   //
@@ -45869,7 +45870,8 @@
   // only the way into Refine is left.
   const WW_MP_CAP = 100;
   const WW_MP_TO_END = 50;
-  const WW_BALANCE_CAP = 20;   // Refine closes at this much combined Balance
+  // Refine options are HIDDEN at this much combined Balance (seen in game 2026-11-14).
+  const WW_BALANCE_CAP = 20;
   const WW_BALANCE_TO_END = 11;
   // The guide's rough odds of the rare (Generate) and alternate (Refine) success.
   const WW_RARE_ODDS = { General: 0.1, Cunning: 0.5, Invention: 0.5, Community: 0.5 };
@@ -46006,7 +46008,9 @@
         + '%, the guide’s rough figure): +' + row.alt + '.');
       lines.push('Failure: ' + (row.fail == null ? 'nothing the guide records' : q + ' +' + row.fail) + '. '
         + (row.cost.mp != null ? 'A failure still takes the ' + row.cost.mp + ' Mythic Potential (seen in game).'
-          : 'Whether a failure still takes the ' + row.cost.item + ' is not known yet.'));
+          : 'A failure still takes the ' + row.cost.item + ' ×' + row.cost.n
+            + (row.cost.item === 'Extraordinary Implication' ? ' (seen in game).'
+              : ' (seen with Extraordinary Implications; assumed for this one).')));
       lines.push('Each point of Balance also lowers A Hole In Your Story by one; the Finish needs it at '
         + WW_HOLE_TO_END + ' or less.');
       const net = wwRefineNet(row);
@@ -46014,7 +46018,7 @@
         ? 'Net: none -- ' + row.cost.item + ' has no sale value on the wiki.'
         : 'Net about ' + (net >= 0 ? '+' : '−') + wwEchoes(Math.abs(net)) + ' Echoes (the alternate at its rough odds, the cost at '
           + (row.cost.mp != null ? WW_ECHOES_PER_MP + ' Echoes per Mythic Potential' : 'its sale value, ' + row.cost.value + ' Echoes each') + ').');
-      lines.push('', 'Refine options close at ' + WW_BALANCE_CAP + '+ Balance (Moralising Developments, Heroic Rallies and '
+      lines.push('', 'Refine options disappear at ' + WW_BALANCE_CAP + '+ Balance (Moralising Developments, Heroic Rallies and '
         + 'Inscrutable Twists together); the story needs ' + WW_BALANCE_TO_END + ' to end. Each point pays '
         + WW_ECHOES_PER_BALANCE + ' Echoes; a 12.5 Echo item arrives at 7, 13, 19 and 25 of one quality.');
     }
@@ -46258,11 +46262,11 @@
         + ';color:' + UI.dim + ';font-size:12px;line-height:1.6;',
     }, [
       'Pick a Virtue (1 action). Generate Mythic Potential; those options disappear at ' + WW_MP_CAP + '+. Refine it or '
-        + 'items into Balance (Moralising Development, Heroic Rally, Inscrutable Twist); Refine closes at '
+        + 'items into Balance (Moralising Development, Heroic Rally, Inscrutable Twist); those options disappear at '
         + WW_BALANCE_CAP + '+ Balance. You can go back from Refine to Generate while below ' + WW_MP_CAP + ' MP.',
       'To finish: ' + WW_MP_TO_END + '+ Mythic Potential and ' + WW_BALANCE_TO_END + '+ Balance. A Hole In Your Story '
         + 'starts at 20 and drops one for each point of Balance; the Finish needs it at ' + WW_HOLE_TO_END + ' or less.'
-        + ' A failed Refine still takes its 10 Mythic Potential and pays +1. Mythic Potential pays ' + WW_ECHOES_PER_MP + ' Echoes a point, Balance '
+        + ' A failed Refine still takes its cost: 10 Mythic Potential, or the items. Mythic Potential pays ' + WW_ECHOES_PER_MP + ' Echoes a point, Balance '
         + WW_ECHOES_PER_BALANCE + ', plus ' + WW_BASE_CLUES + ' Cryptic Clues every time. No level wastes value; a '
         + '12.5 Echo Balance item arrives at 7, 13, 19 and 25 of one quality, a Virtue one at 63 and 125 MP.',
       'No ranking: the best Generate and the free Refine both come to about 5 Echoes an action.',

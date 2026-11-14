@@ -2838,7 +2838,7 @@ navigation. Two consequences:
   Echoes an action. The tooltip: challenges with their certain level (Broad by `broadCertainAt`, Narrow difficulty + 5, both matching
   the guide's strategies), success, rare/alternate at the guide's rough odds, failure, the Echo value (MP is 0.2 Echoes a point) or
   the Refine net (`wwRefineNet`, from each input's sale value; Memory of a Much Lesser Self has none), and the caps (Generate closes
-  at 100+ MP -- the options disappear, seen in game 2026-11-14 -- the story needs 50; Refine closes at 20+ Balance, needs 11). **Matching** reuses Philosofruits' `phfImageKey` and
+  at 100+ MP -- the options disappear, seen in game 2026-11-14 -- the story needs 50; Refine options disappear at 20+ Balance, seen the same day -- needs 11). **Matching** reuses Philosofruits' `phfImageKey` and
   `phfBranches`: a titled row by title only, an untitled one by picture. Twelve titles were read off the game's HTML on 2026-11-14:
   three Generate (*Gnaw towards secluded dreamings*, bazaardoor_teeth; *Sift dreams of lost mail*, chesspiece_apocyan; *Navigate the
   needy islands of the zee*, crowd2) and all nine Refine, from the Refine storylet *Refining your Unrefined Myth* (enginegreen). **The gate** is (1) the greeting in `WW_AREAS` (*The Whisker-Ways*, captured verbatim 2026-11-14, confirm-only) or
@@ -2848,7 +2848,8 @@ navigation. Two consequences:
   Refine are separate storylets: *Refine your nascent myth* (stationVIII, needs 50 MP) leads in, *Gather more mythic potential*
   (diamondpurple) back. The Finish, *Declare the Unrefined Myth of <myth> complete* (firequill), is locked while *A Hole In Your
   Story* is above 9; the Hole starts at 20 and drops by the Balance a Refine raises (seen 2026-11-14), so 9 is the guide's
-  11 Balance. A failed MP Refine still takes its 10 MP and pays +1 (seen 2026-11-14). Left out: the
+  11 Balance. A failed Refine still takes its cost: 10 MP (and pays +1), or the Extraordinary Implications (seen 2026-11-14;
+  the other item Refines assumed the same). Left out: the
   Virtue pick, the Finish, and the five one-action options (stage 4 of the plan).
 
   **Hallowmas Masques** (`hallowmas-masques`, `HM_MASQUE_OPTIONS`; panel `hallowmas`, `renderHallowmasPanel`, added 2026-10-13; filed
@@ -4195,9 +4196,8 @@ Confirmed live by the author:
   option** -- drawn greyed or not at all before the Hintershroom.
 
 - **The Whisker-Ways** (`whisker-ways`, added 2026-11-14). **Confirmed in game 2026-11-14:** badges on both steps (Generate,
-  Refine), the greeting, all nine Refine titles, Generate options hidden at 100+ MP. Still to report: **(1) Locked Refine options**
-  at 20+ Balance: greyed or hidden. **(2) A failed item Refine** -- does it still take the items (a failed MP Refine takes its MP,
-  seen). The panel's quality reading is confirmed (2026-11-14): all five `WW_QUALITIES` names read off the Myself tab.
+  Refine), the greeting, all nine Refine titles, Generate options hidden at 100+ MP, Refine options hidden at 20+ Balance. Still to report: **(1) A failed item Refine** other than Extraordinary Implication -- does it still take the items
+  (assumed; seen for Implications and for the MP Refines). The panel's quality reading is confirmed (2026-11-14): all five `WW_QUALITIES` names read off the Myself tab.
 
 - **Hallowmas Masques** (`hallowmas-masques`, added 2026-10-13, prepared from 2025's pages before the festival opened). Nothing has been seen
   in game. Report first: **(1) The storylet headings** -- whether each Masque's open heading is exactly *The Roof Below*, *The Wreck of the

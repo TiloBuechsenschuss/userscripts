@@ -247,7 +247,7 @@ check('tooltip: a "-" failure is not claimed to be nothing',
   tip('mirrormonster').includes('Failure: nothing the guide records.'), true);
 check('tooltip: the Generate caps',
   tip('evade2').includes('disappear at 100+ Mythic Potential, leaving only Refine; the story needs 50 to end'), true);
-check('tooltip: the Refine caps', tip('clouds').includes('close at 20+ Balance'), true);
+check('tooltip: the Refine caps', tip('clouds').includes('disappear at 20+ Balance'), true);
 check('tooltip: the Refine net', tip('beeface').includes('Net about +4.5 Echoes'), true);
 check('tooltip: no net without a sale value', tip('delirium').includes('Net: none'), true);
 check('tooltip: an untitled row quotes what the game shows, to copy in',
@@ -417,8 +417,11 @@ check('an unread quality is a dash, a quality absent from an unfiltered tab is 0
   [{ MP: 40 }, { MP: 40, Dev: 0, Rally: 0, Twist: 0, Hole: 0 }]);
 check('tooltip: a failed MP Refine still takes its Mythic Potential (seen in game)',
   tip('hoofprint').includes('A failure still takes the 10 Mythic Potential (seen in game).'), true);
-check('tooltip: an item Refine does not claim the same',
-  tip('snakehead2').includes('Whether a failure still takes the Extraordinary Implication is not known yet.'), true);
+check('tooltip: a failed Implication Refine still takes the Implications (seen in game)',
+  tip('snakehead2').includes('A failure still takes the Extraordinary Implication ×2 (seen in game).'), true);
+check('tooltip: the other item Refines say the same is assumed, not seen',
+  tip('cross').includes('A failure still takes the Mourning Candle ×2 (seen with Extraordinary Implications; assumed for this one).'),
+  true);
 check('tooltip: Balance lowers A Hole In Your Story', tip('map').includes('lowers A Hole In Your Story by one'), true);
 {
   const panel = api.renderWwPanel(null);
