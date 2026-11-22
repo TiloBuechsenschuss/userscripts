@@ -2593,7 +2593,7 @@ navigation. Two consequences:
   carousel of its own: Unfinished Business ×4 (Duelling the Black Ribbon and Hunting Dangerous Prey
   went to `running-battle` and `the-hunt-is-on`, below); and the options that only *re-roll* Airs
   without being gated on it (*Sample prisoner’s honey*).
-  **Sift through the pages (2026-10-25).** Using The Censored Census of 1862 opens *Perusal of Forgotten Pages* (captured
+  **Sift through the pages (2026-10-25).** Using the item Censored Census of 1862 (no article in game; the wiki page is The Censored Census of 1862) opens *Perusal of Forgotten Pages* (captured
   in game, branch 247042); its one option is not Airs-gated, re-rolls the Airs at any Airs, and is filed under
   `AOL_ELSEWHERE` with the window `0–100`. The page's Variant tables retitle the result text by Airs, not the option.
   **A cavalry officer (2026-10-25).** An Airs-gated option kept from outside the six: an option of the Spite card

@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.84
+// @version      1.85
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -562,7 +562,7 @@
  *     in Spite, Life on Ladybones Road, Business on Watchmaker's Hill, Dabble in the Great Game,
  *     Working for the Widow and the Honey-Dens -- and the storylets their redirecting options open,
  *     A cavalry officer in Spite's Rob a drunk, whose Map Scraps grow with your Shadowy ("≥"), and
- *     Sift through the pages, which The Censored Census of 1862 opens.
+ *     Sift through the pages, which the Censored Census of 1862 opens.
  *     Each option shows the Echoes per action of what a success gives at the Bazaar sell price, then
  *     what else it moves and any faction result; a redirect shows its best line inside, a random
  *     bundle is marked rather than priced, and the six dreams that share one Honey-Dens title carry
@@ -10463,7 +10463,7 @@
   const AOL_TOP = [AOL_SPITE, AOL_LADY, AOL_HILL, AOL_GAME, AOL_WIDOW, AOL_HONEY];
   // Storylets outside the six that hold an option of their own the guide names, not opened from the six. Rob a drunk
   // is a Spite card whose other options are Someone Is Coming's or carry no window; Perusal of Forgotten Pages is what
-  // using The Censored Census of 1862 opens (both captured in game, 2026-10-25).
+  // using the Censored Census of 1862 opens (both captured in game, 2026-10-25).
   const AOL_DRUNK = 'Rob a drunk';
   const AOL_CENSUS = 'Perusal of Forgotten Pages';
   const AOL_ELSEWHERE = [AOL_DRUNK, AOL_CENSUS];
@@ -10666,7 +10666,7 @@
       scale: { item: 'Map Scrap', stat: 'Shadowy', k: 0.03, c: 3.49 },
       rare: { g: [['Tasselled Sword-Cane', 1]] }, fail: { g: [['Cryptic Clue', 3]], q: [['Suspicion', 1]] } }),
     aolE(AOL_CENSUS, 'Sift through the pages', [[0, 100]], { ch: ['Watchful', 150], g: [['Proscribed Material', [41, 55]]],
-      fail: { g: [['Proscribed Material', 25]] }, needs: 'The Censored Census of 1862',
+      fail: { g: [['Proscribed Material', 25]] }, needs: 'Censored Census of 1862',
       note: 'Not gated on the Airs: offered at any, and the guide’s fallback for cycling them.' }),
   ];
 
@@ -11237,8 +11237,8 @@
     { every3: true, name: 'Dice!', where: 'A card game, The Cave of the Nadir',
       gives: 'Irrigo +1 and a Devilbone Die', needs: 'The Airs of London exactly three times your Irrigo (3, 6, … 27)',
       badged: 'cave-of-the-nadir' },
-    { airs: [[0, 100]], name: 'Sift through the pages', where: 'The Censored Census of 1862 (an item)',
-      use: 'The Censored Census of 1862',
+    { airs: [[0, 100]], name: 'Sift through the pages', where: 'Censored Census of 1862 (an item)',
+      use: 'Censored Census of 1862',
       gives: '41–55 Proscribed Material (Watchful 150); a failure gives 25', badged: 'airs-of-london',
       note: 'Re-rolls the Airs on a success and a failure, at any Airs: the guide’s fallback for cycling them.' },
   ];
@@ -11262,7 +11262,7 @@
       badged: 'time-in-bed' },
     { name: 'Unfinished Business', where: 'Ladybones Road, Spite, Watchmaker’s Hill, Veilgarden', how: 're-rolls',
       needs: 'A Person of Some Importance', badged: null, note: 'Four storylets of about eight options each; not badged yet.' },
-    { name: 'The Censored Census of 1862', where: 'an item: Sift through the pages', use: 'The Censored Census of 1862',
+    { name: 'Censored Census of 1862', where: 'an item: Sift through the pages', use: 'Censored Census of 1862',
       how: 're-rolls, at any Airs',
       needs: 'the item', badged: 'airs-of-london' },
     { name: 'Brawling with Dockers', where: 'The Blind Helmsman', how: 'the fights re-roll',

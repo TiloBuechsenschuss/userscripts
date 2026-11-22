@@ -710,9 +710,9 @@ check('the Census rows carry a "use" for the item, and the panel draws the butto
   (() => {
     const rows = api.AOL_NOTABLE.concat(api.AOL_CHANGERS).filter((e) => e.use);
     const text = (n) => (n.text || n.textContent || '') + (n.childNodes || []).map(text).join('|');
-    return [rows.map((e) => e.name).sort(), rows.every((e) => e.use === 'The Censored Census of 1862'),
+    return [rows.map((e) => e.name).sort(), rows.every((e) => e.use === 'Censored Census of 1862'),
       (text(api.renderAolPanel(null)).match(/\|use\|/g) || []).length >= 2];
-  })(), [['Sift through the pages', 'The Censored Census of 1862'], true, true]);
+  })(), [['Censored Census of 1862', 'Sift through the pages'], true, true]);
 
 check('every "badged" names a registered feature',
   api.AOL_NOTABLE.concat(api.AOL_CHANGERS).filter((e) => e.badged && !api.FEATURES.some((f) => f.name === e.badged))
