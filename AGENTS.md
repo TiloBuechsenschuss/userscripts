@@ -1892,6 +1892,36 @@ navigation. Two consequences:
   guide's repeatable projects (`LAB_PROJECTS`), equipment ladder (`LAB_EQUIPMENT`) and expertise
   table (`LAB_EXPERTS`).
 
+  `lab-investigations` badges the options of the lab storylet **Begin a Scientific Investigation**
+  (added 2026-11-23, badges only — no panel, by request), so a player choosing a project sees at a
+  glance what it costs and pays: `▼ 550 LR +15 PR · 62.50 E · Toxicological` — the Total Lab Research
+  Required (and Parabolan Research), the **Echo value of the finished product**, and the **focus**
+  the start page sets, with any faction result after it. `LAB_INV` is one entry per option (70, from
+  the thirteen section subpages), transcribed from the option pages, the conclusion pages each one
+  links to, and the item pages for `LAB_INV_PRICES`. **The Echo figure is the London Bazaar's sale
+  price** of what the first conclusion hands over; an Osteology item has no Bazaar price and is
+  valued at its **Bone Value** (pence ÷ 100) and marked `☠`, because it only becomes Echoes in a
+  sold skeleton. Every item named anywhere must have a `LAB_INV_PRICES` entry — `{ e }`, `{ bone }`
+  or `{ none: 'why' }` — so an unpriced item is a looked-up claim, not a gap (Tempestuous Tales and
+  Roof-Charts sell only in the Roof's markets; Hinterland Scrip and Surveys only for Scrip). A
+  product with no Echo price is named instead (`Watchful Gains 21`, `Formula for Railway Steel`). A
+  challenge or random pick on the conclusion is the **range across its outcomes** with `?`; a
+  project that can be extended (the Albatross, Shark, False-Snake, rifle) is marked `»`; one whose
+  start uses something up `▼`, with the costs priced in the tooltip but **not netted on the badge**.
+  The hidden **Expected Lab Reward Value** the start pages set is the game's own valuation, and two
+  conclusions pay in proportion to it, but on most projects it is not what the product sells for
+  (the Albatross's is 12.50; its two Wings sell for 25), so it is quoted in the tooltip and kept as
+  `elrv` for the cross-check, never put on the badge. **Cross-check**: 27 projects are also in the
+  guide's Repeatable Research table (`LAB_PROJECTS`); research, Parabolan research, Value (= `elrv`)
+  and the focus named in its Type column must all agree, and do. One disagreement is recorded rather
+  than changed: the guide says the Starved citadel study costs one Starved Expression, the page five.
+  Three titles are two options each (the two egg-hatching projects, the two locomotives, the two
+  monstrosity studies) and nothing on screen tells them apart, so the badge says what is true of both
+  (`no focus / Red Science`) and the tooltip carries both. **The gate** is the opened storylet's own
+  heading, which is distinctive; a greeting read verbatim as somewhere other than the University
+  (`labWhere`) still clears. Its own class/flag pair on `.branch__title`; the test runs every feature
+  with all 70 titles open and asserts none but this one badges them.
+
   `arbor` is the seventh, for **Arbor, of the Roses**, and has **no panel** (the user asked for
   badges only, 2026-09-14). Arbor deals no opportunity cards, so it badges three things: the
   London card **A Dream of Roses** (`ARBOR_CARD_CLASS`: "9 actions", and in the tooltip whether the
@@ -3671,6 +3701,17 @@ Confirmed live by the author:
   Kataleptic Toxicology; and what *Discover what is mandated* / *Write to your Secret College for
   help* paid, since the pages do not say how that Equipment ÷ 9 formula rounds.
 
+- The **Begin a Scientific Investigation badges** (added 2026-11-23). Nothing seen in the game.
+  Report first, in order: **(1) The storylet's heading** reads *Begin a Scientific Investigation*
+  when you start a project (the whole gate rests on it). **(2) The option titles** match the wiki's —
+  in particular whether the Eolith option reads *Disambiguate an Eolith* or *… (again)*, and that the
+  same-titled pairs really do show the same title. **(3) Any payout against what the conclusion
+  actually gave**, above all the Roof-Chart split by Breadth of the Roof Surveyed, and whether
+  *Test Spices' drug on various animals* needs 450 or 550 research to finish honestly (the start
+  page sets 450; the truthful conclusion asks 550). **(4) The three research figures taken from a
+  conclusion** because the start page sets none: *Experiment on an Aged Egg* / *Percipient Egg*
+  (100) and the plain and "greatest price" *Prepare a weapon of vengeance* (50 + 25 PR).
+
 - The **Arbor badges** (added 2026-09-14). Nothing about them has been seen in the game. Worth
   reporting, in order: whether a stay really shows **Near Arbor** / **Far Arbor** as an opened
   storylet (a `.storylet-root__heading`) with the options beneath it — the whole option gate rests
@@ -4646,6 +4687,16 @@ Current tests:
   open-ended Experimental Object wording, every new Reflection row, and `LAB_LEFT_OUT` — the
   cards deliberately not transcribed, with the reason for each.
   It passes a `localStorage` stub with auto-refresh off, so no hidden frame or timer is started.
+- `tests/choice-lab-investigations.test.mjs` — asserts `choice-helper.js`'s Begin a Scientific
+  Investigation badges. The table's shape (every option has research or an explicit null, a focus
+  list and a conclusion that pays an Echo figure or names its product; every item named has a price
+  entry and no price is left over); the **cross-check** of the 27 projects shared with
+  `LAB_PROJECTS` (research, PR, Value against `elrv`, focus against the Type column); the arithmetic
+  on worked examples (the Albatross's 26 against its 12.50 valuation, the Shark's `☠`, the elastic
+  limits' two-way bones as 60.10–67, challenges as ranges with `?`, the Route's `50+75`, Emetic
+  Revelations as Cryptic Clues); colour bands and ink; the three same-titled pairs merged; and the
+  gate end to end — only inside the storylet, cleared by another greeting, idempotent on a recycled
+  heading, and no other feature badging any of the 70 titles. `--dump` prints every badge.
 - `tests/choice-arbor.test.mjs` — asserts `choice-helper.js`'s Arbor feature. The
   transcription row by row (challenges, flat outcomes, the six scaling rows, the options costing no
   Permission to Linger, the guide's option count per district) and the four guide disagreements

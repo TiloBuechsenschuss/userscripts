@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.85
+// @version      1.86
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -204,6 +204,13 @@
  *     Its panel, University Laboratory, shows your Equipment, staff, students, project and what
  *     Circulate a draft of your findings would pay right now, every laboratory card searchable, the
  *     repeatable projects, the equipment ladder, and which experts suit which projects.
+ *     When you start a new project, every option of Begin a Scientific Investigation gets a badge
+ *     of its own: the Laboratory Research it needs (and Parabolan Research, if any), what the
+ *     finished product sells for in Echoes at the Bazaar, and the project's focus -- for example
+ *     "450 LR +15 PR · 62.50 E · Toxicological". A bone is priced at its Bone Market value and
+ *     marked with a skull; a product with no Echo price says what it is instead ("Watchful Gains
+ *     21"); a down triangle means starting it uses something up, a question mark a range across
+ *     a challenge's outcomes, and a double chevron a project that can be extended for more.
  *
  * (7) Arbor, of the Roses deals no opportunity cards, so the badges go on the London card that
  *     takes you there, A Dream of Roses -- how many actions a trip costs, with your last
@@ -8997,6 +9004,1050 @@
     // gone stale, pays for a background load of Myself and Possessions --
     // throttled to one a minute and off with the auto-refresh toggle.
     if (wantsReading) labMaybeRefresh();
+  }
+
+  // === feature: Begin a Scientific Investigation ==========================
+  //
+  // The storylet in your Laboratory where a new project is chosen. Each of its
+  // options starts one, and the choice decides three things the option's own
+  // text barely says: how much Laboratory Research the project needs (and how
+  // much Parabolan Research, which is far harder to come by), which FOCUS it
+  // has -- the focus decides which focus cards and expert options the lab deck
+  // deals you while it runs -- and what the finished product is worth.
+  //
+  // **What the badge says, and why.** Three things, in that order:
+  //
+  //   ▼ 550 LR +15 PR · 62.50 E · Toxicological
+  //
+  // the research (with `▼` when starting it uses something up), the Echo
+  // payout of the finished product, and the focus. Echoes are what a grind is
+  // measured in, so the payout is in Echoes wherever the wiki gives the product
+  // a price -- the London Bazaar's sale price, off each item's own page. A
+  // bone (Osteology) has no Bazaar price; its figure is its BONE VALUE, what it
+  // adds to a skeleton at the Bone Market, and is marked `☠`, because it only
+  // turns into Echoes once a skeleton is built and sold. Where a project's
+  // product has no Echo price at all -- a Formula, a stat cap, a story step, a
+  // unique item -- the badge says what it is ("Watchful Gains 21") rather than
+  // putting an invented number on it. Where the product is a CHANCE (a narrow
+  // challenge on the conclusion, or a random pick), the badge is the range
+  // across the outcomes with a `?`, never the advertised half. A project that
+  // can be extended at its first conclusion into a much longer one for a
+  // bigger reward carries `»`; the extension is in the tooltip.
+  //
+  // Nothing here nets the cost against the payout on the badge: what an
+  // ingredient is worth to you depends on what else you would do with it. The
+  // costs are in the tooltip, priced where they can be.
+  //
+  // Not the hidden Expected Lab Reward Value the start pages set. That is the
+  // game's own "How much is it worth?" for the project, and two conclusions
+  // (the Surveys and the Glass Gazettes) pay out in proportion to it -- but on
+  // most projects it is NOT what the product sells for (the Albatross's is
+  // 12.50; its two Albatross Wings alone sell for 25), so it is quoted in the
+  // tooltip and kept as `elrv` for the cross-check against the guide's table,
+  // never put on the badge.
+  //
+  // Transcribed 2026-11-23 from every option page listed on Begin a Scientific
+  // Investigation and its thirteen section subpages, the conclusion pages each
+  // links to (Assess your Progress regarding the (Project Name) and its
+  // subpages), and the item pages for the prices. Where the guide's Repeatable
+  // Research table (`LAB_PROJECTS`, in the lab panel) covers a project, its
+  // research, Parabolan research, Value and focus are checked against this in
+  // the test. Corrections go in LAB_INV and LAB_INV_PRICES and nowhere else.
+  //
+  // One option per entry:
+  //
+  //   branch    the option, as the game titles it. page: the wiki page, where
+  //             it differs (the wiki numbers same-titled options "… 2").
+  //             aliases: other titles it is listed under.
+  //   section   the wiki subpage it is filed on.
+  //   research  Total Lab Research Required, from the start page. `more`: the
+  //             research a second, compulsory stage adds. `null`: no page
+  //             records it. researchFrom: where a figure came from other than
+  //             the start page.
+  //   pr        Total Parabolan Research Required.
+  //   focus     the focus qualities the start page sets (LAB_INV_FOCUS keys).
+  //             An empty list is a claim: the page sets none.
+  //   needs     what unlocks it, in words.
+  //   costs     [[item, n], ...] the start page takes.
+  //   factions  [[quality, change], ...] -- on the badge, after the focus.
+  //   elrv      the hidden Expected Lab Reward Value the page sets, in pence.
+  //   ends      the conclusions, the one the badge quotes first:
+  //     via       the conclusion's option title.
+  //     research / pr / costs   where the conclusion asks for more or other
+  //               than the start (an extension, or a second ending).
+  //     gives     [[item, n], ...] -- items, priced through LAB_INV_PRICES.
+  //     outcomes  [{ label, gives, product }, ...] instead of `gives`, when
+  //               the conclusion is a challenge or a random pick.
+  //     product   what the badge says the product is when it is not (only)
+  //               Echoes: a cap, a story step, an unpriced item.
+  //     also      everything else it does, in words, for the tooltip.
+  //     extend    this ending is a longer extension of the project (`»`).
+  //   note      anything else.
+
+  const LAB_INV_STORYLET = 'Begin a Scientific Investigation';
+
+  const LAB_INV_FOCUS = {
+    monstrous: 'Monstrous',
+    toxic: 'Toxicological',
+    shapeling: 'Shapeling',
+    red: 'Red Science',
+    nautical: 'Nautical',
+    corr: 'Correspondence',
+  };
+
+  // What each item fetches, from its own wiki page, 2026-11-23.
+  //   { e }      the London Bazaar's sale price, in Echoes.
+  //   { bone }   no Bazaar price; its Bone Value (pence ÷ 100), what it adds
+  //              to a skeleton at the Bone Market. A [lo, hi] pair is a bone
+  //              the page says can be used two ways.
+  //   { none }   no Echo price anywhere the wiki lists -- why, in words. This
+  //              is a claim, not a gap: every item a project names must be in
+  //              here, so an unpriced item is never one nobody looked up.
+  const LAB_INV_PRICES = {
+    'Aged Egg, Untreated': { none: 'no sale price listed' },
+    'Albatross Wing': { e: 12.5 },
+    'Ambiguous Eolith': { e: 0.5 },
+    'Ancient Hunting Rifle': { e: 12.5 },
+    'Antique Mystery': { e: 12.5 },
+    'Bessemer Steel Ingot': { none: 'sold only in the Mausoleum Stalls' },
+    'Bloodstained Eolith': { none: 'no sale price listed' },
+    'Bone Fragments': { e: 0.01 },
+    'Captivating Ballad': { e: 62.5 },
+    'Captured Ushabti': { none: 'no sale price listed' },
+    'Cartographer\'s Hoard': { e: 312.5 },
+    'Cheerful Goldfish': { e: 0.04 },
+    'Conceptual Breakthrough in Currency Design': { e: 12.5 },
+    'Correspondence Plaque': { e: 0.5 },
+    'Crackling Device': { e: 62.5 },
+    'Dazed Raven Advisor': { e: 6.4 },
+    'Devilish Probability Distributor': { e: 62.5 },
+    'Direful Reflection': { e: 12.5 },
+    'Dreadful Surmise': { e: 312.5 },
+    'Edicts of the First City': { e: 312.5 },
+    // 625 Cryptic Clues, which sell for 0.02 each.
+    'Emetic Revelation': { e: 12.5 },
+    'Extraordinary Implication': { e: 2.5 },
+    'Fairly Tame Sorrow-Spider': { e: 6.4 },
+    'Femur of a Jurassic Beast': { bone: 3 },
+    'Femur of a Surface Deer': { e: 0.1 },
+    'Fin Bones, Collected': { bone: 0.5 },
+    'Flask of Abominable Salts': { e: 0.1 },
+    'Focused Albatross': { e: 12.5 },
+    'Forged Justificande Coin': { none: 'no sale price listed' },
+    'Glass Gazette': { none: 'bought, never sold, in the Stores of the Queensmen' },
+    'Helical Thighbone': { bone: 3 },
+    'Hillmover': { none: 'no sale price listed' },
+    'Hinterland Scrip': { none: 'a currency of the Hinterland, not of London' },
+    'Holy Relic of the Thigh of Saint Fiacre': { bone: 12.5 },
+    'Human Arm': { bone: 2.5 },
+    'Human Ribcage': { bone: 12.5 },
+    // As the item page states it; one would expect 1,562.50.
+    'Impossible Theorem': { e: 1562.6 },
+    'Incisive Observation': { e: 0.5 },
+    'Infernal Sharpshooter\'s Rifle': { e: 210 },
+    'Irrigo-filled Mirrorcatch Box': { none: 'no sale price listed' },
+    'Justificande Coin': { none: 'no sale price listed' },
+    'Khaganian Lightbulb': { none: 'bought, never sold, at the Midnight Market' },
+    'Knotted Humerus': { bone: [0.1, 3] },
+    'Legal Document': { e: 12.5 },
+    'Lucky Weasel': { e: 0.2 },
+    'Machiavellian Raven Advisor': { none: 'no sale price listed' },
+    'Magnificent Diamond': { e: 12.5 },
+    'Mammoth Ribcage': { bone: 62.5 },
+    'Memory of Discordance': { none: 'no sale price listed' },
+    'Memory of Distant Shores': { e: 0.5 },
+    // 25 Cryptic Clues.
+    'Memory of Light': { e: 0.5 },
+    'Mirthless Compendium of Statistical Observations': { e: 12.5 },
+    'Nevercold Brass Sliver': { e: 0.01 },
+    'Night-Whisper': { e: 62.5 },
+    'Nodule of Deep Amber': { e: 0.01 },
+    'Nodule of Trembling Amber': { e: 12.5 },
+    'Parabolan Cultivator': { none: 'no sale price listed' },
+    'Parabolan Orange-apple': { none: 'no sale price listed' },
+    'Pelagic Egg, Untreated': { none: 'no sale price listed' },
+    'Percipient Egg, Untreated': { none: 'no sale price listed' },
+    'Perfumed Gunpowder': { none: 'no sale price listed' },
+    'Phosphorescent Scarab': { e: 0.1 },
+    'Primaeval Hint': { e: 62.5 },
+    'Prophetic Raven Advisor': { none: 'no sale price listed' },
+    'Railway Steel': { none: 'sold only at the Upper River Exchange, for Hinterland Scrip' },
+    'Ravenglass Knife': { e: 51.2 },
+    'Ray-Drenched Cinder': { e: 312.5 },
+    'Relic of the Fourth City': { e: 0.05 },
+    'Relic of the Revolution': { none: 'no sale price listed' },
+    'Relic of the Second City': { e: 0.15 },
+    'Relic of the Third City': { e: 0.1 },
+    'Remains of a Pinewood Shark': { none: 'no sale price listed' },
+    'Roof-Chart': { none: 'sold only in the markets of the Roof' },
+    'Sample of Roof-Drip': { none: 'sold only in the markets of the Roof' },
+    'Scarlet Egg, Untreated': { none: 'no sale price listed' },
+    'Searing Enigma': { e: 62.5 },
+    'Seven-Throated Warbler': { e: 12.5 },
+    'Skeleton with Seven Necks': { bone: 62.5 },
+    'Starved Expression': { none: 'sold only in the markets of the Roof' },
+    'Storm-bird': { none: 'no sale price listed' },
+    'Strong-Backed Labour': { e: 2.5 },
+    'Survey of the Neath\'s Bones': { none: 'sold only at the Upper River Exchange, for Hinterland Scrip' },
+    'Taciturn Mynah': { none: 'no sale price listed' },
+    'Tale of Terror!!': { e: 0.5 },
+    'Tempestuous Tale': { none: 'sold only in the markets of the Roof and Parabola' },
+    'Thorned Ribcage': { bone: 12.5 },
+    'Trace of the First City': { none: 'no sale price listed' },
+    'Uncanny Incunabulum': { e: 12.5 },
+    'Unearthly Fossil': { e: 2.5 },
+    'Unidentified Thigh Bone': { bone: 1 },
+    'Unprovenanced Artefact': { e: 2.5 },
+    'Venom-Ruby': { e: 0.1 },
+    'Violant-filled Mirrorcatch Box': { none: 'no sale price listed' },
+    'Volume of Collated Research': { e: 2.5 },
+    'Warbler Skeleton': { none: 'no sale price listed' },
+    'Whirring Contraption': { e: 6 },
+    'Withered Tentacle': { bone: [0.5, 2.5] },
+  };
+
+  const LAB_INV_BONE_FALSE = {
+    via: 'Invent a false nature for this bone', research: 75, pr: 25,
+    gives: [['Holy Relic of the Thigh of Saint Fiacre', 1]],
+    also: 'Record of Successful Forgery +1, Route: The Bone Market',
+  };
+  const LAB_INV_BONE_TRUE = {
+    via: 'Determine the true nature of this bone',
+    outcomes: [
+      { label: 'Monstrous Anatomy 3 (narrow) succeeds', gives: [['Femur of a Jurassic Beast', 1]] },
+      { label: 'it fails', gives: [['Femur of a Surface Deer', 1]] },
+    ],
+    also: 'Route: The Bone Market',
+  };
+  const LAB_INV_JAGUAR_END = {
+    via: 'Complete a Jaguar Blade', product: 'Jaguar Blade',
+    also: 'needs Expertise of the Third City 30; arms you with the Jaguar Blade',
+  };
+  const LAB_INV_LOCO_COSTS = [['Nevercold Brass Sliver', 4000], ['Railway Steel', 1],
+    ['Flask of Abominable Salts', 200], ['Khaganian Lightbulb', 200], ['Whirring Contraption', 1],
+    ['Crackling Device', 1], ['Uncanny Incunabulum', 2], ['Correspondence Plaque', 25]];
+  const LAB_INV_DIAMOND_END = {
+    via: 'Conclude your study of diamond implantation', product: 'diamond-heart story',
+    also: 'Familiarity with the Method of Transplanting a Diamond Heart; continue at Ealing Gardens',
+  };
+  const LAB_INV_GENERAL = function (general, gives) {
+    return {
+      via: 'Conclude your Augmentation of the ' + general, gives: gives,
+      product: 'General freed',
+      also: 'Parabolan Cultivator; the General can serve in any Parabolan Campaign',
+    };
+  };
+
+  const LAB_INV = [
+    // === Cartography ========================================================
+    {
+      branch: 'Find a Route to Parabola', section: 'Cartography', research: 50, more: 75, focus: [],
+      needs: 'Memory of Light 50, an Uncanny Incunabulum and an Antique Mystery; no Base-Camp yet',
+      costs: [['Memory of Light', 50], ['Uncanny Incunabulum', 1], ['Antique Mystery', 1]],
+      ends: [{ via: 'Lay out a Plan and a Process, then Build the Equipment', product: 'Parabolan Base-Camp',
+        also: 'Access to a Parabolan Base-Camp' }],
+    },
+    {
+      branch: 'Create a Cartographer\'s Hoard', section: 'Cartography', research: 2700, focus: ['nautical'],
+      needs: 'Equipment 6', elrv: 31250,
+      ends: [{ via: 'Complete your Hoard', gives: [['Cartographer\'s Hoard', 1]],
+        also: 'sells for 625 Hinterland Scrip at the Upper River Exchange' }],
+    },
+    {
+      branch: 'Prepare a set of Glass Gazettes', section: 'Cartography', research: 50, pr: 10, focus: [],
+      needs: 'Route: The Reflection of your Laboratory and a Parabolan Base-Camp', elrv: 1250,
+      ends: [{ via: 'How much research and how much dream?', gives: [['Glass Gazette', 5]],
+        product: '5 Glass Gazettes', also: 'the more Parabolan Research you hold, the less Laboratory Research it asks' }],
+    },
+    {
+      branch: 'Explore the cartographical meaning of Hinterland Scrip', section: 'Cartography', research: 125,
+      focus: [], needs: 'the Numismatrix, 5 Hinterland Scrip and The Efficient Commissioner\'s Tale 100',
+      costs: [['Hinterland Scrip', 5]],
+      ends: [{ via: 'Conclude your study of Hinterland Scrip',
+        gives: [['Conceptual Breakthrough in Currency Design', 1]] }],
+    },
+    {
+      branch: 'Make a cartographical study of the ceiling', section: 'Cartography', research: 550, focus: [],
+      needs: 'Firmament 70 and a Tempestuous Tale', costs: [['Tempestuous Tale', 1]], elrv: 6250,
+      ends: [{ via: 'Collate your findings',
+        outcomes: [
+          { label: 'Breadth of the Roof Surveyed 1', gives: [['Roof-Chart', 14], ['Extraordinary Implication', 11]] },
+          { label: 'Breadth of the Roof Surveyed 9', gives: [['Roof-Chart', 25]] },
+        ],
+        product: '14–25 Roof-Charts',
+        also: 'the more of the Roof you have surveyed, the more Roof-Charts and the fewer Extraordinary '
+          + 'Implications: 14 + 11 at Breadth 1, 19 + 6 at 4, 22 + 3 at 6, 24 + 1 at 8, 25 + 0 at 9' }],
+      note: 'The range is Breadth of the Roof Surveyed, which you know, not chance.',
+    },
+
+    // === Chemistry ==========================================================
+    {
+      branch: 'Disambiguate an Eolith', aliases: ['Disambiguate an Eolith (again)'], section: 'Chemistry',
+      research: 10, focus: [], needs: 'an Ambiguous Eolith', costs: [['Ambiguous Eolith', 1]],
+      ends: [{ via: 'Disambiguate the Eolith',
+        outcomes: [
+          { label: 'Kataleptic Toxicology 1 (narrow) succeeds', gives: [['Perfumed Gunpowder', 1]] },
+          { label: 'rare success, 15%', gives: [['Nodule of Trembling Amber', 1]] },
+          { label: 'it fails', gives: [['Unprovenanced Artefact', 1]] },
+          { label: 'rare failure, 5%', gives: [['Bloodstained Eolith', 1]] },
+        ] }],
+    },
+    {
+      branch: 'Research the Formula for Perfumed Gunpowder', section: 'Chemistry', research: 150, pr: 25,
+      focus: [], needs: 'a Perfumed Gunpowder and some Equipment', costs: [['Perfumed Gunpowder', 1]],
+      ends: [{ via: 'Part chemistry, part invention', product: 'Formula for Perfumed Gunpowder' }],
+    },
+    {
+      branch: 'Research the Formula for Railway Steel', section: 'Chemistry', research: 500, pr: 25, focus: [],
+      needs: 'a Railway Steel (not used up) and some Equipment',
+      ends: [{ via: 'Fire at the proper temperature', product: 'Formula for Railway Steel' }],
+    },
+    {
+      branch: 'Research the Recipe for Scintillack Snuff', section: 'Chemistry', research: 100, focus: ['toxic'],
+      needs: 'a Consignment of Scintillack Snuff (not used up) and some Equipment', elrv: 1250,
+      ends: [{ via: 'Complete your recipe for Scintillack Snuff', product: 'Recipe for Scintillack Snuff',
+        also: 'lets you make more Consignments in the lab' }],
+    },
+    {
+      branch: 'Study the properties of Attar', section: 'Chemistry', research: 450, pr: 15, focus: ['toxic'],
+      needs: 'A Vial of Queenly Attar (the page lists no loss)', elrv: 6250,
+      ends: [{ via: 'Conclude your study of Attar', gives: [['Night-Whisper', 1]],
+        also: 'Kataleptic Toxicology +1 CP' }],
+    },
+    {
+      branch: 'Explore the metallurgical qualities of a Justificande', section: 'Chemistry', research: 125,
+      focus: ['toxic', 'red'],
+      needs: 'the Numismatrix, a Justificande Coin, a Forged one, The Efficient Commissioner\'s Tale 100',
+      costs: [['Justificande Coin', 1], ['Forged Justificande Coin', 1]],
+      ends: [{ via: 'Conclude your study of the metallurgy of Justificandes',
+        gives: [['Conceptual Breakthrough in Currency Design', 1]] }],
+    },
+    {
+      branch: 'Study the geochemical properties of Roof drippings', section: 'Chemistry', research: 100, focus: [],
+      needs: 'a Sample of Roof-Drip', costs: [['Sample of Roof-Drip', 1]], elrv: 1250,
+      ends: [{ via: 'Prepare a report on the contents of London\'s \'rain\'',
+        gives: [['Extraordinary Implication', 4], ['Tempestuous Tale', 5]], product: '5 Tempestuous Tales' }],
+    },
+    {
+      branch: 'Make a study of a few samples from a Starved citadel', section: 'Chemistry', research: 550,
+      focus: ['toxic'], needs: '5 Starved Expressions', costs: [['Starved Expression', 5]], elrv: 6250,
+      ends: [{ via: 'Conclude your study of Starved secretions',
+        gives: [['Emetic Revelation', 2], ['Extraordinary Implication', 15], ['Tempestuous Tale', 5]],
+        product: '5 Tempestuous Tales' }],
+      note: 'The guide\'s table says it costs one Starved Expression; the option page says five.',
+    },
+    {
+      branch: 'Analyse the honey on the stolen watch', section: 'Chemistry', research: 50, pr: 10, focus: ['toxic'],
+      needs: 'Candlefinder: Case 5, at progress 70–79', elrv: 1250,
+      ends: [{ via: 'Conclude your analysis of the unconventional honey', product: 'Candlefinder case',
+        also: 'Candlefinder: Progress in a Case +10' }],
+    },
+    {
+      branch: 'Adjust a Second City poison to amuse a Princess', section: 'Chemistry', research: 50,
+      focus: ['toxic'], needs: 'A Complication in Delivery 3',
+      ends: [{ via: 'Finish altering a Second City poison in an amusing fashion', gives: [['Antique Mystery', 1]] }],
+    },
+
+    // === Artifice ===========================================================
+    {
+      branch: 'Research a Devilish Probability Distributor', section: 'Artifice', research: 450, focus: [],
+      needs: 'Prestige 5, 250 Nevercold Brass and Favours: Hell 3',
+      costs: [['Nevercold Brass Sliver', 250]], factions: [['Favours: Hell', -3]],
+      ends: [{ via: 'Complete and test the Devilish Probability Distributor',
+        gives: [['Devilish Probability Distributor', 1]] }],
+    },
+    {
+      branch: 'Create an Infernal Machine', section: 'Artifice', research: 500, focus: [],
+      needs: 'Equipment 5, 250 Nevercold Brass and 5 Bessemer Steel Ingots',
+      costs: [['Nevercold Brass Sliver', 250], ['Bessemer Steel Ingot', 5]],
+      ends: [{ via: 'Finish your Machine of Industry', product: 'Infernal Machine',
+        also: 'an Infernal Machine, which has no sale price' }],
+    },
+    {
+      branch: 'Construct a rifle in historical style', section: 'Artifice', research: 100, focus: [], needs: 'nothing',
+      elrv: 1250,
+      ends: [
+        { via: 'Complete your Hunting Rifle', gives: [['Ancient Hunting Rifle', 1]] },
+        { via: 'Disguise your Ancient Hunting Rifle as a valuable antique', extend: true, research: 1650,
+          gives: [['Infernal Sharpshooter\'s Rifle', 1]], also: 'Record of Successful Forgery +1' },
+      ],
+    },
+
+    // === Palaeontological research ========================================
+    {
+      branch: 'Accept a Palaeontological Task from the Dean', section: 'Palaeontology', research: 50, focus: [],
+      needs: 'Prestige 5 and no Teaching Reputation yet',
+      ends: [LAB_INV_BONE_TRUE, LAB_INV_BONE_FALSE],
+      note: 'The conclusion asks for only 25 research; the start sets 50.',
+    },
+    {
+      branch: 'Discover the background of this bone', section: 'Palaeontology', research: 25, focus: [],
+      needs: 'an Unidentified Thigh Bone', costs: [['Unidentified Thigh Bone', 1]],
+      ends: [LAB_INV_BONE_TRUE, LAB_INV_BONE_FALSE,
+        { via: 'Determine the true nature of this bone (Sous)', gives: [['Relic of the Revolution', 1]],
+          product: 'Relic of the Revolution', also: 'only on the Sous story' }],
+    },
+    {
+      branch: 'Discern the nature of the Resurrectionist\'s bone', section: 'Palaeontology', research: 100,
+      focus: ['shapeling'], needs: 'an Unidentified Thigh Bone and Shaping Matters Morphological 10', elrv: 1250,
+      ends: [{ via: 'Determine the true nature of this bone',
+        gives: [['Helical Thighbone', 1], ['Volume of Collated Research', 4]],
+        also: 'Shaping Matters Morphological 11: speak to the Resurrectionist' }],
+    },
+    {
+      branch: 'Track recent palaeontological discoveries and the stones of the Neath', section: 'Palaeontology',
+      research: 100, focus: [], needs: 'Teaching Reputation', elrv: 1250,
+      ends: [{ via: 'Assemble your conclusions', gives: [['Survey of the Neath\'s Bones', 25]],
+        product: '25 Surveys', also: 'Surveys are spent digging for fossils' }],
+    },
+    {
+      branch: 'Collate a great number of palaeontological reports', section: 'Palaeontology', research: 2700,
+      focus: [], needs: 'Teaching Reputation and Prestige 10', elrv: 31250,
+      ends: [{ via: 'Assemble your conclusions', gives: [['Survey of the Neath\'s Bones', 625]],
+        product: '625 Surveys', also: 'Surveys are spent digging for fossils' }],
+    },
+    {
+      branch: 'Analyse your Thorned Ribcage', section: 'Palaeontology', research: 350, pr: 15, focus: [],
+      needs: 'a Thorned Ribcage', costs: [['Thorned Ribcage', 1]],
+      ends: [{ via: 'Finish your study of the Thorned Ribcage', gives: [['Searing Enigma', 1]],
+        also: 'Monstrous Anatomy +1 CP, Shapeling Arts +1 CP' }],
+    },
+    {
+      branch: 'Try the Betrayer of Measures on a human ribcage', section: 'Palaeontology', research: 425,
+      focus: ['red'], needs: 'the Betrayer of Measures and a Human Ribcage', costs: [['Human Ribcage', 1]],
+      ends: [{ via: 'Finish your work resizing a human ribcage using the Red Science',
+        gives: [['Mammoth Ribcage', 1]],
+        also: 'an Artisan of the Red Science 5 (narrow) challenge; a failure costs Nightmares +2 CP and you try '
+          + 'again. Artisan of the Red Science +1 CP either way' }],
+    },
+    {
+      branch: 'Try the Betrayer of Measures on Warbler Skeleton', section: 'Palaeontology', research: 425,
+      focus: ['red'], needs: 'the Betrayer of Measures, a Warbler Skeleton and 1,000 Nevercold Brass',
+      costs: [['Warbler Skeleton', 1], ['Nevercold Brass Sliver', 1000]],
+      ends: [{ via: 'Finish your work resizing a warbler skeleton using the Red Science',
+        gives: [['Skeleton with Seven Necks', 1]],
+        also: 'an Artisan of the Red Science 5 (narrow) challenge; a failure costs Nightmares +2 CP and you try '
+          + 'again. Artisan of the Red Science +1 CP either way' }],
+    },
+
+    // === Mathematics ========================================================
+    {
+      branch: 'Research an Impossible Theorem', section: 'Mathematics', research: 13000, pr: 300, focus: [],
+      needs: 'Equipment 7',
+      ends: [{ via: 'Reach a realisation. Drag the knowledge kicking and screaming out of Parabola',
+        gives: [['Impossible Theorem', 1]],
+        also: 'a Watchful 500 (broad) challenge; a failure costs Nightmares +2 CP and keeps your research' }],
+    },
+    {
+      branch: 'Create a Mirthless Compendium of Statistical Observations', section: 'Mathematics', research: 100,
+      focus: [], needs: 'Teaching Reputation, and no Parabolan Research', elrv: 1250,
+      ends: [
+        { via: 'Finish assembling your statistical tables',
+          gives: [['Mirthless Compendium of Statistical Observations', 1]], also: 'needs a Meticulous Student' },
+        { via: 'Pass off your corrupted tables to an unsuspecting colleague', gives: [['Hinterland Scrip', 20]],
+          product: '20 Hinterland Scrip',
+          also: 'needs Parabolan Research 1; Record of Successful Forgery +1' },
+      ],
+    },
+    {
+      branch: 'Decipher the notes on the Sullier of Probabilities', section: 'Mathematics', research: 2500, pr: 65,
+      focus: ['red'],
+      needs: 'the Incomprehensible Notes, a Parabolan Base-Camp and the Formula for Perfumed Gunpowder; once',
+      elrv: 31250,
+      ends: [{ via: 'Conclude your study into infected probabilities', product: 'Notes on a Sullier',
+        also: 'lets you make Overcompensating Dice; Nightmares +7 CP' }],
+    },
+
+    // === History ============================================================
+    {
+      branch: 'Study the Prelapsarian history of the Red Science', section: 'History', research: 2700,
+      focus: ['red', 'corr'],
+      needs: 'Artisan Studies 2 and 10 each of Trace of the First City and Relics of the Second, Third and Fourth City',
+      costs: [['Trace of the First City', 10], ['Relic of the Second City', 10], ['Relic of the Third City', 10],
+        ['Relic of the Fourth City', 10]],
+      ends: [
+        { via: 'Publish your findings', gives: [['Dreadful Surmise', 1]], also: 'Making Waves' },
+        { via: 'Expand your understanding of oaths and boundaries', gives: [['Edicts of the First City', 1]],
+          also: 'needs and spends 10 Expertise of the First City' },
+        { via: 'Trace the boundary of the Is-Not', gives: [['Ray-Drenched Cinder', 1]],
+          also: 'needs and spends 10 Expertise of the Second City' },
+        { via: 'Translate the alphabet of hungers', gives: [['Dreadful Surmise', 1]],
+          also: 'needs and spends 10 Expertise of the Third City' },
+        { via: 'Dream of the Fourth City', gives: [['Cartographer\'s Hoard', 1]],
+          also: 'needs and spends 10 Expertise of the Fourth City' },
+      ],
+    },
+    {
+      branch: 'Study your Captured Ushabti', section: 'History', research: 550, focus: ['toxic'],
+      needs: 'a Captured Ushabti (taken at the end)', elrv: 6250,
+      ends: [{ via: 'Perform the final dissection', costs: [['Captured Ushabti', 1]],
+        gives: [['Primaeval Hint', 1], ['Tale of Terror!!', 1]],
+        also: 'Nightmares +1 CP; a clue for F.F. Gebrandt at the Museum of Prelapsarian History' }],
+    },
+    {
+      branch: 'Study the nature of the Sun-Blazoned Cuirass', section: 'History', research: 550,
+      focus: ['monstrous'], needs: 'the Sun-Blazoned Cuirass (not used up)', elrv: 6250,
+      ends: [{ via: 'Complete your research into the Sun-Blazoned Cuirass', gives: [['Primaeval Hint', 1]],
+        also: 'Exploration of a Hinterland City +3' }],
+    },
+
+    // === Biology ============================================================
+    {
+      branch: 'Study the Focused Albatross', section: 'Biology', research: 100, focus: ['monstrous'],
+      needs: 'Prestige 1 and a Focused Albatross', costs: [['Focused Albatross', 1]], elrv: 1250,
+      ends: [
+        { via: 'Keep it in total darkness', gives: [['Albatross Wing', 2], ['Incisive Observation', 2]] },
+        { via: 'Extend your studies', extend: true, research: 1500, pr: 50,
+          costs: [['Dazed Raven Advisor', 1], ['Taciturn Mynah', 1], ['Seven-Throated Warbler', 1], ['Storm-bird', 1]],
+          product: 'Comprehensive Study of Avian Anatomies',
+          also: 'a one-of-a-kind item, Monstrous Anatomy +2 CP and Prestige +3' },
+      ],
+    },
+    {
+      branch: 'Translate an Aureate Stag', section: 'Biology', research: 50, pr: 10, focus: ['monstrous'],
+      needs: 'Hunting a Golden Stag 20', elrv: 1250,
+      ends: [{ via: 'Complete your translation of an Aureate Stag', product: 'Golden Stag hunt',
+        also: 'Hunting a Golden Stag 30: return to Burgundy' }],
+    },
+    {
+      branch: 'Dissect the Pinewood Shark', section: 'Biology', research: 100, focus: ['monstrous'],
+      needs: 'the Remains of a Pinewood Shark', costs: [['Remains of a Pinewood Shark', 1]], elrv: 1250,
+      ends: [
+        { via: 'Turn attention to its Skeleton',
+          gives: [['Incisive Observation', 2], ['Fin Bones, Collected', 38], ['Bone Fragments', 500]] },
+        { via: 'Extend your studies', extend: true, research: 1500, pr: 50,
+          product: 'Unexpurgated Accounting of Aquatic Life-forms',
+          also: 'a one-of-a-kind item, Monstrous Anatomy +2 CP and Prestige +3' },
+      ],
+    },
+    {
+      branch: 'Begin an investigation into the Professor\'s \'dead\' Punch', section: 'Biology', research: 550,
+      focus: ['monstrous'], needs: 'Candlefinder: Case 3, at progress 20', elrv: 6250,
+      ends: [{ via: 'Conclude your investigation into the Professor\'s puppet', product: 'Candlefinder case',
+        also: 'Candlefinder: Progress in a Case +10' }],
+    },
+    {
+      branch: 'Analyse your False-Snake', section: 'Biology', research: 100, focus: ['toxic'],
+      needs: 'a Preserved False-Snake (the page lists no loss)', elrv: 1250,
+      ends: [
+        { via: 'Extract an understanding of its venoms',
+          gives: [['Unearthly Fossil', 1], ['Memory of Distant Shores', 20]], also: 'Kataleptic Toxicology +1 CP' },
+        { via: 'Extend your studies', extend: true, research: 1500, pr: 50,
+          product: 'Complete Account of Frogs, Toads, and Other Croaking Beasts',
+          also: 'a one-of-a-kind item, Kataleptic Toxicology +1 CP, Monstrous Anatomy +1 CP and Prestige +3' },
+      ],
+    },
+    {
+      branch: 'Test the elastic limits of flesh and bone', section: 'Biology', research: 550, focus: ['shapeling'],
+      needs: 'a Human Arm, a Human Ribcage and 100 Nodules of Deep Amber',
+      costs: [['Human Arm', 1], ['Human Ribcage', 1], ['Nodule of Deep Amber', 100]], elrv: 6250,
+      ends: [{ via: 'Complete your research in the shaping of bones',
+        gives: [['Knotted Humerus', 1], ['Thorned Ribcage', 1], ['Withered Tentacle', 2],
+          ['Nodule of Trembling Amber', 2], ['Bone Fragments', 2150]],
+        also: 'Shapeling Arts +1 CP, if you have any' }],
+    },
+    {
+      branch: 'Complete your study into the beasts of the Neath', section: 'Biology', research: 1500,
+      focus: ['toxic', 'monstrous'],
+      needs: 'Monstrous Anatomy 7, the other three studies of beasts and 10 Fairly Tame Sorrow-Spiders',
+      costs: [['Fairly Tame Sorrow-Spider', 10]],
+      ends: [{ via: 'Conclude your Survey of Arachnids and Insects Native to the Neath', product: 'Survey of Arachnids',
+        also: 'a one-of-a-kind item that opens new possibilities at the Bone Market' }],
+    },
+    {
+      branch: 'Study how to replace a person\'s heart with a Shard of the Mountain of Light', section: 'Biology',
+      research: 250, focus: ['toxic', 'red', 'corr'],
+      needs: 'the Solicitor-Baroness\' proposal, 5 Magnificent Diamonds and a Seven-Throated Warbler',
+      costs: [['Magnificent Diamond', 5], ['Seven-Throated Warbler', 1]], ends: [LAB_INV_DIAMOND_END],
+    },
+    {
+      branch: 'Study the Mountain-Sherd you have on hand', section: 'Biology', research: 250,
+      focus: ['toxic', 'red', 'corr'], needs: 'the Solicitor-Baroness\' proposal and a Mountain-sherd (not used up)',
+      ends: [LAB_INV_DIAMOND_END],
+    },
+    {
+      branch: 'Study your very own Shard of the Mountain of Light', section: 'Biology', research: 250,
+      focus: ['toxic', 'red', 'corr'],
+      needs: 'the Solicitor-Baroness\' proposal and the Kitten-Sized Diamond (not used up)',
+      ends: [LAB_INV_DIAMOND_END],
+    },
+    {
+      branch: 'Attempt to create the ideal hatching conditions for your egg',
+      page: 'Attempt to create the ideal hatching conditions for your egg 2', section: 'Biology', research: 2700,
+      focus: ['monstrous'], needs: 'an Egg as Black as Coal', elrv: 31250,
+      ends: [{ via: 'Attempt to finally hatch your stubborn egg', product: 'Prophetic Raven Advisor',
+        gives: [['Prophetic Raven Advisor', 1]] }],
+    },
+    {
+      branch: 'Attempt to create the ideal hatching conditions for your egg', section: 'Biology', research: 2700,
+      focus: ['monstrous'], needs: 'an Egg as White as Fear', elrv: 31250,
+      ends: [{ via: 'Attempt to finally hatch your stubborn egg', product: 'Machiavellian Raven Advisor',
+        gives: [['Machiavellian Raven Advisor', 1]] }],
+    },
+
+    // === Whitsun ============================================================
+    {
+      branch: 'Study the Augmentation Device', section: 'Whitsun', research: 100, focus: ['red'],
+      needs: 'the Highly Illegal Experimental Augmentation Device (not used up)', elrv: 1250,
+      ends: [{ via: 'Finish the study of your Highly Illegal Device', gives: [['Direful Reflection', 1]],
+        also: 'Artisan of the Red Science +1 CP' }],
+    },
+    {
+      branch: 'Experiment on an Aged Egg', section: 'Whitsun', research: 100, researchFrom: 'the conclusion page',
+      focus: ['red'], needs: 'an Aged Egg, Untreated', costs: [['Aged Egg, Untreated', 1]],
+      ends: [{ via: 'Finish the study of the Aged Egg', gives: [['Uncanny Incunabulum', 1]],
+        also: 'Speculation about Whitsun +5 CP; Artisan of the Red Science +1 CP, if you have any' }],
+      note: 'The Red Science Focus is set only if you have Artisan of the Red Science already.',
+    },
+    {
+      branch: 'Experiment on a Scarlet Egg', section: 'Whitsun', research: 100, focus: ['shapeling'],
+      needs: 'a Scarlet Egg, Untreated', costs: [['Scarlet Egg, Untreated', 1]], elrv: 1250,
+      ends: [{ via: 'Finish the study of the Scarlet Egg', gives: [['Nodule of Trembling Amber', 1]],
+        also: 'Speculation about Whitsun +5 CP; Shapeling Arts +1 CP, if you have any' }],
+      note: 'The Shapeling Focus is set only if you have Shapeling Arts already.',
+    },
+    {
+      branch: 'Experiment on a Percipient Egg', section: 'Whitsun', research: 100, researchFrom: 'the conclusion page',
+      focus: ['toxic'], needs: 'a Percipient Egg, Untreated', costs: [['Percipient Egg, Untreated', 1]],
+      ends: [{ via: 'Finish the study of the Percipient Egg', gives: [['Parabolan Orange-apple', 1]],
+        product: 'Parabolan Orange-apple',
+        also: 'Speculation about Whitsun +5 CP; Kataleptic Toxicology +1 CP' }],
+    },
+    {
+      branch: 'Experiment on a Pelagic Egg', section: 'Whitsun', research: 100, focus: ['monstrous'],
+      needs: 'a Pelagic Egg, Untreated', costs: [['Pelagic Egg, Untreated', 1]], elrv: 1250,
+      ends: [{ via: 'Finish the study of the Pelagic Egg', gives: [['Antique Mystery', 1]],
+        also: 'Speculation about Whitsun +5 CP; Monstrous Anatomy +1 CP' }],
+    },
+
+    // === Raising stat caps ==================================================
+    {
+      branch: 'Chemically analyse Mr Spices\' new drug', section: 'Stat caps', research: 550, focus: ['toxic'],
+      needs: 'Mr Spices\' Private Stash and Watchful Gains 3',
+      ends: [{ via: 'Complete your chemical analysis of Mr Spices\' new intoxicant', gives: [['Searing Enigma', 1]],
+        product: 'Watchful Gains 6', also: 'Watchful Gains 6, which raises your Watchful cap' }],
+    },
+    {
+      branch: 'Test Spices\' drug on various animals', section: 'Stat caps', research: 450, focus: ['toxic'],
+      needs: 'Watchful Gains 6, Mr Spices\' Private Stash and base Watchful 206',
+      ends: [
+        { via: 'Finish your experiment with Mr Spices\' Drug and reveal the truth to the Dean', research: 550,
+          gives: [['Searing Enigma', 1]], product: 'Watchful Gains 12',
+          also: 'Watchful Gains 12; the page asks for 550 research' },
+        { via: 'Finish your experiment with Mr Spices\' Drug and lie to the Dean', pr: 50,
+          gives: [['Searing Enigma', 1]], product: 'Watchful Gains 12',
+          also: 'Watchful Gains 12 and Record of Successful Forgery +1; needs 50 Parabolan Research' },
+      ],
+    },
+    {
+      branch: 'Investigate the tears you recovered from Mr Spices', section: 'Stat caps', research: 500, pr: 50,
+      focus: ['toxic'],
+      needs: 'Watchful Gains 18, base Watchful 218, Involved in a Railway Venture 130 and both Mirrorcatch Boxes',
+      costs: [['Violant-filled Mirrorcatch Box', 1], ['Irrigo-filled Mirrorcatch Box', 1]],
+      ends: [{ via: 'Conclude your study of Mr Spices\' tears', product: 'Watchful Gains 21',
+        also: 'Watchful Gains 21, which raises your Watchful cap' }],
+    },
+    {
+      branch: 'Build a Locomotive for Mr Spices', section: 'Stat caps', research: 550, focus: [],
+      needs: 'Mr Spices\' plans, Watchful Gains 21, base Watchful 221 and the parts', costs: LAB_INV_LOCO_COSTS,
+      elrv: 6250,
+      ends: [{ via: 'Assemble the experimental locomotive', product: 'Watchful Gains 24',
+        also: 'Watchful Gains 24; Mr Spices leaves your laboratory; continue at Moloch Street' }],
+    },
+    {
+      branch: 'Build a Locomotive for Mr Spices', page: 'Build a Locomotive for Mr Spices 2', section: 'Stat caps',
+      research: 550, focus: ['red'],
+      needs: 'the Solicitor-Baroness\' plans, Watchful Gains 21, base Watchful 221 and the parts',
+      costs: LAB_INV_LOCO_COSTS,
+      ends: [{ via: 'Assemble the experimental locomotive', costs: [['Strong-Backed Labour', 5]],
+        product: 'Watchful Gains 24', also: 'Watchful Gains 24; continue at Moloch Street' }],
+    },
+    {
+      branch: 'Make a deeper study of toxins', section: 'Stat caps', research: 300, pr: 50, focus: ['toxic'],
+      needs: 'base Kataleptic Toxicology 5, 10 Parabolan Orange-apples and 60 Lucky Weasels',
+      costs: [['Parabolan Orange-apple', 10], ['Lucky Weasel', 60]],
+      ends: [{ via: 'Poison yourself as a practical test', costs: [['Venom-Ruby', 20]],
+        product: 'Kataleptic Toxicology cap 6', also: 'raises your Kataleptic Toxicology cap to 6' }],
+    },
+    {
+      branch: 'Better understand the metabolism of poisons', section: 'Stat caps', research: 500, pr: 50,
+      focus: ['toxic'], needs: 'Kataleptic Toxicology Studies 1 and base Kataleptic Toxicology 6, and the animals',
+      costs: [['Seven-Throated Warbler', 3], ['Hillmover', 3], ['Legal Document', 4], ['Phosphorescent Scarab', 210]],
+      ends: [{ via: 'Excretion, generation, the expulsion of toxins', gives: [['Hillmover', 1]],
+        product: 'Kataleptic Toxicology cap 7', also: 'raises your Kataleptic Toxicology cap to 7' }],
+    },
+    {
+      branch: 'Work toward a fuller understanding of monstrosities',
+      page: 'Work toward a fuller understanding of monstrosities 1', section: 'Stat caps', research: 300, pr: 50,
+      focus: ['monstrous'], needs: 'base Monstrous Anatomy 5, 3 Focused Albatrosses and 500 Cheerful Goldfish',
+      costs: [['Focused Albatross', 3], ['Cheerful Goldfish', 500]],
+      ends: [{ via: 'Come to fresh conclusions about the shape of a monster', product: 'Monstrous Anatomy cap 6',
+        also: 'raises your Monstrous Anatomy cap to 6' }],
+    },
+    {
+      branch: 'Work toward a fuller understanding of monstrosities',
+      page: 'Work toward a fuller understanding of monstrosities 2', section: 'Stat caps', research: 500, pr: 50,
+      focus: ['monstrous'], needs: 'Monstrous Studies 1, base Monstrous Anatomy 6 and 3 Storm-birds',
+      costs: [['Storm-bird', 3]],
+      ends: [{ via: 'Know the Storm-bird', product: 'Monstrous Anatomy cap 7',
+        also: 'raises your Monstrous Anatomy cap to 7' }],
+    },
+
+    // === Parabolan Generals =================================================
+    {
+      branch: 'Augment the Fortified Principle of Horizons', section: 'Parabolan Generals', research: 450, pr: 50,
+      focus: [], needs: 'General: Principle of Horizons 2',
+      ends: [LAB_INV_GENERAL('Principle of Horizons', [['Glass Gazette', 5], ['Parabolan Cultivator', 1]])],
+    },
+    {
+      branch: 'Augment the Empowered Principle of Hollows', section: 'Parabolan Generals', research: 450, pr: 50,
+      focus: [], needs: 'General: Principle of Hollows 2',
+      ends: [LAB_INV_GENERAL('Principle of Hollows', [['Glass Gazette', 5], ['Parabolan Cultivator', 1]])],
+    },
+    {
+      branch: 'Augment the Dual Principle of Heralds', section: 'Parabolan Generals', research: 450, pr: 50,
+      focus: [], needs: 'General: Principle of Heralds 2',
+      ends: [LAB_INV_GENERAL('Principle of Heralds', [['Memory of Discordance', 1], ['Parabolan Cultivator', 1]])],
+    },
+
+    // === Ambition: Bag a Legend! ============================================
+    {
+      branch: 'Begin the investigation that April requested', section: 'Bag a Legend', research: 50, focus: [],
+      needs: 'Ambition: Bag a Legend! 155, 100 Relics of the Fourth City and a Map Scrap (the page lists no loss)',
+      ends: [{ via: 'Mark the spot', product: 'Ambition progress',
+        also: 'the location of the Khan\'s Workshop' }],
+    },
+    {
+      branch: 'Complete a Route to Parabola', section: 'Bag a Legend', research: 75, focus: [],
+      needs: 'Halfway through the Mirror, Memory of Light 50, an Uncanny Incunabulum and an Antique Mystery',
+      costs: [['Memory of Light', 50], ['Uncanny Incunabulum', 1], ['Antique Mystery', 1]],
+      ends: [{ via: 'Build the Equipment', product: 'Parabolan Base-Camp', also: 'Access to a Parabolan Base-Camp' }],
+    },
+    {
+      branch: 'Create an Export Route for your Bomb', section: 'Bag a Legend', research: 50, focus: [],
+      needs: 'a Parabolan Base-Camp and Ambition: Bag a Legend! 300',
+      ends: [{ via: 'Widen the door', product: 'Ambition progress',
+        also: 'move the Chorister\'s Bomb to Parabola, in your lab' }],
+    },
+    {
+      branch: 'Prepare a weapon of vengeance', section: 'Bag a Legend', research: 50, pr: 25,
+      researchFrom: 'the conclusion page', focus: [],
+      needs: 'Ambition: Bag a Legend! 400–450, 5 Ravenglass Knives, 1,000 Relics of the Third City and an Impossible Theorem',
+      costs: [['Impossible Theorem', 1], ['Relic of the Third City', 1000], ['Ravenglass Knife', 5]],
+      ends: [LAB_INV_JAGUAR_END],
+    },
+    {
+      branch: 'Prepare a weapon of vengeance using particular knowledge', section: 'Bag a Legend', research: 50,
+      pr: 25, focus: [],
+      needs: 'Ambition: Bag a Legend! 400–450, 5 Ravenglass Knives, 1,000 Relics of the Third City and a Wink '
+        + 'from the Manager (not used up)',
+      costs: [['Ravenglass Knife', 5], ['Relic of the Third City', 1000]],
+      ends: [LAB_INV_JAGUAR_END],
+    },
+    {
+      branch: 'Prepare a weapon of vengeance using the knowledge you attained at the greatest price',
+      section: 'Bag a Legend', research: 50, pr: 25, researchFrom: 'the conclusion page', focus: [],
+      needs: 'Ambition: Bag a Legend! 400–450 and The Seven-Fold Knock (not used up)',
+      ends: [LAB_INV_JAGUAR_END],
+    },
+    {
+      branch: 'Create a replica of your Jaguar Blade', section: 'Bag a Legend', research: 125, pr: 125, focus: [],
+      needs: 'Ambition: Bag a Legend! 2000 and a Ravenglass Knife', costs: [['Ravenglass Knife', 1]],
+      ends: [{ via: 'Complete your Jaguar Blade, Remembered', product: 'Jaguar Blade, Remembered',
+        also: 'needs Expertise of the Third City 10; Bragging Rights at the Medusa\'s Head +5 CP' }],
+    },
+
+    // === Seasonal and one-off events ========================================
+    {
+      branch: 'Make a study of the river and the zee', section: 'Coilheart Games', research: 550,
+      focus: ['nautical'], needs: 'the Coilheart Games, having taken a side', elrv: 6250,
+      ends: [{ via: 'Conclude your investigations into the waterways of the Hinterlands',
+        gives: [['Searing Enigma', 1]], also: 'Science: Knowledge of the Waters +1, for your chosen team' }],
+    },
+    {
+      branch: 'Study the scents most conducive to romance', section: 'Feast of the Exceptional Rose', research: 550,
+      focus: ['toxic'], needs: 'the Feast of the Exceptional Rose', elrv: 6250,
+      ends: [{ via: 'Conclude your investigation into perfumed affection', gives: [['Captivating Ballad', 1]],
+        also: 'Burgeoning Romance +2500, for Mr Spices during the Feast' }],
+    },
+  ];
+
+  const LAB_INV_CLASS = 'fl-ux-lab-inv';
+  const LAB_INV_FLAG = 'flUxLabInv';
+
+  const LAB_INV_MARK_COSTS = '▼';
+  const LAB_INV_MARK_BONE = '☠';
+  const LAB_INV_MARK_CHANCE = '?';
+  const LAB_INV_MARK_EXTEND = '»';
+
+  // The colour is the Echo figure (its top, for a range), in the laboratory's
+  // own ramp so a lab screen reads as one palette: slate under 12.50, blue,
+  // teal from 12.50, amber from 60, gold from 300. A product with no Echo
+  // figure is the lab's plum. The number is always printed, so the colour only
+  // repeats it.
+  const LAB_INV_RAMP = [
+    { min: 300, color: '#e0b53a', ink: '#14181c' },
+    { min: 60, color: '#9a5b12' },
+    { min: 12.5, color: '#1f7a73' },
+    { min: 1, color: '#2d6aa0' },
+    { min: -Infinity, color: '#465262' },
+  ];
+  const LAB_INV_COLOR_NONE = '#4a3f5a';
+
+  function labInvRamp(value) {
+    for (const step of LAB_INV_RAMP) if (value >= step.min) return step;
+    return LAB_INV_RAMP[LAB_INV_RAMP.length - 1];
+  }
+
+  // --- arithmetic ----------------------------------------------------------
+
+  function labInvPrice(item) {
+    return Object.prototype.hasOwnProperty.call(LAB_INV_PRICES, item) ? LAB_INV_PRICES[item] : null;
+  }
+
+  // What a list of items fetches: { lo, hi, priced, bone, unpriced: [names] }.
+  // `priced` is whether anything in it has an Echo figure at all.
+  function labInvWorth(gives) {
+    const out = { lo: 0, hi: 0, priced: false, bone: false, unpriced: [] };
+    for (const g of gives || []) {
+      const p = labInvPrice(g[0]);
+      if (!p || p.none) { out.unpriced.push(g[0]); continue; }
+      const v = p.e != null ? p.e : p.bone;
+      const lo = Array.isArray(v) ? v[0] : v;
+      const hi = Array.isArray(v) ? v[1] : v;
+      out.lo += lo * g[1];
+      out.hi += hi * g[1];
+      out.priced = true;
+      if (p.bone != null) out.bone = true;
+    }
+    // Sums of cent prices drift (0.1 + 0.2); a figure here is never finer
+    // than a hundredth of an Echo.
+    out.lo = Math.round(out.lo * 100) / 100;
+    out.hi = Math.round(out.hi * 100) / 100;
+    return out;
+  }
+
+  // One conclusion: its items, or the range across its outcomes.
+  function labInvEndWorth(end) {
+    if (!end.outcomes) return Object.assign(labInvWorth(end.gives), { chance: false });
+    const each = end.outcomes.map(function (o) { return labInvWorth(o.gives); });
+    return {
+      lo: Math.min.apply(null, each.map(function (w) { return w.lo; })),
+      hi: Math.max.apply(null, each.map(function (w) { return w.hi; })),
+      priced: each.some(function (w) { return w.priced; }),
+      bone: each.some(function (w) { return w.bone; }),
+      unpriced: [].concat.apply([], each.map(function (w) { return w.unpriced; })),
+      chance: true,
+    };
+  }
+
+  // "62.50", "26", "1,562.60": whole Echoes bare, anything else to the penny.
+  function labInvEchoes(x) {
+    const whole = Math.abs(x - Math.round(x)) < 1e-9;
+    const s = whole ? String(Math.round(x)) : x.toFixed(2);
+    return s.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  function labInvThousands(n) {
+    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  // --- the badge -----------------------------------------------------------
+
+  function labInvResearchText(e) {
+    if (e.research == null) return '? LR';
+    let s = labInvThousands(e.research) + (e.more ? '+' + labInvThousands(e.more) : '') + ' LR';
+    if (e.pr) s += ' +' + e.pr + ' PR';
+    return s;
+  }
+
+  function labInvFocusText(e) {
+    if (!e.focus.length) return 'no focus';
+    return e.focus.map(function (k) { return LAB_INV_FOCUS[k]; }).join(' + ');
+  }
+
+  // The payout half of the badge, for the first conclusion: the Echo figure
+  // with its marks, the product word where there is one, or both.
+  function labInvPayoutText(e) {
+    const end = e.ends[0];
+    const w = labInvEndWorth(end);
+    let money = '';
+    if (w.priced) {
+      money = (w.lo === w.hi ? labInvEchoes(w.hi) : labInvEchoes(w.lo) + '–' + labInvEchoes(w.hi)) + ' E';
+      if (w.bone) money += ' ' + LAB_INV_MARK_BONE;
+      if (w.chance) money += LAB_INV_MARK_CHANCE;
+    }
+    const parts = [];
+    if (money) parts.push(money);
+    if (end.product) parts.push(end.product);
+    let s = parts.join(' + ');
+    if (e.ends.some(function (x) { return x.extend; })) s += ' ' + LAB_INV_MARK_EXTEND;
+    return { text: s, worth: w };
+  }
+
+  function labInvCostsWords(costs) {
+    return costs.map(function (c) {
+      const p = labInvPrice(c[0]);
+      const each = !p ? 'not priced' : p.none ? p.none
+        : (p.bone != null ? 'Bone Value ' : '')
+          + (Array.isArray(p.e != null ? p.e : p.bone)
+            ? (p.e != null ? p.e : p.bone).map(labInvEchoes).join('–') : labInvEchoes(p.e != null ? p.e : p.bone))
+          + ' E each';
+      return c[0] + ' ×' + labInvThousands(c[1]) + ' (' + each + ')';
+    }).join(', ');
+  }
+
+  function labInvGivesWords(gives) {
+    return labInvCostsWords(gives);
+  }
+
+  function labInvEndLine(end) {
+    const bits = [];
+    const head = end.via + (end.extend ? ' (an extension)' : '')
+      + (end.research != null || end.pr ? ' — needs ' + [end.research != null
+        ? labInvThousands(end.research) + ' Laboratory Research' : null,
+      end.pr ? end.pr + ' Parabolan Research' : null].filter(Boolean).join(' and ') : '');
+    bits.push('• ' + head + ':');
+    if (end.costs) bits.push('  uses ' + labInvCostsWords(end.costs) + '.');
+    if (end.outcomes) {
+      end.outcomes.forEach(function (o) {
+        const w = labInvWorth(o.gives);
+        bits.push('  ' + o.label + ': ' + labInvGivesWords(o.gives)
+          + (w.priced ? ' = ' + labInvEchoes(w.lo) + (w.lo !== w.hi ? '–' + labInvEchoes(w.hi) : '') + ' E' : '')
+          + '.');
+      });
+    } else if (end.gives && end.gives.length) {
+      const w = labInvWorth(end.gives);
+      bits.push('  gives ' + labInvGivesWords(end.gives)
+        + (w.priced ? ' = ' + labInvEchoes(w.lo) + (w.lo !== w.hi ? '–' + labInvEchoes(w.hi) : '') + ' E' : '')
+        + '.');
+    }
+    if (end.product && !(end.gives && end.gives.some(function (g) { return g[0] === end.product; }))) {
+      bits.push('  product: ' + end.product + '.');
+    }
+    if (end.also) bits.push('  also: ' + end.also + '.');
+    return bits.join('\n');
+  }
+
+  const LAB_INV_LEGEND = 'LR Laboratory Research · PR Parabolan Research · E Echoes, at the Bazaar\'s sale price · '
+    + LAB_INV_MARK_COSTS + ' starting it uses something up · ' + LAB_INV_MARK_BONE
+    + ' Bone Value, Echoes only once built into a skeleton and sold · ' + LAB_INV_MARK_CHANCE
+    + ' a range across the outcomes · ' + LAB_INV_MARK_EXTEND + ' can be extended into a longer project.';
+
+  // entry -> { text, color, ink?, title }.
+  function labInvSpec(e) {
+    const pay = labInvPayoutText(e);
+    const head = (e.costs && e.costs.length ? LAB_INV_MARK_COSTS + ' ' : '') + labInvResearchText(e);
+    const text = withFactions([head, pay.text, labInvFocusText(e)].join(' · '), e);
+
+    const w = pay.worth;
+    const step = w.priced ? labInvRamp(w.hi) : null;
+    const lines = [e.branch + ' — ' + e.section];
+    lines.push('Needs: ' + e.needs + '.');
+    lines.push('Research: ' + (e.research == null ? 'not recorded'
+      : labInvThousands(e.research) + ' Laboratory Research'
+        + (e.more ? ', then ' + labInvThousands(e.more) + ' more in a second stage' : ''))
+      + (e.pr ? ', and ' + e.pr + ' Parabolan Research' : '')
+      + (e.researchFrom ? ' (from ' + e.researchFrom + '; the start page sets none)' : '') + '.');
+    lines.push('Focus: ' + (e.focus.length ? labInvFocusText(e) : 'none')
+      + ' — the focus decides which focus cards and expert options the deck deals while it runs.');
+    if (e.costs && e.costs.length) lines.push('Uses up: ' + labInvCostsWords(e.costs) + '.');
+    const fl = factionLine(e);
+    if (fl) lines.push(fl);
+    lines.push('');
+    lines.push(e.ends.length > 1 ? 'Ways to finish it (the badge quotes the first):' : 'Finishing it:');
+    e.ends.forEach(function (end) { lines.push(labInvEndLine(end)); });
+    if (w.priced && e.research) {
+      lines.push('');
+      lines.push('About ' + labInvEchoes(Math.round(w.hi / e.research * 10000) / 100)
+        + ' E per 100 Laboratory Research' + (e.pr ? ', before the Parabolan Research' : '') + '.');
+    }
+    if (e.elrv != null) {
+      lines.push('The game\'s own hidden valuation (Expected Lab Reward Value): '
+        + labInvEchoes(e.elrv / 100) + ' E.');
+    }
+    if (e.note) lines.push(e.note);
+    lines.push('');
+    lines.push(LAB_INV_LEGEND);
+
+    const spec = {
+      text: text,
+      color: step ? step.color : LAB_INV_COLOR_NONE,
+      title: lines.join('\n'),
+    };
+    if (step && step.ink) spec.ink = step.ink;
+    return spec;
+  }
+
+  // --- looking one up ------------------------------------------------------
+
+  const LAB_INV_BY_TITLE = new Map();
+  for (const e of LAB_INV) {
+    for (const title of [e.branch].concat(e.aliases || [])) {
+      const key = normalizeName(title);
+      if (!LAB_INV_BY_TITLE.has(key)) LAB_INV_BY_TITLE.set(key, []);
+      LAB_INV_BY_TITLE.get(key).push(e);
+    }
+  }
+
+  function labInvRows(title) {
+    return LAB_INV_BY_TITLE.get(normalizeName(title)) || [];
+  }
+
+  // Three titles are each two options with different pages (the two eggs, the
+  // two locomotives, the two monstrosity studies), and nothing on screen this
+  // feature reads tells them apart. Rather than pick one, the badge then says
+  // what is true of both: each differing part as "a / b", and a tooltip with
+  // both in full.
+  function labInvSpecFor(rows) {
+    if (!rows.length) return null;
+    if (rows.length === 1) return labInvSpec(rows[0]);
+    const specs = rows.map(labInvSpec);
+    const split = specs.map(function (s) { return s.text.split(' · '); });
+    const width = Math.max.apply(null, split.map(function (p) { return p.length; }));
+    const merged = [];
+    for (let i = 0; i < width; i++) {
+      const seen = [];
+      split.forEach(function (p) { if (p[i] != null && seen.indexOf(p[i]) === -1) seen.push(p[i]); });
+      merged.push(seen.join(' / '));
+    }
+    const worths = rows.map(function (e) { return labInvPayoutText(e).worth; });
+    const priced = worths.filter(function (w) { return w.priced; });
+    const step = priced.length ? labInvRamp(Math.max.apply(null, priced.map(function (w) { return w.hi; }))) : null;
+    const spec = {
+      text: merged.join(' · '),
+      color: step ? step.color : LAB_INV_COLOR_NONE,
+      title: 'Two options share this title, and nothing on screen tells which one this is:\n\n'
+        + specs.map(function (s) { return s.title.replace('\n\n' + LAB_INV_LEGEND, ''); }).join('\n\n— or —\n\n')
+        + '\n\n' + LAB_INV_LEGEND,
+    };
+    if (step && step.ink) spec.ink = step.ink;
+    return spec;
+  }
+
+  // --- wiring --------------------------------------------------------------
+  //
+  // Options are badged only while Begin a Scientific Investigation is the
+  // opened storylet: its option titles ("Create an Infernal Machine", "Study
+  // the Augmentation Device") are what the storylet is for, but several are
+  // ordinary enough that their name alone is no evidence. The storylet's own
+  // name is distinctive, so it is the gate; a greeting read verbatim as
+  // somewhere other than the University (`labWhere`) still clears everything.
+  function labInvRatings() {
+    const where = labWhere();
+    let open = false;
+    document.querySelectorAll('.storylet-root__heading').forEach(function (head) {
+      if (normalizeName(headingName(head)) === normalizeName(LAB_INV_STORYLET)) open = true;
+    });
+    const usable = open && where !== 'no';
+    document.querySelectorAll('.branch__title').forEach(function (head) {
+      const name = headingName(head);
+      const spec = usable && name ? labInvSpecFor(labInvRows(name)) : null;
+      attachBadge(head, {
+        cls: LAB_INV_CLASS, flag: LAB_INV_FLAG,
+        value: name + (usable ? '@inv' : '@-'), spec: spec, place: 'after',
+      });
+    });
   }
 
   // === feature: Arbor, of the Roses ======================================
@@ -46375,6 +47426,9 @@
     // options of an opened card: a lab option is only badged inside a lab card,
     // because "Take a break" and "No more of this!" could be anywhere.
     { name: 'university-laboratory', run: labRatings },
+    // The same lab's project chooser: an opened storylet, not a card, so it
+    // badges only the options of Begin a Scientific Investigation.
+    { name: 'lab-investigations', run: labInvRatings },
     // The fifth on `.branch__title`. Arbor deals no cards, so it badges the
     // London card that takes you there, the two storylets a stay happens in,
     // and their options -- the options only while one of those is open.
@@ -46649,7 +47703,7 @@
   // content that is only on for part of the year.
   const FEATURE_GROUPS = {
     'London': [
-      'spite-card-ratings', 'university-laboratory', 'arbor', 'lb-industries', 'menace-eradication',
+      'spite-card-ratings', 'university-laboratory', 'lab-investigations', 'arbor', 'lb-industries', 'menace-eradication',
       'vertiginous-horticulture', 'forgotten-quarter', 'cat-and-mouse', 'season-in-soup',
       'long-dead-god', 'engaged-in-a-case', 'sunken-embassy', 'law-furnace', 'prelapsarian-museum',
       'on-a-heist', 'spider-symposium', 'short-stories', 'flash-lays', 'social-actions',
@@ -46715,6 +47769,7 @@
     'wilmots-business': 'Wilmot’s End business',
     'hearts-game': 'Hearts’ Game',
     'law-furnace': 'Law-Furnace',
+    'lab-investigations': 'Begin a Scientific Investigation options',
   };
 
   const LABEL_SMALL = { a: 1, an: 1, the: 1, of: 1, in: 1, on: 1, to: 1, and: 1, at: 1, for: 1 };
