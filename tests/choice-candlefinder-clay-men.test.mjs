@@ -4,9 +4,10 @@
 // There's no test runner in this repo (see AGENTS.md). Standalone Node script: evaluates the
 // userscript's IIFE against a stub DOM and pulls out the internals.
 //
-// What's worth pinning here: exactly the 5 Airs-gated rows (the two non-Airs options,
-// "Eavesdrop on private conversations" and "Concrete evidence", are NOT in the table), the
-// Detecting... amounts 8/6/6/6/4, challenge marks only on the rows that have a challenge, the
+// What's worth pinning here: all 7 options (the two without an Airs window, "Eavesdrop on
+// private conversations" and "Concrete evidence", were missing until 2026-11-24), the
+// Detecting... amounts 8/6/6/6/4/4, challenge marks only on the rows that have a challenge, the
+// case-closer badged as a payout (Progress in a Case → 60) rather than as progress, the
 // "below 40" window on "Be open about your motives" stated in words, and no name collision.
 //
 // Numbers come from Candlefinder: Canvassing the Clay Men on fallenlondon.wiki, all 7 option pages
@@ -140,39 +141,53 @@ function allNames() {
   ].map(key);
 }
 
-check('5 rows, exactly the Airs-gated ones',
+check('7 rows, every option on the storylet page',
   api.CANDLEFINDER_CLAY_MEN_OPTIONS.map((e) => e.name),
   ['Emancipate a Clay Man', 'Patch up an injured Clay Man', 'Send in the Gravel-Voiced Gossip',
-    'Keep track of Clay movements', 'Be open about your motives']);
+    'Keep track of Clay movements', 'Be open about your motives', 'Eavesdrop on private conversations',
+    'Concrete evidence']);
 
-check('the two non-Airs options are absent',
-  ['Eavesdrop on private conversations', 'Concrete evidence'].map((n) => row(n) === undefined), [true, true]);
-
-check('Detecting... progress per row',
-  api.CANDLEFINDER_CLAY_MEN_OPTIONS.map((e) => e.progress), [8, 6, 6, 6, 4]);
+check('Detecting... progress per row (null on the case-closer, which spends it)',
+  api.CANDLEFINDER_CLAY_MEN_OPTIONS.map((e) => e.progress), [8, 6, 6, 6, 4, 4, null]);
 
 check('the challenge mark shows only on rows with a challenge',
   api.CANDLEFINDER_CLAY_MEN_OPTIONS.map((e) => api.candlefinderClayMenSpec(e).text.includes('?')),
-  [false, true, false, true, true]);
+  [false, true, false, true, true, true, false]);
+
+check('badge text per row',
+  api.CANDLEFINDER_CLAY_MEN_OPTIONS.map((e) => api.candlefinderClayMenSpec(e).text),
+  ['Detecting... +8', 'Detecting... +6?', 'Detecting... +6', 'Detecting... +6?', 'Detecting... +4?',
+    'Detecting... +4?', 'Case progress → 60']);
+
+check('Eavesdrop: Watchful 150, no Airs window, Nightmares on failure',
+  (() => { const t = api.candlefinderClayMenSpec(row('Eavesdrop on private conversations')).title;
+    return [t.includes('Watchful 150'), t.includes('no Airs window'), t.includes('Failure: Nightmares +1')]; })(),
+  [true, true, true]);
+
+check('Concrete evidence: needs Detecting... 8, sets the case to 60, removes the lead',
+  (() => { const t = api.candlefinderClayMenSpec(row('Concrete evidence')).title;
+    return [t.includes('Requires: Detecting... 8'), t.includes('Progress in a Case set to 60'),
+      t.includes('Lead: Clay Men of London both removed')]; })(),
+  [true, true, true]);
 
 check('"Be open about your motives" states its below-40 window in words',
   api.candlefinderClayMenSpec(row('Be open about your motives')).title.toLowerCase().includes('below 40'), true);
 
 check('wiring: badges only appear while the Clay Men storylet is open',
   (() => {
-    const head = makeHeading('Emancipate a Clay Man');
-    branches = [head];
+    const heads = ['Emancipate a Clay Man', 'Eavesdrop on private conversations', 'Concrete evidence'].map(makeHeading);
+    branches = heads;
     const out = [];
     roots = [makeHeading('Candlefinder: Canvassing the Clay Men')];
     api.candlefinderClayMenRatings();
-    out.push(text(head, api.CANDLEFINDER_CLAY_MEN_BRANCH_CLASS) !== null);
+    out.push(heads.map((h) => text(h, api.CANDLEFINDER_CLAY_MEN_BRANCH_CLASS)));
     roots = [makeHeading('Some Other Storylet')];
     api.candlefinderClayMenRatings();
-    out.push(text(head, api.CANDLEFINDER_CLAY_MEN_BRANCH_CLASS) !== null);
+    out.push(heads.map((h) => text(h, api.CANDLEFINDER_CLAY_MEN_BRANCH_CLASS)));
     roots = []; branches = [];
     return out;
   })(),
-  [true, false]);
+  [['Detecting... +8', 'Detecting... +4?', 'Case progress → 60'], [null, null, null]]);
 
 check('no Clay Men name is in another feature\'s table',
   (() => { const others = allNames();

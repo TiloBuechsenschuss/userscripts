@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.89
+// @version      1.90
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -44219,13 +44219,19 @@
   // only the Clay Men are covered here.
   //
   // **What the badge says.** How far the option moves the "Detecting..."
-  // progress quality (8/6/6/6/4), marked as a challenge where it has one.
-  // Requirements and the failure menace are in the tooltip. Two options are
-  // not Airs-gated and not badged: "Eavesdrop on private conversations" and
-  // "Concrete evidence" (the case-closer).
+  // progress quality (8/6/6/6/4/4), marked as a challenge where it has one.
+  // Requirements and the failure menace are in the tooltip. The case-closer,
+  // "Concrete evidence" (Detecting... 8), says instead what it cashes the
+  // progress in for: Candlefinder: Progress in a Case set to 60.
+  //
+  // Every option is badged, Airs-gated or not. The first version left out the
+  // two that carry no Airs window ("Eavesdrop on private conversations" and
+  // "Concrete evidence") because this storylet was reached through the Airs
+  // of London pass; that left the always-available option and the one that
+  // finishes the lead unbadged (fixed 2026-11-24).
   //
   // Transcribed from all 7 option pages (fetched through the API,
-  // 2026-09-27) -- see
+  // 2026-09-27, re-checked 2026-11-24) -- see
   // docs/superpowers/research/2026-09-27-airs-of-london-group-c.md
   // section 7. Corrections go in CANDLEFINDER_CLAY_MEN_OPTIONS and nowhere else.
 
@@ -44246,6 +44252,12 @@
       'Suspicion +1'),
     cfRow('Be open about your motives', 'Airs of London below 40 (locked at 40 and above)', null,
       { stat: 'Persuasive', diff: 150 }, 4, null, 'Scandal +1'),
+    cfRow('Eavesdrop on private conversations', 'Any Airs of London (no Airs window)', null,
+      { stat: 'Watchful', diff: 150 }, 4, null, 'Nightmares +1'),
+    // The case-closer: no Detecting... gain (`progress` null), it spends the lot.
+    cfRow('Concrete evidence', 'Any Airs of London (no Airs window)', 'Detecting... 8', null, null,
+      { sets: ['Candlefinder: Progress in a Case', 60],
+        extra: 'Detecting... and Candlefinder Lead: Clay Men of London both removed' }),
   ];
 
   const CANDLEFINDER_CLAY_MEN_INDEX = carouselIndex(CANDLEFINDER_CLAY_MEN_OPTIONS);
@@ -44261,9 +44273,12 @@
       e.airs + '.',
       e.ch ? 'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.' : 'No challenge.',
       e.needs ? 'Requires: ' + e.needs + '.' : null,
-      'Gives: Detecting... +' + e.progress + (e.extra ? ', ' + e.extra : '') + '.',
+      e.sets
+        ? 'Gives: ' + e.sets[0] + ' set to ' + e.sets[1] + (e.extra ? '; ' + e.extra : '') + '.'
+        : 'Gives: Detecting... +' + e.progress + (e.extra ? ', ' + e.extra : '') + '.',
       e.fail ? 'Failure: ' + e.fail + '.' : null,
     ].filter(Boolean).join('\n');
+    if (e.sets) return { text: 'Case progress → ' + e.sets[1], color: CAROUSEL_COLOR_PAYOUT, title: lines };
     return { text: 'Detecting... +' + e.progress + (e.ch ? CAROUSEL_MARK_CHALLENGE : ''), color: CAROUSEL_COLOR_PROGRESS, title: lines };
   }
 
@@ -44272,7 +44287,7 @@
     return {
       text: 'Clay Men', color: CAROUSEL_COLOR_LABEL,
       title: CANDLEFINDER_CLAY_MEN_STORYLET + '\n\nOne storylet of the Candlefinder storyline. '
-        + 'Open it and every Airs-gated option is badged in its own right.',
+        + 'Open it and every option is badged in its own right; Concrete evidence (Detecting... 8) closes the lead.',
     };
   }
 

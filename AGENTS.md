@@ -5313,8 +5313,8 @@ Current tests:
     equal to the Watchful difficulty on five rows.
   - `tests/choice-shifting-streets.test.mjs` — the base reward per row, the tier-4/8 bonus stated
     as not computed, the shared Pedestrian Peregrinations line only in the storylet tooltip.
-  - `tests/choice-candlefinder-clay-men.test.mjs` — the five Airs-gated rows, the two non-Airs
-    options absent.
+  - `tests/choice-candlefinder-clay-men.test.mjs` — all seven options, including the two without
+    an Airs window (Eavesdrop, and Concrete evidence badged as a payout: Progress in a Case → 60).
   - `tests/choice-on-the-trail.test.mjs` — both case-stage windows shown, both Goat-Demon
     outcomes, and zero shared names with `clay-highwayman`.
   - `tests/choice-christmas-card.test.mjs` — one merged informational row listing all four gains.
