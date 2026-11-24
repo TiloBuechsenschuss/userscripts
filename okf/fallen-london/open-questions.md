@@ -4,8 +4,8 @@ title: Open questions about Fallen London
 kind: open-questions
 domain: fallenlondon.com
 status: open
-updated: 2026-10-25
-see_also: [api.md, challenges.md, equipment.md, agents-tab.md]
+updated: 2026-11-24
+see_also: [api.md, challenges.md, equipment.md, agents-tab.md, fl-small-mercies.md]
 ---
 
 # Open questions
@@ -13,6 +13,30 @@ see_also: [api.md, challenges.md, equipment.md, agents-tab.md]
 Each entry says what is unknown, why it matters, what the code does meanwhile,
 and what capture would settle it. When one is settled, move the fact into the
 right file and delete the entry.
+
+## Observing the game's own API traffic from a userscript
+
+Raised 2026-11-24 by reading FL Small Mercies (see
+[fl-small-mercies.md](fl-small-mercies.md), commit `0ca935a`; check the live
+repository first, it may have changed).
+
+- **Unknown:** whether the game makes its `api.fallenlondon.com` calls with
+  `XMLHttpRequest` only, or also with `fetch`. Our recorder wrapped both and did
+  not note which one each call came through; the extension wraps only XHR.
+- **Unknown:** whether a `@grant none`, `@run-at document-start` userscript is
+  injected into the page early enough to wrap `XMLHttpRequest` before the
+  game's first `GET /api/character/myself`, in each userscript manager we
+  support (Tampermonkey, Violentmonkey, Greasemonkey).
+- **Unknown:** which actions make the game fetch `/api/character/myself` again,
+  so how stale a copy observed at boot gets.
+- **Unknown:** the method, body and effect of `/api/outfit/equipHighest`.
+- **Matters:** observing the replies the game already fetches would replace our
+  own `GET /api/character/myself` (about 350 KB) and the hidden-iframe tab
+  loads with zero extra requests.
+- **Meanwhile:** nothing depends on it; the scripts fetch or load tabs as before.
+- **Capture:** run the recorder with its log noting `xhr` or `fetch` per call,
+  through a page load and a few actions; and a `document-start` script per
+  manager that logs whether its wrapper saw the boot `/myself`.
 
 ## The Agents tab
 

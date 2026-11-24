@@ -46,8 +46,24 @@ Facts about how a game behaves that took a capture to establish are written down
 bearer token, every endpoint seen and its reply shapes), `challenges.md` (broad and narrow
 chances, the 10% floor and 100% cap, how to infer what the game does not send),
 `equipment.md` (slots, item bonuses, effective versus base level, equipping),
-`agents-tab.md` (the `/agents` tab's markup and how Choice Helper reads it) and
-`open-questions.md` (what has not been captured).
+`agents-tab.md` (the `/agents` tab's markup and how Choice Helper reads it),
+`fl-small-mercies.md` (API facts read out of a third-party extension's source; all *assumed*,
+see below) and `open-questions.md` (what has not been captured).
+
+**Third-party sources.** These are snapshots of someone else's project: each says the date it
+was read and the commit, and **a live check against that repository is recommended** before
+relying on it, since it may have changed since.
+
+- **FL Small Mercies** (<https://github.com/lensvol/fl-small-mercies>, a Fallen London browser
+  extension, MIT; read 2026-11-24 at commit `0ca935a`, committed 2026-11-06, version 3.5.0;
+  check the live repo before relying on it). It makes no API calls of its own: it wraps the
+  page's `XMLHttpRequest` and reads, and sometimes rewrites, the game's own API replies,
+  catching the boot-time `/api/character/myself` with a `document-start` script. What it does,
+  feature by feature, and what that could mean for faster data loading here:
+  `docs/fl-small-mercies/reference.md`. What its source implies about the game (extra
+  endpoints, `choosebranch` reply messages, page facts): `okf/fallen-london/fl-small-mercies.md`,
+  all *assumed* until a capture of ours confirms it. Analysis only so far (2026-11-24): no script
+  uses any of it.
 
 The format is structured markdown: a front-matter block (`okf: 1`, `title`, `kind`,
 `status`, `verified` or `updated`, `see_also`), one topic per file, tables for shapes, and

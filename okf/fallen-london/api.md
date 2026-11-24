@@ -6,7 +6,7 @@ domain: fallenlondon.com
 status: verified
 verified: 2026-09-26
 source: live capture of the game's own XHR traffic, plus one probe
-see_also: [challenges.md, equipment.md, open-questions.md]
+see_also: [challenges.md, equipment.md, open-questions.md, fl-small-mercies.md]
 ---
 
 # The Fallen London web API
@@ -48,6 +48,12 @@ Verified means seen in the capture with the stated shape.
 | `GET /api/plan` | none | Your plans, active and completed, each with its requirements checked against you now. | yes (see below) |
 | `GET /api/messages` | none | Messages. | yes (shape not studied) |
 | `GET /api/settings` | none | Settings. | yes (shape not studied) |
+
+More endpoints, and reply shapes for some marked "not studied" above, are in
+[fl-small-mercies.md](fl-small-mercies.md): read out of a third-party
+extension's source on 2026-11-24 (commit `0ca935a`), all *assumed*, not in this
+table until a capture of ours confirms them. Check the live repository before
+relying on them.
 
 Calls that choose a branch or spend actions were never made during the capture
 and their names are unknown. Nothing in this repository may call them.
