@@ -222,7 +222,7 @@ const wrapped = src
   .replace(/\}\)\(\);\s*$/,
     'return { FACTIONS, RENOWN_TIERS, PANELS, FEATURES, readFactionState,'
     + ' renderFactionsPanel, factionRow, wikiHref, mountLauncher, LAUNCHER_ID,'
-    + ' parseQualityItem, readQualities, factionsFromQualities, captureFactionState,'
+    + ' parseQualityItem, readQualities, factionsFromQualities, captureTabs,'
     + ' characterName, CACHE_KEY, ITEMS_KEY, ageText, readPossessions, itemNameFromLabel,'
     + ' itemKey,'
     + ' autoRefreshEnabled, setAutoRefresh, stateIsFresh,'
@@ -808,7 +808,7 @@ check('the menu offers the Factions, Zailing and Fruits of the Zee panels',
 
 check('the registry holds the launcher, the background jobs and the card ratings',
   api.FEATURES.map((f) => f.name),
-  ['launcher', 'faction-capture', 'pending-item', 'equipment-helper', 'equipment-optimizer']);
+  ['launcher', 'tab-capture', 'pending-item', 'equipment-helper', 'equipment-optimizer']);
 
 // --- the leading article ---------------------------------------------------
 //

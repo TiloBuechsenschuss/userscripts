@@ -101,9 +101,10 @@ Notes, all **verified** in the capture:
 | Complete or not | `.agent-filter-group [class*="-singleValue"]` is exactly `All` | any other filter hides agents, so an absent name proves nothing |
 
 The reading is banked in `localStorage` (`fl-ux-agents`) whenever the tab is on
-screen, and loaded in a hidden frame by the Hallowmas panel's refresh. A read
-that fails (no list within 20 s) is banked beside the last good reading as
-`failedAt` and retried after an hour.
+screen, and loaded in a hidden frame by Choice Helper's shared tab refresh
+(`refreshTabs`): on every Refresh press, and by an automatic refresh at most once
+an hour. A read that fails (no list within 20 s) is banked beside the last good
+reading as `failedAt` and retried after an hour.
 
 ## Assumed
 

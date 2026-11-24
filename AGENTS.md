@@ -1000,12 +1000,38 @@ navigation. Two consequences:
     badges all still work and the panels have no menu to be in.
   - **`fl-ux-shared-frame`** (`FRAME_EVENT`). A background refresh boots the whole SPA in a hidden
     frame, and before the split one boot of `/myself` banked the Factions, festival and Port
-    Carnelian numbers together. Each script now has its own `refreshBackgroundState`, which banks
-    only its own numbers — and `shareFrame` hands the frame's document to the other script from
-    inside `extract`, the only moment it still exists (the listener runs synchronously, before
-    `loadInFrame` removes the frame). The other script banks its numbers off the same boot, and
-    its own refresh then finds a fresh cache and has nothing to do. `SCRIPT_ID` is how a script
-    ignores its own event.
+    Carnelian numbers together. Each script runs its own copy of the tab reader (next item), which
+    banks only its own features — and `shareFrame` hands the frame's document to the other script
+    from inside `extract`, the only moment it still exists (the listener runs synchronously, before
+    `loadInFrame` removes the frame). The other script banks it through `bankSharedFrame` for every
+    feature of its own that wants that tab and redraws its open panel; `fl-ux-tabs` (below) then
+    says the tab was just read, so its own automatic refresh has nothing to do. `SCRIPT_ID` is how
+    a script ignores its own event.
+  - **The tab reader** (Choice Helper 1.87, UX Enhancers 3.11; "shared: reading the tabs",
+    byte-identical in both files). One engine for everything read off a tab, replacing a
+    `refreshBackgroundState` per script that listed every feature's bank function by hand (and a
+    separate `refreshAgents` only Hallowmas called). A **source** is a tab —
+    `tabSource(id, { path, read, loaded, sig, fresh, retry })`; both scripts register `myself` and
+    `possessions` in the shared block, Choice Helper adds `agents`. A feature **wants** a source —
+    `wantTab(id, bank, failed)`, written beside the feature's own bank function — and `bank(got)` is
+    handed every reading of that tab, however it was taken. `captureTabs` (the `tab-capture` feature,
+    first in each `FEATURES`, no switch) banks a tab when its `sig` changes and redraws the open panel
+    then, and again when the tab goes off screen so "live" turns into an age: **this is what makes
+    walking onto Myself or Possessions with a panel open update the panel** (before 1.87 the tab was
+    banked and the panel kept the old reading until reopened). `refreshTabs(force)` reads each wanted
+    tab off the page if it is on screen, else loads it in a hidden frame, sequentially, in
+    registration order (Myself, Possessions, Agents); `force` (every Refresh button, through
+    `refreshTabsNow`) loads them all, an automatic refresh only those `tabDue` — not read within
+    `fresh` and not tried within `retry`, both a minute for Myself and Possessions and an hour for
+    Agents (`AGENTS_FRESH_MS` / `AGENTS_RETRY_MS`: otherwise every automatic refresh would boot a
+    third SPA for one panel's question). The read and tried times are in `fl-ux-tabs`, shared by both
+    scripts, and a load marks its tab tried **before** it starts, so the other script does not load the
+    same tab at the same moment. A panel takes part with `autoRefreshTabs(ctx, stale)` in its render —
+    which is also what registers it as the panel to redraw (`watchTabs`); `tabsChanged` defers the
+    redraw and a `schedule()` to a microtask, so a capture mid-scan does not rebuild the panel under
+    it. A new feature that reads a tab adds one `wantTab` call, and nothing else: no list to extend.
+    `tests/fl-tab-reading.test.mjs` pins it. A redraw rebuilds the panel body, so a filter typed into
+    a panel's search box is lost when a reading lands — as it always was when a refresh landed.
   - **The launcher's ids** (`fl-ux-launcher`, `fl-ux-launcher-button`). The depth control docks
     behind the button by finding it by id (`launcherDockHost`). A **cross-file contract**: change
     them in both scripts or not at all.
@@ -1610,7 +1636,8 @@ navigation. Two consequences:
   Two shared pieces moved for this. `refreshFactionState` became **`refreshBackgroundState`**,
   which banked both panels' readings off the same two page loads -- booting the SPA twice more for
   this panel would have been silly. Since the split each script has its own, and the frame is
-  shared across instead (`FRAME_EVENT`, above), which keeps the one-boot property. And `fotzHoldings()` is memoised on a `fotzGen` counter bumped
+  shared across instead (`FRAME_EVENT`, above), which keeps the one-boot property. Since Choice
+  Helper 1.87 both are the tab reader (`refreshTabs`, above). And `fotzHoldings()` is memoised on a `fotzGen` counter bumped
   whenever anything is re-banked, because unlike the panels it runs once per card on every
   debounced scan and would otherwise re-parse a few hundred cached item names each time. The
   badge's `attachBadge` value carries the depth and that generation, not just the card name, so
@@ -1736,15 +1763,15 @@ navigation. Two consequences:
   Society favour, which the ending page states and which is a different claim from paying one
   you cannot hold.
   The plumbing is the festival's, reused rather than rebuilt: `PC_QUALITIES` off the Myself tab
-  into `PC_CACHE_KEY` by `bankPcQualities`, banked from the same scrape `fotz-capture` already
-  makes and from `refreshBackgroundState`, and `pcPurse()` memoised on a `pcGen` counter with
+  into `PC_CACHE_KEY` by `bankPcQualities`, which asks the tab reader for the Myself tab
+  (`wantTab('myself', bankPcQualities)`), and `pcPurse()` memoised on a `pcGen` counter with
   the age **bucketed** into the key — a raw timestamp there would rebuild every badge on every
   mutation for ever. The purse is in `attachBadge`'s `value` for the same reason the gate is:
   an ending's badge *is* your Delights, so a badge drawn before the reading landed has to
-  redraw when it does. And because banking mutates nothing in the page, `pcMaybeRefresh` calls
-  `schedule()` itself afterwards. It books a hidden-frame load of `/myself` only when an ending
-  is actually on screen (`spec.cash` says so), only when the reading is stale, at most one a
-  minute, and never when the auto-refresh toggle is off.
+  redraw when it does; the tab reader's `tabsChanged` rescans after anything is banked, since
+  banking mutates nothing in the page. `pcMaybeRefresh` asks for an automatic refresh only when an
+  ending is actually on screen (`spec.cash` says so), only when the reading is stale, at most one a
+  minute (`tabDue`), and never when the auto-refresh toggle is off.
   The `port-carnelian` panel opens on that calculator — the purse, the four endings priced with
   the best one marked **in words** as well as in the accent, and the next rounding step — over
   the same Refresh / auto controls the other two panels carry. Then the reference half: how to
@@ -2910,7 +2937,7 @@ navigation. Two consequences:
   leading "A" since 2026-10-29), and adds a "please report" line to the storylet tooltip
   of an open Masque the season says is resting. 2026: Roof Below, Pavilion, Sacristy (Scandal, Demon); the Wreck rests. **What you hold**
   (added 2026-10-21, `hmHoldings`, `hmUpgradeStatus`): the panel reads Possessions -- live, else the shared banked counts (`COUNTS_KEY`),
-  labelled with their age, with Refresh and auto through `refreshBackgroundState` like the Philosofruit panel -- for the six Confessions
+  labelled with their age, with Refresh and auto through the tab reader (`refreshTabs`) like the Philosofruit panel -- for the six Confessions
   (and their total), the four masks (`hmMaskHeldText`: `✓ gilded` for the Fate mask in `HM_GILDED_MASK_ITEMS`, which carries the same
   unlock quality as the plain one, else `✓ held` / `none`), a "(hold N)" on every option's spend, and a "You hold" column on the upgrades: `✓ have X (locked)`,
   `needs …` (with `n/N` for a count), or `★ ready` (`★ ready if …` where the option also needs a quality). Items only; Spirit and the
@@ -3283,7 +3310,7 @@ navigation. Two consequences:
   a `–` pip rather than the `◇` "not held" pip — three states, so an unknown is never mistaken for
   a no. A "0 Favours" that really means "couldn't tell" is worse than no panel, and Favours
   genuinely can be 0. (3) The values are read where they're shown but wanted everywhere else, so
-  the last good read is cached in `localStorage` (`fl-ux-factions`) by the `faction-capture`
+  the last good read is cached in `localStorage` (`fl-ux-factions`) by the `tab-capture`
   feature — always **labelled with its age** in the panel, and discarded if the character name
   (from `#accessible-sidebar .welcome a[href^="/profile/"]`, present on every page) doesn't match.
   Which items you hold comes from the **Possessions tab**, also verified in both layouts: every
@@ -3487,13 +3514,13 @@ navigation. Two consequences:
   in `.working-agent-elapsed-actions`) and one `.free-agent` per agent at home (name in `h2.agent-header`). The
   name element's TAG differs between the two, so select on the class. The plot heading is a `.branch__title`,
   so every option-badging feature walks it (harmlessly: no table holds a plot name), and its name is read with
-  `headingName`. Banked in `fl-ux-agents` by `captureAgents` (run from `fotz-capture`, not a feature of its
-  own) and loaded in a hidden frame by `refreshAgents`, which is **not** part of `refreshBackgroundState`: it
-  is a third SPA boot, so only a panel that needs it (Hallowmas) calls it. A failed read is banked as
-  `failedAt` beside the last good one and retried after an hour.
+  `headingName`. Banked in `fl-ux-agents` by `bankAgents`, the `agents` source of the tab reader (captured by
+  `tab-capture` when the tab is on screen, `agentsSig`). It is a third SPA boot, so an automatic refresh loads
+  it at most once an hour (`AGENTS_FRESH_MS`); a Refresh press loads it every time. A failed read is banked as
+  `failedAt` beside the last good one (`bankAgentsFailed`) and retried after an hour.
 - **Refreshing the Factions panel: `fetch` does not work, and that is settled.** Fallen London is
   client-rendered — `GET /myself` returns a ~4.7KB shell whose `#root` holds a loading splash and
-  no quality list (checked against the live site, not assumed). So `refreshBackgroundState()` uses a
+  no quality list (checked against the live site, not assumed). So the tab reader (`refreshTabs`) uses a
   hidden off-screen **iframe** instead: point it at the route, let the app boot inside it, poll
   `contentDocument` until the markup appears, then read it. It's off-screen rather than
   `display:none` because a `display:none` iframe may skip layout and never run the app. The two
@@ -3634,6 +3661,15 @@ Confirmed live by the author:
 
 **Not** verified in-game (reasoned about only):
 
+- The **tab reader** (Choice Helper 1.87, UX Enhancers 3.11). Report: (1) with a panel open (Port
+  Carnelian, Fruits of the Zee, the Laboratory, Philosofruits, Whisker-Ways, Hallowmas, Spending
+  Secrets or Factions), clicking the game's Myself or Possessions tab should redraw it within a moment
+  with "live" figures, and leaving the tab should turn "live" into an age; (2) pressing Refresh on one
+  panel and then opening another should show the second as just read, without it refreshing again;
+  (3) a Refresh press now loads Agents as a third hidden frame, so "Refreshing…" lasts longer than it
+  did — up to 20 s more on a character whose Agents tab never draws; say if that is too slow;
+  (4) typing in the game's Myself search box with a panel open redraws the panel per keystroke —
+  say if that is visibly janky.
 - The Factions panel's **done block** (UX Enhancers 3.10): that a faction at Renown 40 with all
   three Renown items held sorts below the rest under the "✓ Done" divider, faded, and that the
   fade still leaves it readable on the panel's dark background. Report a done faction listed
@@ -5226,13 +5262,21 @@ Current tests:
 - `tests/fl-agents-tab.test.mjs` — `readAgents` run against a trimmed copy of the real `/agents` capture
   through a small HTML parser in the suite (so the selectors meet the game's own shape): a working and a free
   agent, the plot and its progress, the wiki-links "W" kept out of the plot name, the filter making the list
-  incomplete, an undrawn list and another tab reading as null; the banking (live, cached, stale after a minute,
+  incomplete, an undrawn list and another tab reading as null; the banking (live, cached, stale after an hour,
   a failure kept beside the good reading and retried after an hour); and the Hallowmas Infiltrator row against it.
+- `tests/fl-tab-reading.test.mjs` — the tab reader, with both IIFEs loaded into one stub page whose
+  hidden frames draw whatever the test says: one refresh started from one panel banks every feature's
+  figures (all seven Myself readers and the item counts) off one boot per tab, an Agents tab that never
+  draws is banked as a failure, an automatic refresh a moment later loads nothing and a Refresh press
+  loads everything; walking onto Myself or Possessions banks it and redraws the open panel once (again
+  on a search-box change and on walking off), with no frame booted; every panel that shows a tab
+  figure is redrawn that way; and across the two scripts a frame Choice Helper loads is banked and
+  redrawn by UX Enhancers' Factions panel, and is not due again for the other.
 - `tests/fl-shared-helpers.test.mjs` — asserts what `ux-enhancers.js` and
   `choice-helper.js` share now that they are two files, which no other suite can see because
   every other suite loads one of the two. First the **copies**: every top-level declaration the
   two files have in common must be byte-identical, bar a short list (`SCRIPT_ID`, `FEATURES`,
-  `PANELS`, `refreshBackgroundState`, `scan`) that differs on purpose — and that list must really
+  `PANELS`, `UI_SCRIPT`, `scan`) that differs on purpose — and that list must really
   differ, so it cannot go stale — and a named list of the shared helpers must be declared in
   both, so a rename in one file reads as a missing copy. Then the **contract**, with both IIFEs
   loaded into one stub page: the menu holds Factions and then Choice Helper's four panels in
