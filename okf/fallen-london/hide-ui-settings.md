@@ -61,7 +61,7 @@ event itself.
 ## Features
 
 An entry with a `group` can be switched off. Without one it cannot: the launcher (the way back),
-and the captures `faction-capture`, `pending-item` and `fotz-capture`, which draw nothing.
+and the captures `tab-capture` (one in each script) and `pending-item`, which draw nothing.
 
 - **`ux-enhancers.js`** files its two features in the entries. `equipment-helper` and
   `equipment-optimizer` carry an `off()` that removes their stars, summary line, BDR option and

@@ -54,6 +54,17 @@ feature off removes its badges and clears the host flags. A feature that draws s
 than badges needs an `off` function on its entry that removes it and its flags, and one that also
 banks state needs a `keep`. `check.mjs` and `tests/fl-ui-settings.test.mjs` fail on an unfiled one.
 
+## Reading your qualities or items
+
+A feature that needs a figure off Myself, Possessions or Agents does **not** read or refresh the
+tab itself. Write its bank function (scan in, `saveCache`, return whether it kept anything) and
+register it right below with `wantTab('myself' | 'possessions' | 'agents', bankX)`. The tab reader
+(AGENTS.md, "The tab reader") then hands it every reading, from the tab on screen, a hidden frame or
+the other script's frame, and one refresh serves every feature. A panel that shows such a figure
+calls `const busy = autoRefreshTabs(ctx, stale)` in its render (that also gets it redrawn when a tab
+goes by) and `refreshTabsNow()` from its Refresh button. A badge that needs a fresh reading calls
+`refreshTabs(false)`; the reader throttles it.
+
 ## Checklist
 
 Work in this order. **TRAP** marks the ones that get skipped.

@@ -81,6 +81,9 @@ function matches(el, compound) {
     if (p[0] === '#') return el.id === p.slice(1);
     if (p[0] === '.') return el.classList.contains(p.slice(1));
     if (p[0] === '[') {
+      // A bare [attr], which the Possessions tab's capture asks for.
+      const bare = /^\[([\w-]+)\]$/.exec(p);
+      if (bare) return el.getAttribute(bare[1]) != null;
       const a = /^\[([\w-]+)\*="([^"]*)"\]$/.exec(p);
       if (!a) throw new Error('unsupported selector ' + p);
       return String(el.getAttribute(a[1]) || '').includes(a[2]);
@@ -189,8 +192,8 @@ const noTimer = () => 0;
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { readAgents, bankAgents, bankAgentsFailed, agentsState, captureAgents, AGENTS_KEY, AGENTS_RETRY_MS,'
-    + ' FRESH_MS, hmUpgradeStatus, HM_SEASONS }; })();');
+    'return { readAgents, bankAgents, bankAgentsFailed, agentsState, captureTabs, AGENTS_KEY, AGENTS_RETRY_MS,'
+    + ' AGENTS_FRESH_MS, hmUpgradeStatus, HM_SEASONS }; })();');
 const fn = new Function(
   'document', 'MutationObserver', 'requestAnimationFrame', 'getComputedStyle', 'console',
   'localStorage', 'setInterval', 'setTimeout', 'clearInterval', 'clearTimeout',
@@ -234,20 +237,20 @@ check('never read: no state at all',
   api.agentsState(), null);
 
 live = parseHtml(capture());
-api.captureAgents();
+api.captureTabs();
 check('on the tab itself the state is live, and capturing banks it',
   [api.agentsState().live, JSON.parse(store.get(api.AGENTS_KEY)).agents.map((a) => a.name)],
   [true, ['Nectared Proprietor', 'Mild-Mannered Mondaine']]);
 
 live = null;
-check('off the tab the banked reading is used, fresh for a minute',
+check('off the tab the banked reading is used, fresh for an hour',
   (() => { const s = api.agentsState(); return [s.live, s.failed, s.stale, s.agents.length]; })(),
   [false, false, false, 2]);
 
 const rec = JSON.parse(store.get(api.AGENTS_KEY));
-rec.at = Date.now() - api.FRESH_MS - 1000;
+rec.at = Date.now() - api.AGENTS_FRESH_MS - 1000;
 store.set(api.AGENTS_KEY, JSON.stringify(rec));
-check('a reading older than a minute is stale', api.agentsState().stale, true);
+check('a reading older than an hour is stale', api.agentsState().stale, true);
 
 api.bankAgentsFailed();
 check('a failed read keeps the last good agents, is marked failed, and is not retried for an hour',

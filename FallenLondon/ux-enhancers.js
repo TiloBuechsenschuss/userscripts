@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      3.10
+// @version      3.11
 // @description  Small quality-of-life tweaks for Fallen London, behind a docked "UX" button.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -30,7 +30,8 @@
  *   items each unlocks at Renown 10/25/40, and the Faction Item that turns Favours into Renown,
  *   with where to buy it and what it costs.
  * Renown and Favours come off the Myself tab and which items you hold off Possessions; both are
- *   remembered, and opening the panel refreshes them in the background.
+ *   remembered, and opening the panel refreshes them in the background. Walking onto either tab
+ *   with the panel open redraws it, and a refresh Choice Helper runs is banked here too.
  * A Renown item you could go and collect right now -- Renown reached and the Favours in hand --
  *   gets a filled "!" badge and is listed at the top; one whose Renown is high enough but whose
  *   Favours are still short gets an outlined "!"; and any faction whose Favours have hit the cap of
@@ -2069,22 +2070,6 @@
     return values;
   }
 
-  // Called on every scan. Cheap on any page but the Myself tab (one failed
-  // querySelectorAll), and re-scrapes there only when something changed, since
-  // this runs on every debounced mutation and the list is a few hundred items.
-  let lastScrapeSig = null;
-  function captureFactionState() {
-    const items = document.querySelectorAll('li.quality-item');
-    const owned = document.querySelectorAll(OWNED_MARKER);
-    if (!items.length && !owned.length) { lastScrapeSig = null; return; }
-    const search = document.querySelector('input.input--item-search');
-    const sig = items.length + '/' + owned.length + '|' + (search ? search.value : '');
-    if (sig === lastScrapeSig) return;
-    lastScrapeSig = sig;
-    bankQualities(readQualities());
-    bankPossessions(readPossessions());
-  }
-
   function bankQualities(scan) {
     if (!scan) return false;
     const values = factionsFromQualities(scan);
@@ -2246,46 +2231,6 @@
     });
   }
 
-  // One refresh at a time, and never two of these racing each other.
-  let refreshing = null;
-
-  // Refreshes what the Factions panel reads, off the same two page loads
-  // Choice Helper uses -- and shares each page it loads, so Choice Helper banks
-  // its own numbers off the same boot rather than paying for another.
-  function refreshBackgroundState() {
-    if (refreshing) return refreshing;
-    refreshing = (async function () {
-      let changed = false;
-      // Sequential, not parallel: two copies of the SPA booting at once is a
-      // lot of work for the browser, and nothing here is urgent.
-      if (!readQualities()) {
-        const scan = await loadInFrame('/myself', function (doc) {
-          const got = myselfLoaded(doc);
-          if (got) shareFrame('/myself', doc);
-          return got;
-        });
-        if (bankQualities(scan)) changed = true;
-      }
-      const here = readPossessions();
-      if (!here || !here.size) {
-        const held = await loadInFrame('/possessions', function (doc) {
-          const got = possessionsLoaded(doc);
-          if (got) shareFrame('/possessions', doc);
-          return got;
-        });
-        if (bankPossessions(held ? new Set(held.keys()) : null)) changed = true;
-      }
-      return changed;
-    })().catch(function (e) {
-      console.error('FL UX Enhancers: background refresh failed.', e);
-      return false;
-    }).then(function (v) {
-      refreshing = null;
-      return v;
-    });
-    return refreshing;
-  }
-
   // Auto-refresh is on by default but remembered, so a slow connection can
   // turn it off and keep the (labelled) cached numbers.
   const AUTO_KEY = 'fl-ux-auto-refresh';
@@ -2323,6 +2268,248 @@
     const days = Math.round(hours / 24);
     return days + (days === 1 ? ' day ago' : ' days ago');
   }
+
+  // === shared: reading the tabs ==========================================
+  //
+  // Most of what either script knows about you is read off a tab -- Myself,
+  // Possessions, and for Choice Helper the Agents tab -- and wanted while you
+  // are anywhere else. This is the one place that reads them, for every
+  // feature at once:
+  //
+  //  - A SOURCE is a tab: `tabSource(id, spec)`. `read(doc)` is its scrape
+  //    (null off the tab); `loaded(doc)` says a hidden frame's copy is drawn
+  //    far enough to bank; `sig(doc)` is a cheap string that changes when what
+  //    the tab shows does (null off the tab); `fresh` is how long a reading
+  //    counts as current before an automatic refresh loads the tab again, and
+  //    `retry` how long after a load that came back empty.
+  //  - A feature WANTS a source: `wantTab(id, bank, failed)`. `bank(got)` is
+  //    handed every reading of that tab, wherever it came from -- the tab on
+  //    screen, a hidden frame, or a frame the other script loaded -- and says
+  //    whether it kept anything. `failed()`, if given, hears about a frame
+  //    that came back empty.
+  //  - ONE refresh (`refreshTabs`) loads every wanted tab that is not on
+  //    screen and hands each reading to every feature that wants it, so
+  //    whichever panel's Refresh was pressed, every other panel and badge is
+  //    as fresh as that one.
+  //  - Whenever a reading is banked -- by a refresh, by the other script's
+  //    frame, or by walking onto Myself or Possessions with a panel open --
+  //    the open panel is redrawn and the badges rescanned (`tabsChanged`).
+  //
+  // A panel takes part through `autoRefreshTabs(ctx, stale)` in its render,
+  // which is also what registers it to be redrawn, and `refreshTabsNow()` on
+  // its Refresh button.
+
+  const TABS_KEY = 'fl-ux-tabs';
+  const tabSources = [];
+  let tabsRefreshing = null;
+  let tabsQueued = false;
+  let tabPanelCtx = null;
+
+  function tabSource(id, spec) {
+    if (tabSources.some(function (s) { return s.id === id; })) return;
+    tabSources.push(Object.assign({ id: id, fresh: FRESH_MS, retry: FRESH_MS }, spec,
+      { wants: [], lastSig: null }));
+  }
+
+  function tabById(id) {
+    return tabSources.find(function (s) { return s.id === id; }) || null;
+  }
+
+  function wantTab(id, bank, failed) {
+    const src = tabById(id);
+    if (!src) throw new Error('No tab source "' + id + '".');
+    src.wants.push({ bank: bank, failed: failed || null });
+  }
+
+  // When each tab was last read and last tried, in localStorage and under one
+  // key both scripts use: a tab one of them is loading, or has just read, is
+  // not due for the other either.
+  function tabTimes() {
+    const rec = loadCache(TABS_KEY, 1);
+    return rec && rec.read && rec.tried ? rec : { v: 1, read: {}, tried: {} };
+  }
+
+  function noteTab(id, read) {
+    const rec = tabTimes();
+    rec.character = characterName() || rec.character || null;
+    rec.tried[id] = Date.now();
+    if (read) rec.read[id] = Date.now();
+    saveCache(TABS_KEY, rec);
+  }
+
+  // Whether an automatic refresh should load this tab: not read within
+  // `fresh`, and not tried within `retry` -- the second is what stops a tab
+  // that will not load from being booted again on every redraw.
+  function tabDue(src) {
+    const t = tabTimes();
+    const now = Date.now();
+    return now - (t.read[src.id] || 0) > src.fresh && now - (t.tried[src.id] || 0) > src.retry;
+  }
+
+  // Hands one reading to every feature that wants it. True when any kept it.
+  function bankTab(src, got) {
+    if (!got) return false;
+    let kept = false;
+    for (const want of src.wants) {
+      try {
+        if (want.bank(got)) kept = true;
+      } catch (e) {
+        console.error(SCRIPT_ID + ': banking the ' + src.id + ' tab failed.', e);
+      }
+    }
+    if (kept) noteTab(src.id, true);
+    return kept;
+  }
+
+  function tabFailed(src) {
+    for (const want of src.wants) {
+      if (!want.failed) continue;
+      try {
+        want.failed();
+      } catch (e) {
+        console.error(SCRIPT_ID + ': noting a failed ' + src.id + ' read failed.', e);
+      }
+    }
+  }
+
+  // The panel to redraw when a reading lands: the last one whose render asked
+  // `autoRefreshTabs`. A closed panel's `rerender` does nothing, so holding on
+  // to one after it closes is harmless.
+  function watchTabs(ctx) {
+    if (ctx && ctx.rerender) tabPanelCtx = ctx;
+  }
+
+  // Redraw the open panel and rescan the badges, once, after whatever banked
+  // the reading has finished: a capture runs in the middle of a scan, and
+  // rebuilding the panel under it helps nobody.
+  function tabsChanged() {
+    if (tabsQueued) return;
+    tabsQueued = true;
+    Promise.resolve().then(function () {
+      tabsQueued = false;
+      schedule();
+      const ctx = tabPanelCtx;
+      if (!ctx) return;
+      try {
+        ctx.rerender();
+      } catch (e) {
+        console.error(SCRIPT_ID + ': redrawing a panel failed.', e);
+      }
+    });
+  }
+
+  // Run on every scan. Banks a tab when it comes on screen and again whenever
+  // what it shows changes, and redraws the open panel then -- and when the tab
+  // goes, since what the panel called live is now a banked reading. Cheap off
+  // the tabs: one failed query per source.
+  function captureTabs() {
+    let changed = false;
+    for (const src of tabSources) {
+      if (!src.wants.length) continue;
+      const sig = src.sig(document);
+      if (sig === src.lastSig) continue;
+      const was = src.lastSig;
+      src.lastSig = sig;
+      if (sig == null) {
+        if (was != null) changed = true;
+      } else if (bankTab(src, src.read(document))) {
+        changed = true;
+      }
+    }
+    if (changed) tabsChanged();
+  }
+
+  // One refresh for every feature. Each wanted tab is read off the page if it
+  // is on screen, else loaded in a hidden frame -- every one of them when
+  // `force` (a Refresh button), only the due ones otherwise. Sequential, not
+  // parallel: two copies of the SPA booting at once is a lot of work for the
+  // browser, and nothing here is urgent. The panel is redrawn as each tab
+  // lands and once more when the last has.
+  function refreshTabs(force) {
+    if (tabsRefreshing) return tabsRefreshing;
+    tabsRefreshing = (async function () {
+      let changed = false;
+      for (const src of tabSources) {
+        if (!src.wants.length) continue;
+        const here = src.sig(document) != null ? src.read(document) : null;
+        if (here) {
+          if (bankTab(src, here)) changed = true;
+          continue;
+        }
+        if (!force && !tabDue(src)) continue;
+        noteTab(src.id, false); // taken: the other script need not load it too
+        const got = await loadInFrame(src.path, function (doc) {
+          const ready = src.loaded(doc);
+          if (ready) shareFrame(src.path, doc);
+          return ready;
+        });
+        if (got && bankTab(src, got)) changed = true;
+        if (!got) tabFailed(src);
+        tabsChanged();
+      }
+      return changed;
+    })().catch(function (e) {
+      console.error(SCRIPT_ID + ': background refresh failed.', e);
+      return false;
+    }).then(function (v) {
+      tabsRefreshing = null;
+      tabsChanged();
+      return v;
+    });
+    return tabsRefreshing;
+  }
+
+  // What a Refresh button does: everything, now, and the panel redrawn at once
+  // so it can say it is refreshing.
+  function refreshTabsNow() {
+    const done = refreshTabs(true);
+    tabsChanged();
+    return done;
+  }
+
+  // Called from a panel's render. `stale` is the panel's own judgement of
+  // what it shows; with auto-refresh on that starts a refresh of whatever is
+  // due. True while a refresh is under way, so the panel can say so.
+  function autoRefreshTabs(ctx, stale) {
+    watchTabs(ctx);
+    if (ctx && stale && !tabsRefreshing && autoRefreshEnabled()
+      && tabSources.some(function (s) { return s.wants.length && tabDue(s); })) {
+      refreshTabs(false);
+    }
+    return !!tabsRefreshing;
+  }
+
+  // A page the other script loaded in a hidden frame, banked as if this one
+  // had loaded it.
+  function bankSharedFrame(path, doc) {
+    const src = tabSources.find(function (s) { return s.path === path; });
+    if (src && bankTab(src, src.read(doc))) tabsChanged();
+  }
+
+  // What changes on the two tabs both scripts read. The search box is in the
+  // Myself one because a filtered list means something else (see readQualities).
+  function myselfSig(doc) {
+    const items = doc.querySelectorAll('li.quality-item');
+    if (!items.length) return null;
+    const search = doc.querySelector('input.input--item-search');
+    return items.length + '|' + (search ? search.value : '');
+  }
+
+  function possessionsSig(doc) {
+    const owned = doc.querySelectorAll(OWNED_MARKER);
+    return owned.length ? String(owned.length) : null;
+  }
+
+  tabSource('myself', { path: '/myself', read: readQualities, loaded: myselfLoaded, sig: myselfSig });
+  tabSource('possessions', {
+    path: '/possessions', read: readPossessionCounts, loaded: possessionsLoaded, sig: possessionsSig,
+  });
+
+  // What the Factions panel takes off the two tabs. Called on every scan by
+  // captureTabs, and only when what the tab shows has changed, since the
+  // Myself list is a few hundred items.
+  wantTab('myself', bankQualities);
+  wantTab('possessions', function (held) { return bankPossessions(new Set(held.keys())); });
 
   // --- using a Faction Item ----------------------------------------------
   //
@@ -2759,11 +2946,7 @@
     // Kick a background refresh the first time the panel is opened on stale
     // data, then redraw when it lands. Nothing blocks on it: the panel is
     // already on screen with whatever was known.
-    let busy = false;
-    if (ctx && autoRefreshEnabled() && !stateIsFresh(state)) {
-      busy = true;
-      refreshBackgroundState().then(function () { ctx.rerender(); });
-    }
+    const busy = autoRefreshTabs(ctx, !stateIsFresh(state));
 
     // Say plainly where the numbers came from and how old they are. A stale
     // read is useful; a stale read presented as current is not.
@@ -2860,9 +3043,7 @@
           on: {
             click: function () {
               if (busy || !ctx) return;
-              busy = true;
-              ctx.rerender();
-              refreshBackgroundState().then(function () { ctx.rerender(); });
+              refreshTabsNow();
             },
           },
         }, [busy ? 'Refreshing…' : 'Refresh']),
@@ -4336,10 +4517,11 @@
 
   const FEATURES = [
     { name: 'launcher', run: mountLauncher },
-    // Not a visible tweak: it watches for the Myself tab going by and banks
-    // what it says, so the Factions panel has something to show from anywhere
-    // else in London.
-    { name: 'faction-capture', run: captureFactionState },
+    // Not a visible tweak: it watches for the Myself and Possessions tabs
+    // going by and banks what they say (wantTab), so the Factions panel has
+    // something to show from anywhere else in London -- and redraws the open
+    // panel when it does.
+    { name: 'tab-capture', run: captureTabs },
     // Finishes a "use" click that had to change route to get to Possessions.
     { name: 'pending-item', run: runPendingItem },
     // Possessions: stars the best item per slot for the "Show:" stat, and
@@ -4418,10 +4600,7 @@
 
   // A page Choice Helper loaded in a hidden frame is a page this script would
   // otherwise load again for itself.
-  onSharedFrame(function (path, doc) {
-    if (path === '/myself') bankQualities(readQualities(doc));
-    else if (path === '/possessions') bankPossessions(readPossessions(doc));
-  });
+  onSharedFrame(bankSharedFrame);
 
   flUiOnChange(function () {
     for (const feature of FEATURES) {

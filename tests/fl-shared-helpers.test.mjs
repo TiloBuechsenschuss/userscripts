@@ -80,7 +80,6 @@ const choiceDecl = declarations(source(CHOICE));
 // copy, and a copy that has drifted is a bug in one of them.
 const DIFFERENT = {
   SCRIPT_ID: 'which script is talking -- the one thing the shared block may not share',
-  refreshBackgroundState: 'each refreshes and banks only its own numbers',
   FEATURES: 'each registry holds its own features',
   PANELS: 'each script\'s own panels',
   UI_SCRIPT: 'the id each script files its switches under (tm-fl-ui-settings)',
@@ -99,6 +98,9 @@ const SHARED = [
   'AUTO_KEY', 'autoRefreshEnabled', 'setAutoRefresh', 'FRESH_MS', 'stateIsFresh', 'ageText',
   'PANEL_REGISTRY', 'FRAME_EVENT', 'pageWindow', 'sharedPanels', 'shareFrame', 'onSharedFrame',
   'myselfLoaded', 'possessionsLoaded', 'LAUNCHER_ID', 'LAUNCHER_BUTTON_ID',
+  'TABS_KEY', 'tabSources', 'tabsRefreshing', 'tabsQueued', 'tabPanelCtx', 'tabSource', 'tabById', 'wantTab',
+  'tabTimes', 'noteTab', 'tabDue', 'bankTab', 'tabFailed', 'watchTabs', 'tabsChanged', 'captureTabs',
+  'refreshTabs', 'refreshTabsNow', 'autoRefreshTabs', 'bankSharedFrame', 'myselfSig', 'possessionsSig',
   'FL_API', 'flToken', 'flFail', 'flApi',
   'PENDING_KEY', 'writePending', 'clearPending', 'findItemNode', 'clickItem', 'openItem',
 ];

@@ -267,7 +267,7 @@ const wrapped = src
     + ' FOTZ_MARK_NEED, FOTZ_MARK_DONE, FOTZ_MARK_UNSURE, FOTZ_CLASS,'
     + ' lookupFotzCard, fotzOptionsAt, fotzBadgeSpec, fotzMissingFrom, fotzColor,'
     + ' FOTZ_FAVOUR_COLORS, FOTZ_INK, FOTZ_COLOR_NEED, FOTZ_COLOR_HELD, FOTZ_COLOR_UNSURE,'
-    + ' fotzCollection, fotzLedger, readFotzState, fotzHoldings, captureFotzState, itemKey,'
+    + ' fotzCollection, fotzLedger, readFotzState, fotzHoldings, captureTabs, itemKey,'
     + ' FOTZ_ECONOMY,'
     + ' fotzUniquesByDepth, fotzSplitUniques,'
     + ' fotzSetDepth, fotzDepth, fotzDepthFloor, fotzReadDepth, depthSourceText,'
@@ -1136,7 +1136,7 @@ check('an Accomplishment is read even though it states no level',
     qualityLis = [accomplishmentLi('Discovered: the Pentamerous Bride'),
       qualityLi('Thalassic Favour', 260)];
     ownedEls = [ownedEl('Witch-Stone', 1)];
-    api.captureFotzState();
+    api.captureTabs();
     const state = api.readFotzState();
     const holdings = api.fotzHoldings();
     return [state.values.get('Discovered: the Pentamerous Bride'), holdings.bride];
@@ -1845,7 +1845,7 @@ check('and for one whose Myself and Possessions have never been read',
 
 check('the feature list, in order',
   api.FEATURES.map((f) => f.name),
-  ['fotz-capture', 'spite-card-ratings', 'zee-card-ratings', 'zee-map-regions',
+  ['tab-capture', 'spite-card-ratings', 'zee-card-ratings', 'zee-map-regions',
     'fotz-card-ratings', 'fotz-depth-control', 'fotz-supplication', 'port-carnelian',
     'scientific-voyages', 'university-laboratory', 'lab-investigations', 'arbor',
     'lb-industries', 'menace-eradication', 'vertiginous-horticulture',

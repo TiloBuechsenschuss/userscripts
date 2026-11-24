@@ -164,8 +164,8 @@ const BLOCK_NAMES = ['flUiHidden', 'flUiSetHidden', 'flUiOnChange', 'flUiRegiste
 
 // --- the registries ---------------------------------------------------------
 
-const NO_UI = ['fotz-capture'];
-const UX_NO_UI = ['launcher', 'faction-capture', 'pending-item'];
+const NO_UI = ['tab-capture'];
+const UX_NO_UI = ['launcher', 'tab-capture', 'pending-item'];
 {
   const page = makePage();
   load(page, WIKI, []);
