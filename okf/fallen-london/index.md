@@ -4,7 +4,7 @@ title: Fallen London knowledge base
 kind: index
 domain: fallenlondon.com
 status: current
-updated: 2026-10-21
+updated: 2026-11-24
 ---
 
 # Fallen London knowledge base
@@ -32,6 +32,7 @@ one place.
 | [api.md](api.md) | The game's own web API: base URL, authentication, every endpoint seen, request and reply shapes. |
 | [challenges.md](challenges.md) | How a challenge's shown percentage relates to your level: broad and narrow, the 10% floor, the 100% cap, and how to infer what the game does not send. |
 | [equipment.md](equipment.md) | Outfit slots, items, stat bonuses, effective versus base level, and how equipping works. |
+| [fl-small-mercies.md](fl-small-mercies.md) | What the source of the FL Small Mercies extension implies about the API (more endpoints, `choosebranch` replies, observing the game's own XHR traffic). All **assumed**: read from its repository at commit `0ca935a` on 2026-11-24; check the live repository before relying on it. |
 | [hide-ui-settings.md](hide-ui-settings.md) | The shared show/hide switches the three Fallen London userscripts carry: storage, catalogue, categories, live teardown. |
 | [outcome-page.md](outcome-page.md) | The outcome page after an action: its quality-update lines, and how The Airs of London reports a re-roll (flavour text, no number). |
 | [plans-tab.md](plans-tab.md) | The Plans tab (`/plans`): its layout, the requirement icons and their wordings, and how Choice Helper reads the Airs off it. |
