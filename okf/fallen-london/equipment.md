@@ -137,6 +137,8 @@ ToolOfTheTrade, Adornment, Luggage, Crew.
     `form.outfit-controls__outfit-rename-form`: an input
     (`.outfit-controls__outfit-rename-field`), a check button
     (`.buttonlet-check`) and a cancel button (`.buttonlet-delete`, an ×).
+    The script (3.13) drives this form and the save button after a store; see
+    "What the script does with saved outfits". Unverified in game.
   - Not verified: whether a script can switch outfits by setting the hidden
     select, or must open the react-select menu and click the option.
 
@@ -166,3 +168,18 @@ popup instead. **Verified markup:**
 - **Unknown:** whether a worn item can open a similar popup with an Unequip
   button. Clicking a worn item in the Adornment slot emptied it directly.
 - The API `POST /api/outfit/equip` does not go through this popup.
+
+## What the script does with saved outfits
+
+`ux-enhancers.js` 3.13 uses the saved outfits to avoid equipping by hand: it switches to an outfit
+named for the stat (or to a `temp` outfit that holds the stat set), and stores improvements into a free
+`temp` outfit. When it changed the outfit through the Possessions page, it renames with the pencil /
+check form (setting the field through the native value setter and an `input` event) and saves with the
+save button, then goes back to the story; after the first step the page does not take (a save button
+already disabled counts as one), or in a run that already used the API, the rest of the store uses the
+rename and save calls instead. Driving that form and button is **not verified in the real game**. It never writes to an outfit that is not a temp: `temp` (any
+case) followed by the end of the name, a digit or a capital letter (`temp1`, `tempGlaWat`; not
+"Tempest" or "Temple Club"). Every
+switch is confirmed by the selected id from `GET /api/character/myself`. **Not verified in the real
+game yet**, for the API fallback path only (rename and save calls): whether the page's dropdown and
+save button show the new state after an API rename or save without the game refetching.

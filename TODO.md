@@ -31,4 +31,6 @@ Fallen London Choice Helper:
 
 # Done
 
+- Saved-outfit shortcuts (`equipment-optimizer` with stat and `temp` outfits, new `outfit-emptier`), `FallenLondon/ux-enhancers.js` 3.13. Tested in-game 2026-11-24, confirmed overall by the author. Reported specifically: a result stored in a temp outfit, renamed through the game's own pencil and save button so the dropdown shows the new name (`temp1` to `tempMit`); a 10% Mithridacy challenge now wears the most Mithridacy instead of "Already the best"; "Optimize equipment" left of Go with a gap; the "Empty outfit" trash-can button beside the game's star / edit / save buttons, emptying through the API plus one reload (noticeably quicker than clicks).
+
 - `zee-map-regions`, `FallenLondon/choice-helper.js` 1.80: region and Zee Peril under each destination on the Unterzee map. Tested in-game 2026-11-02: a line shows below each destination. Abbey Rock's label not seen, its unlock being unmet.

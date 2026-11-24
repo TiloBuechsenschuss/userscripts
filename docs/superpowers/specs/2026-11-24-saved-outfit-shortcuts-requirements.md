@@ -1,13 +1,38 @@
 # Saved-outfit shortcuts for "Optimize equipment": requirements
 
-Status: **draft for discussion** (2026-11-24). Feeds a later plan in `docs/superpowers/plans/`.
+Status: **implemented 2026-11-24, tested in game by the author 2026-11-24 (confirmed overall)**. Plan:
+`docs/superpowers/plans/2026-11-24-saved-outfit-shortcuts.md`.
 Script: `FallenLondon/ux-enhancers.js`, features `equipment-optimizer` and `equipment-helper`.
 
 ## 0. Handoff: where this stands (keep this section current)
 
 - **Branch** `feature/fallen-london-outfit-sets`, draft PR
   [TiloBuechsenschuss/userscripts#26](https://github.com/TiloBuechsenschuss/userscripts/pull/26).
-  Docs only so far. No script code has been written.
+- **Implemented (2026-11-24)** in `ux-enhancers.js` 3.13 from the plan named in the header.
+  **Tested in game by the author on 2026-11-24, confirmed overall** (see `TODO.md`, Done). The
+  check list that went with it:
+  1. Persuasive-only action with "Persuasive" not worn: one switch, no reload.
+  2. Two-stat action with a free temp: renamed `temp...` to the key, contents saved (switch away and
+     back, the items stay).
+  3. The page after a store: does the dropdown show the new name, and is the save button dark?
+     (Not verified; if stale, note it.)
+  4. Unsaved hand change, then the button: prompt, second tap switches.
+  5. "Empty outfit" on a temp and on a named outfit.
+  6. Button row on desktop and on the phone: Optimize left of Go, same height.
+  7. Undo/Dismiss: are they comfortable to tap on the phone at the game button's height?
+  8. The safety net: an outfit that locks or lowers a branch is switched back, and the line says so.
+- **Deferred minor findings** (from the build review, not fixed):
+  - Task 4: Escape on a closed clearable react-select may clear the value; the parent fallback re-admits the decoy risk in layouts not captured.
+  - Task 5: a missing branch1 is reported as "locked"; `runWithOutfit` is long.
+  - Task 5: a failed switch clears the previous run's undo record; the store guard after swaps is unreachable (defensive). (The failing switch-back test, the missed "moved" case and the hidden third outfit were fixed in the final review.)
+  - Task 6: the shape is copied once at build; no test for the no-row fallback; Undo/Dismiss have a vertical gap when wrapping. (The shorthands were replaced by longhands in the final review.)
+  - Task 6: switching the feature off leaves inline `flex-wrap` on the game's row; the post-Possessions label check is characterization only.
+  - Task 7: no try/finally around `eoBusy`; the first guard in `outfitEmptier` is redundant.
+  - Task 7: the result line is drawn under the first `.fl-ux-empty-wrap` if there are several outfit controls.
+  - **Final review fixes (2026-11-24):**
+    - C1: after a switch the plan also guards requirements met in the outfit worn before, and nothing is saved (the run switches back) when the re-read shows the action locked.
+    - I2: R2.1 narrowed: `temp` must be followed by the end of the name, a digit or a capital letter ("Tempest" is not a temp).
+    - I3: the safety net for stat and hit outfits compares the best chance reachable from the outfit (the plan's, else the shown one) with the chance before, not the raw shown chance.
 - **Process the author asked for:** go through the decisions in section 6 **one question at a
   time** with the author, and write each answer into this file (mark the question answered, and
   change the requirement it affects). Once every question is answered and the captures are in,
@@ -31,9 +56,6 @@ Script: `FallenLondon/ux-enhancers.js`, features `equipment-optimizer` and `equi
   waiting for the author's review. One deviation: R3.5's button is not disabled in advance; a tap
   where outfits cannot change shows the reason instead (knowing it in advance needs a
   `/myself` read on every Possessions visit).
-- **Not verified:** whether a script can switch outfit by setting the hidden
-  `#a11y-outfit-dropdown` select, or must open the react-select menu and click the option (U5).
-  A prototype during planning settles it.
 - **Not verified:**
   - The recorder (`docs/tools/fallen-london/api-recorder.js`) was tested only in headless
     Chromium against a faked site. It has not been tested in the real game.
@@ -144,7 +166,9 @@ not committed). The details are in `okf/fallen-london/api.md` and `equipment.md`
 
 ### R2. Temp outfits as a cache
 
-- **R2.1 Recognition.** A temp outfit is one whose name starts with `temp` (ignoring case). Free
+- **R2.1 Recognition.** A temp outfit is one whose name starts with `temp` (ignoring case). The
+  character after `temp` must be the end of the name, a digit or a capital letter, so "Tempest",
+  "Temple Club" and "Temporary hat" are not temps (narrowed 2026-11-24 after review). Free
   temp: exactly `temp`, or `temp` followed only by digits (`temp2`). Any other suffix is read as a
   key (R2.2). A suffix that does not parse is treated as a free temp. Names must be unique (U3), so
   when the script gives a temp a free name it uses `temp` plus the smallest number no other outfit
@@ -217,7 +241,10 @@ not committed). The details are in `okf/fallen-london/api.md` and `equipment.md`
 ### R3. "Empty outfit" button (Possessions tab)
 
 - **R3.1 Placement.** On the Possessions tab, next to the game's outfit controls. A real `<button>`
-  at least 44 px high.
+  at least 44 px high. **Changed 2026-11-24 after the author saw it:** the text button broke the
+  outfit box's layout. It is now one of the game's own round icon buttons (like star, edit, save)
+  with a trash-can icon, right after the game's save button; the result line goes under the whole
+  outfit box.
 - **R3.2 Effect.** Unequip every slot that has `canChange: true`, is not `isEffect`, and holds an
   item. Locked slots and Boon/Burden are left alone and counted in the result ("2 slots cannot be
   changed").
@@ -225,8 +252,11 @@ not committed). The details are in `okf/fallen-london/api.md` and `equipment.md`
   If the selected outfit is a temp, the button then saves it (`POST /api/outfit/save`). A keyed
   temp (`tempGlaWat`) is renamed to a free name (`temp1`, R2.1) **before** the save, so an empty
   outfit never carries a key. If an unequip fails, nothing is saved or renamed.
-- **R3.4 How.** Click the worn items on the page (K5), with an API-and-reload fallback, using the
-  same code path as the optimizer's swaps.
+- **R3.4 How.** ~~Click the worn items on the page (K5), with an API-and-reload fallback.~~
+  **Changed 2026-11-24 (author: "a second per item feels long"):** one `POST /api/outfit/unequip`
+  per item, one at a time, then one page reload. Every click makes the game refetch `/api/plan`
+  and the 350 KB `/myself` (about 1.2 s per item in the captures); an API unequip takes about
+  0.2 s. The outfit's name is still read from `/myself`, not the page, which can be stale.
 - **R3.5 Not allowed.** If `canChangeOutfit` is false, the button is disabled and says why.
 - **R3.6 Other outfits are never saved (Q5, answered 2026-11-24).** On a non-temp outfit the
   button only takes items off. The saved outfit stays as it was: the game's save button lights up,

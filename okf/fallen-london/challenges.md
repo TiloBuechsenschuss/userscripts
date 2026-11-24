@@ -77,7 +77,9 @@ From the shown percentage `p` (as a fraction) and your level:
   fell to 92% at 138.) Treat it as fixed at 100% and keep the stat where it is.
 - **At 10%** the floor hides how far the challenge is from changing.
   (Mithridacy shown as 10% stayed 10% after +2 levels, where narrow would give
-  30%.) Treat it as fixed.
+  30%.) The optimizer (2026-11-24) reads it at its lowest possible difficulty
+  (narrow: level + 5; broad: six times the level), so the most of the stat is
+  worn; the predicted chance is a best case and often stays 10%.
 
 ## Several challenges on one action
 

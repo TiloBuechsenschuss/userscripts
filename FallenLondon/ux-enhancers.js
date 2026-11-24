@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/ux-enhancers.js
-// @version      3.12
+// @version      3.13
 // @description  Small quality-of-life tweaks for Fallen London, behind a docked "UX" button.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -63,6 +63,20 @@
  *   chance before and after -- as the game itself shows it -- what changed, and an Undo. It fills an empty slot when an
  *   item helps, but never empties a slot that holds something, leaves locked slots alone, and
  *   refuses a challenge that combines stats.
+ * Saved outfits make it faster. An action that tests one stat is served by an outfit named for it
+ *   ("Persuasive" or "PER"): the script switches to it and calculates from there, one switch and no
+ *   reload. Other actions are served by a "temp" outfit that already holds the stat set (named
+ *   temp + the stats' three-letter codes), or the improvements are saved into a free temp outfit
+ *   (named temp1, temp2 ...) and it is renamed to that key. Outfits not named like that ("temp" and
+ *   then the end, a digit or a capital letter; "Tempest" is not one) are never written to. Every
+ *   switch is confirmed against a fresh read of the worn outfit; if the outfit locks the action or
+ *   cannot reach the chance you had, the script switches back and says so, and it never saves an
+ *   outfit the game shows locking the action. With unsaved changes on the worn outfit
+ *   the button asks for a second tap before it switches anything.
+ * The button sits left of the game's own button with the same shape; the result panel is under the row.
+ * The Possessions tab gets an "Empty outfit" button (a round trash-can icon beside the game's own
+ *   star / edit / save buttons) that takes everything off the worn outfit and
+ *   saves it, for temp outfits only; the result stays shown across the reload.
  * Built as a feature registry so further tweaks can be added as entries.
  */
 
@@ -3599,9 +3613,10 @@
   //    `0.6 x level / difficulty`. Persuasive 270 -> 200 took 90% to 66%. A
   //    Skills challenge behaves as NARROW: `0.6 + 0.1 x (level - difficulty)`.
   //    Mithridacy 1 -> 3 took 60% to 80% and 20% to 40%.
-  //  - Both are clamped to 10%..100%. A challenge shown at 10% or at 100%
-  //    therefore says nothing about how far it is from changing, so it is
-  //    treated as fixed (and a 100% one holds its stat where it is).
+  //  - Both are clamped to 10%..100%. A challenge shown at 100% says nothing
+  //    about how far it is from changing, so it is treated as fixed and holds
+  //    its stat where it is. One shown at 10% is read at its lowest possible
+  //    difficulty, a best case (see inferChallenge).
   //
   // CONFIRMED WORKING in-game by the author (2026-09-26): the button on real
   // actions, the change made through the Possessions tab and back with no
@@ -3626,6 +3641,8 @@
   // One `challenges[]` entry from the game, as the model. `level` is your
   // effective level in the challenge's stat right now. Returns
   //   { kind, diff, terms }  a stat challenge we can predict,
+  //   { ..., floor: true }   one shown at the 10% floor, read at its LOWEST
+  //                          possible difficulty (a best case, see below),
   //   { fixed, hold? }       one whose chance we cannot move (`hold` is a
   //                          requirement keeping the stat where it is),
   //   null                   a challenge that combines stats, not modelled.
@@ -3634,7 +3651,17 @@
     const stat = normalizeName(ch.name);
     const shown = Number(ch.targetNumber);
     if (shown >= 100) return { fixed: 1, hold: { stat: stat, min: level } };
-    if (shown <= 10) return { fixed: shown / 100 };
+    if (shown <= 10) {
+      // The floor hides how far below the difficulty you are. It is read as
+      // "at least this hard": the difficulty at which 10% is exact (narrow:
+      // level + 5; broad: six times the level). Then every point of the stat
+      // counts, so the outfit with the most of it is chosen -- treating it as
+      // fixed reported "Already the best" with Mithridacy gear owned
+      // (2026-11-24). The predicted chance is a best case.
+      const terms = [{ stat: stat, weight: 1 }];
+      if (ch.category === 'BasicAbility' && level > 0) return { kind: 'broad', diff: 6 * level, terms: terms, floor: true };
+      return { kind: 'narrow', diff: level + 5, terms: terms, floor: true };
+    }
     // Narrow moves in steps of ten, so a percentage that is not a multiple of
     // ten is broad whatever its category says. The game floors what it shows,
     // so a broad figure is read as half a point higher.
@@ -3977,6 +4004,123 @@
     return (branchEl && branchEl.getAttribute && branchEl.getAttribute('data-branch-id')) || '';
   }
 
+  // --- saved outfits: stat codes and temp names -----------------------------
+  //
+  // CONFIRMED WORKING in-game by the author (2026-11-24, ux-enhancers 3.13,
+  // "overall"): storing a result in a temp outfit, renamed and saved through
+  // the game's own controls so the dropdown shows the new name, and the 10%
+  // floor reading. See TODO.md's Done entry for what was reported.
+
+  // The game caps an outfit name at 20 characters, so a saved outfit is named
+  // `temp` + the three-letter codes of the stats it serves. NEVER change a
+  // released code: names already saved in players' outfits would stop reading.
+  const STAT_CODES = {
+    'watchful': 'Wat', 'shadowy': 'Sha', 'dangerous': 'Dan', 'persuasive': 'Per',
+    'artisan of the red science': 'Art', 'glasswork': 'Gla', 'kataleptic toxicology': 'Kat',
+    'mithridacy': 'Mit', 'monstrous anatomy': 'Mon', 'player of chess': 'Che',
+    'shapeling arts': 'Shp', 'zeefaring': 'Zee', 'chthonosophy': 'Cht',
+    'steward of the discordance': 'Ste', 'inerrant': 'Ine', 'insubstantial': 'Ins',
+    'neathproofed': 'Nea', 'bizarre': 'Biz', 'dreaded': 'Dre', 'respectable': 'Res',
+  };
+  const TEMP_MAX = 20;
+
+  function statCode(statName) {
+    const c = STAT_CODES[normalizeName(statName)];
+    return c || null;
+  }
+
+  // Codes unique and sorted, so the same stats always give the same key;
+  // `missing` are the stats we have no code for (the caller falls back).
+  function keyFor(statNames) {
+    const codes = [];
+    const missing = [];
+    (statNames || []).forEach((n) => {
+      const c = statCode(n);
+      if (!c) missing.push(n);
+      else if (codes.indexOf(c) < 0) codes.push(c);
+    });
+    return { codes: codes.sort(), missing: missing };
+  }
+
+  function tempName(codes) {
+    if (!codes || !codes.length) return null;
+    const name = 'temp' + codes.join('');
+    return name.length > TEMP_MAX ? null : name;
+  }
+
+  // A temp is `temp` (any case) followed by the end of the name, a digit or a
+  // capital letter, so "Tempest" or "Temple Club" is not one. A name we did
+  // not make (`temp`, `temp3`, `tempFoo`) is a free slot, not a saved outfit.
+  // Codes are compared as a set, so a hand-typed order matches.
+  function parseTemp(name) {
+    const m = /^temp(.*)$/i.exec(String(name == null ? '' : name));
+    if (!m) return null;
+    const suffix = m[1];
+    if (suffix && !/^[0-9A-Z]/.test(suffix)) return null;
+    if (!suffix || /^\d+$/.test(suffix)) return { free: true };
+    const parts = suffix.match(/[A-Z][a-z]*/g) || [];
+    const known = Object.keys(STAT_CODES).map((k) => STAT_CODES[k]);
+    if (parts.join('') !== suffix || !parts.every((p) => known.indexOf(p) >= 0)) return { free: true };
+    const codes = [];
+    parts.forEach((p) => { if (codes.indexOf(p) < 0) codes.push(p); });
+    return { free: false, codes: codes.sort() };
+  }
+
+  function sameKey(a, b) {
+    const x = Array.from(new Set(a || []));
+    const y = new Set(b || []);
+    return x.length === y.size && x.every((c) => y.has(c));
+  }
+
+  // `temp` + the smallest number nobody else is using (names compare without
+  // case, as the game does).
+  function freeTempName(outfits, exceptId) {
+    const taken = new Set((outfits || []).filter((o) => o.id !== exceptId)
+      .map((o) => String(o.name).toLowerCase()));
+    let n = 1;
+    while (taken.has('temp' + n)) n++;
+    return 'temp' + n;
+  }
+
+  // Which saved outfit serves this plan. Order: an outfit named for the one
+  // stat the action tests, then a temp already holding this stat set, then a
+  // temp to store it in. Stat and hit apply whatever the plan's status; a
+  // store only when the plan changes something.
+  function chooseOutfit(plan, outfits, lastUsed) {
+    const list = outfits || [];
+    const stats = plan.stats || [];
+    const squash = (s) => String(s == null ? '' : s).toLowerCase().replace(/\s+/g, '');
+    if (stats.length === 1) {
+      const want = [squash(stats[0])];
+      const code = statCode(stats[0]);
+      if (code) want.push(squash(code));
+      const hit = list.filter((o) => want.indexOf(squash(o.name)) >= 0)[0];
+      if (hit) return { kind: 'stat', outfit: hit };
+    }
+    const key = keyFor(stats);
+    if (!key.missing.length && key.codes.length) {
+      const hit = list.filter((o) => {
+        const p = parseTemp(o.name);
+        return p && !p.free && sameKey(p.codes, key.codes);
+      })[0];
+      if (hit) return { kind: 'hit', outfit: hit, codes: key.codes };
+    }
+    if (plan.status === 'already') return { kind: 'none', reason: 'already' };
+    if (key.missing.length) return { kind: 'none', reason: 'no-code', missing: key.missing };
+    if (!key.codes.length || !tempName(key.codes)) return { kind: 'none', reason: 'too-many' };
+    const temps = list.filter((o) => parseTemp(o.name));
+    if (!temps.length) return { kind: 'none', reason: 'no-temp' };
+    const free = temps.filter((o) => parseTemp(o.name).free)[0];
+    let pick = free;
+    if (!pick) {
+      pick = temps[0];
+      temps.forEach((o) => {
+        if ((lastUsed && lastUsed[o.id] || 0) < (lastUsed && lastUsed[pick.id] || 0)) pick = o;
+      });
+    }
+    return { kind: 'store', outfit: pick, codes: key.codes };
+  }
+
   // --- planning one action -------------------------------------------------
 
   // What to do for one branch, from the four replies. Never touches the page
@@ -3990,7 +4134,11 @@
   // level in them could not be read and nothing you wear changes them (Luck, say).
   // A swap is { slot, from: { id, name }, to: { id, name } }; an id of null is
   // an empty slot ("nothing"), so filling one has `from.id === null`.
-  function planFor(branch, storylet, outfit, myself) {
+  // `guardFrom` ({ branch, myself }, optional): also guard what was met there.
+  // After a switch to a saved outfit, a requirement met in the outfit worn
+  // before but not in the new one must stay met (it is not `Unlocked` in
+  // `branch`, so it would not be guarded otherwise).
+  function planFor(branch, storylet, outfit, myself, guardFrom) {
     const blocked = function (reason) { return { status: 'blocked', reason: reason }; };
     if (!branch) return blocked('no-branch');
     if (!(branch.challenges || []).length) return blocked('no-challenge');
@@ -4006,6 +4154,8 @@
     const holds = [];
     const names = [];
     const ignored = [];
+    const floored = [];
+    const stats = [];
     for (const ch of branch.challenges) {
       if (ch.bonuses && ch.bonuses.length) return blocked('combined');
       const stat = normalizeName(ch.name);
@@ -4030,9 +4180,12 @@
       }
       challenges.push(c);
       names.push(ch.name);
+      if (c.floor && floored.indexOf(ch.name) < 0) floored.push(ch.name);
+      if (stats.indexOf(ch.name) < 0) stats.push(ch.name);
     }
 
-    const requirements = holds.concat(requirementsFor(branch, gear.slots, myself));
+    const requirements = holds.concat(requirementsFor(branch, gear.slots, myself),
+      guardFrom ? requirementsFor(guardFrom.branch, gear.slots, guardFrom.myself) : []);
     const base = {};
     challenges.forEach(function (c) { (c.terms || []).forEach(function (t) { base[t.stat] = baseFor(myself, gear.slots, t.stat); }); });
     requirements.forEach(function (r) {
@@ -4050,7 +4203,7 @@
     });
     const before = successChance(challenges, wornLevels);
     if (best.changes === 0 || best.chance <= before + 1e-9) {
-      return { status: 'already', chance: before, ignored: ignored };
+      return { status: 'already', chance: before, ignored: ignored, stats: stats, floored: floored };
     }
 
     const swaps = [];
@@ -4065,11 +4218,13 @@
       const p = c.fixed != null ? c.fixed : challengeChance(c.kind, c.diff, c.terms.reduce(function (n, t) {
         return n + t.weight * (best.levels[t.stat] || 0);
       }, 0));
-      return { name: names[i], shown: Math.floor(p * 100 + 1e-9) };
+      const row = { name: names[i], shown: Math.floor(p * 100 + 1e-9) };
+      if (c.floor) row.floor = true;
+      return row;
     });
     return {
       status: 'change', before: before, after: best.chance, swaps: swaps,
-      challenges: challenges, predicted: predicted, ignored: ignored, approx: !!best.approx,
+      challenges: challenges, predicted: predicted, ignored: ignored, stats: stats, floored: floored, approx: !!best.approx,
     };
   }
 
@@ -4210,16 +4365,160 @@
     return Array.from(document.querySelectorAll('button, [role="button"], a')).filter(eoInDialog);
   }
 
+  // The saved-outfit dropdown (a react-select, captured 2026-11-24), found
+  // afresh each time: the page may redraw the controls. Everything is scoped
+  // to the parent of the hidden select, as the page has a second react-select
+  // (the "Show:" filter) in the same controls. Null when it is not there (in
+  // rename mode the form replaces it).
+  function eoOutfitDropdown() {
+    const select = document.querySelector('#a11y-outfit-dropdown');
+    const parent = select && select.parentNode;
+    if (!parent) return null;
+    // The dropdown's own subtree: the element right after the hidden
+    // select. The parent is the fallback only when that holds no combobox.
+    const sib = select.nextElementSibling;
+    const scope = sib && sib.querySelector && sib.querySelector('[role="combobox"]') ? sib : parent;
+    const input = scope.querySelector('[role="combobox"]');
+    const isControl = function (n) { return /(^|\s)css-[^\s]*-control(\s|$)/.test(String(n.className || '')); };
+    let control = input;
+    while (control && control !== scope && !isControl(control)) control = control.parentNode;
+    if (!control || control === scope || !control.querySelector) return null;
+    return { scope: scope, input: input, control: control };
+  }
+
+  // The name the outfit dropdown shows, or null.
+  function eoOutfitShown() {
+    const f = eoOutfitDropdown();
+    const v = f && f.control.querySelector('[class*="singleValue"]');
+    return v ? v.textContent.trim() : null;
+  }
+
+  // The game's round button (`button.buttonlet-container`) holding the face
+  // `.buttonlet-<kind>`, inside `root`, or null.
+  function eoButtonlet(root, kind) {
+    const face = root && root.querySelector('.buttonlet-' + kind);
+    if (!face) return null;
+    return (face.closest && face.closest('button')) || face;
+  }
+
+  function eoDisabled(button) {
+    const face = button.querySelector && button.querySelector('.buttonlet');
+    return button.disabled === true
+      || (!!button.getAttribute && (button.getAttribute('disabled') != null || button.getAttribute('aria-disabled') === 'true'))
+      || /(^|\s)buttonlet-disabled(\s|$)/.test(String((face && face.className) || button.className || ''));
+  }
+
   // The page, as far as the run needs it; a stand-in is injected in tests.
   function eoSoftIo() {
     return {
       goToPossessions: async function () {
+        // Already there: a second click on the same route would push a history
+        // entry and break `back`.
+        if (document.querySelector('.equipment-group-list')) return true;
         const link = document.querySelector('a.cursor-pointer[href="/possessions"]')
           || document.querySelector('nav a[href="/possessions"]')
           || document.querySelector('a[href="/possessions"]');
         if (!link) return false;
         link.click();
         return eoWait(function () { return document.querySelector('.equipment-group-list'); }, EO_TIMING.pageMs);
+      },
+      // The saved-outfit dropdown (eoOutfitDropdown; the switch itself is not
+      // yet seen in the real game). Any miss is `false`, with Escape pressed so
+      // no menu stays open.
+      switchOutfit: async function (name) {
+        const find = eoOutfitDropdown;
+        const shows = function () { return eoOutfitShown() === name; };
+        const escape = function () {
+          const f = find();
+          try {
+            if (f && f.input.dispatchEvent && typeof KeyboardEvent === 'function') {
+              f.input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', keyCode: 27, which: 27, bubbles: true }));
+            }
+          } catch (e) { /* nothing more to do */ }
+        };
+        const option = function () {
+          const f = find();
+          return (f && Array.from(f.scope.querySelectorAll('[role="listbox"] [role="option"]'))
+            .filter(function (o) { return o.textContent.trim() === name; })[0]) || null;
+        };
+        const f0 = find();
+        if (!f0) return false;
+        if (shows()) return true;
+        try {
+          f0.control.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 0 }));
+        } catch (e) { escape(); return false; }
+        if (!(await eoWait(option, EO_TIMING.itemMs))) { escape(); return false; }
+        option().click();
+        if (await eoWait(shows, EO_TIMING.itemMs)) return true;
+        escape();
+        return false;
+      },
+      // Renames the selected outfit with the game's own form (markup captured
+      // 2026-11-24, the rename itself not yet seen run by a script): the pencil
+      // swaps the dropdown for `form.outfit-controls__outfit-rename-form` with
+      // a name field, a check (save) and an × (cancel). The value goes in
+      // through the native setter, so React's onChange sees it. Done when the
+      // form is gone AND the dropdown shows the new name; any miss is `false`,
+      // with the form cancelled if it is still open -- unless the dropdown then
+      // shows the new name after all (the rename went through).
+      // It acts on the outfit the PAGE shows as selected; there is no id. A
+      // caller must only use it on a fresh page (no API switch or swaps in the
+      // run: runWithOutfit's `pageFresh`) after the target id was confirmed
+      // selected in the latest read (`now.selected`).
+      renameOnPage: async function (newName) {
+        const form = function () { return document.querySelector('form.outfit-controls__outfit-rename-form'); };
+        const field = function () {
+          const f = form();
+          return f && f.querySelector('input.outfit-controls__outfit-rename-field');
+        };
+        const cancel = function () {
+          const x = eoButtonlet(form(), 'delete');
+          if (x) x.click();
+          return false;
+        };
+        if (!form()) {
+          const edit = eoButtonlet(document.querySelector('.outfit-controls'), 'edit');
+          if (!edit) return false;
+          edit.click();
+        }
+        if (!(await eoWait(field, EO_TIMING.itemMs))) return cancel();
+        const input = field();
+        try {
+          const desc = typeof HTMLInputElement === 'function'
+            && Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+          if (desc && desc.set) desc.set.call(input, newName);
+          else input.value = newName;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        } catch (e) {
+          return cancel();
+        }
+        const check = eoButtonlet(form(), 'check');
+        if (!check) return cancel();
+        check.click();
+        if (await eoWait(function () { return !form() && eoOutfitShown() === newName; }, EO_TIMING.itemMs)) return true;
+        cancel();
+        return eoOutfitShown() === newName;
+      },
+      // Saves the worn items into the selected outfit with the game's save
+      // button (`.buttonlet-save-outfit`). Done when the button is disabled
+      // again; not yet seen run by a script. A button disabled BEFORE the
+      // click is a miss, not "nothing to save": it cannot be told apart from a
+      // request still pending or a dirty flag lagging behind, so the caller
+      // saves through the API (harmless when nothing changed).
+      // The save button is there and greyed out.
+      saveDisabled: function () {
+        const b = eoButtonlet(document.querySelector('.outfit-controls'), 'save-outfit');
+        return !!b && eoDisabled(b);
+      },
+      saveOnPage: async function () {
+        const button = function () { return eoButtonlet(document.querySelector('.outfit-controls'), 'save-outfit'); };
+        const b = button();
+        if (!b || eoDisabled(b)) return false;
+        b.click();
+        return eoWait(function () {
+          const now = button();
+          return !!now && eoDisabled(now);
+        }, EO_TIMING.itemMs);
       },
       spare: function (id) { return document.querySelector('.icon--available-item[data-quality-id="' + id + '"]'); },
       worn: function (id) { return document.querySelector('.equipped-item[data-quality-id="' + id + '"]'); },
@@ -4293,11 +4592,16 @@
   // would not. Returns { done, failed, error?, onPage, reload, backFailed }.
   //   reload      the page is stale (the API was used) and must be reloaded;
   //   onPage      the run left the Story tab, so the old button is gone and
-  //               the result has to be drawn after the return.
-  async function applyOutfit(swaps, call, io, branchId) {
+  //               the result has to be drawn after the return;
+  //   stayed      `stay` was asked and every swap went through the page: the
+  //               run is still on Possessions and the CALLER goes back.
+  // `stay`: on a page success, do not go back (a temp store renames and saves
+  // with the page's own controls first). The API fallback goes back as ever.
+  async function applyOutfit(swaps, call, io, branchId, stay) {
     if (!swaps.length) return { done: [], failed: null, onPage: false, reload: false };
     const page = await applyInPage(swaps, io);
     if (!page.failed) {
+      if (stay) return { done: page.done, failed: null, onPage: true, reload: false, stayed: true };
       const back = await io.back(branchId);
       return { done: page.done, failed: null, onPage: true, reload: false, backFailed: !back };
     }
@@ -4308,6 +4612,95 @@
       done: page.done.concat(viaApi.done), failed: viaApi.failed, error: viaApi.error,
       onPage: page.onPage, reload: true,
     };
+  }
+
+  // --- saved-outfit calls ----------------------------------------------------
+  //
+  // Verified in captures (2026-11-24): `POST /api/outfit/change {outfitId}`,
+  // `POST /api/outfit/rename {outfitId, newName}` and `POST /api/outfit/save`
+  // (no body; saves into the selected outfit). Every reply carries
+  // `isSuccess`; each helper is true only for `isSuccess === true`, and a
+  // thrown call is false, never a rejection.
+  async function outfitCall(path, body, call) {
+    try {
+      const out = await call('POST', path, body);
+      return !!out && out.isSuccess === true;
+    } catch (e) {
+      return false;
+    }
+  }
+  function changeOutfitApi(id, call) { return outfitCall('/api/outfit/change', { outfitId: id }, call); }
+  function renameOutfit(id, name, call) { return outfitCall('/api/outfit/rename', { outfitId: id, newName: name }, call); }
+  function saveOutfit(call) { return outfitCall('/api/outfit/save', undefined, call); }
+
+  // Writes the worn items into `outfit` under the key name for `codes`:
+  // free the key name's slot first if the outfit holds another key, save, then
+  // rename. Stops at the first failure. `name` is what the outfit is called
+  // afterwards, so a half-done store never leaves a name that lies.
+  // `ops` = { rename(id, name), save() }, each a Promise<boolean>: how the
+  // steps are made. Left out, they are the API calls. A run still on
+  // Possessions with a fresh page passes steps that use the game's own rename
+  // form and save button first (so the page shows the new name without a
+  // reload) and the API only for a step the page does not take.
+  async function storeInTemp(outfit, codes, outfits, call, ops) {
+    const rename = ops ? ops.rename : function (id, n) { return renameOutfit(id, n, call); };
+    const save = ops ? ops.save : function () { return saveOutfit(call); };
+    let name = outfit.name;
+    const parsed = parseTemp(name);
+    if (!(parsed && parsed.free)) {
+      const free = freeTempName(outfits, outfit.id);
+      if (!(await rename(outfit.id, free))) return { ok: false, name: name };
+      name = free;
+    }
+    if (!(await save())) return { ok: false, name: name };
+    const key = tempName(codes);
+    if (!(await rename(outfit.id, key))) return { ok: false, name: name };
+    return { ok: true, name: key };
+  }
+
+  // The store steps for a run on a fresh Possessions page: each tries the
+  // page, then the API for that step. A thrown page step counts as a miss, and
+  // after the first miss every later step of this store goes straight to the
+  // API (no wait on a dead page per step, no mixing back).
+  function eoPageOps(io, call) {
+    let missed = false;
+    const tryPage = async function (fn) {
+      if (missed) return false;
+      let ok = false;
+      try { ok = (await fn()) === true; } catch (e) { ok = false; }
+      if (!ok) missed = true;
+      return ok;
+    };
+    return {
+      rename: async function (id, name) {
+        return (await tryPage(function () { return io.renameOnPage(name); })) || renameOutfit(id, name, call);
+      },
+      save: async function () {
+        // A greyed-out save button is no proof of a save (see saveOnPage), so
+        // the API saves -- but the page itself is fine: the key rename after
+        // it still goes through the page, or a store with nothing to swap
+        // would leave the old name in the dropdown (the bug this path fixes).
+        if (!missed && io.saveDisabled && io.saveDisabled()) return saveOutfit(call);
+        return (await tryPage(function () { return io.saveOnPage(); })) || saveOutfit(call);
+      },
+    };
+  }
+
+  const TEMP_USED_KEY = 'fl-ux-temp-used';
+  function readTempUsed() {
+    try {
+      const map = JSON.parse(localStorage.getItem(TEMP_USED_KEY) || '{}');
+      return map && typeof map === 'object' && !Array.isArray(map) ? map : {};
+    } catch (e) {
+      return {};
+    }
+  }
+  function markTempUsed(id) {
+    try {
+      const map = readTempUsed();
+      map[id] = Date.now();
+      localStorage.setItem(TEMP_USED_KEY, JSON.stringify(map));
+    } catch (e) { /* storage unavailable: the order just stays unknown */ }
   }
 
   // --- the button ------------------------------------------------------------
@@ -4377,79 +4770,385 @@
     if ((branch.challenges || []).some(function (c) { return c.secondChanceId > 0; })) {
       notes.push('A second chance is not counted.');
     }
+    if (plan && plan.floored && plan.floored.length) {
+      notes.push('The game shows its lowest chance (10%) for ' + plan.floored.join(', ')
+        + ', which hides how hard it is: the most of it you can wear was chosen, and any predicted chance is a best case.');
+    }
     return notes;
   }
 
-  // The whole run for one branch. Returns { lines, reload?, undoable? } and
-  // touches nothing on the page. `call` is `flApi`.
-  async function runOptimize(branchId, call, io) {
-    let myself;
-    let outfit;
-    let storylet;
+  // The three replies a run plans from, one at a time, as the game itself does.
+  async function readState(call) {
+    const myself = await call('GET', '/api/character/myself');
+    const outfit = await call('GET', '/api/outfit');
+    const storylet = await call('POST', '/api/storylet');
+    return { myself: myself, outfit: outfit, storylet: storylet };
+  }
+
+  // One saved-outfit change: the page's dropdown if it will go, else the API
+  // (the page is then stale and the run ends in a reload). `apiOnly`: the run
+  // already used the API, so the page's dropdown cannot be trusted.
+  // The page's word is never taken: its labels can be stale (an API switch or
+  // rename does not redraw them), so a label can match while the outfit
+  // selected is another. Success is the wanted id selected in a fresh read
+  // (`read()` -> { myself, ... }); a page switch that fails that check is
+  // redone through the API and read again.
+  // Returns { ok, viaApi, onPage, state? }; `onPage`: the run is on
+  // Possessions now; `state`: the last read, when there was one.
+  async function switchTo(outfit, call, io, apiOnly, read) {
+    let onPage = false;
+    let viaApi = !!apiOnly;
+    if (!viaApi) {
+      onPage = await io.goToPossessions();
+      viaApi = !(onPage && await io.switchOutfit(outfit.name));
+    }
+    let state = null;
+    let readFailed = false;
+    const check = async function () {
+      try {
+        state = await read();
+        readFailed = false;
+      } catch (e) {
+        state = null;
+        readFailed = true;
+        return false;
+      }
+      return selectedIdOf(state.myself) === outfit.id;
+    };
+    if (viaApi && !(await changeOutfitApi(outfit.id, call))) return { ok: false, viaApi: true, onPage: onPage };
+    let ok = await check();
+    if (!ok && !viaApi) {
+      viaApi = true;
+      if (!(await changeOutfitApi(outfit.id, call))) return { ok: false, viaApi: true, onPage: onPage, state: state };
+      ok = await check();
+    }
+    return { ok: ok, viaApi: viaApi, onPage: onPage, state: state, readFailed: readFailed };
+  }
+
+  function selectedIdOf(myself) {
+    const o = outfitsOf(myself).filter(function (x) { return x.selected; })[0];
+    return o ? o.id : null;
+  }
+
+  async function readMyself(call) {
+    return { myself: await call('GET', '/api/character/myself') };
+  }
+
+  // Set when the safety net switched back, so the next press on that branch
+  // calculates instead of trying the same outfit again. Survives a reload.
+  const EQUIP_CALC_KEY = 'fl-ux-equip-calc';
+
+  function outfitsOf(myself) {
+    return (myself && myself.character && myself.character.outfits) || [];
+  }
+
+  // The whole run for one branch. Returns { lines, reload?, persist?,
+  // undoable?, confirm? } and touches nothing on the page. `call` is `flApi`;
+  // `confirmed`: the player already answered the unsaved-changes question.
+  async function runOptimize(branchId, call, io, confirmed) {
+    let s0;
     try {
-      // One at a time, as the game itself does.
-      myself = await call('GET', '/api/character/myself');
-      outfit = await call('GET', '/api/outfit');
-      storylet = await call('POST', '/api/storylet');
+      s0 = await readState(call);
     } catch (e) {
       return { lines: [eoFailText(e)] };
     }
-    const branch = branchFrom(storylet, branchId);
-    const plan = planFor(branch, storylet, outfit, myself);
+    // Used up only by a run that gets as far as planning.
+    const calc = readRecord(EQUIP_CALC_KEY);
+    dropRecord(EQUIP_CALC_KEY);
+    const branch = branchFrom(s0.storylet, branchId);
+    const plan = planFor(branch, s0.storylet, s0.outfit, s0.myself);
     if (plan.status === 'blocked') {
       return { lines: [EO_BLOCKED[plan.reason] || 'Cannot optimize this action.'] };
     }
+    const choice = calc && String(calc.branchId) === String(branchId)
+      ? { kind: 'none', reason: 'calc' }
+      : chooseOutfit(plan, outfitsOf(s0.myself), readTempUsed());
+    if (choice.kind !== 'none') return runWithOutfit(branchId, call, io, confirmed, s0, branch, plan, choice);
+
+    const out = await runPlain(branchId, call, io, branch, plan);
+    if (choice.reason === 'no-code') {
+      out.lines = out.lines.concat(['No saved outfit for ' + choice.missing.join(', ') + ': no stat code.']);
+    } else if (choice.reason === 'no-temp') {
+      out.lines = out.lines.concat(['Rename an outfit to temp1 to keep results for next time.']);
+    }
+    return out;
+  }
+
+  // Swaps within the outfit worn now, nothing saved: the run as it was before
+  // saved outfits.
+  async function runPlain(branchId, call, io, branch, plan) {
     if (plan.status === 'already') {
       return { lines: ['Already the best outfit: ' + eoPct(eoShown(branch)) + '.'].concat(eoNotes(branch, plan)) };
     }
-
     // Kept BEFORE the first equip, in case the page dies mid-run; rewritten
     // below for what actually changed.
     saveUndo(undoFor(plan.swaps, branchId));
     const run = await applyOutfit(plan.swaps, call, io, branchId);
     if (run.done.length) saveUndo(undoFor(run.done, branchId));
     else clearUndo();
-
     if (run.failed) {
-      const why = run.error ? ' ' + eoFailText(run.error) : '';
-      const lines = ['Could not equip ' + run.failed.to.name + ' in ' + run.failed.slot + '.' + why
-        + (run.done.length
-          ? ' ' + run.done.length + ' of ' + plan.swaps.length + ' changes were made.'
-          : ' Nothing was changed.')];
       return {
-        lines: lines.concat(run.done.map(eoSwapLine)), undoable: run.done.length > 0,
+        lines: eoFailLines(run, plan), undoable: run.done.length > 0,
         reload: run.done.length > 0 && run.reload, persist: run.onPage || run.done.length > 0,
       };
     }
+    const after = await eoAfterLines(eoShown(branch), plan, call, branchId, '');
+    return { lines: after.lines.concat(eoNotes(branch, plan)), reload: run.reload, persist: true, undoable: true };
+  }
 
-    // The game's own figures decide whether it worked.
+  function eoFailLines(run, plan) {
+    const why = run.error ? ' ' + eoFailText(run.error) : '';
+    return ['Could not equip ' + run.failed.to.name + ' in ' + run.failed.slot + '.' + why
+      + (run.done.length
+        ? ' ' + run.done.length + ' of ' + plan.swaps.length + ' changes were made.'
+        : ' Nothing was changed.')].concat(run.done.map(eoSwapLine));
+  }
+
+  // After the swaps: the game's own figures decide whether it worked. `tag`
+  // goes before the chance line's full stop (" (unsaved)").
+  // Returns { lines, read, after }: `read` false when the storylet could not
+  // be re-read; `after` the branch in the re-read (null: not there).
+  async function eoAfterLines(shownBefore, plan, call, branchId, tag) {
     let after = null;
+    let read = false;
     try {
       after = branchFrom(await call('POST', '/api/storylet'), branchId);
+      read = true;
     } catch (e) { /* the line falls back to the prediction, and says so */ }
     const lines = [];
     if (after && (after.challenges || []).length === plan.predicted.length) {
-      lines.push(eoChanceLine(eoShown(branch), eoShown(after)));
+      lines.push(eoChanceLine(shownBefore, eoShown(after)).replace(/\.$/, tag + '.'));
       lines.push.apply(lines, plan.swaps.map(eoSwapLine));
       const off = plan.predicted.map(function (p, i) {
-        return { name: p.name, predicted: p.shown, shown: Number(after.challenges[i].targetNumber) };
-      }).filter(function (x) { return Math.abs(x.predicted - x.shown) > 1; });
+        return { name: p.name, predicted: p.shown, shown: Number(after.challenges[i].targetNumber), floor: p.floor };
+      }).filter(function (x) { return !x.floor && Math.abs(x.predicted - x.shown) > 1; });
       if (off.length) {
         lines.push('Predicted ' + off.map(function (x) { return x.predicted + '% for ' + x.name; }).join(', ')
           + ', but the game shows ' + off.map(function (x) { return x.shown + '%'; }).join(', ')
           + '. Undo it if it looks wrong.');
       }
     } else {
-      lines.push(eoChanceLine(plan.before, plan.after).replace(/\.$/, ' (predicted; the game could not be re-read).'));
+      lines.push(eoChanceLine(plan.before, plan.after).replace(/\.$/, tag + ' (predicted; the game could not be re-read).'));
       lines.push.apply(lines, plan.swaps.map(eoSwapLine));
     }
-    return { lines: lines.concat(eoNotes(branch, plan)), reload: run.reload, persist: true, undoable: true };
+    return { lines: lines, read: read, after: after };
   }
 
-  // Puts the saved outfit back. Only what actually changed is in the record.
+  // A saved outfit serves the branch: switch to it (asking first if that
+  // drops unsaved changes), check it is no worse, improve on it, and for a
+  // temp outfit save the result under the branch's key. A stat outfit is
+  // never saved into. Nothing is kept or saved in an outfit where the game,
+  // re-read, shows the action locked.
+  async function runWithOutfit(branchId, call, io, confirmed, s0, branch0, plan0, choice) {
+    const target = choice.outfit;
+    const current = outfitsOf(s0.myself).filter(function (o) { return o.selected; })[0] || null;
+    let sw = null;
+    let s1 = s0;
+    let branch1 = branch0;
+    // The switch dropped unsaved changes the player agreed to lose (R2.10).
+    let lostUnsaved = false;
+    const first = [];
+    // The swaps went through the page and the run stayed on Possessions for
+    // the store (applyOutfit's `stay`), so it still has to go back.
+    let stayed = false;
+    // Leaves Possessions for the story, unless something already did.
+    const finish = async function (out, backDone) {
+      if (!backDone && ((sw && sw.onPage) || stayed)) await io.back(branchId);
+      return out;
+    };
+    // Back to the outfit worn before, confirmed by id like every switch.
+    // `apiOnly`: the page is stale (an API switch, or swaps made through the
+    // API). `backDone`: the run is on the story again, so a switch through
+    // the page has to come back there itself.
+    const switchBack = async function (reason, apiOnly, backDone) {
+      const back = current
+        ? await switchTo(current, call, io, apiOnly, function () { return readMyself(call); })
+        : { ok: false, viaApi: false, onPage: false };
+      if (backDone && back.onPage) await io.back(branchId);
+      const reload = !!apiOnly || !!sw.viaApi || !!back.viaApi;
+      if (!back.ok) {
+        // The undo record stays, and the next press is not forced to calculate.
+        return finish({
+          lines: ['Could not switch back to ' + (current ? current.name : 'your previous outfit') + '.',
+            target.name + ': ' + reason + '. Use Undo to try again.'],
+          reload: reload, persist: true, undoable: !!current,
+        }, backDone);
+      }
+      clearUndo();
+      keepRecord(EQUIP_CALC_KEY, { branchId: branchId });
+      return finish({
+        lines: ['Switched back from ' + target.name + ': ' + reason + '.' + (lostUnsaved ? ' Your unsaved changes are gone.' : ''),
+          'Press again for a calculated outfit instead.'],
+        reload: reload, persist: true,
+      }, backDone);
+    };
+
+    if (!target.selected) {
+      if (s0.outfit && s0.outfit.dirty && !confirmed) {
+        return {
+          lines: ['Unsaved changes on ' + (current ? current.name : 'your outfit') + ' will be lost. Tap again to switch to '
+            + target.name + '.'],
+          confirm: true,
+        };
+      }
+      lostUnsaved = !!(s0.outfit && s0.outfit.dirty);
+      // Kept before the switch, in case the page dies mid-run.
+      if (current) saveUndo({ branchId: branchId, outfitId: current.id, outfitName: current.name, restore: [] });
+      else clearUndo();
+      // The re-read the run needs anyway is the one that confirms the switch.
+      sw = await switchTo(target, call, io, false, function () { return readState(call); });
+      if (!sw.ok) {
+        // One fresh read says what is worn now: a page click can go through
+        // and still report false, and the API change after it fail.
+        let fresh = null;
+        try { fresh = await readMyself(call); } catch (e) { fresh = null; }
+        let moved;
+        let wearing = null;
+        if (fresh) {
+          const id = selectedIdOf(fresh.myself);
+          moved = !!current && id !== current.id;
+          wearing = outfitsOf(fresh.myself).filter(function (o) { return o.id === id; })[0] || null;
+        } else {
+          // Unless the outfit is known to be the one worn before, keep the undo.
+          moved = !!current && (sw.state ? selectedIdOf(sw.state.myself) !== current.id : !!sw.readFailed);
+        }
+        if (!moved) clearUndo();
+        return finish({
+          lines: ['Could not switch to ' + target.name + '.' + (moved && wearing ? ' You are wearing ' + wearing.name + '.' : '')],
+          reload: sw.viaApi && moved, persist: sw.onPage || moved, undoable: moved,
+        });
+      }
+      s1 = sw.state;
+      branch1 = branchFrom(s1.storylet, branchId);
+      first.push('Switched to ' + target.name + '.');
+    } else {
+      first.push('Already wearing ' + target.name + '.');
+    }
+
+    // After a switch, a requirement met in the outfit worn before stays met,
+    // even one the new outfit does not meet (and so does not guard).
+    const plan1 = sw ? planFor(branch1, s1.storylet, s1.outfit, s1.myself, { branch: branch0, myself: s0.myself }) : plan0;
+    const locked1 = !branch1 || !!branch1.isLocked;
+
+    // Safety net: an outfit picked by its name must not make things worse.
+    // It is judged by the best chance reachable from it, so an outfit that
+    // only misses an item bought since is kept and improved. Not for a store:
+    // its contents are about to be replaced. After an API switch the page's
+    // dropdown is stale: the API again.
+    if (sw && choice.kind !== 'store') {
+      const best = locked1 ? 0 : plan1.status === 'change' ? plan1.after : eoShown(branch1);
+      if (locked1 || best < eoShown(branch0) - 1e-9) {
+        return switchBack(locked1 ? 'the action is locked in it'
+          : 'the chance dropped from ' + eoPct(eoShown(branch0)) + ' to ' + eoPct(best), sw.viaApi, false);
+      }
+    }
+
+    if (plan1.status === 'blocked') {
+      // A store target where the action is locked and no plan can help.
+      if (sw && locked1) return switchBack('the action is locked in it', sw.viaApi, false);
+      return finish({
+        lines: first.concat([EO_BLOCKED[plan1.reason] || 'Cannot optimize this action.']),
+        reload: !!(sw && sw.viaApi), persist: !!sw, undoable: !!(sw && current),
+      });
+    }
+
+    let run = null;
+    if (plan1.status === 'change') {
+      if (!sw) saveUndo(undoFor(plan1.swaps, branchId));
+      if (sw && sw.viaApi) {
+        const r = await applySwaps(plan1.swaps, call);
+        run = { done: r.done, failed: r.failed, error: r.error, onPage: false, reload: true };
+      } else {
+        // A temp target stays on Possessions after the swaps, so the store
+        // can use the page's own rename and save; `finish` goes back.
+        run = await applyOutfit(plan1.swaps, call, io, branchId, choice.kind === 'store' || choice.kind === 'hit');
+        stayed = !!run.stayed;
+      }
+      if (!sw) {
+        if (run.done.length) saveUndo(undoFor(run.done, branchId));
+        else clearUndo();
+      }
+    }
+    const reload = !!(sw && sw.viaApi) || !!(run && run.done.length && run.reload);
+    const undoable = !!(sw && current) || !!(run && run.done.length);
+    const persist = !!sw || !!(run && (run.onPage || run.done.length));
+    const backDone = !!(run && run.onPage && !run.stayed);
+    // Still on Possessions with a page the game itself changed (no API switch,
+    // no API swaps): the store may use the page's controls.
+    const pageFresh = !backDone && !reload && ((!!sw && sw.onPage) || stayed);
+
+    if (run && run.failed) {
+      return finish({ lines: first.concat(eoFailLines(run, plan1)), reload: reload, persist: persist, undoable: undoable }, backDone);
+    }
+
+    // `latest`: the branch as the game shows it now; `reread` false when the
+    // re-read after the swaps failed (the line then shows the prediction).
+    let lines;
+    let latest = branch1;
+    let reread = true;
+    if (run) {
+      const a = await eoAfterLines(eoShown(branch0), plan1, call, branchId, choice.kind === 'stat' ? ' (unsaved)' : '');
+      lines = first.concat(a.lines);
+      latest = a.after;
+      reread = a.read;
+    } else if (sw) {
+      lines = first.concat([eoChanceLine(eoShown(branch0), eoShown(branch1))]);
+    } else {
+      lines = first.concat(['Already the best outfit: ' + eoPct(eoShown(branch1)) + '.']);
+    }
+
+    // The game's word, not the plan's: a switched-to outfit that locks the
+    // action is not kept, whatever the plan predicted.
+    if (sw && reread && (!latest || latest.isLocked)) {
+      return switchBack('the action is locked in it', reload, backDone);
+    }
+
+    if (choice.kind === 'store' || (choice.kind === 'hit' && run)) {
+      // Never a key on an outfit the game has not shown to work.
+      if (!reread || !latest || latest.isLocked) {
+        return finish({
+          lines: lines.concat([reread ? 'Not saved: the action is locked in this outfit.'
+            : 'Not saved: the game could not be re-read.']).concat(eoNotes(branch1, plan1)),
+          reload: reload, persist: persist, undoable: undoable,
+        }, backDone);
+      }
+      // The save writes into whatever outfit is selected, so it must be the
+      // target, by id, in the latest read.
+      const outfits1 = outfitsOf(s1.myself);
+      const now = outfits1.filter(function (o) { return o.id === target.id; })[0];
+      if (!now || !now.selected) {
+        return finish({
+          lines: lines.concat(['Could not switch to ' + target.name + '.']),
+          reload: reload, persist: persist, undoable: undoable,
+        }, backDone);
+      }
+      const ops = pageFresh && io.renameOnPage && io.saveOnPage ? eoPageOps(io, call) : undefined;
+      const st = await storeInTemp(now, choice.codes, outfits1, call, ops);
+      lines.push(st.ok ? 'Saved as ' + st.name + '.' : 'Could not save the outfit; it is named ' + st.name + '.');
+    }
+    if (choice.kind !== 'stat') markTempUsed(target.id);
+    return finish({
+      lines: lines.concat(eoNotes(branch1, plan1)), reload: reload, persist: persist, undoable: undoable,
+    }, backDone);
+  }
+
+  // Puts the saved outfit back: a switch back to the outfit worn before the
+  // run, or else the swaps that actually changed, undone.
   async function runUndo(call, io) {
     const rec = readUndo();
     if (!rec) return { lines: ['Nothing to undo.'] };
+    if (rec.outfitId != null) {
+      // The switch drops any swaps made on top, so they are not replayed.
+      const name = rec.outfitName || 'your previous outfit';
+      const sw = await switchTo({ id: rec.outfitId, name: rec.outfitName }, call, io, false,
+        function () { return readMyself(call); });
+      if (sw.onPage) await io.back(rec.branchId);
+      if (!sw.ok) {
+        return { lines: ['Could not switch back to ' + name + '.'], reload: sw.viaApi, persist: true, undoable: true };
+      }
+      clearUndo();
+      return { lines: ['Switched back to ' + name + '.'], reload: sw.viaApi, persist: true, undoable: false };
+    }
     const run = await applyOutfit(undoSwaps(rec), call, io, rec.branchId);
     if (run.failed) {
       const left = rec.restore.filter(function (r) {
@@ -4484,7 +5183,7 @@
     if (undoable) {
       line.appendChild(h('button', {
         type: 'button', className: 'fl-ux-eo-undo', textContent: 'Undo',
-        css: eoButtonCss(),
+        css: eoButtonCss(eoGameButton(wrap.closest && wrap.closest('.branch'))),
         on: { click: function (e) { e.preventDefault(); e.stopPropagation(); eoRun(wrap, branchId, true); } },
       }));
     }
@@ -4493,7 +5192,7 @@
     if (lines && lines.length) {
       line.appendChild(h('button', {
         type: 'button', className: 'fl-ux-eo-dismiss', textContent: 'Dismiss',
-        css: eoButtonCss(),
+        css: eoButtonCss(eoGameButton(wrap.closest && wrap.closest('.branch'))),
         on: {
           click: function (e) {
             e.preventDefault();
@@ -4507,27 +5206,60 @@
     }
   }
 
-  function eoButtonCss() {
-    return 'min-height:44px;margin:6px 8px 0 0;padding:0 14px;cursor:pointer;'
-      + 'background:' + UI.bgAlt + ';color:' + UI.text + ';border:1px solid ' + UI.accent + ';'
-      + 'border-radius:3px;font:600 14px ' + UI.font + ';touch-action:manipulation;';
+  // The game's own button in the branch's row (the first one that is not ours):
+  // our button copies its shape.
+  function eoGameButton(branchEl) {
+    const row = branchEl && branchEl.querySelector && branchEl.querySelector('.storylet__buttons');
+    if (!row) return null;
+    return Array.from(row.querySelectorAll('button')).filter(function (b) {
+      return !/(^|\s)fl-ux-eo/.test(String(b.className));
+    })[0] || null;
+  }
+
+  // The shape comes from the game's button, the colours stay ours. Without a
+  // game button to copy: a plain 44 px touch target.
+  function eoButtonCss(game) {
+    const colours = 'cursor:pointer;background:' + UI.bgAlt + ';color:' + UI.text + ';border:1px solid '
+      + UI.accent + ';touch-action:manipulation;';
+    let cs = null;
+    try { cs = game ? getComputedStyle(game) : null; } catch (e) { cs = null; }
+    if (!cs) {
+      return 'min-height:44px;margin:6px 8px 0 0;padding:0 14px;' + colours
+        + 'border-radius:3px;font:600 14px ' + UI.font + ';';
+    }
+    // Longhands: some browsers report the `padding` and `border-radius`
+    // shorthands of a computed style as empty.
+    const copy = [['height', 'height'], ['padding-top', 'paddingTop'], ['padding-right', 'paddingRight'],
+      ['padding-bottom', 'paddingBottom'], ['padding-left', 'paddingLeft'], ['font-family', 'fontFamily'],
+      ['font-size', 'fontSize'], ['font-weight', 'fontWeight'], ['letter-spacing', 'letterSpacing'],
+      ['text-transform', 'textTransform'], ['line-height', 'lineHeight'],
+      ['border-top-left-radius', 'borderTopLeftRadius'], ['border-top-right-radius', 'borderTopRightRadius'],
+      ['border-bottom-right-radius', 'borderBottomRightRadius'], ['border-bottom-left-radius', 'borderBottomLeftRadius'],
+      ['box-sizing', 'boxSizing']];
+    return copy.map(function (p) { return cs[p[1]] ? p[0] + ':' + cs[p[1]] + ';' : ''; }).join('')
+      + 'margin-right:8px;flex:0 0 auto;' + colours;
   }
 
   // A click on either button. One run at a time, page-wide.
   async function eoRun(wrap, branchId, undo) {
     if (eoBusy) return;
     eoBusy = true;
-    const button = wrap.querySelector('.fl-ux-eo-run');
+    const button = wrap.flUxButton;
     const label = button.textContent;
     button.textContent = 'Optimizing…';
     clearResult();
     eoDraw(wrap, branchId, [], false);
+    // The unsaved-changes question is answered by a second tap on this same
+    // button; a redraw of the branch (a new wrap) forgets it.
+    const confirmed = wrap.dataset.flUxEoConfirm === '1';
+    wrap.dataset.flUxEoConfirm = '';
     let out;
     try {
-      out = undo ? await runUndo(flApi, eoSoftIo()) : await runOptimize(branchId, flApi, eoSoftIo());
+      out = undo ? await runUndo(flApi, eoSoftIo()) : await runOptimize(branchId, flApi, eoSoftIo(), confirmed);
     } catch (e) {
       out = { lines: [eoFailText(e)] };
     }
+    if (out.confirm) wrap.dataset.flUxEoConfirm = '1';
     eoBusy = false;
     button.textContent = label;
     if (out.persist || out.reload) {
@@ -4546,21 +5278,49 @@
     eoDraw(wrap, branchId, out.lines, false);
   }
 
+  // Our button must SHOW left of the game's button, with a gap (asked
+  // 2026-11-24). Where it goes in the markup depends on how the game lays the
+  // row out: a reversed flex row, or a button floated right, draws the markup
+  // right to left, so ours then goes after the game's button (and floats right
+  // with it). Its `margin-right` is the gap in every case.
+  function eoPlaceLeftOf(row, game, button) {
+    let reversed = false;
+    let floated = false;
+    try {
+      reversed = /reverse/.test(String(getComputedStyle(row).flexDirection || ''));
+      const g = getComputedStyle(game);
+      floated = String(g.cssFloat || g.float || '') === 'right';
+    } catch (e) { /* no layout to read: the plain order */ }
+    if (floated) button.style.cssText += 'float:right;';
+    if (reversed || floated) row.insertBefore(button, game.nextSibling);
+    else row.insertBefore(button, game);
+  }
+
   function eoBuild(branchEl) {
     const branchId = branchIdOf(branchEl);
     const line = h('div', { className: EO_LINE, css: EO_PANEL_CSS });
     line.style.display = 'none';
-    const wrap = h('div', { className: EO_CLASS, css: 'flex:1 0 100%;width:100%;margin-top:8px;' }, [
-      h('button', {
-        type: 'button', className: 'fl-ux-eo-run', textContent: 'Optimize equipment',
-        title: 'Equips the outfit that gives the best chance of passing this action’s challenges.',
-        css: eoButtonCss(),
-        on: { click: function (e) { e.preventDefault(); e.stopPropagation(); eoRun(wrap, branchId, false); } },
-      }),
-      line,
-    ]);
-    const target = branchEl.querySelector('.storylet__buttons') || branchEl.querySelector('.branch__body') || branchEl;
-    target.appendChild(wrap);
+    const wrap = h('div', { className: EO_CLASS, css: 'width:100%;margin-top:8px;' }, [line]);
+    const row = branchEl.querySelector('.storylet__buttons');
+    const game = eoGameButton(branchEl);
+    const button = h('button', {
+      type: 'button', className: 'fl-ux-eo-run', textContent: 'Optimize equipment',
+      title: 'Equips the outfit that gives the best chance of passing this action’s challenges.',
+      css: eoButtonCss(game),
+      on: { click: function (e) { e.preventDefault(); e.stopPropagation(); eoRun(wrap, branchId, false); } },
+    });
+    wrap.flUxButton = button;
+    if (row) {
+      // In the game's own row, right before Go; the result panel under the row.
+      // Go never shrinks: a row too narrow for both wraps our button onto its own line.
+      if (!row.style.flexWrap) row.style.flexWrap = 'wrap';
+      if (game) eoPlaceLeftOf(row, game, button); else row.appendChild(button);
+      row.parentNode.insertBefore(wrap, row.nextSibling);
+    } else {
+      const target = branchEl.querySelector('.branch__body') || branchEl;
+      target.appendChild(button);
+      target.appendChild(wrap);
+    }
     return wrap;
   }
 
@@ -4568,7 +5328,13 @@
     const stored = readResult();
     document.querySelectorAll('.branch').forEach(function (branchEl) {
       if (!branchEl.querySelector('.challenges')) return;
-      const wrap = branchEl.querySelector('.' + EO_CLASS) || eoBuild(branchEl);
+      // The button and the panel live apart; if React threw one away, rebuild both.
+      let wrap = branchEl.querySelector('.' + EO_CLASS);
+      if (!wrap || !wrap.flUxButton || !branchEl.contains(wrap.flUxButton)) {
+        branchEl.querySelectorAll('.fl-ux-eo-run').forEach(function (b) { b.remove(); });
+        if (wrap) wrap.remove();
+        wrap = eoBuild(branchEl);
+      }
       // A result belongs to the branch it was made for, and is drawn once.
       const mine = stored && String(stored.branchId) === branchIdOf(branchEl);
       const key = mine ? String(stored.at) : '';
@@ -4576,6 +5342,212 @@
       wrap.dataset.flUxEoShown = key;
       if (mine) eoDraw(wrap, branchIdOf(branchEl), stored.lines, !!stored.undoable);
     });
+  }
+
+  // === the Empty outfit button (Possessions) ===============================
+  //
+  // CONFIRMED WORKING in-game by the author (2026-11-24, ux-enhancers 3.13):
+  // the trash-can button beside the game's own, emptying through the API with
+  // one reload.
+  //
+  // Takes off every worn item that can come off (a slot that can change, is not
+  // a Boon/Burden effect and holds something), through the API, one call at a
+  // time, then one page reload (see runEmpty). Unequipping does not change the
+  // saved outfit, so a temp outfit
+  // is then saved empty -- a keyed one (`tempGlaWat`) renamed to a free name
+  // first, so an empty outfit never carries a key. Only when every unequip
+  // worked; a rename that fails means no save. Any other outfit is left as the
+  // game has it (its save button lights up; switching away restores it).
+
+  const EMPTY_RESULT_KEY = 'fl-ux-empty-result';
+  const EMPTY_CLASS = 'fl-ux-empty-wrap';
+  const EMPTY_LINE = 'fl-ux-empty-line';
+
+  function emptySwaps(outfit) {
+    const swaps = [];
+    let locked = 0;
+    ((outfit && outfit.slots) || []).forEach(function (s) {
+      if (s.isEffect || s.qualityId == null) return;
+      if (!s.canChange) { locked++; return; }
+      swaps.push({ slot: s.name, from: { id: s.qualityId, name: s.name }, to: { id: null, name: NOTHING } });
+    });
+    return { swaps: swaps, locked: locked };
+  }
+
+  function slotsText(n) { return n + (n === 1 ? ' slot' : ' slots'); }
+
+  // Returns { lines, reload? }; `reload`: the API was used, so the page is stale.
+  async function runEmpty(call, io) {
+    const outfit = await call('GET', '/api/outfit');
+    const myself = await call('GET', '/api/character/myself');
+    const ch = (myself && myself.character) || {};
+    if (ch.canChangeOutfit === false || (ch.setting && ch.setting.canChangeOutfit === false)) {
+      return { lines: ['The game does not let you change your outfit here.'] };
+    }
+    const plan = emptySwaps(outfit);
+    const cur = outfitsOf(myself).filter(function (o) { return o.selected; })[0] || null;
+    const lockedLine = plan.locked ? [slotsText(plan.locked) + ' cannot be changed.'] : [];
+    if (!plan.swaps.length) return { lines: ['Nothing to take off.'].concat(lockedLine) };
+
+    // Through the API, one unequip at a time, then ONE reload (reported
+    // 2026-11-24: about a second per item). A click on the page makes the game
+    // refetch /api/plan and the 350 KB /api/character/myself after EVERY item
+    // (about 1.2 s each in the captures); an API unequip takes about 0.2 s and
+    // triggers nothing. Never in parallel: each reply is the whole outfit, so
+    // overlapping calls could leave a later reply describing an earlier state.
+    // The outfit's name still comes from /myself above, not from the page:
+    // after the optimizer renames a temp through the API, the dropdown shows
+    // the old name until a reload, and a stale "temp1" would skip the rename.
+    const via = await applySwaps(plan.swaps, call);
+    const done = via.done;
+    const failed = via.failed;
+    const error = via.error;
+    const reload = done.length > 0;
+    const lines = done.length ? ['Emptied ' + slotsText(done.length) + '.'] : [];
+    if (failed) {
+      lines.push('Could not take off ' + failed.slot + '; nothing was saved.');
+      if (error) lines.push(eoFailText(error));
+      return { lines: lines.concat(lockedLine), reload: reload };
+    }
+    const result = lines.concat(lockedLine);
+    const parsed = cur ? parseTemp(cur.name) : null;
+    if (!parsed) {
+      result.push('Not saved.');
+      return { lines: result, reload: reload };
+    }
+    let renamed = null;
+    if (!parsed.free) {
+      const free = freeTempName(outfitsOf(myself), cur.id);
+      if (!(await renameOutfit(cur.id, free, call))) {
+        result.push('Could not rename ' + cur.name + '; nothing was saved.');
+        return { lines: result, reload: reload };
+      }
+      renamed = free;
+    }
+    if (!(await saveOutfit(call))) {
+      result.push(renamed ? 'Renamed ' + cur.name + ' to ' + renamed + ', but could not save the outfit.'
+        : 'Could not save the outfit.');
+    } else {
+      result.push(renamed ? 'Renamed ' + cur.name + ' to ' + renamed + ' and saved.' : 'Saved.');
+    }
+    return { lines: result, reload: reload };
+  }
+
+  function emptyDraw(wrap, lines) {
+    const line = wrap.querySelector('.' + EMPTY_LINE);
+    for (const child of Array.from(line.children)) child.remove();
+    (lines || []).forEach(function (text) {
+      line.appendChild(h('div', { textContent: text, css: 'color:' + UI.text + ';' }));
+    });
+    line.style.display = (lines && lines.length) ? 'block' : 'none';
+  }
+
+  // The button is one of the game's own round icon buttons (reported
+  // 2026-11-24: a full-size text button broke the outfit box's grid). It is
+  // built from the captured markup of the star / edit / save buttons beside the
+  // outfit dropdown, with a trash can: `button.buttonlet-container` >
+  // `span.buttonlet.fa-stack.fa-lg.buttonlet-enabled` > a `fa-circle` and the
+  // icon, plus a visually hidden label. It sits right after the game's last
+  // button. The result line goes under the whole outfit box, outside its grid.
+  function emptySetBusy(button, busy) {
+    const face = button.querySelector('.buttonlet');
+    button.disabled = !!busy;
+    if (face) {
+      face.className = face.className.replace(/\bbuttonlet-(enabled|disabled)\b/, busy ? 'buttonlet-disabled' : 'buttonlet-enabled');
+    }
+  }
+
+  async function emptyRun(button) {
+    if (eoBusy) return;
+    eoBusy = true;
+    emptySetBusy(button, true);
+    dropRecord(EMPTY_RESULT_KEY);
+    const before = document.querySelector('.' + EMPTY_CLASS);
+    if (before) emptyDraw(before, ['Emptying your outfit…']);
+    let out;
+    try {
+      out = await runEmpty(flApi, eoSoftIo());
+    } catch (e) {
+      out = { lines: [eoFailText(e)] };
+    }
+    eoBusy = false;
+    emptySetBusy(button, false);
+    if (out.reload) {
+      keepRecord(EMPTY_RESULT_KEY, { lines: out.lines });
+      location.reload();
+      return;
+    }
+    // The game redraws its screen as items come off: the line goes under the
+    // box shown now, or is kept for the next one drawn.
+    const now = document.querySelector('.' + EMPTY_CLASS);
+    if (now && emptyAttached(now)) emptyDraw(now, out.lines);
+    else keepRecord(EMPTY_RESULT_KEY, { lines: out.lines });
+  }
+
+  function emptyAttached(node) {
+    if (node.isConnected !== undefined) return !!node.isConnected;
+    for (let n = node; n; n = n.parentNode) if (n === document.body) return true;
+    return false;
+  }
+
+  // The game's last round button beside the outfit dropdown, or null (rename
+  // mode replaces them with a form). They sit INSIDE the dropdown's own flex
+  // div, after the "Outfit" label, not directly in the row (seen in-game
+  // 2026-11-24: the row's only child is that div).
+  function emptyAnchor(controls) {
+    const row = controls.querySelector('.outfit-controls__dropdown-and-buttons');
+    if (!row) return null;
+    const own = Array.from(row.querySelectorAll('button.buttonlet-container')).filter(function (c) {
+      return !/\bfl-ux-empty\b/.test(String(c.className || ''));
+    });
+    return own.length ? own[own.length - 1] : null;
+  }
+
+  function emptyButton() {
+    const button = h('button', {
+      type: 'button', className: 'buttonlet-container fl-ux-empty',
+      title: 'Empty outfit: takes off everything that can come off. A temp outfit is then saved empty.',
+      on: { click: function (e) { e.preventDefault(); e.stopPropagation(); emptyRun(button); } },
+    }, [
+      h('span', { className: 'buttonlet fa-stack fa-lg buttonlet-enabled buttonlet-empty-outfit' }, [
+        h('span', { className: 'fa fa-circle fa-stack-2x' }),
+        h('span', { className: 'fa fa-inverse fa-stack-1x fa-trash' }),
+        h('span', { className: 'u-visually-hidden', textContent: 'Empty outfit' }),
+      ]),
+    ]);
+    button.setAttribute('aria-label', 'Empty outfit');
+    return button;
+  }
+
+  function outfitEmptier() {
+    const controls = document.querySelector('.outfit-controls');
+    if (!controls) return;
+    const anchor = emptyAnchor(controls);
+    const mine = controls.querySelector('.fl-ux-empty');
+    if (!anchor) {
+      if (mine) mine.remove();
+    } else if (!mine) {
+      anchor.parentNode.insertBefore(emptyButton(), anchor.nextSibling);
+    } else if (anchor.nextSibling !== mine) {
+      anchor.parentNode.insertBefore(mine, anchor.nextSibling);
+    }
+    let wrap = document.querySelector('.' + EMPTY_CLASS);
+    if (!wrap && controls.parentNode) {
+      const line = h('div', { className: EMPTY_LINE, css: EO_PANEL_CSS });
+      line.style.display = 'none';
+      wrap = h('div', { className: EMPTY_CLASS, css: 'margin:8px 0;' }, [line]);
+      controls.parentNode.insertBefore(wrap, controls.nextSibling);
+    }
+    // The line of a run that ended in a reload (or lost its box): shown once.
+    const kept = readRecord(EMPTY_RESULT_KEY);
+    if (kept && wrap) {
+      dropRecord(EMPTY_RESULT_KEY);
+      emptyDraw(wrap, kept.lines);
+    }
+  }
+
+  function outfitEmptierOff() {
+    document.querySelectorAll('.fl-ux-empty, .' + EMPTY_CLASS).forEach(function (w) { w.remove(); });
   }
 
   // === feature registry ==================================================
@@ -4597,6 +5569,9 @@
     // the outfit giving the best chance, through the game's own API.
     { name: 'equipment-optimizer', run: equipmentOptimizer, off: equipmentOptimizerOff,
       group: 'UX tweaks', label: 'the Optimize equipment button' },
+    // Possessions: an "Empty outfit" button that takes everything off and saves a temp outfit empty.
+    { name: 'outfit-emptier', run: outfitEmptier, off: outfitEmptierOff,
+      group: 'UX tweaks', label: 'the Empty outfit button (Possessions)' },
   ];
 
   // === switches (tm-fl-ui-settings) ======================================
@@ -4638,7 +5613,7 @@
   }
 
   function equipmentOptimizerOff() {
-    document.querySelectorAll('.' + EO_CLASS).forEach(function (w) { w.remove(); });
+    document.querySelectorAll('.' + EO_CLASS + ', .fl-ux-eo-run').forEach(function (w) { w.remove(); });
   }
 
   // === dispatch ==========================================================

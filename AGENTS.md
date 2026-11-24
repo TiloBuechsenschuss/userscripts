@@ -3529,8 +3529,11 @@ navigation. Two consequences:
     no broad/narrow flag is sent. `inferChallenge` solves the difficulty from it and your level: a
     `BasicAbility` challenge is **broad** (`0.6 × level / difficulty`), a `Skills` one **narrow**
     (`0.6 + 0.1 × (level − difficulty)`), a percentage that is not a multiple of ten is always broad;
-    both clamp to 10%–100%. A challenge shown at 10% or 100% hides its headroom, so it is **fixed**,
-    and a 100% one **holds its stat** at today's level. Checked against real outfit changes (Persuasive
+    both clamp to 10%–100%. A challenge shown at 100% hides its headroom, so it is **fixed** and
+    **holds its stat** at today's level. One shown at the **10% floor** is read at its lowest possible
+    difficulty (narrow: level + 5; broad: 6 × level, flagged `floor`), so the most of the stat is worn;
+    the result says the prediction is a best case and the predicted-vs-shown warning skips it
+    (changed 2026-11-24: treating it as fixed said "Already the best" with Mithridacy gear owned). Checked against real outfit changes (Persuasive
     270→200: 90%→66%; Mithridacy 1→3: 60%→80%). **The kind rule is a working guess for other
     categories**: the post-run comparison ("Predicted X%, the game shows Y%") is what catches it.
   - **Base level** is `effectiveLevel` minus the bonuses of the worn items in the slots being
@@ -3582,6 +3585,59 @@ navigation. Two consequences:
     in-game by the author (2026-09-26)** on real actions, including the in-page route, the Use/Equip
     popup and the unreadable-level case. Not yet reported on: Undo, Dismiss, filling an empty slot, the
     API-and-reload fallback, and the phone layout.
+  - **Saved-outfit shortcuts** (`ux-enhancers.js` 3.13; requirements in
+    `docs/superpowers/specs/2026-11-24-saved-outfit-shortcuts-requirements.md`, plan in
+    `docs/superpowers/plans/2026-11-24-saved-outfit-shortcuts.md`). **Nothing here has been verified in the real game yet**; the author's
+    check list is in the spec's section 0.
+    - `chooseOutfit(plan, outfits, lastUsed)` picks the outfit: one named for the single stat (game name
+      or code, via `STAT_CODES`/`statCode`), else a temp that holds the stat set, else a temp to store
+      into (a free `tempN` first, else the least recently used, read from `TEMP_USED_KEY`
+      `fl-ux-temp-used` in localStorage). Only temp outfits are ever written to: `parseTemp` reads a name
+      as a temp when it is `temp` (any case) followed by the end of the name, a digit or a capital letter
+      ("Tempest", "Temple Club" are not temps). A stat code, once released, never changes: saved names
+      depend on it.
+    - `storeInTemp` writes the worn items into the target temp: whenever the target's name carries a key
+      (its own key included, on a hit), it first renames the target to a free name (`freeTempName`), then
+      `POST /api/outfit/save`, then renames it to the key (`temp` + codes, at most 20 chars). Before it
+      runs, the storylet re-read after the swaps must show the action unlocked; otherwise nothing is
+      saved or renamed and the run switches back.
+      On the page route (no API switch, no API swaps) a store or hit stays on Possessions after the
+      swaps (`applyOutfit`'s `stay`) and renames and saves with the game's own pencil / check form and
+      save button (`renameOnPage`, `saveOnPage`, via `eoPageOps`), so the dropdown shows the new name
+      with no reload; the first step the page does not take (a save button already disabled counts as
+      one) and every later step of that store go through the API, and the run goes back to the story
+      once at the end. Otherwise rename and save go through the API (the page may
+      look stale until the game refetches). Not verified in the real game.
+    - `switchOutfit` (page click) and `POST /api/outfit/change` (fallback). Every switch, forward,
+      safety-net switch-back and Undo, is confirmed by the selected id from a fresh `GET /api/character/myself`.
+      A page switch with the wrong id falls back to the API; once a run used the API, later switches in
+      it go straight to the API.
+    - **Safety net:** after a switch, `planFor` is given `guardFrom` (the branch and `/myself` before the
+      switch), so requirements met in the outfit worn before stay guarded. A stat or hit outfit is switched
+      back when the action is locked or missing in it, or when the best chance reachable from it (the
+      plan's `after` if it changes something, else the shown chance) is below the chance before. Any
+      switched-to outfit (a store too) is switched back when the re-read after the swaps shows the action
+      locked. A switch-back sets the one-shot sessionStorage flag `fl-ux-equip-calc`, so the next press on
+      that branch runs the plain calculation; a failed switch-back keeps the undo record and sets no flag.
+    - **Unsaved changes:** the button asks for a second tap before any switch
+      (`wrap.dataset.flUxEoConfirm`).
+    - **Look (`eoButtonCss`):** the button sits left of the game's button in `.storylet__buttons` and
+      takes the game button's computed shape (`flex:0 0 auto`; the row gets `flex-wrap:wrap` if it had
+      none). It always SHOWS left of the game's button with an 8 px gap (`eoPlaceLeftOf`): in a
+      reversed flex row or beside a Go floated right it goes after Go in the markup (and floats right too).
+      The result panel is the row's next sibling. Undo and Dismiss take the game button's
+      height, which may be under 44 px on a phone.
+    - **`outfit-emptier`** (`outfitEmptier`): an "Empty outfit" button on Possessions. It is one of the
+      game's own round icon buttons, built from the captured star/edit/save markup
+      (`button.buttonlet-container` > `span.buttonlet.fa-stack.fa-lg.buttonlet-enabled` > `fa-circle` +
+      `fa-trash` + a visually hidden "Empty outfit"), placed right after the game's last button beside the
+      dropdown; rename mode (no game buttons) removes it. The result line sits under the whole
+      `.outfit-controls` box, outside its grid (a full-size text button there broke the layout, reported
+      2026-11-24). It unequips through the API, one call at a time, then reloads the page once: a click
+      makes the game refetch `/plan` and the 350 KB `/myself` after every item (about 1.2 s each), an
+      API unequip takes about 0.2 s. Temps only are saved (a keyed one is renamed to a free
+      name first). The result is kept in sessionStorage `fl-ux-empty-result` across the reload. R3.5
+      deviation: the reason shows on tap; the button is never disabled in advance. No Undo for it.
 - **The Agents tab (`/agents`)** is read by Choice Helper's `readAgents` (captured 2026-10-21; the whole
   structure is in `okf/fallen-london/agents-tab.md`). Agents are not items and carry no `data-quality-id`, so
   this tab is the only place that lists them. `#agents` holds `.agents-header` (whose `N/M Active Plots` span is
