@@ -106,3 +106,27 @@ repository first, it may have changed).
 - **Meanwhile:** one request at a time, no polling; an authentication failure
   stops the feature and says so.
 
+
+## Saved outfits: renaming, saving, switching through the page
+
+Raised 2026-11-24 by the saved-outfit shortcuts requirements
+(`docs/superpowers/specs/2026-11-24-saved-outfit-shortcuts-requirements.md`).
+Name length is settled: the game accepted a 21-character name, and the script
+will write at most 20.
+
+- **Unknown:** the call that renames a saved outfit (path, body, reply).
+- **Unknown:** whether an equip changes the selected saved outfit by itself,
+  or needs a separate save; what the outfit reply's `dirty`, `type` and
+  `isFavourite` mean.
+- **Unknown:** whether outfit names keep their letter case, whether two
+  outfits may share a name, and which characters are allowed.
+- **Unknown:** whether outfits can be created or deleted, or only renamed;
+  whether `maxOutfits: 4` is this account's real limit.
+- **Unknown:** the markup of the outfit control on Possessions, and whether
+  switching through it redraws the page without a reload.
+- **Matters:** the saved-outfit shortcuts cannot be planned without them.
+- **Meanwhile:** nothing uses saved outfits.
+- **Capture:** follow
+  [`docs/tools/fallen-london/outfit-capture-guide.md`](../../docs/tools/fallen-london/outfit-capture-guide.md).
+  Its recorder also notes `xhr` or `fetch` per call, which settles the first
+  question under "Observing the game's own API traffic" for the calls it sees.

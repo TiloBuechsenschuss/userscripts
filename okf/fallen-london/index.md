@@ -50,6 +50,11 @@ read-only `GET /api/outfit` was made with the page's own token to learn what
 the worn items are. The raw captures contain personal data (character name,
 possessions) and are not committed.
 
+That first recorder was not kept. Its successor is
+[`docs/tools/fallen-london/api-recorder.js`](../../docs/tools/fallen-london/api-recorder.js)
+(written 2026-11-24), which does the same and also records markup. Capture
+guides for specific questions sit beside it.
+
 ## Related code
 
 - `FallenLondon/ux-enhancers.js`: the `equipment-optimizer` feature reads all of
