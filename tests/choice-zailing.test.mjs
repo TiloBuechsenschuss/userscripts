@@ -30,6 +30,11 @@
 //    quarry's ship.
 //  - The strictZee gate on "The Sound of Wings" -- the one card name Fallen
 //    London reuses in eight other places.
+//  - The option badges on an opened card: one star per card and it is
+//    bestZeeLine's; and for an option the table lacks, the wiki reader -- its
+//    parse of real option pages, the fetch round trip against a stubbed
+//    fetch (only the missing pages are asked for), the disambiguation filter,
+//    and silence when the wiki cannot be reached.
 //
 // Numbers come from Zailing (Guide) and the individual card/option pages on
 // fallenlondon.wiki.
@@ -57,7 +62,6 @@ function makeEl(tag) {
     childNodes: [],
     children: [],
     parentNode: null,
-    nextElementSibling: null,
     appendChild(child) {
       child.parentNode = this;
       this.childNodes.push(child);
@@ -71,7 +75,22 @@ function makeEl(tag) {
       p.children = p.children.filter((n) => n !== this);
       this.parentNode = null;
     },
-    after() { throw new Error('after() not exercised by these tests'); },
+    // Enough of after() for the option badges: insert right behind this node
+    // in its parent, with nextElementSibling derived from the same list.
+    after(node) {
+      const p = this.parentNode;
+      if (!p) throw new Error('after() on a detached node');
+      if (node.parentNode) node.remove();
+      node.parentNode = p;
+      const i = p.children.indexOf(this);
+      p.children.splice(i + 1, 0, node);
+      p.childNodes.splice(p.childNodes.indexOf(this) + 1, 0, node);
+    },
+    get nextElementSibling() {
+      const p = this.parentNode;
+      if (!p) return null;
+      return p.children[p.children.indexOf(this) + 1] || null;
+    },
     addEventListener() {},
     querySelector(sel) {
       const cls = sel.replace(/^\./, '');
@@ -88,9 +107,11 @@ function makeEl(tag) {
 // currentArea() reads, so the zee gate can be exercised from here. `null`
 // stands for a greeting that can't be read at all.
 let area = 'The Sea of Voices';
+let domQuery = {};
 const fakeDoc = {
   body: makeEl('body'),
-  querySelectorAll: () => [],
+  // Selector -> nodes, so a test can put an opened card on the page.
+  querySelectorAll: (sel) => domQuery[sel] || [],
   querySelector: (sel) => {
     if (sel.includes('.welcome') && area != null) {
       const h1 = makeEl('h1');
@@ -106,6 +127,20 @@ const fakeDoc = {
 };
 class FakeObserver { observe() {} }
 
+// The wiki, as far as this suite is concerned: title -> wikitext. Every
+// request is recorded, and nothing ever reaches the network.
+let wikiPages = {};
+const wikiAsked = [];
+globalThis.fetch = (url) => {
+  const titles = decodeURIComponent(/titles=([^&]*)/.exec(url)[1]).split('|');
+  wikiAsked.push(titles);
+  const pages = titles.map((t) => (wikiPages[t] != null
+    ? { title: t, revisions: [{ slots: { main: { content: wikiPages[t] } } }] }
+    : { title: t, missing: true }));
+  return Promise.resolve({ ok: true, json: () => Promise.resolve({ query: { pages } }) });
+};
+const settle = () => new Promise((r) => setTimeout(r, 0));
+
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
@@ -113,7 +148,9 @@ const wrapped = src
     + ' SPITE_CARDS, normalizeName, lookupZeeCard, zeeCardFor, bestZeeLine, zeeHasBetterGated,'
     + ' zeeBadgeSpec, zeeColor, zeeProgScore, zeeTwScore, zeeTwWord, zeeSpeedWord, inZee,'
     + ' attachBadge, ZEE_CLASS, ZEE_FLAG, ZEE_URGENT_COLOR, ZEE_GATED_MARK, SPITE_CLASS,'
-    + ' SPITE_FLAG, FEATURES, PANELS, renderZailingPanel, zeeHandRows }; })();');
+    + ' SPITE_FLAG, FEATURES, PANELS, renderZailingPanel, zeeHandRows, zeeTwShort, zeeOptionFor,'
+    + ' zeeOptionSpec, zeeCardRatings, ZEE_BEST_MARK, ZEE_OPTION_CLASS, ZEE_OPTION_FLAG,'
+    + ' zeeOptionHits, zeeWikiParse, zeeWikiCardOptions, zeeWikiSpec, zeeWikiOption, ZEE_WIKI_MARK }; })();');
 const fn = new Function(
   'document', 'MutationObserver', 'requestAnimationFrame', 'getComputedStyle', 'console',
   wrapped + '\nreturn globalThis.__flux;');
@@ -326,28 +363,39 @@ check('the arrow marks a cheaper line the badge refused to quote',
 
 // --- the badge -------------------------------------------------------------
 
-check('a plain, free, full-speed line is just its number',
-  badge('Your False-Star').text, '-5');
+check('a plain, free, full-speed line is its Troubled Waters and its progress',
+  badge('Your False-Star').text, 'TW -5 · full speed');
 
 check('a challenge\'s success value is marked with a question mark',
-  badge('A Hazard to Shipping').text, '+2?');
+  badge('A Hazard to Shipping').text, 'TW +2 · full speed?');
 
 check('a card whose best free line is free, but whose best line is not, gets both marks',
   // Correct your course: a Watchful success for nothing. A False-Star of your
   // Own would make the same card -5.
-  badge('A Navigation Error').text, '0?' + api.ZEE_GATED_MARK);
+  badge('A Navigation Error').text, 'TW 0 · full speed? ' + api.ZEE_GATED_MARK);
 
-check('half speed is marked',
-  badge('Crossing Paths').text, '½-2');
+check('half speed is said in words',
+  badge('Crossing Paths').text, 'TW -2 · ½ speed');
 
 check('and so is a cheaper line hiding behind an item',
-  badge('The Killing Wind').text, '+4?' + api.ZEE_GATED_MARK);
+  badge('The Killing Wind').text, 'TW +4 · full speed? ' + api.ZEE_GATED_MARK);
 
-check('the flat-80 line gets its own mark',
-  badge('The Giant of the Unterzee').text, '★+5?');
+check('the flat-80 line says it is a flat 80, not a share of your speed',
+  badge('The Giant of the Unterzee').text, 'TW +5 · +80 flat?');
 
-check('a line that makes no progress at all is marked',
-  badge('A Growing Concern').text.startsWith('·'), true);
+check('a line that makes no progress at all says so',
+  badge('A Growing Concern').text.includes('· no progress'), true);
+
+check('a Troubled Waters level or direction is never printed as a change',
+  [api.zeeTwShort({ tw: null, twText: 'Troubled Waters set to 5' }),
+   api.zeeTwShort({ tw: null, twText: 'Troubled Waters set to 0' }),
+   api.zeeTwShort({ tw: null, twText: 'Troubled Waters falls by an amount the wiki does not record' }),
+   api.zeeTwShort({ tw: null, twText: 'Troubled Waters up by an unrecorded amount' }),
+   api.zeeTwShort({ tw: 2, twRange: '+2-3' })],
+  ['=5', '=0', '↓', '↑', '+2-3']);
+
+check('every option in the table has a short Troubled Waters figure the badge can print',
+  api.ZEE_CARDS.flatMap((c) => c.opts).filter((o) => api.zeeTwShort(o) === '→').map((o) => o.text), []);
 
 check('black cards take the sinister colour whatever their numbers say',
   api.ZEE_CARDS.filter((c) => c.urgent).map((c) => api.zeeBadgeSpec(c).color),
@@ -427,7 +475,7 @@ const draw = (host, name) => {
 
 const host = makeEl('div');
 draw(host, 'Your False-Star');
-check('a card in the table gets one badge', host.children.map((c) => c.textContent), ['-5']);
+check('a card in the table gets one badge', host.children.map((c) => c.textContent), ['TW -5 · full speed']);
 
 draw(host, 'Your False-Star');
 check('re-running the scan does not stack a second badge', host.children.length, 1);
@@ -436,7 +484,7 @@ check('re-running the scan does not stack a second badge', host.children.length,
 // new card is the failure mode this guards.
 draw(host, 'Navigating the Snares');
 check('the same container reused for another card is redrawn',
-  host.children.map((c) => c.textContent), ['½0']);
+  host.children.map((c) => c.textContent), ['TW 0 · ½ speed']);
 
 draw(host, 'A Stroll around the Hill');
 check('and reused for a card we know nothing about, it is cleared', host.children.length, 0);
@@ -449,7 +497,331 @@ api.attachBadge(shared, {
   spec: { text: 'X', color: '#000', title: 'other feature' }, place: 'append',
 });
 check('a second feature\'s badge lands beside ours, not instead of it',
-  shared.children.map((c) => c.textContent), ['-5', 'X']);
+  shared.children.map((c) => c.textContent), ['TW -5 · full speed', 'X']);
+
+// --- one badge per option, on the opened card ------------------------------
+
+const opt = (cardName, title) => api.zeeOptionFor(card(cardName), title);
+const optBadge = (cardName, title) => api.zeeOptionSpec(card(cardName), opt(cardName, title));
+
+check('an option badge says what that option does, in the card badge\'s own words',
+  [optBadge('Navigating the Snares', 'You have places to be').text,
+   optBadge('A Spit of Land', 'Stop briefly at the island').text],
+  // The island stop quotes its -1 success; the card badge ranks it on the
+  // coin flip's expected value, which is why it is not the starred line.
+  ['TW +6 · full speed?', 'TW -1 · ½ speed?']);
+
+check('the line the card badge speaks for is starred, and only that one',
+  card('Navigating the Snares').opts
+    .filter((o) => api.zeeOptionSpec(card('Navigating the Snares'), o).text.startsWith(api.ZEE_BEST_MARK))
+    .map((o) => o.text),
+  ['Slow and steady does it']);
+
+check('on every card with options, exactly one is starred, and it is bestZeeLine\'s',
+  api.ZEE_CARDS.filter((c) => c.opts.length).filter((c) => {
+    const starred = c.opts.filter((o) => api.zeeOptionSpec(c, o).text.startsWith(api.ZEE_BEST_MARK));
+    return starred.length !== 1 || starred[0] !== api.bestZeeLine(c).opt;
+  }).map((c) => c.name), []);
+
+check('the starred option\'s text is the card badge\'s, apart from the star and the ▾',
+  api.ZEE_CARDS.filter((c) => c.opts.length).filter((c) => {
+    const best = api.bestZeeLine(c).opt;
+    const o = api.zeeOptionSpec(c, best).text.replace(api.ZEE_BEST_MARK + ' ', '');
+    return api.zeeBadgeSpec(c).text.replace(' ' + api.ZEE_GATED_MARK, '') !== o;
+  }).map((c) => c.name), []);
+
+check('a gated line is badged but never starred, and its tooltip says why',
+  (() => {
+    const s = optBadge('The Killing Wind', 'Make ready to dive');
+    return [s.text.startsWith(api.ZEE_BEST_MARK), /Needs something you may not have/.test(s.title)];
+  })(),
+  [false, true]);
+
+check('a piracy line says it is piracy',
+  /piracy line/.test(optBadge('A Bounty Upon Your Head', 'Evade them!').title), true);
+
+check('an option\'s tooltip carries its failure and its menaces',
+  (() => { const s = optBadge('Navigating the Snares', 'You have places to be').title;
+    return [s.includes('Mutinous Whispers'), s.includes('failure: TW +14, half speed, Groaning Hull')]; })(),
+  [true, true]);
+
+check('a bracket that is part of the real title is matched literally, not as a fill-in',
+  // "(8 FATE)" is in the game's title; carouselMatcher only wildcards its
+  // named placeholders.
+  [opt('A Wily Zailor', '"I\'ll be in my bunk." (8 FATE)') != null,
+   opt('A Wily Zailor', '"I\'ll be in my bunk." (9 FATE)')],
+  [true, null]);
+
+check('matching ignores case and punctuation',
+  [opt('Navigating the Snares', 'SLOW AND STEADY DOES IT'), opt('Navigating the Snares', 'Slow and steady does it.')]
+    .map((o) => o && o.text), ['Slow and steady does it', 'Slow and steady does it']);
+
+check('a title the card does not have gets nothing',
+  [opt('Navigating the Snares', 'Zail on'), opt('Navigating the Snares', ''), api.zeeOptionFor(null, 'Zail on')],
+  [null, null, null]);
+
+check('a title two options share gets nothing rather than one of two claims',
+  // Passing a Lightship: the Zee-Ztory trade and the piracy chase are both
+  // "Stop and exchange news", with different numbers.
+  opt('Passing a Lightship', 'Stop and exchange news'), null);
+
+check('and that is the only such title in the table',
+  api.ZEE_CARDS.filter((c) => c.opts.some((o) => api.zeeOptionFor(c, o.text) !== o)).map((c) => c.name),
+  ['Passing a Lightship']);
+
+
+// --- options the table lacks, read off the wiki ------------------------------
+// Fixtures are the real pages' wikitext (2026-11-24), descriptions trimmed.
+
+const BLIND_NAVIGATORS = `{{Incomplete|Exact menace gain values}}
+{{Action
+|Icon = blindnavigators.png
+|From Card title = A Navigation Error
+|ID = 280220
+|Description = One of them unrolls a chart. When you examine it, the paper is blank.
+|Unlocked with = {{Unlock|Blind Navigators}}
+|BroadQuality = Watchful
+|BroadDiff = 100
+|Challenge information = The difficulty is equal to your {{Use|Zee Peril|Type=Math}} level. The above is the level for {{IL|Home Waters}}.
+|Success title = Clear-sighted
+|Success description = Yes. Of course! This is the way.
+}}
+*{{Success Increase|Watchful}}
+*{{Gain|Map Scrap|8 x}}
+*{{Loss|Troubled Waters|2 CP}}
+*{{Loss|Nightmares|-3 CP}}
+*{{ZailingProgress}}
+*{{Gain|Time Spent at Zee|1 x|hidden=yes}}
+
+{{Failure
+|Failure title = What ''is'' this place?
+|Failure description = The Navigators might know where they're going, but you still don't.
+}}
+*{{Failure Increase|Watchful}}
+*{{Gain|Map Scrap|4 x}}
+*{{Gain|Nightmares|1-? CP}}
+*{{ZailingProgress|2}}
+*{{Gain|Time Spent at Zee|1 x|hidden=yes}}`;
+
+const FEARLESS_RAT = `{{Fate
+|Icon = rat.png
+|From Card title = Navigating the Snares
+|ID = 279503
+|Description = It's clinging to a stalagmite!
+|Unlocked with = {{Unlock|Passing the Plate Around}}
+|Locked with = {{Lock|Alms for Eligius|7}}
+|NarrowQuality = Zeefaring
+|NarrowDiff = 12
+}}
+* {{Gain|Word of the Tender Mercy|1 x|cap=1}}
+* {{Gain|Alms for Eligius|1 x}}
+* {{ZailingProgress|2}}
+* {{Gain|Time Spent at Zee|1 x|hidden=yes}}
+
+{{Fate Result
+|Result = failure
+}}`;
+
+const ISLAND_HERE = `{{Action
+|Icon = Drownie.png
+|From Card title = A Blank Space on the Charts
+|ID = 247844
+|Description = An island big enough to be inhabited.
+|LuckChallenge = 50
+|Success title = A deeper song
+|Success description = The song […] No! […]
+|Success summary = You only regain your senses when the island disappears from your sight.}}
+
+*{{Gain|Creeping Fear|message=Terror grips your vessel.|now=1}}
+*{{Loss|Troubled Waters|-5 CP}}
+
+{{Failure
+|Failure title = All gone forever
+|Failure description = The island is gone.}}
+
+*{{Gain|Creeping Fear|now=1|message=Terror grips your vessel.}}
+*{{Loss|Troubled Waters|now=4 - Calm Seas|special message=occurrence}}
+*{{Gain|Nightmares|+3 CP}}
+*{{Loss|Zailing...|60 x}}`;
+
+const PILGRIMAGE_STEAM_ON = `{{Action
+|Icon = generic_unterzee2.png
+|From Storylet title = Bearing Witness to a Pilgrimage
+|ID = 258947
+|Description = You have business to attend to.
+|Success title = Out of sight and mind
+}}
+*{{Gain|Troubled Waters|+4 CP}}
+*{{Gain|Zailing...|({{Use|Zailing Speed}})}}
+*{{Gain|Time Spent at Zee|1 x|hidden=yes}}`;
+
+const wp = (t) => api.zeeWikiParse(t);
+const brief = (e) => [e.tw.short, e.prog.short];
+
+check('the wiki reader takes a challenge, a TW loss with no sign, and full speed off a page',
+  (() => { const e = wp(BLIND_NAVIGATORS); return [e.ch, brief(e.success), e.success.tw.n, brief(e.failure)]; })(),
+  ['Watchful vs Zee Peril', ['-2', 'full speed'], -2, ['0', '½ speed']]);
+
+check('"Success Increase" and "Failure Increase" are effects, not section markers',
+  wp(BLIND_NAVIGATORS).success.other, ['Map Scrap 8 x', 'Nightmares -3 CP']);
+
+check('and it says the page is incomplete when the page says so',
+  wp(BLIND_NAVIGATORS).incomplete, 'Exact menace gain values');
+
+check('a Fate option: its narrow challenge, its gates, and a failure the wiki leaves blank',
+  (() => { const e = wp(FEARLESS_RAT);
+    return [e.fate, e.ch, e.unlock, e.lock, brief(e.success), e.failure]; })(),
+  [true, 'Zeefaring 12', 'Passing the Plate Around', 'Alms for Eligius 7', ['0', '½ speed'], null]);
+
+check('a Luck challenge, and a failure that SETS Troubled Waters and takes progress away',
+  (() => { const e = wp(ISLAND_HERE); return [e.ch, brief(e.success), brief(e.failure)]; })(),
+  ['Luck 50%', ['-5', 'no progress'], ['=4', '-60 progress']]);
+
+check('a level is never given a number to be coloured or ranked by',
+  wp(ISLAND_HERE).failure.tw.n, null);
+
+check('"(Zailing Speed)" as a Zailing... gain is full speed',
+  brief(wp(PILGRIMAGE_STEAM_ON).success), ['+4', 'full speed']);
+
+check('a page that is not an option page is no reading at all',
+  [wp('{{Social Actions\n|Icon = Bat.png\n}}'), wp(''), wp(null)], [null, null, null]);
+
+check('a card page\'s Option list gives each option\'s page and the title the game shows',
+  api.zeeWikiCardOptions(`{{Card
+|Option1 = There's an island here
+|Option2 = Steam on by (Spit of Land){{!}}Steam on by
+|Option3 = Confront it (Unterzee){{!}}Confront it}}`),
+  [{ page: "There's an island here", shown: "There's an island here" },
+   { page: 'Steam on by (Spit of Land)', shown: 'Steam on by' },
+   { page: 'Confront it (Unterzee)', shown: 'Confront it' }]);
+
+(() => {
+  const e = wp(BLIND_NAVIGATORS);
+  e.page = 'Take direction from your Blind Navigators';
+  e.shown = 'Take direction from your Blind Navigators';
+  const s = api.zeeWikiSpec(card('A Navigation Error'), e);
+  check('a wiki badge says it is one, carries the challenge "?", and is never starred',
+    [s.text, s.text.includes(api.ZEE_BEST_MARK)], [api.ZEE_WIKI_MARK + ' TW -2 · full speed?', false]);
+  check('its tooltip names the page it was read from and says nobody checked it by hand',
+    [s.title.includes('“Take direction from your Blind Navigators”'), /not checked by hand/.test(s.title),
+     s.title.includes('Failure: no Troubled Waters, half Zailing Speed')], [true, true, true]);
+})();
+
+// The whole walk, against an opened card on a stub page.
+function heading(cls, text) {
+  const parent = makeEl('div');
+  const el = makeEl('h2');
+  el.className = cls;
+  el.childNodes.push({ nodeType: 3, nodeValue: text });
+  el.textContent = text;
+  parent.appendChild(el);
+  return el;
+}
+const optBadges = (head) => head.parentNode.children
+  .filter((c) => String(c.className).includes(api.ZEE_OPTION_CLASS)).map((c) => c.textContent);
+
+let root = heading('storylet-root__heading', 'Navigating the Snares');
+let branches = ['Slow and steady does it', 'You have places to be', 'Something the table lacks']
+  .map((t) => heading('branch__title', t));
+domQuery = { '.storylet-root__heading': [root], '.branch__title': branches };
+api.zeeCardRatings();
+check('opening a zee card badges each option the table knows',
+  branches.map(optBadges),
+  [[api.ZEE_BEST_MARK + ' TW 0 · ½ speed'], ['TW +6 · full speed?'], []]);
+check('and the opened card keeps its own badge',
+  root.parentNode.children.filter((c) => String(c.className).includes(api.ZEE_CLASS + ' ')
+    || String(c.className).endsWith(api.ZEE_CLASS)).map((c) => c.textContent),
+  ['TW 0 · ½ speed']);
+
+api.zeeCardRatings();
+check('re-running the scan does not stack option badges', branches.map((b) => optBadges(b).length), [1, 1, 0]);
+
+// React recycles the branch nodes for the next storylet.
+root.childNodes[0].nodeValue = 'A Stroll around the Hill';
+api.zeeCardRatings();
+check('a storylet that is not a zee card clears the option badges', branches.map((b) => optBadges(b).length), [0, 0, 0]);
+
+root.childNodes[0].nodeValue = 'The Sound of Wings';
+branches[0].childNodes[0].nodeValue = 'Full power to the engines!';
+area = 'Veilgarden';
+api.zeeCardRatings();
+check('the strictZee card\'s options wait for a zee greeting, like the card does',
+  optBadges(branches[0]).length, 0);
+area = 'The Sea of Voices';
+api.zeeCardRatings();
+check('and are badged once the greeting says zee', optBadges(branches[0]).length, 1);
+
+// A title the table lacks goes to the wiki: the card's page for its Option
+// list, then ONLY the pages of options the table does not carry.
+wikiPages = {
+  'A Navigation Error': `{{Card
+|location = Zailing the Unterzee
+|Option1 = Correct your course
+|Option2 = Take direction from your Blind Navigators}}`,
+  'Take direction from your Blind Navigators': BLIND_NAVIGATORS,
+};
+wikiAsked.length = 0;
+root.childNodes[0].nodeValue = 'A Navigation Error';
+branches = ['Correct your course', 'Take direction from your Blind Navigators']
+  .map((t) => heading('branch__title', t));
+domQuery = { '.storylet-root__heading': [root], '.branch__title': branches };
+api.zeeCardRatings();
+check('while the wiki is being read, the unknown option has no badge yet',
+  optBadges(branches[1]), []);
+await settle();
+api.zeeCardRatings();
+check('once it lands, the unknown option is badged from its page',
+  optBadges(branches[1]), [api.ZEE_WIKI_MARK + ' TW -2 · full speed?']);
+check('and the table option keeps its table badge',
+  optBadges(branches[0]).length === 1 && !optBadges(branches[0])[0].startsWith(api.ZEE_WIKI_MARK), true);
+check('only the card page and the missing option\'s page were asked for',
+  wikiAsked, [['A Navigation Error'], ['Take direction from your Blind Navigators']]);
+api.zeeCardRatings();
+await settle();
+check('and nothing is fetched again for the same card', wikiAsked.length, 2);
+
+// A disambiguation page: only the embedded page whose card is AT ZEE counts.
+wikiPages = {
+  'A Khaganian Patrol Vessel': `{{Disambig}}
+{{Embed|A Khaganian Patrol Vessel (Elsewhere){{!}}A Khaganian Patrol Vessel|(a made-up namesake elsewhere)}}
+{{Embed|A Khaganian Patrol Vessel (Corsair){{!}}A Khaganian Patrol Vessel|(With {{IL|Corsair's Colours}} 2)}}`,
+  'A Khaganian Patrol Vessel (Elsewhere)': `{{Card
+|location = Cave of the Nadir
+|Option1 = Hide}}`,
+  'A Khaganian Patrol Vessel (Corsair)': `{{Card
+|location = Zailing the Unterzee
+|Option1 = Man the cannons!
+|Option2 = Hide in the hold}}`,
+  'Hide': PILGRIMAGE_STEAM_ON,
+  'Hide in the hold': PILGRIMAGE_STEAM_ON,
+};
+wikiAsked.length = 0;
+root.childNodes[0].nodeValue = 'A Khaganian Patrol Vessel';
+branches = ['Hide', 'Hide in the hold'].map((t) => heading('branch__title', t));
+domQuery = { '.storylet-root__heading': [root], '.branch__title': branches };
+api.zeeCardRatings();
+await settle();
+api.zeeCardRatings();
+check('a disambiguation page is followed to its zee card only, never to a namesake elsewhere',
+  [optBadges(branches[0]), optBadges(branches[1])],
+  [[], [api.ZEE_WIKI_MARK + ' TW +4 · full speed']]);
+check('and the namesake\'s option page is never even fetched',
+  wikiAsked.flat().includes('Hide'), false);
+
+// A wiki that cannot be reached leaves the option unbadged, and says nothing.
+const realFetch = globalThis.fetch;
+globalThis.fetch = () => Promise.reject(new Error('offline'));
+root.childNodes[0].nodeValue = 'Rats in the hold';
+branches = ['Bear witness to a midnight ritual'].map((t) => heading('branch__title', t));
+domQuery = { '.storylet-root__heading': [root], '.branch__title': branches };
+api.zeeCardRatings();
+await settle();
+api.zeeCardRatings();
+check('an unreachable wiki leaves the option unbadged', optBadges(branches[0]), []);
+check('because the read failed, not because it was never tried',
+  api.zeeWikiOption(card('Rats in the hold'), 'Bear witness to a midnight ritual').state, 'failed');
+globalThis.fetch = realFetch;
+domQuery = {};
 
 // --- the panel -------------------------------------------------------------
 // The panel is a few hundred hand-built nodes; building it here is the only

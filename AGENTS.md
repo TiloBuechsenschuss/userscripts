@@ -1294,6 +1294,31 @@ navigation. Two consequences:
   full progress anyway, so the number that actually separates the cards in your hand is what they
   cost, and the thing that ends a voyage badly is Troubled Waters reaching 8. When the cheapest
   line is the slow one the badge admits it with a speed mark rather than hiding it.
+  **The badge text** (since 1.89) is `zeeLineText`: `TW <change> · <progress>` plus `?` for a
+  challenge, e.g. `TW -2 · full speed`, `TW 0 · ½ speed?`, `TW +5 · +80 flat?`. Progress is a
+  *share* of Zailing Speed, in words, because the script does not read your ship; a level the wiki
+  records ("set to 5") prints as `=5` and a bare direction as an arrow, never as a number.
+  **Option badges** (1.89): with a zee card open, every `.branch__title` whose title is one of that
+  card's options gets the same text (class `fl-ux-zee-option`, flag `flUxZeeOption`, drawn by
+  `zee-card-ratings` itself, so its switch covers both), ★ on `bestZeeLine`'s choice. Gated and
+  piracy options are badged but never starred. Titles match through `carouselMatcher`; every
+  option title in `ZEE_CARDS` was checked against its card page's Option list on 2026-11-24.
+  Passing a Lightship's two "Stop and exchange news" options share a title with different
+  numbers, so that title gets no badge -- `zeeOptionFor` refuses an ambiguous match.
+  **Options the table lacks are read off the wiki at runtime** (1.89, `zeeWikiLoad` /
+  `zeeWikiParse`). A branch title on an open zee card that matches *no* table option makes the
+  browser fetch the card's page (following a `{{Disambig}}` only to embedded pages whose
+  `location` is the Unterzee), take its `OptionN` list, and fetch the pages of just the options
+  the table does not carry, through the same `api.php?...&origin=*` route as `resolveWikiLinks`.
+  Each page is parsed for its challenge, gates, and per-section (success / rare / alternative /
+  failure) Troubled Waters and progress; the result is cached per card in `sessionStorage`
+  (`fl-zee-wiki-options`) and badged `wiki TW … · …`, never starred, its tooltip naming the page
+  and saying it was not checked by hand. The parser was run over all 236 zee option pages on
+  2026-11-24: of the 228 comparisons with `ZEE_CARDS` 223 agree; the rest are the Lightship
+  shared title (an artefact of comparing both rows), the diving-bell (wiki: progress wiped; table:
+  none), two retired options, and **A Giant Angler Crab's "Pursue it to its spawning grounds"**,
+  whose page lists no Troubled Waters on a success where the table has +2 -- left as it is, to be
+  settled in-game. The table always wins where it has the option; the wiki only fills gaps.
   Inside that rule sits one exception, and it is there to avoid *understating* a cost, never to
   invent one: a **Luck** option is ranked on its expected value, because that is the only case
   where the wiki gives both outcomes and the odds. A Spit of Land's island stop buys a point on a
@@ -3695,6 +3720,16 @@ Confirmed live by the author:
   ("Welcome to The Sea of Voices"), the ocean, or something else entirely; `inZee()` is written
   to fail closed on the one card that leans on it and open on everything else. Move this up on a
   report, and say what the greeting actually said.
+  The **option badges** (1.89) assume the opened card's options render as `.branch__title`, as
+  every other storylet's do -- not captured on a zee card. Report: open a zee card and say whether
+  each option shows a `TW … · …` badge with one ★, and name any option that shows none (expected
+  only for Passing a Lightship's "Stop and exchange news" and the options the table does not
+  carry and the wiki has no page for). Also say whether Spiralling Into Sorrow's option really
+  reads "Dive with the (diving-bell)": if the game fills that in, it goes unbadged.
+  The **wiki-read option badges** have never run against the live wiki from the game: report
+  whether a rat-crew or Blind Navigators option shows a `wiki …` badge a moment after the card
+  opens, and, if you take one, whether its Troubled Waters and progress matched. Also report
+  what Troubled Waters "Pursue it to its spawning grounds" (A Giant Angler Crab) gave on a success.
   The **ports table** (added 2026-09-09) is transcription too, and it has one open question of its
   own: the guide marks **Port Cecil** and **Tanah-Chook** unsafe while the hidden sort key on both
   cells says safe, and the table follows the visible cross. Dock at either with Troubled Waters
@@ -4668,6 +4703,14 @@ Current tests:
   gated and piracy lines never quoted, and a card with nothing else admitting `gated` rather than
   going quiet. Then the badge marks, the two prefix-matched bounty cards, the `strictZee` gate in
   all three greeting states, and redraw-on-reuse (React hands the next card the same container).
+  The option badges: one ★ per card and it is `bestZeeLine`'s, the starred text equals the card
+  badge's, gated lines never starred, the shared-title refusal (and that Lightship is the only
+  card with one), and the whole `zeeCardRatings` walk against an opened card on a stub page whose
+  elements implement `after()`. The wiki reader: `zeeWikiParse` on real pages' wikitext (a
+  challenge, a sign-less Loss, a Fate option with a blank failure, a Luck flip whose failure sets
+  a level and takes progress, "(Zailing Speed)" as full speed), and the fetch round trip against
+  a stubbed `fetch` -- only the missing pages asked for, once; a disambiguation followed only to
+  its zee card; and an unreachable wiki leaving the option silent.
   It also pins `ZEE_PORTS`: the nine safe docks as a list (so a tenth cannot appear by accident),
   the three-valued `safe` field with one row of each kind, the two Fate-locked destinations, the
   recorded Port Cecil / Tanah-Chook conflict, that every port names a region `ZEE_REGIONS` knows,
