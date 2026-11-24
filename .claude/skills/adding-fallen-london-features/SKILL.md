@@ -61,8 +61,8 @@ tab itself. Write its bank function (scan in, `saveCache`, return whether it kep
 register it right below with `wantTab('myself' | 'possessions' | 'agents', bankX)`. The tab reader
 (AGENTS.md, "The tab reader") then hands it every reading, from the tab on screen, a hidden frame or
 the other script's frame, and one refresh serves every feature. A panel that shows such a figure
-calls `const busy = autoRefreshTabs(ctx, stale)` in its render (that also gets it redrawn when a tab
-goes by) and `refreshTabsNow()` from its Refresh button. A badge that needs a fresh reading calls
+calls `const busy = autoRefreshTabs(ctx, stale, ['myself', ...])` in its render, naming the tabs it
+shows (that also gets it redrawn when a tab goes by, and `busy` is true only while one of those is loading) and `refreshTabsNow()` from its Refresh button. A badge that needs a fresh reading calls
 `refreshTabs(false)`; the reader throttles it.
 
 ## Checklist

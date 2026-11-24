@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.87
+// @version      1.88
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -701,7 +701,9 @@
  *   each feature registers what it wants off which tab, one Refresh (or one automatic refresh) loads each tab once and
  *   hands it to every feature, so every panel is as fresh as the one whose Refresh was pressed, and walking onto Myself
  *   or Possessions with a panel open redraws that panel at once. The Agents tab is loaded automatically at most once an
- *   hour, and on every Refresh press. UX Enhancers' Factions panel shares the same frames.
+ *   hour, and on every Refresh press. UX Enhancers' Factions panel shares the same frames. Each tab shows up as it lands,
+ *   and a panel stops saying "Refreshing…" once the tabs it shows are in; walking onto a tab the refresh is loading
+ *   stops that load and reads the tab on screen instead.
  *     Built as a feature registry so further advice can be added as entries.
  */
 
@@ -1849,7 +1851,9 @@
 
   const REFRESH_TIMEOUT_MS = 20000;
 
-  function loadInFrame(path, extract) {
+  // `control`, if given, gets a `stop()` that gives up at once: the frame is
+  // removed and the promise answers null, as for a timeout.
+  function loadInFrame(path, extract, control) {
     return new Promise(function (resolve) {
       let frame;
       let poll = null;
@@ -1863,6 +1867,7 @@
         if (frame && frame.parentNode) frame.remove();
         resolve(value || null);
       };
+      if (control) control.stop = function () { finish(null); };
       try {
         frame = h('iframe', {
           src: path,
@@ -2162,14 +2167,25 @@
   //    frame, or by walking onto Myself or Possessions with a panel open --
   //    the open panel is redrawn and the badges rescanned (`tabsChanged`).
   //
-  // A panel takes part through `autoRefreshTabs(ctx, stale)` in its render,
-  // which is also what registers it to be redrawn, and `refreshTabsNow()` on
-  // its Refresh button.
+  // A panel takes part through `autoRefreshTabs(ctx, stale, tabs)` in its
+  // render, which is also what registers it to be redrawn and says whether the
+  // tabs IT shows are still on their way, and `refreshTabsNow()` on its
+  // Refresh button.
+  //
+  // A refresh is a QUEUE of tabs, loaded one at a time. Each tab is banked and
+  // the panel redrawn the moment it lands, so a slow tab (Agents, last) never
+  // holds back one that is already in. And walking onto a tab that is queued
+  // or loading takes it out: its frame is stopped, and the tab on screen is
+  // read instead (`captureTabs`).
 
   const TABS_KEY = 'fl-ux-tabs';
   const tabSources = [];
   let tabsRefreshing = null;
   let tabsQueued = false;
+  // The refresh in progress: the tabs still to load, and the one loading now
+  // with the `stop` loadInFrame gave it.
+  let tabQueue = [];
+  let tabLoading = null;
   let tabPanelCtx = null;
 
   function tabSource(id, spec) {
@@ -2265,15 +2281,36 @@
     });
   }
 
+  // Whether any of these tabs (ids; all of them when none are given) is still
+  // waiting in the refresh queue or loading.
+  function tabPending(ids) {
+    const mine = function (src) { return !ids || ids.indexOf(src.id) !== -1; };
+    return (!!tabLoading && mine(tabLoading.src)) || tabQueue.some(mine);
+  }
+
   // Run on every scan. Banks a tab when it comes on screen and again whenever
   // what it shows changes, and redraws the open panel then -- and when the tab
-  // goes, since what the panel called live is now a banked reading. Cheap off
-  // the tabs: one failed query per source.
+  // goes, since what the panel called live is now a banked reading. A tab on
+  // screen is also taken out of the refresh: no frame for it is started, and
+  // one already loading is stopped. Cheap off the tabs: one failed query per
+  // source.
   function captureTabs() {
     let changed = false;
     for (const src of tabSources) {
       if (!src.wants.length) continue;
       const sig = src.sig(document);
+      if (sig != null) {
+        const queued = tabQueue.indexOf(src);
+        if (queued !== -1) {
+          tabQueue.splice(queued, 1);
+          changed = true;
+        }
+        if (tabLoading && tabLoading.src === src && !tabLoading.stopped) {
+          tabLoading.stopped = true;
+          if (tabLoading.stop) tabLoading.stop();
+          changed = true;
+        }
+      }
       if (sig === src.lastSig) continue;
       const was = src.lastSig;
       src.lastSig = sig;
@@ -2287,29 +2324,52 @@
   }
 
   // One refresh for every feature. Each wanted tab is read off the page if it
-  // is on screen, else loaded in a hidden frame -- every one of them when
-  // `force` (a Refresh button), only the due ones otherwise. Sequential, not
-  // parallel: two copies of the SPA booting at once is a lot of work for the
-  // browser, and nothing here is urgent. The panel is redrawn as each tab
-  // lands and once more when the last has.
+  // is on screen, else queued to load in a hidden frame -- every one of them
+  // when `force` (a Refresh button), only the due ones otherwise. Called while
+  // a refresh is running, it adds what is not already queued or loading to the
+  // same queue, and answers the same promise. Sequential, not parallel: two
+  // copies of the SPA booting at once is a lot of work for the browser, and
+  // nothing here is urgent. The panel is redrawn as each tab lands and once
+  // more when the last has.
   function refreshTabs(force) {
+    let added = false;
+    for (const src of tabSources) {
+      if (!src.wants.length) continue;
+      const here = src.sig(document) != null ? src.read(document) : null;
+      if (here) {
+        if (bankTab(src, here)) tabsChanged();
+        continue;
+      }
+      if (tabQueue.indexOf(src) !== -1 || (tabLoading && tabLoading.src === src)) continue;
+      if (!force && !tabDue(src)) continue;
+      tabQueue.push(src);
+      added = true;
+    }
     if (tabsRefreshing) return tabsRefreshing;
+    if (!added) return Promise.resolve(false);
+    return runTabQueue();
+  }
+
+  // Works through tabQueue until it is empty. A tab queued after the last one
+  // was taken but before this run had finished is picked up by a run of its
+  // own, which the first run's promise waits for.
+  function runTabQueue() {
     tabsRefreshing = (async function () {
       let changed = false;
-      for (const src of tabSources) {
-        if (!src.wants.length) continue;
-        const here = src.sig(document) != null ? src.read(document) : null;
-        if (here) {
-          if (bankTab(src, here)) changed = true;
-          continue;
-        }
-        if (!force && !tabDue(src)) continue;
+      while (tabQueue.length) {
+        const src = tabQueue.shift();
+        // Walked onto since it was queued: captureTabs has banked it already.
+        if (src.sig(document) != null) continue;
         noteTab(src.id, false); // taken: the other script need not load it too
+        const job = { src: src, stop: null, stopped: false };
+        tabLoading = job;
         const got = await loadInFrame(src.path, function (doc) {
           const ready = src.loaded(doc);
           if (ready) shareFrame(src.path, doc);
           return ready;
-        });
+        }, job);
+        tabLoading = null;
+        if (job.stopped) continue; // the tab on screen was read instead
         if (got && bankTab(src, got)) changed = true;
         if (!got) tabFailed(src);
         tabsChanged();
@@ -2317,11 +2377,14 @@
       return changed;
     })().catch(function (e) {
       console.error(SCRIPT_ID + ': background refresh failed.', e);
+      tabQueue = [];
       return false;
     }).then(function (v) {
       tabsRefreshing = null;
+      tabLoading = null;
       tabsChanged();
-      return v;
+      if (!tabQueue.length) return v;
+      return runTabQueue().then(function (w) { return v || w; });
     });
     return tabsRefreshing;
   }
@@ -2336,14 +2399,17 @@
 
   // Called from a panel's render. `stale` is the panel's own judgement of
   // what it shows; with auto-refresh on that starts a refresh of whatever is
-  // due. True while a refresh is under way, so the panel can say so.
-  function autoRefreshTabs(ctx, stale) {
+  // due. `tabs` are the ids of the tabs this panel shows (all, when left out):
+  // the answer is true only while one of THOSE is still on its way, so a panel
+  // that reads Myself stops saying "refreshing" as soon as Myself is in, while
+  // the Agents tab is still loading for somebody else.
+  function autoRefreshTabs(ctx, stale, tabs) {
     watchTabs(ctx);
-    if (ctx && stale && !tabsRefreshing && autoRefreshEnabled()
-      && tabSources.some(function (s) { return s.wants.length && tabDue(s); })) {
+    if (ctx && stale && autoRefreshEnabled()
+      && tabSources.some(function (s) { return s.wants.length && !tabPending([s.id]) && tabDue(s); })) {
       refreshTabs(false);
     }
-    return !!tabsRefreshing;
+    return tabPending(tabs);
   }
 
   // A page the other script loaded in a hidden frame, banked as if this one
@@ -37341,7 +37407,7 @@
     // and redraw when it lands.
     const purse = pcPurse();
     const cashouts = pcCashoutAll(purse);
-    let busy = autoRefreshTabs(ctx, (!purse || purse.stale));
+    let busy = autoRefreshTabs(ctx, (!purse || purse.stale), ['myself']);
 
     const section = function (title, children) {
       return h('div', { css: 'margin-top:14px;' }, [
@@ -38113,7 +38179,7 @@
   function renderLabPanel(ctx) {
     const state = labState();
     const q = state.q;
-    let busy = autoRefreshTabs(ctx, (state.stale || state.itemsStale));
+    let busy = autoRefreshTabs(ctx, (state.stale || state.itemsStale), ['myself', 'possessions']);
 
     const section = function (title, children) {
       return h('div', { css: 'margin-top:14px;' }, [
@@ -38961,7 +39027,7 @@
     const hand = fotzHandRows(at.depth, at.source, floor, fotzHoldings());
 
     const lookDeeper = wantsDepthRefresh();
-    let busy = autoRefreshTabs(ctx, !stateIsFresh(state) || lookDeeper);
+    let busy = autoRefreshTabs(ctx, !stateIsFresh(state) || lookDeeper, ['myself', 'possessions']);
     if (busy && lookDeeper) depthRefreshAt = Date.now();
 
     const section = function (title, children) {
@@ -43241,7 +43307,8 @@
     const agents = agentsState();
     const routes = hmConfessionRoutes(season);
     const stale = function (r) { return !r || (!r.live && Date.now() - r.at > FRESH_MS); };
-    let busy = autoRefreshTabs(ctx, (stale(held) || stale(spirit) || !agents || agents.stale));
+    let busy = autoRefreshTabs(ctx, (stale(held) || stale(spirit) || !agents || agents.stale),
+      ['myself', 'possessions', 'agents']);
     const count = function (name) { return held ? String(held.count(name)) : '–'; };
     const yearNote = season.stale
       ? 'No entry for ' + (now || new Date()).getFullYear() + ' yet: everything below is ' + season.year
@@ -46220,7 +46287,7 @@
 
   function renderCtdPanel(ctx) {
     const st = ctdState();
-    let busy = autoRefreshTabs(ctx, (!st || st.ctdStale || st.plcStale));
+    let busy = autoRefreshTabs(ctx, (!st || st.ctdStale || st.plcStale), ['myself', 'possessions']);
 
     const section = function (title, children) {
       return h('div', { css: 'margin-top:14px;' }, [
@@ -46876,7 +46943,7 @@
     const st = readPhfState();
     const holdings = fotzHoldings();
     const stale = !st || (!st.live && Date.now() - st.at > FRESH_MS);
-    let busy = autoRefreshTabs(ctx, stale);
+    let busy = autoRefreshTabs(ctx, stale, ['myself', 'possessions']);
 
     const section = function (title, children) {
       return h('div', { css: 'margin-top:14px;' }, [
@@ -47368,7 +47435,7 @@
   function renderWwPanel(ctx) {
     const st = readWwState();
     const stale = !st || (!st.live && Date.now() - st.at > FRESH_MS);
-    let busy = autoRefreshTabs(ctx, stale);
+    let busy = autoRefreshTabs(ctx, stale, ['myself']);
 
     const dim = function (text) { return h('div', { css: 'color:' + UI.dim + ';font-size:11px;' }, [text]); };
     const section = function (title, children) {
