@@ -1026,8 +1026,19 @@ navigation. Two consequences:
     Agents (`AGENTS_FRESH_MS` / `AGENTS_RETRY_MS`: otherwise every automatic refresh would boot a
     third SPA for one panel's question). The read and tried times are in `fl-ux-tabs`, shared by both
     scripts, and a load marks its tab tried **before** it starts, so the other script does not load the
-    same tab at the same moment. A panel takes part with `autoRefreshTabs(ctx, stale)` in its render —
-    which is also what registers it as the panel to redraw (`watchTabs`); `tabsChanged` defers the
+    same tab at the same moment. A refresh is a **queue** (`tabQueue`, `tabLoading`; Choice Helper 1.88,
+    UX Enhancers 3.12): each tab is banked and the panel redrawn the moment it lands, a Refresh pressed
+    mid-run adds what is not already queued or loading to the same run, and **walking onto a tab the
+    refresh has queued or is loading takes it out** — `captureTabs` drops it from the queue, or calls the
+    `stop()` that `loadInFrame`'s new `control` argument hands back, and the run goes straight on to
+    the next tab; a stopped frame is not a failed read. A panel takes part with
+    `autoRefreshTabs(ctx, stale, tabs)` in its render — which is also what registers it as the panel to
+    redraw (`watchTabs`) — and `tabs` names what it shows: its answer (`tabPending`) is true only while
+    one of those is still on its way, so a panel that reads Myself stops saying "Refreshing…" and
+    offers Refresh again as soon as Myself is in, while the Agents tab is still loading for
+    Hallowmas. (Reported after 1.87: the Myself figures were already banked as they landed, but every
+    panel kept saying "Refreshing…", with its button disabled, until Agents had finished or timed out.)
+    `tabsChanged` defers the
     redraw and a `schedule()` to a microtask, so a capture mid-scan does not rebuild the panel under
     it. A new feature that reads a tab adds one `wantTab` call, and nothing else: no list to extend.
     `tests/fl-tab-reading.test.mjs` pins it. A redraw rebuilds the panel body, so a filter typed into
@@ -3669,7 +3680,10 @@ Confirmed live by the author:
   (3) a Refresh press now loads Agents as a third hidden frame, so "Refreshing…" lasts longer than it
   did — up to 20 s more on a character whose Agents tab never draws; say if that is too slow;
   (4) typing in the game's Myself search box with a panel open redraws the panel per keystroke —
-  say if that is visibly janky.
+  say if that is visibly janky. And since 1.88 / 3.12: (5) clicking Myself or Possessions while a
+  background refresh is loading that tab should stop it (no second boot) and show the tab's figures
+  as live; (6) after pressing Refresh, a panel that reads only Myself (Whisker-Ways, Port Carnelian)
+  should stop saying "Refreshing…" once Myself is in, while Hallowmas keeps saying it until Agents is.
 - The Factions panel's **done block** (UX Enhancers 3.10): that a faction at Renown 40 with all
   three Renown items held sorts below the rest under the "✓ Done" divider, faded, and that the
   fade still leaves it readable on the panel's dark background. Report a done faction listed
@@ -5271,7 +5285,12 @@ Current tests:
   loads everything; walking onto Myself or Possessions banks it and redraws the open panel once (again
   on a search-box change and on walking off), with no frame booted; every panel that shows a tab
   figure is redrawn that way; and across the two scripts a frame Choice Helper loads is banked and
-  redrawn by UX Enhancers' Factions panel, and is not due again for the other.
+  redrawn by UX Enhancers' Factions panel, and is not due again for the other. Since 1.88: with a slow
+  Agents tab, Myself and Possessions are banked and the panel redrawn first, a Myself-only panel (built
+  for real, its button read) offers Refresh while Hallowmas still says Refreshing…, and a Refresh pressed
+  meanwhile is queued into the same run; walking onto Myself while its frame loads removes the frame at
+  once and the run moves on without waiting out the timeout; and a queued tab walked onto is never
+  loaded.
 - `tests/fl-shared-helpers.test.mjs` — asserts what `ux-enhancers.js` and
   `choice-helper.js` share now that they are two files, which no other suite can see because
   every other suite loads one of the two. First the **copies**: every top-level declaration the

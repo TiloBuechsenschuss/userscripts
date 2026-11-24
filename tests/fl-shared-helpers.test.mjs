@@ -101,6 +101,7 @@ const SHARED = [
   'TABS_KEY', 'tabSources', 'tabsRefreshing', 'tabsQueued', 'tabPanelCtx', 'tabSource', 'tabById', 'wantTab',
   'tabTimes', 'noteTab', 'tabDue', 'bankTab', 'tabFailed', 'watchTabs', 'tabsChanged', 'captureTabs',
   'refreshTabs', 'refreshTabsNow', 'autoRefreshTabs', 'bankSharedFrame', 'myselfSig', 'possessionsSig',
+  'tabQueue', 'tabLoading', 'tabPending', 'runTabQueue',
   'FL_API', 'flToken', 'flFail', 'flApi',
   'PENDING_KEY', 'writePending', 'clearPending', 'findItemNode', 'clickItem', 'openItem',
 ];

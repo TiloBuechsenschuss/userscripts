@@ -16,6 +16,10 @@
 //    redraw, and the Agents tab (one panel's) is not booted on every refresh.
 //  - The two scripts share the work: a frame either loads is banked by both,
 //    and a tab one has just taken is not due for the other.
+//  - Each tab shows up as it lands: a slow Agents tab does not keep a panel
+//    that reads Myself saying "refreshing" (reported after 1.87).
+//  - Walking onto a tab the refresh is loading stops that frame, and one it
+//    has queued is not loaded at all (reported after 1.87).
 //
 //   node tests/fl-tab-reading.test.mjs
 
@@ -81,7 +85,7 @@ function makeEl(tag) {
     get textContent() { return this._text + this.children.map((c) => c.textContent || '').join(''); },
     set textContent(v) { this._text = String(v); this.children = []; },
     classList: { contains: () => false },
-    appendChild(c) { c.parentNode = this; if (c.nodeType === 1) this.children.push(c); return c; },
+    appendChild(c) { c.parentNode = this; if (c.nodeType === 1) this.children.push(c); else this._text += c.nodeValue; return c; },
     insertBefore(c) { return this.appendChild(c); },
     remove() {
       if (this.parentNode) this.parentNode.children = this.parentNode.children.filter((n) => n !== this);
@@ -136,9 +140,10 @@ function makePage() {
   return page;
 }
 
-// Real timers, but the frame's 20-second give-up fires at once, so a route that
-// never loads fails in a test-sized moment.
-const quickTimeout = (fn, ms) => setTimeout(fn, ms >= 1000 ? 5 : ms);
+// Real timers, but the frame's 20-second give-up fires after `page.giveUp` ms
+// (5 unless a test wants a slow tab), so a route that never loads fails in a
+// test-sized moment.
+const quickTimeout = (page) => (fn, ms) => setTimeout(fn, ms >= 1000 ? page.giveUp || 5 : ms);
 
 function load(page, file, names) {
   const wrapped = source(file)
@@ -151,10 +156,10 @@ function load(page, file, names) {
     wrapped + '\nreturn globalThis.__flTabs;')(
     page.doc, class { observe() {} }, () => {}, () => ({ position: 'relative' }), page.console,
     URLSearchParams, page.storage, page.storage, { pathname: '/' }, class {}, CustomEvent,
-    page.win, quickTimeout, (fn) => setInterval(fn, 1), clearTimeout, clearInterval);
+    page.win, quickTimeout(page), (fn) => setInterval(fn, 1), clearTimeout, clearInterval);
 }
 
-const ENGINE = ['tabSources', 'refreshTabs', 'refreshTabsNow', 'autoRefreshTabs', 'captureTabs', 'tabDue',
+const ENGINE = ['tabSources', 'refreshTabs', 'refreshTabsNow', 'autoRefreshTabs', 'captureTabs', 'tabDue', 'tabPending',
   'tabById', 'TABS_KEY', 'FEATURES'];
 const CHOICE_NAMES = ENGINE.concat(['PANELS', 'PC_CACHE_KEY', 'FOTZ_CACHE_KEY', 'COUNTS_KEY', 'LAB_CACHE_KEY',
   'CTD_CACHE_KEY', 'PHF_CACHE_KEY', 'WW_CACHE_KEY', 'HM_CACHE_KEY', 'AGENTS_KEY', 'readPcState', 'readHmSpirit',
@@ -162,6 +167,15 @@ const CHOICE_NAMES = ENGINE.concat(['PANELS', 'PC_CACHE_KEY', 'FOTZ_CACHE_KEY', 
 const UX_NAMES = ENGINE.concat(['CACHE_KEY', 'ITEMS_KEY', 'renderFactionsPanel']);
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+// The hidden frames in the page right now, by route.
+const framesUp = (page) => page.doc.body.children.filter((c) => c.tagName === 'IFRAME').map((c) => c.src);
+// Every button in a built panel, as [label, disabled].
+function buttons(el, out = []) {
+  if (el && el.tagName === 'BUTTON') out.push([el.textContent, !!el.disabled]);
+  for (const c of (el && el.children) || []) buttons(c, out);
+  return out;
+}
 const fakeCtx = () => {
   const ctx = { draws: 0, rerender() { this.draws++; } };
   return ctx;
@@ -212,6 +226,84 @@ const cached = (page, key) => (page.store.has(key) ? JSON.parse(page.store.get(k
   await flush();
   check('a Refresh button loads every tab regardless', page.booted, ['/myself', '/possessions', '/agents']);
   check('...and nothing threw anywhere', page.errors, []);
+}
+
+// --- each tab as it lands -----------------------------------------------------------
+
+{
+  const page = makePage();
+  page.giveUp = 150; // the Agents tab takes its time and never draws
+  page.frames['/myself'] = MYSELF;
+  page.frames['/possessions'] = POSSESSIONS;
+  const choice = load(page, CHOICE, CHOICE_NAMES);
+  const ctx = fakeCtx();
+  choice.renderWwPanel(ctx);
+  const done = choice.refreshTabsNow();
+  await wait(40);
+  check('while the Agents tab is still loading, Myself and Possessions are already banked',
+    [framesUp(page), cached(page, choice.WW_CACHE_KEY) != null, cached(page, choice.COUNTS_KEY) != null],
+    [['/agents'], true, true]);
+  check('...and the open panel has been redrawn with them', ctx.draws >= 2, true);
+  check('...a panel reading Myself is no longer refreshing; one reading Agents still is',
+    [choice.tabPending(['myself']), choice.tabPending(['myself', 'possessions']), choice.tabPending(['agents']),
+      choice.tabPending()], [false, false, true, true]);
+  check('...so the Whisker-Ways panel offers Refresh again, and Hallowmas still says Refreshing…',
+    [buttons(choice.renderWwPanel(fakeCtx())), buttons(choice.renderHallowmasPanel(fakeCtx())).filter((b) => /Refresh/.test(b[0]))],
+    [[['Refresh', false]], [['Refreshing…', true]]]);
+
+  page.booted.length = 0;
+  choice.refreshTabsNow();
+  check('a Refresh pressed meanwhile queues what is already in, behind the tab still loading',
+    [choice.tabPending(['myself']), page.booted], [true, []]);
+  await done;
+  await flush();
+  check('...and the same run loads it after Agents, then stops',
+    [page.booted, choice.tabPending()], [['/myself', '/possessions'], false]);
+  check('...with nothing thrown', page.errors, []);
+}
+
+// --- walking onto a tab the refresh is loading --------------------------------------
+
+{
+  const page = makePage();
+  page.giveUp = 400; // Myself never draws in its frame
+  page.frames['/possessions'] = POSSESSIONS;
+  page.frames['/agents'] = BLANK;
+  const choice = load(page, CHOICE, CHOICE_NAMES);
+  const ctx = fakeCtx();
+  choice.autoRefreshTabs(ctx, false);
+  const started = Date.now();
+  const done = choice.refreshTabsNow();
+  await wait(20);
+  check('the refresh is loading Myself', framesUp(page), ['/myself']);
+
+  page.screen = MYSELF;
+  choice.captureTabs();
+  check('walking onto Myself stops its frame on the spot', framesUp(page).includes('/myself'), false);
+  await flush();
+  check('...banks the tab on screen instead, and redraws the panel',
+    [cached(page, choice.PC_CACHE_KEY).values['Striped Delights'], ctx.draws >= 1], [40, true]);
+  await wait(30);
+  check('...and the refresh goes straight on to the next tab rather than waiting out the frame',
+    [page.booted.slice(0, 2), Date.now() - started < 300], [['/myself', '/possessions'], true]);
+  await done;
+  check('...the stopped frame is not reported as a failed read', page.errors, []);
+}
+
+{
+  const page = makePage();
+  page.giveUp = 60; // Myself never draws in its frame
+  page.frames['/possessions'] = POSSESSIONS;
+  page.frames['/agents'] = BLANK;
+  const choice = load(page, CHOICE, CHOICE_NAMES);
+  const done = choice.refreshTabsNow();
+  await wait(10);
+  page.screen = POSSESSIONS;
+  choice.captureTabs();
+  check('walking onto Possessions while it is still queued takes it out of the queue',
+    [choice.tabPending(['possessions']), cached(page, choice.COUNTS_KEY).held.length], [false, 26]);
+  await done;
+  check('...so it is never loaded in a frame', page.booted, ['/myself', '/agents']);
 }
 
 // --- walking onto a tab with a panel open -------------------------------------------
