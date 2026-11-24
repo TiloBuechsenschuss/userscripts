@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.88
+// @version      1.89
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -30,8 +30,11 @@
  *
  * (2) While zailing the Unterzee every opportunity card gets a badge showing what the best line you
  *     can take with nothing special in hand costs you in Troubled Waters, in change points, and
- *     whether it makes full progress, half, or none -- with a tooltip carrying every option on the
- *     card: its challenge, what it is gated on, what it gives, and what a failure costs.
+ *     the progress it makes as a share of your Zailing Speed ("TW -2 · full speed", "TW 0 · ½
+ *     speed?") -- with a tooltip carrying every option on the card: its challenge, what it is gated
+ *     on, what it gives, and what a failure costs. Open the card and each option gets a badge of
+ *     the same kind, the recommended one starred; an option the script's own table lacks is read
+ *     off its wiki page in the browser and badged "wiki …".
  *     Black (urgent) cards are marked as the blockages they are.
  *     Its panel, Zailing, holds the numbers behind a voyage: how much Zailing... each route needs
  *     and roughly what that costs in actions per ship, the Zee Peril of every region, what Troubled
@@ -3945,8 +3948,48 @@
     return '#8a3b3b';
   }
 
-  const ZEE_SPEED_MARK = { 0.5: '½', 0.25: '¼', 0: '·' };
   const ZEE_GATED_MARK = '▾';
+  // On an option badge: this is the line the card's own badge speaks for.
+  const ZEE_BEST_MARK = '★';
+
+  // What a line does, in the few characters a badge has: its Troubled Waters
+  // change, then its progress, then "?" if both are a challenge's success
+  // value. "TW -2 · full speed", "TW 0 · ½ speed?", "TW +5 · +80 flat?".
+  //
+  // Progress is a SHARE of your ship's Zailing Speed (45 on a tramp steamer,
+  // 55 on most ships, 75 on a clipper), not a number of Zailing..., because the
+  // script does not read your ship and a figure for the wrong one would be
+  // wrong by half. The one exception is the Giant's flat 80, which is a number
+  // whatever you sail. Words rather than marks, so the badge says what it
+  // means without a legend -- it used to be a bare "½" or "·" in front of the
+  // Troubled Waters figure, and nothing at all for full speed.
+  //
+  // A Troubled Waters change the wiki records as a level is "=5", never the
+  // level dressed up as a change; one it records only as a direction is an
+  // arrow, never a number.
+  function zeeTwShort(opt) {
+    if (typeof opt.tw === 'number') {
+      if (opt.twRange) return opt.twRange;
+      return opt.tw > 0 ? '+' + opt.tw : String(opt.tw);
+    }
+    const set = opt.twText && /set to (\d+)/.exec(opt.twText);
+    if (set) return '=' + set[1];
+    if (opt.twText && /falls/.test(opt.twText)) return '↓';
+    if (opt.twText && /up by/.test(opt.twText)) return '↑';
+    return '→';
+  }
+
+  function zeeProgShort(prog) {
+    if (prog === 'flat80') return '+80 flat';
+    if (prog === 1) return 'full speed';
+    if (prog === 0.5) return '½ speed';
+    if (prog === 0.25) return '¼ speed';
+    return 'no progress';
+  }
+
+  function zeeLineText(opt) {
+    return 'TW ' + zeeTwShort(opt) + ' · ' + zeeProgShort(opt.prog) + (opt.ch ? '?' : '');
+  }
 
   function zeeSpeedWord(prog) {
     if (prog === 'flat80') return 'a flat Zailing… 80, whatever your ship';
@@ -3989,9 +4032,7 @@
       };
     }
     const opt = best.opt;
-    const mark = ZEE_SPEED_MARK[opt.prog] || (opt.prog === 'flat80' ? '★' : '');
-    const value = typeof opt.tw !== 'number' ? '→' : (opt.tw > 0 ? '+' + opt.tw : String(opt.tw));
-    const text = mark + value + (opt.ch ? '?' : '') + (zeeHasBetterGated(card, opt) ? ZEE_GATED_MARK : '');
+    const text = zeeLineText(opt) + (zeeHasBetterGated(card, opt) ? ' ' + ZEE_GATED_MARK : '');
 
     const lines = [card.name];
     lines.push((card.where.indexOf('any') !== -1 ? 'Anywhere at zee' : card.where.join(' / '))
@@ -4002,7 +4043,7 @@
     lines.push('Best line without anything special in hand'
       + (best.gated ? ' — there is none, so this one is gated:' : ':'));
     // The menaces go in the headline too, not only in the list below it. The
-    // badge speaks about Troubled Waters and nothing else, so a line that is
+    // badge speaks about Troubled Waters and progress and nothing else, so a line that is
     // cheap in Troubled Waters and expensive in Nightmares (Becalmed's, for
     // one) would otherwise read as free right where you are most likely to
     // stop reading.
@@ -4018,6 +4059,469 @@
     lines.push('');
     lines.push('Zee cards cannot be discarded. Troubled Waters resets at a safe dock; at 8 it kills you.');
     return { text: text, color: card.urgent ? ZEE_URGENT_COLOR : zeeColor(opt.tw), title: lines.join('\n') };
+  }
+
+  // --- one badge per option, on the card you have opened -------------------
+  //
+  // The card badge answers "which card next"; once a card is open the
+  // question is "which of these", so every option the table knows gets the
+  // same short text the card badge uses for its best line, and the best line
+  // itself is starred. An option behind an item, a quality or piracy is
+  // badged too -- if the game is showing it, the player can see whether they
+  // meet it, and the tooltip says what it wants -- but it is never the one
+  // starred, for the same reason bestZeeLine will not quote it.
+  //
+  // Titles are matched through carouselMatcher, so the piracy options that
+  // name your quarry ("(Bounty)") still match. Every option title in ZEE_CARDS
+  // was checked against its card page's Option list on 2026-11-24. The pages
+  // list a few options the table does not carry (the rat-crew and cultist
+  // lines, a handful of item-gated ones); those are read off the wiki at
+  // runtime instead -- see zeeWikiOption below.
+  //
+  // One card has two options with one title: Passing a Lightship's "Stop and
+  // exchange news" is both the Zee-Ztory trade and the piracy chase, with
+  // different numbers. Nothing in the branch's title tells them apart, so that
+  // title gets no badge at all rather than a coin-flip between two claims.
+  const ZEE_OPTION_CLASS = 'fl-ux-zee-option';
+  const ZEE_OPTION_FLAG = 'flUxZeeOption';
+
+  const zeeOptionMatchers = new WeakMap();
+  // Every table option a title matches. Two or more is the shared-title case
+  // below; none is what sends a title to the wiki (zeeWikiOption).
+  function zeeOptionHits(card, title) {
+    const key = normalizeName(title);
+    if (!card || !key) return [];
+    return card.opts.filter(function (o) {
+      let m = zeeOptionMatchers.get(o);
+      if (!m) { m = carouselMatcher(o.text); zeeOptionMatchers.set(o, m); }
+      return m(key);
+    });
+  }
+
+  function zeeOptionFor(card, title) {
+    const hits = zeeOptionHits(card, title);
+    return hits.length === 1 ? hits[0] : null;
+  }
+
+  function zeeOptionSpec(card, opt) {
+    const best = bestZeeLine(card);
+    const isBest = !!best && best.opt === opt;
+    const gated = !!(opt.need || opt.piracy);
+    const text = (isBest ? ZEE_BEST_MARK + ' ' : '') + zeeLineText(opt);
+
+    const lines = [opt.text + ' — on ' + card.name];
+    lines.push(zeeTwWord(opt) + ', ' + zeeSpeedWord(opt.prog)
+      + (opt.men ? ', ' + opt.men : '')
+      + (opt.ch ? ' (on a success of ' + opt.ch + ')' : ''));
+    if (isBest) {
+      lines.push(ZEE_BEST_MARK + ' The line the card’s badge recommends'
+        + (best.gated ? ' — every line here is gated, so it is the best of those.' : ' with nothing special in hand.'));
+    } else if (best) {
+      lines.push('The card’s badge recommends: ' + best.opt.text + ' (' + zeeLineText(best.opt) + ').');
+    }
+    if (gated) {
+      lines.push(opt.piracy
+        ? 'A piracy line: never the one recommended, since it needs Corsair’s Colours or a bounty.'
+        : 'Needs something you may not have, so it is never the one recommended.');
+    }
+    lines.push('');
+    lines.push(zeeOptionLine(opt));
+    lines.push('');
+    lines.push('Progress is a share of your ship’s Zailing Speed (45 tramp steamer, 55 most ships, 75 clipper).'
+      + (opt.ch ? ' "?" means the badge quotes the success; the failure is above.' : ''));
+    return { text: text, color: zeeColor(opt.tw), title: lines.join('\n') };
+  }
+
+  // --- options the table lacks, read off the wiki at runtime ----------------
+  //
+  // ZEE_CARDS does not carry every option a card can show: the rat-crew Fate
+  // lines (Passing the Plate Around), the Blind Navigators, and a handful of
+  // other item-gated ones. Rather than leave those unbadged, an open card whose
+  // options include a title the table does not know has its wiki pages read in
+  // the browser -- the card's page for its Option list, then those options'
+  // own pages -- and each is badged from what the page says. The same api.php
+  // route resolveWikiLinks already uses, which the wiki's Anubis lets through.
+  //
+  // These badges are a weaker claim than the table's and say so: they start
+  // "wiki", they are never starred, and the tooltip says the figures were read
+  // automatically and not checked by hand. The parser was run over every zee
+  // option page on 2026-11-24 and agreed with the hand-made table wherever the
+  // two describe the same option (see tests/choice-zailing.test.mjs), which is
+  // the evidence it reads these pages right; a page in a shape it does not
+  // know produces a "?" rather than a number.
+  //
+  // What the reader understands, from a survey of all 236 zee option pages:
+  //   * the top {{Action}} or {{Fate}} template: LuckChallenge, Broad/Narrow
+  //     Quality and Diff, Unlocked with, Locked with;
+  //   * effect lists, one per section: the success after the top template, then
+  //     sections opened by {{Rare Success}}, {{Success}} (an alternative
+  //     success), {{Failure}} and {{Fate Result}};
+  //   * in each list, {{Gain|Troubled Waters|+2 CP}} / {{Loss|…|-5 CP}} /
+  //     now=N (a level) for Troubled Waters, and {{ZailingProgress}} (full
+  //     speed), {{ZailingProgress|2}} (half), {{Gain|Zailing...|80}} (flat)
+  //     and {{Loss|Zailing...}} for progress. No ZailingProgress at all is no
+  //     progress -- the table agrees on every page where that is the case.
+
+  const ZEE_WIKI_STORE = 'fl-zee-wiki-options';
+  const ZEE_WIKI_MARK = 'wiki';
+  // Templates whose presence means a figure depends on something the page
+  // tabulates rather than states: your quarry, your region, your Airs.
+  const ZEE_WIKI_VARIES = ['Variant table', 'ZeeVariantTable', 'PiracyTable', 'TLC variant table',
+    'TLC variant text', 'Variant text', 'SCurveTable'];
+
+  // Index just past the `}}` that closes the `{{` at `start`, or -1.
+  function zeeWikiClose(text, start) {
+    let depth = 0;
+    for (let i = start; i < text.length - 1; i++) {
+      if (text[i] === '{' && text[i + 1] === '{') { depth++; i++; }
+      else if (text[i] === '}' && text[i + 1] === '}') {
+        depth--; i++;
+        if (depth === 0) return i + 1;
+      }
+    }
+    return -1;
+  }
+
+  // One template's name, positional and named arguments, split on its own
+  // pipes only (a nested {{IL|…}} keeps its pipes).
+  function zeeWikiParts(tpl) {
+    const inner = tpl.slice(2, -2);
+    const parts = [];
+    let depth = 0;
+    let cur = '';
+    for (let i = 0; i < inner.length; i++) {
+      const two = inner.substr(i, 2);
+      if (two === '{{' || two === '[[') { depth++; cur += two; i++; continue; }
+      if ((two === '}}' || two === ']]') && depth > 0) { depth--; cur += two; i++; continue; }
+      if (inner[i] === '|' && depth === 0) { parts.push(cur); cur = ''; continue; }
+      cur += inner[i];
+    }
+    parts.push(cur);
+    const name = parts.shift().trim();
+    const pos = [];
+    const named = {};
+    parts.forEach(function (p) {
+      const m = /^\s*([A-Za-z][\w .'-]*?)\s*=([\s\S]*)$/.exec(p);
+      if (m) named[m[1].trim()] = m[2].trim();
+      else pos.push(p.trim());
+    });
+    return { name: name, pos: pos, named: named };
+  }
+
+  // Wikitext to a line of plain text: a template becomes its positional
+  // arguments ({{Unlock|Zee-Ztory|10 x}} -> "Zee-Ztory 10 x"), a link its label.
+  function zeeWikiPlain(s) {
+    let out = String(s == null ? '' : s).replace(/\{\{!\}\}/g, '/').replace(/<[^>]*>/g, '');
+    for (let guard = 0; guard < 20 && /\{\{[^{}]*\}\}/.test(out); guard++) {
+      out = out.replace(/\{\{([^{}]*)\}\}/g, function (all, inner) {
+        return zeeWikiParts('{{' + inner + '}}').pos.join(' ');
+      });
+    }
+    return out.replace(/\[\[(?:[^\]|]*\|)?([^\]]*)\]\]/g, '$1').replace(/'{2,}/g, '')
+      .replace(/\s+/g, ' ').trim();
+  }
+
+  // Every top-level template in a stretch of wikitext, in order.
+  function zeeWikiTemplates(text) {
+    const out = [];
+    for (let i = text.indexOf('{{'); i !== -1; i = text.indexOf('{{', i)) {
+      const end = zeeWikiClose(text, i);
+      if (end === -1) break;
+      out.push(zeeWikiParts(text.slice(i, end)));
+      i = end;
+    }
+    return out;
+  }
+
+  function zeeWikiTw(t) {
+    const gain = t.name === 'Gain';
+    const now = t.named.now;
+    if (now) {
+      const m = /^-?\d+/.exec(now);
+      if (m) return { n: null, short: '=' + m[0], word: 'Troubled Waters set to ' + m[0] };
+    }
+    if (/gone/.test(t.named['special message'] || '')) {
+      return { n: null, short: '=0', word: 'Troubled Waters cleared' };
+    }
+    let a = (t.pos[1] || '').replace(/\s*CP\s*$/i, '').replace(/\s+/g, '');
+    if (!a || /^[+-]?\?$/.test(a)) {
+      return { n: null, short: gain ? '↑' : '↓',
+        word: 'Troubled Waters ' + (gain ? 'up' : 'down') + ' by an amount the wiki does not record' };
+    }
+    if (!/^[+-]/.test(a)) a = (gain ? '+' : '-') + a;
+    const m = /^[+-]\d+/.exec(a);
+    return { n: m ? Number(m[0]) : null, short: a, word: 'Troubled Waters ' + a + ' CP' };
+  }
+
+  const ZEE_WIKI_SHARE = { 1: 'full speed', 2: '½ speed', 3: '⅓ speed', 4: '¼ speed' };
+  const ZEE_WIKI_SHARE_WORD = { 1: 'full Zailing Speed', 2: 'half Zailing Speed', 3: 'a third of Zailing Speed', 4: 'a quarter of Zailing Speed' };
+
+  function zeeWikiProg(t) {
+    if (t.name === 'ZailingProgress') {
+      const d = t.pos[0] || '1';
+      const extra = t.named.noExtra ? ', without the usual +1-5' : '';
+      if (/\?/.test(d) || !ZEE_WIKI_SHARE[d]) {
+        return { score: null, short: 'speed?', word: 'progress the wiki does not pin down' + extra };
+      }
+      return { score: 1 / Number(d), short: ZEE_WIKI_SHARE[d], word: ZEE_WIKI_SHARE_WORD[d] + extra };
+    }
+    const gain = t.name === 'Gain';
+    const amount = zeeWikiPlain(t.pos[1] || '').replace(/\s*x\s*$/i, '').trim();
+    // "({{IL|Zailing Speed}} + 11)" and "({{Use|Zailing Speed}})": your
+    // speed, plus whatever the page adds, which is full speed by another name.
+    if (gain && /Zailing Speed/.test(amount)) {
+      const plus = /\+\s*(\d+)/.exec(amount);
+      return { score: 1, short: 'full speed', word: 'full Zailing Speed' + (plus ? ' + ' + plus[1] : '') };
+    }
+    if (gain) {
+      return /^\d+$/.test(amount)
+        ? { score: 2, short: '+' + amount + ' flat', word: 'a flat Zailing… +' + amount + ', whatever your ship' }
+        : { score: null, short: 'speed?', word: 'progress the wiki does not pin down' };
+    }
+    if (/gone/.test(t.named['special message'] || '')) {
+      return { score: -2, short: 'progress lost', word: 'all progress on this voyage lost' };
+    }
+    return /^\d+$/.test(amount)
+      ? { score: -1, short: '-' + amount + ' progress', word: 'Zailing… -' + amount }
+      : { score: -1, short: 'loses progress', word: 'progress lost, by an amount the wiki does not record' };
+  }
+
+  // One effect list -> its Troubled Waters, its progress and everything else.
+  function zeeWikiEffects(chunk) {
+    const res = { tw: null, prog: null, other: [], count: 0 };
+    for (const t of zeeWikiTemplates(chunk)) {
+      const what = zeeWikiPlain(t.pos[0] || '');
+      if ((t.name === 'Gain' || t.name === 'Loss') && what === 'Troubled Waters') {
+        res.count++;
+        if (!res.tw) res.tw = zeeWikiTw(t);
+      } else if (t.name === 'ZailingProgress' || ((t.name === 'Gain' || t.name === 'Loss') && what === 'Zailing...')) {
+        res.count++;
+        if (!res.prog) res.prog = zeeWikiProg(t);
+      } else if (t.name === 'Gain' || t.name === 'Loss') {
+        res.count++;
+        if (/^yes$/i.test(t.named.hidden || '')) continue;
+        let amount = zeeWikiPlain(t.pos[1] || '');
+        if (!amount && t.named.now) amount = 'to ' + zeeWikiPlain(t.named.now);
+        if (!amount && /gone/.test(t.named['special message'] || '')) amount = 'gone';
+        res.other.push((t.name === 'Loss' && amount && !/^[-=]|^to |^gone/.test(amount) ? 'loses ' : '')
+          + what + (amount ? ' ' + amount : ''));
+      } else if (t.name === 'Move') {
+        res.count++;
+        res.other.push('moves you to ' + zeeWikiPlain(t.pos[0] || ''));
+      } else if (t.name === 'Gone' && !/^yes$/i.test(t.named.hidden || '')) {
+        res.count++;
+        res.other.push(zeeWikiPlain(t.pos[0] || '') + ' gone');
+      }
+    }
+    if (!res.tw) res.tw = { n: 0, short: '0', word: 'no Troubled Waters' };
+    if (!res.prog) res.prog = { score: 0, short: 'no progress', word: 'no progress' };
+    return res;
+  }
+
+  // A whole option page. Pure: wikitext in, a plain object out.
+  function zeeWikiParse(text) {
+    const src = String(text || '');
+    const head = /\{\{\s*(Action|Fate|ImpossibleAction)\s*(?=[|\n}])/.exec(src);
+    if (!head) return null;
+    const headEnd = zeeWikiClose(src, head.index);
+    if (headEnd === -1) return null;
+    const top = zeeWikiParts(src.slice(head.index, headEnd));
+    const p = top.named;
+
+    let ch = null;
+    if (p.LuckChallenge) ch = 'Luck ' + zeeWikiPlain(p.LuckChallenge) + '%';
+    else if (p.BroadQuality) {
+      ch = zeeWikiPlain(p.BroadQuality) + (/Zee Peril/.test(p['Challenge information'] || '')
+        ? ' vs Zee Peril' : (p.BroadDiff ? ' ' + zeeWikiPlain(p.BroadDiff) : ''));
+    } else if (p.NarrowQuality) {
+      ch = zeeWikiPlain(p.NarrowQuality) + (p.NarrowDiff ? ' ' + zeeWikiPlain(p.NarrowDiff) : '');
+    }
+
+    // The sections after the top template, each opened by its own marker.
+    // "Failure Increase" and "Success Increase" are effects, not markers --
+    // hence the lookahead for a pipe, a newline or the closing braces.
+    const rest = src.slice(headEnd);
+    const marker = /\{\{\s*(Rare Success|Failure|Fate Result|Success)\s*(?=[|\n}])/g;
+    const cuts = [];
+    let m;
+    while ((m = marker.exec(rest))) {
+      const end = zeeWikiClose(rest, m.index);
+      cuts.push({ kind: m[1], start: m.index, body: end === -1 ? rest.length : end });
+      if (end !== -1) marker.lastIndex = end;
+    }
+    const section = function (from, to) { return zeeWikiEffects(rest.slice(from, to)); };
+    const success = section(0, cuts.length ? cuts[0].start : rest.length);
+    let rare = null, alt = null, failure = null, failureSeen = false;
+    cuts.forEach(function (c, i) {
+      const eff = section(c.body, i + 1 < cuts.length ? cuts[i + 1].start : rest.length);
+      if (c.kind === 'Rare Success' && !rare) rare = eff;
+      else if (c.kind === 'Success' && !alt) alt = eff;
+      else if ((c.kind === 'Failure' || c.kind === 'Fate Result') && !failureSeen) {
+        failureSeen = true;
+        failure = eff.count ? eff : null;
+      }
+    });
+
+    const names = zeeWikiTemplates(src).map(function (t) { return t.name; });
+    // Nested ones too (a Variant table inside Challenge information).
+    const all = src.match(/\{\{\s*([A-Za-z][^|}\n]*)/g) || [];
+    const used = all.map(function (s) { return s.replace(/^\{\{\s*/, '').trim(); }).concat(names);
+    const incomplete = zeeWikiTemplates(src).find(function (t) { return t.name === 'Incomplete'; });
+    return {
+      fate: head[1] === 'Fate',
+      ch: ch,
+      unlock: p['Unlocked with'] ? zeeWikiPlain(p['Unlocked with']) : null,
+      lock: p['Locked with'] ? zeeWikiPlain(p['Locked with']) : null,
+      success: success,
+      rare: rare,
+      alt: alt,
+      failure: failure,
+      varies: ZEE_WIKI_VARIES.some(function (v) { return used.indexOf(v) !== -1; }),
+      retired: used.indexOf('Retired') !== -1,
+      incomplete: incomplete ? (zeeWikiPlain(incomplete.pos[0] || '') || 'yes') : null,
+    };
+  }
+
+  // A card page's Option list: the page each option lives on, and the title
+  // the game shows ("Steam on by (Spit of Land){{!}}Steam on by").
+  function zeeWikiCardOptions(text) {
+    const out = [];
+    const re = /\|\s*Option\d+\s*=\s*([^\n]*)/g;
+    let m;
+    while ((m = re.exec(String(text || '')))) {
+      const raw = m[1].trim().replace(/\}\}\s*$/, '').trim();
+      const bits = raw.split('{{!}}');
+      const page = bits[0].trim();
+      if (page) out.push({ page: page, shown: zeeWikiPlain(bits.length > 1 ? bits[1] : bits[0]) });
+    }
+    return out;
+  }
+
+  function zeeWikiFetch(titles) {
+    const url = WIKI_BASE + 'w/api.php?action=query&prop=revisions&rvprop=content&rvslots=main'
+      + '&redirects=1&format=json&formatversion=2&origin=*&titles=' + titles.map(encodeURIComponent).join('%7C');
+    return fetch(url)
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (data) {
+        const q = data && data.query;
+        if (!q) throw new Error('no query in reply');
+        const norm = {}, redir = {}, text = {};
+        (q.normalized || []).forEach(function (x) { norm[x.from] = x.to; });
+        (q.redirects || []).forEach(function (x) { redir[x.from] = x.to; });
+        (q.pages || []).forEach(function (pg) {
+          const rev = pg.revisions && pg.revisions[0];
+          const body = rev && (rev.slots ? rev.slots.main && rev.slots.main.content : rev.content);
+          if (body) text[pg.title] = body;
+        });
+        const out = {};
+        titles.forEach(function (t) {
+          const t0 = norm[t] || t;
+          out[t] = text[redir[t0] || t0] || null;
+        });
+        return out;
+      });
+  }
+
+  // card name -> { state: 'loading' | 'done' | 'failed', titles: { key: [entry] } },
+  // kept for the tab in sessionStorage so an open card costs its fetch once.
+  const zeeWikiCache = new Map();
+
+  function zeeWikiRestore(name) {
+    try {
+      const all = JSON.parse(sessionStorage.getItem(ZEE_WIKI_STORE)) || {};
+      return all[name] ? { state: 'done', titles: all[name] } : null;
+    } catch (e) { return null; }
+  }
+
+  function zeeWikiSave(name, titles) {
+    try {
+      const all = JSON.parse(sessionStorage.getItem(ZEE_WIKI_STORE)) || {};
+      all[name] = titles;
+      sessionStorage.setItem(ZEE_WIKI_STORE, JSON.stringify(all));
+    } catch (e) { /* uncached */ }
+  }
+
+  function zeeWikiLoad(card) {
+    let st = zeeWikiCache.get(card.name) || zeeWikiRestore(card.name);
+    if (st) { zeeWikiCache.set(card.name, st); return st; }
+    st = { state: 'loading', titles: {} };
+    zeeWikiCache.set(card.name, st);
+    zeeWikiFetch([card.name])
+      .then(function (pages) {
+        const text = pages[card.name] || '';
+        if (!/\{\{\s*Disambig/i.test(text)) return [text];
+        // A disambiguation page (The Sound of Wings, the Khaganian patrol):
+        // read each page it embeds and keep the zee ones.
+        const subs = [];
+        text.replace(/\{\{Embed\|([^|{}]+?)(?:\{\{!\}\}|\|)/g, function (all, t) { subs.push(t.trim()); return all; });
+        if (!subs.length) return [];
+        return zeeWikiFetch(subs).then(function (more) {
+          return subs.map(function (s) { return more[s] || ''; })
+            .filter(function (t) { return /\|\s*location\s*=[^\n]*Unterzee/i.test(t); });
+        });
+      })
+      .then(function (cardTexts) {
+        const wanted = [];
+        cardTexts.forEach(function (t) {
+          zeeWikiCardOptions(t).forEach(function (o) {
+            if (!zeeOptionHits(card, o.shown).length) wanted.push(o);
+          });
+        });
+        if (!wanted.length) return [];
+        const pages = Array.from(new Set(wanted.map(function (o) { return o.page; }))).slice(0, 50);
+        return zeeWikiFetch(pages).then(function (texts) {
+          return wanted.map(function (o) { return { o: o, text: texts[o.page] }; });
+        });
+      })
+      .then(function (got) {
+        got.forEach(function (g) {
+          const parsed = g.text ? zeeWikiParse(g.text) : null;
+          if (!parsed) return;
+          const key = normalizeName(g.o.shown);
+          parsed.page = g.o.page;
+          parsed.shown = g.o.shown;
+          (st.titles[key] = st.titles[key] || []).push(parsed);
+        });
+        st.state = 'done';
+        zeeWikiSave(card.name, st.titles);
+      })
+      .catch(function () { st.state = 'failed'; })
+      .then(function () { schedule(); });
+    return st;
+  }
+
+  // The wiki's reading of one title on one card: { state, entry }. An entry
+  // only when exactly one option page answers to the title.
+  function zeeWikiOption(card, title) {
+    const st = zeeWikiLoad(card);
+    if (st.state !== 'done') return { state: st.state, entry: null };
+    const list = st.titles[normalizeName(title)] || [];
+    return { state: 'done', entry: list.length === 1 ? list[0] : null };
+  }
+
+  function zeeWikiLine(eff) {
+    return eff.tw.word + ', ' + eff.prog.word + (eff.other.length ? ', ' + eff.other.join(', ') : '');
+  }
+
+  function zeeWikiSpec(card, e) {
+    const s = e.success;
+    const unsure = !!(e.varies || e.incomplete);
+    const text = ZEE_WIKI_MARK + ' TW ' + s.tw.short + ' · ' + s.prog.short + (e.ch || unsure ? '?' : '');
+    const lines = [e.shown + ' — on ' + card.name];
+    lines.push(zeeWikiLine(s) + (e.ch ? ' (on a success of ' + e.ch + ')' : ''));
+    if (e.fate) lines.push('A Fate option.');
+    if (e.unlock) lines.push('Unlocked with: ' + e.unlock);
+    if (e.lock) lines.push('Locked with: ' + e.lock);
+    if (e.rare) lines.push('Rare success: ' + zeeWikiLine(e.rare));
+    if (e.alt) lines.push('Alternative success: ' + zeeWikiLine(e.alt));
+    if (e.ch) lines.push(e.failure ? 'Failure: ' + zeeWikiLine(e.failure) : 'Failure: not recorded on the wiki.');
+    if (e.varies) lines.push('Some figures on the page depend on a table (your quarry, region or Airs) — see the wiki.');
+    if (e.incomplete) lines.push('The wiki marks this page incomplete: ' + e.incomplete);
+    if (e.retired) lines.push('The wiki marks this option retired.');
+    lines.push('');
+    lines.push('This option is not in the script’s own table. It was read automatically from its wiki page, “'
+      + e.page + '”, and not checked by hand. Never the recommended line.');
+    return { text: text, color: zeeColor(s.tw.n), title: lines.join('\n') };
   }
 
   // The area gate, and it is a weaker one than the Crowds of Spite feature's
@@ -4206,6 +4710,35 @@
         spec: card ? zeeBadgeSpec(card) : null,
         place: place,
         style: style,
+      });
+    });
+
+    let open = null;
+    document.querySelectorAll('.storylet-root__heading').forEach(function (head) {
+      const card = zeeCardFor(headingName(head));
+      if (card) open = card;
+    });
+    document.querySelectorAll('.branch__title').forEach(function (head) {
+      const name = headingName(head);
+      const hits = open && name ? zeeOptionHits(open, name) : [];
+      let spec = null;
+      let state = 'table';
+      if (hits.length === 1) {
+        spec = zeeOptionSpec(open, hits[0]);
+      } else if (open && name && !hits.length) {
+        // Not in the table at all: ask the wiki. Two table hits stay silent.
+        const wiki = zeeWikiOption(open, name);
+        state = wiki.state;
+        spec = wiki.entry ? zeeWikiSpec(open, wiki.entry) : null;
+      }
+      attachBadge(head, {
+        cls: ZEE_OPTION_CLASS,
+        flag: ZEE_OPTION_FLAG,
+        // The wiki state is in the value, so the badge is drawn the moment
+        // the fetch lands rather than on some later re-render.
+        value: name + '@' + (open ? open.name : '-') + '#' + state,
+        spec: spec,
+        place: 'after',
       });
     });
   }
@@ -37330,13 +37863,13 @@
       ])),
 
       h('div', { css: 'margin-top:12px;color:' + UI.dim + ';font-size:11px;line-height:1.6;' }, [
-        h('div', null, ['The badge is the Troubled Waters cost, in change points, of the best line you '
-          + 'can take with nothing special in hand. ',
-          h('b', null, ['?']), ' means that is a challenge’s success value; ',
-          h('b', null, ['½']), ' that the line only makes half progress; ',
-          h('b', null, ['·']), ' that it makes none; ',
-          h('b', null, ['★']), ' the one line that hands you a flat 80; ',
-          h('b', null, [ZEE_GATED_MARK]), ' that a cheaper line exists behind an item, a quality or piracy.']),
+        h('div', null, ['A card’s badge is the best line you can take with nothing special in hand: its '
+          + 'Troubled Waters change in change points, then its progress as a share of your Zailing Speed '
+          + '(“full speed”, “½ speed”, “no progress”, or the Giant’s “+80 flat”). ',
+          h('b', null, ['?']), ' means both are a challenge’s success value; ',
+          h('b', null, [ZEE_GATED_MARK]), ' that a cheaper line exists behind an item, a quality or piracy. '
+          + 'Open the card and every option gets the same kind of badge, with ',
+          h('b', null, [ZEE_BEST_MARK]), ' on the one the card’s badge speaks for.']),
         h('div', null, ['Options behind an item or a quality are in the tooltip but never in the badge, '
           + 'and piracy lines (Corsair’s Colours, a bounty) are left out of it too.']),
         h('div', { css: 'margin-top:6px;' }, ['Data from ',
