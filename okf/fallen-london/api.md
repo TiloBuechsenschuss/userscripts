@@ -39,7 +39,9 @@ Verified means seen in the capture with the stated shape.
 | `GET /api/outfit` | none | The current outfit: which item is worn in each slot. | yes |
 | `POST /api/outfit/equip` | `{"qualityId": <item id>}` | Equips that item in its slot, replacing what was worn. Replies with the new outfit. | yes |
 | `POST /api/outfit/unequip` | `{"qualityId": <id of the item worn>}` | Empties the slot that item is worn in. Replies with the new outfit, where that slot has no `qualityId`. | yes |
-| `POST /api/outfit/change` | `{"outfitId": <saved outfit id>}` | Switches to a saved outfit. Replies with the new outfit. | yes |
+| `POST /api/outfit/change` | `{"outfitId": <saved outfit id>}` | Switches to a saved outfit. Replies with the new outfit. Unsaved changes to the outfit you leave are dropped. | yes |
+| `POST /api/outfit/rename` | `{"outfitId": <saved outfit id>, "newName": "<name>"}` | Renames a saved outfit. Replies with the outfit reply plus `message: <new name>`. Case is kept. | yes (2026-11-24) |
+| `POST /api/outfit/save` | none | Stores the worn items into the **selected** saved outfit (no id is sent). Sent by the save button on Possessions. Replies with the outfit reply, `dirty: false`. | yes (2026-11-24) |
 | `POST /api/storylet` | none | The storylet you are currently in, with its branches. The game calls it after every navigation. Read-only in the capture. | yes |
 | `POST /api/storylet/begin` | `{"eventId": <storylet id>}` | Opens a storylet from a list. | yes |
 | `POST /api/storylet/goback` | none | Leaves the open storylet. | yes |
@@ -102,8 +104,14 @@ See [equipment.md](equipment.md) for what `level`, `effectiveLevel` and
 - `canChange: false` marks a slot the game will not let you change.
 - `isEffect: true` marks `Boon` and `Burden`, which hold temporary effects, not
   equipment.
-- `dirty` was `true` in the reply to `equip` and `false` in a later `GET`;
-  what it means is unknown.
+- `dirty: true` means the worn items differ from the selected saved outfit:
+  an equip is **not** saved into it by itself. The save button on Possessions
+  is enabled exactly while `dirty` is true. Verified 2026-11-24: after an
+  equip (`dirty: true`), switching away and back brought back the saved item.
+- `maxOutfits` was 4 on an account with 17 saved outfits (2026-11-24), so it
+  is not the number of outfits allowed. What it counts is unknown.
+- `isFavourite` is the favourite star next to the outfit dropdown.
+- The `rename` reply adds `message`, holding the new name.
 - `isSuccess` is `true` on success.
 
 ## `POST /api/storylet`

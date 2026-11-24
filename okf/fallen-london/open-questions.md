@@ -23,12 +23,16 @@ repository first, it may have changed).
 - **Unknown:** whether the game makes its `api.fallenlondon.com` calls with
   `XMLHttpRequest` only, or also with `fetch`. Our recorder wrapped both and did
   not note which one each call came through; the extension wraps only XHR.
+  *Partial answer (2026-11-24):* in the outfit capture every call came through
+  XHR (`outfit/change`, `outfit/equip`, `outfit/rename`, `plan`, `messages`,
+  `character/myself`). A page load and storylet calls were not in it.
 - **Unknown:** whether a `@grant none`, `@run-at document-start` userscript is
   injected into the page early enough to wrap `XMLHttpRequest` before the
   game's first `GET /api/character/myself`, in each userscript manager we
   support (Tampermonkey, Violentmonkey, Greasemonkey).
 - **Unknown:** which actions make the game fetch `/api/character/myself` again,
-  so how stale a copy observed at boot gets.
+  so how stale a copy observed at boot gets. *Seen 2026-11-24:* an outfit switch
+  and an equip on Possessions each did; a rename did not.
 - **Unknown:** the method, body and effect of `/api/outfit/equipHighest`.
 - **Matters:** observing the replies the game already fetches would replace our
   own `GET /api/character/myself` (about 350 KB) and the hidden-iframe tab
@@ -89,9 +93,9 @@ repository first, it may have changed).
 
 ## `dirty`, `isOutfit`, and `hasUpdatedCharacter`
 
-- **Unknown:** what `dirty` (outfit reply) and `isOutfit` (possessions) mean.
-  `isOutfit` is not "worn". `dirty` was true after an equip and false after a
-  reload.
+- **Unknown:** what `isOutfit` (possessions) means. It is not "worn".
+  (`dirty` is settled: the worn items differ from the saved outfit; see
+  [equipment.md](equipment.md), "Saved outfits".)
 - **Matters:** low; nothing depends on them.
 
 ## Second chances
@@ -107,26 +111,21 @@ repository first, it may have changed).
   stops the feature and says so.
 
 
-## Saved outfits: renaming, saving, switching through the page
+## Saved outfits: duplicate names, and switching from a script
 
 Raised 2026-11-24 by the saved-outfit shortcuts requirements
 (`docs/superpowers/specs/2026-11-24-saved-outfit-shortcuts-requirements.md`).
-Name length is settled: the game accepted a 21-character name, and the script
-will write at most 20.
+Renaming, saving (`POST /api/outfit/save`; there is no auto-save), names,
+limits and the outfit control's markup were settled by a capture the same day; see "Saved outfits" in
+[equipment.md](equipment.md).
 
-- **Unknown:** the call that renames a saved outfit (path, body, reply).
-- **Unknown:** whether an equip changes the selected saved outfit by itself,
-  or needs a separate save; what the outfit reply's `dirty`, `type` and
-  `isFavourite` mean.
-- **Unknown:** whether outfit names keep their letter case, whether two
-  outfits may share a name, and which characters are allowed.
-- **Unknown:** whether outfits can be created or deleted, or only renamed;
-  whether `maxOutfits: 4` is this account's real limit.
-- **Unknown:** the markup of the outfit control on Possessions, and whether
-  switching through it redraws the page without a reload.
-- **Matters:** the saved-outfit shortcuts cannot be planned without them.
+- **Unknown:** whether the server refuses a rename to a name another outfit
+  already has. The page refuses it before sending anything.
+- **Unknown:** whether a script can switch outfits through the page by setting
+  the hidden `#a11y-outfit-dropdown` select, or must click the react-select
+  option.
+- **Matters:** low. The script keeps names unique itself; the switch can fall
+  back to `POST /api/outfit/change` and a reload, as the swaps do.
 - **Meanwhile:** nothing uses saved outfits.
-- **Capture:** follow
-  [`docs/tools/fallen-london/outfit-capture-guide.md`](../../docs/tools/fallen-london/outfit-capture-guide.md).
-  Its recorder also notes `xhr` or `fetch` per call, which settles the first
-  question under "Observing the game's own API traffic" for the calls it sees.
+- **Capture:** the switch question is settled by a prototype while planning the
+  saved-outfit shortcuts.

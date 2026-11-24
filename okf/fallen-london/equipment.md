@@ -89,7 +89,7 @@ ToolOfTheTrade, Adornment, Luggage, Crew.
   worn item in the Possessions page is what sends it.
 - `POST /api/outfit/change` with `{"outfitId": ...}` switches to a saved outfit.
   `character.outfits` lists them (`{ name, selected, type, id }`) and
-  `maxOutfits` was 4.
+  `maxOutfits` was 4. See "Saved outfits" below.
 - `canChangeOutfit` (on `character`, on `character.setting` and on the storylet reply)
   says whether the game allows it now.
 - **Assumed:** after an equip made through the API the game's own copy of your
@@ -100,6 +100,45 @@ ToolOfTheTrade, Adornment, Luggage, Crew.
   the items on the Possessions tab, then go back: the Story tab refetches
   `GET /api/opportunity` and `POST /api/storylet` on arrival, seen in the
   capture). Neither route has been tried after an API equip.
+
+## Saved outfits
+
+**Verified 2026-11-24** with the outfit capture guide
+(`docs/tools/fallen-london/outfit-capture-guide.md`) on one account.
+
+- **No auto-save.** An equip or unequip changes what you wear, not the selected
+  saved outfit. The outfit reply then says `dirty: true`, and the save button
+  next to the dropdown is enabled. Switching to another outfit drops the
+  unsaved change without asking: switching back brings back the saved item.
+- **Saving** is a separate button (`.buttonlet-save-outfit`, disabled while
+  nothing is changed). It sends `POST /api/outfit/save` with no body, so it
+  always saves into the **selected** outfit. The reply is the outfit reply with
+  `dirty: false`. The page refetched nothing after it (only `GET /api/messages`).
+  Verified twice on 2026-11-24 (save with a spare hat, then save the original
+  back).
+- **Renaming:** `POST /api/outfit/rename {"outfitId": n, "newName": "..."}`.
+  Letter case is kept. The page takes up to 21 characters (`maxlength="21"`).
+  The page refuses a name another outfit already has (tooltip, no call sent);
+  whether the server would refuse it too is not known. The page did not refetch
+  the outfit list after a rename.
+- **No create, no delete.** The controls are the dropdown, a favourite star,
+  edit name, save, and "Equip Highest". The outfits are fixed places; the
+  account seen has 17, although the outfit reply says `maxOutfits: 4`.
+- `type` is one of `Standard`, `Purchased`, `GivenInGame`, `Exceptional`,
+  `EnhancedExceptional`. *Our reading:* how the place was obtained.
+- **The outfit control on Possessions** (`.outfit-controls`):
+  - a react-select dropdown, plus a visually hidden
+    `<select id="a11y-outfit-dropdown">` whose `<option value>` is the outfit
+    id and whose text is `Name (type)`;
+  - picking an outfit sends `POST /api/outfit/change`, then the page refetches
+    `GET /api/plan` and `GET /api/character/myself` and redraws the item list
+    without a reload;
+  - the pencil button (`.buttonlet-edit`) swaps the dropdown for
+    `form.outfit-controls__outfit-rename-form`: an input
+    (`.outfit-controls__outfit-rename-field`), a check button
+    (`.buttonlet-check`) and a cancel button (`.buttonlet-delete`, an ×).
+  - Not verified: whether a script can switch outfits by setting the hidden
+    select, or must open the react-select menu and click the option.
 
 ## Items that ask before equipping
 
