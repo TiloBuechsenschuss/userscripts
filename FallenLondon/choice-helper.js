@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.89
+// @version      1.91
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -631,8 +631,8 @@
  *     storylet so a same-named option elsewhere is left alone. Rattus Faber, The Tower of Eyes, The Feast of the Rose,
  *     Festive Fir, the Cheery Man's constable, Time in bed, A Dream of a Burning City, the University creatures,
  *     the Clay Quarters, a Mutually-Agreed Divorce and the Hallowmas visitor badge what each option pays and which
- *     Airs of London window offers it. Clathermont's Tattoo Parlour, Shifting Streets, Candlefinder's Clay Men,
- *     On the Trail, Send a Christmas Card, the Watchmaker's Hill "Name Scrawled in Blood" storylets, An opportunity
+ *     Airs of London window offers it. Clathermont's Tattoo Parlour, Shifting Streets, Candlefinder Canvassing
+ *     (the Clay Men, the Servants, the Dockers, and the Fate-locked Flit variant matched by picture), On the Trail, Send a Christmas Card, the Watchmaker's Hill "Name Scrawled in Blood" storylets, An opportunity
  *     for profit, The Alleys of Spite, The Flit and its King, Bones in the River and The Chandleress' Complaint
  *     do the same, stating what the script cannot read (the case stage, which card art) instead of guessing it.
  *     Literary Ambitions joins the Spider Symposium, and four visiting storylets join Someone Is Coming.
@@ -44211,77 +44211,282 @@
     });
   }
 
-  // === Candlefinder: Canvassing the Clay Men ===============================
+  // === Candlefinder: Canvassing (Clay Men, Servants, Dockers) ==============
   //
-  // **What it is.** A global (Location "Fallen London") storylet, unlocked
-  // with "Candlefinder Lead: Clay Men of London". This is ONE storylet of a
-  // larger Candlefinder storyline (Dockers and Servants exist too, deferred);
-  // only the Clay Men are covered here.
+  // **What it is.** Canvassing is the short activity a Candlefinder case sends
+  // you to between steps: raise "Detecting..." to 8, then the closer moves the
+  // case on. Three storylets, each opened by its own lead quality:
+  //   * Candlefinder: Canvassing the Clay Men (location Fallen London; lead
+  //     "Candlefinder Lead: Clay Men of London") -- the Clay Kidnapper.
+  //   * Candlefinder: Canvassing the Servants (The Shuttered Palace; lead
+  //     "...: The Shuttered Palace Downstairs") -- Missing Comb, Wayward Will,
+  //     Stolen Sceptre.
+  //   * Candlefinder: Canvassing the Dockers (Wolfstack Docks; lead "...: The
+  //     Workers of the Docks") -- Dead Puppet, Sealed Vault, Pince-Nez Pirates
+  //     and the Fate-locked Empty Belfry.
+  // A fourth, Fate-locked variant in The Flit has no wiki pages and is matched
+  // by picture: see `candlefinder-flit` below.
   //
-  // **What the badge says.** How far the option moves the "Detecting..."
-  // progress quality (8/6/6/6/4), marked as a challenge where it has one.
-  // Requirements and the failure menace are in the tooltip. Two options are
-  // not Airs-gated and not badged: "Eavesdrop on private conversations" and
-  // "Concrete evidence" (the case-closer).
+  // **What the badge says.** How far the option moves Detecting..., marked `?`
+  // where it is a challenge. A closer instead says what it does to
+  // "Candlefinder: Progress in a Case": the Dockers' and Servants' add 10,
+  // Clay Men's sets it to 60 (its one step, 50 -> 60). Requirements, the
+  // challenge and the failure menace are in the tooltip. Every option is
+  // badged, Airs-gated or not: the first version left out the two Clay Men
+  // options with no Airs window (fixed 2026-11-24).
   //
-  // Transcribed from all 7 option pages (fetched through the API,
-  // 2026-09-27) -- see
-  // docs/superpowers/research/2026-09-27-airs-of-london-group-c.md
-  // section 7. Corrections go in CANDLEFINDER_CLAY_MEN_OPTIONS and nowhere else.
+  // **Difficulty.** Each case sets a hidden "Candlefinder: Attribute Difficulty
+  // Scaler" and the guide warns that Canvassing difficulty may follow it; the
+  // Dockers pages all say 200 and the Servants pages 56-100, which looks like
+  // one case's numbers each. So the tooltip gives the wiki's difficulty AS THE
+  // WIKI RECORDS IT and says it may differ; the badge never shows one. The game
+  // shows only a chance, 60% x your stat / difficulty, so a difficulty can be
+  // checked from it: Patch up an injured Clay Man at Dangerous 217 read 86%,
+  // i.e. 150 as the page says (captured 2026-11-24).
+  //
+  // **Hidden, not greyed.** The 2026-11-24 capture of Clay Men at Airs 100 and
+  // Detecting... 0 showed only the two options then open: locked ones are not
+  // drawn at all here.
+  //
+  // Transcribed from the three storylet pages and all 21 option pages (fetched
+  // through the API, 2026-09-27 for Clay Men and 2026-11-24 for the rest),
+  // cross-checked against The Candlefinder Society (Guide), "Canvassing". Where
+  // they differ, the option page won. Corrections go in
+  // CANDLEFINDER_CANVASSING_OPTIONS and nowhere else. Plan:
+  // docs/superpowers/plans/2026-11-24-candlefinder-canvassing.md.
 
-  const CANDLEFINDER_CLAY_MEN_STORYLET = 'Candlefinder: Canvassing the Clay Men';
+  const CF_CLAY_MEN = 'Candlefinder: Canvassing the Clay Men';
+  const CF_SERVANTS = 'Candlefinder: Canvassing the Servants';
+  const CF_DOCKERS = 'Candlefinder: Canvassing the Dockers';
+  const CF_STORYLETS = [
+    [CF_CLAY_MEN, 'Clay Men', 'the Clay Kidnapper'],
+    [CF_SERVANTS, 'Servants', 'the Missing Comb, the Wayward Will and the Stolen Sceptre'],
+    [CF_DOCKERS, 'Dockers', 'the Dead Puppet, the Sealed Vault, the Pince-Nez Pirates and the Fate-locked Empty Belfry'],
+  ];
+  const CF_NO_AIRS = 'Any Airs of London (no Airs window)';
 
-  function cfRow(name, airs, needs, ch, progress, more, fail) {
-    return Object.assign({ storylet: CANDLEFINDER_CLAY_MEN_STORYLET, name: name, airs: airs, needs: needs, ch: ch,
+  // ch: { stat, diff, bonus } -- bonus is the page's "Each point of X adds N".
+  // `unsure` marks a value the wiki itself writes with a "?".
+  function cfRow(storylet, name, airs, needs, ch, progress, more, fail) {
+    return Object.assign({ storylet: storylet, name: name, airs: airs, needs: needs, ch: ch,
       progress: progress, fail: fail || null }, more);
   }
 
-  const CANDLEFINDER_CLAY_MEN_OPTIONS = [
-    cfRow('Emancipate a Clay Man', 'Airs of London 40-80', 'Strong-Backed Labour (spent)', null, 8,
+  const CANDLEFINDER_CANVASSING_OPTIONS = [
+    // --- the Clay Men ------------------------------------------------------
+    cfRow(CF_CLAY_MEN, 'Emancipate a Clay Man', 'Airs of London 40-80', 'Strong-Backed Labour (spent)', null, 8,
       { extra: 'Ruthless +? (cap 10), Magnanimous +2' }),
-    cfRow('Patch up an injured Clay Man', 'Airs of London 70-100', null, { stat: 'Dangerous', diff: 150 }, 6, null, 'Nightmares +1'),
-    cfRow('Send in the Gravel-Voiced Gossip', 'Airs of London 0-50', 'Gravel-Voiced Gossip (companion)', null, 6,
+    cfRow(CF_CLAY_MEN, 'Patch up an injured Clay Man', 'Airs of London 70-100', null, { stat: 'Dangerous', diff: 150 }, 6,
+      { seenDiff: true }, 'Nightmares +1'),
+    cfRow(CF_CLAY_MEN, 'Send in the Gravel-Voiced Gossip', 'Airs of London 0-50', 'Gravel-Voiced Gossip (companion)', null, 6,
       { extra: 'Suspicion +2' }),
-    cfRow('Keep track of Clay movements', 'Airs of London 31-69', 'Detecting... 4', { stat: 'Shadowy', diff: 130 }, 6, null,
-      'Suspicion +1'),
-    cfRow('Be open about your motives', 'Airs of London below 40 (locked at 40 and above)', null,
+    cfRow(CF_CLAY_MEN, 'Keep track of Clay movements', 'Airs of London 31-69', 'Detecting... 4', { stat: 'Shadowy', diff: 130 }, 6,
+      null, 'Suspicion +1'),
+    cfRow(CF_CLAY_MEN, 'Be open about your motives', 'Airs of London below 40 (locked at 40 and above)', null,
       { stat: 'Persuasive', diff: 150 }, 4, null, 'Scandal +1'),
+    cfRow(CF_CLAY_MEN, 'Eavesdrop on private conversations', CF_NO_AIRS, null,
+      { stat: 'Watchful', diff: 150 }, 4, null, 'Nightmares +1'),
+    // The case-closer: no Detecting... gain (`progress` null), it spends the lot.
+    cfRow(CF_CLAY_MEN, 'Concrete evidence', CF_NO_AIRS, 'Detecting... 8', null, null,
+      { closes: { to: 60 }, extra: 'Detecting... and Candlefinder Lead: Clay Men of London both removed' }),
+
+    // --- the Servants ------------------------------------------------------
+    cfRow(CF_SERVANTS, 'Watch the comings and goings', CF_NO_AIRS, null,
+      { stat: 'Watchful', diff: 70, bonus: 'Insubstantial adds 10 per point' }, 4, null, 'Scandal +1'),
+    cfRow(CF_SERVANTS, 'Flirt with a footman', CF_NO_AIRS, null, { stat: 'Persuasive', diff: 70 }, 4, null, 'Scandal +1'),
+    cfRow(CF_SERVANTS, 'Approach a senior maid', CF_NO_AIRS, 'Detecting... 4',
+      { stat: 'Watchful', diff: 100, bonus: 'Persuasive adds 1 per point' }, 6),
+    cfRow(CF_SERVANTS, 'Steal some correspondence', 'Airs of London 70-100', null, { stat: 'Shadowy', diff: 56 }, 6,
+      null, 'Suspicion +1'),
+    cfRow(CF_SERVANTS, 'A chambermaid is not what she seems', 'Airs of London 40-80', 'An Identity Uncovered! (not used up)',
+      null, 8),
+    // No ID on the page and the wiki writes "8? CP".
+    cfRow(CF_SERVANTS, 'Casually stroll downstairs', CF_NO_AIRS, 'Newly-Cast Crown of the City of London', null, 8,
+      { unsure: true }),
+    cfRow(CF_SERVANTS, 'Put the pieces together', CF_NO_AIRS, 'Detecting... 8', null, null,
+      { closes: { add: 10 }, extra: 'Detecting... and Candlefinder Lead: The Shuttered Palace Downstairs both removed' }),
+
+    // --- the Dockers -------------------------------------------------------
+    // Locked once you hold any Detecting..., so only ever a first action.
+    cfRow(CF_DOCKERS, 'Pop in to the Blind Helmsman', CF_NO_AIRS,
+      'An Explorer of the Unterzee: The Captain, base Zeefaring 5, and no Detecting... yet', null, 8),
+    cfRow(CF_DOCKERS, 'Probe in dark corners', CF_NO_AIRS, null,
+      { stat: 'Shadowy', diff: 200, bonus: 'Inerrant adds 10 per point' }, 4, null, 'Wounds +1'),
+    cfRow(CF_DOCKERS, 'Observe arrivals and departures', CF_NO_AIRS, null, { stat: 'Watchful', diff: 200 }, 4,
+      null, 'Suspicion +1'),
+    cfRow(CF_DOCKERS, 'Lean on the foreman', CF_NO_AIRS, 'Detecting... 4',
+      { stat: 'Dangerous', diff: 200, bonus: 'Persuasive adds 1 per point' }, 6),
+    cfRow(CF_DOCKERS, 'Armwrestle a dockworker', 'Airs of London 70-100', null, { stat: 'Dangerous', diff: 200 }, 6,
+      null, 'Wounds +1'),
+    cfRow(CF_DOCKERS, 'Recognise a familiar face', 'Airs of London 40-80', 'Strong-Backed Labour (not used up)', null, 8),
+    cfRow(CF_DOCKERS, 'Put the pieces together', CF_NO_AIRS, 'Detecting... 8', null, null,
+      { closes: { add: 10 }, extra: 'Detecting... and Candlefinder Lead: The Workers of the Docks both removed' }),
   ];
 
-  const CANDLEFINDER_CLAY_MEN_INDEX = carouselIndex(CANDLEFINDER_CLAY_MEN_OPTIONS);
+  const CANDLEFINDER_CANVASSING_INDEX = carouselIndex(CANDLEFINDER_CANVASSING_OPTIONS);
 
-  const CANDLEFINDER_CLAY_MEN_CLASS = 'fl-ux-candlefinder-clay-men';
-  const CANDLEFINDER_CLAY_MEN_FLAG = 'flUxCandlefinderClayMen';
-  const CANDLEFINDER_CLAY_MEN_BRANCH_CLASS = 'fl-ux-candlefinder-clay-men-branch';
-  const CANDLEFINDER_CLAY_MEN_BRANCH_FLAG = 'flUxCandlefinderClayMenBranch';
+  const CANDLEFINDER_CANVASSING_CLASS = 'fl-ux-candlefinder-canvassing';
+  const CANDLEFINDER_CANVASSING_FLAG = 'flUxCandlefinderCanvassing';
+  const CANDLEFINDER_CANVASSING_BRANCH_CLASS = 'fl-ux-candlefinder-canvassing-branch';
+  const CANDLEFINDER_CANVASSING_BRANCH_FLAG = 'flUxCandlefinderCanvassingBranch';
 
-  function candlefinderClayMenSpec(e) {
-    const lines = [
-      e.name, CANDLEFINDER_CLAY_MEN_STORYLET, '',
-      e.airs + '.',
-      e.ch ? 'Challenge: ' + e.ch.stat + ' ' + e.ch.diff + '.' : 'No challenge.',
-      e.needs ? 'Requires: ' + e.needs + '.' : null,
-      'Gives: Detecting... +' + e.progress + (e.extra ? ', ' + e.extra : '') + '.',
-      e.fail ? 'Failure: ' + e.fail + '.' : null,
-    ].filter(Boolean).join('\n');
-    return { text: 'Detecting... +' + e.progress + (e.ch ? CAROUSEL_MARK_CHALLENGE : ''), color: CAROUSEL_COLOR_PROGRESS, title: lines };
+  const CF_DIFF_NOTE = 'The difficulty is the wiki’s; it may differ by case (each case sets a hidden difficulty scaler). '
+    + 'The game shows only your chance, which is 60% × your stat ÷ the difficulty.';
+
+  function cfChallengeLine(ch) {
+    if (!ch) return 'No challenge.';
+    return 'Challenge: ' + ch.stat + (ch.diff == null ? ' (difficulty not recorded)' : ' ' + ch.diff)
+      + (ch.bonus ? ' (' + ch.bonus + ')' : '') + '.';
   }
 
-  function candlefinderClayMenStoryletSpec(key) {
-    if (key !== normalizeName(CANDLEFINDER_CLAY_MEN_STORYLET)) return null;
+  // The badge text shared by both Canvassing features.
+  function cfProgressText(e) {
+    if (e.closes) return 'Case progress ' + (e.closes.to != null ? '→ ' + e.closes.to : '+' + e.closes.add);
+    return 'Detecting... +' + e.progress + (e.ch ? CAROUSEL_MARK_CHALLENGE : '') + (e.unsure ? ' unconfirmed' : '');
+  }
+
+  function cfGivesLine(e) {
+    if (e.closes) {
+      return 'Gives: Candlefinder: Progress in a Case ' + (e.closes.to != null ? 'set to ' + e.closes.to : '+' + e.closes.add)
+        + (e.extra ? '; ' + e.extra : '') + '.';
+    }
+    return 'Gives: Detecting... +' + e.progress + (e.unsure ? ' (the wiki is unsure of this number)' : '')
+      + (e.extra ? ', ' + e.extra : '') + '.';
+  }
+
+  function candlefinderCanvassingSpec(e) {
+    const lines = [
+      e.name, e.storylet, '',
+      e.airs + '.',
+      cfChallengeLine(e.ch),
+      e.needs ? 'Requires: ' + e.needs + '.' : null,
+      cfGivesLine(e),
+      e.fail ? 'Failure: ' + e.fail + '.' : null,
+      e.ch ? '' : null,
+      e.ch ? (e.seenDiff ? 'Difficulty ' + e.ch.diff + ' confirmed in game (2026-11-24). ' : '') + CF_DIFF_NOTE : null,
+    ].filter(function (l) { return l != null; }).join('\n');
+    return { text: cfProgressText(e), color: e.closes ? CAROUSEL_COLOR_PAYOUT : CAROUSEL_COLOR_PROGRESS, title: lines };
+  }
+
+  function candlefinderCanvassingStoryletSpec(key) {
+    const s = CF_STORYLETS.find(function (r) { return normalizeName(r[0]) === key; });
+    if (!s) return null;
     return {
-      text: 'Clay Men', color: CAROUSEL_COLOR_LABEL,
-      title: CANDLEFINDER_CLAY_MEN_STORYLET + '\n\nOne storylet of the Candlefinder storyline. '
-        + 'Open it and every Airs-gated option is badged in its own right.',
+      text: s[1], color: CAROUSEL_COLOR_LABEL,
+      title: s[0] + '\n\nCandlefinder Canvassing, used by ' + s[2] + '. Raise Detecting... to 8, then put it together '
+        + 'to move the case on; Detecting... above 8 is wasted. Every option is badged in its own right. '
+        + 'Options you cannot take yet are not shown at all.',
     };
   }
 
-  function candlefinderClayMenRatings() {
+  function candlefinderCanvassingRatings() {
     carouselRatings({
-      storylets: [CANDLEFINDER_CLAY_MEN_STORYLET], index: CANDLEFINDER_CLAY_MEN_INDEX,
-      storyletSpec: candlefinderClayMenStoryletSpec, optionSpec: candlefinderClayMenSpec,
-      cls: CANDLEFINDER_CLAY_MEN_CLASS, flag: CANDLEFINDER_CLAY_MEN_FLAG,
-      branchCls: CANDLEFINDER_CLAY_MEN_BRANCH_CLASS, branchFlag: CANDLEFINDER_CLAY_MEN_BRANCH_FLAG,
+      storylets: CF_STORYLETS.map(function (s) { return s[0]; }), index: CANDLEFINDER_CANVASSING_INDEX,
+      storyletSpec: candlefinderCanvassingStoryletSpec, optionSpec: candlefinderCanvassingSpec,
+      cls: CANDLEFINDER_CANVASSING_CLASS, flag: CANDLEFINDER_CANVASSING_FLAG,
+      branchCls: CANDLEFINDER_CANVASSING_BRANCH_CLASS, branchFlag: CANDLEFINDER_CANVASSING_BRANCH_FLAG,
+    });
+  }
+
+  // === Candlefinder: Canvassing in The Flit (Fate-locked) ===================
+  //
+  // **What it is.** The third Canvassing variant, in The Flit, used only by
+  // the Fate-locked cases (the Glasshouse War and the Chandler's Mask). The
+  // wiki's content policy leaves Fate content without pages, so the ONLY
+  // source is The Candlefinder Society (Guide), "Canvassing", which gives each
+  // option as a picture (fetched through the API, 2026-11-24). Neither the
+  // storylet's title nor any option title is known.
+  //
+  // **Matching**, as Philosofruits and the Whisker-Ways do it (phfBranches,
+  // phfImageKey): a titled row by its title, an untitled one by its picture.
+  // Each tooltip quotes the title the game shows, so filling titles in is
+  // copying them from the tooltips into CANDLEFINDER_FLIT_OPTIONS.
+  //
+  // **The gate.** (1) The greeting is The Flit -- captured verbatim
+  // 2026-11-24 ("Welcome to / The Flit, / delicious friend!"), confirm-only --
+  // and (2) at least CF_FLIT_MIN_MATCHES options on screen are found here.
+  // These are urchin pictures in urchin country, so one alone says nothing.
+  // The minimum is 2, not 3, because locked options are hidden rather than
+  // greyed (the Clay Men capture): below Airs 70 and without the orphan only
+  // the two ungated options are drawn. An unlisted option does not veto: the
+  // guide lists no closer, and the storylet surely has one.
+  //
+  // **What the badge says.** The same as the other Canvassing storylets. The
+  // guide records no difficulties; the tooltip says so rather than invent one.
+  // Corrections -- and titles, once read off the game -- go in
+  // CANDLEFINDER_FLIT_OPTIONS and nowhere else.
+
+  const CF_FLIT_AREAS = ['The Flit'];
+  const CF_FLIT_MIN_MATCHES = 2;
+
+  function cfFlitRow(key, airs, needs, ch, progress, more, fail) {
+    return Object.assign({ key: key, title: null, airs: airs, needs: needs, ch: ch, progress: progress,
+      fail: fail || null }, more);
+  }
+
+  const CANDLEFINDER_FLIT_OPTIONS = [
+    // The guide writes "+6? CP".
+    cfFlitRow('valkyrie', CF_NO_AIRS, 'HOJOTOHO! 1,500', null, 6, { unsure: true }),
+    cfFlitRow('stutteringurchin', CF_NO_AIRS, null,
+      { stat: 'Watchful', diff: null, bonus: 'Having Recurring Dreams: What the Thunder Said adds 10 per point' }, 4,
+      null, 'Nightmares +1'),
+    cfFlitRow('urchinslingshot', CF_NO_AIRS, null, { stat: 'Persuasive', diff: null }, 4, null, 'Wounds +1'),
+    cfFlitRow('doubleurchin', CF_NO_AIRS, 'Detecting... 4',
+      { stat: 'Dangerous', diff: null, bonus: 'Persuasive adds 1 per point' }, 6),
+    cfFlitRow('admiraltymedal', 'Airs of London 70 and above', null, { stat: 'Dangerous', diff: null }, 6, null, 'Scandal +1'),
+    cfFlitRow('urchinblond', 'Airs of London 40-80', 'Winsome Dispossessed Orphan (not used up)', null, 8),
+  ];
+
+  const CANDLEFINDER_FLIT_CLASS = 'fl-ux-candlefinder-flit';
+  const CANDLEFINDER_FLIT_FLAG = 'flUxCandlefinderFlit';
+
+  function cfFlitHere() {
+    const strip = function (n) { return normalizeName(n).replace(/^the /, ''); };
+    const area = strip(currentArea());
+    return !!area && CF_FLIT_AREAS.some(function (a) { return strip(a) === area; });
+  }
+
+  // A row by its title, else (untitled rows only) by its picture.
+  function cfFlitFind(name, key) {
+    const n = normalizeName(name);
+    const titled = n ? CANDLEFINDER_FLIT_OPTIONS.find(function (r) { return r.title && normalizeName(r.title) === n; }) : null;
+    if (titled) return titled;
+    if (!key) return null;
+    return CANDLEFINDER_FLIT_OPTIONS.find(function (r) { return !r.title && r.key === key; }) || null;
+  }
+
+  function candlefinderFlitSpec(row, seen) {
+    const lines = [
+      row.title || seen || 'The option pictured ' + row.key,
+      'Candlefinder Canvassing in The Flit (Fate-locked: the Glasshouse War, the Chandler’s Mask)', '',
+      row.airs + '.',
+      cfChallengeLine(row.ch),
+      row.needs ? 'Requires: ' + row.needs + '.' : null,
+      cfGivesLine(row),
+      'Failure: ' + (row.fail || (row.ch ? 'nothing the guide records' : 'none, no challenge')) + '.',
+      '',
+      'Raise Detecting... to 8, then put it together to move the case on. The guide records no difficulties '
+        + 'for this storylet and no closer; it is the only source for Fate content.',
+    ];
+    if (!row.title) {
+      lines.push('', 'Matched by its picture (' + row.key + '); the option’s title is not recorded yet.'
+        + (seen ? ' The game shows “' + seen + '”: that is the title to copy into CANDLEFINDER_FLIT_OPTIONS.' : ''));
+    }
+    return { text: cfProgressText(row), color: CAROUSEL_COLOR_PROGRESS,
+      title: lines.filter(function (l) { return l != null; }).join('\n') };
+  }
+
+  function candlefinderFlitRatings() {
+    const here = cfFlitHere();
+    const branches = phfBranches();
+    const hits = branches.map(function (b) { return here ? cfFlitFind(b.name, b.key) : null; });
+    const on = hits.filter(Boolean).length >= CF_FLIT_MIN_MATCHES;
+    branches.forEach(function (b, i) {
+      const row = on ? hits[i] : null;
+      attachBadge(b.head, {
+        cls: CANDLEFINDER_FLIT_CLASS, flag: CANDLEFINDER_FLIT_FLAG, value: b.name + '|' + (b.key || '-') + '|' + (on ? 'on' : 'off'),
+        spec: row ? candlefinderFlitSpec(row, b.name) : null, place: 'after',
+      });
     });
   }
 
@@ -48391,7 +48596,8 @@
     { name: 'hallowmas-masques', run: hallowmasMasquesRatings },
     { name: 'clathermont-tattoo', run: clathermontTattooRatings },
     { name: 'shifting-streets', run: shiftingStreetsRatings },
-    { name: 'candlefinder-clay-men', run: candlefinderClayMenRatings },
+    { name: 'candlefinder-canvassing', run: candlefinderCanvassingRatings },
+    { name: 'candlefinder-flit', run: candlefinderFlitRatings },
     { name: 'on-the-trail', run: onTheTrailRatings },
     { name: 'christmas-card', run: christmasCardRatings },
     { name: 'watchmakers-hill-airs', run: watchmakersHillAirsRatings },
@@ -48441,7 +48647,7 @@
       'investigating', 'someone-is-coming', 'hellworm', 'risen-burgundy', 'menace-locations',
       'rattus-faber', 'tower-of-eyes', 'cheery-man-constable', 'time-in-bed', 'burning-city',
       'university-creatures', 'clay-quarters', 'mutually-agreed-divorce', 'clathermont-tattoo',
-      'shifting-streets', 'candlefinder-clay-men', 'on-the-trail', 'watchmakers-hill-airs',
+      'shifting-streets', 'candlefinder-canvassing', 'candlefinder-flit', 'on-the-trail', 'watchmakers-hill-airs',
       'opportunity-for-profit', 'alleys-of-spite', 'flit-and-its-king', 'bones-in-river',
       'chandleress-complaint',
     ],
@@ -48485,6 +48691,8 @@
     'lb-industries': 'L. B. Industries',
     'sacroboscan': 'The Sacroboscan Calendar',
     'whisker-ways': 'The Whisker-Ways',
+    'candlefinder-canvassing': 'Candlefinder Canvassing (Clay Men, Servants, Dockers)',
+    'candlefinder-flit': 'Candlefinder Canvassing in The Flit (Fate)',
     'cubs-education': 'A Cub’s Education',
     'hunters-keep': 'Hunter’s Keep',
     'wilmots-business': 'Wilmot’s End business',
