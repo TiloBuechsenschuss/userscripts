@@ -3,6 +3,33 @@
 Status: **draft for discussion** (2026-11-24). Feeds a later plan in `docs/superpowers/plans/`.
 Script: `FallenLondon/ux-enhancers.js`, features `equipment-optimizer` and `equipment-helper`.
 
+## 0. Handoff: where this stands (keep this section current)
+
+- **Branch** `feature/fallen-london-outfit-sets`, draft PR
+  [TiloBuechsenschuss/userscripts#26](https://github.com/TiloBuechsenschuss/userscripts/pull/26).
+  Docs only so far. No script code has been written.
+- **Process the author asked for:** go through the decisions in section 6 **one question at a
+  time** with the author, and write each answer into this file (mark the question answered, and
+  change the requirement it affects). Once every question is answered and the captures are in,
+  write the plan in `docs/superpowers/plans/`. Implementation comes after the plan.
+- **Answered:** Q1, the name length: the script writes at most 20 characters.
+- **Next question:** Q2, option A or B. It does not depend on the captures.
+- **Waiting on the author:** the capture run
+  ([`docs/tools/fallen-london/outfit-capture-guide.md`](../../tools/fallen-london/outfit-capture-guide.md))
+  for U1, U2, the rest of U3, U4 and U5. The file is expected in the repo's gitignored `temp/`
+  folder, or attached to the chat, with the author's written notes.
+- **When the capture arrives:** move every settled fact into `okf/fallen-london/api.md` /
+  `equipment.md` (marked *verified* with the date), delete the matching entry in
+  `okf/fallen-london/open-questions.md` ("Saved outfits: ..."), and update the U table in section
+  3 and every requirement that cited an unknown. If U1 shows renaming is impossible, R2 needs the
+  `localStorage` fallback described under the U table. Bring that to the author before planning.
+- **Not verified:**
+  - The recorder (`docs/tools/fallen-london/api-recorder.js`) was tested only in headless
+    Chromium against a faked site. It has not been tested in the real game.
+  - The stat-code table (R2.3) lists names found in `choice-helper.js`. Whether each one occurs
+    as a challenge stat has not been checked.
+  - That the calculation is cheap is reasoned from the code, not measured.
+
 ## 1. Goal
 
 Make the "Optimize equipment" button cheap in the common case. When a saved outfit already holds
