@@ -10,7 +10,17 @@ Plan, 2026-11-24. Implementation follows `.claude/skills/adding-fallen-london-fe
    its own feature, `candlefinder-flit`, because it is matched by picture and gated differently.
    A player who had switched `candlefinder-clay-men` off gets it back on once, under the new name.
 3. **Flit gate: greeting plus at least 3 of the 6 pictures on screen together**, the same way
-   the Whisker-Ways does it.
+   the Whisker-Ways does it. **Changed to 2 at implementation (2026-11-24):** the user's Clay Men
+   capture showed locked options are hidden, not greyed (2 of 7 drawn), so below Airs 70 without
+   the orphan only the two ungated urchins appear and a 3-picture gate would never fire.
+
+## In-game facts (user, 2026-11-24)
+
+- The Flit greeting: "Welcome to / The Flit, / delicious friend!" -- `currentArea()` reads it as is.
+- No Fate case owned: the Flit variant stays matched by picture.
+- The game shows a challenge's chance, not its difficulty; difficulty = 60 × stat ÷ chance%.
+  Patch up an injured Clay Man at Dangerous 217 read 86%, i.e. 150, as the page says.
+- Option pictures are the `<img>` in `.branch__left` (`clayman3`, `whispered_secret`).
 
 ## Sources
 

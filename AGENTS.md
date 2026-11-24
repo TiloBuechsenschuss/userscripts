@@ -2961,6 +2961,31 @@ navigation. Two consequences:
   the other item Refines assumed the same). Left out: the
   Virtue pick, the Finish, and the five one-action options (stage 4 of the plan).
 
+  **Candlefinder Canvassing** (`candlefinder-canvassing`, `CANDLEFINDER_CANVASSING_OPTIONS`, and `candlefinder-flit`,
+  `CANDLEFINDER_FLIT_OPTIONS`; replaced `candlefinder-clay-men` on 2026-11-24; both filed under Airs of London; no panel, by the
+  user's decision). Canvassing is the step a Candlefinder case sends you to between scenes: raise Detecting... to 8, then the closer
+  moves the case on. **`candlefinder-canvassing`** carries all three storylets the wiki documents in one table, matched by title
+  within the open storylet: *the Clay Men* (7 options), *the Servants* (Shuttered Palace, 7) and *the Dockers* (Wolfstack Docks, 7).
+  **The badge** is `Detecting... +N`, `?` on a challenge, `unconfirmed` (a word, not `?`, which already means a challenge) where the
+  wiki writes the number with a `?`; a closer reads `Case progress +10` (Servants, Dockers) or `Case progress → 60` (Clay Men, which
+  sets it), in the payout colour. Every option is badged, Airs-gated or not: the first Clay Men version left out *Eavesdrop on private
+  conversations* and *Concrete evidence* because they carry no Airs window. **Difficulty**: each case sets a hidden *Candlefinder:
+  Attribute Difficulty Scaler* (70 / 150 / 200 on the three Fate cases) and the guide warns Canvassing may follow it; the Dockers
+  pages all say 200 and the Servants 56–100, which looks like one case's numbers each. So the tooltip gives the wiki's difficulty and
+  says it may differ by case, and the badge never shows one. The game shows only a chance (60% × stat ÷ difficulty), which is how
+  Patch up's 150 was confirmed (Dangerous 217 → 86%, 2026-11-24). **Locked options are hidden, not greyed** (the Clay Men capture
+  showed 2 of 7 at Airs 100 and Detecting... 0). **Traps:** *Put the pieces together* is on both Servants and Dockers (the open
+  storylet tells them apart); *Put the pieces together (Candlefinder)* and *Recognise a familiar face (Candlefinder)* are wiki
+  disambiguations of bare game titles; every `{{Variant table}}` on these pages is in the Success block (result text, not title);
+  two Dockers pages share an ID with another (a wiki copy error).
+  **`candlefinder-flit`** is the fourth variant, in The Flit, used only by the Fate-locked Glasshouse War and Chandler's Mask. The
+  wiki has no pages for it; *The Candlefinder Society (Guide)* gives its six options as pictures only, so it is matched by picture
+  like Philosofruits and the Whisker-Ways (`phfBranches`, `phfImageKey`), a titled row by title once someone fills one in. **The
+  gate**: the greeting is The Flit (captured verbatim 2026-11-24, confirm-only) **and** at least `CF_FLIT_MIN_MATCHES` = 2 of its
+  pictures are on screen; an unlisted option does not veto (the guide lists no closer). The plan said 3; it is 2 because locked
+  options are hidden, so below Airs 70 without the orphan only the two ungated urchins are drawn. The guide records no difficulties
+  and the tooltip says so. Plan: `docs/superpowers/plans/2026-11-24-candlefinder-canvassing.md`.
+
   **Hallowmas Masques** (`hallowmas-masques`, `HM_MASQUE_OPTIONS`; panel `hallowmas`, `renderHallowmasPanel`, added 2026-10-13; filed
   under Seasonal, the panel follows the feature). The festival's main loop: raise a Masque's Menace to 7 (28 CP), hand it to the Fool's
   Apostate for 28 Spirit of Hallowmas, cash the Spirit in at the end. Four Masques, 38 option rows: the Roof Below (Wounds, Infant), the
@@ -4264,10 +4289,10 @@ Confirmed live by the author:
   Counterlight value is shown anywhere on that card; if so, its badge can become a real per-round
   number instead of the static reference it is now.
 
-- The **twenty-two Airs of London storylet and card badges** (rattus-faber, tower-of-eyes,
+- The **twenty-three Airs of London storylet and card badges** (rattus-faber, tower-of-eyes,
   feast-of-the-rose, festive-fir, cheery-man-constable, time-in-bed, burning-city,
   university-creatures, clay-quarters, mutually-agreed-divorce, hallowmas-visitor,
-  clathermont-tattoo, shifting-streets, candlefinder-clay-men, on-the-trail, christmas-card,
+  clathermont-tattoo, shifting-streets, candlefinder-canvassing, candlefinder-flit, on-the-trail, christmas-card,
   watchmakers-hill-airs, opportunity-for-profit, alleys-of-spite, flit-and-its-king,
   bones-in-river, chandleress-complaint -- added 2026-09-28), plus Literary Ambitions folded into
   `spider-symposium` and four visiting storylets folded into `someone-is-coming`. Nothing seen in
@@ -4341,6 +4366,15 @@ Confirmed live by the author:
   Refine), the greeting, all nine Refine titles, Generate options hidden at 100+ MP, Refine options hidden at 20+ Balance. Still to report: **(1) A failed item Refine** other than Extraordinary Implication -- does it still take the items
   (assumed; seen for Implications and for the MP Refines). The panel's quality reading is confirmed (2026-11-14): all five `WW_QUALITIES` names read off the Myself tab.
 
+- **Candlefinder Canvassing** (`candlefinder-canvassing`, `candlefinder-flit`, added 2026-11-24). **Seen in game 2026-11-24:** the
+  Clay Men heading and the badges on *Patch up an injured Clay Man*; Patch up's Dangerous 150 (from an 86% chance at 217); the Flit
+  greeting; locked options are hidden, not greyed. Report first: **(1) The Servants and Dockers headings and option titles** --
+  copied from the wiki page titles, minus the disambiguations; a title that reads differently attaches nothing. **(2) Difficulties**
+  -- the chance shown on any Servants or Dockers challenge, with your stat and the case you are on (difficulty = 60 × stat ÷
+  chance%), to settle whether the case scales them. **(3) Casually stroll downstairs** (+8, unconfirmed) and the Flit's Valkyrie
+  option (+6, unconfirmed). **(4) The Flit variant**, if you own the Glasshouse War or the Chandler's Mask: the storylet's heading and
+  each option's title (the tooltips quote it, to be copied into `CANDLEFINDER_FLIT_OPTIONS`), its closer, and whether two pictures is
+  too loose a gate there.
 - **Hallowmas Masques** (`hallowmas-masques`, added 2026-10-13, prepared from 2025's pages before the festival opened). Nothing has been seen
   in game. Report first: **(1) The storylet headings** -- whether each Masque's open heading is exactly *The Roof Below*, *The Wreck of the
   St Elmo*, *The Pavilion of Butterflies* and *Saint Dunstan's Sacristy* (a different title draws nothing). **(2) The option titles** -- whether
@@ -5313,8 +5347,12 @@ Current tests:
     equal to the Watchful difficulty on five rows.
   - `tests/choice-shifting-streets.test.mjs` — the base reward per row, the tier-4/8 bonus stated
     as not computed, the shared Pedestrian Peregrinations line only in the storylet tooltip.
-  - `tests/choice-candlefinder-clay-men.test.mjs` — all seven options, including the two without
-    an Airs window (Eavesdrop, and Concrete evidence badged as a payout: Progress in a Case → 60).
+  - `tests/choice-candlefinder-canvassing.test.mjs` — all 21 options across the Clay Men, the Servants
+    and the Dockers, the closers as payouts (→ 60 and +10), *Put the pieces together* resolved by its own
+    storylet, the may-differ-by-case note on every challenge row.
+  - `tests/choice-candlefinder-flit.test.mjs` — six picture rows, the Flit greeting as captured, 2 pictures
+    badge and 1 does not, an unlisted option does not veto, no picture shared with Philosofruits or the
+    Whisker-Ways.
   - `tests/choice-on-the-trail.test.mjs` — both case-stage windows shown, both Goat-Demon
     outcomes, and zero shared names with `clay-highwayman`.
   - `tests/choice-christmas-card.test.mjs` — one merged informational row listing all four gains.
