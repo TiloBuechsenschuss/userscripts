@@ -95,8 +95,9 @@ does not invent them.
 5. **Blind Helmsman** is locked once you have any Detecting..., so it only ever shows as the
    first action. The tooltip says so.
 6. **Flit pictures are urchins, in urchin country.** The 3-of-6 gate is there because these
-   pictures are likely reused in The Flit. An opened storylet matched by picture must show only
-   its own options (Philosofruits' rule), or nothing is badged.
+   pictures are likely reused in The Flit. An option the table doesn't carry does **not** veto
+   (the Whisker-Ways rule, not Philosofruits'), because the Flit storylet almost certainly has a
+   closer the guide doesn't list.
 7. **The Flit greeting has never been captured.** `inFlit` is confirm-only on `'The Flit'`
    until someone reads the sidebar in-game.
 8. **No name collisions** with other tables: checked by grep; the suite will pin it.
@@ -119,7 +120,7 @@ does not invent them.
    badge text, both closers scoped to their storylet, the difficulty caveat on every challenge
    row, the gate in each storylet. New `tests/choice-candlefinder-flit.test.mjs`: 6 pictures, 2
    matched pictures badge nothing and 3 do, wrong greeting badges nothing, an unknown option in the
-   open storylet vetoes, and no picture overlaps with Philosofruits / Whisker-Ways. Update the three
+   open storylet does not veto, and no picture overlaps with Philosofruits / Whisker-Ways. Update the three
    roster suites (crowds-of-spite, fruits-of-the-zee, zailing) and `fl-ui-settings`.
 7. **Docs and versions.** Header block, README row, AGENTS.md (feature section, test list,
    "Not verified in-game" entry), research note, `@version` on the script and the loader.
