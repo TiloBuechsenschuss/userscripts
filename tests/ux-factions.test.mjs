@@ -808,7 +808,7 @@ check('the menu offers the Factions, Zailing and Fruits of the Zee panels',
 
 check('the registry holds the launcher, the background jobs and the card ratings',
   api.FEATURES.map((f) => f.name),
-  ['launcher', 'tab-capture', 'pending-item', 'equipment-helper', 'equipment-optimizer']);
+  ['launcher', 'tab-capture', 'pending-item', 'equipment-helper', 'equipment-optimizer', 'outfit-emptier']);
 
 // --- the leading article ---------------------------------------------------
 //
