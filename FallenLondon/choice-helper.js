@@ -3,7 +3,7 @@
 // @author       Tilo
 // @namespace    https://github.com/TiloBuechsenschuss
 // @downloadURL  https://raw.githubusercontent.com/TiloBuechsenschuss/userscripts/refs/heads/main/FallenLondon/choice-helper.js
-// @version      1.91
+// @version      1.92
 // @description  Rating badges and advice on Fallen London storylets and opportunity cards.
 // @match        https://www.fallenlondon.com/*
 // @match        https://fallenlondon.com/*
@@ -486,7 +486,10 @@
  *     many rewards exist only there, because one event a week is all you may take.
  *     The Parabolan War shows a campaign's length, both its endings and whether it moves Parabolan
  *     Dominance, which way each piece of your Company leans, and what clearing the Ravages
- *     afterwards costs in actions and in Echoes a Ravage.
+ *     afterwards costs in actions and in Echoes a Ravage. On the campaign trail, in all five stages
+ *     and both London theatres, every option shows the Advance! a success makes and what a failure
+ *     costs in Ravages or Morale, and between the stages which choices set the Chessboard's hidden
+ *     Leanings, which end a campaign and what each ending pays.
  *     And at the Dome of Scales the Cub's Education shows which band of introduced cats each reward
  *     is offered in, and which cats count at all.
  *     The seventh is the rest of the Parabola guide's walkthrough, the storylets no table above
@@ -11442,10 +11445,12 @@
   // "(Alignment)" and "(loved one)" in option titles, the three ideologies in card titles, and three
   // leader-card phrases, and the Station Statues add "(subject)" and "(Subject)". Upon a Red Stage
   // adds "(Role)", the Starring Role the storylet fills in, and "(Character)", the supporting
-  // character a hamartia option names. Only these fifty-two: a bracket like "(3 FATE)" is part of
-  // a real title.
+  // character a hamartia option names. The Parabolan War adds "(enemies)", the power you are fighting,
+  // in three stage options -- the wiki gives most of the fill-ins for two and none for the third, so
+  // it is wildcarded rather than listed. Only these fifty-three: a bracket like "(3 FATE)" is part
+  // of a real title.
   const CAROUSEL_PLACEHOLDER =
-    /\((?:growth|growth type|work leader|first option|second option|a level|a hole|a mirror|direction|somewhere|the workshop|the warzone|the mansion|the jungle|department|campaign focus|skeleton type|garment|Zee-Beast Location|Zee-Beast|Parabolan Quarry|Quarry Home|its lair|your saint|Bounty|a railway passenger|a defendant|defendant|crime|type|your dish|dish|Number|City Name|gendertitle|Roof Prey|the City|Pub|Inhabitant|Chosen Site|Alignment|loved one|Emancipationist|Liberationist|Prehistoricist|a no-Prehistoricists city|a no-Liberationists city|no-Emancipationist|subject|Subject|Role|Character)\)/;
+    /\((?:growth|growth type|work leader|first option|second option|a level|a hole|a mirror|direction|somewhere|the workshop|the warzone|the mansion|the jungle|department|campaign focus|skeleton type|garment|Zee-Beast Location|Zee-Beast|Parabolan Quarry|Quarry Home|its lair|your saint|Bounty|a railway passenger|a defendant|defendant|crime|type|your dish|dish|Number|City Name|gendertitle|Roof Prey|the City|Pub|Inhabitant|Chosen Site|Alignment|loved one|Emancipationist|Liberationist|Prehistoricist|a no-Prehistoricists city|a no-Liberationists city|no-Emancipationist|subject|Subject|Role|Character|enemies)\)/;
 
   function carouselMatcher(title) {
     const pieces = String(title).split(CAROUSEL_PLACEHOLDER);
@@ -29861,27 +29866,56 @@
   // · 1.25 each ▼"), which is the one place in the war where the rates really
   // differ.
   //
-  // **The stages themselves are not badged.** The guide describes the trail by
-  // ACTION TYPE -- safe progress, fast progress, Airs options, skills options,
-  // morale -- and never names the options, which change with the stage and the
-  // units you hired. Those types and their rates are in the rules line instead,
-  // so the numbers are there without a badge claiming to know which option is
-  // in front of you.
+  // **The stages** (added 2026-11-27). Each of the seven stage storylets -- five
+  // in Parabola, two London theatres -- offers about six ways to make Advance!,
+  // and the badge on each is what a SUCCESS pays, then what a FAILURE costs:
+  // "Airs · Advance +4? · fail Ravages +1", "Morale −5 → Advance +6? · fail
+  // Morale −3, no Ravages". Advance! is the number every stage is decided by
+  // (24 moves you on), and Ravages are what the campaign costs you afterwards,
+  // so those two lead; `?` marks a challenge's success value (the difficulty is
+  // the player's business, so no expected value is quoted) and `▼` that the
+  // option uses items, which are named in the tooltip. Where both outcomes pay
+  // the same Advance! the badge says "either way" instead of `?`. These used to
+  // be left to the rules line, because the GUIDE only describes them by action
+  // type; the option pages name every one, and those are the source here.
+  //
+  // **The story between the stages** is badged too: which choices set the
+  // Chessboard's hidden Leanings (White, Red, Black -- the three decide that
+  // campaign's ending), which options END a campaign and what each pays, which
+  // move you on to the next stage, and which are lore that costs no action.
   //
   // Transcribed from the guide's campaign, stage, general and Ravages tables,
   // with every Pavilion storylet page fetched through the API (2026-09-17) as
-  // the cross-check on the option lists. Each Ravages row carries the item's own
-  // Echo price as well as the guide's rate, and the suite recomputes one from
-  // the other. Ten options are titled *Move out!* and told apart only by the
-  // wiki's numbering, so they are one row. Left out: the campaign narratives
-  // between stages (the guide's own Campaign Details), which are story rather
-  // than choice, and the Shadowy Gains and Glass Studies ladders at the Dome of
-  // Scales, which belong to the Dome. Corrections go in PW_OPTIONS and nowhere
-  // else.
+  // the cross-check on the option lists. The stages and the story between them
+  // were fetched on 2026-11-27: all seven stage storylet pages, every option page
+  // they list, and every storylet those options redirect to, followed until
+  // nothing new turned up (23 story storylets, about 100 options). Where the
+  // option pages and the guide's Actions-by-Stage table disagree, the PAGE won:
+  // the five Morale-spending pushes are Broad 100 on their pages (90 in the
+  // table), *Launch a naval assault* costs 1 Ravage on a failure (2 in the
+  // table), and the guide's prose says an Airs failure costs 3 Ravages where its
+  // own table and the pages say 1. Each Ravages row carries the item's own Echo
+  // price as well as the guide's rate, and the suite recomputes one from the
+  // other. Ten options are titled *Move out!* and told apart only by the wiki's
+  // numbering, so they are one row; so are the four *Bear witness* endings, the
+  // two *Leave the Palatinate*, the two *Defend the castle* and the two *Give the
+  // Calendar your word*, each of which is one title on screen (a lookup that
+  // matched two rows would badge neither). Left out: the Shadowy Gains and Glass
+  // Studies ladders at the Dome of Scales, which belong to the Dome.
+  // Corrections go in PW_OPTIONS and nowhere else.
   //
   //   stages / dominance / endings   a cause's length, what it sets, its two payouts.
   //   lean       'Oneironaut' or 'Cultivator', for a piece of the company.
   //   cleared / actions / count / item / unit / rate   a Ravages option.
+  //   kind / ch / general / airs / win / lose / uses / loseUses   a stage option:
+  //              kind is safe | fast | airs | skill | gain | spend; win and lose are
+  //              { adv, rav, morale, other } (Advance!, Ravages, Campaign Morale,
+  //              anything else gained); uses and loseUses the items each outcome
+  //              takes.
+  //   ending     true on an option that ends a campaign; `tag` is what it pays.
+  //   leaning    the Chessboard Leaning a choice sets, as its badge says it.
+  //   onward     true on an option that moves the campaign to its next part.
+  //   actions    0 on an option whose page says it costs no action.
   //   uses / needs / label / gives / note.
 
   const PW_CAUSE = 'The Cause of War';
@@ -29894,6 +29928,15 @@
   const PW_ADVISORS = 'Managing your Advisors';
   const PW_GENERAL = 'Choose a General';
   const PW_FRONT = 'Back to the Front';
+  const PW_WASTES = 'Traversing the Wastes of Want';
+  const PW_MOUNTAINS = 'Through the Hanging Mountains';
+  const PW_HOME = 'The War from Home';
+  const PW_RIVER = 'Along the Writhing River';
+  const PW_SHORE = 'Along the Smoking Shore';
+  const PW_MIRRORPANE = 'Shadows on the Mirrorpane';
+  const PW_CASTLE = 'Within the Castle of Forests';
+  const PW_WAKE = 'In the Wake of War';
+  const PW_STAGES = [PW_WASTES, PW_MOUNTAINS, PW_HOME, PW_RIVER, PW_SHORE, PW_MIRRORPANE, PW_CASTLE];
 
   // "A Visitor" is two ordinary words and could head a storylet anywhere, so it
   // is badged only on a greeting that says the Dolorous Pavilion. Confirm-only:
@@ -29915,6 +29958,60 @@
   PW_WINDOWS['The Seeds of War'] = 'unlocks Generals';
   PW_WINDOWS['A Visitor'] = 'the third Advisor';
   PW_WINDOWS['Leave the Dolorous Pavilion'] = 'leave';
+  PW_WINDOWS[PW_WASTES] = 'stage 1 · Advance! 24';
+  PW_WINDOWS[PW_MOUNTAINS] = 'stage 2 · Advance! 24';
+  PW_WINDOWS[PW_HOME] = 'stage 2, from London · Advance! 24';
+  PW_WINDOWS[PW_RIVER] = 'stage 3 · Advance! 24';
+  PW_WINDOWS[PW_SHORE] = 'stage 4 · Advance! 24';
+  PW_WINDOWS[PW_MIRRORPANE] = 'stage 4, from London · Advance! 24';
+  PW_WINDOWS[PW_CASTLE] = 'stage 5 · Advance! 24';
+  PW_WINDOWS['The Hidden Refuge'] = 'Viscountess · after stage 1';
+  PW_WINDOWS['The Shrine of Wastes'] = 'Ophidian Gentleman · after stage 1';
+  PW_WINDOWS['The Iris of the Sun'] = 'Second City · after stage 1';
+  PW_WINDOWS['A Conclave of Cats'] = 'Cats · after stage 2';
+  PW_WINDOWS['A Quiet Moment with the Appalling Socialite'] = 'Chessboard · after stage 2 · a Leaning';
+  PW_WINDOWS['The Echo of Chambers'] = 'Second City · after stage 2';
+  PW_WINDOWS['The Frost-Rimed Shrine'] = 'Ophidian Gentleman · after stage 2';
+  PW_WINDOWS['Beltane\'s Holdfast'] = 'Vulgate · after stage 2';
+  PW_WINDOWS['The Rosy Crown'] = 'Chessboard · after stage 3 · a Leaning';
+  PW_WINDOWS['The Fall of the Fourth'] = 'Fingerkings · after stage 3';
+  PW_WINDOWS['Petitioning the King of Cats'] = 'Cats · after stage 4 · picks the ending';
+  PW_WINDOWS['The Violet Horticulturist'] = 'Fingerkings · after stage 4';
+  PW_WINDOWS['Queen of Roses'] = 'Chessboard · after stage 4 · a Leaning';
+  PW_WINDOWS['Vulgar Phantasms'] = 'Vulgate · after stage 4';
+  PW_WINDOWS['The Entanglement of Glass'] = 'Viscountess · the ending';
+  PW_WINDOWS['The Enshrinement of Waters'] = 'Ophidian Gentleman · the ending';
+  PW_WINDOWS['The Palace of the Rising, Conquered'] = 'Second City · the ending';
+  PW_WINDOWS['The Palatinate, Regained'] = 'Cats · the ending';
+  PW_WINDOWS['The Khatun\'s Dream'] = 'Fingerkings · the ending';
+  PW_WINDOWS['The Bloody-Handed End'] = 'Chessboard · the ending';
+  PW_WINDOWS['As You Were'] = 'Yourself · the ending';
+  PW_WINDOWS['The Highest of Sancta'] = 'Vulgate · the ending';
+  PW_WINDOWS[PW_WAKE] = 'after the war';
+
+  // A stage option. `kind` is the guide's action type; the rest is off the
+  // option's own page.
+  function pwStep(storylet, name, kind, ch, win, lose, extra) {
+    return Object.assign({ storylet: storylet, name: name, kind: kind, ch: ch, win: win, lose: lose }, extra || {});
+  }
+  function pwCh(stat, diff, general) {
+    return { stat: stat, diff: diff, general: general || null };
+  }
+  function pwNarrow(stat) {
+    return { stat: stat, diff: 5, narrow: true, general: null };
+  }
+  // An objective: the option a stage offers at Advance! 24, one per campaign.
+  function pwOnward(storylet, name, campaign, label, extra) {
+    return Object.assign({ storylet: storylet, name: name, onward: true, label: label,
+      needs: 'Advance! 24, on ' + campaign }, extra || {});
+  }
+  function pwLore(storylet, name, extra) {
+    return Object.assign({ storylet: storylet, name: name, label: 'lore · free', actions: 0 }, extra || {});
+  }
+  function pwEnding(storylet, name, tag, gives, extra) {
+    return Object.assign({ storylet: storylet, name: name, ending: true, tag: tag, gives: gives }, extra || {});
+  }
+  const PW_LEAVE_NOTE = 'You will be able to resume the campaign where you left off.';
 
   const PW_OPTIONS = [
     { storylet: PW_CAUSE, name: 'The Viscountess', stages: 3, dominance: null,
@@ -30088,6 +30185,363 @@
     { storylet: PW_AFTERMATH, name: 'Conclude the work', aliases: ['Conclude the work (Parabolan War)'],
       label: 'done · march again',
       note: 'Time, the Healer clears up to 10 Ravages a week, so a small scar can simply be waited out.' },
+
+    // === Stage 1: Traversing the Wastes of Want ===========================
+    pwStep(PW_WASTES, 'Rally your army onward', 'safe', pwCh('Persuasive', 150, 'Snake'), { adv: 1 }, { adv: 1, rav: 1 }),
+    pwStep(PW_WASTES, 'Scout the way ahead', 'safe', pwCh('Shadowy', 150, 'Cat'), { adv: 1 }, { adv: 1, rav: 1 }),
+    pwStep(PW_WASTES, 'Deploy Counter-Factual Phantasies', 'airs', pwCh('Watchful', 250, 'Chess'), { adv: 4 }, { rav: 1 },
+      { airs: 'below 36' }),
+    pwStep(PW_WASTES, 'Lead your army through forgotten trenches', 'airs', pwCh('Dangerous', 250), { adv: 4 }, { rav: 1 },
+      { airs: '70 or more' }),
+    pwStep(PW_WASTES, 'Host a hunt', 'gain', pwCh('Dangerous', 175), { adv: 1, morale: 1 }, { rav: 2 }),
+    pwStep(PW_WASTES, 'Employ the arts of Glasswhispery', 'skill', pwNarrow('Glasswork'), { adv: 2 },
+      { other: 'Nightmares +3 CP' }, { uses: 'Move in the Great Game ×3', loseUses: 'Move in the Great Game ×1',
+        needs: 'a Set of Cosmogone Spectacles' }),
+    pwOnward(PW_WASTES, 'Reach the Hollowed Refuge', 'the Cats', 'on to stage 2'),
+    pwOnward(PW_WASTES, 'Secure the Jaded Pagoda', 'the Fingerkings', 'on to stage 2'),
+    pwOnward(PW_WASTES, 'Recover the Appalling Socialite\'s first jewel', 'the Chessboard', 'on to stage 2'),
+    pwOnward(PW_WASTES, 'Follow your own trail', 'Yourself', 'on to stage 2'),
+    pwOnward(PW_WASTES, 'Reach the Viscountess\' Refuge', 'the Viscountess', 'on · the Hidden Refuge · free',
+      { actions: 0 }),
+    pwOnward(PW_WASTES, 'Reach the Shrine of Waste', 'the Ophidian Gentleman', 'on · the Shrine of Wastes · free',
+      { actions: 0 }),
+    pwOnward(PW_WASTES, 'Reach the Hanging Mountains', 'A Second City Vengeance', 'on · the Iris of the Sun · free',
+      { actions: 0 }),
+    pwOnward(PW_WASTES, 'Reach the Chalet of the Bethlehem', 'the Vulgate', 'on to stage 2'),
+    pwLore(PW_WASTES, 'Consider the Wastes of Want'),
+    { storylet: PW_WASTES, name: 'Return to your Base-Camp (from a Campaign)', aliases: ['Return to your Base-Camp'],
+      label: 'leave · free', actions: 0, note: PW_LEAVE_NOTE },
+
+    // === Stage 2: Through the Hanging Mountains ===========================
+    pwStep(PW_MOUNTAINS, 'Lead a raid from the sky', 'safe', pwCh('Shadowy', 150, 'Cat'), { adv: 1 }, { adv: 1, rav: 1 }),
+    pwStep(PW_MOUNTAINS, 'Gather the Flowers of Nevermore', 'fast', pwCh('Persuasive', 150, 'Snake'), { adv: 3, rav: 2 },
+      { rav: 2 }, { note: 'Pays for its speed in Ravages rather than items: 2 on a success as well as on a failure.' }),
+    pwStep(PW_MOUNTAINS, 'Lure the (enemies) with false fruit', 'fast', pwCh('Watchful', 250, 'Chess'), { adv: 3 },
+      { rav: 1 }, { uses: 'Solacefruit ×6', loseUses: 'Solacefruit ×3',
+        // "(enemies)" is wildcarded, but on Yourself the "the" goes too.
+        aliases: ['Lure your legions with false fruit'] }),
+    pwStep(PW_MOUNTAINS, 'Deploy a whirlwind of allegiances', 'skill', pwNarrow('A Player of Chess'), { adv: 2 }, {},
+      { uses: 'Well-Placed Pawn ×3 and Move in the Great Game ×1', loseUses: 'Well-Placed Pawn ×1' }),
+    pwStep(PW_MOUNTAINS, 'Toxify the waters of the (enemies)', 'skill', pwNarrow('Kataleptic Toxicology'), { adv: 2 }, {},
+      { uses: 'Deep-zee Catch ×3', loseUses: 'Deep-zee Catch ×1', aliases: ['Toxify the waters of your legions'] }),
+    pwStep(PW_MOUNTAINS, 'Hold a feast', 'gain', pwCh('Dangerous', 175), { adv: 1, morale: 1 }, { rav: 2 }),
+    // Two pages, one title: the Cats' (to A Conclave of Cats) and the
+    // Chessboard's (to the Appalling Socialite). Only your campaign's shows.
+    pwOnward(PW_MOUNTAINS, 'Defend the castle', 'the Cats or the Chessboard', 'on to stage 3',
+      { aliases: ['Defend the castle 2'], note: 'The Cats go by A Conclave of Cats, the Chessboard by A Quiet Moment '
+        + 'with the Appalling Socialite, where a Leaning is chosen.' }),
+    pwOnward(PW_MOUNTAINS, 'Greet Catastrophe\'s Emissary', 'the Fingerkings', 'on to stage 3'),
+    pwOnward(PW_MOUNTAINS, 'Continue the hunt for yourself', 'Yourself', 'on to stage 3'),
+    pwOnward(PW_MOUNTAINS, 'Harvest the Gooseberry Key', 'the Viscountess', 'on to stage 3 · free', { actions: 0 }),
+    pwOnward(PW_MOUNTAINS, 'Reach the Frost-Rimed Shrine', 'the Ophidian Gentleman', 'on · the Frost-Rimed Shrine · free',
+      { actions: 0 }),
+    pwOnward(PW_MOUNTAINS, 'Locate the Echo of Chambers', 'A Second City Vengeance', 'on · the Echo of Chambers · free',
+      { actions: 0 }),
+    pwOnward(PW_MOUNTAINS, 'Reach Beltane\'s Holdfast', 'the Vulgate', 'on · Beltane’s Holdfast'),
+    { storylet: PW_MOUNTAINS, name: 'Progress the War from London instead', label: 'fight this stage from London',
+      needs: 'a five-stage campaign', note: 'You keep your Advance!, but cannot come back to Parabola until the stage '
+        + 'is done; moving there and back is an action each way, so the guide only advises it when London’s options '
+        + 'suit you better.' },
+    pwLore(PW_MOUNTAINS, 'Consider the Hanging Mountains'),
+    { storylet: PW_MOUNTAINS, name: 'Return to your Base-Camp (from the Hanging Mountains)',
+      aliases: ['Return to your Base-Camp'], label: 'leave · free', actions: 0, note: PW_LEAVE_NOTE },
+
+    // === Stage 2 from London: The War from Home ===========================
+    pwStep(PW_HOME, 'Deploy reinforcements', 'safe', pwCh('Dangerous', 150), { adv: 1 }, { adv: 1, rav: 1 }),
+    pwStep(PW_HOME, 'Provide a distraction', 'safe', pwCh('Shadowy', 150, 'Cat'), { adv: 1 }, { adv: 1, rav: 1 }),
+    pwStep(PW_HOME, 'Boost the spirits of your Company', 'airs', pwCh('Persuasive', 250, 'Snake'), { adv: 4 }, { rav: 1 },
+      { airs: '70 or more' }),
+    pwStep(PW_HOME, 'Conduct an experiment from within your tub', 'skill', pwNarrow('Kataleptic Toxicology'), { adv: 2 },
+      {}, { uses: 'Secluded Address ×3', loseUses: 'Secluded Address ×1' }),
+    pwStep(PW_HOME, 'Spy on the movement of cats', 'gain', pwCh('Shadowy', 200, 'Cat'), { adv: 1, morale: 1 }, { rav: 2 },
+      { note: 'A harder check than the other Morale gains (200 rather than 175).' }),
+    pwStep(PW_HOME, 'Inspire artistic support', 'spend', pwCh('Persuasive', 100, 'Snake'), { adv: 5, morale: -5 },
+      { morale: -3 }, { needs: 'Campaign Morale 5' }),
+    { storylet: PW_HOME, name: 'Return to London 2', aliases: ['Return to London'], label: 'leave · free', actions: 0,
+      note: PW_LEAVE_NOTE },
+    { storylet: PW_HOME, name: 'Return to Parabola', label: 'back to Parabola · stage done', onward: true,
+      needs: 'Advance! 24' },
+
+    // === Stage 3: Along the Writhing River ================================
+    pwStep(PW_RIVER, 'Delegate to yourself', 'safe', pwCh('Persuasive', 150, 'Snake'), { adv: 2, other: 'Mirror-Fed +1' },
+      { adv: 2, rav: 1 }, { uses: 'Memory of a Much Lesser Self ×1', loseUses: 'Memory of a Much Lesser Self ×1' }),
+    pwStep(PW_RIVER, 'Consult a Poisoned Oracle', 'safe', pwCh('Shadowy', 150, 'Cat'), { adv: 2 }, { adv: 2, rav: 1 },
+      { uses: 'Glass Gazette ×1', loseUses: 'Glass Gazette ×1' }),
+    pwStep(PW_RIVER, 'Grow mounts to speed your passage', 'fast', pwCh('Watchful', 250, 'Chess'), { adv: 3 }, { rav: 1 },
+      { uses: 'Royal-Blue Feather ×6', loseUses: 'Royal-Blue Feather ×2' }),
+    pwStep(PW_RIVER, 'Illuminate ancient passages', 'fast', pwCh('Dangerous', 250), { adv: 3 }, { rav: 1 },
+      { uses: 'Memory of Light ×3', loseUses: 'Memory of Light ×1' }),
+    pwStep(PW_RIVER, 'Launch a naval assault', 'gain', pwCh('Dangerous', 175), { adv: 1, morale: 1 }, { rav: 1 },
+      { note: 'Its page says a failure costs 1 Ravage; the guide’s table says 2. The badge follows the page.' }),
+    pwStep(PW_RIVER, 'Sail the Wanting-Way', 'spend', pwCh('Dangerous', 100), { adv: 6, morale: -5 }, { morale: -3 },
+      { needs: 'Campaign Morale 5', note: 'The one Morale push that pays 6 rather than 5.' }),
+    pwOnward(PW_RIVER, 'Recover the Countess Palatine', 'the Cats', 'on to stage 4'),
+    pwOnward(PW_RIVER, 'Reach the Place that was White and Gold', 'the Fingerkings', 'on · the Fall of the Fourth'),
+    pwOnward(PW_RIVER, 'Find the Temple of the Outflung Rose', 'the Chessboard', 'on · the Rosy Crown'),
+    pwOnward(PW_RIVER, 'Consult the Oracle of Glaziers', 'Yourself', 'on to stage 4'),
+    pwOnward(PW_RIVER, 'Enter the Entanglement of Glass', 'the Viscountess', 'on · the ending · free', { actions: 0 }),
+    pwOnward(PW_RIVER, 'Enter the Enshrinement of Waters', 'the Ophidian Gentleman', 'on · the ending · free',
+      { actions: 0 }),
+    pwOnward(PW_RIVER, 'Enter the Palace of the Rising', 'A Second City Vengeance', 'on · the ending · free',
+      { actions: 0 }),
+    pwOnward(PW_RIVER, 'Discover where the Writhing River meets a confluence of hazy waters', 'the Vulgate',
+      'on to stage 4'),
+    pwLore(PW_RIVER, 'Consider the Writhing River'),
+    { storylet: PW_RIVER, name: 'Return to your Base-Camp (from the Hanging Mountains)',
+      aliases: ['Return to your Base-Camp'], label: 'leave · free', actions: 0, note: PW_LEAVE_NOTE },
+
+    // === Stage 4: Along the Smoking Shore =================================
+    pwStep(PW_SHORE, 'Petition Long-Dead Cats', 'safe', pwCh('Watchful', 250, 'Snake'), { adv: 2 }, { adv: 2, rav: 1 },
+      { uses: 'Silvered Cat\'s Claw ×25', loseUses: 'Silvered Cat\'s Claw ×25',
+        note: 'A harder check than any other safe option (250).' }),
+    pwStep(PW_SHORE, 'Consult a Column of Searing Ash', 'airs', pwCh('Persuasive', 250, 'Snake'), { adv: 3, rav: 1 },
+      { rav: 2 }, { airs: '70 or more', needs: 'Connected: Fingerkings 5',
+        note: 'Costs a Ravage even on a success, and pays 3 rather than the usual Airs 4.' }),
+    pwStep(PW_SHORE, 'Siege an Insidious Spinney', 'airs', pwCh('Dangerous', 250), { adv: 4 },
+      { rav: 1, other: 'Solacefruit +2' }, { airs: 'below 36' }),
+    pwStep(PW_SHORE, 'Dream your way past the (enemies)', 'airs', pwCh('Watchful', 250, 'Chess'), { adv: 4 },
+      { rav: 1, other: 'Trace of Viric +2' }, { airs: '36 to 69' }),
+    pwStep(PW_SHORE, 'Disseminate Falsehood', 'skill', pwNarrow('Mithridacy'), { adv: 2 }, {},
+      { uses: 'Palimpsest Scrap ×3', loseUses: 'Palimpsest Scrap ×1' }),
+    pwStep(PW_SHORE, 'Enjoy a respite', 'gain', pwCh('Dangerous', 175), { adv: 1, morale: 1 }, { rav: 2 }),
+    pwStep(PW_SHORE, 'Mount a cavalry charge', 'spend', pwCh('Watchful', 100), { adv: 5, morale: -5 }, { morale: -3 },
+      { needs: 'Campaign Morale 5' }),
+    pwOnward(PW_SHORE, 'Petition the King of Cats', 'the Cats', 'on · the King of Cats'),
+    pwOnward(PW_SHORE, 'Reach the Violet Horticulturist', 'the Fingerkings', 'on · the Violet Horticulturist'),
+    pwOnward(PW_SHORE, 'Enter Arbor 2', 'the Chessboard', 'on · the Queen of Roses', { aliases: ['Enter Arbor'] }),
+    pwOnward(PW_SHORE, 'Follow yourself', 'Yourself', 'on to stage 5'),
+    pwOnward(PW_SHORE, 'Find where the Vulgate dream', 'the Vulgate', 'on · Vulgar Phantasms'),
+    { storylet: PW_SHORE, name: 'Progress the War from London instead', label: 'fight this stage from London',
+      needs: 'a five-stage campaign', note: 'You keep your Advance!, but cannot come back to Parabola until the stage '
+        + 'is done; moving there and back is an action each way, so the guide only advises it when London’s options '
+        + 'suit you better.' },
+    pwLore(PW_SHORE, 'Consider the Smoking Shore'),
+    { storylet: PW_SHORE, name: 'Return to your Base-Camp (from the Hanging Mountains)',
+      aliases: ['Return to your Base-Camp'], label: 'leave · free', actions: 0, note: PW_LEAVE_NOTE },
+
+    // === Stage 4 from London: Shadows on the Mirrorpane ===================
+    pwStep(PW_MIRRORPANE, 'Establish a night watch', 'safe', pwCh('Watchful', 150, 'Chess'), { adv: 2 },
+      { adv: 1, rav: 1 }, { uses: 'London Street Sign ×1', loseUses: 'London Street Sign ×1' }),
+    pwStep(PW_MIRRORPANE, 'Embark upon a crime-spree', 'airs', pwCh('Shadowy', 250, 'Cat'), { adv: 4 }, { rav: 3 },
+      { airs: 'below 36' }),
+    pwStep(PW_MIRRORPANE, 'Call on Dr Schlomo\'s assistance', 'airs', pwCh('Persuasive', 250, 'Snake'), { adv: 4 },
+      { rav: 1 }, { airs: '70 or more', needs: 'Dr Schlomo' }),
+    pwStep(PW_MIRRORPANE, 'Infiltrate disordered dreams', 'skill', pwNarrow('Glasswork'), { adv: 2 }, {},
+      { uses: 'Memory of Light ×3', loseUses: 'Memory of Light ×3' }),
+    pwStep(PW_MIRRORPANE, 'Initiate a campaign of public health', 'gain', pwCh('Persuasive', 200, 'Snake'),
+      { adv: 1, morale: 1 }, { rav: 3 }, { note: 'Harder than the other Morale gains, and a failure costs 3 Ravages.' }),
+    pwStep(PW_MIRRORPANE, 'Summon your Company for aid', 'spend', pwCh('Shadowy', 100), { adv: 5, morale: -5 },
+      { morale: -5 }, { needs: 'Campaign Morale 5', note: 'A failure here loses all 5 Morale, not 3.' }),
+    { storylet: PW_MIRRORPANE, name: 'Return to other affairs', label: 'leave · free', actions: 0, note: PW_LEAVE_NOTE },
+    { storylet: PW_MIRRORPANE, name: 'Return to Parabola 2', aliases: ['Return to Parabola'],
+      label: 'back to Parabola · stage done', onward: true, needs: 'Advance! 24' },
+
+    // === Stage 5: Within the Castle of Forests ============================
+    pwStep(PW_CASTLE, 'Pray', 'safe', pwCh('Persuasive', 150, 'Snake'), { adv: 2 }, { adv: 2, rav: 1 },
+      { uses: 'Apostate\'s Psalm ×1', note: 'The Psalm is only used up on a success.' }),
+    pwStep(PW_CASTLE, 'Summon a Terror-Bird', 'fast', pwCh('Watchful', 250, 'Chess'), { adv: 4 }, { rav: 1 },
+      { uses: 'Wing of a Young Terror Bird ×1 and Memory of Light ×3',
+        loseUses: 'Wing of a Young Terror Bird ×1 and Memory of Light ×1' }),
+    pwStep(PW_CASTLE, 'Ignite the Chorus of Forests', 'fast', pwCh('Dangerous', 250), { adv: 4 }, { rav: 1 },
+      { uses: 'Glass Gazette ×1 and Correspondence Plaque ×3', loseUses: 'Glass Gazette ×1 and Correspondence Plaque ×1' }),
+    pwStep(PW_CASTLE, 'Sear the Castle with Viric', 'skill', pwNarrow('Glasswork'), { adv: 2 }, {},
+      { uses: 'Trace of Viric ×3', loseUses: 'Trace of Viric ×2' }),
+    pwStep(PW_CASTLE, 'Liberate the dungeons of the Castle', 'gain', pwCh('Dangerous', 175), { adv: 1, morale: 1 },
+      { rav: 2 }),
+    pwStep(PW_CASTLE, 'Assault the Citadel of Vineyards', 'spend', pwCh('Watchful', 100), { adv: 5, morale: -5 },
+      { morale: -3 }, { needs: 'Campaign Morale 5' }),
+    pwOnward(PW_CASTLE, 'Liberate the Surrendered Palatinate', 'the Cats', 'on · the ending'),
+    pwOnward(PW_CASTLE, 'Uncover the Khan\'s Mirror', 'the Fingerkings', 'on · the ending'),
+    pwOnward(PW_CASTLE, 'Reach the Appalling Socialite\'s Prize', 'the Chessboard', 'on · the ending'),
+    pwOnward(PW_CASTLE, 'Siege yourself', 'Yourself', 'on · the ending'),
+    pwOnward(PW_CASTLE, 'Breach Zenith', 'the Vulgate', 'on · the Highest of Sancta',
+      { needs: 'Advance! 24, on the Vulgate, with Firmament 725 and They Do It With Mirrors 25' }),
+    pwLore(PW_CASTLE, 'Consider the Castle of Forests'),
+    { storylet: PW_CASTLE, name: 'Return to your Base-Camp (from a Campaign)', aliases: ['Return to your Base-Camp'],
+      label: 'leave · free', actions: 0, note: PW_LEAVE_NOTE },
+
+    // === Between the stages ===============================================
+    // Options that only move a hidden tracker along are "story"; two that
+    // set the same tracker to the same value are "either answer", because the
+    // page records no difference between them.
+    pwLore('The Hidden Refuge', 'Ask what she means'),
+    pwLore('The Hidden Refuge', 'What is the key?'),
+    pwLore('The Hidden Refuge', 'Where are you going?'),
+    { storylet: 'The Hidden Refuge', name: 'Ask what comes next', label: 'on to stage 2', onward: true },
+
+    { storylet: 'The Shrine of Wastes', name: 'Comply', label: 'story · either answer',
+      note: 'Comply and Refuse set the same hidden marker; the page records no other difference.' },
+    { storylet: 'The Shrine of Wastes', name: 'Refuse (Shrine of Wastes)', aliases: ['Refuse'], label: 'story · either answer',
+      note: 'Comply and Refuse set the same hidden marker; the page records no other difference.' },
+    { storylet: 'The Shrine of Wastes', name: 'Leave for the Hanging Mountains', label: 'on to stage 2', onward: true },
+
+    { storylet: 'The Iris of the Sun', name: 'Force the dome open again', label: 'story · either answer' },
+    { storylet: 'The Iris of the Sun', name: 'Allow the dome to remain closed', label: 'story · either answer' },
+    { storylet: 'The Iris of the Sun', name: 'Force the issue', label: 'on to stage 2 · either answer', onward: true },
+    { storylet: 'The Iris of the Sun', name: 'Let the matter lie', label: 'on to stage 2 · either answer', onward: true },
+
+    pwLore('A Conclave of Cats', 'Ask about the Palatinate'),
+    pwLore('A Conclave of Cats', 'Ask about the Palatinate\'s fall'),
+    pwLore('A Conclave of Cats', 'Ask about the Pauper\'s Prince'),
+    { storylet: 'A Conclave of Cats', name: 'Prepare to move out', label: 'on to stage 3', onward: true },
+
+    pwLore('A Quiet Moment with the Appalling Socialite', 'Ask her about the jewels'),
+    pwLore('A Quiet Moment with the Appalling Socialite', 'Ask about her family'),
+    { storylet: 'A Quiet Moment with the Appalling Socialite', name: 'Speak to the Aged Governess',
+      label: 'story · opens the choice' },
+    { storylet: 'A Quiet Moment with the Appalling Socialite', name: 'Abandon her quest', leaning: 'White Leaning +1',
+      onward: true },
+    { storylet: 'A Quiet Moment with the Appalling Socialite', name: 'Continue her quest', leaning: 'Red Leaning +1',
+      onward: true },
+    { storylet: 'A Quiet Moment with the Appalling Socialite', name: 'Seek vengeance', leaning: 'Black Leaning +1',
+      onward: true },
+
+    { storylet: 'The Echo of Chambers', name: 'Search for a pool that meets the description', label: 'story' },
+    { storylet: 'The Echo of Chambers', name: 'Ask about the Palace', label: 'story' },
+    { storylet: 'The Echo of Chambers', name: 'Offer your condolences (The Echo of Chambers)',
+      aliases: ['Offer your condolences'], label: 'on to stage 3 · either answer', onward: true },
+    { storylet: 'The Echo of Chambers', name: 'Offer only your support', label: 'on to stage 3 · either answer',
+      onward: true },
+
+    { storylet: 'The Frost-Rimed Shrine', name: 'Feed the Ophidian Gentleman', label: 'story · either answer' },
+    { storylet: 'The Frost-Rimed Shrine', name: 'Refuse the Gentleman\'s request', label: 'story · either answer' },
+    pwLore('The Frost-Rimed Shrine', 'Ask about your destination'),
+    pwLore('The Frost-Rimed Shrine', 'Ask about the other pilgrims'),
+    { storylet: 'The Frost-Rimed Shrine', name: 'Make for the Writhing River', label: 'on to stage 3', onward: true },
+
+    { storylet: 'Beltane\'s Holdfast', name: 'Speak to St Margaret', label: 'Memory of Light +1' },
+    { storylet: 'Beltane\'s Holdfast', name: 'Speak to Whitsun', label: 'Memory of Light +1' },
+    { storylet: 'Beltane\'s Holdfast', name: 'Speak to St Valentine', label: 'Memory of Light +1' },
+    { storylet: 'Beltane\'s Holdfast', name: 'Speak to Beltane', label: 'on to stage 3', onward: true },
+
+    { storylet: 'The Rosy Crown', name: 'Consult the Appalling Socialite', label: 'story · opens the choice' },
+    { storylet: 'The Rosy Crown', name: 'Keep the jewels', leaning: 'White Leaning +2', onward: true },
+    { storylet: 'The Rosy Crown', name: 'Wear the jewels', leaning: 'Red Leaning +2', onward: true },
+    { storylet: 'The Rosy Crown', name: 'Destroy the jewels', leaning: 'Black Leaning +2', onward: true },
+
+    { storylet: 'The Fall of the Fourth', name: 'Look down into the depths', label: 'story · either answer' },
+    { storylet: 'The Fall of the Fourth', name: 'Look out across the zee', label: 'story · either answer' },
+    { storylet: 'The Fall of the Fourth', name: 'Reach the Palace', label: 'on to stage 4', onward: true },
+
+    { storylet: 'Petitioning the King of Cats', name: 'Encourage the Prince to accept the King\'s offer',
+      label: 'picks: Cinder · Cultivator +3', onward: true,
+      note: 'Decides the Cats ending: leaving the Palatinate then pays a Ray-Drenched Cinder and Parabolan Cultivator +3.' },
+    { storylet: 'Petitioning the King of Cats', name: 'Encourage the Prince to reject the King\'s offer',
+      label: 'picks: Parable · Oneironaut +3', onward: true,
+      note: 'Decides the Cats ending: leaving the Palatinate then pays a Parabolan Parable and Parabolan Oneironaut +3.' },
+
+    { storylet: 'The Violet Horticulturist', name: 'Ask the Relict\'s question', label: 'story' },
+    pwLore('The Violet Horticulturist', 'Who is the Devoted Relict?'),
+    pwLore('The Violet Horticulturist', 'What is the object of your campaign?'),
+    pwLore('The Violet Horticulturist', 'What does Catastrophe\'s Emissary intend?'),
+    { storylet: 'The Violet Horticulturist', name: 'Leave the Violet Horticulturalist', label: 'on to stage 5',
+      onward: true },
+
+    { storylet: 'Queen of Roses', name: 'Greet the Queen of Arbor', label: 'story · opens the choice' },
+    { storylet: 'Queen of Roses', name: 'Retain the Aged Governess', leaning: 'White Leaning +2', onward: true },
+    { storylet: 'Queen of Roses', name: 'Surrender the Aged Governess', leaning: 'Red Leaning +2', onward: true },
+    { storylet: 'Queen of Roses', name: 'Defy the Roseate Queen', leaning: 'Black Leaning +2 · Red Leaning +2',
+      onward: true },
+
+    { storylet: 'Vulgar Phantasms', name: 'Enter the dream', label: 'story · 1 of 3' },
+    { storylet: 'Vulgar Phantasms', name: 'Follow the dream', label: 'story · 2 of 3' },
+    { storylet: 'Vulgar Phantasms', name: 'Pursue the dream', label: 'on to stage 5', onward: true },
+
+    // === The endings ======================================================
+    { storylet: 'The Entanglement of Glass', name: 'Approach the reflection', label: 'story · opens the ending' },
+    pwLore('The Entanglement of Glass', 'Ask how she escaped'),
+    pwLore('The Entanglement of Glass', 'Ask about the child\'s reflection'),
+    pwLore('The Entanglement of Glass', 'How was the Viscountess trapped?'),
+    pwLore('The Entanglement of Glass', 'What happens now?'),
+    pwEnding('The Entanglement of Glass', 'Break the Glass', 'Night-Whisper ×3 · Cultivator +1',
+      'Night-Whisper ×3 and Parabolan Cultivator +1'),
+    pwEnding('The Entanglement of Glass', 'Walk away (The Entanglement of Glass)', 'Stalemate ×3 · Oneironaut +1',
+      'Stalemate ×3 and Parabolan Oneironaut +1', { aliases: ['Walk away'] }),
+
+    { storylet: 'The Enshrinement of Waters', name: 'Approach the fountain', label: 'story · opens the ending' },
+    pwEnding('The Enshrinement of Waters', 'Follow the Gentleman', 'Night-Whisper ×3 · Oneironaut +1',
+      'Night-Whisper ×3 and Parabolan Oneironaut +1'),
+    pwEnding('The Enshrinement of Waters', 'Wait for the Ophidian Gentleman', 'False Hagiotoponym ×3 · Cultivator +1',
+      'False Hagiotoponym ×3 and Parabolan Cultivator +1', { actions: 0 }),
+
+    { storylet: 'The Palace of the Rising, Conquered', name: 'Assault the Palace', label: 'story · either answer' },
+    { storylet: 'The Palace of the Rising, Conquered', name: 'Stay your hand', label: 'story · either answer' },
+    { storylet: 'The Palace of the Rising, Conquered', name: 'Consult the figure on the throne',
+      label: 'story · either answer', needs: 'A Night to Remember below 170' },
+    { storylet: 'The Palace of the Rising, Conquered', name: 'Consult the Adoratrice', label: 'story · either answer',
+      needs: 'A Night to Remember 170' },
+    { storylet: 'The Palace of the Rising, Conquered', name: 'Let the Dreaming Priest rest', label: 'story · either answer' },
+    { storylet: 'The Palace of the Rising, Conquered', name: 'Demand the release of the Dreaming Priest',
+      label: 'story · either answer' },
+    pwEnding('The Palace of the Rising, Conquered', 'Enforce your demands', 'Mortification ×3 · Cultivator +1',
+      'Mortification of a Great Power ×3 and Parabolan Cultivator +1'),
+    pwEnding('The Palace of the Rising, Conquered', 'Suggest she join you', 'Revelation ×3 · Oneironaut +1',
+      'Oneiromantic Revelation ×3 and Parabolan Oneironaut +1'),
+    pwEnding('The Palace of the Rising, Conquered', 'Ask the Adoratrice about the ushabtiu terrorising London',
+      'Revelation ×3 · Oneironaut +1 · a Clue',
+      'Oneiromantic Revelation ×3, Parabolan Oneironaut +1, Clue: Ushabti Purpose and In Possession of a Clue +1',
+      { needs: 'the Prelapsarian Exhibition season, The Prelapsarian Exhibition 40–49 and A Night to Remember 170',
+        note: 'The same pay as Suggest she join you, plus the clue for the Exhibition.' }),
+
+    { storylet: 'The Palatinate, Regained', name: 'Walk the Palatinate', label: 'story · opens the ending' },
+    // One title on screen, two pages: which one you get was decided at the
+    // King of Cats. Both set Dominance to the Cats.
+    pwEnding('The Palatinate, Regained', 'Leave the Palatinate', 'as you advised the Prince',
+      'accepting the King’s offer: a Ray-Drenched Cinder and Parabolan Cultivator +3; rejecting it: a Parabolan '
+        + 'Parable and Parabolan Oneironaut +3. Either way Parabolan Dominance becomes the Cats',
+      { aliases: ['Leave the Palatinate (accepted offer)', 'Leave the Palatinate (rejected offer)'] }),
+
+    { storylet: 'The Khatun\'s Dream', name: 'Sleep before the idol', label: 'story · opens the ending' },
+    pwEnding('The Khatun\'s Dream', 'Recover a piece of the Catastrophe of Crowns', 'Edicts · Oneironaut +3',
+      'Edicts of the First City and Parabolan Oneironaut +3; Parabolan Dominance becomes the Fingerkings'),
+    pwEnding('The Khatun\'s Dream', 'Recover the Khatun', 'Parable · Cultivator +3',
+      'a Parabolan Parable and Parabolan Cultivator +3; Parabolan Dominance becomes the Fingerkings'),
+
+    // One title for four pages; which one you see is your Leanings' doing.
+    pwEnding('The Bloody-Handed End', 'Bear witness', 'by your Leanings',
+      'with any Leaning at 4 or more: a Parabolan Parable and Parabolan Oneironaut +1, and Parabolan Dominance becomes '
+        + 'the Red-Handed Queen; with all three at 3 or less: a Waswood Almanac and Parabolan Oneironaut +1, and '
+        + 'Dominance is left alone',
+      { aliases: ['Bear witness (White Leaning)', 'Bear witness (Red Leaning)', 'Bear witness (Black Leaning)',
+        'Bear witness (Tied)'] }),
+    pwEnding('The Bloody-Handed End', 'Make a sacrifice', 'Parable · Oneironaut +1 · Crimson-Handed',
+      'a Parabolan Parable, Parabolan Oneironaut +1 and Crimson-Handed, for your Scarlet-Handed; Parabolan Dominance '
+        + 'becomes the Red-Handed Queen',
+      { needs: 'Scarlet-Handed (Fate, from The Fair Unknown), and to qualify for the Red Leaning ending' }),
+
+    { storylet: 'As You Were', name: 'Speak to yourself', label: 'story · your Cavalry back' },
+    pwEnding('As You Were', 'Give your reflection what it wants', 'Concentrate of Self · Oneironaut +3',
+      'a Concentrate of Self and Parabolan Oneironaut +3',
+      { needs: 'the item your Ambition ended with', note: 'Sixteen pages, one per Ambition ending; one title on screen.' }),
+    pwEnding('As You Were', 'Deny Yourself', 'Almanac · Cultivator +3', 'a Waswood Almanac and Parabolan Cultivator +3'),
+
+    { storylet: 'The Highest of Sancta', name: 'Go through the dream of diamonds', label: 'Memory of Light +1 · onward',
+      onward: true, note: 'The one dream that moves They Do It With Mirrors on.' },
+    { storylet: 'The Highest of Sancta', name: 'Go through the dream of fire', label: 'Memory of Light +1' },
+    { storylet: 'The Highest of Sancta', name: 'Go through the dream of blood', label: 'Memory of Light +1' },
+    { storylet: 'The Highest of Sancta', name: 'Go through the dream of bees', label: 'Memory of Light +1' },
+    { storylet: 'The Highest of Sancta', name: 'Breach Zenith 2', aliases: ['Breach Zenith'], label: 'story · onward',
+      onward: true },
+    { storylet: 'The Highest of Sancta', name: 'Give the Calendar your word', label: 'ends it · Firmament',
+      aliases: ['Give the Calendar your word (Honest)', 'Give the Calendar your word (Dishonest)'], ending: true,
+      tag: 'Firmament', gives: 'They Do It With Mirrors 35 and A Cry from the Machine (the Firmament story goes on)',
+      note: 'The wiki has an honest and a dishonest version, with the same recorded effects.' },
+
+    // === After the war ====================================================
+    { storylet: PW_WAKE, name: 'Accept a gift on behalf of the Principle of Heralds',
+      label: 'General: gifted · Oneironaut +1', needs: 'the Principle of Heralds as your General, after the Cats, and '
+        + 'Dangerous Gains 12', gives: 'Dangerous Gains ×6 (as its page records it) and Parabolan Oneironaut +1' },
+    { storylet: PW_WAKE, name: 'Accept a gift on behalf of your Principle of Hollows',
+      label: 'General: gifted · Oneironaut +1', needs: 'the Principle of Hollows as your General, after the Fingerkings, '
+        + 'and Dangerous Gains 12', gives: 'Dangerous Gains ×6 (as its page records it) and Parabolan Oneironaut +1' },
+    { storylet: PW_WAKE, name: 'Accept a gift on behalf of the Principle of Horizons',
+      label: 'General: gifted · Oneironaut +1', needs: 'the Principle of Horizons as your General, after the '
+        + 'Chessboard, and Dangerous Gains 12',
+      gives: 'Dangerous Gains ×6 (as its page records it) and Parabolan Oneironaut +1' },
+    { storylet: PW_WAKE, name: 'Depart for your Base-Camp', label: 'leave · ends the campaign',
+      note: 'Clears the campaign, your General, Advance!, Morale and the Chessboard’s Leanings, and gives '
+        + 'Parabolan Commander +1 -- though its page notes that this does not always happen, for reasons unknown. Take '
+        + 'a General’s gift first.' },
   ];
 
   const PW_STORYLETS = PW_OPTIONS.map(function (e) { return e.storylet; })
@@ -30099,12 +30553,25 @@
   const PW_BRANCH_CLASS = 'fl-ux-parabolan-war-branch';
   const PW_BRANCH_FLAG = 'flUxParabolanWarBranch';
 
-  const PW_RULES = 'A campaign is three stages or five, each needing Advance! 24, and the trail is not badged because '
-    + 'the guide describes it by action TYPE rather than by option: safe progress makes about 1 Advance! an action; '
-    + 'gaining Morale five times and spending it once makes about 1.67, which is the guide’s recommended rhythm; fast '
-    + 'progress pays 3 (4 in the last stage) but costs items and 2 Ravages on a failure; an Airs option pays 4 and costs '
-    + '3 Ravages on a failure; an advanced-skill option pays 2 and costs no Ravages at all. Afterwards the Ravages of '
-    + 'Parabolan Warfare must be cleared before the next campaign.';
+  const PW_RULES = 'A campaign is three stages or five, each needing Advance! 24. A stage option’s badge is off its own '
+    + 'wiki page: what a success pays (? when it is a challenge’s success value, ▼ when it uses items), then what a '
+    + 'failure costs. The guide’s rates per action: safe progress about 1 Advance!; five Morale gains and one spend '
+    + 'about 1.67, which it calls usually the best; fast progress and the Airs options better only at a high chance of '
+    + 'success, since their failures cost Ravages; advanced skills at most 1.33, but they never cost a Ravage. You may '
+    + 'hold 16 Morale at most. The guide’s prose says an Airs failure costs 3 Ravages; its own table and the option '
+    + 'pages say 1 (3 on the crime-spree), and the badges follow the pages. Afterwards the Ravages of Parabolan Warfare '
+    + 'must be cleared before the next campaign.';
+
+  // What each stage action type is, in the guide's terms.
+  const PW_KIND = {
+    safe: { word: 'safe', line: 'Safe progress: an easy check, and Advance! even on a failure.' },
+    fast: { word: 'fast', line: 'Fast progress: more Advance! for items, and Ravages on a failure.' },
+    airs: { word: 'Airs', line: 'An Airs option: offered only while Airs of the Parabolan War is in its band, which '
+      + 'the guide puts at about 30% of the time.' },
+    skill: { word: 'skill', line: 'An advanced-skill option: items on a success and on a failure, but never a Ravage.' },
+    gain: { word: '', line: 'Gains Campaign Morale, to be spent five at a time on a push.' },
+    spend: { word: '', line: 'Spends 5 Campaign Morale on one push.' },
+  };
 
   function pwInPavilion() {
     return normalizeName(currentArea() || '') === normalizeName(PW_AREA);
@@ -30112,6 +30579,31 @@
 
   function pwAllowed(storylet) {
     return PW_STRICT.indexOf(storylet) === -1 || pwInPavilion();
+  }
+
+  // "Advance +1, Ravages +1": the parts of one outcome, in the order the badge
+  // reads them. `morale` is signed; on a spend it leads the success instead.
+  function pwOutcome(o, skipMorale) {
+    const out = [];
+    if (o.adv) out.push('Advance ' + carouselSigned(o.adv));
+    if (o.rav) out.push('Ravages ' + carouselSigned(o.rav));
+    if (o.morale && !skipMorale) out.push('Morale ' + carouselSigned(o.morale));
+    if (o.other) out.push(o.other);
+    return out;
+  }
+
+  function pwStepText(e) {
+    const win = e.win;
+    const lose = e.lose;
+    const same = win.adv && win.adv === lose.adv;
+    let head = (e.kind === 'spend' ? 'Morale ' + carouselSigned(win.morale) + ' → ' : '')
+      + 'Advance ' + carouselSigned(win.adv) + (same ? ' either way' : CAROUSEL_MARK_CHALLENGE)
+      + (e.uses ? ' ' + CAROUSEL_MARK_USES : '');
+    const rest = pwOutcome({ rav: win.rav, morale: win.morale, other: win.other }, e.kind === 'spend');
+    const fail = pwOutcome(same ? { rav: lose.rav, morale: lose.morale, other: lose.other } : lose);
+    if (!lose.rav) fail.push('no Ravages');
+    const word = PW_KIND[e.kind].word;
+    return [word, head].concat(rest).filter(Boolean).join(' · ') + ' · fail ' + fail.join(', ');
   }
 
   function pwBadgeCore(e) {
@@ -30123,6 +30615,9 @@
       return 'Ravages −' + e.cleared + ' · ' + e.actions + ' action' + (e.actions === 1 ? '' : 's') + ' · '
         + e.rate.toFixed(2) + ' each ' + CAROUSEL_MARK_USES;
     }
+    if (e.kind) return pwStepText(e);
+    if (e.ending && !e.label) return 'ending · ' + e.tag;
+    if (e.leaning) return e.leaning;
     return e.label + (e.uses ? ' ' + CAROUSEL_MARK_USES : '');
   }
 
@@ -30130,11 +30625,24 @@
     return withFactions(pwBadgeCore(e), e);
   }
 
+  // A stage option is teal when a failure costs no Ravages and brick when it
+  // does -- the text says which in words ("no Ravages" / "Ravages +2"), so the
+  // hue only repeats it. An ending is gold, a Leaning violet, a step onward teal.
   function pwColor(e) {
     if (e.stages != null) return CAROUSEL_COLOR_PAYOUT;
     if (e.cleared != null) return e.rate > 1 ? CAROUSEL_COLOR_RISK : CAROUSEL_COLOR_PROGRESS;
     if (e.lean) return CAROUSEL_COLOR_SETUP;
+    if (e.kind) return e.lose.rav || e.win.rav ? CAROUSEL_COLOR_RISK : CAROUSEL_COLOR_PROGRESS;
+    if (e.ending) return CAROUSEL_COLOR_PAYOUT;
+    if (e.leaning) return CAROUSEL_COLOR_SETUP;
+    if (e.onward) return CAROUSEL_COLOR_PROGRESS;
     return CAROUSEL_COLOR_NEUTRAL;
+  }
+
+  function pwOutcomeLine(head, o, uses) {
+    const parts = pwOutcome(o);
+    if (uses) parts.push('uses ' + uses);
+    return head + ': ' + (parts.length ? parts.join(', ') : 'nothing') + '.';
   }
 
   function pwSpec(e) {
@@ -30150,13 +30658,24 @@
       body.push('Leans your Company towards Parabolan ' + e.lean + ' (+1), which is all this choice does mechanically: '
         + 'Oneironaut and Cultivator set your starting Campaign Morale.');
     }
+    if (e.kind) {
+      body.push(PW_KIND[e.kind].line);
+      body.push(carouselChallenge(e.ch) + (e.ch.general ? ' A ' + e.ch.general + ' General makes it easier.' : ''));
+      if (e.airs) body.push('Offered only while Airs of the Parabolan War is ' + e.airs + '.');
+      body.push(pwOutcomeLine('Success', e.win, e.uses));
+      body.push(pwOutcomeLine('Failure', e.lose, e.loseUses));
+    }
+    if (e.ending) body.push('Ends the campaign.');
+    if (e.leaning) body.push('Sets the Chessboard’s hidden ' + e.leaning + ', and moves the campaign on. White, Red '
+      + 'and Black decide its ending: any at 4 or more pays a Parabolan Parable and sets Dominance to the Red-Handed '
+      + 'Queen; all three at 3 or less pays a Waswood Almanac and leaves Dominance alone.');
     if (e.cleared != null) {
       body.push('Clears Ravages of Parabolan Warfare ×' + e.cleared + ' for ' + e.actions + ' action'
         + (e.actions === 1 ? '' : 's') + ' and ' + e.item + ' ×' + e.count + ' (' + e.unit + ' Echoes each, so '
         + Math.round(e.count * e.unit * 100) / 100 + ' Echoes, ' + e.rate.toFixed(2) + ' a Ravage).');
     }
     if (e.gives) body.push('Gives: ' + e.gives + '.');
-    if (e.uses) body.push(CAROUSEL_MARK_USES + ' Uses up ' + e.uses + '.');
+    if (e.uses && !e.kind) body.push(CAROUSEL_MARK_USES + ' Uses up ' + e.uses + '.');
     if (e.needs) body.push('Needs: ' + e.needs + '.');
     body.push(carouselActionsLine(e));
     return { text: pwBadgeText(e), color: pwColor(e), title: carouselTooltip('Parabolan War', e, body, PW_RULES) };

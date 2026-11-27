@@ -2478,9 +2478,21 @@ navigation. Two consequences:
   its stages, both endings and what it does to Parabolan Dominance; a piece of the Company shows which
   way it leans (Oneironaut or Cultivator, which is all those choices do); and each of the eighteen
   Ravages options shows what it clears, in how many actions, at how many Echoes a Ravage — with the
-  item's own price carried so the suite can recompute the rate. **The campaign trail itself is
-  deliberately not badged**: the guide describes it by action TYPE (safe 1 Advance! an action, morale
-  1.67, fast 3, Airs 4, skills 2) and never names the options, so those rates live in the rules line.
+  item's own price carried so the suite can recompute the rate. **The campaign trail** (added
+  2026-11-27, after a player found *Traversing the Wastes of Want* unbadged): the 43 action options of
+  the seven stage storylets, each badged off its own option page with what a success pays, then what a
+  failure costs (`safe · Advance +1 either way · fail Ravages +1`, `skill · Advance +2? ▼ · fail no
+  Ravages`), `?` for a challenge's success value and `▼` for items. The guide's rates per action type
+  stay in the rules line. Where the guide's Actions-by-Stage table and the option pages disagree the
+  page won, and the three disagreements are written down in the comment above `PW_OPTIONS` (Morale-spend
+  difficulty 100 vs 90, *Launch a naval assault* failure 1 Ravage vs 2, Airs failure 1 vs the prose's 3).
+  `(enemies)` joins `CAROUSEL_PLACEHOLDER`; on the Yourself campaign the game drops the "the" as well, so
+  *Lure your legions…* and *Toxify the waters of your legions* are aliases. **The story between the
+  stages and the endings**: 23 storylets found by following every option's redirect until nothing new
+  turned up — lore (free), story steps, the Chessboard's nine Leaning choices, every ending with its pay,
+  and the General's gifts in *In the Wake of War*. Titles the wiki splits into several pages (*Bear
+  witness* ×4, *Leave the Palatinate* ×2, *Defend the castle* ×2, *Give the Calendar your word* ×2) are
+  ONE row each with the page titles as aliases, because two rows matching one heading badge neither.
   *A Visitor* is two ordinary words, so it is `strict` on a greeting saying the Dolorous Pavilion.
   **A Cub's Education** (`cubs-education`, `CE_OPTIONS`, `CE_NOT_CATS`): the four rewards by band of
   cats introduced, and 22 introductions each marked as counting once and whether it costs Fate. The
@@ -4072,6 +4084,15 @@ Confirmed live by the author:
   numbering implies.
   **(4) The Cub's cats.** Whether all 22 introductions are on the storylet at once, and whether the
   Midnight Matriarch of the Menagerie of Roses is a separate introduction from the plain Matriarch.
+
+- The **Parabolan War's campaign trail and story** (added 2026-11-27). Nothing seen in the game. Report
+  first, in order: **(1) The "(enemies)" titles.** What *Lure the … with false fruit*, *Toxify the waters
+  of …* and *Dream your way past …* read as on screen for your campaign; the wiki gives no fill-ins at all
+  for the third, and on Yourself it drops "the", so a third wording there would go unbadged. **(2) The
+  titles the wiki splits.** Whether *Bear witness*, *Leave the Palatinate*, *Defend the castle*, *Give the
+  Calendar your word* and *Return to your Base-Camp* show without the wiki's suffix, as assumed. **(3)
+  The numbers the pages and the guide disagree on**: whether a failed *Launch a naval assault* costs 1
+  Ravage or 2, and whether the Morale pushes are a check at 100 or 90.
 
 - The **Parabolan Base-Camp badges** (added 2026-09-24). Nothing seen in the game. Report first, in order:
   **(1) The two titles that are each two storylets.** Whether *Reach towards the shore* and *Climb the dome

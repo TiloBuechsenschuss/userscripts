@@ -8,12 +8,15 @@
 // What's worth pinning here: that every Ravages option's Echoes-per-Ravage is
 // what its own parts come to and lands on one of the guide's two rates, that
 // every campaign carries its stages, both endings and its effect on Parabolan
-// Dominance, that every piece of the Company leans one way, and that the trail
-// itself is NOT badged -- the guide describes it by action type, so the rates
-// live in the rules line instead.
+// Dominance, that every piece of the Company leans one way, that every stage
+// option says what a success pays and what a failure costs (and that the ones
+// with no Ravages on a failure are exactly the guide's skill and Morale-spend
+// types), that the "(enemies)" titles resolve however the game fills them in,
+// and that every title the wiki splits into several pages is one row.
 //
-// Numbers come from Parabolan War (Guide) and the Dolorous Pavilion's storylet pages on fallenlondon.wiki, fetched through the API on
-// 2026-09-17.
+// Numbers come from Parabolan War (Guide) and the Dolorous Pavilion's storylet
+// pages on fallenlondon.wiki, fetched through the API on 2026-09-17; the stage
+// and story storylets and every option page they list on 2026-11-27.
 //
 //   node tests/choice-parabolan-war.test.mjs
 
@@ -107,7 +110,7 @@ const TABLES = ['ARBOR_OPTIONS', 'LBI_OPTIONS', 'DME_OPTIONS', 'VH_OPTIONS', 'FQ
 const wrapped = src
   .replace('(function () {', 'globalThis.__flux = (function () {')
   .replace(/\}\)\(\);\s*$/,
-    'return { PW_OPTIONS, PW_STORYLETS, PW_INDEX, PW_CAUSE, PW_AFTERMATH, PW_MUNITIONS, PW_LOGISTICS, PW_GENERAL, PW_STRICT, PW_CLASS, PW_BRANCH_CLASS, pwBadgeText, pwSpec, pwStoryletSpec, pwAllowed, pwRatings, carouselLookup, carouselCanonical, carouselHandSpec, factionText, ZEE_CARDS, SPITE_CARDS,'
+    'return { PW_OPTIONS, PW_STORYLETS, PW_STAGES, PW_WASTES, PW_MOUNTAINS, PW_SHORE, PW_RIVER, PW_RULES, pwColor, CAROUSEL_COLOR_RISK, CAROUSEL_COLOR_PROGRESS, PW_INDEX, PW_CAUSE, PW_AFTERMATH, PW_MUNITIONS, PW_LOGISTICS, PW_GENERAL, PW_STRICT, PW_CLASS, PW_BRANCH_CLASS, pwBadgeText, pwSpec, pwStoryletSpec, pwAllowed, pwRatings, carouselLookup, carouselCanonical, carouselHandSpec, factionText, ZEE_CARDS, SPITE_CARDS,'
     + ' FOTZ_CARDS, LAB_CARDS, PC_OPTIONS, VSD_OPTIONS, normalizeName, BADGE_CLASS, FEATURES, '
     + TABLES.join(', ') + ' }; })();');
 const api = new Function(
@@ -190,13 +193,103 @@ check('every armament and every piece of infrastructure leans one way',
   ['Oneironaut', 'Oneironaut', 'Cultivator', 'Oneironaut', 'Cultivator', 'Cultivator',
     'Oneironaut', 'Cultivator', 'Cultivator', 'Oneironaut', 'Oneironaut', 'Cultivator']);
 
-// The trail itself is described by action TYPE in the guide and never by
-// option, so nothing here may badge a stage's options -- the rates live in the
-// rules line instead.
-check('the trail is not badged, and its rates are in the rules line',
-  [rows.some((e) => /Advance!/.test(api.pwBadgeText(e))),
-    /1.67/.test(api.pwSpec(row('The Cats')).title) && /Airs option pays 4/.test(api.pwSpec(row('The Cats')).title)],
-  [false, true]);
+// The rules line keeps the guide's rates, and says which source the badges
+// follow where the guide's prose and the option pages disagree.
+check('the rules line keeps the guide’s rates and says the pages win',
+  [/1\.67/.test(api.PW_RULES), /1\.33/.test(api.PW_RULES), /badges follow the pages/.test(api.PW_RULES)],
+  [true, true, true]);
+
+// === The stages ===========================================================
+const steps = rows.filter((e) => e.kind);
+check('each stage carries the action options its storylet page lists',
+  api.PW_STAGES.map((s) => steps.filter((e) => e.storylet === s).length),
+  [6, 6, 6, 6, 7, 6, 6]);
+
+check('every stage option has a challenge, a success that makes Advance!, and a failure',
+  steps.filter((e) => !(e.ch && e.ch.stat && e.ch.diff && e.win && e.win.adv > 0 && e.lose)).map((e) => e.name), []);
+
+// The guide's claim about the two kinds that never cost a Ravage on failure,
+// checked against what was transcribed off the pages.
+check('the options whose failure costs no Ravages are exactly the skill and Morale-spend ones',
+  [...new Set(steps.filter((e) => !e.lose.rav).map((e) => e.kind))].sort(), ['skill', 'spend']);
+
+check('a stage option’s badge, for each action type',
+  [['Rally your army onward', api.PW_WASTES], ['Deploy Counter-Factual Phantasies', api.PW_WASTES],
+    ['Host a hunt', api.PW_WASTES], ['Employ the arts of Glasswhispery', api.PW_WASTES],
+    ['Gather the Flowers of Nevermore', api.PW_MOUNTAINS], ['Sail the Wanting-Way', api.PW_RIVER],
+    ['Siege an Insidious Spinney', api.PW_SHORE], ['Delegate to yourself', api.PW_RIVER]]
+    .map(([n, s]) => api.pwBadgeText(row(n, s))),
+  ['safe · Advance +1 either way · fail Ravages +1', 'Airs · Advance +4? · fail Ravages +1',
+    'Advance +1? · Morale +1 · fail Ravages +2', 'skill · Advance +2? ▼ · fail Nightmares +3 CP, no Ravages',
+    'fast · Advance +3? · Ravages +2 · fail Ravages +2', 'Morale −5 → Advance +6? · fail Morale −3, no Ravages',
+    'Airs · Advance +4? · fail Ravages +1, Solacefruit +2',
+    'safe · Advance +2 either way ▼ · Mirror-Fed +1 · fail Ravages +1']);
+
+// Colour repeats what the words say, never alone: brick exactly where the
+// badge names a Ravage cost, teal exactly where it says there is none.
+check('a stage option’s colour is carried by its text as well',
+  steps.filter((e) => {
+    const t = api.pwBadgeText(e);
+    const c = api.pwColor(e);
+    return c === api.CAROUSEL_COLOR_RISK ? !/Ravages \+/.test(t) : !(c === api.CAROUSEL_COLOR_PROGRESS && /no Ravages/.test(t));
+  }).map((e) => e.name), []);
+
+check('every option that uses items says so with ▼ and names them in the tooltip',
+  steps.filter((e) => e.uses).filter((e) => {
+    const spec = api.pwSpec(e);
+    return !spec.text.includes('▼') || !spec.title.includes(e.uses);
+  }).map((e) => e.name), []);
+
+// "(enemies)" is filled in by the game with the power you are fighting; the
+// wiki lists most fill-ins for two of the three and none for the third.
+const hit = (name, storylet) => {
+  const e = api.carouselLookup(api.PW_INDEX, name, key(storylet));
+  return e && e.name;
+};
+check('the "(enemies)" titles resolve however the game fills them in, and never into each other',
+  [hit('Lure the Fingerkings with false fruit', api.PW_MOUNTAINS), hit('Lure the hidden enemies with false fruit', api.PW_MOUNTAINS),
+    hit('Lure your legions with false fruit', api.PW_MOUNTAINS),
+    hit('Toxify the waters of the cats', api.PW_MOUNTAINS), hit('Toxify the waters of your legions', api.PW_MOUNTAINS),
+    hit('Dream your way past the Fingerkings', api.PW_SHORE)],
+  ['Lure the (enemies) with false fruit', 'Lure the (enemies) with false fruit', 'Lure the (enemies) with false fruit',
+    'Toxify the waters of the (enemies)', 'Toxify the waters of the (enemies)', 'Dream your way past the (enemies)']);
+
+// Titles the wiki splits into several pages are one title on screen, so each
+// is one row: two rows would match the same heading and badge neither.
+check('a title the wiki splits into pages is one row, found by its plain title',
+  [hit('Return to your Base-Camp', api.PW_WASTES), hit('Return to your Base-Camp', api.PW_RIVER),
+    hit('Defend the castle', api.PW_MOUNTAINS), hit('Bear witness', 'The Bloody-Handed End'),
+    hit('Leave the Palatinate', 'The Palatinate, Regained'), hit('Give the Calendar your word', 'The Highest of Sancta'),
+    hit('Walk away', 'The Entanglement of Glass'), hit('Enter Arbor', api.PW_SHORE)],
+  ['Return to your Base-Camp (from a Campaign)', 'Return to your Base-Camp (from the Hanging Mountains)',
+    'Defend the castle', 'Bear witness', 'Leave the Palatinate', 'Give the Calendar your word',
+    'Walk away (The Entanglement of Glass)', 'Enter Arbor 2']);
+
+// === The story between the stages =========================================
+check('each of the Chessboard’s three choices offers one of each Leaning',
+  ['A Quiet Moment with the Appalling Socialite', 'The Rosy Crown', 'Queen of Roses']
+    .map((s) => rows.filter((e) => e.storylet === s && e.leaning).map((e) => e.leaning)),
+  [['White Leaning +1', 'Red Leaning +1', 'Black Leaning +1'], ['White Leaning +2', 'Red Leaning +2', 'Black Leaning +2'],
+    ['White Leaning +2', 'Red Leaning +2', 'Black Leaning +2 · Red Leaning +2']]);
+
+// An ending's pay, as the story pages give it, against the cause rows taken
+// from the guide's campaign table: the item each ending leads with must be in
+// some campaign's endings.
+check('every ending’s item is one the campaign table also records',
+  (() => {
+    const all = rows.filter((e) => e.storylet === api.PW_CAUSE && e.endings).map((e) => e.endings).join(' ');
+    const words = { Edicts: 'Edicts of the First City', Parable: 'Parabolan Parable', Almanac: 'Waswood Almanac',
+      Mortification: 'Mortification of a Great Power', Revelation: 'Oneiromantic Revelation' };
+    return rows.filter((e) => e.ending && e.storylet !== 'The Highest of Sancta' && !/^(as|by) /.test(e.tag))
+      .map((e) => e.tag.split(' · ')[0].replace(/ ×\d+$/, ''))
+      .map((w) => words[w] || w).filter((w) => !all.includes(w));
+  })(), []);
+
+check('every ending, Leaning and onward step has a badge and a tooltip',
+  rows.filter((e) => e.ending || e.leaning || e.onward).filter((e) => {
+    const spec = api.pwSpec(e);
+    return !spec || !spec.text || !spec.title.includes(e.name);
+  }).map((e) => e.name), []);
 
 // "A Visitor" is two ordinary words; it is badged only where the greeting says
 // the Pavilion, in all three greeting states.
@@ -210,8 +303,13 @@ check('the one ordinary heading is gated on the greeting, in all three states',
 greeting = null;
 
 check('a heading says which part of the war it is',
-  [api.PW_CAUSE, api.PW_AFTERMATH, api.PW_MUNITIONS, api.PW_GENERAL].map((s) => api.pwStoryletSpec(key(s)).text),
-  ['pick a cause', 'clear the Ravages', 'Armaments · 3 needed', 'appoint a General']);
+  [api.PW_CAUSE, api.PW_AFTERMATH, api.PW_MUNITIONS, api.PW_GENERAL, api.PW_WASTES, 'The Rosy Crown']
+    .map((s) => api.pwStoryletSpec(key(s)).text),
+  ['pick a cause', 'clear the Ravages', 'Armaments · 3 needed', 'appoint a General', 'stage 1 · Advance! 24',
+    'Chessboard · after stage 3 · a Leaning']);
+
+check('every storylet in the table has a heading of its own',
+  api.PW_STORYLETS.filter((s) => !api.PW_STRICT.includes(s) && api.pwStoryletSpec(key(s)).text === 'the Pavilion'), []);
 
 check('the registered pass: a heading and an option under its open storylet',
   (() => {
@@ -229,6 +327,20 @@ check('the registered pass: a heading and an option under its open storylet',
     return out;
   })(),
   ['pick a cause', 'clear the Ravages', 'Ravages −2 · 1 action · 1.25 each ▼', null]);
+
+check('the registered pass on a stage: the option the user found unbadged now is',
+  (() => {
+    const open = makeHeading(api.PW_WASTES, 'storylet-root__heading');
+    const hunt = makeHeading('Host a hunt');
+    const trench = makeHeading('Lead your army through forgotten trenches');
+    roots = [open];
+    branches = [hunt, trench];
+    api.pwRatings();
+    const out = [text(open, api.PW_CLASS), text(hunt, api.PW_BRANCH_CLASS), text(trench, api.PW_BRANCH_CLASS)];
+    roots = []; branches = [];
+    return out;
+  })(),
+  ['stage 1 · Advance! 24', 'Advance +1? · Morale +1 · fail Ravages +2', 'Airs · Advance +4? · fail Ravages +1']);
 
 check('no Parabolan War name is in another feature\u2019s table',
   (() => {
